@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { recentPlays, recordListRun, MAX_LIST_RUNS } from "./history";
+import { freshList, recentPlays, recordListRun, MAX_LIST_RUNS } from "./history";
 import type { GameState } from "./state";
 import type { Saved } from "./storage";
 
@@ -29,5 +29,16 @@ describe("play history", () => {
     };
     expect(recentPlays(s).map((p) => `${p.kind}:${p.id}`)).toEqual(["list:b", "blitz:m", "list:a"]);
     expect(recentPlays(s)[1]).toMatchObject({ today: true });
+  });
+});
+
+describe("fresh start", () => {
+  it("clears only that list's saved game and keeps its history", () => {
+    const done = game("a", 1, 2);
+    const s = recordListRun({ ...empty, games: { a: done, b: game("b", 3) } }, done);
+    const fresh = freshList(s, "a");
+    expect(fresh.games).toEqual({ b: game("b", 3) });
+    expect(fresh.listRuns?.map((r) => r.id)).toEqual(["a"]);
+    expect(freshList(fresh, "a")).toBe(fresh);
   });
 });

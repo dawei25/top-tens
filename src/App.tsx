@@ -6,9 +6,11 @@ import { History } from "./components/History";
 import { Game, Loading } from "./components/Game";
 import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
-import { blitzAvailable } from "./game/blitz";
+import { blitzAvailable, freshBlitz } from "./game/blitz";
+import { freshList } from "./game/history";
 import {
   blitzOfTheDay,
+  dailyHoldouts,
   entryForDate,
   loadSchedule,
   localDate,
@@ -16,7 +18,7 @@ import {
   todayEntry,
   type DailyEntry,
 } from "./game/daily";
-import { load } from "./game/storage";
+import { load, save } from "./game/storage";
 
 type Route =
   | { screen: "home" }
@@ -123,8 +125,14 @@ export default function App() {
 
   if (!index || !schedule) return <Loading />;
 
+  // A roll is always a fresh game, even on a list played before (its result stays in Past runs). It never lands on
+  // today's or a future daily, or on the list already on screen.
   const roll = (category?: string) => {
-    location.hash = `#p-${randomPuzzleId(index, category)}`;
+    const exclude = dailyHoldouts(schedule, today);
+    if (route.screen === "game") exclude.add(route.id);
+    const id = randomPuzzleId(index, category, exclude);
+    save(freshList(load(), id));
+    location.hash = `#p-${id}`;
   };
   const home = () => (location.hash = "");
   // Back: the screen we came from in this tab if there is one, else one level up (replacing this entry, so the
@@ -134,7 +142,7 @@ export default function App() {
     replacing.current = true;
     location.replace(`${location.pathname}${location.search}${parentOf(location.hash, today) || "#"}`);
   };
-  // Blitz a random list: a uniformly random open Blitz list, never one of the last few rolled.
+  // Blitz a random list: a uniformly random open Blitz list, never one of the last few rolled, always a fresh round.
   const blitzRoll = async (): Promise<boolean> => {
     const saved = load();
     const open = index.filter((m) => m.blitz && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
@@ -143,6 +151,7 @@ export default function App() {
       "blitz",
     );
     if (!id) return false;
+    save(freshBlitz(saved, id));
     location.hash = `#blitz-${id}`;
     return true;
   };

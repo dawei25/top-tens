@@ -61,10 +61,14 @@ export function pickRandom(ids: string[], kind: string, rand = Math.random): str
   return pick;
 }
 
-/** A random list to play, optionally within a category, never one of the last few rolled. */
-export function randomPuzzleId(index: PuzzleMeta[], category?: string): string {
+/**
+ * A random list to play, optionally within a category, never one of the last few rolled. `exclude` (today's and
+ * future dailies, the list on screen) is skipped unless nothing else is left.
+ */
+export function randomPuzzleId(index: PuzzleMeta[], category?: string, exclude: ReadonlySet<string> = new Set()): string {
   const ids = index.filter((p) => !category || p.category === category).map((p) => p.id);
-  return pickRandom(ids, `roll:${category ?? ""}`) ?? index[0].id;
+  const open = ids.filter((id) => !exclude.has(id));
+  return pickRandom(open.length ? open : ids, `roll:${category ?? ""}`) ?? index[0].id;
 }
 
 function hash(s: string): number {

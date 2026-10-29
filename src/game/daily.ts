@@ -47,6 +47,16 @@ export function entryForDate(schedule: DailyEntry[], date: string): DailyEntry |
   return schedule.find((e) => e.date === date);
 }
 
+/**
+ * Lists a random roll must not land on: today's daily (its save is today's result) and every future one (spoilers).
+ */
+export function dailyHoldouts(schedule: DailyEntry[], today = localDate()): Set<string> {
+  const ids = new Set(schedule.filter((e) => e.date > today).map((e) => e.id));
+  const current = todayEntry(schedule, today);
+  if (current) ids.add(current.id);
+  return ids;
+}
+
 /** Past and present dailies, newest first: the archive. Future entries are never listed. */
 export function archive(schedule: DailyEntry[], today = localDate()): DailyEntry[] {
   return schedule.filter((e) => e.date <= today).sort((a, b) => b.date.localeCompare(a.date));

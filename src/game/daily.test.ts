@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { archive, formatCountdown, msUntilNextDaily, streak, todayEntry, type DailyEntry } from "./daily";
+import { archive, dailyHoldouts, formatCountdown, msUntilNextDaily, streak, todayEntry, type DailyEntry } from "./daily";
 import { applyHint, canHint, hintLetter, newGame, shareText } from "./state";
 import type { Saved } from "./storage";
 import type { Puzzle } from "./types";
@@ -72,5 +72,12 @@ describe("random rolls", () => {
     expect(new Set(picks).size).toBe(10);
     expect(pickRandom(["only"], "solo")).toBe("only");
     expect(pickRandom(["only"], "solo")).toBe("only");
+  });
+});
+
+describe("random roll holdouts", () => {
+  it("holds back today's daily and future ones, and the stand-in once the schedule runs out", () => {
+    expect([...dailyHoldouts(schedule, "2026-10-21")].sort()).toEqual(["b", "c"]);
+    expect([...dailyHoldouts(schedule, "2026-11-05")]).toEqual(["c"]);
   });
 });

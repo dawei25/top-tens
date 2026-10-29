@@ -232,6 +232,16 @@ export function resumeBlitz(saved: Saved, puzzleId: string, now = Date.now()): {
   return { state: live, over: false };
 }
 
+/**
+ * Clear a list's saved round so the next visit starts fresh (a random roll always does). A round left behind is
+ * ended where it stands and kept in the history.
+ */
+export function freshBlitz(saved: Saved, puzzleId: string, now = Date.now()): Saved {
+  const live = saved.blitzLive?.[puzzleId];
+  if (!live) return saved;
+  return recordBlitz(saved, puzzleId, finishBlitz(live, now)).saved;
+}
+
 /** Finished rounds on a list, newest first. */
 export function blitzHistory(saved: Saved, puzzleId: string): BlitzRun[] {
   return saved.blitzRuns?.[puzzleId] ?? [];

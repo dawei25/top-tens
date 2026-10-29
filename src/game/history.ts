@@ -40,6 +40,17 @@ export function recordListRun(saved: Saved, game: GameState, daily?: number): Sa
   return { ...saved, listRuns: [run, ...runs].slice(0, MAX_LIST_RUNS) };
 }
 
+/**
+ * Clear a list's saved game so the next visit starts fresh (a random roll always does). A finished game is already
+ * in the history; an unfinished one is dropped.
+ */
+export function freshList(saved: Saved, id: string): Saved {
+  if (!saved.games[id]) return saved;
+  const games = { ...saved.games };
+  delete games[id];
+  return { ...saved, games };
+}
+
 export type Play =
   | { kind: "list"; id: string; at: number; run: ListRun }
   | { kind: "blitz"; id: string; at: number; run: BlitzRun; today?: boolean };

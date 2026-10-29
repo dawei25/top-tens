@@ -6,6 +6,7 @@ import {
   blitzScore,
   blitzShareText,
   finishBlitz,
+  freshBlitz,
   isOver,
   missedTop,
   newBlitz,
@@ -147,5 +148,17 @@ describe("today's blitz", () => {
     const again = recordDailyBlitz(first.saved, "2026-10-29", st(900));
     expect(again.counted).toBe(false);
     expect(again.saved.blitzDaily?.["2026-10-29"]).toMatchObject({ score: 300, answers: 1 });
+  });
+});
+
+describe("fresh Blitz start", () => {
+  it("ends a left-behind round into the history and clears it", () => {
+    const empty: Saved = { games: {}, daily: {}, seenHelp: true };
+    const t0 = 1_000_000;
+    const live = saveLiveBlitz(empty, startBlitz(newBlitz(puzzle), t0));
+    expect(freshBlitz(empty, puzzle.id)).toBe(empty);
+    const fresh = freshBlitz(live, puzzle.id, t0 + 5_000);
+    expect(fresh.blitzLive?.[puzzle.id]).toBeUndefined();
+    expect(blitzHistory(fresh, puzzle.id)).toHaveLength(1);
   });
 });
