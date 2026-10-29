@@ -1,0 +1,52 @@
+{
+  "LeBron James": {
+    "text": "Holds league records for most seasons played, with 24, and for most field goals.",
+    "source": "https://en.wikipedia.org/wiki/LeBron_James",
+    "evidence": "The oldest active player in the NBA, he holds league records for the most seasons played with 24, the most games played, the most minutes played, and the most field goals."
+  },
+  "Kareem Abdul-Jabbar": {
+    "text": "Broke the NBA's career scoring record in 1984 and held it until 2023.",
+    "source": "https://en.wikipedia.org/wiki/Kareem_Abdul-Jabbar",
+    "evidence": "Widely regarded as one of the greatest players of all time, Abdul-Jabbar broke the NBA's career scoring record in 1984, and held it until 2023."
+  },
+  "Karl Malone": {
+    "text": "Holds the NBA records for most free throws made and attempted.",
+    "source": "https://en.wikipedia.org/wiki/Karl_Malone",
+    "evidence": "Malone's 36,928 career points scored rank third all-time in NBA history and he holds the records for most free throws made and attempted, in addition to being tied for the second-most first-team All-NBA selections with Kobe Bryant (11), both behind LeBron James (13)."
+  },
+  "Kobe Bryant": {
+    "text": "Scored a career-high 81 points on January 22, 2006, the third most in an NBA game.",
+    "source": "https://en.wikipedia.org/wiki/Kobe_Bryant",
+    "evidence": "On January 22, 2006, Bryant scored a career-high 81 points, the third most in an NBA game."
+  },
+  "Kevin Durant": {
+    "text": "The leading scorer in Team USA's Olympic basketball history, with four gold medals.",
+    "source": "https://en.wikipedia.org/wiki/Kevin_Durant",
+    "evidence": "As a member of the U.S. national team, Durant has won four gold medals in the Olympics (2012, 2016, 2020 and 2024), and is the leading scorer in Team USA's Olympic basketball history."
+  },
+  "Michael Jordan": {
+    "text": "Holds the NBA record for career regular season scoring average, at 30.1 points per game.",
+    "source": "https://en.wikipedia.org/wiki/Michael_Jordan",
+    "evidence": "He holds the NBA records for career regular season scoring average (30.1 points per game) and career playoff scoring average (33.4 points per game)."
+  },
+  "Dirk Nowitzki": {
+    "text": "The highest-scoring foreign-born player in NBA history.",
+    "source": "https://en.wikipedia.org/wiki/Dirk_Nowitzki",
+    "evidence": "Nowitzki is the highest-scoring foreign-born player in NBA history."
+  },
+  "Wilt Chamberlain": {
+    "text": "Still the only player to score 100 points in a single game.",
+    "source": "https://en.wikipedia.org/wiki/Wilt_Chamberlain",
+    "evidence": "He remains the only player to score 100 points in a single game."
+  },
+  "James Harden": {
+    "text": "Was Sixth Man of the Year in 2012, then led the league in scoring three times with Houston.",
+    "source": "https://en.wikipedia.org/wiki/James_Harden",
+    "evidence": "In 2012, he was named NBA Sixth Man of the Year and helped Oklahoma City reach the NBA Finals, where they lost to the Miami Heat in five games. ... Over the next seven full seasons with Houston, Harden led the league in scoring three times and assists once, and was named the NBA Most Valuable Player in 2018 while leading the Rockets to the Western Conference Finals."
+  },
+  "Shaquille O'Neal": {
+    "text": "Has released four rap albums, including the platinum-certified Shaq Diesel.",
+    "source": "https://en.wikipedia.org/wiki/Shaquille_O'Neal",
+    "evidence": "In addition to his basketball career, O'Neal has released four rap albums, including the platinum-certified Shaq Diesel (1993) and the gold-certified Shaq Fu: Da Return (1994)."
+  }
+}
