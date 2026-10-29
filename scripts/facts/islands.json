@@ -1,0 +1,52 @@
+{
+  "Greenland": {
+    "text": "Shares a 1.2-kilometre land border with Canada, on Hans Island.",
+    "source": "https://en.wikipedia.org/wiki/Greenland",
+    "evidence": "It shares a small 1.2-kilometre (0.75 mi) border with Canada on Hans Island."
+  },
+  "New Guinea": {
+    "text": "Named in 1545 by a Spanish explorer for a perceived resemblance of its people to those of Guinea in Africa.",
+    "source": "https://en.wikipedia.org/wiki/New_Guinea",
+    "evidence": "The island's name was given by Spanish explorer Yñigo Ortiz de Retez during his maritime expedition of 1545, due to the perceived resemblance of the indigenous peoples of the island to those in the African region of Guinea."
+  },
+  "Borneo": {
+    "text": "Divided among three sovereign states: Indonesia, Malaysia and Brunei.",
+    "source": "https://en.wikipedia.org/wiki/Borneo",
+    "evidence": "Since decolonisation, Borneo has been politically divided among three sovereign states. Approximately 73% of the island forms part of Indonesia, comprising the five provinces collectively known as Kalimantan. About 26% consists of the Malaysian states of Sabah and Sarawak, while the sovereign state of Brunei occupies a small area on the island's northwestern coast."
+  },
+  "Madagascar": {
+    "text": "Split from Africa around 180 million years ago, and over 90% of its wildlife is endemic.",
+    "source": "https://en.wikipedia.org/wiki/Madagascar",
+    "evidence": "Following the prehistoric breakup of the supercontinent Gondwana, Madagascar split from Africa during the Early Jurassic period, around 180 million years ago, and from the Indian subcontinent approximately 90 million years ago. ... As a result, Madagascar is a biodiversity hotspot and one of the world's 17 megadiverse countries, with over 90% of its wildlife being endemic."
+  },
+  "Baffin Island": {
+    "text": "Its Inuktitut name, Qikiqtaaluk, means \"very big island\".",
+    "source": "https://en.wikipedia.org/wiki/Baffin_Island",
+    "evidence": "The Inuktitut name for the island is Qikiqtaaluk, which means \"very big island\" (qikiqtaq \"island\" + -aluk \"very big\") and in Inuktitut syllabics is written as ᕿᑭᖅᑖᓗᒃ."
+  },
+  "Sumatra": {
+    "text": "Its ancient Sanskrit names meant \"Island of Gold\", for the gold deposits in its highlands.",
+    "source": "https://en.wikipedia.org/wiki/Sumatra",
+    "evidence": "Sumatra was known in ancient times by the Sanskrit names of Svarṇadvīpa ('Island of Gold') and Svarṇabhūmi ('Land of Gold'), because of the gold deposits in the island's highlands."
+  },
+  "Honshu": {
+    "text": "Historically known as Akitsushima, which means \"dragonfly island\".",
+    "source": "https://en.wikipedia.org/wiki/Honshu",
+    "evidence": "Honshu (Japanese: 本州, Hepburn: Honshū; ... lit. 'main province'), historically known as Akitsushima (秋津島; lit. 'dragonfly island') or Hondo (本土; lit. 'mainland'), is the largest of Japan's four main islands."
+  },
+  "Victoria Island": {
+    "text": "The first recorded walk across it was finished in 2008, on a second attempt.",
+    "source": "https://en.wikipedia.org/wiki/Victoria_Island",
+    "evidence": "In 2008 Clark Carter and Chris Bray became the first recorded people to walk across Victoria Island. Their first attempt at the 1,000 km (620 mi) trek in 2005 failed, so they returned and completed the remaining 660 km (410 mi) in 2008."
+  },
+  "Great Britain": {
+    "text": "Joined to mainland Europe until 9,000 years ago by a land bridge now known as Doggerland.",
+    "source": "https://en.wikipedia.org/wiki/Great_Britain",
+    "evidence": "Connected to mainland Europe until 9,000 years ago by a land bridge now known as Doggerland, the island of Great Britain has been inhabited by modern humans for around 30,000 years."
+  },
+  "Ellesmere Island": {
+    "text": "Only 144 people lived here in 2021; as of 2025 the north geomagnetic pole was on the island.",
+    "source": "https://en.wikipedia.org/wiki/Ellesmere_Island",
+    "evidence": "As of 2025, the north geomagnetic pole (the south pole of the earth's magnetic field) is located on the island at 80°51′N 72°46′W / 80.850°N 72.767°W / 80.850; -72.767 (North geomagnetic pole). ... In 2021, the population of Ellesmere Island was recorded at 144 in three settlements: Alert, Eureka, and Grise Fiord."
+  }
+}
