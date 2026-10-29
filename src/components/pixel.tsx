@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { SoundToggle } from "./sound/SoundToggle";
 
 export function reducedMotion(): boolean {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -80,9 +81,9 @@ export function HomeIcon() {
 }
 
 /**
- * Every screen's header: BACK (one step up) on the left, the screen's own middle, HOME on the right. Escape is
- * Back too, except while typing in a field or when something on the screen already used the Escape (a hint
- * confirm marks it with preventDefault).
+ * Every screen's header: BACK (one step up) on the left, the screen's own middle, the sound key and HOME on the
+ * right. Escape is Back too, except while typing in a field or when something on the screen already used the
+ * Escape (a hint confirm marks it with preventDefault).
  */
 export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; onHome: () => void; children: ReactNode }) {
   const back = useRef(onBack);
@@ -105,9 +106,12 @@ export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; o
       <div className="game-head-mid" data-testid="screen-title">
         {children}
       </div>
-      <button className="key key-icon" onClick={onHome} aria-label="Home" title="Home" data-testid="nav-home">
-        <HomeIcon />
-      </button>
+      <div className="game-head-end">
+        <SoundToggle />
+        <button className="key key-icon" onClick={onHome} aria-label="Home" title="Home" data-testid="nav-home">
+          <HomeIcon />
+        </button>
+      </div>
     </header>
   );
 }
