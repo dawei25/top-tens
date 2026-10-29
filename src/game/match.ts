@@ -88,11 +88,12 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
  * Classify a guess against a puzzle.
  * - correct / duplicate: matches a top-10 entry (exactly or via autocorrect)
  * - near: matches another accepted answer (rank 11+ or unranked), costs a life
- * - typo: close to more than one entry, or probably a misspelled non-top-10 answer; the player picks, no life lost
+ * - typo: close to more than one entry; the player picks, no life lost
  * - unknown: not an accepted answer for this list at all ("asdf", or something the source doesn't cover), no life lost
  *
- * A misspelling that clearly points at one top-10 entry counts as that entry, unless what was typed is
- * itself a different real name (Austria when Australia is on the list).
+ * A misspelling that clearly points at one entry resolves to it with `corrected: true` (the game fills the
+ * input with that name for the player to confirm), unless what was typed is itself a different real name
+ * (Austria when Australia is on the list).
  */
 export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?: Lexicon): GuessResult {
   const guess = normalize(raw);
@@ -116,12 +117,7 @@ export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?
   const close = candidates.filter((c) => c.dist <= typoBudget(len));
   if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
     const tied = close.filter((c) => c.dist === close[0].dist);
-    if (tied.length === 1) {
-      const c = tied[0];
-      if (c.inTop10 || c.dist <= autoCorrectBudget(len)) return resolve(c, true);
-      // Probably a misspelled rank 11+ answer: let the player confirm before it costs a life.
-      return { kind: "typo", suggestions: [c.entry.name] };
-    }
+    if (tied.length === 1) return resolve(tied[0], true);
     return { kind: "typo", suggestions: tied.slice(0, 3).map((c) => c.entry.name) };
   }
 

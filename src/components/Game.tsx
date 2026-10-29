@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { loadPuzzle, dayNumber, type PuzzleMeta } from "../game/puzzles";
+import { judgeGuess } from "../game/match";
 import { applyGuess, giveUp, MAX_LIVES, newGame, shareText, type GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import type { Lexicon } from "../game/junk";
@@ -25,7 +26,7 @@ interface Feedback {
 function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   switch (r.kind) {
     case "correct":
-      return { tone: "good", text: r.corrected ? `#${r.entry.rank} ${r.entry.name}` : `#${r.entry.rank}` };
+      return { tone: "good", text: `#${r.entry.rank}` };
     case "duplicate":
       return { tone: "warn", text: `Already guessed ${r.entry.name}` };
     case "near":
@@ -88,7 +89,18 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
   if (!puzzle || !game) return <div className="loading">Loading…</div>;
 
   const over = game.status !== "playing";
+  const fill = (name: string) => {
+    setInput(name);
+    inputRef.current?.focus();
+  };
   const guess = (text: string) => {
+    // A misspelling is corrected in the box, never submitted for the player.
+    const preview = judgeGuess(text, puzzle, new Set(game.found), lexicon);
+    if ((preview.kind === "correct" || preview.kind === "near") && preview.corrected) {
+      fill(preview.entry.name);
+      setFeedback({ tone: "warn", text: `Did you mean ${preview.entry.name}? Press Enter to guess it.`, key: Date.now() });
+      return;
+    }
     const { state, result } = applyGuess(game, puzzle, text, lexicon);
     const fb = describe(result);
     if (!fb) return;
@@ -181,7 +193,7 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
             <div key={feedback.key} className={`toast ${feedback.tone}`} role="status">
               {feedback.text}
               {feedback.suggestions?.map((s) => (
-                <button key={s} type="button" className="suggestion" onClick={() => guess(s)}>
+                <button key={s} type="button" className="suggestion" onClick={() => fill(s)}>
                   {s}
                 </button>
               ))}

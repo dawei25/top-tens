@@ -19,7 +19,7 @@ export function HowToPlay({ onClose }: { onClose: () => void }) {
             ranks.
           </li>
           <li>
-            <b>Typos are free.</b> Close spellings count, and if a guess could be two things you pick which.
+            <b>Typos are free.</b> A close spelling gets corrected in the box; press Enter again to guess it.
           </li>
           <li>
             Anything that isn't a recognized answer for the list costs nothing.
