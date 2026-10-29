@@ -381,6 +381,14 @@ a {
   padding-top: 8px;
   border-top: 1px solid var(--hairline);
 }
+.home-foot-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  column-gap: 14px;
+  margin-left: auto;
+}
 
 /* How to play */
 .howto {
@@ -771,7 +779,8 @@ a {
   padding: 6px 16px 2px;
   border-top: 1px dashed var(--hairline);
 }
-.fact-all {
+.fact-all,
+.text-btn {
   min-height: 36px;
   padding: 0 4px;
   border: 0;
@@ -783,8 +792,13 @@ a {
   text-underline-offset: 3px;
   touch-action: manipulation;
 }
-.fact-all:hover {
+.fact-all:hover,
+.text-btn:hover {
   color: var(--cyan);
+}
+.text-btn.danger,
+.text-btn.danger:hover {
+  color: var(--danger);
 }
 
 .misses {
