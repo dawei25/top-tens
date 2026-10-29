@@ -51,9 +51,11 @@ export function giveUp(state: GameState): GameState {
   return state.status === "playing" ? { ...state, status: "gave-up" } : state;
 }
 
-/** Share text: one square per rank, plus lives used. */
+/** Share text: one square per rank (#1 gold, found blue, missed black), plus lives left. */
 export function shareText(state: GameState, puzzle: Puzzle, url: string): string {
-  const squares = puzzle.answers.map((a) => (state.found.includes(a.rank) ? "🟩" : "⬛")).join("");
+  const squares = puzzle.answers
+    .map((a) => (state.found.includes(a.rank) ? (a.rank === 1 ? "🟨" : "🟦") : "⬛"))
+    .join("");
   const hearts = "♥".repeat(state.lives) + "♡".repeat(MAX_LIVES - state.lives);
   return `Top Tens: ${puzzle.title}\n${state.found.length}/10 ${hearts}\n${squares}\n${url}`;
 }

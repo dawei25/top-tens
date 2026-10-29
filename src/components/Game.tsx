@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { loadPuzzle, dayNumber, type PuzzleMeta } from "../game/puzzles";
 import { judgeGuess } from "../game/match";
 import { applyGuess, giveUp, MAX_LIVES, newGame, shareText, type GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
+import { BackArrow, Heart, ordinal, reducedMotion, TypeIn } from "./pixel";
 
 interface Props {
   id: string;
@@ -23,10 +24,13 @@ interface Feedback {
   key: number;
 }
 
+/** Milliseconds between missed rows typing in at the end of a game. */
+const REVEAL_STEP = 90;
+
 function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   switch (r.kind) {
     case "correct":
-      return { tone: "good", text: `#${r.entry.rank}` };
+      return { tone: "good", text: `${r.entry.name}. #${r.entry.rank} on the board.` };
     case "duplicate":
       return { tone: "warn", text: `Already guessed ${r.entry.name}` };
     case "near":
@@ -48,16 +52,22 @@ function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   }
 }
 
-export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
+export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
   const [input, setInput] = useState("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [lastFound, setLastFound] = useState<number | null>(null);
-  const [shake, setShake] = useState(0);
+  const [shake, setShake] = useState({ n: 0, hit: false });
+  const [lostLife, setLostLife] = useState<{ i: number; key: number } | null>(null);
+  const [confirmQuit, setConfirmQuit] = useState(false);
   const [copied, setCopied] = useState(false);
+  /** Whether the game ended while on screen (so the end reveal plays), as opposed to loading a finished one. */
+  const [endedHere, setEndedHere] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLElement>(null);
+  const shareRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     loadPuzzle(id)
@@ -76,22 +86,48 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
     save(s);
   }, [game, puzzle, id, daily]);
 
+  const over = !!game && game.status !== "playing";
+  const missedCount = puzzle && game ? puzzle.answers.length - game.found.length : 0;
+  const resultsDelay = endedHere && !reducedMotion() ? missedCount * REVEAL_STEP + 350 : 0;
+
+  // Second beat of the end: once the table has revealed, bring the verdict into view and focus SHARE.
+  useEffect(() => {
+    if (!over || !endedHere) return;
+    const t = setTimeout(() => {
+      shareRef.current?.focus({ preventScroll: true });
+      resultsRef.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "nearest" });
+    }, resultsDelay);
+    return () => clearTimeout(t);
+  }, [over, endedHere, resultsDelay]);
+
+  useEffect(() => {
+    if (!confirmQuit) return;
+    const t = setTimeout(() => setConfirmQuit(false), 3000);
+    return () => clearTimeout(t);
+  }, [confirmQuit]);
+
   if (error) {
     return (
-      <main className="game">
-        <p>{error}</p>
-        <button className="btn" onClick={onHome}>
-          Home
-        </button>
+      <main className="screen game">
+        <section className="panel error">
+          <p className="label pink">Error</p>
+          <p>{error}</p>
+          <button className="key" onClick={onHome}>
+            Home
+          </button>
+        </section>
       </main>
     );
   }
-  if (!puzzle || !game) return <div className="loading">Loading…</div>;
+  if (!puzzle || !game) return <Loading />;
 
-  const over = game.status !== "playing";
   const fill = (name: string) => {
     setInput(name);
     inputRef.current?.focus();
+  };
+  const commit = (state: GameState) => {
+    if (state.status !== "playing" && game.status === "playing") setEndedHere(true);
+    setGame(state);
   };
   const guess = (text: string) => {
     // A misspelling is corrected in the box, never submitted for the player.
@@ -104,10 +140,12 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
     const { state, result } = applyGuess(game, puzzle, text, lexicon);
     const fb = describe(result);
     if (!fb) return;
-    setGame(state);
+    commit(state);
     setFeedback({ ...fb, key: Date.now() });
     if (result.kind === "correct") setLastFound(result.entry.rank);
-    if (result.kind === "near" || result.kind === "unknown" || result.kind === "typo") setShake((n) => n + 1);
+    if (state.lives < game.lives) setLostLife({ i: state.lives, key: Date.now() });
+    if (result.kind === "near" || result.kind === "unknown" || result.kind === "typo")
+      setShake((s) => ({ n: s.n + 1, hit: result.kind === "near" }));
     // Keep the text on a typo so it can be fixed by hand as well as by tapping a suggestion.
     if (result.kind !== "typo") setInput("");
     inputRef.current?.focus();
@@ -115,6 +153,11 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     guess(input);
+  };
+  const quit = () => {
+    if (!confirmQuit) return setConfirmQuit(true);
+    setConfirmQuit(false);
+    commit(giveUp(game));
   };
 
   const share = async () => {
@@ -134,115 +177,176 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
 
   const misses = game.log.flatMap((l, i) =>
     l.result.kind === "near"
-      ? [{ key: i, text: l.result.entry.rank ? `#${l.result.entry.rank} ${l.result.entry.name}` : l.result.entry.name }]
+      ? [{ key: i, rank: l.result.entry.rank, name: l.result.entry.name }]
       : [],
   );
+  const missedRanks = puzzle.answers.filter((a) => !game.found.includes(a.rank)).map((a) => a.rank);
+  const animate = !reducedMotion();
 
   return (
-    <main className={`game status-${game.status}`}>
+    <main className={`screen game status-${game.status}`}>
       <header className="game-head">
-        <button className="icon-btn" onClick={onHome} aria-label="Home">
-          ←
+        <button className="key key-icon" onClick={onHome} aria-label="Home">
+          <BackArrow />
         </button>
-        <span className="game-mode">{daily ? "Today's list" : "Random list"}</span>
-        <div className="lives" aria-label={`${game.lives} lives left`}>
-          {Array.from({ length: MAX_LIVES }, (_, i) => (
-            <span key={i} className={`life ${i < game.lives ? "on" : "off"}`} />
-          ))}
+        <div className="game-head-mid">
+          <span className="label mode">{daily ? "Today's list" : "Random list"}</span>
+          <div
+            key={lostLife?.key}
+            className={`lives ${lostLife ? "lives-hit" : ""}`}
+            role="img"
+            aria-label={`${game.lives} ${game.lives === 1 ? "life" : "lives"} left`}
+          >
+            {Array.from({ length: MAX_LIVES }, (_, i) => (
+              <Heart key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
+            ))}
+          </div>
         </div>
+        {!over ? (
+          <button className={`key key-sm ${confirmQuit ? "key-danger" : ""}`} onClick={quit} onBlur={() => setConfirmQuit(false)}>
+            {confirmQuit ? "Sure?" : "Give up"}
+          </button>
+        ) : (
+          <span className="key-sm-spacer" aria-hidden="true" />
+        )}
       </header>
 
-      <section className="prompt">
-        <h1>{puzzle.title}</h1>
-        <p>{puzzle.prompt}</p>
-        <div className="progress">
-          <b>{game.found.length}</b>/10
+      <section className="panel prompt">
+        <div className="prompt-top">
+          <span className="label cyan">{meta?.category ?? "Top 10"}</span>
+          <span className="count" aria-label={`${game.found.length} of 10 found`}>
+            <b>{game.found.length}</b>/10
+          </span>
         </div>
+        <h1>{puzzle.title}</h1>
+        <p className="caption">{puzzle.prompt}</p>
       </section>
 
-      <ol className="slots">
-        {puzzle.answers.map((a) => {
-          const found = game.found.includes(a.rank);
-          const revealed = found || over;
-          return (
-            <li
-              key={a.rank}
-              className={`slot ${found ? "found" : revealed ? "missed" : "hidden"} ${lastFound === a.rank ? "just" : ""}`}
-            >
-              <span className="rank">{a.rank}</span>
-              <span className="name">{revealed ? a.name : ""}</span>
-              {revealed && a.value && <span className="value">{a.value}</span>}
-            </li>
-          );
-        })}
-      </ol>
+      <section className="panel board" aria-label="Top 10">
+        <div className="board-head" aria-hidden="true">
+          <span>Rank</span>
+          <span className="slot-body">
+            <span>Name</span>
+            <span className="board-metric">{puzzle.metric ?? "Value"}</span>
+          </span>
+        </div>
+        <ol className="slots">
+          {puzzle.answers.map((a) => {
+            const found = game.found.includes(a.rank);
+            const revealed = found || over;
+            const just = found && lastFound === a.rank;
+            const missIdx = missedRanks.indexOf(a.rank);
+            const revealDelay = !found && endedHere ? missIdx * REVEAL_STEP : 0;
+            const typing = animate && (just || (!found && endedHere));
+            return (
+              <li
+                key={a.rank}
+                className={[
+                  "slot",
+                  found ? "found" : revealed ? "missed" : "hidden",
+                  a.rank === 1 ? "top" : "",
+                  just ? "just" : "",
+                  !found && endedHere ? "late" : "",
+                ].join(" ")}
+                style={{ "--d": `${revealDelay}ms` } as CSSProperties}
+              >
+                <span className="rank">{ordinal(a.rank)}</span>
+                <span className="slot-body">
+                  <span className="name">
+                    {revealed ? (
+                      <TypeIn text={a.name} animate={typing} delay={revealDelay} />
+                    ) : (
+                      <span className="blank" aria-label="not found yet">
+                        . . . . . . . .
+                      </span>
+                    )}
+                  </span>
+                  {revealed && a.value && <span className="value">{a.value}</span>}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
 
       {misses.length > 0 && (
-        <div className="miss-list" aria-label="Wrong guesses">
+        <section className="misses" aria-label="Wrong guesses">
+          <span className="label">Misses</span>
           {misses.map((m) => (
             <span key={m.key} className="miss-chip">
-              {m.text}
+              {m.rank ? <b>#{m.rank}</b> : null} {m.name}
             </span>
           ))}
-        </div>
+        </section>
       )}
 
       {!over ? (
         <form className="guess" onSubmit={submit}>
-          {feedback && (
-            <div key={feedback.key} className={`toast ${feedback.tone}`} role="status">
-              {feedback.text}
-              {feedback.suggestions?.map((s) => (
-                <button key={s} type="button" className="suggestion" onClick={() => fill(s)}>
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-          <div key={shake} className={`guess-row ${shake ? "shake" : ""}`}>
+          <div className="feedback-line">
+            {feedback ? (
+              <div key={feedback.key} className={`feedback ${feedback.tone}`} role="status">
+                <span>{feedback.text}</span>
+                {feedback.suggestions?.map((s) => (
+                  <button key={s} type="button" className="suggestion" onClick={() => fill(s)}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="feedback hint">type a name, press enter. typos are free.</p>
+            )}
+          </div>
+          <div key={shake.n} className={`guess-row ${shake.n ? "shake" : ""} ${shake.hit ? "hit" : ""}`}>
             <input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type a guess…"
+              placeholder="type a guess..."
               autoFocus
               autoComplete="off"
               autoCorrect="off"
+              autoCapitalize="off"
               spellCheck={false}
               enterKeyHint="send"
               aria-label="Your guess"
             />
-            <button className="btn btn-primary" type="submit" disabled={!input.trim()}>
+            <button className="key key-pink" type="submit" disabled={!input.trim()}>
               Guess
             </button>
           </div>
-          <button type="button" className="link give-up" onClick={() => setGame(giveUp(game))}>
-            Give up
-          </button>
         </form>
       ) : (
-        <section className="results">
-          <h2>
-            {game.status === "won" ? "Perfect 10!" : `${game.found.length}/10`}
-            <small>
-              {game.status === "won"
-                ? `with ${game.lives} ${game.lives === 1 ? "life" : "lives"} to spare`
-                : game.status === "gave-up"
-                  ? "You gave up"
-                  : "Out of lives"}
-            </small>
-          </h2>
+        <section
+          ref={resultsRef}
+          className={`panel results ${endedHere ? "enter" : ""}`}
+          style={{ "--d": `${resultsDelay}ms` } as CSSProperties}
+          aria-live="polite"
+        >
+          <p className={`label ${game.status === "won" ? "gold" : "pink"}`}>
+            {game.status === "won" ? "Perfect 10" : game.status === "gave-up" ? "Gave up" : "Game over"}
+          </p>
+          <p className="score" aria-label={`${game.found.length} out of 10`}>
+            <span className={`score-n ${game.status === "won" ? "gold" : ""}`}>{game.found.length}</span>
+            <span className="score-of">/10</span>
+          </p>
+          <p className="caption">
+            {game.status === "won"
+              ? `with ${game.lives} ${game.lives === 1 ? "life" : "lives"} to spare.`
+              : game.status === "gave-up"
+                ? "you gave up. the full list is above."
+                : "out of lives. the full list is above."}
+          </p>
           <div className="results-actions">
-            <button className="btn btn-primary" onClick={share}>
-              {copied ? "Copied!" : "Share"}
+            <button ref={shareRef} className="key key-pink" onClick={share}>
+              {copied ? "Copied" : "Share"}
             </button>
-            <button className="btn btn-secondary" onClick={onRoll}>
+            <button className="key" onClick={onRoll}>
               Roll another
             </button>
           </div>
           <p className="source">
-            {puzzle.metric && <>Ranked by {puzzle.metric.toLowerCase()}. </>}
-            Source:{" "}
+            {puzzle.metric && <>ranked by {puzzle.metric.toLowerCase()}. </>}
+            source:{" "}
             <a href={puzzle.source.url} target="_blank" rel="noreferrer">
               {puzzle.source.name}
             </a>{" "}
@@ -251,5 +355,13 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
         </section>
       )}
     </main>
+  );
+}
+
+export function Loading() {
+  return (
+    <div className="loading">
+      <span className="label cyan blink">Loading</span>
+    </div>
   );
 }
