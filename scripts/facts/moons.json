@@ -1,0 +1,52 @@
+{
+  "Ganymede": {
+    "text": "The only moon in the Solar System with its own internally generated magnetic field.",
+    "source": "https://en.wikipedia.org/wiki/Ganymede_(moon)",
+    "evidence": "Ganymede is the only natural satellite in the solar system to possess an internally generated magnetic field."
+  },
+  "Titan": {
+    "text": "From its surface, Saturn looks more than ten times as large as the Moon does from Earth.",
+    "source": "https://en.wikipedia.org/wiki/Titan_(moon)",
+    "evidence": "From Titan's surface, Saturn, disregarding its rings, subtends an arc of 5.09 degrees, rendering it more than ten times as large in Titan's sky as the Moon is in Earth's sky."
+  },
+  "Callisto": {
+    "text": "Its surface is the oldest and most heavily cratered in the Solar System.",
+    "source": "https://en.wikipedia.org/wiki/Callisto_(moon)",
+    "evidence": "The surface of Callisto is the oldest and most heavily cratered in the Solar System, with the surface almost completely covered with impact craters."
+  },
+  "Io": {
+    "text": "Was used for the first measurement of the speed of light.",
+    "source": "https://en.wikipedia.org/wiki/Io_(moon)",
+    "evidence": "Io in particular was used for the first measurement of the speed of light."
+  },
+  "Moon": {
+    "text": "Looks about the same size as the Sun in Earth's sky, so it can completely cover the Sun in a total eclipse.",
+    "source": "https://en.wikipedia.org/wiki/Moon",
+    "evidence": "The Moon's apparent size in Earth's sky is about the same as that of the Sun, which causes it to cover the Sun completely during a total solar eclipse."
+  },
+  "Europa": {
+    "text": "With no large mountains or craters, it is the smoothest known solid object in the Solar System.",
+    "source": "https://en.wikipedia.org/wiki/Europa_(moon)",
+    "evidence": "Europa has a pale, geologically young surface striated by light tan cracks and streaks; the surface lacks large-scale features such as mountains or craters, making the moon the smoothest known solid object in the Solar System."
+  },
+  "Triton": {
+    "text": "The only large moon with a retrograde orbit, and thought to be a captured dwarf planet from the Kuiper belt.",
+    "source": "https://en.wikipedia.org/wiki/Triton_(moon)",
+    "evidence": "Triton orbits Neptune in a retrograde orbit—revolving in the opposite direction to the parent planet's rotation—the only large moon in the Solar System to do so. Triton is thought to have once been a dwarf planet from the Kuiper belt, captured into Neptune's orbit by the latter's gravity."
+  },
+  "Titania": {
+    "text": "For nearly 50 years after its discovery, no instrument but William Herschel's observed it.",
+    "source": "https://en.wikipedia.org/wiki/Titania_(moon)",
+    "evidence": "For nearly the next 50 years, Titania and Oberon would not be observed by any instrument other than William Herschel's, although the moon can be seen from Earth with a present-day high-end amateur telescope."
+  },
+  "Rhea": {
+    "text": "Its discoverer, Cassini, grouped it with three other moons as \"the stars of Louis\", for King Louis XIV.",
+    "source": "https://en.wikipedia.org/wiki/Rhea_(moon)",
+    "evidence": "Cassini named the four moons he discovered (Tethys, Dione, Rhea, and Iapetus) Sidera Lodoicea (the stars of Louis) to honor King Louis XIV."
+  },
+  "Oberon": {
+    "text": "Named after the king of the fairies in Shakespeare's A Midsummer Night's Dream.",
+    "source": "https://en.wikipedia.org/wiki/Oberon_(moon)",
+    "evidence": "Discovered by William Herschel in 1787, Oberon is named after the mythical king of the fairies who appears as a character in Shakespeare's A Midsummer Night's Dream."
+  }
+}
