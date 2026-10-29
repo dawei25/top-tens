@@ -7,6 +7,8 @@ export interface Saved {
   /** Local date (YYYY-MM-DD) -> id of that date's daily, finished on that date. Drives streaks. */
   daily: Record<string, string>;
   seenHelp: boolean;
+  /** Best Blitz score per list id. */
+  blitzBest?: Record<string, number>;
 }
 
 const empty = (): Saved => ({ games: {}, daily: {}, seenHelp: false });
