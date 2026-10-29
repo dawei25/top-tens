@@ -33,13 +33,18 @@ for (const vp of VIEWPORTS) {
     assert.ok(Number(score) > 0);
 
     // A guess sent after time is up doesn't count, even before the screen ticks; the input locks.
+    // The installed clock runs in real time, so the screen's 100 ms tick would end the round (and remove the input)
+    // between the jump and Enter. Pause the timers first: then only the submitted guess can see that time is up.
+    const now = await page.evaluate(() => Date.now());
+    await page.clock.pauseAt(now + 100);
     await page.getByLabel("Your guess").fill(p.answers[1].name);
-    await page.clock.setSystemTime((await page.evaluate(() => Date.now())) + 90_000);
+    await page.clock.setSystemTime(now + 100 + 90_000);
     await page.getByLabel("Your guess").press("Enter");
     await page.getByTestId("blitz-results").waitFor();
     assert.equal(await page.getByTestId("blitz-final").textContent(), score);
     assert.equal(await page.getByLabel("Your guess").count(), 0);
     assert.ok(await noHScroll(page));
+    await page.clock.resume();
 
     // Its past run: opens at its own address; Back returns to the list's Blitz screen with past runs open.
     await page.getByTestId("past-runs-toggle").click();

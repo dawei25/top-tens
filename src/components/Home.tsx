@@ -6,6 +6,7 @@ import { recentPlays } from "../game/history";
 import { Countdown } from "./Countdown";
 import { HowToPlay, markHelpSeen } from "./HowToPlay";
 import { EnterHint, ModeTag, type Mode } from "./pixel";
+import { SoundToggle } from "./sound/SoundToggle";
 
 /**
  * A home key: mode tag and status on top, the action below. Today's keys carry their mode's accent while unplayed
@@ -161,6 +162,7 @@ export function Home({
 
   return (
     <main className="screen home">
+      <SoundToggle className="home-sound" />
       <header className="title">
         <h1 className="logo" aria-label="TENtacle">
           <span>TEN</span><span>tacle</span>
