@@ -1,0 +1,238 @@
+/*
+ * Motion layer (animations agent). Arcade effects on top of index.css, loaded after it.
+ * - CSS first, transform and opacity only, steps() for the arcade feel. Nothing here moves layout or waits
+ *   on the player.
+ * - Everything sits inside prefers-reduced-motion: no-preference. With reduced motion the screen shows its final
+ *   state as is; the only rule outside hides the decorative extras (burst, float).
+ * - Infinite blinks are named motion-blink-*: src/components/motion pins them to the wall-clock second, so they
+ *   blink together.
+ * - Already in index.css and not doubled here: found-row flash and type-in, heart flash and lives shake,
+ *   guess-row shake, the Blitz clock's low-time blink.
+ */
+
+/* Decorative extras only exist with motion on. */
+.motion-burst,
+.motion-float {
+  display: none;
+}
+
+@property --motion-n {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---- Home title: CRT power-on, once per page load (html[data-motion-boot]) ---- */
+  html[data-motion-boot] .home .logo {
+    position: relative;
+    animation: motion-crt-on 0.6s linear both;
+  }
+  /* A scanline of light rolls down the title once it is on. */
+  html[data-motion-boot] .home .logo::after {
+    content: "";
+    position: absolute;
+    inset: 0 -6%;
+    background: linear-gradient(
+      to bottom,
+      transparent 0 72%,
+      rgba(77, 227, 255, 0.12) 90%,
+      rgba(77, 227, 255, 0.4) 98%,
+      rgba(232, 241, 255, 0.7) 100%
+    );
+    pointer-events: none;
+    animation: motion-crt-sweep 0.45s 0.42s steps(9, end) both;
+  }
+
+  /* ---- Home: the focused key's ENTER cap blinks like INSERT COIN (on 1.5 s, off 0.5 s) ---- */
+  .enter-hint {
+    animation: motion-blink-enter 2s steps(1, end) infinite;
+  }
+
+  /* ---- Countdown: the colons tick each second, like a digital clock ---- */
+  .motion-colon {
+    animation: motion-blink-colon 1s steps(1, end) infinite;
+  }
+
+  /* ---- Life lost: the heart shatters into pixels (index.css already flashes it and shakes the row) ---- */
+  .lives {
+    position: relative;
+  }
+  .motion-burst {
+    display: block;
+    position: absolute;
+    top: 50%;
+    /* Hearts are 24px wide with a 6px gap. */
+    left: calc(var(--i) * 30px + 12px);
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .motion-burst i {
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    width: 4px;
+    height: 4px;
+    background: var(--pink);
+    animation: motion-shard 0.45s steps(6, end) both;
+  }
+  .motion-burst i:nth-child(3n) {
+    background: #fff;
+  }
+
+  /* ---- Blitz: "+57" rises off the score ---- */
+  .blitz-meter-cell {
+    position: relative;
+  }
+  .motion-float {
+    display: block;
+    /* Just left of the score, level with its top, so it never covers the digits. */
+    position: absolute;
+    top: 26px;
+    right: calc(100% + 10px);
+    font-size: 30px;
+    line-height: 1;
+    color: var(--cyan);
+    text-shadow: 0 0 12px var(--cyan-glow);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: motion-float 0.6s steps(8, end) both;
+  }
+
+  /* ---- Results: the score counts up from 0 as the panel arrives ---- */
+  .results.enter .motion-count {
+    display: inline-grid;
+    --motion-n: var(--to);
+    counter-reset: motion-n var(--motion-n);
+    animation: motion-count 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) calc(var(--d, 0ms) + 0.15s) both;
+  }
+  .results.enter .motion-count-n {
+    visibility: hidden;
+  }
+  /* The counting copy sits in the same grid cell as the real number, on the same baseline. */
+  .results.enter .motion-count-n,
+  .results.enter .motion-count::after {
+    grid-area: 1 / 1;
+  }
+  /* Right-aligned, so the digits grow leftward and stay snug against "/10" or "pts". */
+  .results.enter .motion-count::after {
+    content: counter(motion-n);
+    justify-self: end;
+  }
+
+  /* ---- Results banner (PERFECT 10, GAME OVER, TIME'S UP, new best): blinks twice, then holds ---- */
+  .results.enter [data-motion="banner"] {
+    animation: motion-banner 1.2s steps(1, end) calc(var(--d, 0ms) + 0.35s) both;
+  }
+}
+
+@keyframes motion-crt-on {
+  0% {
+    opacity: 0;
+    transform: scale(1.2, 0.02);
+  }
+  6% {
+    opacity: 1;
+    transform: scale(1.2, 0.02);
+  }
+  26% {
+    transform: scale(1, 1.08);
+  }
+  32% {
+    transform: none;
+    opacity: 1;
+    animation-timing-function: steps(1, end);
+  }
+  44% {
+    opacity: 0.3;
+  }
+  52% {
+    opacity: 1;
+  }
+  68% {
+    opacity: 0.6;
+  }
+  76%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes motion-crt-sweep {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  10%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+@keyframes motion-blink-enter {
+  75%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes motion-blink-colon {
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes motion-shard {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+@keyframes motion-float {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  15%,
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-26px);
+  }
+}
+@keyframes motion-count {
+  from {
+    --motion-n: 0;
+  }
+}
+@keyframes motion-banner {
+  0% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0;
+  }
+  37.5% {
+    opacity: 1;
+  }
+  62.5% {
+    opacity: 0;
+  }
+  75%,
+  100% {
+    opacity: 1;
+  }
+}

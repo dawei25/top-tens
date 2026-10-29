@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { formatCountdown, msUntilNextDaily } from "../game/daily";
+import { BlinkColons } from "./motion/effects";
 
 /** "next list in 05:12:09", ticking on the second. Only this line re-renders. */
 export function Countdown({ className = "", label = "next list in" }: { className?: string; label?: string }) {
@@ -16,7 +17,9 @@ export function Countdown({ className = "", label = "next list in" }: { classNam
   }, []);
   return (
     <p className={`countdown ${className}`}>
-      {label} <b>{formatCountdown(ms)}</b>
+      {label} <b>
+        <BlinkColons text={formatCountdown(ms)} />
+      </b>
     </p>
   );
 }
