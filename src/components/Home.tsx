@@ -202,27 +202,32 @@ export function Home({
               onBlitz().then((ok) => setNoBlitz(!ok));
             })}
           />
-          <ModeKey mode="classic" title="Archive" status={`${archiveCount} dailies`} onClick={start(onArchive)} />
-          <ModeKey
-            mode="both"
-            title="Past runs"
-            status={plays ? `${plays} played` : "none yet"}
-            onClick={start(() => (location.hash = "#history"))}
-          />
         </div>
         {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
+        {/* A chip rolls a random classic list in that category, straight away. */}
+        <div className="cat-row">
+          <span className="caption">or by category</span>
+          <div className="chips">
+            {categories.map((c) => (
+              <button key={c} className="chip" onClick={start(() => onRoll(c))}>
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section className="home-cats" aria-labelledby="cats-title">
-        <h2 id="cats-title" className="label">
-          Roll by category
+      <section className="home-group" aria-labelledby="games-title">
+        <h2 id="games-title" className="label">
+          Your games
         </h2>
-        <div className="chips">
-          {categories.map((c) => (
-            <button key={c} className="chip" onClick={start(() => onRoll(c))}>
-              {c}
-            </button>
-          ))}
+        <div className="games-row">
+          <button className="key key-sm games-key" onClick={start(onArchive)}>
+            Archive <span className="games-n">{archiveCount}</span>
+          </button>
+          <button className="key key-sm games-key" onClick={start(() => (location.hash = "#history"))}>
+            Past runs {plays > 0 && <span className="games-n">{plays}</span>}
+          </button>
         </div>
       </section>
 
