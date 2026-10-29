@@ -14,6 +14,7 @@ import {
 } from "../game/state";
 import { load, save } from "../game/storage";
 import { localDate, streak, type DailyEntry } from "../game/daily";
+import { blitzAvailable } from "../game/blitz";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
@@ -26,6 +27,7 @@ interface Props {
   daily?: DailyEntry;
   /** The player's local date, from App. */
   today: string;
+  schedule: DailyEntry[];
   lexicon?: Lexicon;
   onHome: () => void;
   onRoll: () => void;
@@ -70,7 +72,7 @@ function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   }
 }
 
-export function Game({ id, meta, daily, today, lexicon, onHome, onRoll }: Props) {
+export function Game({ id, meta, daily, today, schedule, lexicon, onHome, onRoll }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -290,6 +292,12 @@ export function Game({ id, meta, daily, today, lexicon, onHome, onRoll }: Props)
     dailyStreak = streak(sv);
   }
   const mode = !daily ? "Random list" : daily.date === today ? `Daily #${daily.n}` : `Archive #${daily.n}`;
+  // Count this game in before the save effect runs, so finishing today's daily opens Blitz on the results at once.
+  const blitzOpen = (() => {
+    const sv = load();
+    sv.games[id] = game;
+    return blitzAvailable(puzzle, schedule, today, sv);
+  })();
 
   return (
     <main className={`screen game status-${game.status}`}>
@@ -322,6 +330,11 @@ export function Game({ id, meta, daily, today, lexicon, onHome, onRoll }: Props)
       <section className="panel prompt">
         <div className="prompt-top">
           <span className="label cyan">{meta?.category ?? "Top 10"}</span>
+          {blitzOpen && !over && (
+            <a className="key key-xs key-blitz-sm" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
+              Blitz
+            </a>
+          )}
           <span className="count" aria-label={`${game.found.length} of 10 found`}>
             <b>{game.found.length}</b>/10
           </span>
@@ -550,6 +563,11 @@ export function Game({ id, meta, daily, today, lexicon, onHome, onRoll }: Props)
             <button ref={shareRef} className="key key-pink" onClick={share}>
               {copied ? "Copied" : "Share"}
             </button>
+            {blitzOpen && (
+              <a className="key key-blitz" href={`#blitz-${puzzle.id}`}>
+                Blitz
+              </a>
+            )}
             <button className="key" onClick={playAgain}>
               Play again
             </button>

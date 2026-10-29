@@ -12,10 +12,13 @@ interface Props {
   archiveCount: number;
   onDaily: () => void;
   onRoll: (category?: string) => void;
+  /** Goes to a random Blitz-ready list; false when there is none. */
+  onBlitz: () => Promise<boolean>;
   onArchive: () => void;
 }
 
-export function Home({ index, entry, archiveCount, onDaily, onRoll, onArchive }: Props) {
+export function Home({ index, entry, archiveCount, onDaily, onRoll, onBlitz, onArchive }: Props) {
+  const [noBlitz, setNoBlitz] = useState(false);
   const saved = load();
   const s = stats(saved);
   const st = streak(saved);
@@ -91,6 +94,17 @@ export function Home({ index, entry, archiveCount, onDaily, onRoll, onArchive }:
           <span className="key-label">Roll a random list</span>
           <span className="key-sub">{index.length} lists</span>
         </button>
+        <button
+          className="key key-big key-blitz"
+          onClick={start(() => {
+            setNoBlitz(false);
+            onBlitz().then((ok) => setNoBlitz(!ok));
+          })}
+        >
+          <span className="key-label">Blitz a random list</span>
+          <span className="key-sub">90 seconds</span>
+        </button>
+        {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
         <button className="key key-big" onClick={start(onArchive)}>
           <span className="key-label">Archive</span>
           <span className="key-sub">{archiveCount} dailies</span>
