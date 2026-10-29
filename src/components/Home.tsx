@@ -40,6 +40,8 @@ function ModeKey({
       disabled={disabled}
       data-testid={testId}
       data-done={done || undefined}
+      // Hovering a Today key selects it, so Enter (and the ENTER cap shown on hover) means this key.
+      onPointerEnter={today ? (e) => e.pointerType === "mouse" && e.currentTarget.focus({ preventScroll: true }) : undefined}
     >
       <span className="mode-key-top">
         <ModeTag mode={mode} />
@@ -105,6 +107,23 @@ export function Home({
   useEffect(() => {
     // Only on arrival.
     focusDaily();
+  }, []);
+  // Keyboard modality for the ENTER cap: a key press turns it on, any pointer press turns it off. It starts off on
+  // arrival, so the auto-focused key doesn't show the cap until the player actually uses the keyboard here.
+  useEffect(() => {
+    const root = document.documentElement;
+    delete root.dataset.modality;
+    const onKey = (e: KeyboardEvent) => {
+      if (!["Shift", "Control", "Alt", "Meta"].includes(e.key)) root.dataset.modality = "keyboard";
+    };
+    const onPointer = () => delete root.dataset.modality;
+    addEventListener("keydown", onKey, true);
+    addEventListener("pointerdown", onPointer, true);
+    return () => {
+      removeEventListener("keydown", onKey, true);
+      removeEventListener("pointerdown", onPointer, true);
+      delete root.dataset.modality;
+    };
   }, []);
   // Inline confirm, like GIVE UP: the first click arms it for 3 s, the second clears everything but seenHelp.
   const [confirmReset, setConfirmReset] = useState(false);

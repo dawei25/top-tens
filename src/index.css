@@ -478,10 +478,36 @@ a {
   color: var(--muted);
   opacity: 0.9;
 }
+/*
+ * The ENTER cap shows on a hovered Today key (hover also moves focus there, so Enter starts that key), or on a key
+ * the player reached with the keyboard (html[data-modality="keyboard"], set by a keydown, cleared by any pointer).
+ * The auto-focus on arrival doesn't show it.
+ */
 @media (pointer: fine) {
-  .mode-key:focus-visible .enter-hint,
-  .mode-key.today:focus .enter-hint {
+  .mode-key.today:hover .enter-hint,
+  html[data-modality="keyboard"] .mode-key:focus .enter-hint {
     display: inline-block;
+  }
+  /* Today's keys lift and grow a touch under the mouse, in their own color; transform only, so nothing moves. */
+  .mode-key.today {
+    transition:
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      background-color 120ms linear;
+  }
+  .mode-key.today:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.025);
+    box-shadow:
+      0 8px 0 var(--accent-shadow),
+      0 0 22px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .mode-key.today.done:hover:not(:disabled) {
+    box-shadow: 0 8px 0 var(--key-shadow);
+  }
+  /* Pressed: the usual keycap sink wins over the hover lift. */
+  .mode-key.today:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--accent-shadow);
   }
 }
 
