@@ -38,6 +38,8 @@ interface Props {
   lexicon?: Lexicon;
   /** Open the past-runs panel (arriving from the Blitz runs screen). */
   showRuns?: boolean;
+  /** Open this past run's results (its startedAt), arriving from Past runs. */
+  openRun?: number;
   /** Set when this is a date's Today's Blitz (n is that date's daily number). */
   dailyBlitz?: { date: string; n: number };
   onHome: () => void;
@@ -176,7 +178,7 @@ function PastRuns({ runs, best, open, onOpen }: { runs: BlitzRun[]; best?: numbe
   );
 }
 
-export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, dailyBlitz, onHome }: Props) {
+export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, openRun: openAt, dailyBlitz, onHome }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<BlitzState | null>(null);
@@ -209,6 +211,11 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
       })
       .catch((e) => setError(String(e.message ?? e)));
   }, [id]);
+
+  // Arriving at #blitz-<id>/run-<startedAt> (from Past runs): show that run.
+  useEffect(() => {
+    if (openAt) setViewRun(blitzHistory(load(), id).find((r) => r.startedAt === openAt) ?? null);
+  }, [id, openAt]);
 
   // Keep the live round in storage if the page goes away (tab closed, app switched).
   useEffect(() => {
@@ -375,7 +382,12 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
             {isBest && <p className="gold">best on this list</p>}
           </div>
           <div className="results-actions">
-            <button className="key" onClick={() => openRun(null)} autoFocus>
+            <button
+              className="key"
+              // Opened from Past runs: back goes there. Opened from this list's panel: back to the list's screen.
+              onClick={() => (openAt === viewRun.startedAt ? history.back() : openRun(null))}
+              autoFocus
+            >
               Back
             </button>
           </div>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PuzzleMeta } from "../game/puzzles";
 import { streak, type DailyEntry } from "../game/daily";
 import { load, save, stats } from "../game/storage";
+import { recentPlays } from "../game/history";
 import { Countdown } from "./Countdown";
 import { HowToPlay, markHelpSeen } from "./HowToPlay";
 import { EnterHint, ModeTag, type Mode } from "./pixel";
@@ -108,7 +109,9 @@ export function Home({
     return () => clearTimeout(t);
   }, [confirmReset]);
   const blitzRuns = Object.values(saved.blitzRuns ?? {}).reduce((k, runs) => k + runs.length, 0);
+  const plays = recentPlays(saved, 1000).length;
   const hasProgress =
+    plays > 0 ||
     Object.keys(saved.games).length > 0 ||
     Object.keys(saved.daily).length > 0 ||
     blitzRuns > 0 ||
@@ -201,10 +204,10 @@ export function Home({
           />
           <ModeKey mode="classic" title="Archive" status={`${archiveCount} dailies`} onClick={start(onArchive)} />
           <ModeKey
-            mode="blitz"
-            title="Blitz runs"
-            status={blitzRuns ? `${blitzRuns} round${blitzRuns === 1 ? "" : "s"}` : "none yet"}
-            onClick={start(() => (location.hash = "#blitz-history"))}
+            mode="both"
+            title="Past runs"
+            status={plays ? `${plays} played` : "none yet"}
+            onClick={start(() => (location.hash = "#history"))}
           />
         </div>
         {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}

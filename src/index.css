@@ -1737,19 +1737,6 @@ a.text-btn {
 .blitz-run.best .run-when {
   color: var(--gold);
 }
-.arch-n.gold {
-  color: var(--gold);
-}
-.runs-row .arch-result {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  line-height: 1.1;
-}
-.runs-row .arch-result small {
-  font-size: 15px;
-  color: var(--faint);
-}
 @media (max-width: 420px) {
   .blitz-run {
     padding: 4px 12px;
@@ -1770,4 +1757,51 @@ a.text-btn {
 }
 .results-meta p.gold b {
   color: var(--gold);
+}
+
+/* Past runs: a mode-neutral tag for keys that cover both modes. */
+.mode-tag.both {
+  color: var(--cyan);
+}
+.play-row .play-date {
+  font-size: 20px;
+  line-height: 1.1;
+  white-space: nowrap;
+  color: var(--label);
+}
+.play-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.play-tag {
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.play-tag.blitz {
+  color: var(--gold);
+}
+.play-row .arch-result {
+  font-size: 18px;
+}
+@media (max-width: 520px) {
+  /* Phones: the result moves under the title instead of squeezing it. */
+  .play-row .play-date {
+    font-size: 17px;
+  }
+  .play-row {
+    grid-template-columns: 58px minmax(0, 1fr);
+    grid-template-areas:
+      "n title"
+      "date result";
+    row-gap: 2px;
+  }
+  .play-row .arch-result {
+    text-align: left;
+    white-space: normal;
+  }
 }

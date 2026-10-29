@@ -26,9 +26,10 @@ export function sourceSite(name: string): string {
 /**
  * Mode identity, the same everywhere: classic (name the top 10, 5 lives) is pink, Blitz (90 s, points) is gold.
  */
-export type Mode = "classic" | "blitz";
+export type Mode = "classic" | "blitz" | "both";
+const MODE_TAG: Record<Mode, string> = { classic: "5 lives", blitz: "Blitz · 90 s", both: "Lists + Blitz" };
 export function ModeTag({ mode }: { mode: Mode }) {
-  return <span className={`mode-tag ${mode}`}>{mode === "blitz" ? "Blitz · 90 s" : "5 lives"}</span>;
+  return <span className={`mode-tag ${mode}`}>{MODE_TAG[mode]}</span>;
 }
 
 /** The keyboard hint on a home key; CSS shows it only on the focused key, and only with a fine pointer. */
