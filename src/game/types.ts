@@ -1,3 +1,10 @@
+export interface Fact {
+  /** One sentence, at most 120 characters. */
+  text: string;
+  /** URL of the Wikipedia article that supports it. */
+  source: string;
+}
+
 export interface Entry {
   /** 1-based position in the source ranking; 0 for a real answer the source doesn't rank. */
   rank: number;
@@ -5,6 +12,10 @@ export interface Entry {
   aliases: string[];
   /** Display value from the source table, e.g. "1,441,719,852". */
   value?: string;
+  /** Wikipedia article title for this entry (top 10 only). */
+  article?: string;
+  /** One short, sourced fun fact, shown on hover or tap once the row is revealed (top 10 only). */
+  fact?: Fact;
 }
 
 export interface Puzzle {

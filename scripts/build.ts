@@ -1,8 +1,8 @@
 // Builds public/puzzles/*.json from the Wikipedia tables listed in topics.ts.
 // Usage: npm run build:puzzles [-- topic-id ...]
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Entry, Puzzle } from "../src/game/types";
+import type { Entry, Fact, Puzzle } from "../src/game/types";
 import { normalize } from "../src/game/match";
 import { cleanText, splitHeader, tableGrid, wikitables, type Cell } from "./table";
 import { TOPICS, type Topic } from "./topics";
@@ -297,6 +297,14 @@ function applyIntent(topic: Topic, entries: Entry[]): void {
   }
 }
 
+const FACTS_DIR = join(import.meta.dirname, "facts");
+
+/** Curated fun facts for a topic, keyed by entry name: scripts/facts/<topic id>.json. */
+function readFacts(id: string): Record<string, Fact> {
+  const file = join(FACTS_DIR, `${id}.json`);
+  return existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {};
+}
+
 async function buildPuzzle(topic: Topic): Promise<Puzzle> {
   const rows = (await readRows(topic)).slice(0, MAX_ROWS);
   if (rows.length < 10) throw new Error(`only ${rows.length} rows`);
@@ -304,6 +312,7 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
     throw new Error(`tie at #10/#11: ${rows[9].name} / ${rows[10].name}`);
   }
 
+  const facts = readFacts(topic.id);
   const entries: Entry[] = [];
   for (const [i, row] of rows.entries()) {
     const aliases = new Set(row.aliasSeeds);
@@ -318,11 +327,14 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
       const last = row.name.split(" ").at(-1)!;
       if (last.length >= 4) aliases.add(last);
     }
+    const fact = i < 10 ? facts[row.name] : undefined;
     entries.push({
       rank: i + 1,
       name: row.name,
       aliases: [...aliases],
       value: (topic.prefix ?? "") + row.valueText + (topic.unit ?? ""),
+      ...(i < 10 ? { article: row.redirectTarget } : {}),
+      ...(fact ? { fact } : {}),
     });
   }
 
