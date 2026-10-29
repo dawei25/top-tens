@@ -2,11 +2,20 @@ import { useEffect, useState } from "react";
 import { Home } from "./components/Home";
 import { Archive } from "./components/Archive";
 import { Blitz } from "./components/Blitz";
+import { BlitzRuns } from "./components/BlitzRuns";
 import { Game, Loading } from "./components/Game";
 import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, loadPuzzle, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
 import { blitzAvailable } from "./game/blitz";
-import { entryForDate, loadSchedule, localDate, msUntilNextDaily, todayEntry, type DailyEntry } from "./game/daily";
+import {
+  blitzOfTheDay,
+  entryForDate,
+  loadSchedule,
+  localDate,
+  msUntilNextDaily,
+  todayEntry,
+  type DailyEntry,
+} from "./game/daily";
 import { load } from "./game/storage";
 
 type Route =
@@ -14,13 +23,18 @@ type Route =
   | { screen: "archive" }
   | { screen: "daily"; date: string }
   | { screen: "game"; id: string }
-  | { screen: "blitz"; id: string };
+  | { screen: "blitz"; id: string; runs: boolean }
+  | { screen: "blitz-history" }
+  | { screen: "dailyblitz"; date: string };
 
 function readHash(): Route {
   const h = location.hash;
   if (h === "#archive") return { screen: "archive" };
-  const blitz = h.match(/^#blitz-([\w-]+)$/);
-  if (blitz) return { screen: "blitz", id: blitz[1] };
+  if (h === "#blitz-history") return { screen: "blitz-history" };
+  const dailyBlitz = h.match(/^#dailyblitz-(\d{4}-\d{2}-\d{2})$/);
+  if (dailyBlitz) return { screen: "dailyblitz", date: dailyBlitz[1] };
+  const blitz = h.match(/^#blitz-([\w-]+)(\/runs)?$/);
+  if (blitz) return { screen: "blitz", id: blitz[1], runs: !!blitz[2] };
   const date = h.match(/^#daily-(\d{4}-\d{2}-\d{2})$/);
   if (date) return { screen: "daily", date: date[1] };
   const m = h.match(/^#(daily|p)-([\w-]+)/);
@@ -28,6 +42,20 @@ function readHash(): Route {
   // Old daily links named the list itself: play it as a roll.
   if (m[1] === "daily") history.replaceState(null, "", `#p-${m[2]}`);
   return { screen: "game", id: m[2] };
+}
+
+function NoList({ text, onHome }: { text: string; onHome: () => void }) {
+  return (
+    <main className="screen game">
+      <section className="panel error">
+        <p className="label pink">No list</p>
+        <p>{text}</p>
+        <button className="key" onClick={onHome}>
+          Home
+        </button>
+      </section>
+    </main>
+  );
 }
 
 export default function App() {
@@ -73,7 +101,7 @@ export default function App() {
     const shuffled = [...index].sort(() => Math.random() - 0.5);
     const fresh = shuffled.filter((m) => saved.blitzBest?.[m.id] === undefined);
     for (const m of [...fresh, ...shuffled.filter((x) => !fresh.includes(x))]) {
-      const flag = (m as PuzzleMeta & { blitz?: boolean }).blitz;
+      const flag = m.blitz;
       if (flag === false) continue;
       const p = flag === true ? { id: m.id, blitz: true } : await loadPuzzle(m.id).catch(() => null);
       if (p && blitzAvailable(p, schedule, localDate(), saved)) {
@@ -94,6 +122,28 @@ export default function App() {
         schedule={schedule}
         today={today}
         lexicon={lexicon}
+        showRuns={route.runs}
+        onHome={home}
+      />
+    );
+  }
+
+  if (route.screen === "blitz-history") return <BlitzRuns index={index} onHome={home} />;
+
+  if (route.screen === "dailyblitz") {
+    // Today's Blitz: one list per date, the same for everyone; never a future one.
+    const id = route.date <= today ? blitzOfTheDay(schedule, index, route.date) : undefined;
+    if (!id) return <NoList text={`There's no Blitz for ${route.date} yet.`} onHome={home} />;
+    const n = (entryForDate(schedule, route.date) ?? todayEntry(schedule, route.date))?.n ?? 0;
+    return (
+      <Blitz
+        key={`dailyblitz-${route.date}`}
+        id={id}
+        meta={index.find((p) => p.id === id)}
+        schedule={schedule}
+        today={today}
+        lexicon={lexicon}
+        dailyBlitz={{ date: route.date, n }}
         onHome={home}
       />
     );
@@ -107,17 +157,7 @@ export default function App() {
     const entry = route.screen === "daily" ? entryForDate(schedule, route.date) : undefined;
     // A daily from the future (or a date with no list) isn't playable yet.
     if (route.screen === "daily" && (!entry || entry.date > today)) {
-      return (
-        <main className="screen game">
-          <section className="panel error">
-            <p className="label pink">No list</p>
-            <p>There's no daily for {route.date} yet.</p>
-            <button className="key" onClick={home}>
-              Home
-            </button>
-          </section>
-        </main>
-      );
+      return <NoList text={`There's no daily for ${route.date} yet.`} onHome={home} />;
     }
     const id = entry ? entry.id : (route as { id: string }).id;
     return (
@@ -141,6 +181,9 @@ export default function App() {
       entry={current}
       archiveCount={schedule.filter((e) => e.date <= today).length}
       onDaily={() => current && (location.hash = `#daily-${current.date}`)}
+      today={today}
+      hasDailyBlitz={!!blitzOfTheDay(schedule, index, today)}
+      onDailyBlitz={() => (location.hash = `#dailyblitz-${today}`)}
       onRoll={roll}
       onBlitz={blitzRoll}
       onArchive={() => (location.hash = "#archive")}
