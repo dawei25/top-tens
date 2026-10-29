@@ -10,8 +10,7 @@
  *   guess-row shake, the Blitz clock's low-time blink.
  */
 
-/* Decorative extras only exist with motion on. */
-.motion-burst,
+/* Decorative extras only exist with motion on. (The squid, ink lives and their effects: components/squid.) */
 .motion-float {
   display: none;
 }
@@ -52,33 +51,6 @@
   /* ---- Countdown: the colons tick each second, like a digital clock ---- */
   .motion-colon {
     animation: motion-blink-colon 1s steps(1, end) infinite;
-  }
-
-  /* ---- Life lost: the heart shatters into pixels (index.css already flashes it and shakes the row) ---- */
-  .lives {
-    position: relative;
-  }
-  .motion-burst {
-    display: block;
-    position: absolute;
-    top: 50%;
-    /* Hearts are 24px wide with a 6px gap. */
-    left: calc(var(--i) * 30px + 12px);
-    width: 0;
-    height: 0;
-    pointer-events: none;
-  }
-  .motion-burst i {
-    position: absolute;
-    left: -2px;
-    top: -2px;
-    width: 4px;
-    height: 4px;
-    background: var(--pink);
-    animation: motion-shard 0.45s steps(6, end) both;
-  }
-  .motion-burst i:nth-child(3n) {
-    background: #fff;
   }
 
   /* ---- Blitz: "+57" rises off the score ---- */
@@ -184,19 +156,6 @@
   50%,
   100% {
     opacity: 0;
-  }
-}
-@keyframes motion-shard {
-  0% {
-    opacity: 1;
-    transform: none;
-  }
-  60% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(var(--dx), var(--dy));
   }
 }
 @keyframes motion-float {

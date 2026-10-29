@@ -20,8 +20,9 @@ import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { formatAsOf, Heart, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
-import { CountUp, PixelBurst } from "./motion/effects";
+import { formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
+import { CountUp } from "./motion/effects";
+import { ClassicSquid, SquidFx } from "./squid";
 
 interface Props {
   id: string;
@@ -317,6 +318,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   return (
     <main className={`screen game status-${game.status}`}>
       <ScreenHead onBack={onBack} onHome={onHome}>
+        <ClassicSquid found={game.found} status={game.status} />
         <span className="label mode">{mode}</span>
           <div
             key={lostLife?.key}
@@ -327,9 +329,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
             aria-label={`${game.lives} ${game.lives === 1 ? "life" : "lives"} left`}
           >
             {Array.from({ length: MAX_LIVES }, (_, i) => (
-              <Heart key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
+              <InkSac key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
             ))}
-            {lostLife && <PixelBurst index={lostLife.i} />}
           </div>
       </ScreenHead>
 
@@ -612,6 +613,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
           </p>
         </section>
       )}
+      <SquidFx />
     </main>
   );
 }

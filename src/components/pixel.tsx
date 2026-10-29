@@ -61,6 +61,34 @@ export function Heart({ className }: { className?: string }) {
   );
 }
 
+/**
+ * A life: one of the squid's ink sacs, a droplet with a rim, ink inside (deeper at the bottom) and a glint.
+ * Colours come from CSS (.ink-sac .rim / .ink / .deep / .glint), so a spent sac can go empty and dark.
+ */
+const SAC = [
+  "...r...",
+  "..rir..",
+  ".rgiir.",
+  "rgiiiir",
+  "riiiiir",
+  "rddddir",
+  ".rdddr.",
+  "..rrr..",
+];
+const sac = (c: string) => pixels(SAC.map((row) => row.replace(new RegExp(`[^${c}]`, "g"), ".").replace(new RegExp(c, "g"), "#")));
+const SAC_PATHS = { rim: sac("r"), ink: sac("i"), deep: sac("d"), glint: sac("g") };
+
+export function InkSac({ className }: { className?: string }) {
+  return (
+    <svg className={`ink-sac ${className ?? ""}`} viewBox="0 0 7 8" shapeRendering="crispEdges" aria-hidden="true">
+      <path className="ink" d={SAC_PATHS.ink} />
+      <path className="deep" d={SAC_PATHS.deep} />
+      <path className="glint" d={SAC_PATHS.glint} />
+      <path className="rim" d={SAC_PATHS.rim} />
+    </svg>
+  );
+}
+
 const HOUSE = pixels(["...##...", "..####..", ".######.", "########", ".##..##.", ".##..##.", ".##..##."]);
 
 export function BackArrow() {
