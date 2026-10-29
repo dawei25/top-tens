@@ -27,8 +27,8 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 - [x] **Clearer metric labels** (test set; "Sales (millions)" is now "Copies sold (millions)", box office and
       money labels say US$; 12 labels across the 82 lists).
 
-- [ ] **Blitz stats** (`n` per entry in the list's unit, `blitz` flag, `lowerIsBetter` topics): data agent, test set
-      first; all 82 lists need the rebuild.
+- [x] **Blitz stats** (test set: `n` per entry in the list's unit, `blitz` flag, `lowerIsBetter` on websites; all 82
+      lists need the rebuild).
 
 ## Done
 
