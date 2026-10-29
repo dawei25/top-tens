@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { CheerioAPI } from "cheerio";
 import type { Entry } from "../src/game/types";
-import { cleanText } from "./table";
+import { cleanText, statNumber } from "./table";
 import { normalize } from "../src/game/match";
 import { NO_VALUE, pickLikely } from "./likely";
 import type { Topic } from "./topics";
@@ -250,9 +250,16 @@ export async function addValues(
       : undefined;
     if (value) {
       entry.value = value;
+      // Already in the list's unit (scale applied); the year in "(2025)" is never part of it.
+      if (r.number !== undefined && Number.isFinite(r.number)) entry.n = statNumber(r.number);
       found++;
     }
-    const rec = { article, why, ...(value ? { value } : { skip: r.skip }), ...(r.raw ? { raw: r.raw } : {}) };
+    const rec = {
+      article,
+      why,
+      ...(value ? { value, ...(entry.n !== undefined ? { n: entry.n } : {}) } : { skip: r.skip }),
+      ...(r.raw ? { raw: r.raw } : {}),
+    };
     lines.push(`  ${JSON.stringify(entry.name)}: ${JSON.stringify(rec)}`);
   }
   writeFileSync(join(LIKELY_DIR, `${topic.id}.json`), `{\n${lines.join(",\n")}\n}\n`);

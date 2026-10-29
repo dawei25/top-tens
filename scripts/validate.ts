@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { normalize } from "../src/game/match";
 import type { Entry, Puzzle } from "../src/game/types";
 import { INTENT } from "./intent";
+import { NOT_PUZZLES } from "./lexicon";
 import { TOPICS } from "./topics";
 
 const DIR = join(import.meta.dirname, "..", "public", "puzzles");
@@ -92,11 +93,29 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
       }
     }
   }
+
+  // Blitz scores `n`: it must be present on the top 10, follow the ranking, and share one unit across entries.
+  for (const e of all) if (e.n !== undefined && !Number.isFinite(e.n)) err(`"${e.name}": n is not a finite number`);
+  if (p.blitz) {
+    for (const e of p.answers) if (e.n === undefined) err(`#${e.rank} ${e.name}: blitz list without n`);
+    const ranked = all.filter((e) => e.rank > 0 && e.n !== undefined).sort((a, b) => a.rank - b.rank);
+    for (let i = 1; i < ranked.length; i++) {
+      if (ranked[i].n! > ranked[i - 1].n!) {
+        warn(`n rises from #${ranked[i - 1].rank} (${ranked[i - 1].n}) to #${ranked[i].rank} ${ranked[i].name} (${ranked[i].n})`);
+      }
+    }
+    const top = p.answers[0]?.n;
+    for (const e of all) {
+      if (e.rank === 0 && e.n !== undefined && top !== undefined && e.n > top) {
+        warn(`unranked "${e.name}" n ${e.n} exceeds #1's ${top} (unit mismatch?)`);
+      }
+    }
+  }
   return issues;
 }
 
 function main(): number {
-  const files = readdirSync(DIR).filter((f) => f.endsWith(".json") && f !== "index.json" && f !== "lexicon.json");
+  const files = readdirSync(DIR).filter((f) => f.endsWith(".json") && !NOT_PUZZLES.has(f));
   const globalIssues: Issue[] = [];
 
   const indexPath = join(DIR, "index.json");
@@ -109,8 +128,14 @@ function main(): number {
   const fileIds = new Set(files.map((f) => f.replace(/\.json$/, "")));
   const topicIds = new Set(TOPICS.map((t) => t.id));
   for (const id of indexIds) if (!fileIds.has(id)) globalIssues.push({ level: "error", msg: `index.json lists "${id}" but there is no ${id}.json` });
-  // After `build:test` the index lists only the test set; the other puzzle files are expected to sit unindexed.
-  const testIndex = indexIds.size === TEST_SET.length && TEST_SET.every((id) => indexIds.has(id));
+  // After `build:test` the index lists only the test set and the scheduled dailies; the other puzzle files are
+  // expected to sit unindexed.
+  const dailyPath = join(DIR, "daily.json");
+  const scheduled = new Set<string>(
+    existsSync(dailyPath) ? JSON.parse(readFileSync(dailyPath, "utf8")).map((d: { id: string }) => d.id) : [],
+  );
+  const testIndex =
+    TEST_SET.every((id) => indexIds.has(id)) && [...indexIds].every((id) => TEST_SET.includes(id) || scheduled.has(id));
   if (!testIndex) {
     for (const id of fileIds) if (!indexIds.has(id)) globalIssues.push({ level: "error", msg: `${id}.json is not in index.json` });
   }

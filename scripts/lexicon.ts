@@ -10,6 +10,9 @@ import type { Puzzle } from "../src/game/types";
 
 const require = createRequire(import.meta.url);
 
+/** JSON files in public/puzzles that are not puzzles: the index, this lexicon, the daily schedule. */
+export const NOT_PUZZLES = new Set(["index.json", "lexicon.json", "daily.json"]);
+
 /**
  * Every name and alias in the bank. `ranked` is the part from the source tables (ranked entries); the rest are
  * unranked pool members (universes, other tables, category members), thousands of them in some puzzles.
@@ -18,7 +21,7 @@ export function bankNames(dir: string): { ranked: string[]; all: string[] } {
   const ranked: string[] = [];
   const all: string[] = [];
   for (const f of readdirSync(dir)) {
-    if (!f.endsWith(".json") || f === "index.json" || f === "lexicon.json") continue;
+    if (!f.endsWith(".json") || NOT_PUZZLES.has(f)) continue;
     const p: Puzzle = JSON.parse(readFileSync(join(dir, f), "utf8"));
     for (const e of [...p.answers, ...p.extras]) {
       const forms = [e.name, ...e.aliases];
