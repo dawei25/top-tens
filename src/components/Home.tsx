@@ -4,6 +4,49 @@ import { streak, type DailyEntry } from "../game/daily";
 import { load, save, stats } from "../game/storage";
 import { Countdown } from "./Countdown";
 import { HowToPlay, markHelpSeen } from "./HowToPlay";
+import { EnterHint, ModeTag, type Mode } from "./pixel";
+
+/**
+ * A home key: mode tag and status on top, the action below. Today's keys carry their mode's accent while unplayed
+ * (filled when focused) and settle once played; free-play keys stay quiet.
+ */
+function ModeKey({
+  mode,
+  title,
+  status,
+  today = false,
+  done = false,
+  disabled = false,
+  btnRef,
+  onClick,
+}: {
+  mode: Mode;
+  title: string;
+  status: string;
+  today?: boolean;
+  done?: boolean;
+  disabled?: boolean;
+  btnRef?: React.Ref<HTMLButtonElement>;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      ref={btnRef}
+      className={`key mode-key ${mode} ${today ? "today" : ""} ${done ? "done" : ""}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      <span className="mode-key-top">
+        <ModeTag mode={mode} />
+        <span className="key-sub">{status}</span>
+      </span>
+      <span className="mode-key-main">
+        <span className="key-label">{title}</span>
+        <EnterHint />
+      </span>
+    </button>
+  );
+}
 
 interface Props {
   index: PuzzleMeta[];
@@ -41,9 +84,19 @@ export function Home({
   const [help, setHelp] = useState(!saved.seenHelp);
   const [helpAsked, setHelpAsked] = useState(false);
   const dailyRef = useRef<HTMLButtonElement>(null);
-  // Keyboard-first: Enter starts today's list. Focus without scrolling so the title stays in view.
-  const focusDaily = () => dailyRef.current?.focus({ preventScroll: true });
+  const blitzRef = useRef<HTMLButtonElement>(null);
+  const dailyGame = entry && saved.games[entry.id];
+  const dailyDone = !!dailyGame && dailyGame.status !== "playing";
+  const dailyBlitzDone = saved.blitzDaily?.[today];
+  // Keyboard-first: Enter starts today's list, or today's Blitz once the list is done. Focus without scrolling so
+  // the title stays in view. The focused today key is the one loud element on the screen.
+  // Touch screens have no Enter to press, so they get no auto focus (and no focus ring on a key nobody chose).
+  const focusDaily = () => {
+    if (typeof matchMedia === "function" && !matchMedia("(pointer: fine)").matches) return;
+    (dailyDone && hasDailyBlitz && !dailyBlitzDone ? blitzRef : dailyRef).current?.focus({ preventScroll: true });
+  };
   useEffect(() => {
+    // Only on arrival.
     focusDaily();
   }, []);
   // Inline confirm, like GIVE UP: the first click arms it for 3 s, the second clears everything but seenHelp.
@@ -69,9 +122,7 @@ export function Home({
     focusDaily();
   };
   const categories = [...new Set(index.map((p) => p.category))];
-  const dailyGame = entry && saved.games[entry.id];
-  const dailyDone = !!dailyGame && dailyGame.status !== "playing";
-  const dailyBlitzDone = saved.blitzDaily?.[today];
+  const blitzCount = index.filter((p) => p.blitz).length;
 
   // Starting a game with the rules on screen counts as having seen them.
   const start = (fn: () => void) => () => {
@@ -99,47 +150,64 @@ export function Home({
         />
       )}
 
-      <section className="home-actions">
-        <button ref={dailyRef} className="key key-pink key-big" onClick={start(onDaily)} disabled={!entry}>
-          <span className="key-label">Today's list</span>
-          <span className="key-sub">
-            {entry ? `no. ${entry.n}` : "none yet"}
-            {dailyDone && ` · ${dailyGame.found.length}/10`}
-          </span>
-        </button>
-        {hasDailyBlitz && (
-          <button className="key key-big key-blitz" onClick={start(onDailyBlitz)}>
-            <span className="key-label">Today's Blitz</span>
-            <span className="key-sub">
-              {dailyBlitzDone ? `${dailyBlitzDone.score} pts` : `${entry ? `no. ${entry.n} · ` : ""}90 s`}
-            </span>
-          </button>
-        )}
-        <div className="daily-meta">
-          <Countdown className="caption" />
-          <p className="press-enter caption" aria-hidden="true">
-            press enter
-          </p>
+      <section className="home-group" aria-labelledby="today-title">
+        <div className="group-head">
+          <h2 id="today-title" className="label">
+            Today{entry ? ` · no. ${entry.n}` : ""}
+          </h2>
+          <Countdown label="new lists in" />
         </div>
-        <button className="key key-big" onClick={start(() => onRoll())}>
-          <span className="key-label">Roll a random list</span>
-          <span className="key-sub">{index.length} lists</span>
-        </button>
-        <button
-          className="key key-big key-blitz"
-          onClick={start(() => {
-            setNoBlitz(false);
-            onBlitz().then((ok) => setNoBlitz(!ok));
-          })}
-        >
-          <span className="key-label">Blitz a random list</span>
-          <span className="key-sub">90 s</span>
-        </button>
+        <div className="mode-pair">
+          <ModeKey
+            mode="classic"
+            today
+            btnRef={dailyRef}
+            title="Today's list"
+            status={!entry ? "none yet" : dailyDone ? `${dailyGame.found.length}/10` : dailyGame ? "playing" : "new"}
+            done={dailyDone}
+            disabled={!entry}
+            onClick={start(onDaily)}
+          />
+          {hasDailyBlitz && (
+            <ModeKey
+              mode="blitz"
+              today
+              btnRef={blitzRef}
+              title="Today's Blitz"
+              status={dailyBlitzDone ? `${dailyBlitzDone.score} pts` : "new"}
+              done={!!dailyBlitzDone}
+              onClick={start(onDailyBlitz)}
+            />
+          )}
+        </div>
+      </section>
+
+      <section className="home-group" aria-labelledby="free-title">
+        <div className="group-head">
+          <h2 id="free-title" className="label">
+            Free play
+          </h2>
+        </div>
+        <div className="mode-pair">
+          <ModeKey mode="classic" title="Random list" status={`${index.length} lists`} onClick={start(() => onRoll())} />
+          <ModeKey
+            mode="blitz"
+            title="Random Blitz"
+            status={`${blitzCount} lists`}
+            onClick={start(() => {
+              setNoBlitz(false);
+              onBlitz().then((ok) => setNoBlitz(!ok));
+            })}
+          />
+          <ModeKey mode="classic" title="Archive" status={`${archiveCount} dailies`} onClick={start(onArchive)} />
+          <ModeKey
+            mode="blitz"
+            title="Blitz runs"
+            status={blitzRuns ? `${blitzRuns} round${blitzRuns === 1 ? "" : "s"}` : "none yet"}
+            onClick={start(() => (location.hash = "#blitz-history"))}
+          />
+        </div>
         {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
-        <button className="key key-big" onClick={start(onArchive)}>
-          <span className="key-label">Archive</span>
-          <span className="key-sub">{archiveCount} dailies</span>
-        </button>
       </section>
 
       <section className="home-cats" aria-labelledby="cats-title">
@@ -155,18 +223,11 @@ export function Home({
         </div>
       </section>
 
-      {(s.played > 0 || st.best > 0 || blitzRuns > 0) && (
+      {(s.played > 0 || st.best > 0) && (
         <section className="panel home-stats" aria-labelledby="stats-title">
-          <div className="panel-head">
-            <h2 id="stats-title" className="label">
-              Your record
-            </h2>
-            {blitzRuns > 0 && (
-              <a className="text-btn" href="#blitz-history">
-                blitz runs ({blitzRuns})
-              </a>
-            )}
-          </div>
+          <h2 id="stats-title" className="label">
+            Your record
+          </h2>
           <dl className="stat-row">
             <div>
               <dt>played</dt>

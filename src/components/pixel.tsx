@@ -23,6 +23,23 @@ export function sourceSite(name: string): string {
   return name.split(":")[0].trim() || name;
 }
 
+/**
+ * Mode identity, the same everywhere: classic (name the top 10, 5 lives) is pink, Blitz (90 s, points) is gold.
+ */
+export type Mode = "classic" | "blitz";
+export function ModeTag({ mode }: { mode: Mode }) {
+  return <span className={`mode-tag ${mode}`}>{mode === "blitz" ? "Blitz · 90 s" : "5 lives"}</span>;
+}
+
+/** The keyboard hint on a home key; CSS shows it only on the focused key, and only with a fine pointer. */
+export function EnterHint() {
+  return (
+    <span className="enter-hint" aria-hidden="true">
+      enter
+    </span>
+  );
+}
+
 /** Builds a crisp SVG path from a pixel map ("#" = on). */
 function pixels(rows: string[]): string {
   let d = "";

@@ -283,9 +283,9 @@ a {
 /* ---------- Home ---------- */
 .home {
   min-height: 100dvh;
-  gap: 24px;
+  gap: 28px;
   padding-top: max(32px, 6vh);
-  max-width: calc(560px + 2 * var(--gutter));
+  max-width: calc(var(--col) + 2 * var(--gutter));
 }
 
 .title {
@@ -319,36 +319,27 @@ a {
   color: var(--gold);
 }
 
-.home-actions {
+/*
+ * Home system.
+ * - Groups (Today, Free play, Roll by category, Your record) share one label style and one spacing scale:
+ *   28px between groups, 12px inside a group.
+ * - Every play key is a mode key: a mode tag and a status on top (status right-aligned), the action below.
+ * - Mode identity: classic is pink, Blitz is gold, on the tag, the accent and the fill.
+ * - Today's keys carry their accent while unplayed and fill with it when focused (the one loud element);
+ *   played, they settle to a quiet key with the result as the status. Free-play keys are always quiet.
+ * - The keyboard hint lives on the focused key, with a fine pointer only.
+ */
+.home-group {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
-.press-enter {
-  margin: -6px 0 2px;
-  text-align: center;
-  font-size: 17px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--pink);
-  animation: blink 1.1s steps(1, end) infinite;
-}
-@media (pointer: coarse) {
-  .press-enter {
-    display: none;
-  }
-}
-/* Under TODAY'S LIST: the countdown on the left, the blinking prompt on the right. */
-.daily-meta {
+.group-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: 4px 16px;
-  margin: -6px 2px 2px;
-}
-.daily-meta .press-enter {
-  margin: 0;
 }
 .countdown {
   font-size: 17px;
@@ -360,6 +351,136 @@ a {
   color: var(--cyan);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.08em;
+}
+.mode-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 640px) {
+  .mode-pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.mode-tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.mode-tag.classic {
+  color: var(--pink);
+}
+.mode-tag.blitz {
+  color: var(--gold);
+}
+
+.mode-key {
+  --accent: var(--pink);
+  --accent-ink: var(--pink-ink);
+  --accent-shadow: var(--pink-shadow);
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 84px;
+  padding: 12px 18px 14px;
+  text-align: left;
+  white-space: normal;
+}
+.mode-key.blitz {
+  --accent: var(--gold);
+  --accent-ink: var(--gold-ink);
+  --accent-shadow: #9c7a24;
+}
+.mode-key-top,
+.mode-key-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mode-key .key-label {
+  font-size: 23px;
+  letter-spacing: 0.2em;
+  line-height: 1.1;
+}
+.mode-key .key-sub {
+  font-size: 17px;
+  letter-spacing: 0.15em;
+  color: var(--label);
+  opacity: 1;
+}
+
+/* Today, unplayed: the mode's accent on the edge and the label. */
+.mode-key.today {
+  min-height: 96px;
+  box-shadow:
+    inset 0 0 0 2px var(--accent),
+    0 5px 0 var(--key-shadow);
+}
+.mode-key.today .key-label {
+  color: var(--accent);
+  font-size: 26px;
+}
+.mode-key.today .key-sub {
+  color: var(--accent);
+}
+/* Focused: filled, the loudest thing on the screen. */
+.mode-key.today:not(.done):focus {
+  background: var(--accent);
+  box-shadow: 0 5px 0 var(--accent-shadow);
+  outline: none;
+}
+.mode-key.today:not(.done):focus .key-label,
+.mode-key.today:not(.done):focus .key-sub,
+.mode-key.today:not(.done):focus .mode-tag,
+.mode-key.today:not(.done):focus .enter-hint {
+  color: var(--accent-ink);
+}
+.mode-key.today:not(.done):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+/* Played: settled. The result keeps the status slot, in the accent. */
+.mode-key.today.done {
+  box-shadow:
+    inset 0 0 0 1px var(--hairline),
+    0 5px 0 var(--key-shadow);
+}
+.mode-key.today.done .key-label {
+  color: var(--label);
+}
+.mode-key.today.done .key-sub {
+  color: var(--accent);
+  font-size: 22px;
+  letter-spacing: 0.1em;
+}
+
+/* The keyboard hint, on the focused key only. */
+.enter-hint {
+  display: none;
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.9;
+}
+@media (pointer: fine) {
+  .mode-key:focus-visible .enter-hint,
+  .mode-key.today:not(.done):focus .enter-hint {
+    display: inline-block;
+  }
 }
 
 .home-cats {
@@ -720,7 +841,13 @@ a {
 .key-gold {
   background: var(--gold);
   color: var(--gold-ink);
+  box-shadow: 0 5px 0 #9c7a24;
+}
+.key-gold.key-xs {
   box-shadow: 0 3px 0 #9c7a24;
+}
+.key-gold:active:not(:disabled):not(.key-xs) {
+  box-shadow: 0 2px 0 #9c7a24;
 }
 .key-gold:hover:not(:disabled) {
   background-color: #ffdc85;
@@ -1393,21 +1520,19 @@ a {
 }
 
 /* ---------- Blitz ---------- */
+/* Blitz is gold everywhere (see the home system): its keys outside home use the same gold edge. */
 .key-blitz {
-  color: var(--pink);
+  color: var(--gold);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 93, 143, 0.45),
+    inset 0 0 0 1px rgba(255, 209, 102, 0.55),
     0 5px 0 var(--key-shadow);
-}
-.key-blitz .key-sub {
-  color: var(--text);
 }
 .key-blitz-sm {
   margin-left: auto;
   align-self: center;
-  color: var(--pink);
+  color: var(--gold);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 93, 143, 0.45),
+    inset 0 0 0 1px rgba(255, 209, 102, 0.55),
     0 3px 0 var(--key-shadow);
 }
 .blitz-none {
@@ -1438,8 +1563,8 @@ a {
   text-shadow: 0 0 18px var(--cyan-glow);
 }
 .blitz-clock.low {
-  color: var(--pink);
-  text-shadow: 0 0 18px var(--pink-glow);
+  color: var(--danger);
+  text-shadow: 0 0 18px rgba(255, 82, 82, 0.3);
   animation: blink 1s steps(1, end) infinite;
 }
 .blitz-score {
@@ -1641,8 +1766,8 @@ a.text-btn {
   display: block;
   font-size: 15px;
   letter-spacing: 0.08em;
-  color: var(--pink);
+  color: var(--gold);
 }
-.results-meta p.pink b {
-  color: var(--pink);
+.results-meta p.gold b {
+  color: var(--gold);
 }

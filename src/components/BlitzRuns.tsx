@@ -24,7 +24,7 @@ export function BlitzRuns({ index, onHome }: { index: PuzzleMeta[]; onHome: () =
           <BackArrow />
         </button>
         <div className="game-head-mid">
-          <span className="label mode pink">Blitz runs</span>
+          <span className="label mode gold">Blitz runs</span>
         </div>
         <span className="key-sm-spacer" aria-hidden="true" />
       </header>
