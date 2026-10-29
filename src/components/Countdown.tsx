@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { formatCountdown, msUntilNextDaily } from "../game/daily";
 
 /** "next list in 05:12:09", ticking on the second. Only this line re-renders. */
-export function Countdown({ className = "" }: { className?: string }) {
+export function Countdown({ className = "", label = "next list in" }: { className?: string; label?: string }) {
   const [ms, setMs] = useState(msUntilNextDaily);
   useEffect(() => {
     let t: ReturnType<typeof setTimeout>;
@@ -16,7 +16,7 @@ export function Countdown({ className = "" }: { className?: string }) {
   }, []);
   return (
     <p className={`countdown ${className}`}>
-      next list in <b>{formatCountdown(ms)}</b>
+      {label} <b>{formatCountdown(ms)}</b>
     </p>
   );
 }

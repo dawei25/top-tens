@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Home } from "./components/Home";
 import { Archive } from "./components/Archive";
 import { Blitz } from "./components/Blitz";
-import { BlitzRuns } from "./components/BlitzRuns";
+import { History } from "./components/History";
 import { Game, Loading } from "./components/Game";
 import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
@@ -23,18 +23,20 @@ type Route =
   | { screen: "archive" }
   | { screen: "daily"; date: string }
   | { screen: "game"; id: string }
-  | { screen: "blitz"; id: string; runs: boolean }
-  | { screen: "blitz-history" }
+  | { screen: "blitz"; id: string; runs: boolean; run?: number }
+  | { screen: "history" }
   | { screen: "dailyblitz"; date: string };
 
 function readHash(): Route {
   const h = location.hash;
   if (h === "#archive") return { screen: "archive" };
-  if (h === "#blitz-history") return { screen: "blitz-history" };
+  // The Blitz-only runs screen became Past runs, which lists list games and Blitz rounds together.
+  if (h === "#blitz-history") history.replaceState(null, "", "#history");
+  if (h === "#history" || h === "#blitz-history") return { screen: "history" };
   const dailyBlitz = h.match(/^#dailyblitz-(\d{4}-\d{2}-\d{2})$/);
   if (dailyBlitz) return { screen: "dailyblitz", date: dailyBlitz[1] };
-  const blitz = h.match(/^#blitz-([\w-]+)(\/runs)?$/);
-  if (blitz) return { screen: "blitz", id: blitz[1], runs: !!blitz[2] };
+  const blitz = h.match(/^#blitz-([\w-]+?)(\/runs|\/run-(\d+))?$/);
+  if (blitz) return { screen: "blitz", id: blitz[1], runs: blitz[2] === "/runs", run: blitz[3] ? Number(blitz[3]) : undefined };
   const date = h.match(/^#daily-(\d{4}-\d{2}-\d{2})$/);
   if (date) return { screen: "daily", date: date[1] };
   const m = h.match(/^#(daily|p)-([\w-]+)/);
@@ -118,12 +120,15 @@ export default function App() {
         today={today}
         lexicon={lexicon}
         showRuns={route.runs}
+        openRun={route.run}
         onHome={home}
       />
     );
   }
 
-  if (route.screen === "blitz-history") return <BlitzRuns index={index} onHome={home} />;
+  if (route.screen === "history") {
+    return <History index={index} schedule={schedule} entry={todayEntry(schedule, today)} onHome={home} />;
+  }
 
   if (route.screen === "dailyblitz") {
     // Today's Blitz: one list per date, the same for everyone; never a future one.

@@ -15,6 +15,7 @@ import {
 import { load, save } from "../game/storage";
 import { localDate, streak, type DailyEntry } from "../game/daily";
 import { blitzAvailable } from "../game/blitz";
+import { recordListRun } from "../game/history";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
@@ -109,7 +110,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onHome, onRoll
     s.games[id] = game;
     // Only a daily finished on its own date counts toward the streak; archive replays don't.
     if (daily && game.status !== "playing" && daily.date === localDate()) s.daily[daily.date] = daily.id;
-    save(s);
+    // Past runs: a finished game goes into the history (a no-op if it's already there), so PLAY AGAIN can't lose it.
+    save(recordListRun(s, game, daily?.n));
   }, [game, puzzle, id, daily]);
 
   // The hint confirm closes on Escape or a press anywhere outside its row.

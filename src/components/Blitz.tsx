@@ -28,7 +28,7 @@ import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { load, save } from "../game/storage";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
-import { BackArrow } from "./pixel";
+import { BackArrow, ModeTag } from "./pixel";
 
 interface Props {
   id: string;
@@ -38,6 +38,8 @@ interface Props {
   lexicon?: Lexicon;
   /** Open the past-runs panel (arriving from the Blitz runs screen). */
   showRuns?: boolean;
+  /** Open this past run's results (its startedAt), arriving from Past runs. */
+  openRun?: number;
   /** Set when this is a date's Today's Blitz (n is that date's daily number). */
   dailyBlitz?: { date: string; n: number };
   onHome: () => void;
@@ -134,7 +136,7 @@ function RoundLists({ puzzle, hits, byName }: { puzzle: Puzzle; hits: BlitzHit[]
         )}
       </section>
       <section className="panel blitz-list missed" aria-labelledby="blitz-missed">
-        <h2 id="blitz-missed" className="label pink">
+        <h2 id="blitz-missed" className="label">
           Biggest you missed
         </h2>
         <ol>
@@ -176,7 +178,7 @@ function PastRuns({ runs, best, open, onOpen }: { runs: BlitzRun[]; best?: numbe
   );
 }
 
-export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, dailyBlitz, onHome }: Props) {
+export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, openRun: openAt, dailyBlitz, onHome }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<BlitzState | null>(null);
@@ -209,6 +211,11 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
       })
       .catch((e) => setError(String(e.message ?? e)));
   }, [id]);
+
+  // Arriving at #blitz-<id>/run-<startedAt> (from Past runs): show that run.
+  useEffect(() => {
+    if (openAt) setViewRun(blitzHistory(load(), id).find((r) => r.startedAt === openAt) ?? null);
+  }, [id, openAt]);
 
   // Keep the live round in storage if the page goes away (tab closed, app switched).
   useEffect(() => {
@@ -271,7 +278,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
     return (
       <main className="screen game">
         <section className="panel error blitz-closed">
-          <p className="label pink">Blitz closed</p>
+          <p className="label gold">Blitz closed</p>
           <h1 className="blitz-closed-title">{puzzle.title}</h1>
           <p>{why.text}</p>
           <div className="results-actions">
@@ -363,7 +370,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
     body = (
       <>
         <section className="panel results" aria-live="polite">
-          <p className="label cyan">Past run · {runTime(viewRun.startedAt)}</p>
+          <p className="label gold">Past run · {runTime(viewRun.startedAt)}</p>
           <p className="score" aria-label={`${viewRun.score} points`}>
             <span className={`score-n ${isBest ? "gold" : ""}`}>{viewRun.score}</span>
             <span className="score-of">pts</span>
@@ -375,7 +382,12 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
             {isBest && <p className="gold">best on this list</p>}
           </div>
           <div className="results-actions">
-            <button className="key" onClick={() => openRun(null)} autoFocus>
+            <button
+              className="key"
+              // Opened from Past runs: back goes there. Opened from this list's panel: back to the list's screen.
+              onClick={() => (openAt === viewRun.startedAt ? history.back() : openRun(null))}
+              autoFocus
+            >
               Back
             </button>
           </div>
@@ -443,7 +455,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
               enterKeyHint="send"
               aria-label="Your guess"
             />
-            <button className="key key-pink" type="submit" disabled={!input.trim()}>
+            <button className="key key-gold" type="submit" disabled={!input.trim()}>
               Guess
             </button>
           </div>
@@ -454,7 +466,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
     body = (
       <>
         <section className="panel results enter" aria-live="polite">
-          <p className="label pink">Time's up</p>
+          <p className="label gold">Time's up</p>
           {note === "away" && <p className="caption">time ran out while you were away.</p>}
           <p className="score" aria-label={`${score} points`}>
             <span className={`score-n ${record?.best && score > 0 ? "gold" : ""}`}>{score}</span>
@@ -466,7 +478,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
             </p>
             {record?.daily &&
               (record.daily.counted ? (
-                <p className="pink">
+                <p className="gold">
                   today's blitz: <b>{record.daily.score}</b>
                 </p>
               ) : (
@@ -486,7 +498,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
               ))}
           </div>
           <div className="results-actions">
-            <button className="key key-pink" onClick={share}>
+            <button className="key key-gold" onClick={share}>
               {copied ? "Copied" : "Share"}
             </button>
             <button className="key" onClick={again} autoFocus>
@@ -510,7 +522,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
           <BackArrow />
         </button>
         <div className="game-head-mid">
-          <span className="label mode pink">
+          <span className="label mode gold">
             {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
           </span>
         </div>
@@ -522,7 +534,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, da
       <section className="panel prompt">
         <div className="prompt-top">
           <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-          <span className="label pink">{BLITZ_SECONDS} seconds</span>
+          <ModeTag mode="blitz" />
         </div>
         <h1>{puzzle.title}</h1>
         <p className="caption">
