@@ -23,7 +23,8 @@ for (const f of readdirSync(PUZZLES)) {
     let lead = "";
     try {
       const $ = await fetchPage(article);
-      $(".mw-parser-output > p")
+      $("section > p, .mw-parser-output > p")
+        .filter((_, el) => $(el).text().trim().length > 40)
         .toArray()
         .some((el) => {
           lead += cleanText($(el).text()) + "\n";

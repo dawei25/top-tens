@@ -299,10 +299,15 @@ function applyIntent(topic: Topic, entries: Entry[]): void {
 
 const FACTS_DIR = join(import.meta.dirname, "facts");
 
-/** Curated fun facts for a topic, keyed by entry name: scripts/facts/<topic id>.json. */
+/**
+ * Curated fun facts for a topic, keyed by entry name: scripts/facts/<topic id>.json. Each may also carry an
+ * `evidence` quote from the article for review; only text and source ship.
+ */
 function readFacts(id: string): Record<string, Fact> {
   const file = join(FACTS_DIR, `${id}.json`);
-  return existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {};
+  if (!existsSync(file)) return {};
+  const raw: Record<string, Fact & { evidence?: string }> = JSON.parse(readFileSync(file, "utf8"));
+  return Object.fromEntries(Object.entries(raw).map(([name, f]) => [name, { text: f.text, source: f.source }]));
 }
 
 async function buildPuzzle(topic: Topic): Promise<Puzzle> {
