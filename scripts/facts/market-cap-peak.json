@@ -1,0 +1,52 @@
+{
+  "Nvidia": {
+    "text": "Its three founders sketched out the company in a meeting at a Denny's diner in East San Jose.",
+    "source": "https://en.wikipedia.org/wiki/Nvidia",
+    "evidence": "In late 1992, the three men agreed to start the company by sketching out their initial ideas in a meeting at a Denny's roadside diner on Berryessa Road in East San Jose."
+  },
+  "Apple": {
+    "text": "In 2018 it became the first publicly traded US company to be valued at over $1 trillion.",
+    "source": "https://en.wikipedia.org/wiki/Apple_Inc.",
+    "evidence": "Apple became the first publicly traded US company to be valued at over $1 trillion in 2018, and, as of October 2025, is valued at just over $4 trillion."
+  },
+  "Alphabet": {
+    "text": "Created in 2015 to make the core Google business \"cleaner and more accountable\".",
+    "source": "https://en.wikipedia.org/wiki/Alphabet_Inc.",
+    "evidence": "It was created through a restructuring of Google on October 2, 2015, and became the parent holding company of Google and several former Google subsidiaries. ... The establishment of Alphabet Inc. was prompted by a desire to make the core Google business \"cleaner and more accountable\" while allowing greater autonomy to group companies that operate in businesses other than Internet services."
+  },
+  "Microsoft": {
+    "text": "Its 1986 stock market debut and rising share price made an estimated 12,000 employees millionaires.",
+    "source": "https://en.wikipedia.org/wiki/Microsoft",
+    "evidence": "The company's 1986 initial public offering and the subsequent rise in its share price created three billionaires and an estimated 12,000 millionaires among Microsoft employees."
+  },
+  "Amazon": {
+    "text": "Began in 1994 as an online book marketplace in Bellevue, Washington.",
+    "source": "https://en.wikipedia.org/wiki/Amazon_(company)",
+    "evidence": "Founded in 1994 by Jeff Bezos in Bellevue, Washington, the company started as an online book marketplace that gradually expanded to include virtually all consumer products as well as many other categories, positioned as \"The Everything Store\"."
+  },
+  "Saudi Aramco": {
+    "text": "Passed the US$2 trillion mark on only its second day of trading, in December 2019.",
+    "source": "https://en.wikipedia.org/wiki/Saudi_Aramco",
+    "evidence": "On 11 December 2019, the company's shares commenced trading on the Saudi Exchange. The shares rose to 35.2 Saudi riyals, giving it a market capitalisation of about US$1.88 trillion, and surpassed the US$2 trillion mark on the second day of trading."
+  },
+  "SpaceX": {
+    "text": "Three failed launches almost bankrupted it before Falcon 1 reached orbit in 2008.",
+    "source": "https://en.wikipedia.org/wiki/SpaceX",
+    "evidence": "In 2008, after three failed attempts between 2006 and 2008 that almost pushed the company to bankruptcy, SpaceX successfully launched the Falcon 1 into orbit, becoming the first private company to develop and launch a liquid-fueled rocket to orbit."
+  },
+  "TSMC": {
+    "text": "Makes up about 30 percent of the Taiwan Stock Exchange's main index.",
+    "source": "https://en.wikipedia.org/wiki/TSMC",
+    "evidence": "TSMC constitutes about 30 percent of the Taiwan Stock Exchange's main index."
+  },
+  "Meta": {
+    "text": "Its 2012 IPO valued it at $104 billion, then the largest valuation for a newly public company.",
+    "source": "https://en.wikipedia.org/wiki/Meta_Platforms",
+    "evidence": "Facebook filed for an initial public offering (IPO) on January 1, 2012. ... Underwriters valued the shares at $38 each, valuing the company at $104 billion, the largest valuation yet for a newly public company."
+  },
+  "Broadcom": {
+    "text": "Passed $1 trillion in December 2024 and $2 trillion in April 2026, the sixth company ever to do so.",
+    "source": "https://en.wikipedia.org/wiki/Broadcom",
+    "evidence": "In December 2024, Broadcom became the 12th company to surpass a $1 trillion market cap. In April 2026, Broadcom surpassed a $2 trillion market cap, becoming the sixth company in history to do so."
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "Mario": {
+    "text": "Mario's first game was the 1981 arcade game Donkey Kong, two years before Mario Bros.",
+    "source": "https://en.wikipedia.org/wiki/Mario_(franchise)",
+    "evidence": "Mario made his first video game appearance in the arcade game Donkey Kong (1981) and was featured in multiple Donkey Kong games prior to Mario Bros. (1983), the first game with \"Mario\" in the title."
+  },
+  "Tetris": {
+    "text": "Its Soviet creator made it in his spare time, programming the first version in about three weeks.",
+    "source": "https://en.wikipedia.org/wiki/Tetris",
+    "evidence": "Tetris (Russian: Тетрис) is a puzzle video game created by Alexey Pajitnov, a Soviet software engineer, in the mid-1980s. ... In the mid-1980s, Pajitnov created Tetris in his spare time while working at the Dorodnitsyn Computing Center of the Academy of Sciences. He initially programmed it in Pascal for the Elektronika 60 in about three weeks, then spent over two months porting it to the IBM PC using Turbo Pascal with help from Dmitry Pavlovsky and Vadim Gerasimov."
+  },
+  "Pokémon": {
+    "text": "The first games were Pocket Monsters Red and Green in Japan, released abroad as Red and Blue.",
+    "source": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_(video_game_series)",
+    "evidence": "The first games, Pocket Monsters Red and Green, were released in 1996 in Japan for the Game Boy, later released outside of Japan as Pokémon Red Version and Blue Version."
+  },
+  "Call of Duty": {
+    "text": "Began as a World War II series; Call of Duty 4 in 2007 moved it to a modern setting.",
+    "source": "https://en.wikipedia.org/wiki/Call_of_Duty",
+    "evidence": "The series originally focused on a World War II setting, with Infinity Ward developing Call of Duty (2003) and Call of Duty 2 (2005) and Treyarch developing Call of Duty 3 (2006). Infinity Ward's Call of Duty 4: Modern Warfare (2007) introduced a modern setting and proved to be the breakthrough title for the series, creating the Modern Warfare sub-series; a Modern Warfare remastered version was released in 2016."
+  },
+  "Grand Theft Auto": {
+    "text": "Started in 1997 at Dundee-based DMA Design, the studio now called Rockstar North.",
+    "source": "https://en.wikipedia.org/wiki/Grand_Theft_Auto",
+    "evidence": "It is primarily developed by British development house Rockstar North (formerly DMA Design), and published by its American parent company, Rockstar Games. ... Dundee-based DMA Design began the series with 1997's Grand Theft Auto."
+  },
+  "Minecraft": {
+    "text": "First released in 2009 by independent designer Markus Persson; Microsoft bought Mojang in 2014.",
+    "source": "https://en.wikipedia.org/wiki/Minecraft_(franchise)",
+    "evidence": "Microsoft acquired Mojang AB in 2014, alongside the Minecraft game and its editions. ... It was first released by the independent video game designer Markus Persson in 2009, before giving the development to Jens Bergensten in 2011 after the game's full 1.0 update."
+  },
+  "FIFA": {
+    "text": "After a four-year hiatus the name returned in 2026, with games on Roblox and Netflix.",
+    "source": "https://en.wikipedia.org/wiki/FIFA_(video_game_series)",
+    "evidence": "After a four-year hiatus, it returned in 2026 with three games: FIFA Super Soccer, developed by Gamefam and published on Roblox, FIFA Heroes, developed and published by ENVER, and FIFA World Cup: Launch Edition released on Netflix."
+  },
+  "Assassin's Creed": {
+    "text": "Inspired by Alamut, a novel by Slovenian writer Vladimir Bartol about the medieval Hashashin sect.",
+    "source": "https://en.wikipedia.org/wiki/Assassin's_Creed",
+    "evidence": "Considered a spiritual successor to the Prince of Persia series, Assassin's Creed took inspiration from the novel Alamut by the Slovenian writer Vladimir Bartol, based on the historical Hashashin sect of medieval Iran (Persia)."
+  },
+  "Resident Evil": {
+    "text": "Called Biohazard in Japan, its 1996 debut is credited with returning zombies to popular culture.",
+    "source": "https://en.wikipedia.org/wiki/Resident_Evil",
+    "evidence": "Resident Evil, also known as Biohazard (バイオハザード, Baiohazādo) in Japan, is a Japanese horror game series and media franchise created by Capcom. ... The first Resident Evil game was created by Shinji Mikami and Tokuro Fujiwara for PlayStation, and was released in 1996. It is credited with defining the survival horror genre and returning zombies to popular culture."
+  },
+  "Final Fantasy": {
+    "text": "Its numbered games are volumes, not sequels: each has a story unrelated to the ones before.",
+    "source": "https://en.wikipedia.org/wiki/Final_Fantasy",
+    "evidence": "Successive games are numbered as volumes rather than sequels; subsequent games have stories unrelated to previous ones."
+  }
+}

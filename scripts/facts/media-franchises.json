@@ -1,0 +1,47 @@
+{
+  "Pokémon": {
+    "text": "The accent over the e was added for the international release, to help with pronunciation.",
+    "source": "https://en.wikipedia.org/wiki/Pok%C3%A9mon",
+    "evidence": "When the franchise was released internationally, the short form of the title was used, with an acute accent (´) over the e to aid in pronunciation."
+  },
+  "Winnie-the-Pooh": {
+    "text": "Its Latin translation, Winnie ille Pu, is the only Latin book ever on The New York Times Best Seller list.",
+    "source": "https://en.wikipedia.org/wiki/Winnie-the-Pooh",
+    "evidence": "The Pooh stories have been translated into many languages, including Alexander Lenard's Latin translation, Winnie ille Pu, which was first published in 1958 and in 1960 became the only Latin book ever to be featured on The New York Times Best Seller list."
+  },
+  "Star Wars": {
+    "text": "George Lucas gave up ownership of the franchise in 2012, when he sold his production company to Disney.",
+    "source": "https://en.wikipedia.org/wiki/Star_Wars",
+    "evidence": "In 2012, Lucas sold his production company to Disney, relinquishing his ownership of the franchise."
+  },
+  "Disney Princess": {
+    "text": "Began after an executive saw girls at Disney on Ice wearing generic, non-Disney princess outfits.",
+    "source": "https://en.wikipedia.org/wiki/Disney_Princess",
+    "evidence": "While attending his first Disney on Ice show, Mooney noticed that several young girls attending the show were dressed in princess attire—though not authentic Disney merchandise. \"They were generic princess products they'd appended to a Halloween costume,\" Mooney told The New York Times. Concerned by this, Mooney addressed the company the following morning and encouraged them to commence work on a legitimate Disney Princess franchise in January 2000."
+  },
+  "Call of Duty": {
+    "text": "Beyond the games, it has spun off action figures, a card game, Mega Bloks sets and a comic book miniseries.",
+    "source": "https://en.wikipedia.org/wiki/Call_of_Duty",
+    "evidence": "Other products in the franchise include a line of action figures designed by Plan B Toys, a card game created by Upper Deck Company, Mega Bloks sets by Mega Brands, and a comic book miniseries published by WildStorm Productions, and a feature film in development by Paramount Pictures, set to be releas"
+  },
+  "Anpanman": {
+    "text": "Its creator faced starvation in World War II, and his dreams of eating an anpan inspired the hero.",
+    "source": "https://en.wikipedia.org/wiki/Anpanman",
+    "evidence": "During the Second World War, Takashi Yanase faced starvation countless times, which made him dream about eating an anpan. This inspired the creation of Anpanman."
+  },
+  "Marvel Cinematic Universe": {
+    "text": "Began with Iron Man in 2008, and releases its films in groups called \"Phases\".",
+    "source": "https://en.wikipedia.org/wiki/Marvel_Cinematic_Universe",
+    "evidence": "Marvel Studios releases its films in groups called \"Phases\", with the first three phases collectively known as \"The Infinity Saga\" and the following three phases as \"The Multiverse Saga\". The first MCU film, Iron Man (2008), began Phase One, which culminated in the crossover film The Avengers (2012)."
+  },
+  "Barbie": {
+    "text": "As a media franchise, it began with a Barbie video game released in 1984.",
+    "source": "https://en.wikipedia.org/wiki/Barbie_(media_franchise)",
+    "evidence": "It began with the release of an eponymous video game in 1984 and has since been featured in more video games, a film series and in other media formats across technologies like television and the Internet."
+  },
+  "Wizarding World": {
+    "text": "David Heyman and his company Heyday Films have produced every film in the series.",
+    "source": "https://en.wikipedia.org/wiki/Wizarding_World",
+    "evidence": "David Heyman and his company Heyday Films have produced every film in the Wizarding World series."
+  }
+}

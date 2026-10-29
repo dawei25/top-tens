@@ -1,0 +1,52 @@
+{
+  "Sweden": {
+    "text": "The last war it was directly involved in was in 1814.",
+    "source": "https://en.wikipedia.org/wiki/Sweden",
+    "evidence": "The last war in which Sweden was directly involved was in 1814, when Sweden by military means forced Norway into a personal union, a union which lasted until 1905."
+  },
+  "Norway": {
+    "text": "Takes in the remote Arctic island of Jan Mayen and the Svalbard archipelago.",
+    "source": "https://en.wikipedia.org/wiki/Norway",
+    "evidence": "Norway, officially the Kingdom of Norway, is a Nordic country comprising the western and northernmost parts of the Scandinavian Peninsula in Northern Europe, the remote Arctic island Jan Mayen and the archipelago Svalbard."
+  },
+  "Finland": {
+    "text": "In 1906 it became the first country to give all adult citizens the right to run for public office.",
+    "source": "https://en.wikipedia.org/wiki/Finland",
+    "evidence": "Finland became the first country in Europe to grant universal suffrage in 1906, and the first in the world to give all adult citizens the right to run for public office."
+  },
+  "Canada": {
+    "text": "Has the longest coastline of any country, and its border with the US is the longest land border.",
+    "source": "https://en.wikipedia.org/wiki/Canada",
+    "evidence": "Its ten provinces and three territories extend from the Atlantic Ocean to the Pacific Ocean and northward into the Arctic Ocean, making it the second-largest country by total area, with the longest coastline of any country. Its border with the United States is the longest international land border."
+  },
+  "Chile": {
+    "text": "Administers several Pacific islands, Easter Island among them.",
+    "source": "https://en.wikipedia.org/wiki/Chile",
+    "evidence": "It also administers several Pacific islands, including Juan Fernández, Isla Salas y Gómez, Desventuradas, and Easter Island, and claims about 1,250,000 square kilometers (480,000 sq mi) of Antarctica as the Chilean Antarctic Territory."
+  },
+  "United States": {
+    "text": "Asserts sovereignty over five major island territories, plus uninhabited islands in Oceania and the Caribbean.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "The United States also asserts sovereignty over five major island territories and various uninhabited islands in Oceania and the Caribbean."
+  },
+  "Indonesia": {
+    "text": "More than half of Indonesians live on Java, the most heavily populated island in the world.",
+    "source": "https://en.wikipedia.org/wiki/Indonesia",
+    "evidence": "More than half of Indonesians live on Java, the most heavily populated island in the world, while the capital Jakarta is the world's most populous city."
+  },
+  "Japan": {
+    "text": "Around 75% of its terrain is mountainous and heavily forested.",
+    "source": "https://en.wikipedia.org/wiki/Japan",
+    "evidence": "Japan is divided into 47 administrative prefectures and eight traditional regions, and around 75% of its terrain is mountainous and heavily forested, concentrating its agriculture and highly urbanized population along its eastern coastal plains."
+  },
+  "Australia": {
+    "text": "At the time of British settlement, Aboriginal Australians spoke more than 250 distinct languages.",
+    "source": "https://en.wikipedia.org/wiki/Australia",
+    "evidence": "By the time of British settlement, Aboriginal Australians spoke more than 250 distinct languages and had one of the oldest living cultures in the world."
+  },
+  "Philippines": {
+    "text": "Named las Islas Filipinas in 1543 by a Spanish explorer, in honour of King Philip II.",
+    "source": "https://en.wikipedia.org/wiki/Philippines",
+    "evidence": "In 1543, Spanish explorer Ruy López de Villalobos named the archipelago las Islas Filipinas in honor of King Philip II."
+  }
+}

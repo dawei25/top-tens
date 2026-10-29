@@ -1,0 +1,52 @@
+{
+  "United States": {
+    "text": "The US military runs around 800 military bases around the world.",
+    "source": "https://en.wikipedia.org/wiki/United_States_Armed_Forces",
+    "evidence": "The U.S. Armed Forces has significant capabilities in both defense and power projection due to its large budget, resulting in advanced and powerful technologies which enable widespread deployment of the force globally, including around 800 military bases around the world."
+  },
+  "China": {
+    "text": "Gunpowder, paper, printing and the compass were all invented during its imperial era.",
+    "source": "https://en.wikipedia.org/wiki/China",
+    "evidence": "The imperial era saw the expansion of the Silk Road and the invention of gunpowder, paper, printing, and the compass."
+  },
+  "Russia": {
+    "text": "Its armed forces hold the world's largest stockpile of nuclear weapons.",
+    "source": "https://en.wikipedia.org/wiki/Russian_Armed_Forces",
+    "evidence": "They maintain the world's largest stockpile of nuclear weapons, possess the world's second-largest fleet of ballistic missile submarines, and are the only armed forces outside the United States and China that operate strategic bombers."
+  },
+  "Germany": {
+    "text": "Regained its full sovereignty on 15 March 1991, after reunification in October 1990.",
+    "source": "https://en.wikipedia.org/wiki/Germany",
+    "evidence": "After the fall of the communist-led government in East Germany, German reunification saw the former East German states join the FRG on 3 October 1990. Germany regained its full sovereignty on 15 March 1991."
+  },
+  "India": {
+    "text": "Its armed forces include the world's largest volunteer army.",
+    "source": "https://en.wikipedia.org/wiki/Indian_Armed_Forces",
+    "evidence": "With a strength of over 1.4 million active personnel, it is the world's second-largest military force and has the world's largest volunteer army."
+  },
+  "United Kingdom": {
+    "text": "At its height in the 1920s, the British Empire covered around a quarter of the world's land and people.",
+    "source": "https://en.wikipedia.org/wiki/United_Kingdom",
+    "evidence": "At its height in the 1920s, the empire encompassed around a quarter of the world's landmass and population, and was the largest in history."
+  },
+  "Ukraine": {
+    "text": "Its medieval state, Kievan Rus', was the largest and most powerful realm in Europe in the 10th and 11th centuries.",
+    "source": "https://en.wikipedia.org/wiki/Ukraine",
+    "evidence": "Kievan Rus' became the largest and most powerful realm in Europe in the 10th and 11th centuries, but gradually disintegrated into rival regional powers before being destroyed by the Mongols in the 13th century."
+  },
+  "Saudi Arabia": {
+    "text": "The kingdom founded in 1932 is the Third Saudi State, after earlier ones from 1727 and 1824.",
+    "source": "https://en.wikipedia.org/wiki/Saudi_Arabia",
+    "evidence": "Saudi Arabia was founded in 1932 by King Abdulaziz, who united Hejaz, Najd, parts of Eastern Arabia and South Arabia into a single state through a series of military and political campaigns beginning in 1902. The Kingdom is the Third Saudi State and the successor to the First Saudi State (1727–1818) and the Second Saudi State (1824–1891)."
+  },
+  "France": {
+    "text": "Under Louis XIV, the country built Europe's strongest army.",
+    "source": "https://en.wikipedia.org/wiki/France",
+    "evidence": "Under his rule, the nation built Europe's strongest army, fought a series of wars, and experienced artistic and scientific flourishing."
+  },
+  "Japan": {
+    "text": "The constitution says Japan will never maintain a military, so the Self-Defense Forces serve as its de facto one.",
+    "source": "https://en.wikipedia.org/wiki/Japan_Self-Defense_Forces",
+    "evidence": "The Japanese Constitution, which was adopted by the Supreme Command for the Allied Powers during the occupation of Japan after World War II, stipulates that Japan will never maintain a military as well as other war potential. However, rising tensions during the Cold War led to the reinterpretation of the constitution to allow for the right to self-defense, eventually leading to the creation of the Japan Self-Defense Forces in 1954 that functions as the country's de facto military."
+  }
+}

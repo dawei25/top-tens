@@ -1,0 +1,52 @@
+{
+  "Netflix": {
+    "text": "Started as a DVD rental service and in 2005 was shipping 1 million DVDs out every day.",
+    "source": "https://en.wikipedia.org/wiki/Netflix",
+    "evidence": "Netflix was founded by Marc Randolph and Reed Hastings as a DVD rental service on August 29, 1997, in Scotts Valley, California. ... In 2005, 35,000 different films were available, and Netflix shipped 1 million DVDs out every day."
+  },
+  "Cristiano Ronaldo": {
+    "text": "The only player to have scored 100 goals with four different clubs.",
+    "source": "https://en.wikipedia.org/wiki/Cristiano_Ronaldo",
+    "evidence": "He is the only player to have scored 100 goals with four different clubs and to finish as the top scorer in four different domestic leagues."
+  },
+  "Samsung": {
+    "text": "Began in 1938 as a small trading company dealing in dried fish, groceries and noodles.",
+    "source": "https://en.wikipedia.org/wiki/Samsung",
+    "evidence": "Founded in 1938 by Lee Byung-chul as a trading company, Samsung diversified into various sectors, including food processing, textiles, insurance, securities, and retail, over the next three decades. ... Samsung started out as a small trading company with forty employees located in Su-dong (now Ingyo-dong). It dealt in dried fish, locally-grown groceries and noodles."
+  },
+  "Facebook": {
+    "text": "Named after the face book directories often given to American university students.",
+    "source": "https://en.wikipedia.org/wiki/Facebook",
+    "evidence": "The name Facebook derives from the face book directories often given to American university students."
+  },
+  "5-Minute Crafts": {
+    "text": "Its life hacks have drawn criticism for being unusual and potentially dangerous.",
+    "source": "https://en.wikipedia.org/wiki/5-Minute_Crafts",
+    "evidence": "The channel has drawn criticism for its unusual and potentially dangerous life hacks and its reliance on clickbait."
+  },
+  "Mr. Bean": {
+    "text": "The original sitcom ran to just 14 episodes, yet has been sold in 245 territories.",
+    "source": "https://en.wikipedia.org/wiki/Mr._Bean",
+    "evidence": "The sitcom consists of 14 episodes that were co-written by Atkinson alongside Curtis and Robin Driscoll; the pilot episode was co-written by Ben Elton. ... The series has since been sold in 245 territories worldwide."
+  },
+  "Real Madrid C.F.": {
+    "text": "\"Real\" is Spanish for \"Royal\", a title bestowed on the club by Alfonso XIII in 1920.",
+    "source": "https://en.wikipedia.org/wiki/Real_Madrid_C.F.",
+    "evidence": "The honorific title 'Real' is Spanish for \"Royal\" and was bestowed by Alfonso XIII in 1920."
+  },
+  "FC Barcelona": {
+    "text": "Founded in 1899 by Swiss, Catalan, German and English footballers led by Joan Gamper.",
+    "source": "https://en.wikipedia.org/wiki/FC_Barcelona",
+    "evidence": "Founded in 1899 by a group of Swiss, Catalan, German, and English footballers led by Joan Gamper, the club has become a symbol of Catalan culture and Catalanism, hence the motto Més que un club (\"More than a club\")."
+  },
+  "Shakira": {
+    "text": "The first woman with number-one albums on Billboard's Top Latin Albums chart in four decades.",
+    "source": "https://en.wikipedia.org/wiki/Shakira",
+    "evidence": "Her success was further solidified with the Spanish-language albums Fijación Oral, Vol. 1 (2005), Sale el Sol (2010), El Dorado (2017), and Las Mujeres Ya No Lloran (2024), all of which topped the Billboard Top Latin Albums chart, making her the first woman with number-one albums across four different decades."
+  },
+  "CGTN": {
+    "text": "Grew out of CCTV's all-English channel, launched in 2000, and took the CGTN name in 2017.",
+    "source": "https://en.wikipedia.org/wiki/CGTN",
+    "evidence": "CGTN grew out of CCTV's all-English channel, known as CCTV-9 or CCTV International, launched in 2000 and renamed CCTV News in 2010. ... On 1 January 2017, the six non-Chinese language television channels under CCTV International were rebranded to bear the CGTN name."
+  }
+}

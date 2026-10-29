@@ -1,0 +1,52 @@
+{
+  "Liechtenstein": {
+    "text": "The world's smallest country to border two countries, and one of the few with no debt.",
+    "source": "https://en.wikipedia.org/wiki/Liechtenstein",
+    "evidence": "It is the world's smallest country to border two countries. ... It is one of the few countries with no debt."
+  },
+  "Luxembourg": {
+    "text": "The world's only remaining sovereign grand duchy, where foreign nationals are almost half the population.",
+    "source": "https://en.wikipedia.org/wiki/Luxembourg",
+    "evidence": "In 2026, it had a population of 696,268, which makes it one of the least-populated countries in Europe, albeit with the highest population growth rate; foreign nationals account for almost half the population. Luxembourg is a representative democracy headed by a constitutional monarch, Grand Duke Guillaume V, making it the world's only remaining sovereign grand duchy."
+  },
+  "Ireland": {
+    "text": "The state covers five-sixths of the island; Northern Ireland, part of the UK, covers the rest.",
+    "source": "https://en.wikipedia.org/wiki/Ireland",
+    "evidence": "Geopolitically, the island is divided between the Republic of Ireland (officially named Ireland – a sovereign state covering five-sixths of the island) and Northern Ireland (part of the United Kingdom – covering the remaining sixth)."
+  },
+  "Switzerland": {
+    "text": "With four language regions, it is described as a Willensnation, a \"nation of volition\".",
+    "source": "https://en.wikipedia.org/wiki/Switzerland",
+    "evidence": "The country encompasses four principal linguistic and cultural regions—German, French, Italian, and Romansh—reflecting a long-standing tradition of multilingualism and cultural pluralism. ... Swiss nationhood transcends language, ethnicity, and religion, leading to Switzerland being described as a Willensnation (\"nation of volition\") rather than a conventional nation state."
+  },
+  "Norway": {
+    "text": "The unified kingdom dates from 872 and has existed continuously for over a millennium.",
+    "source": "https://en.wikipedia.org/wiki/Norway",
+    "evidence": "The unified kingdom of Norway was established in 872 as a merger of petty kingdoms and has existed continuously for over a millennium."
+  },
+  "Singapore": {
+    "text": "Joined Malaysia in 1963, was expelled two years later and became independent in 1965.",
+    "source": "https://en.wikipedia.org/wiki/Singapore",
+    "evidence": "Singapore gained self-governance in 1959 and in 1963 became part of the new federation of Malaysia, alongside Malaya, North Borneo and Sarawak. Ideological differences led to Singapore's expulsion from the federation two years later; it became an independent sovereign country in 1965."
+  },
+  "Iceland": {
+    "text": "Its parliament, the Althing, is one of the world's oldest functioning legislative assemblies.",
+    "source": "https://en.wikipedia.org/wiki/Iceland",
+    "evidence": "The island was governed as an independent commonwealth under the native parliament, the Althing, one of the world's oldest functioning legislative assemblies."
+  },
+  "United States": {
+    "text": "Independence was formally declared in the Lee Resolution of July 2, 1776, two days before the Declaration.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "Independence from Great Britain was formally declared in the Lee Resolution of July 2, 1776, two days before the Declaration of Independence."
+  },
+  "Denmark": {
+    "text": "The kingdom has roughly 1,400 islands over 100 square metres; only 78 are inhabited.",
+    "source": "https://en.wikipedia.org/wiki/Denmark",
+    "evidence": "The Kingdom of Denmark, including the Faroe Islands and Greenland, has roughly 1,400 islands greater than 100 square metres (1,100 sq ft) in area; 443 have been named and 78 are inhabited."
+  },
+  "Netherlands": {
+    "text": "Despite its small, crowded territory, it is the world's second largest exporter of food by value.",
+    "source": "https://en.wikipedia.org/wiki/Netherlands",
+    "evidence": "With a population of over 18 million people, all living within a total area of 41,850 km2 (16,160 sq mi)—of which the land area is 33,500 km2 (12,900 sq mi)—the Netherlands is the 15th most densely populated country, with a density of 433 people per square kilometre (1,120 people/sq mi). Nevertheless, it is the world's second largest exporter of food and agricultural products by value, owing to its fertile soil, mild climate, intensive agriculture, and inventiveness."
+  }
+}
