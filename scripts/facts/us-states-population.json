@@ -1,0 +1,52 @@
+{
+  "California": {
+    "text": "It was admitted in 1850 as the 31st state, entering as a free state under the Compromise of 1850.",
+    "source": "https://en.wikipedia.org/wiki/California",
+    "evidence": "It organized itself and was admitted as the 31st state in 1850 as a free state, following the Compromise of 1850."
+  },
+  "Texas": {
+    "text": "The lone star design on its flag was first flown in 1819, during the Long Expedition.",
+    "source": "https://en.wikipedia.org/wiki/Texas",
+    "evidence": "The lone star design was originally flown in 1819 during the Long Expedition, an early attempt to liberate Texas from Spanish imperial rule."
+  },
+  "Florida": {
+    "text": "St. Augustine, founded in 1565, is the oldest continuously inhabited European-established settlement in the US.",
+    "source": "https://en.wikipedia.org/wiki/Florida",
+    "evidence": "In 1565, it founded St. Augustine, the oldest continuously inhabited European-established settlement in the United States."
+  },
+  "New York": {
+    "text": "Its Long Island is the nation's most populous island.",
+    "source": "https://en.wikipedia.org/wiki/New_York_(state)",
+    "evidence": "The southeastern part of the state, known as Downstate, encompasses New York City, the most populous city in the United States and Long Island, with approximately 40% of the state's population, the nation's most populous island; and the cities, suburbs, and wealthy areas of the lower Hudson Valley."
+  },
+  "Pennsylvania": {
+    "text": "It has no ocean shoreline, but has 140 miles of waterfront on Lake Erie and the tidal Delaware River.",
+    "source": "https://en.wikipedia.org/wiki/Pennsylvania",
+    "evidence": "Although Pennsylvania technically has no oceanic shoreline, it has 140 miles (225 km) of waterfront along Lake Erie and along the tidal Delaware River, the latter of which reaches the Delaware Bay, a marginal bay of the Atlantic Ocean."
+  },
+  "Illinois": {
+    "text": "Illinoisan John Deere's self-scouring steel plow turned its prairie into some of the world's most productive farmland.",
+    "source": "https://en.wikipedia.org/wiki/Illinois",
+    "evidence": "The Erie Canal brought increased commercial activity in the Great Lakes, and the invention of the self-scouring steel plow by Illinoisan John Deere turned the state's rich prairie into some of the world's most productive and valuable farmland, attracting immigrant farmers from Germany, Sweden, Hungary, and elsewhere."
+  },
+  "Ohio": {
+    "text": "It is named after the Ohio River, from a Seneca word meaning \"good river\" or \"great river\".",
+    "source": "https://en.wikipedia.org/wiki/Ohio",
+    "evidence": "Ohio derives its name from the Ohio River that forms its southern border, which, in turn, originated from the Seneca word ohiːyo', meaning \"good river\", \"great river\", or \"large creek\"."
+  },
+  "Georgia": {
+    "text": "It was the last and southernmost of the original Thirteen Colonies.",
+    "source": "https://en.wikipedia.org/wiki/Georgia_(U.S._state)",
+    "evidence": "By 1752, Georgia had transitioned into a British royal colony, making it the last and southernmost of the original Thirteen Colonies."
+  },
+  "North Carolina": {
+    "text": "It is home to Research Triangle Park, the largest research park in the United States.",
+    "source": "https://en.wikipedia.org/wiki/North_Carolina",
+    "evidence": "The Research Triangle, with an estimated population of 2,368,947 in 2023, is the second-most populous combined metropolitan area in the state, 31st-most populous in the United States, and is home to the largest research park in the United States, Research Triangle Park."
+  },
+  "Michigan": {
+    "text": "It has the longest freshwater coastline of any US political subdivision, at 3,288 miles.",
+    "source": "https://en.wikipedia.org/wiki/Michigan",
+    "evidence": "Bordering four of the five Great Lakes and Lake St. Clair, Michigan has the longest freshwater coastline of any U.S. political subdivision, measuring 3,288 miles."
+  }
+}

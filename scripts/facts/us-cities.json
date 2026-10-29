@@ -1,0 +1,52 @@
+{
+  "New York": {
+    "text": "An estimated 800 languages are spoken here, making it the most linguistically diverse city in the world.",
+    "source": "https://en.wikipedia.org/wiki/New_York_City",
+    "evidence": "An estimated 800 languages are spoken in New York City, making it the most linguistically diverse city in the world."
+  },
+  "Los Angeles": {
+    "text": "It was incorporated as a city in 1850, five months before California became a state.",
+    "source": "https://en.wikipedia.org/wiki/Los_Angeles",
+    "evidence": "Los Angeles was incorporated as a municipality on April 4, 1850, five months before California achieved statehood."
+  },
+  "Chicago": {
+    "text": "The Great Chicago Fire of 1871 left more than 100,000 homeless, yet the population kept growing.",
+    "source": "https://en.wikipedia.org/wiki/Chicago",
+    "evidence": "In 1871, the Great Chicago Fire destroyed several square miles and left more than 100,000 homeless, but Chicago's population continued to grow."
+  },
+  "Houston": {
+    "text": "It is named after Sam Houston, who won Texas's independence from Mexico at the Battle of San Jacinto.",
+    "source": "https://en.wikipedia.org/wiki/Houston",
+    "evidence": "The city is named after former General Sam Houston, who was president of the Republic of Texas and had won Texas's independence from Mexico at the Battle of San Jacinto 25 miles (40 km) east of Allen's Landing."
+  },
+  "Phoenix": {
+    "text": "The Hohokam built about 135 miles of irrigation canals here, paths later reused by modern canals.",
+    "source": "https://en.wikipedia.org/wiki/Phoenix%2C_Arizona",
+    "evidence": "They created roughly 135 miles (217 kilometers) of irrigation canals, making the desert land arable, and paths of these canals were used for the Arizona Canal, Central Arizona Project Canal, and the Hayden-Rhodes Aqueduct."
+  },
+  "Philadelphia": {
+    "text": "It was the nation's first capital from May 1775 to December 1776, and again on four later occasions.",
+    "source": "https://en.wikipedia.org/wiki/Philadelphia",
+    "evidence": "Philadelphia remained the largest U.S. city until 1790, and it served as the nation's first capital from May 10, 1775, until December 12, 1776, and on four subsequent occasions until 1800, when construction of the new national capital in Washington, D.C. was completed."
+  },
+  "San Antonio": {
+    "text": "Its five 18th-century Spanish frontier missions, including the Alamo, are UNESCO World Heritage sites.",
+    "source": "https://en.wikipedia.org/wiki/San_Antonio",
+    "evidence": "San Antonio is home to five 18th-century Spanish frontier missions, including The Alamo and those preserved in San Antonio Missions National Historical Park, which were collectively designated as UNESCO World Heritage sites in 2015."
+  },
+  "San Diego": {
+    "text": "San Diego International is the busiest single-runway airport in the United States.",
+    "source": "https://en.wikipedia.org/wiki/San_Diego",
+    "evidence": "San Diego International Airport (SAN) is the busiest single-runway airport in the United States."
+  },
+  "Dallas": {
+    "text": "Its metro area is the largest inland one in the US with no navigable link to the sea.",
+    "source": "https://en.wikipedia.org/wiki/Dallas",
+    "evidence": "Dallas is a core city of the largest metropolitan area in the Southern U.S. and the largest inland metropolitan area in the U.S. that lacks any navigable link to the sea."
+  },
+  "Fort Worth": {
+    "text": "It was established in 1849 as an army outpost on a bluff overlooking the Trinity River.",
+    "source": "https://en.wikipedia.org/wiki/Fort_Worth%2C_Texas",
+    "evidence": "The city of Fort Worth was established in 1849 as an army outpost on a bluff overlooking the Trinity River."
+  }
+}
