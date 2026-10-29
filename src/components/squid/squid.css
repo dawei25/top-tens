@@ -188,9 +188,10 @@
 .ink-sac.off .glint { fill: transparent; }
 .ink-sac.off .deep { fill: #121d33; }
 
-/* ---------- Blitz score bump: grows from its right edge, where the digits are anchored ---------- */
+/* ---------- Blitz score bump: grows mostly from its right edge, where the digits are anchored, so it stays clear
+   of the +N float on its left ---------- */
 .blitz-meter [data-motion="score"] {
-  transform-origin: 100% 70%;
+  transform-origin: 85% 75%;
 }
 
 /* ---------- One-off effects layer ---------- */

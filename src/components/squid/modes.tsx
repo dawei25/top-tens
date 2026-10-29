@@ -92,7 +92,7 @@ export function ScoreBump({ score }: { score: number }) {
     if (gain <= 0 || !el || reducedMotion() || typeof el.animate !== "function") return;
     // Points run 10 to 100: 0 for a small answer, 1 for a top one.
     const k = Math.min(1, Math.max(0, (gain - 10) / 80));
-    const s = 1.08 + 0.3 * k;
+    const s = 1.06 + 0.2 * k;
     const shake = k > 0.45 ? 2 + 3 * k : 0;
     el.animate(
       [

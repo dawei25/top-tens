@@ -63,7 +63,8 @@
     /* Just left of the score, level with its top, so it never covers the digits. */
     position: absolute;
     top: 26px;
-    right: calc(100% + 10px);
+    /* Clear of the score's bump (components/squid ScoreBump), which grows it a little leftward. */
+    right: calc(100% + 22px);
     font-size: 30px;
     line-height: 1;
     color: var(--cyan);
