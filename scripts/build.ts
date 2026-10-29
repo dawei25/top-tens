@@ -406,7 +406,11 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
 // (index untouched); no arguments builds everything.
 const args = process.argv.slice(2);
 const testMode = args.includes("--test");
-const only = testMode ? TEST_SET : args.filter((a) => !a.startsWith("--"));
+// Test mode also builds every list on the daily schedule, so scheduled dailies always exist and are indexed.
+const scheduled: string[] = existsSync(join(OUT_DIR, "daily.json"))
+  ? JSON.parse(readFileSync(join(OUT_DIR, "daily.json"), "utf8")).map((e: { id: string }) => e.id)
+  : [];
+const only = testMode ? [...new Set([...TEST_SET, ...scheduled])] : args.filter((a) => !a.startsWith("--"));
 mkdirSync(OUT_DIR, { recursive: true });
 const index: { id: string; title: string; category: string }[] = [];
 for (const topic of TOPICS) {

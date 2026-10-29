@@ -4,8 +4,8 @@ const KEY = "top-tens:v1";
 
 export interface Saved {
   games: Record<string, GameState>;
-  /** Day number -> puzzle id finished on that day in daily mode. */
-  daily: Record<number, string>;
+  /** Local date (YYYY-MM-DD) -> id of that date's daily, finished on that date. Drives streaks. */
+  daily: Record<string, string>;
   seenHelp: boolean;
 }
 
@@ -13,7 +13,10 @@ const empty = (): Saved => ({ games: {}, daily: {}, seenHelp: false });
 
 export function load(): Saved {
   try {
-    return { ...empty(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
+    const s: Saved = { ...empty(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
+    // Early builds keyed the daily by day number; those entries can't count toward date-based streaks.
+    for (const k of Object.keys(s.daily)) if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) delete s.daily[k];
+    return s;
   } catch {
     return empty();
   }
