@@ -163,11 +163,21 @@ export const INTENT: Record<string, Intent> = {
   "video-games": {
     same: {
       "Mario Kart 8": ["Mario Kart 8 Deluxe", "MK8", "MK8D"],
-      "Grand Theft Auto V": ["GTA 5", "GTA V", "GTA Online"],
+      "Grand Theft Auto V": ["GTA 5", "GTA V"],
+      "Grand Theft Auto Online": ["GTA Online"],
       "Red Dead Redemption 2": ["RDR2", "Red Dead 2"],
       "PUBG: Battlegrounds": ["PlayerUnknown's Battlegrounds", "PUBG"],
       "The Elder Scrolls V: Skyrim": ["Skyrim", "Elder Scrolls Skyrim"],
       "The Witcher 3: Wild Hunt": ["Witcher 3", "The Witcher 3"],
+    },
+    groups: {
+      GTA: ["Grand Theft Auto V", "Grand Theft Auto: San Andreas", "Grand Theft Auto IV", "Grand Theft Auto VI"],
+      "Grand Theft Auto": ["Grand Theft Auto V", "Grand Theft Auto: San Andreas", "Grand Theft Auto IV", "Grand Theft Auto VI"],
+      Zelda: [
+        "The Legend of Zelda: Breath of the Wild",
+        "The Legend of Zelda: Tears of the Kingdom",
+        "The Legend of Zelda: Ocarina of Time",
+      ],
     },
   },
   consoles: {
@@ -216,6 +226,7 @@ export const INTENT: Record<string, Intent> = {
   },
   "nba-points": {
     same: {
+      "Magic Johnson": ["Magic", "Earvin Johnson"],
       "LeBron James": ["LeBron", "King James", "LBJ"],
       "Kareem Abdul-Jabbar": ["Kareem", "Lew Alcindor"],
       "Karl Malone": ["The Mailman"],
@@ -521,6 +532,7 @@ export const INTENT: Record<string, Intent> = {
   },
   "nba-rebounds": {
     same: {
+      "Magic Johnson": ["Magic", "Earvin Johnson"],
       "Wilt Chamberlain": ["Wilt", "Wilt the Stilt"],
       "Kareem Abdul-Jabbar": ["Kareem", "Lew Alcindor"],
       "Elvin Hayes": ["The Big E"],

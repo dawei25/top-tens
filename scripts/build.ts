@@ -330,6 +330,9 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
   for (const e of extra) {
     const forms = [e.name, ...e.aliases].map(normalize).filter(Boolean);
     if (forms.some((f) => taken.has(f))) continue;
+    // Add-ons of an entry already listed ("Skyrim – Dragonborn" next to Skyrim) only blur what its name means.
+    const base = e.name.split(" – ")[0];
+    if (base !== e.name && taken.has(normalize(base))) continue;
     entries.push(e);
     taken.add(normalize(e.name));
   }

@@ -329,7 +329,7 @@ export const TOPICS: Topic[] = [
     metric: "Subscribers (millions)",
     also: [{ tables: [1, 2], name: 0 }, ...CELEBRITIES],
     universeCategories: ["YouTube channels", "YouTubers"],
-    categoryDepth: 1,
+    categoryDepth: 2,
   },
   {
     id: "youtube-videos",
@@ -609,7 +609,10 @@ export const TOPICS: Topic[] = [
     value: "Goals",
     metric: "Goals",
     people: true,
-    also: [{ page: "List of NHL players with 1,000 points", tables: [0, 1, 2], name: 2 }],
+    also: [
+      { page: "List of NHL players with 1,000 points", tables: [0], name: 2 },
+      { page: "List of NHL players with 1,000 points", tables: [1, 2], name: "Player" },
+    ],
     universeCategories: ["Hockey Hall of Fame inductees"],
   },
 
@@ -1049,7 +1052,7 @@ export const TOPICS: Topic[] = [
     value: "Pts",
     metric: "Points",
     people: true,
-    also: [{ page: "List of NHL players with 500 goals", tables: [0], name: 2 }, { tables: [1, 2], name: 2 }],
+    also: [{ page: "List of NHL players with 500 goals", tables: [0], name: 2 }, { tables: [1, 2], name: "Player" }],
     universeCategories: ["Hockey Hall of Fame inductees"],
   },
   {

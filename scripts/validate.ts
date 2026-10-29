@@ -25,11 +25,12 @@ export function junkReason(name: string): string | null {
   if (/^(grand )?(totals?|subtotal|overall|world|others?|various|unknown|n\/a|rest of( the)? world)$/i.test(name.trim())) {
     return "total/placeholder row";
   }
-  if (/\d{5,}/.test(name.replace(/[,.\s]/g, ""))) return "long digit run";
-  if (/^[\d\s.,%$€£()+-]+$/.test(name)) return "only digits/punctuation";
-  if (/\b(citation needed|note|ref\.?)\b/i.test(name)) return "note text";
+  // Titles can be numbers ("1989", "21", "2012"); table debris looks like "1,286" or a long serial.
+  if (/\d{6,}/.test(name)) return "long digit run";
+  if (/^[\d\s.,%$€£()+-]+$/.test(name) && (/,\d{3}/.test(name) || /\d{5,}/.test(name))) return "a number, not a name";
+  if (/\b(citation needed|ref\.)|^(notes?|see also)$/i.test(name)) return "note text";
   if (name.length > 80) return "very long";
-  if (/^[^\p{L}\p{N}"'¡¿(]/u.test(name)) return "starts with punctuation";
+  if (/^[^\p{L}\p{N}"'¡¿(.&+]/u.test(name)) return "starts with punctuation";
   return null;
 }
 

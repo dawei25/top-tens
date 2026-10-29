@@ -49,7 +49,7 @@ const JUNK_REDIRECT =
 const ASPECT_REDIRECT = new RegExp(
   [
     "^(personal|early|private|later|political|professional|sporting|playing|coaching|business|musical|acting) (life|career)\\b",
-    "^(life|career|death|legacy|reception|assassination|presidency|criticism|biography|works|awards|honours|honors|controversies|influence|impact|image|depictions?|ecology|geology|flora|fauna|conservation|railways|railroads|protected areas|natural resources|environmental issues|social issues|indigenous peoples|human rights|lgbt rights|public image|cultural depictions)\\b.*\\b(of|in)\\b",
+    "^(controversies surrounding|life|career|death|legacy|reception|assassination|presidency|criticism|biography|works|awards|honours|honors|controversies|influence|impact|image|depictions?|ecology|geology|flora|fauna|conservation|railways|railroads|protected areas|natural resources|environmental issues|social issues|indigenous peoples|human rights|lgbt rights|public image|cultural depictions)\\b.*\\b(of|in)\\b",
     "\\b(rivalry|discography|filmography|bibliography|videography|awards|honours|honors|controversies|controversy|statistics|records|career|nicknames?|in popular culture|in fiction|in film|in world war i+|during world war i+|trivia)$",
     "\\(disambiguation\\)",
   ].join("|"),
