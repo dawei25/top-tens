@@ -1,3 +1,4 @@
+import type { BlitzRun, BlitzState } from "./blitz";
 import type { GameState } from "./state";
 
 const KEY = "top-tens:v1";
@@ -9,6 +10,10 @@ export interface Saved {
   seenHelp: boolean;
   /** Best Blitz score per list id. */
   blitzBest?: Record<string, number>;
+  /** Finished Blitz rounds per list id, newest first, capped (see MAX_BLITZ_RUNS in blitz.ts). */
+  blitzRuns?: Record<string, BlitzRun[]>;
+  /** A Blitz round in progress per list id, saved after every hit so leaving the page doesn't lose it. */
+  blitzLive?: Record<string, BlitzState>;
 }
 
 const empty = (): Saved => ({ games: {}, daily: {}, seenHelp: false });

@@ -11,6 +11,10 @@ import {
   newBlitz,
   points,
   recordBlitz,
+  blitzHistory,
+  MAX_BLITZ_RUNS,
+  resumeBlitz,
+  saveLiveBlitz,
   startBlitz,
   timeLeft,
 } from "./blitz";
@@ -86,10 +90,28 @@ describe("availability and bests", () => {
     expect(blitzAvailable({ id: "old", blitz: true }, schedule, "2026-10-29", saved)).toBe(true);
     expect(blitzAvailable({ id: "x" }, schedule, "2026-10-29", saved)).toBe(false);
   });
-  it("keeps the best score per list", () => {
-    const a = recordBlitz(saved, "islands", 300);
+  const round = (startedAt: number, pts: number[]) => ({
+    puzzleId: "islands",
+    startedAt,
+    endedAt: startedAt + 90_000,
+    hits: pts.map((p, i) => ({ name: `x${i}`, rank: 0, n: 1, points: p })),
+  });
+  it("keeps the best score and a capped history, newest first", () => {
+    const a = recordBlitz(saved, "islands", round(1, [100, 200]));
     expect(a.best).toBe(true);
-    const b = recordBlitz(a.saved, "islands", 200);
+    const b = recordBlitz(a.saved, "islands", round(2, [50]));
     expect(b).toMatchObject({ best: false, previous: 300 });
+    expect(blitzHistory(b.saved, "islands").map((r) => r.score)).toEqual([50, 300]);
+    expect(recordBlitz(b.saved, "islands", round(2, [50])).saved.blitzRuns?.islands).toHaveLength(2);
+    let s = b.saved;
+    for (let i = 10; i < 40; i++) s = recordBlitz(s, "islands", round(i, [1])).saved;
+    expect(blitzHistory(s, "islands")).toHaveLength(MAX_BLITZ_RUNS);
+  });
+  it("a round left mid-way resumes, or finishes if its time ran out", () => {
+    const live = { puzzleId: "islands", startedAt: 1_000, hits: [] };
+    const s = saveLiveBlitz(saved, live);
+    expect(resumeBlitz(s, "islands", 30_000)).toMatchObject({ over: false });
+    expect(resumeBlitz(s, "islands", 200_000)).toMatchObject({ over: true, state: { endedAt: 91_000 } });
+    expect(recordBlitz(s, "islands", { ...live, endedAt: 91_000 }).saved.blitzLive?.islands).toBeUndefined();
   });
 });

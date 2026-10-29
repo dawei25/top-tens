@@ -140,15 +140,70 @@ export function blitzAvailable(puzzle: Pick<Puzzle, "id" | "blitz">, schedule: D
   return true;
 }
 
-/** Record a finished round; returns whether it beat the previous best on this list. */
-export function recordBlitz(saved: Saved, puzzleId: string, score: number): { saved: Saved; best: boolean; previous?: number } {
+/** A finished round, as kept in the player's history. */
+export interface BlitzRun {
+  /** Epoch ms the round started; also its id. */
+  startedAt: number;
+  endedAt: number;
+  score: number;
+  hits: BlitzHit[];
+}
+
+/** How many finished rounds are kept per list. */
+export const MAX_BLITZ_RUNS = 20;
+
+/**
+ * Record a finished round: its best-score check and its place in the history (newest first, capped). Clears the
+ * saved in-progress round. Recording the same round twice (same startedAt) is a no-op.
+ */
+export function recordBlitz(
+  saved: Saved,
+  puzzleId: string,
+  state: BlitzState,
+): { saved: Saved; best: boolean; previous?: number } {
+  const score = blitzScore(state);
+  const runs = saved.blitzRuns?.[puzzleId] ?? [];
+  const startedAt = state.startedAt ?? state.endedAt ?? Date.now();
+  const live = { ...saved.blitzLive };
+  delete live[puzzleId];
   const previous = saved.blitzBest?.[puzzleId];
+  if (runs.some((r) => r.startedAt === startedAt)) {
+    return { saved: { ...saved, blitzLive: live }, best: false, previous };
+  }
   const best = previous === undefined || score > previous;
+  const run: BlitzRun = { startedAt, endedAt: state.endedAt ?? Date.now(), score, hits: state.hits };
   return {
-    saved: best ? { ...saved, blitzBest: { ...saved.blitzBest, [puzzleId]: score } } : saved,
+    saved: {
+      ...saved,
+      blitzBest: best ? { ...saved.blitzBest, [puzzleId]: score } : saved.blitzBest,
+      blitzRuns: { ...saved.blitzRuns, [puzzleId]: [run, ...runs].slice(0, MAX_BLITZ_RUNS) },
+      blitzLive: live,
+    },
     best,
     previous,
   };
+}
+
+/** Save a round in progress (after the first keystroke and after every hit). */
+export function saveLiveBlitz(saved: Saved, state: BlitzState): Saved {
+  if (!state.startedAt || state.endedAt) return saved;
+  return { ...saved, blitzLive: { ...saved.blitzLive, [state.puzzleId]: state } };
+}
+
+/**
+ * The saved round for a list when the player comes back: still running (resume it, the clock never stopped), or
+ * already over (finished here, so the caller records it and shows its results). Undefined if there is none.
+ */
+export function resumeBlitz(saved: Saved, puzzleId: string, now = Date.now()): { state: BlitzState; over: boolean } | undefined {
+  const live = saved.blitzLive?.[puzzleId];
+  if (!live?.startedAt) return undefined;
+  if (isOver(live, now)) return { state: finishBlitz(live, now), over: true };
+  return { state: live, over: false };
+}
+
+/** Finished rounds on a list, newest first. */
+export function blitzHistory(saved: Saved, puzzleId: string): BlitzRun[] {
+  return saved.blitzRuns?.[puzzleId] ?? [];
 }
 
 /** "Top Tens Blitz: Busiest airports · 742 pts · 14 answers" plus a link. */

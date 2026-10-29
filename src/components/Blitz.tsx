@@ -109,7 +109,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, onHome }: Props) {
   // Record once per finished round.
   useEffect(() => {
     if (!state?.endedAt || record) return;
-    const r = recordBlitz(load(), id, blitzScore(state));
+    const r = recordBlitz(load(), id, state);
     save(r.saved);
     setRecord({ best: r.best, previous: r.previous });
   }, [state, record, id]);
