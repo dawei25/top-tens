@@ -521,17 +521,21 @@ a {
 }
 
 /* The high-score table */
+/* No overflow clipping: a hovered row's fact panel may hang past the board's edge on a short, narrow window. */
 .board {
   padding: 8px 0 6px;
-  overflow: hidden;
 }
+/* Shared by the header and the rows (in px, so the header's smaller type doesn't shift its columns). */
 .board-head,
 .slot {
+  --slot-pad: 16px;
+  --rank-col: 75px;
+  --slot-gap: 12px;
   display: grid;
-  grid-template-columns: 3.4em minmax(0, 1fr);
-  column-gap: 12px;
+  grid-template-columns: var(--rank-col) minmax(0, 1fr);
+  column-gap: var(--slot-gap);
   align-items: baseline;
-  padding: 0 16px;
+  padding: 0 var(--slot-pad);
 }
 .slot-body {
   display: flex;
@@ -667,7 +671,11 @@ a {
   animation: fade 0.2s var(--d, 0ms) steps(2, end) both;
 }
 
-/* Facts: a revealed row with a fact carries a tiny "i" key; hover (mouse), tap or Enter opens it under the row. */
+/*
+ * Facts. No marker: a revealed row with a fact gets a quiet hover state on desktop and opens on tap,
+ * click or Enter (inline, under the row). Mouse hover shows the same fact as a panel over the rows below:
+ * pure CSS with no reflow, so it is instant and the board never moves under the pointer.
+ */
 .slot.has-fact {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -675,67 +683,31 @@ a {
 .slot.fact-open {
   background: rgba(77, 227, 255, 0.04);
 }
-@media (hover: hover) {
-  .slot.has-fact:hover {
-    background: rgba(77, 227, 255, 0.04);
-  }
-}
-.fact-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 0.95em;
-  height: 0.95em;
-  margin-left: 0.45em;
+.name-toggle {
+  margin: 0;
   padding: 0;
-  border: 1px solid rgba(77, 227, 255, 0.45);
-  border-radius: 3px;
-  background: var(--key);
-  box-shadow: 0 2px 0 var(--key-shadow);
-  color: var(--cyan);
-  font-size: 17px;
-  line-height: 1;
-  letter-spacing: 0;
-  text-transform: none;
-  vertical-align: 0.12em;
-  cursor: pointer;
+  border: 0;
+  background: none;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: inherit;
+  color: inherit;
+  cursor: inherit;
 }
-.slot.missed .fact-mark {
-  border-color: var(--hairline);
-  color: var(--muted);
-}
-.slot.fact-open .fact-mark {
-  background: var(--cyan);
-  border-color: var(--cyan);
-  color: var(--well);
-  box-shadow: 0 1px 0 var(--key-shadow);
-  transform: translateY(1px);
-}
-.slot.top .fact-mark {
-  border-color: rgba(255, 209, 102, 0.5);
-  color: var(--gold);
-}
-.slot.top.fact-open .fact-mark {
-  background: var(--gold);
-  border-color: var(--gold);
-  color: var(--gold-ink);
-}
-/* The row shows its focus ring; the little key doesn't need its own. */
-.fact-mark:focus-visible {
+/* The row shows the focus ring; the name inside it doesn't need its own. */
+.name-toggle:focus-visible {
   outline: none;
 }
-.slot:has(.fact-mark:focus-visible) {
+.slot:has(.name-toggle:focus-visible) {
   outline: 3px solid var(--cyan);
   outline-offset: -3px;
 }
-.slot.just .fact-mark {
-  animation: fade 0.25s 0.4s steps(3, end) both;
-}
-.slot.late .fact-mark {
-  animation: fade 0.2s calc(var(--d, 0ms) + 0.35s) steps(2, end) both;
-}
 .fact {
+  display: none;
   grid-column: 2 / -1;
-  margin: 4px 0 4px;
+  margin: 4px 0;
   padding-left: 10px;
   border-left: 2px solid var(--cyan-edge);
   font-size: 19px;
@@ -743,8 +715,9 @@ a {
   letter-spacing: 0.04em;
   color: var(--text);
   overflow-wrap: anywhere;
-  cursor: auto;
-  animation: fact-in 0.18s steps(3, end) both;
+}
+.slot.fact-open .fact {
+  display: block;
 }
 .slot.top .fact {
   border-left-color: var(--gold);
@@ -753,14 +726,44 @@ a {
   border-left-color: var(--faint);
   color: var(--label);
 }
-.fact-source {
-  font-size: 16px;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  white-space: nowrap;
-}
-.fact-source:hover {
-  color: var(--cyan);
+@media (hover: hover) and (pointer: fine) {
+  .slot.has-fact {
+    cursor: help;
+  }
+  .slot.has-fact:hover {
+    background: rgba(77, 227, 255, 0.05);
+  }
+  /* data-hover is set on the first pointer move, so a row revealed under a resting mouse stays shut. */
+  .slot.has-fact[data-hover]:not(.fact-open):hover .fact {
+    display: block;
+    position: absolute;
+    z-index: 6;
+    /* Its containing block is its grid area (name column to the end), so it lines up with the names. */
+    top: calc(100% - 1px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 6px 12px 7px 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--hairline);
+    border-left: 2px solid var(--cyan-edge);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+  }
+  .slot.top.has-fact[data-hover]:hover .fact {
+    border-left-color: var(--gold);
+  }
+  .slot.missed.has-fact[data-hover]:hover .fact {
+    border-left-color: var(--faint);
+  }
+  /* The bottom rows open upward, over the rows above, so the panel stays on the board. */
+  .slot.has-fact[data-hover]:not(.fact-open):nth-child(n + 8):hover .fact {
+    top: auto;
+    bottom: calc(100% - 1px);
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 -4px 0 rgba(0, 0, 0, 0.45);
+  }
 }
 .board-foot {
   display: flex;
@@ -974,9 +977,10 @@ a {
   }
   .board-head,
   .slot {
-    grid-template-columns: 3.6em minmax(0, 1fr) auto;
-    column-gap: 18px;
-    padding-inline: 22px;
+    --slot-pad: 22px;
+    --rank-col: 79px;
+    --slot-gap: 18px;
+    grid-template-columns: var(--rank-col) minmax(0, 1fr) auto;
   }
   .slot {
     min-height: 44px;
@@ -1011,9 +1015,10 @@ a {
   }
   .board-head,
   .slot {
-    grid-template-columns: 2.9em minmax(0, 1fr);
-    column-gap: 10px;
-    padding-inline: 12px;
+    --slot-pad: 12px;
+    --rank-col: 64px;
+    --slot-gap: 10px;
+    grid-template-columns: var(--rank-col) minmax(0, 1fr);
   }
   .rank {
     font-size: 24px;
@@ -1060,16 +1065,6 @@ a {
     transform: scale(1.6);
   }
   100% {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes fact-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
     opacity: 1;
     transform: none;
   }

@@ -26,8 +26,6 @@ interface Feedback {
 
 /** Milliseconds between missed rows typing in at the end of a game. */
 const REVEAL_STEP = 90;
-/** Mouse rest before a row's fact opens, so sweeping across the board doesn't flicker rows open. */
-const HOVER_DELAY = 180;
 
 function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   switch (r.kind) {
@@ -75,11 +73,6 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
   const shareRef = useRef<HTMLButtonElement>(null);
   /** Facts opened by tap, click or keyboard (by rank). */
   const [openFacts, setOpenFacts] = useState<ReadonlySet<number>>(() => new Set());
-  /** Fact shown because the mouse rests on its row. */
-  const [hoverFact, setHoverFact] = useState<number | null>(null);
-  const hoverTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  useEffect(() => () => clearTimeout(hoverTimer.current), []);
 
   useEffect(() => {
     loadPuzzle(id)
@@ -199,18 +192,12 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
 
   // Facts only ever belong to revealed rows: a hidden row's fact would be a hint.
   const factRanks = puzzle.answers.filter((a) => a.fact && (over || game.found.includes(a.rank))).map((a) => a.rank);
-  const factShown = (rank: number) => openFacts.has(rank) || hoverFact === rank;
-  const toggleFact = (rank: number) => {
-    clearTimeout(hoverTimer.current);
-    const shown = factShown(rank);
-    setHoverFact(null);
+  const toggleFact = (rank: number) =>
     setOpenFacts((prev) => {
       const next = new Set(prev);
-      if (shown) next.delete(rank);
-      else next.add(rank);
+      if (!next.delete(rank)) next.add(rank);
       return next;
     });
-  };
   const allFactsOpen = factRanks.length > 0 && factRanks.every((r) => openFacts.has(r));
 
   return (
@@ -275,7 +262,7 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
             const revealDelay = !found && endedHere ? missIdx * REVEAL_STEP : 0;
             const typing = animate && (just || (!found && endedHere));
             const fact = revealed ? a.fact : undefined;
-            const shown = !!fact && factShown(a.rank);
+            const open = !!fact && openFacts.has(a.rank);
             return (
               <li
                 key={a.rank}
@@ -286,47 +273,33 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
                   just ? "just" : "",
                   !found && endedHere ? "late" : "",
                   fact ? "has-fact" : "",
-                  shown ? "fact-open" : "",
+                  open ? "fact-open" : "",
                 ].join(" ")}
                 style={{ "--d": `${revealDelay}ms` } as CSSProperties}
                 {...(fact && {
-                  onClick: (e: React.MouseEvent) => {
-                    if (!(e.target as Element).closest("a")) toggleFact(a.rank);
-                  },
+                  onClick: () => toggleFact(a.rank),
                   // Keep focus where it is (the guess box during play), so opening a fact never costs a keystroke.
-                  onMouseDown: (e: React.MouseEvent) => {
-                    if (!(e.target as Element).closest("a")) e.preventDefault();
-                  },
-                  onPointerEnter: (e: React.PointerEvent) => {
-                    if (e.pointerType !== "mouse") return;
-                    clearTimeout(hoverTimer.current);
-                    hoverTimer.current = setTimeout(() => setHoverFact(a.rank), HOVER_DELAY);
+                  onMouseDown: (e: React.MouseEvent) => e.preventDefault(),
+                  // Hover is pure CSS; this only arms it once the mouse actually moves here (see index.css), and
+                  // touches the DOM directly so hovering never re-renders the board.
+                  onPointerMove: (e: React.PointerEvent<HTMLLIElement>) => {
+                    const el = e.currentTarget;
+                    if (e.pointerType === "mouse" && !("hover" in el.dataset)) el.dataset.hover = "";
                   },
                 })}
-                onPointerLeave={(e) => {
-                  if (e.pointerType !== "mouse") return;
-                  clearTimeout(hoverTimer.current);
-                  setHoverFact((h) => (h === a.rank ? null : h));
-                }}
               >
                 <span className="rank">{ordinal(a.rank)}</span>
                 <span className="slot-body">
                   <span className="name">
                     {revealed ? (
-                      <>
+                      fact ? (
+                        // The name itself is the keyboard toggle; the row draws its focus ring.
+                        <button type="button" className="name-toggle" aria-expanded={open} aria-controls={`fact-${a.rank}`}>
+                          <TypeIn text={a.name} animate={typing} delay={revealDelay} />
+                        </button>
+                      ) : (
                         <TypeIn text={a.name} animate={typing} delay={revealDelay} />
-                        {fact && (
-                          <button
-                            type="button"
-                            className="fact-mark"
-                            aria-expanded={shown}
-                            aria-controls={`fact-${a.rank}`}
-                            aria-label={`Fact about ${a.name}`}
-                          >
-                            i
-                          </button>
-                        )}
-                      </>
+                      )
                     ) : (
                       <span className="blank" aria-label="not found yet">
                         . . . . . . . .
@@ -335,12 +308,10 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
                   </span>
                   {revealed && a.value && <span className="value">{a.value}</span>}
                 </span>
-                {fact && shown && (
+                {/* Always in the DOM once revealed, so desktop hover is pure CSS (no re-render); hidden until opened or hovered. */}
+                {fact && (
                   <p className="fact" id={`fact-${a.rank}`}>
-                    {fact.text}{" "}
-                    <a className="fact-source" href={fact.source} target="_blank" rel="noreferrer">
-                      source
-                    </a>
+                    {fact.text}
                   </p>
                 )}
               </li>
