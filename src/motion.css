@@ -6,7 +6,8 @@
  *   state as is; the only rule outside hides the decorative extras (burst, float).
  * - Infinite blinks are named motion-blink-*: src/components/motion pins them to the wall-clock second, so they
  *   blink together.
- * - Already in index.css and not doubled here: found-row flash and type-in, heart flash and lives shake,
+ * - The squid, ink-sac lives, tentacle grab and ink clouds live in components/squid (squid.css).
+ * - Already in index.css and not doubled here: found-row flash and type-in, life flash and lives shake,
  *   guess-row shake, the Blitz clock's low-time blink.
  */
 
