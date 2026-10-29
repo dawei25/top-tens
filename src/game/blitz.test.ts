@@ -36,11 +36,17 @@ const puzzle: Puzzle = {
 };
 
 describe("points", () => {
-  it("runs from 10 to 100 on both curves", () => {
-    expect(points(2_000_000, 2_000_000)).toBe(100);
-    expect(points(500_000, 2_000_000, "sqrt")).toBe(55);
-    expect(points(500_000, 2_000_000, "linear")).toBe(33);
-    expect(points(1, 2_000_000)).toBe(10);
+  it("blend: #1 is 100, the top 10 gets a bonus, deep answers still score", () => {
+    expect(points(2_000_000, 2_000_000, 1, true)).toBe(100);
+    // Mountains-like flat list: #10 vs #11 differ by the bonus plus a little rank decay.
+    expect(points(8_091, 8_849, 10, true)).toBe(80);
+    expect(points(8_080, 8_849, 11, false)).toBe(68);
+    expect(points(6_000, 8_849, 100, false)).toBeGreaterThanOrEqual(43);
+    expect(points(1, 2_000_000, 500, false)).toBe(10);
+  });
+  it("value-only formulas stay available for comparison", () => {
+    expect(points(500_000, 2_000_000, 1, false, "sqrt")).toBe(55);
+    expect(points(500_000, 2_000_000, 1, false, "linear")).toBe(33);
     expect(points(0, 100)).toBe(10);
     expect(points(5, 0)).toBe(10);
   });
@@ -66,12 +72,13 @@ describe("blitz round", () => {
     };
     expect(play("Greenland")).toMatchObject({ kind: "scored", hit: { points: 100 }, corrected: false });
     expect(play("Madagascr")).toMatchObject({ kind: "scored", hit: { name: "Madagascar" }, corrected: true });
-    expect(play("Faroe Islands")).toMatchObject({ kind: "scored", hit: { points: 12 } });
+    expect(play("Faroe Islands")).toMatchObject({ kind: "scored", hit: { name: "Faroe Islands" } });
     expect(play("greenland")).toMatchObject({ kind: "duplicate" });
     expect(play("France")).toMatchObject({ kind: "none", junk: false });
     expect(play("asdf")).toMatchObject({ kind: "none" });
     expect(s.hits.map((h) => h.name)).toEqual(["Greenland", "Madagascar", "Faroe Islands"]);
-    expect(blitzScore(s)).toBe(100 + points(587_000, 2_000_000) + 12);
+    expect(blitzScore(s)).toBe(s.hits.reduce((t, h) => t + h.points, 0));
+    expect(s.hits[1].points).toBe(points(587_000, 2_000_000, 4, true));
     expect(missedTop(puzzle, s, 3).map((x) => x.name)).toEqual(["New Guinea", "Borneo", "Ellesmere Island"]);
     expect(blitzShareText(finishBlitz(s, t0 + 90_000), puzzle, "u")).toContain("3 answers in 90s");
   });

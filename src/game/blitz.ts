@@ -12,15 +12,46 @@ import type { Entry, Puzzle } from "./types";
 /** Round length. One constant so it can be tuned. */
 export const BLITZ_SECONDS = 90;
 
-export type Scoring = "sqrt" | "linear";
-/** Which curve turns a stat into points. Both give every answer at least 10 and the #1 answer 100. */
-export const SCORING: Scoring = "sqrt";
+export type Scoring = "blend" | "sqrt" | "linear";
+/**
+ * Which formula turns an answer into points. All give every answer at least 10 and #1 100.
+ * - blend (default): half value, half rank, plus a bonus for the list's real top 10. Stat values alone behave
+ *   very differently per list (8,000 m peaks are all within 15% of Everest; India and China dwarf every other
+ *   country), so the rank half weighs the top the same way on every list, and the value half keeps big real gaps.
+ * - sqrt / linear: value only, kept for comparison.
+ */
+export const SCORING: Scoring = "blend";
+/** Points added for an answer in the list's top 10. */
+export const TOP10_BONUS = 10;
+/** The rank half of the blend halves every this many places. */
+const RANK_HALF_LIFE = 10;
 
-/** Points for a stat `n` on a list whose biggest stat is `top`: 10 to 100. */
-export function points(n: number, top: number, scoring: Scoring = SCORING): number {
+/**
+ * Points for an answer: `n` its stat, `top` the list's biggest stat, `statRank` its 1-based place among all scoring
+ * answers by stat, `inTop10` whether it is one of the list's top 10. 10 to 100.
+ */
+export function points(n: number, top: number, statRank = 1, inTop10 = false, scoring: Scoring = SCORING): number {
   if (!(n > 0) || !(top > 0)) return 10;
   const share = Math.min(1, n / top);
-  return Math.round(10 + 90 * (scoring === "sqrt" ? Math.sqrt(share) : share));
+  if (scoring === "linear") return Math.round(10 + 90 * share);
+  if (scoring === "sqrt") return Math.round(10 + 90 * Math.sqrt(share));
+  const byRank = Math.pow(0.5, (Math.max(1, statRank) - 1) / RANK_HALF_LIFE);
+  const blend = 0.5 * Math.sqrt(share) + 0.5 * byRank;
+  return Math.round(10 + (90 - TOP10_BONUS) * blend + (inTop10 ? TOP10_BONUS : 0));
+}
+
+/** 1-based place of a stat among the list's scoring answers (ties share the better place). */
+export function statRank(puzzle: Puzzle, n: number): number {
+  let above = 0;
+  for (const e of [...puzzle.answers, ...puzzle.extras]) if (e.n !== undefined && e.n > n) above++;
+  return above + 1;
+}
+
+/** Points for one of the list's entries. */
+export function entryPoints(puzzle: Puzzle, entry: Entry, scoring: Scoring = SCORING): number {
+  if (entry.n === undefined) return 0;
+  const inTop10 = entry.rank >= 1 && entry.rank <= 10;
+  return points(entry.n, topValue(puzzle), statRank(puzzle, entry.n), inTop10, scoring);
 }
 
 /** The list's biggest stat (normally #1's). */
@@ -107,7 +138,7 @@ export function blitzGuess(
     const entry: Entry = r.entry;
     if (state.hits.some((h) => h.name === entry.name)) return { state, result: { kind: "duplicate", name: entry.name } };
     if (entry.n === undefined) return { state, result: { kind: "none", junk: false } };
-    const hit: BlitzHit = { name: entry.name, rank: entry.rank, n: entry.n, points: points(entry.n, topValue(puzzle)) };
+    const hit: BlitzHit = { name: entry.name, rank: entry.rank, n: entry.n, points: entryPoints(puzzle, entry) };
     const corrected = r.kind === "duplicate" ? false : r.corrected;
     return { state: { ...startBlitz(state, now), hits: [...state.hits, hit] }, result: { kind: "scored", hit, corrected } };
   }
