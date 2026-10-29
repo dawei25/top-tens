@@ -535,6 +535,12 @@ export const TOPICS: Topic[] = [
     values: { kind: "passengers" },
     aliasCols: ["Code", "Location"],
     also: [{ tables: [1, 2, 3, 4, 5], name: "Airport" }],
+    // Earlier years' tables use old names; without these they come back as unranked duplicates of ranked rows.
+    aliases: {
+      "Harry Reid International Airport": ["McCarran International Airport", "McCarran"],
+      "Adolfo Suárez Madrid–Barajas Airport": ["Madrid Barajas Airport", "Madrid Barajas", "Madrid"],
+      "Leonardo da Vinci Rome Fiumicino Airport": ["Rome Fiumicino", "Rome"],
+    },
   },
 
   // Batch 2: sports
