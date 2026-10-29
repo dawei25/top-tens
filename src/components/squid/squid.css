@@ -1,0 +1,490 @@
+/*
+ * TENtacle's glow squid (animations agent): the sprite, its moods, the ink-sac lives, and the one-off effects layer.
+ * Persistent states (lit limbs, moods, momentum, empty sacs) are plain styles and show with reduced motion too;
+ * every move sits under prefers-reduced-motion: no-preference or is skipped in JS.
+ */
+
+/* ---------- Placement: in the screen header, left of the mode label and the lives ---------- */
+/* The squid is taller than the header's keys; negative margins let it hang into the screen padding above and the
+   gap below, so the header (and the board under it) stays exactly where it was. */
+.game-head-mid:has(> .squid) {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  align-content: center;
+  column-gap: 14px;
+  row-gap: 0;
+}
+.game-head-mid > .squid {
+  grid-row: 1 / span 2;
+  margin: -13px 0;
+}
+/* Big screens have the room: a chunkier squid (4 px pixels), still hanging into the padding above. */
+@media (min-width: 900px) and (min-height: 760px) {
+  .game-head-mid > .squid {
+    --px: 4px;
+    margin: -16px 0 -10px;
+  }
+}
+/* Blitz has only its label beside the squid. */
+.game-head-mid > .squid + .label:last-child {
+  grid-row: 1 / span 2;
+}
+
+/* ---------- The sprite ---------- */
+.squid {
+  --px: 3px;
+  --cyan-hot: #22b5df;
+  --gold-hot: #e0a93e;
+  position: relative;
+  display: block;
+  flex: none;
+  width: calc(19 * var(--px));
+  height: calc(23 * var(--px));
+  pointer-events: none;
+}
+.squid-move {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 40%;
+}
+.squid-px,
+.squid-glow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.squid-px {
+  transition: filter 0.6s steps(6, end);
+}
+
+/* Body: dark, deep-sea blue, shaded like a voxel (lit left face, shaded right face). */
+.s-body-h { fill: #4f8cc0; }
+.s-body-l { fill: #2d5f8f; }
+.s-body-d { fill: #1d4269; }
+.s-body-k { fill: #132f50; }
+.s-fin-h { fill: #3f78a8; }
+.s-fin-l { fill: #23507c; }
+.s-fin-d { fill: #183a5e; }
+.s-fin-k { fill: #102844; }
+.s-eye { fill: #e8f1ff; }
+.s-pupil { fill: #050a14; }
+.s-lid { fill: #2d5f8f; }
+.s-spot { fill: #3f86b4; }
+.squid path {
+  transition: fill 0.4s steps(4, end);
+}
+
+/* Limbs: dim and dark until found. */
+.limb .l-a { fill: #26486f; }
+.limb .l-b { fill: #1c3858; }
+.limb .l-s { fill: #3a2d50; }
+.limb[data-on="true"] .l-a { fill: var(--cyan); }
+.limb[data-on="true"] .l-b { fill: var(--cyan-hot); }
+.limb[data-on="true"] .l-s { fill: var(--pink); }
+/* #1 is gold, like the top row of the table. */
+.limb.first[data-on="true"] .l-a { fill: var(--gold); }
+.limb.first[data-on="true"] .l-b { fill: var(--gold-hot); }
+
+/* Glow: a blurred copy of only the lit parts, under the pixels. The body's halo grows with each limb lit. */
+.squid-glow {
+  filter: blur(3px);
+  opacity: 0.85;
+  transition:
+    opacity 0.35s ease-out,
+    filter 0.35s ease-out;
+}
+.g-body {
+  fill: var(--cyan);
+  opacity: calc(var(--charge, 0) * 0.45);
+  transition: opacity 0.4s ease-out;
+}
+.g-limb { fill: var(--cyan); }
+.g-limb.first { fill: var(--gold); }
+
+/* ---------- Moods ---------- */
+/* 10/10: the whole squid lights up. */
+.squid[data-mood="won"] .s-body-h { fill: #d6fbff; }
+.squid[data-mood="won"] .s-body-l { fill: #7aedff; }
+.squid[data-mood="won"] .s-body-d { fill: #2fc4ec; }
+.squid[data-mood="won"] .s-body-k { fill: #1890c2; }
+.squid[data-mood="won"] .s-fin-h { fill: #b3f6ff; }
+.squid[data-mood="won"] .s-fin-l { fill: #55dcf9; }
+.squid[data-mood="won"] .s-fin-d { fill: #23a9d6; }
+.squid[data-mood="won"] .s-fin-k { fill: #1580ad; }
+.squid[data-mood="won"] .s-spot { fill: #fff; }
+.squid[data-mood="won"] .s-pupil { fill: #0b2a4a; }
+.squid[data-mood="won"] .squid-glow { opacity: 1; filter: blur(4px); }
+.squid[data-mood="won"] .g-body { opacity: 0.75; }
+/* Out of lives: dim and sleepy. Given up: dim, a little less so. */
+.squid[data-mood="lost"] .squid-px {
+  filter: saturate(0.35) brightness(0.55);
+}
+.squid[data-mood="gave-up"] .squid-px {
+  filter: saturate(0.5) brightness(0.7);
+}
+.squid[data-mood="lost"] .squid-glow,
+.squid[data-mood="gave-up"] .squid-glow {
+  opacity: 0.12;
+}
+
+/* ---------- Blitz momentum (data-heat 0-4): brighter glow, and pixel rings that light up one by one ---------- */
+/* The halo's 32 x 32 grid is centred on the head (column 9.5, row 10 of the squid). */
+.squid-halo {
+  position: absolute;
+  left: calc(-6.5 * var(--px));
+  top: calc(-6 * var(--px));
+  width: calc(32 * var(--px));
+  height: calc(32 * var(--px));
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(77, 227, 255, 0.8));
+}
+.squid-halo path {
+  fill: var(--cyan);
+  opacity: 0;
+  transition: opacity 0.3s steps(3, end);
+}
+.squid[data-heat="1"] .h-inner { opacity: 0.35; }
+.squid[data-heat="2"] .h-inner { opacity: 0.6; }
+.squid[data-heat="2"] .h-mid { opacity: 0.4; }
+.squid[data-heat="3"] .h-inner { opacity: 0.8; }
+.squid[data-heat="3"] .h-mid { opacity: 0.8; }
+.squid[data-heat="3"] .h-outer { opacity: 0.35; }
+.squid[data-heat="4"] .squid-halo path { opacity: 1; }
+.squid[data-heat="4"] .h-outer.a { fill: var(--gold); }
+.squid[data-heat="4"] .h-outer.b { fill: var(--pink); }
+.squid[data-heat="1"] .squid-glow { opacity: 1; }
+.squid[data-heat="2"] .squid-glow { opacity: 1; filter: blur(4px) brightness(1.2); }
+.squid[data-heat="2"] .squid-px { filter: brightness(1.12); }
+.squid[data-heat="3"] .squid-glow { opacity: 1; filter: blur(5px) brightness(1.5); }
+.squid[data-heat="3"] .squid-px { filter: brightness(1.25) saturate(1.2); }
+.squid[data-heat="4"] .squid-glow { opacity: 1; filter: blur(6px) brightness(1.9); }
+.squid[data-heat="4"] .squid-px { filter: brightness(1.4) saturate(1.3); }
+.squid[data-heat="3"] .g-body,
+.squid[data-heat="4"] .g-body {
+  opacity: max(0.5, calc(var(--charge, 0) * 0.45));
+}
+
+/* ---------- Ink-sac lives (replace the hearts; the lives element itself is unchanged) ---------- */
+.lives .ink-sac {
+  width: 21px;
+  height: 24px;
+  display: block;
+  filter: none;
+}
+.ink-sac.on {
+  filter: drop-shadow(0 2px 0 var(--pink-shadow));
+}
+.ink-sac.on .rim { fill: var(--pink); }
+.ink-sac.on .ink { fill: #c23a6e; }
+.ink-sac.on .deep { fill: #7a1d47; }
+.ink-sac.on .glint { fill: #ffe3ec; }
+.ink-sac.off .rim { fill: #24365a; }
+.ink-sac.off .ink,
+.ink-sac.off .glint { fill: transparent; }
+.ink-sac.off .deep { fill: #121d33; }
+
+/* ---------- Blitz score bump: grows from its right edge, where the digits are anchored ---------- */
+.blitz-meter [data-motion="score"] {
+  transform-origin: 100% 70%;
+}
+
+/* ---------- One-off effects layer ---------- */
+.squid-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  overflow: hidden;
+}
+.squid-sparks {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Idle: a two-frame bob, like an arcade sprite treading water. */
+  .squid[data-mood="play"] .squid-move,
+  .squid[data-mood="won"] .squid-move {
+    animation: squid-bob 2.4s steps(1, end) infinite;
+  }
+  .squid[data-mood="won"] .squid-glow {
+    animation: squid-breathe 2.4s steps(4, end) infinite alternate;
+  }
+  /* Hot: the dashed rings chase, faster at full heat. */
+  .squid[data-heat="3"] .squid-halo .a,
+  .squid[data-heat="4"] .squid-halo .a {
+    animation: squid-chase 0.6s steps(1, end) infinite;
+  }
+  .squid[data-heat="3"] .squid-halo .b,
+  .squid[data-heat="4"] .squid-halo .b {
+    animation: squid-chase 0.6s steps(1, end) -0.3s infinite;
+  }
+  .squid[data-heat="4"] .squid-halo .a,
+  .squid[data-heat="4"] .squid-halo .b {
+    animation-duration: 0.3s;
+  }
+  .squid[data-heat="4"] .squid-halo .b {
+    animation-delay: -0.15s;
+  }
+
+  /* A limb lighting up: white-hot, then its colour. In classic it waits for the grabbed word to land. */
+  .limb.fresh path {
+    animation: squid-limb-in 0.6s steps(6, end) var(--light-delay, 0ms) both;
+  }
+  .limb.fresh .l-s {
+    animation-name: squid-sucker-in;
+  }
+  .g-limb.fresh {
+    animation: squid-glow-in 0.8s steps(8, end) var(--light-delay, 0ms) both;
+  }
+  .squid[data-mode="classic"] {
+    --light-delay: 0.36s;
+  }
+
+  .squid-sparks {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    width: 0;
+    height: 0;
+  }
+  .squid-sparks i {
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    width: 4px;
+    height: 4px;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+    animation: squid-spark 0.7s steps(7, end) calc(var(--k) * 12ms) both;
+  }
+  .squid-sparks i:nth-child(3n) {
+    background: var(--gold);
+    box-shadow: 0 0 6px var(--gold);
+  }
+  .squid-sparks i:nth-child(4n) {
+    background: var(--pink);
+    box-shadow: 0 0 6px var(--pink);
+  }
+  .squid-sparks.best i {
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold);
+    animation-duration: 0.55s;
+  }
+  .squid-sparks.best i:nth-child(odd) {
+    background: #fff;
+  }
+
+  /* A sac emptying: squeezed flat, then spent. */
+  .lives .ink-sac.lost {
+    animation: ink-sac-lost 0.5s steps(5, end) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .squid-fx {
+    display: none;
+  }
+}
+
+/* Tentacle grab */
+.grab-arm {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(77, 227, 255, 0.7));
+}
+.grab .arm-hi { fill: #a8f4ff; }
+.grab .arm-main { fill: var(--cyan); }
+.grab .arm-shade { fill: #1b9cc7; }
+.grab .arm-sucker { fill: var(--pink); }
+.grab.gold .grab-arm { filter: drop-shadow(0 0 3px rgba(255, 209, 102, 0.7)); }
+.grab.gold .arm-hi { fill: #fff0c2; }
+.grab.gold .arm-main { fill: var(--gold); }
+.grab.gold .arm-shade { fill: #d39a2f; }
+.grab-word {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.grab-text {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateY(-50%);
+  line-height: 1;
+  white-space: nowrap;
+  color: #fff;
+  text-shadow:
+    0 0 6px var(--cyan),
+    0 0 14px var(--cyan-glow);
+}
+.grab.gold .grab-text {
+  color: #fff6dc;
+  text-shadow:
+    0 0 6px var(--gold),
+    0 0 14px rgba(255, 209, 102, 0.4);
+}
+.grab-claw {
+  position: absolute;
+  left: -20px;
+  top: -20px;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(77, 227, 255, 0.7));
+}
+.grab.gold .grab-claw { filter: drop-shadow(0 0 3px rgba(255, 209, 102, 0.7)); }
+.grab-splash {
+  position: absolute;
+  background: linear-gradient(90deg, rgba(77, 227, 255, 0.4), rgba(77, 227, 255, 0.08) 70%, transparent);
+  box-shadow: inset 4px 0 0 var(--cyan);
+}
+.grab-splash.gold {
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.4), rgba(255, 209, 102, 0.08) 70%, transparent);
+  box-shadow: inset 4px 0 0 var(--gold);
+}
+.grab-bit {
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  width: 4px;
+  height: 4px;
+  background: var(--cyan);
+  box-shadow: 0 0 4px var(--cyan);
+}
+.grab.gold .grab-bit {
+  background: var(--gold);
+  box-shadow: 0 0 4px var(--gold);
+}
+
+/* 10/10 fireworks */
+.fireworks .spark {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+}
+.fireworks .cyan {
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+.fireworks .gold {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+.fireworks .pink {
+  background: var(--pink);
+  box-shadow: 0 0 8px var(--pink);
+}
+.fireworks .white {
+  background: #fff;
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+/* Ink */
+.ink-dim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ox) var(--oy), rgba(9, 4, 18, 0.78), rgba(4, 2, 10, 0.5) 45%, rgba(3, 2, 8, 0.42));
+}
+.ink.big .ink-dim {
+  background: radial-gradient(circle at var(--ox) var(--oy), rgba(9, 4, 18, 0.95), rgba(4, 2, 10, 0.82) 50%, rgba(3, 2, 8, 0.72));
+}
+/* An ink blob: a chunky pixel circle (an octagon on a 6 px step), near-black violet, the odd one catching light. */
+.ink-puff {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: rgba(12, 6, 22, 0.94);
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+.ink-puff.lit {
+  background: rgba(30, 14, 44, 0.92);
+}
+.ink-drop {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  background: var(--pink);
+  box-shadow: 6px 6px 0 #2a0a18;
+}
+
+@keyframes squid-bob {
+  50% {
+    transform: translateY(calc(-1 * var(--px)));
+  }
+}
+@keyframes squid-breathe {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes squid-chase {
+  50% {
+    opacity: 0.1;
+  }
+}
+@keyframes squid-limb-in {
+  0% {
+    fill: #26486f;
+  }
+  1% {
+    fill: #fff;
+  }
+}
+@keyframes squid-sucker-in {
+  0% {
+    fill: #3a2d50;
+  }
+  1% {
+    fill: #fff;
+  }
+}
+@keyframes squid-glow-in {
+  0% {
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+    fill: #fff;
+  }
+}
+@keyframes squid-spark {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+@keyframes ink-sac-lost {
+  0% {
+    transform: scale(1.3, 0.7);
+    filter: brightness(2.5);
+  }
+  40% {
+    transform: scale(0.8, 1.2);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
