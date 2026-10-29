@@ -15,6 +15,8 @@ import { reducedMotion } from "../pixel";
 const SVG = "http://www.w3.org/2000/svg";
 /** The tentacle's pixel size, in CSS px. */
 const G = 4;
+/** How far left of the word's text the club clamps it (clear of the word's tile; see .grab-claw). */
+const CLUB = 20;
 
 type P = { x: number; y: number };
 
@@ -28,7 +30,6 @@ export function SquidFx() {
         const scope: ParentNode = layer.closest("main") ?? document;
         if (e.kind === "found") grab(layer, scope, e.rank);
         else if ((e.kind === "miss" && e.lifeLost) || e.kind === "hint") ink(layer, scope);
-        else if (e.kind === "end" && e.status === "won") fireworks(layer, scope);
       }),
     [],
   );
@@ -109,7 +110,7 @@ function grab(layer: HTMLElement, scope: ParentNode, rank: number) {
 
   // The tentacle runs from just left of the name (its base) down to just left of the typed word (its tip).
   const base: P = { x: to.x - 10, y: to.y };
-  const tip: P = { x: Math.max(G, from.x - 12), y: from.y };
+  const tip: P = { x: Math.max(G, from.x - CLUB), y: from.y };
   const dy = tip.y - base.y;
   if (dy < G * 4) return;
   const pts = rowsOf(
@@ -170,6 +171,20 @@ function grab(layer: HTMLElement, scope: ParentNode, rank: number) {
   const label = el("span", "grab-text", word);
   label.textContent = text;
   label.style.fontSize = `${fromSize}px`;
+  const ring = gold ? "var(--gold)" : "var(--cyan-edge)";
+  // A tile cut out of the guess box: it covers the feedback line as it passes, then melts into the row.
+  label.animate(
+    [
+      { backgroundColor: "var(--well)", boxShadow: `0 0 0 2px ${ring}` },
+      { backgroundColor: "var(--well)", boxShadow: `0 0 0 2px ${ring}`, offset: (REACH + GRIP + PULL * 0.6) / TOTAL },
+      { backgroundColor: "transparent", boxShadow: "0 0 0 2px transparent", offset: LAND / TOTAL },
+      { backgroundColor: "transparent", boxShadow: "0 0 0 2px transparent" },
+    ],
+    { duration: TOTAL, fill: "both", easing: "steps(12, end)" },
+  );
+  // The box's placeholder would show through where the word was: keep it hidden until the word is gone.
+  input.dataset.grabbing = "";
+  setTimeout(() => delete input.dataset.grabbing, REACH + GRIP + 120);
   const claw = svgEl("svg", { class: "grab-claw", width: 24, height: 40, viewBox: "-20 -20 24 40", "shape-rendering": "crispEdges" }, word);
   svgEl("path", { class: "arm-main", d: square(-16, -16) + square(-16, -12) + square(-16, 8) + square(-16, 12) + square(-12, -16) + square(-8, -16) + square(-12, 12) + square(-8, 12) }, claw);
   svgEl("path", { class: "arm-shade", d: square(-16, -8) + square(-16, 4) + square(-4, -16) + square(-4, 12) }, claw);
@@ -186,8 +201,9 @@ function grab(layer: HTMLElement, scope: ParentNode, rank: number) {
   const tugs = strain ? 6 : 1;
   for (let k = 1; k <= tugs; k++) {
     const t = REACH + (GRIP * k) / (tugs + 1);
-    const jx = strain ? (k % 2 ? -3 : 3) : 0;
-    const jy = strain ? -2 - k : -2;
+    // The tug stays inside the guess box (clear of the feedback line above it): a sideways shake, barely lifting.
+    const jx = strain ? (k % 2 ? -4 : 4) : 0;
+    const jy = strain ? -1 - (k % 3) : -2;
     frames.push({ transform: at({ x: from.x + jx, y: from.y + jy }), offset: t / TOTAL });
   }
   const pull0 = REACH + GRIP;
@@ -195,8 +211,8 @@ function grab(layer: HTMLElement, scope: ParentNode, rank: number) {
     const i = Math.round((j / SEGS) * (n - 1));
     const p = pts[i];
     const t = pull0 + ((SEGS - j) / SEGS) * PULL;
-    // Hold the word's front at the club, which sits 12 px left of the text.
-    frames.push({ transform: at({ x: p.x + 12, y: p.y }), offset: t / TOTAL });
+    // Hold the word's front at the club, which sits CLUB px left of the text.
+    frames.push({ transform: at({ x: p.x + CLUB, y: p.y }), offset: t / TOTAL });
   }
   const scale = ` scale(${toSize / fromSize})`;
   // A small overshoot past the name, then it settles and hands over to the real row.
@@ -238,110 +254,95 @@ function grab(layer: HTMLElement, scope: ParentNode, rank: number) {
   removeAfter(fx, TOTAL + 260);
 }
 
-/* ---------------------------------------------------------------- 10/10 */
-
-/**
- * A perfect 10: pixel fireworks from the squid, then two more over the board. They live in the fixed layer because
- * the page scrolls down to the results at the same moment, taking the header squid out of view.
- */
-function fireworks(layer: HTMLElement, scope: ParentNode) {
-  const squid = scope.querySelector<HTMLElement>('[data-testid="squid"]')?.getBoundingClientRect();
-  const origins: P[] = [
-    squid ? { x: squid.left + squid.width / 2, y: squid.top + squid.height / 2 } : { x: innerWidth / 2, y: innerHeight * 0.2 },
-    { x: innerWidth * 0.3, y: innerHeight * 0.38 },
-    { x: innerWidth * 0.7, y: innerHeight * 0.3 },
-  ];
-  const fx = el("div", "fireworks", layer);
-  const COLORS = ["cyan", "gold", "pink", "white"];
-  const SPARKS = 18;
-  origins.forEach((o, b) => {
-    const delay = b * 180;
-    const r = b === 0 ? 70 : 54 + Math.min(40, innerWidth / 30);
-    for (let k = 0; k < SPARKS; k++) {
-      const s = el("i", `spark ${COLORS[(k + b) % COLORS.length]}`, fx);
-      const a = (k / SPARKS) * Math.PI * 2 + b;
-      const d = r * (k % 3 === 0 ? 1 : k % 3 === 1 ? 0.72 : 0.45);
-      s.animate(
-        [
-          { transform: `translate(${o.x}px, ${o.y}px)`, opacity: 0 },
-          { transform: `translate(${o.x}px, ${o.y}px)`, opacity: 1, offset: 0.01 },
-          { transform: `translate(${o.x + Math.cos(a) * d}px, ${o.y + Math.sin(a) * d}px)`, opacity: 1, offset: 0.6 },
-          { transform: `translate(${o.x + Math.cos(a) * d * 1.1}px, ${o.y + Math.sin(a) * d * 1.1 + 18}px)`, opacity: 0 },
-        ],
-        { duration: 900, delay, fill: "both", easing: "steps(10, end)" },
-      );
-    }
-  });
-  removeAfter(fx, 900 + 2 * 180);
-}
-
 /* ---------------------------------------------------------------- ink */
+
+/** Blob looks: mostly indigo with a pink gloss, every third a lighter violet, every fourth a flat deep shadow. */
+const puffClass = (k: number) => `ink-puff${k % 3 === 0 ? " lit" : k % 4 === 0 ? " dark" : ""}`;
+/** Ink blob sizes snap to this, so they stay chunky pixels. */
+const BLOB = 8;
 
 function ink(layer: HTMLElement, scope: ParentNode) {
   const sacs = scope.querySelectorAll<SVGElement>('[data-testid="lives"] .ink-sac.on');
-  // Read before the life goes: the last full sac is the one that empties. On the last life the squid itself bursts.
-  const last = sacs.length <= 1;
-  const source = last ? scope.querySelector<HTMLElement>('[data-testid="squid"]') : sacs[sacs.length - 1];
-  if (!source) return;
-  const r = source.getBoundingClientRect();
-  const o: P = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-  const big = last;
-  const DUR = big ? 1500 : 620;
+  const squid = scope.querySelector<HTMLElement>('[data-testid="squid"]');
+  if (!squid) return;
+  // Read before the life goes: the last full sac is the one that empties. On the last life the squid bursts.
+  const big = sacs.length <= 1;
+  const sq = squid.getBoundingClientRect();
+  // The squid squirts from under its head (its funnel), between the arms.
+  const o: P = { x: sq.left + sq.width / 2, y: sq.top + sq.height * (big ? 0.5 : 0.62) };
+  const DUR = big ? 1500 : 600;
+  const unit = Math.min(innerWidth, innerHeight);
 
   const fx = el("div", `ink${big ? " big" : ""}`, layer);
   fx.style.setProperty("--ox", `${o.x}px`);
   fx.style.setProperty("--oy", `${o.y}px`);
 
-  // The screen goes dark from the sac outward, holds a beat, and clears.
+  // The screen darkens a touch around the ink and clears; for the last life, it goes nearly black.
   const dim = el("div", "ink-dim", fx);
   dim.animate(
     big
       ? [{ opacity: 0 }, { opacity: 1, offset: 0.18 }, { opacity: 1, offset: 0.55 }, { opacity: 0 }]
-      : [{ opacity: 0 }, { opacity: 1, offset: 0.2 }, { opacity: 0.85, offset: 0.6 }, { opacity: 0 }],
-    { duration: DUR, fill: "both", easing: "steps(10, end)" },
+      : [{ opacity: 0 }, { opacity: 1, offset: 0.25 }, { opacity: 0.8, offset: 0.6 }, { opacity: 0 }],
+    { duration: DUR, fill: "both", easing: "steps(8, end)" },
   );
 
-  // Chunky blobs of ink sprayed out (mostly downward, away from the header), swelling as they go. The first ones
-  // stay close and big, so the cloud reads as one mass rather than confetti.
-  const reach = big ? Math.max(innerWidth, innerHeight) * 0.8 : Math.min(380, innerHeight * 0.5);
-  const count = big ? 52 : 26;
-  // Aimed at the middle of the screen (the board), from wherever the ink came out.
+  // Aimed at the board, down and across from the squid.
   const aim = Math.atan2(innerHeight * 0.55 - o.y, innerWidth / 2 - o.x);
-  for (let k = 0; k < count; k++) {
-    const puff = el("i", `ink-puff${k % 3 === 0 ? " lit" : ""}`, fx);
-    const spread = big ? Math.PI * 2 : 1.6;
-    const a = aim + (Math.random() - 0.5) * spread;
-    const near = k < count / 3;
-    const d = reach * (near ? 0.05 + 0.3 * Math.random() : 0.25 + 0.75 * Math.sqrt(Math.random()));
-    // Bigger near the source, so the cloud is one mass that thins out; sized to the screen so it stays a mass.
-    const unit = Math.min(innerWidth, innerHeight);
-    const size = Math.round((unit * (big ? 0.14 : 0.11) + Math.random() * unit * (big ? 0.22 : 0.14) * (1.3 - d / reach)) / 6) * 6;
-    const delay = (d / reach) * DUR * 0.15;
-    puff.style.width = puff.style.height = `${size}px`;
-    puff.style.marginLeft = puff.style.marginTop = `${-size / 2}px`;
+  const blob = (k: number, a: number, d: number, size: number, delay: number) => {
+    const puff = el("i", puffClass(k), fx);
+    const s = Math.max(BLOB * 2, Math.round(size / BLOB) * BLOB);
+    puff.style.width = puff.style.height = `${s}px`;
+    puff.style.marginLeft = puff.style.marginTop = `${-s / 2}px`;
     const end = { x: o.x + Math.cos(a) * d, y: o.y + Math.sin(a) * d };
+    const out = Math.min(0.62, delay / DUR + 0.32);
     puff.animate(
       [
-        { transform: `translate(${o.x}px, ${o.y}px) scale(0.15)`, opacity: 0 },
-        { transform: `translate(${o.x}px, ${o.y}px) scale(0.15)`, opacity: 1, offset: delay / DUR },
-        { transform: `translate(${end.x}px, ${end.y}px) scale(1)`, opacity: 1, offset: Math.min(0.6, delay / DUR + 0.3) },
-        { transform: `translate(${end.x}px, ${end.y + 10}px) scale(1.15)`, opacity: 0 },
+        { transform: `translate(${o.x}px, ${o.y}px) scale(0.2)`, opacity: 0 },
+        { transform: `translate(${o.x}px, ${o.y}px) scale(0.2)`, opacity: 1, offset: delay / DUR },
+        { transform: `translate(${end.x}px, ${end.y}px) scale(1)`, opacity: 1, offset: out },
+        { transform: `translate(${end.x}px, ${end.y + s * 0.3}px) scale(1.1)`, opacity: 0 },
       ],
-      { duration: DUR, fill: "both", easing: "steps(12, end)" },
+      { duration: DUR, fill: "both", easing: "steps(10, end)" },
     );
+  };
+
+  if (big) {
+    // Everywhere: the squid empties itself into one big cloud.
+    const reach = Math.max(innerWidth, innerHeight) * 0.8;
+    for (let k = 0; k < 52; k++) {
+      const near = k < 18;
+      const d = reach * (near ? 0.05 + 0.3 * Math.random() : 0.25 + 0.75 * Math.sqrt(Math.random()));
+      const size = unit * 0.14 + Math.random() * unit * 0.22 * (1.3 - d / reach);
+      blob(k, Math.random() * Math.PI * 2, d, size, (d / reach) * DUR * 0.15);
+    }
+  } else {
+    // A squirt: a stream of blobs along the aim, swelling as they go, with a few thrown wide.
+    const reach = Math.min(360, innerHeight * 0.45);
+    const STREAM = 11;
+    for (let k = 0; k < STREAM + 5; k++) {
+      const inStream = k < STREAM;
+      const t = inStream ? (k + 1) / STREAM : 0.4 + Math.random() * 0.5;
+      const a = aim + (Math.random() - 0.5) * (inStream ? 0.35 : 1.3);
+      const size = unit * (0.06 + 0.12 * t) * (0.8 + Math.random() * 0.4);
+      blob(k, a, reach * t, size, (inStream ? k : k - 6) * 18);
+    }
   }
-  // The squirt itself: a few fast pink-black droplets.
-  for (let k = 0; k < (big ? 10 : 6); k++) {
-    const drop = el("i", "ink-drop", fx);
-    const a = aim + (k / 5 - 0.5) * (big ? 2.4 : 1.2);
-    const d = (big ? 140 : 70) + (k % 3) * 18;
-    drop.animate(
-      [
-        { transform: `translate(${o.x}px, ${o.y}px)`, opacity: 1 },
-        { transform: `translate(${o.x + Math.cos(a) * d}px, ${o.y + Math.sin(a) * d}px)`, opacity: 0 },
-      ],
-      { duration: big ? 520 : 340, fill: "both", easing: "steps(6, end)" },
-    );
+
+  // Ink drips from the sac that just emptied (on the last life, the squid bursts instead).
+  const sac = !big ? sacs[sacs.length - 1]?.getBoundingClientRect() : null;
+  if (sac) {
+    for (let k = 0; k < 4; k++) {
+      const drop = el("i", "ink-drop", fx);
+      const x = sac.left + sac.width / 2 + (k - 1.5) * 5;
+      const y = sac.top + sac.height * 0.7;
+      drop.animate(
+        [
+          { transform: `translate(${x}px, ${y}px)`, opacity: 1 },
+          { transform: `translate(${x + (k - 1.5) * 6}px, ${y + 36 + (k % 2) * 14}px)`, opacity: 0 },
+        ],
+        { duration: 420, delay: k * 40, fill: "both", easing: "steps(6, end)" },
+      );
+    }
   }
   removeAfter(fx, DUR);
 }
