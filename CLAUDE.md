@@ -11,7 +11,9 @@ Changes that need a full puzzle rebuild are batched in `docs/REBUILD_QUEUE.md`: 
 
 | Path | What | Owner |
 |---|---|---|
-| `src/components/`, `src/App.tsx`, `src/index.css`, `index.html` | UI | frontend agent |
+| `src/components/`, `src/App.tsx`, `src/index.css`, `index.html` | UI: layout, buttons, behavior | frontend agent |
+| `src/motion.css`, `src/components/motion/` | Animations (may add classes/data attributes to UI markup, never restructure it) | animations agent |
+| `e2e/` | Browser test suite | frontend agent |
 | `scripts/`, `public/puzzles/` | Wikipedia → puzzle JSON pipeline and its output | data agent |
 | `src/game/` | Game rules, answer matching, puzzle format, storage | coordinator (main session) |
 | `CLAUDE.md`, `docs/`, `package.json`, configs | Shared | coordinator |
