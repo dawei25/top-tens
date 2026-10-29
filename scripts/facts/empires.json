@@ -1,0 +1,52 @@
+{
+  "British Empire": {
+    "text": "By 1913 it held sway over 412 million people, 23% of the world population at the time.",
+    "source": "https://en.wikipedia.org/wiki/British_Empire",
+    "evidence": "By 1913 the British Empire held sway over 412 million people, 23 per cent of the world population at the time,"
+  },
+  "Mongol Empire": {
+    "text": "The largest contiguous empire in history, stretching from the Sea of Japan to Eastern Europe.",
+    "source": "https://en.wikipedia.org/wiki/Mongol_Empire",
+    "evidence": "The Mongol Empire was the largest contiguous empire in history. Originating in present-day Mongolia in East Asia, the medieval empire at its height stretched from the Sea of Japan to Eastern Europe,"
+  },
+  "Russian Empire": {
+    "text": "It colonized Alaska between 1799 and 1867, and briefly kept outposts in California.",
+    "source": "https://en.wikipedia.org/wiki/Russian_Empire",
+    "evidence": "It colonized Alaska between 1799 and 1867, and in the early-to-mid 19th century briefly maintained outposts in California."
+  },
+  "Qing dynasty": {
+    "text": "China's last imperial dynasty had over 426 million citizens in 1907, the most of any state at the time.",
+    "source": "https://en.wikipedia.org/wiki/Qing_dynasty",
+    "evidence": "The last imperial dynasty in Chinese history, ... It was also the most populous state at the time, with over 426 million citizens in 1907."
+  },
+  "Spanish Empire": {
+    "text": "It lasted from 1492 until 1976.",
+    "source": "https://en.wikipedia.org/wiki/Spanish_Empire",
+    "evidence": "The Spanish Empire, sometimes referred to as the Hispanic Monarchy or the Catholic Monarchy, was a colonial empire that existed between 1492 and 1976."
+  },
+  "Second French colonial empire": {
+    "text": "It began with the conquest of Algiers in 1830, after France had lost or sold most of its first empire.",
+    "source": "https://en.wikipedia.org/wiki/Second_French_colonial_empire",
+    "evidence": "A distinction is generally made between the \"first French colonial empire\", that existed until 1814, by which time most of it had been lost or sold, and the \"second French colonial empire\", which began with the conquest of Algiers in 1830."
+  },
+  "Abbasid Caliphate": {
+    "text": "Its second caliph, al-Mansur, founded Baghdad in 762 and made it the capital.",
+    "source": "https://en.wikipedia.org/wiki/Abbasid_Caliphate",
+    "evidence": "The Abbasids first centered their government in Kufa, Iraq, but in 762 the second caliph al-Mansur founded the city of Baghdad and made it the capital."
+  },
+  "Umayyad Caliphate": {
+    "text": "Christians still made up the majority of its population.",
+    "source": "https://en.wikipedia.org/wiki/Umayyad_Caliphate",
+    "evidence": "Christians, who still constituted a majority of the caliphate's population, and Jews were allowed to practice their own religion in exchange for the payment of jizya, from which Muslims were exempt."
+  },
+  "Yuan dynasty": {
+    "text": "The first dynasty founded by a non-Han ethnicity to rule all of China proper.",
+    "source": "https://en.wikipedia.org/wiki/Yuan_dynasty",
+    "evidence": "It was the first dynasty founded by a non-Han ethnicity that ruled all of China proper."
+  },
+  "United States": {
+    "text": "By 1900 it had emerged as a great power, a status solidified by its involvement in World War I.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "By 1900, the U.S. emerged as a great power, a status solidified after its involvement in World War I."
+  }
+}
