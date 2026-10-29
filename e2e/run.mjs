@@ -1,10 +1,11 @@
 // npm run e2e: build, serve dist on 5101, run every e2e/*.e2e.cjs with node's test runner (headless, both viewports).
+// Parallel agents: E2E_PORT=5104 npm run e2e serves on another port (default 5101).
 import { spawn } from "node:child_process";
 import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { build, preview } from "vite";
 
-const PORT = 5101;
+const PORT = Number(process.env.E2E_PORT) || 5101;
 const dir = fileURLToPath(new URL(".", import.meta.url));
 const started = Date.now();
 
