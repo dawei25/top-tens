@@ -1096,7 +1096,6 @@ export const TOPICS: Topic[] = [
     metric: "Population (2025 est.)",
     nameFromText: true,
     nameStrip: /,\s*[A-Z]{2}(-[A-Z]{2})*\s+MSA$/,
-    also: CITIES,
   },
   {
     id: "capitals",

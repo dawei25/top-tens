@@ -610,6 +610,7 @@ export const INTENT: Record<string, Intent> = {
       "Real Madrid C.F.": ["Real Madrid"],
       "FC Barcelona": ["Barcelona", "Barca", "Barça"],
       "5-Minute Crafts": ["5 Minute Crafts", "Five Minute Crafts"],
+      CGTN: ["China Global Television Network"],
       "Cristiano Ronaldo": ["CR7", "Cristiano", "Ronaldo"],
     },
   },
@@ -620,6 +621,19 @@ export const INTENT: Record<string, Intent> = {
       "General Motors": ["GM"],
       "BYD Auto": ["BYD"],
       "SAIC Motor": ["SAIC"],
+    },
+  },
+  "us-metros": {
+    same: {
+      "New York–Newark–Jersey City": ["NYC", "New York City", "New York metro", "Tri-State Area"],
+      "Los Angeles–Long Beach–Anaheim": ["LA", "Greater Los Angeles"],
+      "Dallas–Fort Worth–Arlington": ["DFW", "Dallas-Fort Worth", "Metroplex"],
+      "Washington–Arlington–Alexandria": ["DC", "Washington DC", "Washington, D.C."],
+      "Miami–Fort Lauderdale–West Palm Beach": ["South Florida"],
+      "Philadelphia–Camden–Wilmington": ["Philly"],
+      "Houston–Pasadena–The Woodlands": ["Greater Houston"],
+      "Atlanta–Sandy Springs–Roswell": ["Metro Atlanta"],
+      "Chicago–Naperville–Elgin": ["Chicagoland"],
     },
   },
 };
