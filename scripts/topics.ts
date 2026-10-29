@@ -1,6 +1,8 @@
 import type { Universe } from "./gazetteer";
 
 export interface Topic {
+  /** When the table's numbers are from, if the page doesn't say in a way scripts/dates.ts can read. */
+  dataAsOf?: string;
   id: string;
   category: "Geography" | "Entertainment" | "Sports" | "Business" | "Culture";
   title: string;

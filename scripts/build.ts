@@ -8,6 +8,7 @@ import { cleanText, splitHeader, tableGrid, wikitables, type Cell } from "./tabl
 import { TOPICS, type Topic } from "./topics";
 import { fetchCategory, fetchPage, fetchRedirects, pageUrl } from "./wiki";
 import { writeLexicon } from "./lexicon";
+import { tableDataDate } from "./dates";
 import { COUNTRY_FORMS, INTENT } from "./intent";
 import { UNIVERSES, type Place } from "./gazetteer";
 
@@ -310,6 +311,16 @@ function readFacts(id: string): Record<string, Fact> {
   return Object.fromEntries(Object.entries(raw).map(([name, f]) => [name, { text: f.text, source: f.source }]));
 }
 
+/** When the topic's first source table says its numbers are from. */
+async function dataDate(topic: Topic): Promise<string | undefined> {
+  if (topic.dataAsOf) return topic.dataAsOf;
+  const $ = await fetchPage(topic.page);
+  const table = wikitables($)[topic.tables[0]];
+  const { header } = splitHeader(tableGrid($, table));
+  const vh = typeof topic.value === "number" ? header[topic.value] : header[column(header, topic.value)];
+  return tableDataDate($, table, vh ?? "");
+}
+
 async function buildPuzzle(topic: Topic): Promise<Puzzle> {
   const rows = (await readRows(topic)).slice(0, MAX_ROWS);
   if (rows.length < 10) throw new Error(`only ${rows.length} rows`);
@@ -361,13 +372,19 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
 
   pruneAliases(entries);
   applyIntent(topic, entries);
+  const dataAsOf = await dataDate(topic);
 
   return {
     id: topic.id,
     title: topic.title,
     prompt: topic.prompt,
     metric: topic.metric,
-    source: { name: `Wikipedia: ${topic.page}`, url: pageUrl(topic.page), asOf: new Date().toISOString().slice(0, 10) },
+    source: {
+      name: `Wikipedia: ${topic.page}`,
+      url: pageUrl(topic.page),
+      asOf: new Date().toISOString().slice(0, 10),
+      ...(dataAsOf ? { dataAsOf } : {}),
+    },
     answers: entries.slice(0, 10),
     extras: entries.slice(10),
   };

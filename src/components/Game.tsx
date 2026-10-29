@@ -191,7 +191,8 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
   );
   const missedRanks = puzzle.answers.filter((a) => !game.found.includes(a.rank)).map((a) => a.rank);
   const animate = !reducedMotion();
-  const asOf = formatAsOf(puzzle.source.asOf);
+  // The source's own date for its numbers when it states one, otherwise the day we read it.
+  const asOf = puzzle.source.dataAsOf ? `data as of ${puzzle.source.dataAsOf}` : `as of ${formatAsOf(puzzle.source.asOf)}`;
 
   // Facts only ever belong to revealed rows: a hidden row's fact would be a hint.
   const factRanks = puzzle.answers.filter((a) => a.fact && (over || game.found.includes(a.rank))).map((a) => a.rank);
@@ -250,7 +251,7 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
           <a href={puzzle.source.url} target="_blank" rel="noreferrer">
             {sourceSite(puzzle.source.name)}
           </a>
-          , as of {asOf}
+          , {asOf}
         </p>
       </section>
 
@@ -438,7 +439,7 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
             <a href={puzzle.source.url} target="_blank" rel="noreferrer">
               {puzzle.source.name}
             </a>
-            , as of {asOf}.
+            , {asOf}.
           </p>
         </section>
       )}

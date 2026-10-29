@@ -26,7 +26,11 @@ export interface Puzzle {
   prompt: string;
   /** Column the ranking is by, e.g. "Population" */
   metric?: string;
-  source: { name: string; url: string; asOf: string };
+  /**
+   * asOf: the day the list was read from the source. dataAsOf: when the source says its numbers are from
+   * ("March 2026", "2025"), if it says.
+   */
+  source: { name: string; url: string; asOf: string; dataAsOf?: string };
   /** Ranks 1-10, in order. */
   answers: Entry[];
   /**
