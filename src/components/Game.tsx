@@ -20,6 +20,7 @@ import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
 import { formatAsOf, Heart, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
+import { CountUp, PixelBurst } from "./motion/effects";
 
 interface Props {
   id: string;
@@ -320,6 +321,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
             {Array.from({ length: MAX_LIVES }, (_, i) => (
               <Heart key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
             ))}
+            {lostLife && <PixelBurst index={lostLife.i} />}
           </div>
       </ScreenHead>
 
@@ -551,11 +553,11 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
           style={{ "--d": `${resultsDelay}ms` } as CSSProperties}
           aria-live="polite"
         >
-          <p className={`label ${game.status === "won" ? "gold" : "pink"}`}>
+          <p className={`label ${game.status === "won" ? "gold" : "pink"}`} data-motion={game.status === "gave-up" ? undefined : "banner"}>
             {game.status === "won" ? "Perfect 10" : game.status === "gave-up" ? "Gave up" : "Game over"}
           </p>
           <p className="score" data-testid="score" data-found={game.found.length} aria-label={`${game.found.length} out of 10`}>
-            <span className={`score-n ${game.status === "won" ? "gold" : ""}`}>{game.found.length}</span>
+            <span className={`score-n ${game.status === "won" ? "gold" : ""}`}><CountUp value={game.found.length} /></span>
             <span className="score-of">/10</span>
           </p>
           <p className="caption">

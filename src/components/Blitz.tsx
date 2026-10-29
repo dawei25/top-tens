@@ -29,6 +29,7 @@ import { load, save } from "../game/storage";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
 import { ModeTag, ScreenHead } from "./pixel";
+import { CountUp, ScoreFloat } from "./motion/effects";
 
 interface Props {
   id: string;
@@ -430,6 +431,7 @@ export function Blitz({
             <span className="blitz-score" data-testid="blitz-score" aria-live="polite">
               {score}
             </span>
+            <ScoreFloat score={score} />
             <span className="caption">
               {n} answer{n === 1 ? "" : "s"}
             </span>
@@ -488,11 +490,11 @@ export function Blitz({
     body = (
       <>
         <section className="panel results enter" data-testid="blitz-results" aria-live="polite">
-          <p className="label gold">Time's up</p>
+          <p className="label gold" data-motion="banner">Time's up</p>
           {note === "away" && <p className="caption">time ran out while you were away.</p>}
           <p className="score" aria-label={`${score} points`}>
             <span className={`score-n ${record?.best && score > 0 ? "gold" : ""}`} data-testid="blitz-final">
-              {score}
+              <CountUp value={score} />
             </span>
             <span className="score-of">pts</span>
           </p>
@@ -512,7 +514,7 @@ export function Blitz({
               ))}
             {record &&
               (record.best && score > 0 ? (
-                <p className="gold">
+                <p className="gold" data-motion="banner">
                   new best on this list{record.previous !== undefined ? ` (was ${record.previous})` : ""}
                 </p>
               ) : (
