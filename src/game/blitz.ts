@@ -211,3 +211,18 @@ export function blitzShareText(state: BlitzState, puzzle: Puzzle, url: string): 
   const n = state.hits.length;
   return `Top Tens Blitz: ${puzzle.title}\n${blitzScore(state)} pts · ${n} answer${n === 1 ? "" : "s"} in ${BLITZ_SECONDS}s\n${url}`;
 }
+
+/**
+ * Record a finished round of Today's Blitz for its date. Only the first round finished on that date counts;
+ * later rounds are ordinary replays (still in the list's history and best).
+ */
+export function recordDailyBlitz(saved: Saved, date: string, state: BlitzState): { saved: Saved; counted: boolean } {
+  if (saved.blitzDaily?.[date]) return { saved, counted: false };
+  const entry = { id: state.puzzleId, score: blitzScore(state), answers: state.hits.length };
+  return { saved: { ...saved, blitzDaily: { ...saved.blitzDaily, [date]: entry } }, counted: true };
+}
+
+/** "Top Tens Blitz #12: Busiest airports" share text for Today's Blitz. */
+export function dailyBlitzShareText(state: BlitzState, puzzle: Puzzle, url: string, n: number): string {
+  return blitzShareText(state, puzzle, url).replace("Top Tens Blitz: ", `Top Tens Blitz #${n}: `);
+}

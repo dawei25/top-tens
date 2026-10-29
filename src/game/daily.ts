@@ -7,6 +7,8 @@ export interface DailyEntry {
   /** Local calendar date, YYYY-MM-DD. Everyone gets the same list on the same date, at their own midnight. */
   date: string;
   id: string;
+  /** Today's Blitz list, when chosen by hand in the schedule. Otherwise picked by `blitzOfTheDay`. */
+  blitz?: string;
 }
 
 const base = import.meta.env.BASE_URL;
@@ -91,4 +93,29 @@ export function streak(saved: Saved, today = localDate()): Streak {
     best = Math.max(best, run);
   }
   return { current, best: Math.max(best, current), played: days.size };
+}
+
+function hash(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+
+/**
+ * Today's Blitz list, the same for everyone on a date: the schedule's own pick if it names one, otherwise a
+ * date-seeded pick among Blitz lists that isn't that date's daily (Blitz shows every answer, so it would spoil it)
+ * and isn't scheduled as a later daily. It may be a list from an earlier daily.
+ */
+export function blitzOfTheDay(
+  schedule: DailyEntry[],
+  lists: { id: string; blitz?: boolean }[],
+  date = localDate(),
+): string | undefined {
+  const entry = todayEntry(schedule, date);
+  if (entry?.blitz && entry.date === date) return entry.blitz;
+  const blocked = new Set(schedule.filter((e) => e.date >= date).map((e) => e.id));
+  if (entry) blocked.add(entry.id);
+  const pool = lists.filter((l) => l.blitz && !blocked.has(l.id)).sort((a, b) => a.id.localeCompare(b.id));
+  if (!pool.length) return undefined;
+  return pool[hash(`blitz:${date}`) % pool.length].id;
 }

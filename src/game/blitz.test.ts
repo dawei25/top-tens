@@ -11,6 +11,7 @@ import {
   newBlitz,
   points,
   recordBlitz,
+  recordDailyBlitz,
   blitzHistory,
   MAX_BLITZ_RUNS,
   resumeBlitz,
@@ -18,6 +19,7 @@ import {
   startBlitz,
   timeLeft,
 } from "./blitz";
+import { blitzOfTheDay } from "./daily";
 import type { Saved } from "./storage";
 import type { Entry, Puzzle } from "./types";
 
@@ -113,5 +115,30 @@ describe("availability and bests", () => {
     expect(resumeBlitz(s, "islands", 30_000)).toMatchObject({ over: false });
     expect(resumeBlitz(s, "islands", 200_000)).toMatchObject({ over: true, state: { endedAt: 91_000 } });
     expect(recordBlitz(s, "islands", { ...live, endedAt: 91_000 }).saved.blitzLive?.islands).toBeUndefined();
+  });
+});
+
+describe("today's blitz", () => {
+  const lists = ["a", "b", "c", "d", "e"].map((id) => ({ id, blitz: true }));
+  const sched = [
+    { n: 1, date: "2026-10-28", id: "a" },
+    { n: 2, date: "2026-10-29", id: "b" },
+    { n: 3, date: "2026-10-30", id: "c" },
+  ];
+  it("is never that day's daily or a later daily, is stable for the day, and honours a hand pick", () => {
+    const pick = blitzOfTheDay(sched, lists, "2026-10-29");
+    expect(["a", "d", "e"]).toContain(pick);
+    expect(blitzOfTheDay(sched, lists, "2026-10-29")).toBe(pick);
+    expect(blitzOfTheDay([{ ...sched[1], blitz: "e" }], lists, "2026-10-29")).toBe("e");
+    expect(blitzOfTheDay(sched, [{ id: "b", blitz: true }], "2026-10-29")).toBeUndefined();
+  });
+  it("only the first finished round of the day counts", () => {
+    const saved: Saved = { games: {}, daily: {}, seenHelp: true };
+    const st = (score: number) => ({ puzzleId: "a", startedAt: 1, endedAt: 2, hits: [{ name: "x", rank: 1, n: 1, points: score }] });
+    const first = recordDailyBlitz(saved, "2026-10-29", st(300));
+    expect(first.counted).toBe(true);
+    const again = recordDailyBlitz(first.saved, "2026-10-29", st(900));
+    expect(again.counted).toBe(false);
+    expect(again.saved.blitzDaily?.["2026-10-29"]).toMatchObject({ score: 300, answers: 1 });
   });
 });
