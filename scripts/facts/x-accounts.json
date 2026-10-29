@@ -1,0 +1,52 @@
+{
+  "Elon Musk": {
+    "text": "Before renaming Twitter as X, he co-founded X.com, which merged with Confinity in 2000 to form PayPal.",
+    "source": "https://en.wikipedia.org/wiki/Elon_Musk",
+    "evidence": "Following its sale in 1999, he co-founded X.com, an e-commerce payment system that merged with Confinity in March 2000 to form PayPal."
+  },
+  "Barack Obama": {
+    "text": "At Harvard Law School he was the first Black president of the Harvard Law Review.",
+    "source": "https://en.wikipedia.org/wiki/Barack_Obama",
+    "evidence": "In 1988, Obama enrolled at Harvard Law School, where he was the first Black president of the Harvard Law Review."
+  },
+  "Cristiano Ronaldo": {
+    "text": "His 2009 move to Real Madrid, worth €94 million, was then the most expensive transfer in history.",
+    "source": "https://en.wikipedia.org/wiki/Cristiano_Ronaldo",
+    "evidence": "In 2009, he joined Real Madrid in a deal worth €94 million (£80 million), which was the most expensive transfer in history at the time."
+  },
+  "Donald Trump": {
+    "text": "From 2004 to 2015 he hosted the reality television show The Apprentice.",
+    "source": "https://en.wikipedia.org/wiki/Donald_Trump",
+    "evidence": "From 2004 to 2015, he hosted the reality television show The Apprentice, bolstering his reputation as a wealthy tycoon."
+  },
+  "Narendra Modi": {
+    "text": "In 2014 he led the BJP to a parliamentary majority, the first for any party since 1984.",
+    "source": "https://en.wikipedia.org/wiki/Narendra_Modi",
+    "evidence": "In the 2014 Indian general election, Modi led the BJP to a parliamentary majority, the first for a party since 1984."
+  },
+  "Rihanna": {
+    "text": "Her full name is Robyn Rihanna Fenty.",
+    "source": "https://en.wikipedia.org/wiki/Rihanna",
+    "evidence": "Robyn Rihanna Fenty (/riˈænə/ ⓘ ree-AN-ə; born February 20, 1988) is a Barbadian singer, songwriter, businesswoman, and actress."
+  },
+  "NASA": {
+    "text": "Founded in 1958 amid the Space Race, it replaced NACA to give the US space program a civilian focus.",
+    "source": "https://en.wikipedia.org/wiki/NASA",
+    "evidence": "Established in 1958 amid the Space Race, NASA succeeded the National Advisory Committee for Aeronautics (NACA) to give the US space program a distinct civilian orientation focused on peaceful applications."
+  },
+  "Justin Bieber": {
+    "text": "My World 2.0 made him the youngest solo male to top the Billboard 200 in 47 years.",
+    "source": "https://en.wikipedia.org/wiki/Justin_Bieber",
+    "evidence": "His debut studio album, My World 2.0 (2010), topped the US Billboard 200, making him the youngest solo male to do so in 47 years."
+  },
+  "Katy Perry": {
+    "text": "In 2025 she flew into space aboard Blue Origin NS-31.",
+    "source": "https://en.wikipedia.org/wiki/Katy_Perry",
+    "evidence": "Outside of music, Perry released an autobiographical documentary titled Katy Perry: Part of Me in 2012, voiced Smurfette in The Smurfs film series (2011–2013), launched her own shoe line Katy Perry Collections in 2017 and flew into space aboard Blue Origin NS-31 in 2025."
+  },
+  "Taylor Swift": {
+    "text": "She re-recorded four of her first six albums after a dispute with her old label, Big Machine.",
+    "source": "https://en.wikipedia.org/wiki/Taylor_Swift",
+    "evidence": "Shifting to Republic Records in 2018, Swift released the eclectic pop album Lover (2019) and re-recorded four of her first six albums due to a dispute with Big Machine."
+  }
+}
