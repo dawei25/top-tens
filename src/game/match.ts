@@ -88,7 +88,7 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
  * Classify a guess against a puzzle.
  * - correct / duplicate: matches a top-10 entry (exactly or via autocorrect)
  * - near: matches another accepted answer (rank 11+ or unranked), costs a life
- * - typo: close to more than one entry; the player picks, no life lost
+ * - typo: could be more than one entry (a shared name, a tied misspelling, a shared word); the player picks, no life lost
  * - unknown: not an accepted answer for this list at all ("asdf", or something the source doesn't cover), no life lost
  *
  * A misspelling that clearly points at one entry resolves to it with `corrected: true` (the game fills the
@@ -111,15 +111,52 @@ export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?
     return { kind: "correct", entry: c.entry, corrected };
   };
 
-  if (best && best.dist === 0) return resolve(best, false);
+  /** One candidate resolves; several become choices (ones already found are left out). */
+  const choose = (cs: Candidate[], corrected: boolean): GuessResult => {
+    if (cs.length === 1) return resolve(cs[0], corrected);
+    const open = cs.filter((c) => !(c.inTop10 && found.has(c.entry.rank)));
+    if (open.length === 0) return resolve(cs[0], corrected);
+    if (open.length === 1) return resolve(open[0], true);
+    // Alphabetical, so the order never hints at which choice is in the top 10.
+    const names = open.map((c) => c.entry.name).sort((a, b) => a.localeCompare(b));
+    return { kind: "typo", suggestions: names.slice(0, MAX_CHOICES) };
+  };
+
+  // A name several entries share ("New Zealand" for North and South Island) offers each of them.
+  const exact = candidates.filter((c) => c.dist === 0);
+  if (exact.length > 0) return choose(exact, false);
 
   const len = Math.min(guess.length, best?.len ?? guess.length);
   const close = candidates.filter((c) => c.dist <= typoBudget(len));
   if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
-    const tied = close.filter((c) => c.dist === close[0].dist);
-    if (tied.length === 1) return resolve(tied[0], true);
-    return { kind: "typo", suggestions: tied.slice(0, 3).map((c) => c.entry.name) };
+    return choose(close.filter((c) => c.dist === close[0].dist), true);
   }
 
+  // A distinctive word from a longer name: "Haneda" for Tokyo Haneda Airport.
+  const partial = wordMatches(guess, candidates);
+  if (partial.length > 0 && partial.length <= MAX_CHOICES) return choose(partial, true);
+
   return { kind: "unknown", junk: isJunk(raw, lex) };
+}
+
+const MAX_CHOICES = 4;
+
+/** Words too generic to identify an entry on their own. */
+const GENERIC = new Set(
+  (
+    "the of and in on at for new old north south east west central great little big upper lower saint san santa los las " +
+    "de la el le du international airport island islands isle lake river mount mountain mountains peak sea ocean bay " +
+    "stadium arena park tower building centre center city state states county province republic kingdom united " +
+    "national people federal democratic company corporation group bank holdings inc film movie game games series " +
+    "world cup league club team fc"
+  ).split(" "),
+);
+
+/** Entries where the guess appears as whole words inside the name or an alias. */
+function wordMatches(guess: string, candidates: Candidate[]): Candidate[] {
+  const words = guess.split(" ");
+  if (guess.replace(/ /g, "").length < 4 || words.every((w) => GENERIC.has(w))) return [];
+  return candidates.filter(({ entry }) =>
+    [entry.name, ...entry.aliases].some((form) => ` ${normalize(form)} `.includes(` ${guess} `)),
+  );
 }

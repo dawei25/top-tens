@@ -100,3 +100,50 @@ describe("judgeGuess", () => {
     expect(judge("   ").kind).toBe("empty");
   });
 });
+
+describe("intent", () => {
+  const islands: Puzzle = {
+    id: "islands",
+    title: "Largest islands",
+    prompt: "",
+    source: { name: "", url: "", asOf: "" },
+    answers: [
+      e(1, "Greenland"),
+      e(2, "New Guinea"),
+      e(3, "Borneo"),
+      e(4, "Madagascar"),
+      e(5, "Baffin Island", ["Baffin"]),
+      e(6, "Sumatra"),
+      e(7, "Honshu"),
+      e(8, "Victoria Island"),
+      e(9, "Great Britain", ["UK", "United Kingdom"]),
+      e(10, "Ellesmere Island"),
+    ],
+    extras: [
+      e(12, "South Island", ["New Zealand"]),
+      e(14, "North Island", ["New Zealand"]),
+      e(0, "Faroe Islands"),
+      e(30, "Tokyo Haneda Airport"),
+    ],
+  };
+  const j = (s: string, found: number[] = []) => judgeGuess(s, islands, new Set(found));
+
+  it("counts curated same-thing names", () => {
+    expect(j("UK")).toMatchObject({ kind: "correct", entry: { name: "Great Britain" } });
+    expect(j("united kingdom")).toMatchObject({ kind: "correct", entry: { name: "Great Britain" } });
+  });
+
+  it("offers every entry behind a shared name, alphabetically", () => {
+    expect(j("New Zealand")).toEqual({ kind: "typo", suggestions: ["North Island", "South Island"] });
+  });
+
+  it("accepts unranked real answers", () => {
+    expect(j("Faroe Islands")).toMatchObject({ kind: "near", entry: { rank: 0 } });
+  });
+
+  it("matches a distinctive word from a longer name", () => {
+    expect(j("Haneda")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Tokyo Haneda Airport" } });
+    expect(j("Ellesmere")).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 10 } });
+    expect(j("island").kind).toBe("unknown");
+  });
+});
