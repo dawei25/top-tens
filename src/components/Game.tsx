@@ -1,16 +1,31 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { loadPuzzle, dayNumber, type PuzzleMeta } from "../game/puzzles";
+import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { judgeGuess } from "../game/match";
-import { applyGuess, giveUp, MAX_LIVES, newGame, shareText, type GameState } from "../game/state";
+import {
+  applyGuess,
+  applyHint,
+  canHint,
+  giveUp,
+  hintLetter,
+  MAX_LIVES,
+  newGame,
+  shareText,
+  type GameState,
+} from "../game/state";
 import { load, save } from "../game/storage";
+import { localDate, streak, type DailyEntry } from "../game/daily";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
+import { Countdown } from "./Countdown";
 import { BackArrow, formatAsOf, Heart, ordinal, reducedMotion, sourceSite, TypeIn } from "./pixel";
 
 interface Props {
   id: string;
   meta?: PuzzleMeta;
-  daily: boolean;
+  /** Set when playing a daily (today's or one from the archive). */
+  daily?: DailyEntry;
+  /** The player's local date, from App. */
+  today: string;
   lexicon?: Lexicon;
   onHome: () => void;
   onRoll: () => void;
@@ -55,7 +70,7 @@ function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   }
 }
 
-export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
+export function Game({ id, meta, daily, today, lexicon, onHome, onRoll }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -73,6 +88,9 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
   const shareRef = useRef<HTMLButtonElement>(null);
   /** Facts opened by tap, click or keyboard (by rank). */
   const [openFacts, setOpenFacts] = useState<ReadonlySet<number>>(() => new Set());
+  /** The hidden row showing the "first letter?" confirm. */
+  const [hintAsk, setHintAsk] = useState<number | null>(null);
+  const yesRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     loadPuzzle(id)
@@ -87,9 +105,39 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
     if (!game || !puzzle) return;
     const s = load();
     s.games[id] = game;
-    if (daily && game.status !== "playing") s.daily[dayNumber()] = id;
+    // Only a daily finished on its own date counts toward the streak; archive replays don't.
+    if (daily && game.status !== "playing" && daily.date === localDate()) s.daily[daily.date] = daily.id;
     save(s);
   }, [game, puzzle, id, daily]);
+
+  // The hint confirm closes on Escape or a press anywhere outside its row.
+  useEffect(() => {
+    if (hintAsk === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setHintAsk(null);
+      inputRef.current?.focus();
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target as Element).closest?.(`[data-hint-rank="${hintAsk}"]`)) setHintAsk(null);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    // Opened from the keyboard: take focus to YES. Opened by click or tap, focus stays in the guess box.
+    if (document.activeElement?.classList.contains("blank-toggle")) yesRef.current?.focus();
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [hintAsk]);
+
+  // "No hints on your last life" clears itself.
+  const refused = hintAsk !== null && !!game && !canHint(game, hintAsk);
+  useEffect(() => {
+    if (!refused) return;
+    const t = setTimeout(() => setHintAsk(null), 2500);
+    return () => clearTimeout(t);
+  }, [refused]);
 
   const over = !!game && game.status !== "playing";
   const missedCount = puzzle && game ? puzzle.answers.length - game.found.length : 0;
@@ -146,6 +194,7 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
     const { state, result } = applyGuess(game, puzzle, text, lexicon, offered);
     const fb = describe(result);
     if (!fb) return;
+    setHintAsk(null);
     commit(state);
     setFeedback({ ...fb, key: Date.now() });
     if (result.kind === "correct") setLastFound(result.entry.rank);
@@ -165,12 +214,25 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
     setConfirmQuit(false);
     commit(giveUp(game));
   };
-  /** Forget this list's result (and its daily entry) and start it over, fresh. */
+  const takeHint = (rank: number) => {
+    const next = applyHint(game, rank);
+    setHintAsk(null);
+    inputRef.current?.focus();
+    if (next === game) return;
+    setGame(next);
+    setLostLife({ i: next.lives, key: Date.now() });
+    const entry = puzzle.answers.find((a) => a.rank === rank);
+    if (entry) setFeedback({ tone: "warn", text: `#${rank} starts with ${hintLetter(entry.name)}. One life spent.`, key: Date.now() });
+  };
+  /** Forget this list's result (and its streak day) and start it over, fresh. */
   const playAgain = () => {
     const s = load();
     delete s.games[id];
-    for (const [day, pid] of Object.entries(s.daily)) if (pid === id) delete s.daily[Number(day)];
+    if (daily) delete s.daily[daily.date];
+    // A roll of today's daily list shares its saved game, so it takes today's streak day with it too.
+    if (s.daily[localDate()] === id) delete s.daily[localDate()];
     save(s);
+    setHintAsk(null);
     setGame(newGame(puzzle));
     setInput("");
     setFeedback(null);
@@ -185,8 +247,8 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
   };
 
   const share = async () => {
-    const url = `${location.origin}${location.pathname}#p-${puzzle.id}`;
-    const text = shareText(game, puzzle, url);
+    const url = `${location.origin}${location.pathname}${daily ? `#daily-${daily.date}` : `#p-${puzzle.id}`}`;
+    const text = shareText(game, puzzle, url, daily?.n);
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ text });
       else {
@@ -219,6 +281,16 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
     });
   const allFactsOpen = factRanks.length > 0 && factRanks.every((r) => openFacts.has(r));
 
+  const hints = game.hints ?? [];
+  // Count this game in before the save effect has run, so the results show the streak it just made.
+  let dailyStreak: ReturnType<typeof streak> | null = null;
+  if (daily && over) {
+    const sv = load();
+    if (daily.date === localDate()) sv.daily[daily.date] = daily.id;
+    dailyStreak = streak(sv);
+  }
+  const mode = !daily ? "Random list" : daily.date === today ? `Daily #${daily.n}` : `Archive #${daily.n}`;
+
   return (
     <main className={`screen game status-${game.status}`}>
       <header className="game-head">
@@ -226,7 +298,7 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
           <BackArrow />
         </button>
         <div className="game-head-mid">
-          <span className="label mode">{daily ? "Today's list" : "Random list"}</span>
+          <span className="label mode">{mode}</span>
           <div
             key={lostLife?.key}
             className={`lives ${lostLife ? "lives-hit" : ""}`}
@@ -282,6 +354,9 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
             const typing = animate && (just || (!found && endedHere));
             const fact = revealed ? a.fact : undefined;
             const open = !!fact && openFacts.has(a.rank);
+            const hinted = !revealed && hints.includes(a.rank);
+            const hintable = !revealed && !hinted;
+            const asking = hintable && hintAsk === a.rank;
             return (
               <li
                 key={a.rank}
@@ -293,8 +368,17 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
                   !found && endedHere ? "late" : "",
                   fact ? "has-fact" : "",
                   open ? "fact-open" : "",
+                  hintable ? "hintable" : "",
+                  hinted ? "hinted" : "",
+                  asking ? "asking" : "",
                 ].join(" ")}
                 style={{ "--d": `${revealDelay}ms` } as CSSProperties}
+                data-hint-rank={revealed ? undefined : a.rank}
+                {...(hintable && {
+                  onClick: () => setHintAsk((r) => (r === a.rank ? null : a.rank)),
+                  // Same as facts: a click or tap here leaves the guess box focused (and the phone keyboard up).
+                  onMouseDown: (e: React.MouseEvent) => e.preventDefault(),
+                })}
                 {...(fact && {
                   onClick: () => toggleFact(a.rank),
                   // Keep focus where it is (the guess box during play), so opening a fact never costs a keystroke.
@@ -319,14 +403,47 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
                       ) : (
                         <TypeIn text={a.name} animate={typing} delay={revealDelay} />
                       )
-                    ) : (
-                      <span className="blank" aria-label="not found yet">
-                        . . . . . . . .
+                    ) : hinted ? (
+                      <span className="blank" aria-label={`not found yet, starts with ${hintLetter(a.name)}`}>
+                        <b className="hint-letter">{hintLetter(a.name)}</b> . . . . . . .
                       </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="blank-toggle"
+                        aria-label={`Not found yet. Hint for #${a.rank}`}
+                        aria-expanded={asking}
+                      >
+                        <span className="blank" aria-hidden="true">
+                          . . . . . . . .
+                        </span>
+                      </button>
                     )}
                   </span>
                   {revealed && a.value && <span className="value">{a.value}</span>}
                 </span>
+                {asking && (
+                  <div className="hint-ask">
+                    {canHint(game, a.rank) ? (
+                      <>
+                        <span>hint: first letter? costs 1 life</span>
+                        <button
+                          ref={yesRef}
+                          type="button"
+                          className="key key-xs key-gold"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            takeHint(a.rank);
+                          }}
+                        >
+                          Yes
+                        </button>
+                      </>
+                    ) : (
+                      <span role="status">no hints on your last life</span>
+                    )}
+                  </div>
+                )}
                 {/* Always in the DOM once revealed, so desktop hover is pure CSS (no re-render); hidden until opened or hovered. */}
                 {fact && (
                   <p className="fact" id={`fact-${a.rank}`}>
@@ -418,6 +535,17 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
                 ? "you gave up. the full list is above."
                 : "out of lives. the full list is above."}
           </p>
+          {(dailyStreak || hints.length > 0) && (
+            <div className="results-meta">
+              {hints.length > 0 && <p>hints used: {hints.length}</p>}
+              {dailyStreak && (
+                <p>
+                  streak <b className="pink">{dailyStreak.current}</b> · best <b>{dailyStreak.best}</b>
+                </p>
+              )}
+              {daily && <Countdown />}
+            </div>
+          )}
           <div className="results-actions">
             <button ref={shareRef} className="key key-pink" onClick={share}>
               {copied ? "Copied" : "Share"}

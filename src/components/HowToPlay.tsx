@@ -52,6 +52,12 @@ export function HowToPlay({ onClose, scroll }: { onClose: () => void; scroll?: b
           <span className="rule-n">4</span>
           <span>Anything that isn't a recognized answer for the list costs nothing.</span>
         </li>
+        <li>
+          <span className="rule-n">5</span>
+          <span>
+            Stuck? Tap an empty row to see its <b className="gold">first letter</b> for a life. Not on your last one.
+          </span>
+        </li>
       </ol>
     </section>
   );

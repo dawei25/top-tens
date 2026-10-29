@@ -1,19 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import type { PuzzleMeta } from "../game/puzzles";
-import { dailyPuzzleId } from "../game/puzzles";
+import { streak, type DailyEntry } from "../game/daily";
 import { load, save, stats } from "../game/storage";
+import { Countdown } from "./Countdown";
 import { HowToPlay, markHelpSeen } from "./HowToPlay";
 
 interface Props {
   index: PuzzleMeta[];
-  day: number;
+  /** Today's daily; missing only if the schedule failed to load. */
+  entry?: DailyEntry;
+  archiveCount: number;
   onDaily: () => void;
   onRoll: (category?: string) => void;
+  onArchive: () => void;
 }
 
-export function Home({ index, day, onDaily, onRoll }: Props) {
+export function Home({ index, entry, archiveCount, onDaily, onRoll, onArchive }: Props) {
   const saved = load();
   const s = stats(saved);
+  const st = streak(saved);
   const [help, setHelp] = useState(!saved.seenHelp);
   const [helpAsked, setHelpAsked] = useState(false);
   const dailyRef = useRef<HTMLButtonElement>(null);
@@ -39,8 +44,8 @@ export function Home({ index, day, onDaily, onRoll }: Props) {
     focusDaily();
   };
   const categories = [...new Set(index.map((p) => p.category))];
-  const dailyGame = saved.games[dailyPuzzleId(index, day)];
-  const dailyDone = dailyGame && dailyGame.status !== "playing";
+  const dailyGame = entry && saved.games[entry.id];
+  const dailyDone = !!dailyGame && dailyGame.status !== "playing";
 
   // Starting a game with the rules on screen counts as having seen them.
   const start = (fn: () => void) => () => {
@@ -69,16 +74,26 @@ export function Home({ index, day, onDaily, onRoll }: Props) {
       )}
 
       <section className="home-actions">
-        <button ref={dailyRef} className="key key-pink key-big" onClick={start(onDaily)}>
+        <button ref={dailyRef} className="key key-pink key-big" onClick={start(onDaily)} disabled={!entry}>
           <span className="key-label">Today's list</span>
-          <span className="key-sub">{dailyDone ? `done ${dailyGame.found.length}/10` : `no. ${day + 1}`}</span>
+          <span className="key-sub">
+            {entry ? `no. ${entry.n}` : "none yet"}
+            {dailyDone && ` · ${dailyGame.found.length}/10`}
+          </span>
         </button>
-        <p className="press-enter caption" aria-hidden="true">
-          press enter
-        </p>
+        <div className="daily-meta">
+          <Countdown className="caption" />
+          <p className="press-enter caption" aria-hidden="true">
+            press enter
+          </p>
+        </div>
         <button className="key key-big" onClick={start(() => onRoll())}>
           <span className="key-label">Roll a random list</span>
           <span className="key-sub">{index.length} lists</span>
+        </button>
+        <button className="key key-big" onClick={start(onArchive)}>
+          <span className="key-label">Archive</span>
+          <span className="key-sub">{archiveCount} dailies</span>
         </button>
       </section>
 
@@ -95,7 +110,7 @@ export function Home({ index, day, onDaily, onRoll }: Props) {
         </div>
       </section>
 
-      {s.played > 0 && (
+      {(s.played > 0 || st.best > 0) && (
         <section className="panel home-stats" aria-labelledby="stats-title">
           <h2 id="stats-title" className="label">
             Your record
@@ -112,6 +127,14 @@ export function Home({ index, day, onDaily, onRoll }: Props) {
             <div>
               <dt>perfect</dt>
               <dd className="gold">{s.perfect}</dd>
+            </div>
+            <div>
+              <dt>streak</dt>
+              <dd className="pink">{st.current}</dd>
+            </div>
+            <div>
+              <dt>best streak</dt>
+              <dd>{st.best}</dd>
             </div>
           </dl>
         </section>
