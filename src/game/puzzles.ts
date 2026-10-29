@@ -44,11 +44,27 @@ export function dailyPuzzleId(index: PuzzleMeta[], day = dayNumber()): string {
   return sorted[((day % sorted.length) + sorted.length) % sorted.length].id;
 }
 
-export function randomPuzzleId(index: PuzzleMeta[], played: Set<string>, category?: string): string {
-  let pool = index.filter((p) => !category || p.category === category);
-  const fresh = pool.filter((p) => !played.has(p.id));
-  if (fresh.length) pool = fresh;
-  return pool[Math.floor(Math.random() * pool.length)].id;
+/** Recent random picks, per kind of roll, so rolling again never repeats the last few. */
+const recentRolls: Record<string, string[]> = {};
+
+/**
+ * A uniformly random pick from `ids` that avoids the most recent picks of the same `kind` (up to half the pool, so
+ * small pools still rotate). Remembered for the page's lifetime.
+ */
+export function pickRandom(ids: string[], kind: string, rand = Math.random): string | undefined {
+  if (!ids.length) return undefined;
+  const recent = recentRolls[kind] ?? [];
+  const avoid = new Set(recent.slice(0, Math.floor(ids.length / 2)));
+  const pool = ids.filter((id) => !avoid.has(id));
+  const pick = (pool.length ? pool : ids)[Math.floor(rand() * (pool.length || ids.length))];
+  recentRolls[kind] = [pick, ...recent.filter((id) => id !== pick)].slice(0, 20);
+  return pick;
+}
+
+/** A random list to play, optionally within a category, never one of the last few rolled. */
+export function randomPuzzleId(index: PuzzleMeta[], category?: string): string {
+  const ids = index.filter((p) => !category || p.category === category).map((p) => p.id);
+  return pickRandom(ids, `roll:${category ?? ""}`) ?? index[0].id;
 }
 
 function hash(s: string): number {

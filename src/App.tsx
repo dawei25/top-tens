@@ -5,7 +5,7 @@ import { Blitz } from "./components/Blitz";
 import { BlitzRuns } from "./components/BlitzRuns";
 import { Game, Loading } from "./components/Game";
 import type { Lexicon } from "./game/junk";
-import { loadIndex, loadLexicon, loadPuzzle, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
+import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
 import { blitzAvailable } from "./game/blitz";
 import {
   blitzOfTheDay,
@@ -91,25 +91,20 @@ export default function App() {
   if (!index || !schedule) return <Loading />;
 
   const roll = (category?: string) => {
-    const played = new Set(Object.keys(load().games));
-    location.hash = `#p-${randomPuzzleId(index, played, category)}`;
+    location.hash = `#p-${randomPuzzleId(index, category)}`;
   };
   const home = () => (location.hash = "");
-  // Blitz a random list: unplayed-in-Blitz first. The index may carry the blitz flag; if not, read each puzzle.
+  // Blitz a random list: a uniformly random open Blitz list, never one of the last few rolled.
   const blitzRoll = async (): Promise<boolean> => {
     const saved = load();
-    const shuffled = [...index].sort(() => Math.random() - 0.5);
-    const fresh = shuffled.filter((m) => saved.blitzBest?.[m.id] === undefined);
-    for (const m of [...fresh, ...shuffled.filter((x) => !fresh.includes(x))]) {
-      const flag = m.blitz;
-      if (flag === false) continue;
-      const p = flag === true ? { id: m.id, blitz: true } : await loadPuzzle(m.id).catch(() => null);
-      if (p && blitzAvailable(p, schedule, localDate(), saved)) {
-        location.hash = `#blitz-${m.id}`;
-        return true;
-      }
-    }
-    return false;
+    const open = index.filter((m) => m.blitz && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
+    const id = pickRandom(
+      open.map((m) => m.id),
+      "blitz",
+    );
+    if (!id) return false;
+    location.hash = `#blitz-${id}`;
+    return true;
   };
   const current = todayEntry(schedule, today);
 

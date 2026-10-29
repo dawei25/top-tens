@@ -1,4 +1,5 @@
 import type { BlitzRun, BlitzState } from "./blitz";
+import type { ListRun } from "./history";
 import type { GameState } from "./state";
 
 const KEY = "top-tens:v1";
@@ -16,6 +17,8 @@ export interface Saved {
    * Today's Blitz results by local date: the first round finished on that date counts; replays don't change it.
    */
   blitzDaily?: Record<string, { id: string; score: number; answers: number }>;
+  /** Finished list games, newest first, capped (see MAX_LIST_RUNS in history.ts). Survives Play again. */
+  listRuns?: ListRun[];
   /** A Blitz round in progress per list id, saved after every hit so leaving the page doesn't lose it. */
   blitzLive?: Record<string, BlitzState>;
 }
