@@ -16,6 +16,7 @@ import { load, save } from "../game/storage";
 import { localDate, streak, type DailyEntry } from "../game/daily";
 import { blitzAvailable } from "../game/blitz";
 import { recordListRun } from "../game/history";
+import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
@@ -188,7 +189,10 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     inputRef.current?.focus();
   };
   const commit = (state: GameState) => {
-    if (state.status !== "playing" && game.status === "playing") setEndedHere(true);
+    if (state.status !== "playing" && game.status === "playing") {
+      setEndedHere(true);
+      emitPlay({ kind: "end", status: state.status, lives: state.lives, found: state.found.length });
+    }
     setGame(state);
   };
   const guess = (text: string) => {
@@ -204,6 +208,9 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     const fb = describe(result);
     if (!fb) return;
     setHintAsk(null);
+    if (result.kind === "correct") emitPlay({ kind: "found", rank: result.entry.rank, found: state.found.length });
+    else if (result.kind === "near") emitPlay({ kind: "miss", lifeLost: state.lives < game.lives, rank: result.entry.rank });
+    else if (result.kind === "unknown") emitPlay({ kind: "miss", lifeLost: false });
     commit(state);
     setFeedback({ ...fb, key: Date.now() });
     if (result.kind === "correct") setLastFound(result.entry.rank);
@@ -228,6 +235,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     setHintAsk(null);
     inputRef.current?.focus();
     if (next === game) return;
+    emitPlay({ kind: "hint", rank, lives: next.lives });
     setGame(next);
     setLostLife({ i: next.lives, key: Date.now() });
     const entry = puzzle.answers.find((a) => a.rank === rank);

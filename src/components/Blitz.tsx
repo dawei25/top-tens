@@ -26,6 +26,7 @@ import { localDate, type DailyEntry } from "../game/daily";
 import type { Lexicon } from "../game/junk";
 import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { load, save } from "../game/storage";
+import { emitPlay } from "../game/events";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
 import { ModeTag, ScreenHead } from "./pixel";
@@ -273,6 +274,7 @@ export function Blitz({
       daily = { counted: d.counted, score: next.blitzDaily?.[dailyBlitz.date]?.score ?? blitzScore(state) };
     }
     save(next);
+    emitPlay({ kind: "blitz-end", score: blitzScore(state), best: r.best && r.previous !== undefined });
     setRecord({ best: r.best, previous: r.previous, daily });
   }, [state, record, id, dailyBlitz]);
 
@@ -338,6 +340,7 @@ export function Blitz({
       setState(started);
       keepLive(started);
       setNote(null);
+      emitPlay({ kind: "blitz-start" });
     }
   };
   const submit = (e: React.FormEvent) => {
@@ -346,7 +349,10 @@ export function Blitz({
     const { state: next, result } = blitzGuess(startBlitz(state), puzzle, input, lexicon, feedback?.suggestions);
     setState(next);
     if (result.kind === "over" || isOver(next)) return;
-    if (result.kind === "scored") keepLive(next);
+    if (result.kind === "scored") {
+      keepLive(next);
+      emitPlay({ kind: "blitz-hit", rank: result.hit.rank, points: result.hit.points, score: blitzScore(next), best: load().blitzBest?.[id] });
+    } else if (result.kind === "none" || result.kind === "duplicate") emitPlay({ kind: "blitz-miss" });
     const fb = describe(result);
     if (fb) setFeedback({ ...fb, key: Date.now() });
     if (result.kind !== "choices" && result.kind !== "empty") setInput("");
