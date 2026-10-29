@@ -51,3 +51,23 @@ describe("first names and partial names", () => {
     expect(judge("nba-points", "kevin")).toMatchObject({ kind: "typo", suggestions: ["Kevin Durant", "Kevin Garnett"] });
   });
 });
+
+describe("intent edge cases", () => {
+  it("a misspelled first name fills its own entry, not a lookalike surname", () => {
+    expect(judge("nba-points", "kareen")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Kareem Abdul-Jabbar" } });
+  });
+  it("an exact title beats other entries' aliases", () => {
+    expect(judge("films-gross", "avatar")).toMatchObject({ kind: "correct", entry: { name: "Avatar" } });
+  });
+  it("spacing never matters", () => {
+    const r = judge("films-gross", "spiderman");
+    expect(r.kind).toBe("typo");
+    if (r.kind === "typo") expect(r.suggestions.every((s) => s.startsWith("Spider-Man"))).toBe(true);
+  });
+  it("never lists more than two choices for a misspelling", () => {
+    for (const g of ["kareem", "jams", "harde", "malon"]) {
+      const r = judge("nba-points", g);
+      if (r.kind === "typo") expect(r.suggestions.length).toBeLessThanOrEqual(2);
+    }
+  });
+});

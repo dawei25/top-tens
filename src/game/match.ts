@@ -68,26 +68,33 @@ interface Candidate {
   inTop10: boolean;
   dist: number;
   len: number;
+  /** The guess is exactly this entry's full name, not just an alias or a word of it. */
+  fullName: boolean;
 }
 
 function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Candidate[] {
   const guessDigits = digitsOf(guess);
+  const compactGuess = guess.replace(/ /g, "");
   return entries.map((entry) => {
     let best = Infinity;
     let len = 0;
-    for (const form of [entry.name, ...entry.aliases]) {
+    let fullName = false;
+    // Words of the name count as forms too, so a misspelled first name ("kareen") lands on its own entry.
+    for (const form of [entry.name, ...entry.aliases, ...nameWords(entry.name)]) {
       const f = normalize(form);
       // Numbers are identity, not spelling: GTA 6 is not GTA 5, Mario Kart 7 is not Mario Kart.
       if (guessDigits && digitsOf(f) !== guessDigits) continue;
-      const dist = editDistance(guess, f);
+      // Spacing never matters: "spiderman" is "Spider-Man".
+      const dist = f.replace(/ /g, "") === compactGuess ? 0 : editDistance(guess, f);
       // Codes (ATL, EDDF, PRC) match exactly or not at all; fuzzy they catch keyboard mash like "asdf".
       if (dist > 0 && CODE.test(form)) continue;
-      if (dist < best) {
+      if (dist < best || (dist === 0 && form === entry.name)) {
         best = dist;
         len = f.length;
+        fullName = dist === 0 && form === entry.name;
       }
     }
-    return { entry, inTop10, dist: best, len };
+    return { entry, inTop10, dist: best, len, fullName };
   });
 }
 
@@ -129,25 +136,36 @@ export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?
     return { kind: "typo", suggestions: names.slice(0, MAX_CHOICES) };
   };
 
-  // A name several entries share ("New Zealand" for North and South Island) offers each of them.
+  // An entry's full name beats other entries' aliases: "Avatar" is the 2009 film, not a choice of three.
+  // Otherwise a name several entries share ("New Zealand" for North and South Island) offers each of them.
   const exact = candidates.filter((c) => c.dist === 0);
+  const named = exact.filter((c) => c.fullName);
+  if (named.length === 1) return resolve(named[0], false);
   if (exact.length > 0) return choose(exact, false);
 
-  // A whole word from a longer name ("Wilt" for Wilt Chamberlain, "Haneda" for Tokyo Haneda Airport) is
-  // stronger evidence than a near-spelling of something else ("wilt" is two letters from "West").
+  // A whole word from a longer name ("Kareem" for Kareem Abdul-Jabbar, "Haneda" for Tokyo Haneda Airport) is a
+  // correct short form, not a misspelling: if it names one entry it counts like an alias. It is checked before
+  // near-spellings, which are weaker evidence ("wilt" is two letters from "West").
   const partial = wordMatches(guess, candidates);
-  if (partial.length > 0 && partial.length <= MAX_CHOICES) return choose(partial, true);
+  if (partial.length === 1) return resolve(partial[0], false);
+  if (partial.length > 1 && partial.length <= MAX_CHOICES) return choose(partial, true);
 
+  // Near-spellings are corrected in the input for the player to confirm. Two equally close readings
+  // ("Irak": Iran or Iraq) become a choice; more than that is noise, and listing them would leak answers.
   const len = Math.min(guess.length, best?.len ?? guess.length);
   const close = candidates.filter((c) => c.dist <= typoBudget(len));
   if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
-    return choose(close.filter((c) => c.dist === close[0].dist), true);
+    const tied = close.filter((c) => c.dist === close[0].dist);
+    if (tied.length <= MAX_TYPO_CHOICES) return choose(tied, true);
   }
 
   return { kind: "unknown", junk: isJunk(raw, lex) };
 }
 
+/** Most choices offered for a name the player actually wrote (a shared alias or a shared word). */
 const MAX_CHOICES = 4;
+/** Most choices offered for a misspelling. */
+const MAX_TYPO_CHOICES = 2;
 
 /** Words too generic to identify an entry on their own. */
 const GENERIC = new Set(
@@ -160,12 +178,31 @@ const GENERIC = new Set(
   ).split(" "),
 );
 
+/** Distinctive single words of a multi-word name: "Kareem Abdul-Jabbar" → kareem, abdul, jabbar. */
+function nameWords(name: string): string[] {
+  const words = normalize(name).split(" ");
+  return words.length > 1 ? words.filter((w) => w.length >= 4 && !GENERIC.has(w)) : [];
+}
+
 /**
  * Entries whose name contains the guess as whole words. Names only: redirect aliases include phrases like
  * "Russell–Chamberlain rivalry", which would make "Russell" point at Wilt Chamberlain.
  */
 function wordMatches(guess: string, candidates: Candidate[]): Candidate[] {
   const words = guess.split(" ");
-  if (guess.replace(/ /g, "").length < 4 || words.every((w) => GENERIC.has(w))) return [];
-  return candidates.filter(({ entry }) => ` ${normalize(entry.name)} `.includes(` ${guess} `));
+  const compact = guess.replace(/ /g, "");
+  if (compact.length < 4 || words.every((w) => GENERIC.has(w))) return [];
+  return candidates.filter(({ entry }) => hasWordSpan(normalize(entry.name).split(" "), compact));
+}
+
+/** Whether consecutive words of a name, joined without spaces, spell the guess ("spiderman" in "spider man no way home"). */
+function hasWordSpan(nameWords: string[], compact: string): boolean {
+  for (let i = 0; i < nameWords.length; i++) {
+    let joined = "";
+    for (let j = i; j < nameWords.length && joined.length < compact.length; j++) {
+      joined += nameWords[j];
+      if (joined === compact) return true;
+    }
+  }
+  return false;
 }

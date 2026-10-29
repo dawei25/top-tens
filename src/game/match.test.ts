@@ -142,8 +142,8 @@ describe("intent", () => {
   });
 
   it("matches a distinctive word from a longer name", () => {
-    expect(j("Haneda")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Tokyo Haneda Airport" } });
-    expect(j("Ellesmere")).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 10 } });
+    expect(j("Haneda")).toMatchObject({ kind: "near", corrected: false, entry: { name: "Tokyo Haneda Airport" } });
+    expect(j("Ellesmere")).toMatchObject({ kind: "correct", corrected: false, entry: { rank: 10 } });
     expect(j("island").kind).toBe("unknown");
   });
 });
