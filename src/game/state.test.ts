@@ -28,7 +28,13 @@ describe("game state", () => {
   });
 
   it("ends on five wrong guesses", () => {
-    expect(play("a1", "b2", "c3", "d4", "e5").status).toBe("lost");
+    expect(play("Japan", "Canada", "Peru", "Kenya", "Oman").status).toBe("lost");
+  });
+
+  it("junk input costs nothing and isn't logged", () => {
+    const s = play("asdf", "qwerty", "lkjh");
+    expect(s.lives).toBe(5);
+    expect(s.log).toHaveLength(0);
   });
 
   it("wins at 10/10", () => {

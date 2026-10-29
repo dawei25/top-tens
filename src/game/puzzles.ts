@@ -1,3 +1,4 @@
+import type { Lexicon } from "./junk";
 import type { Puzzle } from "./types";
 
 export interface PuzzleMeta {
@@ -17,6 +18,16 @@ export async function loadPuzzle(id: string): Promise<Puzzle> {
   const res = await fetch(`${base}puzzles/${id}.json`);
   if (!res.ok) throw new Error(`Puzzle ${id} not found`);
   return res.json();
+}
+
+/** The junk-guess model. Optional: without it, only the simple mash rules apply. */
+export async function loadLexicon(): Promise<Lexicon | undefined> {
+  try {
+    const res = await fetch(`${base}puzzles/lexicon.json`);
+    return res.ok ? await res.json() : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Days since 2026-01-01 in the player's local time zone. */

@@ -15,6 +15,11 @@
   "category": "Geography"
  },
  {
+  "id": "africa-population",
+  "title": "Most populous African countries",
+  "category": "Geography"
+ },
+ {
   "id": "asia-population",
   "title": "Most populous Asian countries",
   "category": "Geography"
@@ -30,13 +35,38 @@
   "category": "Geography"
  },
  {
+  "id": "us-states-area",
+  "title": "Largest US states",
+  "category": "Geography"
+ },
+ {
+  "id": "us-cities",
+  "title": "Most populous US cities",
+  "category": "Geography"
+ },
+ {
   "id": "world-cities",
   "title": "Largest cities in the world",
   "category": "Geography"
  },
  {
+  "id": "mountains",
+  "title": "Highest mountains",
+  "category": "Geography"
+ },
+ {
+  "id": "rivers",
+  "title": "Longest rivers",
+  "category": "Geography"
+ },
+ {
   "id": "islands",
   "title": "Largest islands",
+  "category": "Geography"
+ },
+ {
+  "id": "lakes",
+  "title": "Largest lakes",
   "category": "Geography"
  },
  {
@@ -52,6 +82,16 @@
  {
   "id": "films-gross",
   "title": "Highest-grossing films",
+  "category": "Entertainment"
+ },
+ {
+  "id": "youtube-channels",
+  "title": "Most-subscribed YouTube channels",
+  "category": "Entertainment"
+ },
+ {
+  "id": "youtube-videos",
+  "title": "Most-viewed YouTube videos",
   "category": "Entertainment"
  },
  {
@@ -75,8 +115,33 @@
   "category": "Culture"
  },
  {
+  "id": "buildings",
+  "title": "Tallest buildings",
+  "category": "Culture"
+ },
+ {
+  "id": "olympic-medals",
+  "title": "Most Olympic medals (all-time)",
+  "category": "Sports"
+ },
+ {
   "id": "nba-points",
   "title": "NBA career scoring leaders",
   "category": "Sports"
+ },
+ {
+  "id": "stadiums",
+  "title": "Largest stadiums",
+  "category": "Sports"
+ },
+ {
+  "id": "companies-revenue",
+  "title": "Largest companies by revenue",
+  "category": "Business"
+ },
+ {
+  "id": "airports",
+  "title": "Busiest airports",
+  "category": "Business"
  }
 ]

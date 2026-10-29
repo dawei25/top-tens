@@ -1,3 +1,4 @@
+import type { Lexicon } from "./junk";
 import { judgeGuess } from "./match";
 import type { GuessResult, Puzzle } from "./types";
 
@@ -24,10 +25,15 @@ export function costsLife(r: GuessResult): boolean {
   return r.kind === "wrong" || r.kind === "near";
 }
 
-export function applyGuess(state: GameState, puzzle: Puzzle, text: string): { state: GameState; result: GuessResult } {
+export function applyGuess(
+  state: GameState,
+  puzzle: Puzzle,
+  text: string,
+  lex?: Lexicon,
+): { state: GameState; result: GuessResult } {
   if (state.status !== "playing") return { state, result: { kind: "empty" } };
-  const result = judgeGuess(text, puzzle, new Set(state.found));
-  if (result.kind === "empty") return { state, result };
+  const result = judgeGuess(text, puzzle, new Set(state.found), lex);
+  if (result.kind === "empty" || result.kind === "junk") return { state, result };
 
   // Re-guessing an answer that already cost a life shouldn't cost another.
   if (costsLife(result) && result.kind === "near" && state.log.some((l) => l.result.kind === "near" && l.result.entry.rank === result.entry.rank)) {

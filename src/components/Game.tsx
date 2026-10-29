@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { loadPuzzle, dayNumber, type PuzzleMeta } from "../game/puzzles";
 import { applyGuess, giveUp, MAX_LIVES, newGame, shareText, type GameState } from "../game/state";
 import { load, save } from "../game/storage";
+import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 
 interface Props {
   id: string;
   meta?: PuzzleMeta;
   daily: boolean;
+  lexicon?: Lexicon;
   onHome: () => void;
   onRoll: () => void;
 }
@@ -28,6 +30,8 @@ function describe(r: GuessResult, raw: string): Omit<Feedback, "key"> | null {
       return { tone: "bad", text: `${r.entry.name} is #${r.entry.rank}. So close.` };
     case "typo":
       return { tone: "warn", text: `Check your spelling${r.suggestions.length ? `: ${r.suggestions.join(" or ")}?` : ""}` };
+    case "junk":
+      return { tone: "warn", text: "That doesn't look like an answer. No life lost." };
     case "wrong":
       return { tone: "bad", text: `${raw} isn't on the list` };
     default:
@@ -35,7 +39,7 @@ function describe(r: GuessResult, raw: string): Omit<Feedback, "key"> | null {
   }
 }
 
-export function Game({ id, daily, onHome, onRoll }: Props) {
+export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -78,7 +82,7 @@ export function Game({ id, daily, onHome, onRoll }: Props) {
   const over = game.status !== "playing";
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const { state, result } = applyGuess(game, puzzle, input);
+    const { state, result } = applyGuess(game, puzzle, input, lexicon);
     const fb = describe(result, input.trim());
     if (!fb) return;
     setGame(state);

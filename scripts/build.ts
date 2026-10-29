@@ -7,6 +7,7 @@ import { normalize } from "../src/game/match";
 import { cleanText, splitHeader, tableGrid, wikitables, type Cell } from "./table";
 import { TOPICS, type Topic } from "./topics";
 import { fetchPage, fetchRedirects, pageUrl } from "./wiki";
+import { writeLexicon } from "./lexicon";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
 const EXTRAS = 40;
@@ -45,13 +46,27 @@ function parseValue(text: string): { value: number; display: string } | null {
   };
 }
 
+const GENERIC_WORDS =
+  /\b(international airport|airport|stadium|mount|lake|island|corporation|corp|company|inc|group|tower|the)\b/gi;
+
+/** "PUBG: Battlegrounds" → PUBG, Battlegrounds; "Atlanta International Airport" → Atlanta. Collisions are pruned later. */
+function shortForms(name: string): string[] {
+  const out = name.split(/\s*[:–]\s*|\s+-\s+/).filter((p) => p !== name);
+  const stripped = name.replace(GENERIC_WORDS, " ").replace(/\s+/g, " ").trim();
+  if (stripped !== name) out.push(stripped);
+  return out.filter((s) => s.replace(/\W/g, "").length >= 3);
+}
+
 function cellName(cell: Cell, topic: Topic): string {
   return cleanName(topic.nameFromText || !cell.linkText ? cell.text : cell.linkText);
 }
 
 /** Use the linked article for redirects only if it is about the thing itself ("Avatar (2009 film)", not "Demographics of India"). */
 function redirectTarget(name: string, cell: Cell): string {
-  if (cell.link && normalize(cleanName(cell.link)) === normalize(name)) return cell.link;
+  if (!cell.link) return name;
+  const link = normalize(cleanName(cell.link));
+  // "Lake Baikal" for "Baikal" is the same thing; "Demographics of India" is not.
+  if (link === normalize(name) || (link.includes(normalize(name)) && !/\b(of|in|at)\b/.test(link))) return cell.link;
   return name;
 }
 
@@ -70,10 +85,11 @@ async function readRows(topic: Topic): Promise<Row[]> {
       if (!nameCell || !valueCell || nameCell.isHeader && !nameCell.text) continue;
       if (topic.rankedOnly && !/^\d/.test(r[0]?.text ?? "")) continue;
       const name = cellName(nameCell, topic);
-      if (!name || topic.skip?.includes(name)) continue;
+      if (!name || topic.skip?.includes(name) || /^(totals?|as of\b|world$)/i.test(name)) continue;
+      if (/\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
       const v = parseValue(valueCell.text);
       if (!v) continue;
-      const seeds = [nameCell.text, nameCell.linkText ?? ""];
+      const seeds = [nameCell.text, nameCell.linkText ?? "", ...shortForms(name)];
       for (const c of aliasCs) {
         const cell = r[c];
         if (cell) seeds.push(cell.linkText ?? "", ...cell.text.split(/[/,]/));
@@ -160,3 +176,4 @@ for (const topic of TOPICS) {
   }
 }
 if (!only.length) writeFileSync(join(OUT_DIR, "index.json"), JSON.stringify(index, null, 1));
+console.log(`lexicon trained on ${writeLexicon(OUT_DIR)} names`);

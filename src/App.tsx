@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Home } from "./components/Home";
 import { Game } from "./components/Game";
-import { dailyPuzzleId, dayNumber, loadIndex, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
+import type { Lexicon } from "./game/junk";
+import { dailyPuzzleId, dayNumber, loadIndex, loadLexicon, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
 import { load } from "./game/storage";
 
 type Route = { screen: "home" } | { screen: "game"; id: string; daily: boolean };
@@ -14,9 +15,11 @@ function readHash(): Route {
 export default function App() {
   const [index, setIndex] = useState<PuzzleMeta[] | null>(null);
   const [route, setRoute] = useState<Route>(readHash);
+  const [lexicon, setLexicon] = useState<Lexicon>();
 
   useEffect(() => {
     loadIndex().then(setIndex);
+    loadLexicon().then(setLexicon);
     const onHash = () => setRoute(readHash());
     addEventListener("hashchange", onHash);
     return () => removeEventListener("hashchange", onHash);
@@ -39,6 +42,7 @@ export default function App() {
         id={route.id}
         meta={index.find((p) => p.id === route.id)}
         daily={route.daily}
+        lexicon={lexicon}
         onHome={() => (location.hash = "")}
         onRoll={() => roll()}
       />

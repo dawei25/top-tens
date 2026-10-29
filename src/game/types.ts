@@ -27,4 +27,5 @@ export type GuessResult =
   | { kind: "duplicate"; entry: Entry }
   | { kind: "near"; entry: Entry; corrected: boolean }
   | { kind: "typo"; suggestions: string[] }
+  | { kind: "junk" }
   | { kind: "wrong" };

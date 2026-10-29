@@ -1,3 +1,4 @@
+import { isJunk, type Lexicon } from "./junk";
 import type { Entry, GuessResult, Puzzle } from "./types";
 
 const LEADING_ARTICLE = /^(the|a|an)\s+/;
@@ -73,9 +74,10 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
  * - correct / duplicate: matches a top-10 entry (exactly or via autocorrect)
  * - near: matches a rank 11+ entry, costs a life
  * - typo: close to something but not confidently one entry, no life lost
- * - wrong: nothing close, costs a life
+ * - junk: matches nothing and doesn't look like a real word or name ("asdf"), no life lost
+ * - wrong: a plausible answer that isn't on the list, costs a life
  */
-export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>): GuessResult {
+export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?: Lexicon): GuessResult {
   const guess = normalize(raw);
   if (!guess) return { kind: "empty" };
 
@@ -106,5 +108,5 @@ export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>): Gue
     return { kind: "typo", suggestions: close.slice(0, 3).map((c) => c.entry.name) };
   }
 
-  return { kind: "wrong" };
+  return isJunk(raw, lex) ? { kind: "junk" } : { kind: "wrong" };
 }

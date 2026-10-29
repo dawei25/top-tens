@@ -124,6 +124,7 @@ export const TOPICS: Topic[] = [
     value: "Total area / km",
     metric: "Total area",
     unit: " km²",
+    skip: ["United States", "50 States and DC", "50 States", "Contiguous US"],
   },
   {
     id: "us-cities",
@@ -384,6 +385,6 @@ export const TOPICS: Topic[] = [
     name: "Airport",
     value: "Totalpassengers",
     metric: "Passengers (2025)",
-    aliasCols: ["Code"],
+    aliasCols: ["Code", "Location"],
   },
 ];

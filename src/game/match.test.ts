@@ -80,7 +80,13 @@ describe("judgeGuess", () => {
 
   it("marks unrelated answers wrong", () => {
     expect(judge("Japan").kind).toBe("wrong");
-    expect(judge("asdfgh").kind).toBe("wrong");
+    expect(judge("Elon Musk").kind).toBe("wrong");
     expect(judge("   ").kind).toBe("empty");
+  });
+
+  it("calls keyboard mash junk instead of wrong", () => {
+    expect(judge("asdfgh").kind).toBe("junk");
+    expect(judge("qwerty").kind).toBe("junk");
+    expect(judge("jjjj").kind).toBe("junk");
   });
 });
