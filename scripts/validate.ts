@@ -5,6 +5,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { normalize } from "../src/game/match";
 import type { Entry, Puzzle } from "../src/game/types";
+import { INTENT } from "./intent";
 import { TOPICS } from "./topics";
 
 const DIR = join(import.meta.dirname, "..", "public", "puzzles");
@@ -74,11 +75,19 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
     }
   }
 
-  // An alias equal to another entry's name makes that entry unreachable.
+  // Shared aliases are groups ("Did you mean A or B?"); a big group means the alias is too generic.
+  const owners = new Map<string, number>();
+  for (const e of all) for (const a of new Set(e.aliases.map(normalize))) owners.set(a, (owners.get(a) ?? 0) + 1);
+  for (const [a, n] of owners) if (n > 4) warn(`alias "${a}" is shared by ${n} entries`);
+
+  // An alias equal to another entry's name shadows that entry, unless intent.ts made it a group on purpose.
+  const curatedGroups = new Set(Object.keys(INTENT[p.id]?.groups ?? {}).map(normalize));
   for (const e of all) {
     for (const a of e.aliases) {
       const other = byName.get(normalize(a));
-      if (other && other !== e) err(`alias "${a}" of "${e.name}" is the name of "${other.name}"`);
+      if (other && other !== e && !curatedGroups.has(normalize(a))) {
+        err(`alias "${a}" of "${e.name}" is the name of "${other.name}"`);
+      }
     }
   }
   return issues;
