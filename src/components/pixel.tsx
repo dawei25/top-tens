@@ -63,25 +63,26 @@ export function Heart({ className }: { className?: string }) {
 }
 
 /**
- * A life: one of the squid's ink sacs, a droplet with a rim, ink inside (deeper at the bottom) and a glint.
- * Colours come from CSS (.ink-sac .rim / .ink / .deep / .glint), so a spent sac can go empty and dark.
+ * A life: one of the squid's ink sacs, an 8 x 9 droplet with a rim, ink inside (deeper at the bottom) and a gloss.
+ * Colours come from CSS (.ink-sac .rim / .ink / .deep / .glint), so a spent sac can go hollow.
  */
 const SAC = [
-  "...r...",
-  "..rir..",
-  ".rgiir.",
-  "rgiiiir",
-  "riiiiir",
-  "rddddir",
-  ".rdddr.",
-  "..rrr..",
+  "...rr...",
+  "..riir..",
+  ".rigiir.",
+  "rigiiiir",
+  "rgiiiiir",
+  "riiiiiir",
+  "riidddir",
+  ".rdddir.",
+  "..rrrr..",
 ];
 const sac = (c: string) => pixels(SAC.map((row) => row.replace(new RegExp(`[^${c}]`, "g"), ".").replace(new RegExp(c, "g"), "#")));
 const SAC_PATHS = { rim: sac("r"), ink: sac("i"), deep: sac("d"), glint: sac("g") };
 
 export function InkSac({ className }: { className?: string }) {
   return (
-    <svg className={`ink-sac ${className ?? ""}`} viewBox="0 0 7 8" shapeRendering="crispEdges" aria-hidden="true">
+    <svg className={`ink-sac ${className ?? ""}`} viewBox="0 0 8 9" shapeRendering="crispEdges" aria-hidden="true">
       <path className="ink" d={SAC_PATHS.ink} />
       <path className="deep" d={SAC_PATHS.deep} />
       <path className="glint" d={SAC_PATHS.glint} />
