@@ -161,7 +161,6 @@ export function Home({
   return (
     <main className="screen home">
       <header className="title">
-        <p className="label title-kicker">High score table</p>
         <h1 className="logo" aria-label="TENtacle">
           <span>TEN</span><span>tacle</span>
         </h1>

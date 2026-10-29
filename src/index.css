@@ -298,9 +298,6 @@ a {
 .title .caption {
   text-wrap: balance;
 }
-.title-kicker {
-  color: var(--cyan);
-}
 .logo {
   font-weight: 400;
   font-size: clamp(76px, 22vw, 128px);
