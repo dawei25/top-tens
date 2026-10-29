@@ -1,0 +1,52 @@
+{
+  "United States": {
+    "text": "Paleo-Indians migrated from North Asia to North America at least 15,000 years ago.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "Paleo-Indians migrated from North Asia to North America at least 15,000 years ago and formed various civilizations."
+  },
+  "China": {
+    "text": "The birthplace of Confucianism and Daoism.",
+    "source": "https://en.wikipedia.org/wiki/China",
+    "evidence": "China is the birthplace of Confucianism and Daoism,"
+  },
+  "India": {
+    "text": "Sikhism emerged in the Punjab, promoting a devotion that transcended Hindu and Muslim boundaries.",
+    "source": "https://en.wikipedia.org/wiki/India",
+    "evidence": "During this era, Sikhism emerged in the Punjab, promoting an egalitarian devotion that transcended traditional Hindu and Muslim boundaries."
+  },
+  "Germany": {
+    "text": "Its main financial centre is Frankfurt, not the capital Berlin.",
+    "source": "https://en.wikipedia.org/wiki/Germany",
+    "evidence": "The nation's capital and most populous city is Berlin and its main financial centre is Frankfurt; the largest urban area is the Ruhr."
+  },
+  "Russia": {
+    "text": "Kievan Rus' adopted Orthodox Christianity from the Byzantine Empire in 988.",
+    "source": "https://en.wikipedia.org/wiki/Russia",
+    "evidence": "The emergence of the East Slavs as a prominent group in Europe between the 3rd and 8th centuries AD led to the establishment of Kievan Rus' in the 9th century, which adopted Orthodox Christianity from the Byzantine Empire in 988."
+  },
+  "Italy": {
+    "text": "The Renaissance flourished here in the 15th and 16th centuries before spreading to the rest of Europe.",
+    "source": "https://en.wikipedia.org/wiki/Italy",
+    "evidence": "The Italian Renaissance flourished during the 15th and 16th centuries and spread to the rest of Europe."
+  },
+  "Canada": {
+    "text": "The Canada Act 1982 severed the last vestiges of its legal dependence on the UK Parliament.",
+    "source": "https://en.wikipedia.org/wiki/Canada",
+    "evidence": "This increased sovereignty was highlighted by the Statute of Westminster, 1931, and culminated in the Canada Act 1982, which severed the vestiges of legal dependence on the Parliament of the United Kingdom."
+  },
+  "Hong Kong": {
+    "text": "It has the most skyscrapers of any city and the most expensive residential property market in the world.",
+    "source": "https://en.wikipedia.org/wiki/Hong_Kong",
+    "evidence": "Hong Kong has the most skyscrapers of any city in the world. Housing is consistently in high demand, making the city of Hong Kong the most expensive residential property market in the world and one of the most expensive cities in the world."
+  },
+  "Brazil": {
+    "text": "After the Portuguese court moved to Rio de Janeiro, it became a united kingdom with Portugal in 1815.",
+    "source": "https://en.wikipedia.org/wiki/Brazil",
+    "evidence": "Brazil remained a colony until 1815, when it was elevated to a united kingdom with Portugal after the transfer of the Portuguese court to Rio de Janeiro."
+  },
+  "Taiwan": {
+    "text": "Its rapid economic growth from the early 1960s became known as the \"Taiwan Miracle\".",
+    "source": "https://en.wikipedia.org/wiki/Taiwan",
+    "evidence": "From the early 1960s, Taiwan saw rapid economic growth and industrialization known as the \"Taiwan Miracle\"."
+  }
+}
