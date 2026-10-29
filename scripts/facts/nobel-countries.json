@@ -1,0 +1,52 @@
+{
+  "United States": {
+    "text": "Independence was formally declared in the Lee Resolution of July 2, 1776, two days before the Declaration.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "Independence from Great Britain was formally declared in the Lee Resolution of July 2, 1776, two days before the Declaration of Independence."
+  },
+  "United Kingdom": {
+    "text": "At its 1920s height, the British Empire covered around a quarter of the world's land and population.",
+    "source": "https://en.wikipedia.org/wiki/United_Kingdom",
+    "evidence": "At its height in the 1920s, the empire encompassed around a quarter of the world's landmass and population, and was the largest in history."
+  },
+  "Germany": {
+    "text": "Reunified on 3 October 1990, it only regained its full sovereignty on 15 March 1991.",
+    "source": "https://en.wikipedia.org/wiki/Germany",
+    "evidence": "After the fall of the communist-led government in East Germany, German reunification saw the former East German states join the FRG on 3 October 1990. Germany regained its full sovereignty on 15 March 1991."
+  },
+  "France": {
+    "text": "Five of its 18 regions are overseas, and its territory includes French Guiana in South America.",
+    "source": "https://en.wikipedia.org/wiki/France",
+    "evidence": "Its overseas regions and territories include French Guiana in South America, Saint Pierre and Miquelon in the North Atlantic, the French West Indies, and many islands in Oceania and the Indian Ocean. ... Its 18 integral regions—five of which are overseas—span a combined area of 632,702 km2 (244,288 sq mi), with a total population estimated at over 69.1 million in 2026."
+  },
+  "Japan": {
+    "text": "Besides its four major islands, the Japanese archipelago has over 14,000 smaller ones.",
+    "source": "https://en.wikipedia.org/wiki/Japan",
+    "evidence": "The Japanese archipelago consists of four major islands alongside over 14,000 smaller islands."
+  },
+  "Sweden": {
+    "text": "88% of Swedes live in urban areas, which together cover just 1.5% of the country's land.",
+    "source": "https://en.wikipedia.org/wiki/Sweden",
+    "evidence": "The population density is 25.5 inhabitants per square kilometre (66/sq mi), and 88% of Swedes reside in urban areas, mostly in the southern and central portions of the country. Sweden's urban areas together cover 1.5% of its land area."
+  },
+  "Russia": {
+    "text": "It spans eleven time zones and shares land borders with fourteen countries.",
+    "source": "https://en.wikipedia.org/wiki/Russia",
+    "evidence": "It is the largest country in the world, spanning eleven time zones and sharing land borders with fourteen countries."
+  },
+  "Canada": {
+    "text": "It has the longest coastline of any country, and its border with the US is the longest international land border.",
+    "source": "https://en.wikipedia.org/wiki/Canada",
+    "evidence": "Its ten provinces and three territories extend from the Atlantic Ocean to the Pacific Ocean and northward into the Arctic Ocean, making it the second-largest country by total area, with the longest coastline of any country. Its border with the United States is the longest international land border."
+  },
+  "Switzerland": {
+    "text": "Its old confederation was the only early modern republic besides San Marino to survive the Napoleonic Wars.",
+    "source": "https://en.wikipedia.org/wiki/Switzerland",
+    "evidence": "The confederation was among the first and few republics of the early modern period, and the only one besides San Marino to survive the Napoleonic Wars."
+  },
+  "Austria": {
+    "text": "After a decade of Allied occupation, it regained sovereignty and declared perpetual neutrality in 1955.",
+    "source": "https://en.wikipedia.org/wiki/Austria",
+    "evidence": "After its liberation in 1945 and a decade of Allied occupation, the country regained its sovereignty and declared its perpetual neutrality in 1955."
+  }
+}

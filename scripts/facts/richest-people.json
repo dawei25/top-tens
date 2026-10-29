@@ -1,0 +1,52 @@
+{
+  "Elon Musk": {
+    "text": "SpaceX's IPO made him the first US-dollar trillionaire in June 2026; a stock collapse undid it the next month.",
+    "source": "https://en.wikipedia.org/wiki/Elon_Musk",
+    "evidence": "Musk became the first US-dollar trillionaire upon the initial public offering of SpaceX in June 2026, though a SpaceX stock collapse brought him under the threshold by the next month."
+  },
+  "Larry Page": {
+    "text": "Google's PageRank search algorithm is named after him, and won him the Marconi Prize in 2004.",
+    "source": "https://en.wikipedia.org/wiki/Larry_Page",
+    "evidence": "Page is the co-creator and namesake of PageRank, a search ranking algorithm for Google for which he received the Marconi Prize in 2004 along with co-writer Brin."
+  },
+  "Sergey Brin": {
+    "text": "He dropped his Stanford PhD to start Google in Susan Wojcicki's garage in Menlo Park.",
+    "source": "https://en.wikipedia.org/wiki/Sergey_Brin",
+    "evidence": "The program became popular at Stanford, and he discontinued his PhD studies to start Google in Susan Wojcicki's garage in Menlo Park, California."
+  },
+  "Jeff Bezos": {
+    "text": "He founded Amazon in 1994 on a road trip from New York City to Seattle.",
+    "source": "https://en.wikipedia.org/wiki/Jeff_Bezos",
+    "evidence": "He founded Amazon in mid-1994 on a road trip from New York City to Seattle."
+  },
+  "Mark Zuckerberg": {
+    "text": "Around age eleven he wrote \"ZuckNet\", linking the computers at home and in his father's dental office.",
+    "source": "https://en.wikipedia.org/wiki/Mark_Zuckerberg",
+    "evidence": "At about the age of eleven, he created \"ZuckNet\", a program that allowed computers at the family home and his father's dental office to communicate with each other."
+  },
+  "Larry Ellison": {
+    "text": "He owns 98% of the land on Lānaʻi, the sixth-largest of the Hawaiian Islands.",
+    "source": "https://en.wikipedia.org/wiki/Larry_Ellison",
+    "evidence": "He is also known for various other investments, such as his ownership of 98% of the land on Lānaʻi, the sixth-largest of the Hawaiian Islands, his stake in the automotive and clean energy company Tesla, Inc. worth over $19 billion, and his controlling stake in the mass media conglomerate Skydance, which is managed by his son David Ellison."
+  },
+  "Bernard Arnault": {
+    "text": "His aggressive moves after buying Christian Dior's parent company earned him the nickname \"The Terminator\".",
+    "source": "https://en.wikipedia.org/wiki/Bernard_Arnault",
+    "evidence": "Arnault's entry into the luxury sector was marked by his strategic acquisition in 1984 of the financially-struggling textile and retail conglomerate Boussac Saint-Frères, which included the prestigious fashion house Christian Dior. His aggressive business strategies earned him the nickname \"The Terminator\", as he revitalized Dior and sold off other assets for profit."
+  },
+  "Jensen Huang": {
+    "text": "He launched Nvidia in 1993 from a Denny's restaurant in San Jose, California.",
+    "source": "https://en.wikipedia.org/wiki/Jensen_Huang",
+    "evidence": "After earning a master's degree from Stanford University, Huang launched Nvidia in 1993 from a Denny's restaurant in San Jose, California, at age 30 and has remained its president and CEO since."
+  },
+  "Warren Buffett": {
+    "text": "He has pledged to give away 99 percent of his fortune to philanthropic causes.",
+    "source": "https://en.wikipedia.org/wiki/Warren_Buffett",
+    "evidence": "Buffett met Chuck Feeney and has pledged to give away 99 percent of his fortune to philanthropic causes; until 2026 his giving was primarily to the Gates Foundation."
+  },
+  "Amancio Ortega": {
+    "text": "The Zara founder has only ever granted interviews to three journalists.",
+    "source": "https://en.wikipedia.org/wiki/Amancio_Ortega",
+    "evidence": "However, he has only ever granted interviews to three journalists."
+  }
+}

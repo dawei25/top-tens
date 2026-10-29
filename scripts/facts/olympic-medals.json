@@ -1,0 +1,52 @@
+{
+  "United States": {
+    "text": "The Soviet Union's collapse in 1991 left it as the world's sole superpower.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "The Soviet Union's collapse in 1991 left the U.S. as the world's sole superpower, although it has faced competition from China in the 2020s."
+  },
+  "Soviet Union": {
+    "text": "It existed only from 1922 to 1991, and in that time was the largest country by area.",
+    "source": "https://en.wikipedia.org/wiki/Soviet_Union",
+    "evidence": "The Soviet Union, officially the Union of Soviet Socialist Republics (USSR), was a transcontinental country that spanned much of Eurasia from its formation in 1922 until its dissolution in 1991. It was the world's third-most populous country, the largest by area, and bordered twelve other countries."
+  },
+  "Great Britain": {
+    "text": "Until 9,000 years ago it was joined to mainland Europe by a land bridge now called Doggerland.",
+    "source": "https://en.wikipedia.org/wiki/Great_Britain",
+    "evidence": "Connected to mainland Europe until 9,000 years ago by a land bridge now known as Doggerland, the island of Great Britain has been inhabited by modern humans for around 30,000 years."
+  },
+  "France": {
+    "text": "The kingdom grew out of West Francia, split off from the Carolingian Empire by the Treaty of Verdun in 843.",
+    "source": "https://en.wikipedia.org/wiki/France",
+    "evidence": "The Treaty of Verdun of 843 partitioned the empire, with West Francia evolving into the Kingdom of France."
+  },
+  "Germany": {
+    "text": "It is both the world's third-largest exporter and its third-largest importer.",
+    "source": "https://en.wikipedia.org/wiki/Germany",
+    "evidence": "As a major force in several industrial, scientific and technological sectors, Germany is both the world's third-largest exporter and third-largest importer."
+  },
+  "Italy": {
+    "text": "Two other countries sit entirely inside it: Vatican City and San Marino.",
+    "source": "https://en.wikipedia.org/wiki/Italy",
+    "evidence": "Italy shares land borders with France to the west; Switzerland and Austria to the north; Slovenia to the east; and the two enclaves of Vatican City and San Marino."
+  },
+  "China": {
+    "text": "Unified under the Qin in 221 BCE, it went on to two millennia of imperial rule.",
+    "source": "https://en.wikipedia.org/wiki/China",
+    "evidence": "In 221 BCE, China was unified under the Qin, followed by the Han dynasty, ushering in two millennia of imperial rule across periods of unity and division."
+  },
+  "Sweden": {
+    "text": "Its last war was in 1814, when it forced Norway into a union that lasted until 1905.",
+    "source": "https://en.wikipedia.org/wiki/Sweden",
+    "evidence": "The last war in which Sweden was directly involved was in 1814, when Sweden by military means forced Norway into a personal union, a union which lasted until 1905."
+  },
+  "Japan": {
+    "text": "An American fleet forced it to open trade to the West in 1853, which led to the end of the shogunate.",
+    "source": "https://en.wikipedia.org/wiki/Japan",
+    "evidence": "In 1853, an American fleet forced Japan to open trade to the West, which led to the end of the shogunate and the restoration of imperial power in 1868."
+  },
+  "Australia": {
+    "text": "It is the world's flattest and driest inhabited continent.",
+    "source": "https://en.wikipedia.org/wiki/Australia",
+    "evidence": "It has a land area of 7,688,287 km2 (2,968,464 sq mi), making it the sixth-largest country in the world, and is the world's flattest and driest inhabited continent."
+  }
+}

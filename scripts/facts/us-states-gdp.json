@@ -1,0 +1,52 @@
+{
+  "California": {
+    "text": "As an independent country it would have the world's fourth-largest economy, behind Germany and ahead of Japan.",
+    "source": "https://en.wikipedia.org/wiki/California",
+    "evidence": "It is also the world's largest sub-national economy and, if it were an independent country, would be the fourth-largest economy in the world (behind Germany and ahead of Japan) by nominal GDP as of 2025."
+  },
+  "Texas": {
+    "text": "It has led the country in state export revenue since 2002.",
+    "source": "https://en.wikipedia.org/wiki/Texas",
+    "evidence": "It has the second-highest gross state product among U.S. states and has led the country in state export revenue since 2002."
+  },
+  "New York": {
+    "text": "It began as the Dutch colony of New Netherland, which England seized in 1664.",
+    "source": "https://en.wikipedia.org/wiki/New_York_(state)",
+    "evidence": "Stemming from Henry Hudson's expedition in 1609, the Dutch established the multiethnic colony of New Netherland in 1621. England seized the colony from the Dutch in 1664, renaming it the Province of New York."
+  },
+  "Florida": {
+    "text": "Ponce de León named it La Pascua Florida, partly because he arrived in the Easter season.",
+    "source": "https://en.wikipedia.org/wiki/Florida",
+    "evidence": "He called the peninsula La Pascua Florida in recognition of the verdant landscape and because it was the Easter season, which the Spaniards called Pascua Florida (Festival of Flowers)."
+  },
+  "Illinois": {
+    "text": "In 2023 alone it produced 136 tornadoes, the most of any state by a significant margin.",
+    "source": "https://en.wikipedia.org/wiki/Illinois",
+    "evidence": "Illinois, alongside Texas, is one of the most tornadically active states in the U.S; in 2023 alone, Illinois produced 136 tornadoes, the highest state by a significant margin."
+  },
+  "Pennsylvania": {
+    "text": "From 1638 to 1655, part of it belonged to New Sweden, a Swedish colony.",
+    "source": "https://en.wikipedia.org/wiki/Pennsylvania",
+    "evidence": "Before that, between 1638 and 1655, a southeast portion of the state was part of New Sweden, a Swedish colony."
+  },
+  "Ohio": {
+    "text": "Nicknamed the \"Mother of Presidents\", it was the birthplace of seven U.S. presidents.",
+    "source": "https://en.wikipedia.org/wiki/Ohio",
+    "evidence": "It is also known as the \"Mother of Presidents\", having been the birthplace of seven U.S. presidents, and the \"Birthplace of Aviation\", as the Wright brothers designed and built the world's first successful airplane in Ohio before its first flight in North Carolina."
+  },
+  "Georgia": {
+    "text": "After the Civil War it was the last state readmitted to the Union, on July 15, 1870.",
+    "source": "https://en.wikipedia.org/wiki/Georgia_(U.S._state)",
+    "evidence": "After the Civil War, it was the last state to be readmitted to the Union on July 15, 1870."
+  },
+  "Washington": {
+    "text": "It is the largest US producer of apples, hops, pears, blueberries, spearmint oil and sweet cherries.",
+    "source": "https://en.wikipedia.org/wiki/Washington_(state)",
+    "evidence": "Washington is a leading lumber producer, the largest producer of apples, hops, pears, blueberries, spearmint oil, and sweet cherries in the U.S., and ranks high in the production of apricots, asparagus, dry edible peas, grapes, lentils, peppermint oil, potatoes and wheat."
+  },
+  "North Carolina": {
+    "text": "Its Halifax Resolves of April 1776 were the colonies' first formal call for independence from Britain.",
+    "source": "https://en.wikipedia.org/wiki/North_Carolina",
+    "evidence": "The Halifax Resolves resolution adopted by North Carolina on April 12, 1776, was the first formal call for independence from Great Britain among the American Colonies during the American Revolution."
+  }
+}

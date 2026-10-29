@@ -1,0 +1,52 @@
+{
+  "United States": {
+    "text": "People first migrated here from North Asia at least 15,000 years ago.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "Paleo-Indians migrated from North Asia to North America at least 15,000 years ago and formed various civilizations."
+  },
+  "Saudi Arabia": {
+    "text": "The kingdom founded in 1932 is the third Saudi state; the first began in 1727.",
+    "source": "https://en.wikipedia.org/wiki/Saudi_Arabia",
+    "evidence": "Saudi Arabia was founded in 1932 by King Abdulaziz, who united Hejaz, Najd, parts of Eastern Arabia and South Arabia into a single state through a series of military and political campaigns beginning in 1902. The Kingdom is the Third Saudi State and the successor to the First Saudi State (1727–1818) and the Second Saudi State (1824–1891)."
+  },
+  "Russia": {
+    "text": "The Soviet era produced the first human-made satellite and the first human expedition into outer space.",
+    "source": "https://en.wikipedia.org/wiki/Russia",
+    "evidence": "The Soviet era saw some of the most significant Russian technological achievements, including the first human-made satellite and the first human expedition into outer space."
+  },
+  "Canada": {
+    "text": "Its last legal ties to the UK Parliament were only severed by the Canada Act 1982.",
+    "source": "https://en.wikipedia.org/wiki/Canada",
+    "evidence": "This increased sovereignty was highlighted by the Statute of Westminster, 1931, and culminated in the Canada Act 1982, which severed the vestiges of legal dependence on the Parliament of the United Kingdom."
+  },
+  "China": {
+    "text": "Its imperial era saw the invention of gunpowder, paper, printing and the compass.",
+    "source": "https://en.wikipedia.org/wiki/China",
+    "evidence": "The imperial era saw the expansion of the Silk Road and the invention of gunpowder, paper, printing, and the compass."
+  },
+  "Iraq": {
+    "text": "Ancient Mesopotamia, between its Tigris and Euphrates, saw the invention of writing, the wheel and the sailboat.",
+    "source": "https://en.wikipedia.org/wiki/Iraq",
+    "evidence": "Starting in the 6th millennium BC, the fertile plains between Iraq's Tigris and Euphrates rivers, referred to as Mesopotamia, fostered the rise of early cities, civilisations, and empires including Sumer, Akkad, Babylonia, and Assyria. Known as the cradle of civilisation, Mesopotamia saw the invention of astrology, mathematics, navigation, timekeeping, writing systems, the wheel, the sailboat, a calendar, and a law code."
+  },
+  "Iran": {
+    "text": "An attempt to nationalize its oil industry led to the Anglo-American coup of 1953.",
+    "source": "https://en.wikipedia.org/wiki/Iran",
+    "evidence": "Attempts by Mohammad Mosaddegh to nationalize the oil industry led to the Anglo-American coup in 1953."
+  },
+  "United Arab Emirates": {
+    "text": "Only 11% of the population are native Emiratis; most residents are expatriates and migrant workers.",
+    "source": "https://en.wikipedia.org/wiki/United_Arab_Emirates",
+    "evidence": "Only 11% of the population are native Emiratis; the vast majority of inhabitants are expatriates and migrant workers, most of whom are from South Asia."
+  },
+  "Brazil": {
+    "text": "It borders every other country on its continent except Ecuador and Chile.",
+    "source": "https://en.wikipedia.org/wiki/Brazil",
+    "evidence": "Covering roughly half of South America's land area, it borders all other countries and territories on the continent except Ecuador and Chile."
+  },
+  "Kuwait": {
+    "text": "Iraq invaded and annexed it in 1990 following disputes over oil production.",
+    "source": "https://en.wikipedia.org/wiki/Kuwait",
+    "evidence": "In 1990, the state of Kuwait was invaded, had a puppet regime installed, and was subsequently annexed by Ba'athist Iraq under the leadership of Saddam Hussein following disputes over oil production."
+  }
+}

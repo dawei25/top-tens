@@ -1,0 +1,52 @@
+{
+  "Alaska": {
+    "text": "Russia sold it to the United States in 1867 for $7.2 million.",
+    "source": "https://en.wikipedia.org/wiki/Alaska",
+    "evidence": "The expense and logistical difficulty of maintaining this distant possession prompted its sale to the U.S. in 1867 for US$7.2 million, equivalent to $166 million in 2025."
+  },
+  "Texas": {
+    "text": "Its name comes from a Caddo word meaning \"friend\".",
+    "source": "https://en.wikipedia.org/wiki/Texas",
+    "evidence": "The name Texas, based on the Caddo word táy:shaʼ (/tə́jːʃaʔ/) 'friend', was applied, in the spelling Tejas or Texas, by the Spanish to the Caddo themselves, specifically the Hasinai Confederacy."
+  },
+  "California": {
+    "text": "Two-thirds of the nation's earthquake risk lies within the state.",
+    "source": "https://en.wikipedia.org/wiki/California",
+    "evidence": "Two-thirds of the nation's earthquake risk lies in California."
+  },
+  "Montana": {
+    "text": "It has no official nickname, but unofficial ones include \"Big Sky Country\" and \"The Last Best Place\".",
+    "source": "https://en.wikipedia.org/wiki/Montana",
+    "evidence": "Montana has no official nickname but has several unofficial ones, most notably \"Big Sky Country\", \"The Treasure State\", \"Land of the Shining Mountains\", and \"The Last Best Place\"."
+  },
+  "New Mexico": {
+    "text": "Its capital, Santa Fe, founded in 1610, is the oldest and the highest state capital in the US.",
+    "source": "https://en.wikipedia.org/wiki/New_Mexico",
+    "evidence": "New Mexico's largest city is Albuquerque, and its state capital is Santa Fe, the oldest state capital in the U.S.—founded in 1610 as the government seat of Nuevo México in New Spain—and the highest in elevation, at 7,000 feet (2,134 m)."
+  },
+  "Arizona": {
+    "text": "It was the last of the contiguous states to join the Union, on February 14, 1912.",
+    "source": "https://en.wikipedia.org/wiki/Arizona",
+    "evidence": "It is the 48th state and last of the contiguous states to be admitted to the Union, achieving statehood on February 14, 1912."
+  },
+  "Idaho": {
+    "text": "The US Forest Service holds about 38% of its land, the highest proportion of any state.",
+    "source": "https://en.wikipedia.org/wiki/Idaho",
+    "evidence": "The United States Forest Service holds about 38% of Idaho's land, the highest proportion of any state."
+  },
+  "Colorado": {
+    "text": "Artifacts at its Lindenmeier site date from approximately 8720 BCE.",
+    "source": "https://en.wikipedia.org/wiki/Colorado",
+    "evidence": "The Lindenmeier site contains artifacts dating from approximately 8720 BCE."
+  },
+  "Oregon": {
+    "text": "It is home to the single largest organism in the world, a fungus called Armillaria ostoyae.",
+    "source": "https://en.wikipedia.org/wiki/Oregon",
+    "evidence": "The state is also home to the single largest organism in the world, Armillaria ostoyae, a fungus"
+  },
+  "Wyoming": {
+    "text": "It was the first state to let women vote and the first to elect a female governor, Nellie Tayloe Ross.",
+    "source": "https://en.wikipedia.org/wiki/Wyoming",
+    "evidence": "Women's suffrage in Wyoming dates to 1869 when it granted women the right to vote as a territory, and in 1890 it became the first state allowing its woman citizens to vote. It also became the first state to allow women to hold elected office and the first to elect a female governor, Nellie Tayloe Ross."
+  }
+}

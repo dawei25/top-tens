@@ -1,0 +1,52 @@
+{
+  "France": {
+    "text": "The 1789 Revolution produced the Declaration of the Rights of Man, which still expresses the nation's ideals.",
+    "source": "https://en.wikipedia.org/wiki/France",
+    "evidence": "The French Revolution of 1789 overthrew the ancien régime and produced the Declaration of the Rights of Man, which expresses the nation's ideals to this day."
+  },
+  "Spain": {
+    "text": "During the Age of Discovery it completed the first circumnavigation of the globe.",
+    "source": "https://en.wikipedia.org/wiki/Spain",
+    "evidence": "During the Age of Discovery, Spain led the exploration and conquest of the New World, completed the first circumnavigation of the globe, and established one of the largest empires in history, which fostered a global trade system driven by precious metals."
+  },
+  "United States": {
+    "text": "Besides its 50 states, it claims five major island territories in Oceania and the Caribbean.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "The United States also asserts sovereignty over five major island territories and various uninhabited islands in Oceania and the Caribbean."
+  },
+  "Turkey": {
+    "text": "Istanbul, then Constantinople, was conquered by Mehmed II in 1453.",
+    "source": "https://en.wikipedia.org/wiki/Turkey",
+    "evidence": "Constantinople (modern-day Istanbul) was conquered in 1453 by Mehmed II."
+  },
+  "Italy": {
+    "text": "Besides the peninsula, it has nearly 800 islands, notably Sicily and Sardinia.",
+    "source": "https://en.wikipedia.org/wiki/Italy",
+    "evidence": "It consists of a peninsula, which extends into the Mediterranean Sea, with the Alps on its northern land border, as well as nearly 800 islands, notably Sicily and Sardinia."
+  },
+  "Mexico": {
+    "text": "It is home to the largest number of native Spanish speakers of any country.",
+    "source": "https://en.wikipedia.org/wiki/Mexico",
+    "evidence": "With a population around 131 million as of 2025, Mexico is the tenth-most populous country in the world and is home to the largest number of native Spanish speakers."
+  },
+  "United Kingdom": {
+    "text": "It was the world's first industrialised country.",
+    "source": "https://en.wikipedia.org/wiki/United_Kingdom",
+    "evidence": "The UK became the first industrialised country and was the world's foremost power for the majority of the 19th and early 20th centuries, particularly during the Pax Britannica between 1815 and 1914."
+  },
+  "Germany": {
+    "text": "In the 16th century its northern regions became the centre of the Protestant Reformation.",
+    "source": "https://en.wikipedia.org/wiki/Germany",
+    "evidence": "During the 16th century, northern German regions became the centre of the Protestant Reformation."
+  },
+  "Japan": {
+    "text": "Around 75% of its terrain is mountainous and heavily forested.",
+    "source": "https://en.wikipedia.org/wiki/Japan",
+    "evidence": "Japan is divided into 47 administrative prefectures and eight traditional regions, and around 75% of its terrain is mountainous and heavily forested, concentrating its agriculture and highly urbanized population along its eastern coastal plains."
+  },
+  "Greece": {
+    "text": "With up to 227 inhabited islands, it has the longest coastline on the Mediterranean.",
+    "source": "https://en.wikipedia.org/wiki/Greece",
+    "evidence": "With nine regions and up to 227 inhabited islands, it has the longest coastline on the Mediterranean basin."
+  }
+}
