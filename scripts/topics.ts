@@ -61,6 +61,8 @@ export interface Topic {
    * isn't measures something else and is dropped.
    */
   values?: { kind: ValueKind; scale?: number; below?: "tenth" | "last" };
+  /** #1 has the smallest number (a rank such as Similarweb's). Such a list is never Blitz: a bigger n isn't better. */
+  lowerIsBetter?: boolean;
 }
 
 /** A source of unranked accepted answers: one name column of some tables on a page (default: the topic's). */
@@ -762,6 +764,7 @@ export const TOPICS: Topic[] = [
     metric: "Similarweb rank",
     prefix: "#",
     keepOrder: true,
+    lowerIsBetter: true,
     aliasCols: ["Domain"],
     universeCategories: ["Social networking services", "Internet search engines"],
   },

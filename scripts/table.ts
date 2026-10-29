@@ -10,6 +10,11 @@ export interface Cell {
   isHeader: boolean;
 }
 
+/** A stat as stored in `n`: float noise trimmed ("27.200000000000003" → 27.2). */
+export function statNumber(x: number): number {
+  return Number(x.toPrecision(12));
+}
+
 export function cleanText(s: string): string {
   return s
     .replace(/\[[^\]]*\]/g, "")

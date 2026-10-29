@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Entry, Fact, Puzzle } from "../src/game/types";
 import { normalize } from "../src/game/match";
-import { cleanText, splitHeader, tableGrid, wikitables, type Cell } from "./table";
+import { cleanText, splitHeader, statNumber, tableGrid, wikitables, type Cell } from "./table";
 import { TEST_SET, TOPICS, type Topic } from "./topics";
 import { fetchCategory, fetchPage, fetchRedirects, pageUrl, requestCount } from "./wiki";
 import { addValues } from "./values";
@@ -14,6 +14,8 @@ import { COUNTRY_FORMS, INTENT } from "./intent";
 import { UNIVERSES, type Place } from "./gazetteer";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
+/** Fewest entries with a stat (`n`) for a list to be playable in Blitz. */
+const BLITZ_MIN = 30;
 /** Wikipedia article behind each entry, where known; only used during the build (values for unranked answers). */
 const ARTICLE = new WeakMap<Entry, string>();
 const articleOf = (e: Entry) => ARTICLE.get(e) ?? e.name;
@@ -357,6 +359,7 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
       name: row.name,
       aliases: [...aliases],
       value: (topic.prefix ?? "") + row.valueText + (topic.unit ?? ""),
+      ...(Number.isFinite(row.value) ? { n: statNumber(row.value) } : {}),
       ...(i < 10 ? { article: row.redirectTarget } : {}),
       ...(fact ? { fact } : {}),
     });
@@ -391,6 +394,7 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
     title: topic.title,
     prompt: topic.prompt,
     metric: topic.metric,
+    ...(!topic.lowerIsBetter && entries.filter((e) => e.n !== undefined).length >= BLITZ_MIN ? { blitz: true } : {}),
     source: {
       name: `Wikipedia: ${topic.page}`,
       url: pageUrl(topic.page),
