@@ -1,6 +1,6 @@
-# Top Tens: design
+# TENtacle: design
 
-Working name. Name the top 10 of a ranked list. Five lives.
+Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
 
 ## 1. Rules
 
@@ -71,3 +71,22 @@ Screenshots of Krillion, taken by an earlier agent, are in
 `/tmp/claude-0/-home-user/2375e5ee-46dc-5ea2-a7f4-fd0dd013e321/scratchpad/krillion/shots/` (start with
 `d_009_p1_ready.png`, `d_030_p1_result.png`, `mu_008_p1_ready.png`, `d_126_summary_view.png`). Its stylesheet is in
 `.../krillion/css/`.
+
+## 6. TENtacle: the glow squid (direction from October 2026)
+
+The game is now TENtacle, and it grows its own identity on top of the arcade table: **a squid has ten limbs (eight
+arms, two long tentacles), and a top 10 has ten slots.** Every answer found is one limb lit.
+
+- Look: an original pixel-art glow squid. Blocky, chunky pixels, a voxel/Minecraft-like vibe, bioluminescent glow in
+  the existing palette (cyan glow, pink and gold accents on navy). Not a copy of any existing sprite.
+- Feedback loop (owner-approved ideas):
+  1. The squid fills in: one limb lights per answer found; ten lit is a full glowing squid.
+  2. The tentacle grab: a correct answer is snatched from the input into its slot; bigger answers pull harder.
+  3. Ink lives: five ink sacs; a life lost squirts ink that dims the screen for a beat; running out ends in a cloud.
+  5. Sound (optional, off by default): each rank is a note (#1 highest); a perfect game ends on a chord.
+  6. Blitz glow: fast hits make the squid glow brighter (momentum, no scoring change); the score bumps with each
+     gain, harder for bigger ones; passing your best flares.
+- Rewards follow value, never obscurity: the game rewards big answers, not niche ones.
+- Decorations are aria-hidden and never delay game state; tests and screen readers see the final state at once.
+  `prefers-reduced-motion` gets static states.
+- Play events (`src/game/events.ts`, `onPlay`) are how feedback layers hear about finds, misses, hints and ends.

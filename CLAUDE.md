@@ -1,6 +1,6 @@
-# Top Tens
+# TENtacle (formerly Top Tens)
 
-A browser game: a category is shown ("Most populous countries"), the player names the top 10, 5 lives.
+A browser game (TENtacle): a category is shown ("Most populous countries"), the player names the top 10, 5 lives.
 Static site (Vite + React + TypeScript), no backend. Puzzles are prebuilt from Wikipedia into JSON.
 
 Read `docs/DESIGN.md` for the rules of the game and the visual direction.
