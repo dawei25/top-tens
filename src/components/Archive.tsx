@@ -44,7 +44,7 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
           const isToday = e.date === today;
           return (
             <li key={e.date}>
-              <a ref={i === 0 ? firstRef : undefined} className={`arch-row ${isToday ? "today" : ""}`} href={`#daily-${e.date}`}>
+              <a ref={i === 0 ? firstRef : undefined} className={`arch-row ${isToday ? "today" : ""}`} data-testid="archive-row" data-date={e.date} href={`#daily-${e.date}`}>
                 <span className="arch-n">#{e.n}</span>
                 <span className="arch-date">{formatAsOf(e.date).replace(/, \d{4}$/, "")}</span>
                 <span className="arch-title">

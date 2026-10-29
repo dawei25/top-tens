@@ -312,6 +312,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
           <div
             key={lostLife?.key}
             className={`lives ${lostLife ? "lives-hit" : ""}`}
+            data-testid="lives"
+            data-lives={game.lives}
             role="img"
             aria-label={`${game.lives} ${game.lives === 1 ? "life" : "lives"} left`}
           >
@@ -367,6 +369,9 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
             return (
               <li
                 key={a.rank}
+                data-testid="slot"
+                data-rank={a.rank}
+                data-state={found ? "found" : revealed ? "missed" : hinted ? "hinted" : "hidden"}
                 className={[
                   "slot",
                   found ? "found" : revealed ? "missed" : "hidden",
@@ -412,12 +417,13 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                       )
                     ) : hinted ? (
                       <span className="blank" aria-label={`not found yet, starts with ${hintLetter(a.name)}`}>
-                        <b className="hint-letter">{hintLetter(a.name)}</b> . . . . . . .
+                        <b className="hint-letter" data-testid="hint-letter">{hintLetter(a.name)}</b> . . . . . . .
                       </span>
                     ) : (
                       <button
                         type="button"
                         className="blank-toggle"
+                        data-testid="hint-open"
                         aria-label={`Not found yet. Hint for #${a.rank}`}
                         aria-expanded={asking}
                       >
@@ -436,6 +442,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                         <span>hint: first letter? costs 1 life</span>
                         <button
                           ref={yesRef}
+                          data-testid="hint-yes"
                           type="button"
                           className="key key-xs key-gold"
                           onClick={(e) => {
@@ -447,7 +454,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                         </button>
                       </>
                     ) : (
-                      <span role="status">no hints on your last life</span>
+                      <span role="status" data-testid="hint-refused">no hints on your last life</span>
                     )}
                   </div>
                 )}
@@ -468,6 +475,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               type="button"
               className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
               onClick={quit}
+              data-testid="give-up"
               onBlur={() => setConfirmQuit(false)}
             >
               {confirmQuit ? "Sure?" : "Give up"}
@@ -504,10 +512,10 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         <form className="guess" onSubmit={submit}>
           <div className="feedback-line">
             {feedback ? (
-              <div key={feedback.key} className={`feedback ${feedback.tone}`} role="status">
+              <div key={feedback.key} className={`feedback ${feedback.tone}`} role="status" data-testid="feedback" data-tone={feedback.tone}>
                 <span>{feedback.text}</span>
                 {feedback.suggestions?.map((s) => (
-                  <button key={s} type="button" className="suggestion" onClick={() => fill(s)}>
+                  <button key={s} type="button" className="suggestion" data-testid="suggestion" onClick={() => fill(s)}>
                     {s}
                   </button>
                 ))}
@@ -530,7 +538,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               enterKeyHint="send"
               aria-label="Your guess"
             />
-            <button className="key key-pink" type="submit" disabled={!input.trim()}>
+            <button className="key key-pink" type="submit" data-testid="guess-submit" disabled={!input.trim()}>
               Guess
             </button>
           </div>
@@ -538,6 +546,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
       ) : (
         <section
           ref={resultsRef}
+          data-testid="results"
           className={`panel results ${endedHere ? "enter" : ""}`}
           style={{ "--d": `${resultsDelay}ms` } as CSSProperties}
           aria-live="polite"
@@ -545,7 +554,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
           <p className={`label ${game.status === "won" ? "gold" : "pink"}`}>
             {game.status === "won" ? "Perfect 10" : game.status === "gave-up" ? "Gave up" : "Game over"}
           </p>
-          <p className="score" aria-label={`${game.found.length} out of 10`}>
+          <p className="score" data-testid="score" data-found={game.found.length} aria-label={`${game.found.length} out of 10`}>
             <span className={`score-n ${game.status === "won" ? "gold" : ""}`}>{game.found.length}</span>
             <span className="score-of">/10</span>
           </p>
@@ -572,11 +581,11 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               {copied ? "Copied" : "Share"}
             </button>
             {blitzOpen && (
-              <a className="key key-blitz" href={`#blitz-${puzzle.id}`}>
+              <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`}>
                 Blitz
               </a>
             )}
-            <button className="key" onClick={playAgain}>
+            <button className="key" data-testid="play-again" onClick={playAgain}>
               Play again
             </button>
             <button className="key" onClick={onRoll}>

@@ -19,6 +19,7 @@ function ModeKey({
   done = false,
   disabled = false,
   btnRef,
+  testId,
   onClick,
 }: {
   mode: Mode;
@@ -28,6 +29,7 @@ function ModeKey({
   done?: boolean;
   disabled?: boolean;
   btnRef?: React.Ref<HTMLButtonElement>;
+  testId: string;
   onClick: () => void;
 }) {
   return (
@@ -36,10 +38,14 @@ function ModeKey({
       className={`key mode-key ${mode} ${today ? "today" : ""} ${done ? "done" : ""}`}
       onClick={onClick}
       disabled={disabled}
+      data-testid={testId}
+      data-done={done || undefined}
     >
       <span className="mode-key-top">
         <ModeTag mode={mode} />
-        <span className="key-sub">{status}</span>
+        <span className="key-sub" data-testid={`${testId}-status`}>
+          {status}
+        </span>
       </span>
       <span className="mode-key-main">
         <span className="key-label">{title}</span>
@@ -165,6 +171,7 @@ export function Home({
             mode="classic"
             today
             btnRef={dailyRef}
+            testId="today-list"
             title="Today's list"
             status={!entry ? "none yet" : dailyDone ? `${dailyGame.found.length}/10` : dailyGame ? "playing" : "new"}
             done={dailyDone}
@@ -176,6 +183,7 @@ export function Home({
               mode="blitz"
               today
               btnRef={blitzRef}
+              testId="today-blitz"
               title="Today's Blitz"
               status={dailyBlitzDone ? `${dailyBlitzDone.score} pts` : "new"}
               done={!!dailyBlitzDone}
@@ -192,9 +200,16 @@ export function Home({
           </h2>
         </div>
         <div className="mode-pair">
-          <ModeKey mode="classic" title="Random list" status={`${index.length} lists`} onClick={start(() => onRoll())} />
+          <ModeKey
+            mode="classic"
+            testId="random-list"
+            title="Random list"
+            status={`${index.length} lists`}
+            onClick={start(() => onRoll())}
+          />
           <ModeKey
             mode="blitz"
+            testId="random-blitz"
             title="Random Blitz"
             status={`${blitzCount} lists`}
             onClick={start(() => {
@@ -209,7 +224,7 @@ export function Home({
           <span className="caption">or by category</span>
           <div className="chips">
             {categories.map((c) => (
-              <button key={c} className="chip" onClick={start(() => onRoll(c))}>
+              <button key={c} className="chip" data-testid="category" onClick={start(() => onRoll(c))}>
                 {c}
               </button>
             ))}
@@ -222,10 +237,14 @@ export function Home({
           Your games
         </h2>
         <div className="games-row">
-          <button className="key key-sm games-key" onClick={start(onArchive)}>
+          <button className="key key-sm games-key" data-testid="archive-key" onClick={start(onArchive)}>
             Archive <span className="games-n">{archiveCount}</span>
           </button>
-          <button className="key key-sm games-key" onClick={start(() => (location.hash = "#history"))}>
+          <button
+            className="key key-sm games-key"
+            data-testid="history-key"
+            onClick={start(() => (location.hash = "#history"))}
+          >
             Past runs {plays > 0 && <span className="games-n">{plays}</span>}
           </button>
         </div>
@@ -279,6 +298,7 @@ export function Home({
             <button
               type="button"
               className={`text-btn ${confirmReset ? "danger" : ""}`}
+              data-testid="reset-all"
               onClick={resetAll}
               onBlur={() => setConfirmReset(false)}
             >

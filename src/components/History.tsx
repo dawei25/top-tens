@@ -55,7 +55,7 @@ export function History({ index, schedule, entry, onBack, onHome }: Props) {
             const [date, time] = runTime(p.at).split(", ");
             return (
               <li key={`${p.kind}-${p.id}-${p.at}`}>
-                <a className="arch-row play-row" href={href(p, schedule)}>
+                <a className="arch-row play-row" data-testid="history-row" data-kind={p.kind} href={href(p, schedule)}>
                   <span className="arch-n play-date">{date}</span>
                   <span className="arch-date">{time}</span>
                   <span className="arch-title">

@@ -99,11 +99,13 @@ export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; o
   }, []);
   return (
     <header className="game-head">
-      <button className="key key-icon" onClick={onBack} aria-label="Back" title="Back (Esc)">
+      <button className="key key-icon" onClick={onBack} aria-label="Back" title="Back (Esc)" data-testid="nav-back">
         <BackArrow />
       </button>
-      <div className="game-head-mid">{children}</div>
-      <button className="key key-icon" onClick={onHome} aria-label="Home" title="Home">
+      <div className="game-head-mid" data-testid="screen-title">
+        {children}
+      </div>
+      <button className="key key-icon" onClick={onHome} aria-label="Home" title="Home" data-testid="nav-home">
         <HomeIcon />
       </button>
     </header>

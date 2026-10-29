@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
+    "e2e": "node e2e/run.mjs",
     "inspect": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/inspect.ts",
     "build:puzzles": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/build.ts",
     "build:test": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/build.ts --test"
