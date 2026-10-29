@@ -1,0 +1,52 @@
+{
+  "New England Patriots": {
+    "text": "In 2007 they had the only undefeated 16-game regular season in NFL history.",
+    "source": "https://en.wikipedia.org/wiki/New_England_Patriots",
+    "evidence": "Other NFL records held by the franchise include the most wins in a 10-year period (126 from 2003 to 2012), the longest winning streak of regular season and playoff games (21 from October 2003 to October 2004), the second most consecutive winning seasons (19 from 2001 to 2019), second only to the Dallas Cowboys (20 from 1966 to 1985), the most consecutive conference championship appearances (8 from 2011 to 2018), the most consecutive division titles (11 from 2009 to 2019), the only undefeated 16-game regular season (2007), the most postseason wins (40, tied with the San Francisco 49ers), and the highest postseason winning percentage (.638)."
+  },
+  "Pittsburgh Steelers": {
+    "text": "In the pre-merger NFL they were the oldest team never to have won a league championship.",
+    "source": "https://en.wikipedia.org/wiki/Pittsburgh_Steelers",
+    "evidence": "In contrast with their status as a perennial losing franchise in the pre-merger NFL, where they were the oldest team never to have won a league championship, the Steelers of the post-merger (modern) era are among the most successful NFL franchises, especially during their dynasty in the 1970s."
+  },
+  "San Francisco 49ers": {
+    "text": "They were the first major professional sports team based in San Francisco.",
+    "source": "https://en.wikipedia.org/wiki/San_Francisco_49ers",
+    "evidence": "The 49ers were the first major professional sports team based in San Francisco."
+  },
+  "Dallas Cowboys": {
+    "text": "They are the only NFL team to record 20 straight winning seasons, from 1966 to 1985.",
+    "source": "https://en.wikipedia.org/wiki/Dallas_Cowboys",
+    "evidence": "The Cowboys are the only NFL team to record 20 straight winning seasons (from 1966 to 1985) during which they missed the playoffs only twice (1974 and 1984)."
+  },
+  "Kansas City Chiefs": {
+    "text": "They started out in 1960 as the Dallas Texans and moved to Kansas City in 1963.",
+    "source": "https://en.wikipedia.org/wiki/Kansas_City_Chiefs",
+    "evidence": "Established in 1959 as a charter member of the American Football League (AFL), the Chiefs started playing in 1960 as the Dallas Texans, owned by league founder Lamar Hunt. In 1963, the team moved to Kansas City, and adopted its current name."
+  },
+  "Green Bay Packers": {
+    "text": "They are the only non-profit, community-owned major league professional sports team in the US.",
+    "source": "https://en.wikipedia.org/wiki/Green_Bay_Packers",
+    "evidence": "They are the third-oldest franchise in the NFL, established in 1919, and are the only non-profit, community-owned major league professional sports team based in the United States."
+  },
+  "New York Giants": {
+    "text": "Their corporate name is still \"New York Football Giants\", coined to tell them apart from the baseball Giants.",
+    "source": "https://en.wikipedia.org/wiki/New_York_Giants",
+    "evidence": "To distinguish themselves from the professional baseball team of the same name, the football team was incorporated as the \"New York National League Football Company, Inc.\" in 1929 and then changed to \"New York Football Giants, Inc.\" in 1937. While the baseball team moved to San Francisco after the 1957 season, the football team continues to legally use it as its corporate name, which the team is often referred to by fans and sportscasters alike."
+  },
+  "Denver Broncos": {
+    "text": "In 1967 they became the first AFL team to beat an NFL team, in a preseason game against Detroit.",
+    "source": "https://en.wikipedia.org/wiki/Denver_Broncos",
+    "evidence": "Seven years later on August 5, 1967, they became the first-ever AFL team to defeat an NFL team, with a 13–7 win over the Detroit Lions in a preseason game."
+  },
+  "Las Vegas Raiders": {
+    "text": "When founded in 1960, the team was almost named the Oakland Señors.",
+    "source": "https://en.wikipedia.org/wiki/Las_Vegas_Raiders",
+    "evidence": "The team was almost chosen under the nickname \"Señors\" when established, as close to the team sporting the \"Oakland Señors\" team name is the original idea of the orange and black team theme colors, that were discontinued as well."
+  },
+  "Washington Commanders": {
+    "text": "Its marching band has played the team's fight song after home touchdowns since 1937.",
+    "source": "https://en.wikipedia.org/wiki/Washington_Commanders",
+    "evidence": "Washington was among the first NFL franchises with an original fight song, \"Hail to the Commanders\", which has been played by their marching band after home game touchdowns since 1937."
+  }
+}
