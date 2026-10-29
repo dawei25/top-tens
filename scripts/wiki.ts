@@ -8,6 +8,12 @@ const USER_AGENT = "TopTensPuzzleBuilder/0.1 (hobby trivia game)";
 const MIN_GAP_MS = 1500;
 
 let lastRequest = 0;
+let networkRequests = 0;
+
+/** Requests that went to Wikipedia (cache misses) since the process started. */
+export function requestCount(): number {
+  return networkRequests;
+}
 
 export class NotFound extends Error {}
 
@@ -21,6 +27,7 @@ async function fetchCached(url: string, cacheOnly = false): Promise<string> {
     const wait = lastRequest + MIN_GAP_MS - Date.now();
     if (wait > 0) await new Promise((r) => setTimeout(r, wait));
     lastRequest = Date.now();
+    networkRequests++;
     const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
     if (res.ok) {
       const body = await res.text();
@@ -40,6 +47,25 @@ export function pageUrl(title: string): string {
 
 export async function fetchPage(title: string): Promise<cheerio.CheerioAPI> {
   return cheerio.load(await fetchCached(pageUrl(title)));
+}
+
+/**
+ * "Page views in the past 30 days" from an article's info page (normal HTML; the pageviews API is rate-limited
+ * from here). Undefined if the page has no such row.
+ */
+export async function fetchPageViews(title: string): Promise<number | undefined> {
+  const url = `https://en.wikipedia.org/w/index.php?title=${encodeURIComponent(title.replace(/ /g, "_"))}&action=info`;
+  let html: string;
+  try {
+    html = await fetchCached(url);
+  } catch (e) {
+    if (e instanceof NotFound) return undefined;
+    throw e;
+  }
+  const $ = cheerio.load(html);
+  const row = $("tr").filter((_, tr) => /page views in the past 30 days/i.test($(tr).children().first().text()));
+  const n = row.first().children().last().text().replace(/[^\d]/g, "");
+  return n ? Number(n) : undefined;
 }
 
 const JUNK_REDIRECT =
