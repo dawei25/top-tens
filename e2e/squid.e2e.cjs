@@ -38,6 +38,19 @@ for (const vp of VIEWPORTS) {
     assert.deepEqual(await litRanks(), [1, 4, 7]);
     assert.equal(await squid.getAttribute("data-mood"), "play");
     assert.ok(await noHScroll(page));
+
+    // Give up: the results panel has the big squid, with the same limbs lit and the header squid dimmed.
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("give-up").click();
+    const hero = page.getByTestId("results").getByTestId("results-squid");
+    await hero.waitFor();
+    assert.deepEqual(
+      (await hero.locator('[data-limb][data-on="true"]').evaluateAll((els) => els.map((e) => Number(e.dataset.limb)))).sort((a, b) => a - b),
+      [1, 4, 7],
+    );
+    assert.equal(await hero.getAttribute("data-mood"), "gave-up");
+    assert.equal(await squid.getAttribute("data-mood"), "gave-up");
+    assert.ok(await noHScroll(page));
     await ctx.close();
   });
 
