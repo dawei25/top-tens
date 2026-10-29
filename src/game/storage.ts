@@ -12,6 +12,10 @@ export interface Saved {
   blitzBest?: Record<string, number>;
   /** Finished Blitz rounds per list id, newest first, capped (see MAX_BLITZ_RUNS in blitz.ts). */
   blitzRuns?: Record<string, BlitzRun[]>;
+  /**
+   * Today's Blitz results by local date: the first round finished on that date counts; replays don't change it.
+   */
+  blitzDaily?: Record<string, { id: string; score: number; answers: number }>;
   /** A Blitz round in progress per list id, saved after every hit so leaving the page doesn't lose it. */
   blitzLive?: Record<string, BlitzState>;
 }
