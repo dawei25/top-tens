@@ -42,17 +42,19 @@ export function BackArrow() {
  * changes height while typing.
  */
 export function TypeIn({ text, animate, delay = 0 }: { text: string; animate: boolean; delay?: number }) {
-  const [n, setN] = useState(animate ? 0 : text.length);
+  // -1: waiting for its turn (nothing shown yet, but the row already has its final height).
+  const [n, setN] = useState(animate ? -1 : text.length);
   useEffect(() => {
     if (!animate) {
       setN(text.length);
       return;
     }
-    setN(0);
+    setN(-1);
     const step = Math.max(10, Math.min(40, 420 / text.length));
     let i = 0;
     let timer: ReturnType<typeof setInterval> | undefined;
     const start = setTimeout(() => {
+      setN(0);
       timer = setInterval(() => {
         i += 1;
         setN(i);
@@ -69,11 +71,17 @@ export function TypeIn({ text, animate, delay = 0 }: { text: string; animate: bo
   return (
     <>
       <span className="sr-only">{text}</span>
-      <span aria-hidden="true">
-        {text.slice(0, n)}
-        <span className="type-cursor">{text[n]}</span>
-        <span className="type-ghost">{text.slice(n + 1)}</span>
-      </span>
+      {n < 0 ? (
+        <span className="type-ghost" aria-hidden="true">
+          {text}
+        </span>
+      ) : (
+        <span aria-hidden="true">
+          {text.slice(0, n)}
+          <span className="type-cursor">{text[n]}</span>
+          <span className="type-ghost">{text.slice(n + 1)}</span>
+        </span>
+      )}
     </>
   );
 }

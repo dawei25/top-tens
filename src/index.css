@@ -7,6 +7,7 @@
   --panel-2: #101d33;
   --glass: rgba(8, 24, 46, 0.92);
   --well: #08162b;
+  --bar: #040912;
   --key: #0a1a30;
   --key-hi: #11264a;
   --key-shadow: #02060f;
@@ -119,7 +120,6 @@ a {
   color: var(--label);
 }
 .caption {
-  text-wrap: balance;
   font-size: 19px;
   color: var(--muted);
   letter-spacing: 0.06em;
@@ -294,6 +294,9 @@ a {
   flex-direction: column;
   align-items: center;
   gap: 8px;
+}
+.title .caption {
+  text-wrap: balance;
 }
 .title-kicker {
   color: var(--cyan);
@@ -677,9 +680,9 @@ a {
   z-index: 5;
   margin-top: 2px;
   padding: 10px 0 max(14px, env(safe-area-inset-bottom));
-  background: rgba(4, 9, 18, 0.96);
+  background: var(--bar);
   /* Full-bleed background without widening the layout. */
-  box-shadow: 0 0 0 100vmax rgba(4, 9, 18, 0.96);
+  box-shadow: 0 0 0 100vmax var(--bar);
   clip-path: inset(0 -100vmax);
   border-top: 1px solid var(--hairline);
   display: flex;
@@ -840,6 +843,10 @@ a {
   }
   .slot {
     min-height: 44px;
+  }
+  /* Room for a value column: long names wrap beside it instead of pushing it down. */
+  .slot-body {
+    flex-wrap: nowrap;
   }
   .rank {
     font-size: 32px;
