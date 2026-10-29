@@ -1,3 +1,3 @@
 export { Squid, type SquidMood } from "./Squid";
-export { BlitzSquid, ClassicSquid, ScoreBump } from "./modes";
+export { BlitzResultsSquid, BlitzSquid, ClassicSquid, ResultsSquid, ScoreBump } from "./modes";
 export { SquidFx } from "./SquidFx";

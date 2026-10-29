@@ -31,7 +31,7 @@ import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
 import { ModeTag, ScreenHead } from "./pixel";
 import { CountUp, ScoreFloat } from "./motion/effects";
-import { BlitzSquid, ScoreBump } from "./squid";
+import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
 
 interface Props {
   id: string;
@@ -498,6 +498,7 @@ export function Blitz({
     body = (
       <>
         <section className="panel results enter" data-testid="blitz-results" aria-live="polite">
+          <BlitzResultsSquid hits={state.hits} best={!!record?.best && score > 0 && record.previous !== undefined} />
           <p className="label gold" data-motion="banner">Time's up</p>
           {note === "away" && <p className="caption">time ran out while you were away.</p>}
           <p className="score" aria-label={`${score} points`}>

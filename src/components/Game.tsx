@@ -22,7 +22,7 @@ import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
 import { formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
 import { CountUp } from "./motion/effects";
-import { ClassicSquid, SquidFx } from "./squid";
+import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
 
 interface Props {
   id: string;
@@ -562,6 +562,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
           style={{ "--d": `${resultsDelay}ms` } as CSSProperties}
           aria-live="polite"
         >
+          <ResultsSquid found={game.found} status={game.status} cheerAt={endedHere ? resultsDelay + 550 : undefined} />
           <p className={`label ${game.status === "won" ? "gold" : "pink"}`} data-motion={game.status === "gave-up" ? undefined : "banner"}>
             {game.status === "won" ? "Perfect 10" : game.status === "gave-up" ? "Gave up" : "Game over"}
           </p>

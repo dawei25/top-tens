@@ -22,6 +22,39 @@ export function ClassicSquid({ found, status }: { found: readonly number[]; stat
   return <Squid mode="classic" lit={found} mood={status === "playing" ? "play" : status} flinch={flinch} />;
 }
 
+/**
+ * The big squid on the classic results panel: the found ranks lit, the same moods as the header squid. A game won
+ * on screen gets its celebration here (the page scrolls down to the results as the round ends, taking the header
+ * squid out of view): `cheerAt` is when, in ms after the panel mounts.
+ */
+export function ResultsSquid({ found, status, cheerAt }: { found: readonly number[]; status: GameState["status"]; cheerAt?: number }) {
+  return (
+    <Squid
+      mode="classic"
+      hero
+      testId="results-squid"
+      lit={found}
+      mood={status === "playing" ? "play" : status}
+      cheer={status === "won" && cheerAt !== undefined ? { kind: "win", delay: cheerAt } : null}
+    />
+  );
+}
+
+/** The big squid on the Blitz results panel: the list's top-10 answers scored are lit; a new best spins it. */
+export function BlitzResultsSquid({ hits, best }: { hits: readonly BlitzHit[]; best: boolean }) {
+  const lit = hits.filter((h) => h.rank >= 1 && h.rank <= 10).map((h) => h.rank);
+  return (
+    <Squid
+      mode="blitz"
+      hero
+      testId="results-squid"
+      lit={lit}
+      mood={lit.length === 10 ? "won" : "play"}
+      cheer={best ? { kind: "best", delay: 700 } : null}
+    />
+  );
+}
+
 /** Hits closer together than this build momentum; further apart, it starts over. */
 const STREAK_MS = 4000;
 /** Momentum holds this long after the last hit, then drops a level every DECAY_STEP_MS. */
