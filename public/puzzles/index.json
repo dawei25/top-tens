@@ -1,0 +1,82 @@
+[
+ {
+  "id": "countries-population",
+  "title": "Most populous countries",
+  "category": "Geography"
+ },
+ {
+  "id": "countries-area",
+  "title": "Largest countries by area",
+  "category": "Geography"
+ },
+ {
+  "id": "countries-gdp",
+  "title": "Largest economies",
+  "category": "Geography"
+ },
+ {
+  "id": "asia-population",
+  "title": "Most populous Asian countries",
+  "category": "Geography"
+ },
+ {
+  "id": "europe-population",
+  "title": "Most populous European countries",
+  "category": "Geography"
+ },
+ {
+  "id": "us-states-population",
+  "title": "Most populous US states",
+  "category": "Geography"
+ },
+ {
+  "id": "world-cities",
+  "title": "Largest cities in the world",
+  "category": "Geography"
+ },
+ {
+  "id": "islands",
+  "title": "Largest islands",
+  "category": "Geography"
+ },
+ {
+  "id": "tourism",
+  "title": "Most visited countries",
+  "category": "Geography"
+ },
+ {
+  "id": "billionaire-countries",
+  "title": "Countries with the most billionaires",
+  "category": "Business"
+ },
+ {
+  "id": "films-gross",
+  "title": "Highest-grossing films",
+  "category": "Entertainment"
+ },
+ {
+  "id": "video-games",
+  "title": "Best-selling video games",
+  "category": "Entertainment"
+ },
+ {
+  "id": "consoles",
+  "title": "Best-selling game consoles",
+  "category": "Entertainment"
+ },
+ {
+  "id": "books",
+  "title": "Best-selling books",
+  "category": "Culture"
+ },
+ {
+  "id": "languages",
+  "title": "Most spoken languages",
+  "category": "Culture"
+ },
+ {
+  "id": "nba-points",
+  "title": "NBA career scoring leaders",
+  "category": "Sports"
+ }
+]

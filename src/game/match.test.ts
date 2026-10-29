@@ -72,6 +72,12 @@ describe("judgeGuess", () => {
     expect(judge("Packeestan")).toMatchObject({ kind: "typo", suggestions: ["Pakistan"] });
   });
 
+  it("never credits a different real answer (Listable accepts Indonesia for India)", () => {
+    const withoutIndonesia = { ...puzzle, answers: puzzle.answers.filter((a) => a.rank !== 4) };
+    expect(judgeGuess("Indonesia", withoutIndonesia, new Set()).kind).toBe("wrong");
+    expect(judgeGuess("Iran", puzzle, new Set())).toMatchObject({ kind: "near", entry: { name: "Iran" } });
+  });
+
   it("marks unrelated answers wrong", () => {
     expect(judge("Japan").kind).toBe("wrong");
     expect(judge("asdfgh").kind).toBe("wrong");
