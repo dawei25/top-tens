@@ -9,6 +9,20 @@ export function ordinal(n: number): string {
   return `${n}${s}`;
 }
 
+/** "2026-10-29" -> "Oct 29, 2026"; anything unparseable comes back as is. */
+export function formatAsOf(asOf: string): string {
+  const m = asOf.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return asOf;
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  if (Number.isNaN(d.getTime())) return asOf;
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+}
+
+/** "Wikipedia: List of ..." -> "Wikipedia". */
+export function sourceSite(name: string): string {
+  return name.split(":")[0].trim() || name;
+}
+
 /** Builds a crisp SVG path from a pixel map ("#" = on). */
 function pixels(rows: string[]): string {
   let d = "";

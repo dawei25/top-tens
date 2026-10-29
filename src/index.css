@@ -507,6 +507,18 @@ a {
   margin-top: 6px;
   font-size: 18px;
 }
+.asof {
+  margin-top: 4px;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.asof a {
+  color: var(--label);
+}
+.asof a:hover {
+  color: var(--cyan);
+}
 
 /* The high-score table */
 .board {
@@ -532,17 +544,25 @@ a {
   padding-bottom: 6px;
   border-bottom: 1px dashed var(--hairline);
   font-size: 14px;
+  line-height: 1.15;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted);
+}
+/* RANK and NAME never give way; a long metric wraps onto a second line instead of being cut. */
+.board-head .slot-body {
+  flex-wrap: nowrap;
+}
+.board-head .slot-body > span:first-child {
+  flex: none;
 }
 .board-metric {
+  flex: 0 1 auto;
+  min-width: 0;
   margin-left: auto;
   text-align: right;
-  max-width: 14em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 .slots {
   list-style: none;
@@ -645,6 +665,123 @@ a {
 .slot.late .rank,
 .slot.late .value {
   animation: fade 0.2s var(--d, 0ms) steps(2, end) both;
+}
+
+/* Facts: a revealed row with a fact carries a tiny "i" key; hover (mouse), tap or Enter opens it under the row. */
+.slot.has-fact {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.slot.fact-open {
+  background: rgba(77, 227, 255, 0.04);
+}
+@media (hover: hover) {
+  .slot.has-fact:hover {
+    background: rgba(77, 227, 255, 0.04);
+  }
+}
+.fact-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 0.95em;
+  height: 0.95em;
+  margin-left: 0.45em;
+  padding: 0;
+  border: 1px solid rgba(77, 227, 255, 0.45);
+  border-radius: 3px;
+  background: var(--key);
+  box-shadow: 0 2px 0 var(--key-shadow);
+  color: var(--cyan);
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  vertical-align: 0.12em;
+  cursor: pointer;
+}
+.slot.missed .fact-mark {
+  border-color: var(--hairline);
+  color: var(--muted);
+}
+.slot.fact-open .fact-mark {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: var(--well);
+  box-shadow: 0 1px 0 var(--key-shadow);
+  transform: translateY(1px);
+}
+.slot.top .fact-mark {
+  border-color: rgba(255, 209, 102, 0.5);
+  color: var(--gold);
+}
+.slot.top.fact-open .fact-mark {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--gold-ink);
+}
+/* The row shows its focus ring; the little key doesn't need its own. */
+.fact-mark:focus-visible {
+  outline: none;
+}
+.slot:has(.fact-mark:focus-visible) {
+  outline: 3px solid var(--cyan);
+  outline-offset: -3px;
+}
+.slot.just .fact-mark {
+  animation: fade 0.25s 0.4s steps(3, end) both;
+}
+.slot.late .fact-mark {
+  animation: fade 0.2s calc(var(--d, 0ms) + 0.35s) steps(2, end) both;
+}
+.fact {
+  grid-column: 2 / -1;
+  margin: 4px 0 4px;
+  padding-left: 10px;
+  border-left: 2px solid var(--cyan-edge);
+  font-size: 19px;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  cursor: auto;
+  animation: fact-in 0.18s steps(3, end) both;
+}
+.slot.top .fact {
+  border-left-color: var(--gold);
+}
+.slot.missed .fact {
+  border-left-color: var(--faint);
+  color: var(--label);
+}
+.fact-source {
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.fact-source:hover {
+  color: var(--cyan);
+}
+.board-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 16px 2px;
+  border-top: 1px dashed var(--hairline);
+}
+.fact-all {
+  min-height: 36px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  touch-action: manipulation;
+}
+.fact-all:hover {
+  color: var(--cyan);
 }
 
 .misses {
@@ -923,6 +1060,16 @@ a {
     transform: scale(1.6);
   }
   100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fact-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
     opacity: 1;
     transform: none;
   }

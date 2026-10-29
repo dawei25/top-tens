@@ -5,7 +5,7 @@ import { applyGuess, giveUp, MAX_LIVES, newGame, shareText, type GameState } fro
 import { load, save } from "../game/storage";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
-import { BackArrow, Heart, ordinal, reducedMotion, TypeIn } from "./pixel";
+import { BackArrow, formatAsOf, Heart, ordinal, reducedMotion, sourceSite, TypeIn } from "./pixel";
 
 interface Props {
   id: string;
@@ -26,6 +26,8 @@ interface Feedback {
 
 /** Milliseconds between missed rows typing in at the end of a game. */
 const REVEAL_STEP = 90;
+/** Mouse rest before a row's fact opens, so sweeping across the board doesn't flicker rows open. */
+const HOVER_DELAY = 180;
 
 function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   switch (r.kind) {
@@ -68,6 +70,13 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLElement>(null);
   const shareRef = useRef<HTMLButtonElement>(null);
+  /** Facts opened by tap, click or keyboard (by rank). */
+  const [openFacts, setOpenFacts] = useState<ReadonlySet<number>>(() => new Set());
+  /** Fact shown because the mouse rests on its row. */
+  const [hoverFact, setHoverFact] = useState<number | null>(null);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(hoverTimer.current), []);
 
   useEffect(() => {
     loadPuzzle(id)
@@ -182,6 +191,23 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
   );
   const missedRanks = puzzle.answers.filter((a) => !game.found.includes(a.rank)).map((a) => a.rank);
   const animate = !reducedMotion();
+  const asOf = formatAsOf(puzzle.source.asOf);
+
+  // Facts only ever belong to revealed rows: a hidden row's fact would be a hint.
+  const factRanks = puzzle.answers.filter((a) => a.fact && (over || game.found.includes(a.rank))).map((a) => a.rank);
+  const factShown = (rank: number) => openFacts.has(rank) || hoverFact === rank;
+  const toggleFact = (rank: number) => {
+    clearTimeout(hoverTimer.current);
+    const shown = factShown(rank);
+    setHoverFact(null);
+    setOpenFacts((prev) => {
+      const next = new Set(prev);
+      if (shown) next.delete(rank);
+      else next.add(rank);
+      return next;
+    });
+  };
+  const allFactsOpen = factRanks.length > 0 && factRanks.every((r) => openFacts.has(r));
 
   return (
     <main className={`screen game status-${game.status}`}>
@@ -220,6 +246,12 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
         </div>
         <h1>{puzzle.title}</h1>
         <p className="caption">{puzzle.prompt}</p>
+        <p className="asof">
+          <a href={puzzle.source.url} target="_blank" rel="noreferrer">
+            {sourceSite(puzzle.source.name)}
+          </a>
+          , as of {asOf}
+        </p>
       </section>
 
       <section className="panel board" aria-label="Top 10">
@@ -238,6 +270,8 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
             const missIdx = missedRanks.indexOf(a.rank);
             const revealDelay = !found && endedHere ? missIdx * REVEAL_STEP : 0;
             const typing = animate && (just || (!found && endedHere));
+            const fact = revealed ? a.fact : undefined;
+            const shown = !!fact && factShown(a.rank);
             return (
               <li
                 key={a.rank}
@@ -247,14 +281,48 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
                   a.rank === 1 ? "top" : "",
                   just ? "just" : "",
                   !found && endedHere ? "late" : "",
+                  fact ? "has-fact" : "",
+                  shown ? "fact-open" : "",
                 ].join(" ")}
                 style={{ "--d": `${revealDelay}ms` } as CSSProperties}
+                {...(fact && {
+                  onClick: (e: React.MouseEvent) => {
+                    if (!(e.target as Element).closest("a")) toggleFact(a.rank);
+                  },
+                  // Keep focus where it is (the guess box during play), so opening a fact never costs a keystroke.
+                  onMouseDown: (e: React.MouseEvent) => {
+                    if (!(e.target as Element).closest("a")) e.preventDefault();
+                  },
+                  onPointerEnter: (e: React.PointerEvent) => {
+                    if (e.pointerType !== "mouse") return;
+                    clearTimeout(hoverTimer.current);
+                    hoverTimer.current = setTimeout(() => setHoverFact(a.rank), HOVER_DELAY);
+                  },
+                })}
+                onPointerLeave={(e) => {
+                  if (e.pointerType !== "mouse") return;
+                  clearTimeout(hoverTimer.current);
+                  setHoverFact((h) => (h === a.rank ? null : h));
+                }}
               >
                 <span className="rank">{ordinal(a.rank)}</span>
                 <span className="slot-body">
                   <span className="name">
                     {revealed ? (
-                      <TypeIn text={a.name} animate={typing} delay={revealDelay} />
+                      <>
+                        <TypeIn text={a.name} animate={typing} delay={revealDelay} />
+                        {fact && (
+                          <button
+                            type="button"
+                            className="fact-mark"
+                            aria-expanded={shown}
+                            aria-controls={`fact-${a.rank}`}
+                            aria-label={`Fact about ${a.name}`}
+                          >
+                            i
+                          </button>
+                        )}
+                      </>
                     ) : (
                       <span className="blank" aria-label="not found yet">
                         . . . . . . . .
@@ -263,10 +331,30 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
                   </span>
                   {revealed && a.value && <span className="value">{a.value}</span>}
                 </span>
+                {fact && shown && (
+                  <p className="fact" id={`fact-${a.rank}`}>
+                    {fact.text}{" "}
+                    <a className="fact-source" href={fact.source} target="_blank" rel="noreferrer">
+                      source
+                    </a>
+                  </p>
+                )}
               </li>
             );
           })}
         </ol>
+        {over && factRanks.length > 0 && (
+          <div className="board-foot">
+            <button
+              type="button"
+              className="fact-all"
+              aria-pressed={allFactsOpen}
+              onClick={() => setOpenFacts(allFactsOpen ? new Set() : new Set(factRanks))}
+            >
+              {allFactsOpen ? "hide facts" : "show all facts"}
+            </button>
+          </div>
+        )}
       </section>
 
       {misses.length > 0 && (
@@ -349,8 +437,8 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
             source:{" "}
             <a href={puzzle.source.url} target="_blank" rel="noreferrer">
               {puzzle.source.name}
-            </a>{" "}
-            (as of {puzzle.source.asOf})
+            </a>
+            , as of {asOf}.
           </p>
         </section>
       )}
