@@ -10,17 +10,17 @@ const puzzle: Puzzle = {
   answers: ["India", "China", "United States", "Indonesia", "Pakistan", "Nigeria", "Brazil", "Bangladesh", "Russia", "Ethiopia"].map(
     (name, i) => ({ rank: i + 1, name, aliases: [] }),
   ),
-  extras: [{ rank: 11, name: "Mexico", aliases: [] }],
+  extras: ["Mexico", "Japan", "Philippines", "Egypt", "Vietnam"].map((name, i) => ({ rank: 11 + i, name, aliases: [] })),
 };
 
 const play = (...guesses: string[]) =>
   guesses.reduce((s, g) => applyGuess(s, puzzle, g).state, newGame(puzzle));
 
 describe("game state", () => {
-  it("only wrong and near guesses cost lives", () => {
-    const s = play("India", "Indai", "Packeestan", "Mexico", "Japan");
-    expect(s.found).toEqual([1]);
-    expect(s.lives).toBe(3);
+  it("only accepted non-top-10 answers cost lives", () => {
+    const s = play("India", "Indai", "Packeestan", "Mexico", "Japan", "asdf");
+    expect(s.found).toEqual([1, 5]);
+    expect(s.lives).toBe(3); // Mexico and Japan are accepted answers outside the top 10
   });
 
   it("does not charge twice for the same near miss", () => {
@@ -28,11 +28,11 @@ describe("game state", () => {
   });
 
   it("ends on five wrong guesses", () => {
-    expect(play("Japan", "Canada", "Peru", "Kenya", "Oman").status).toBe("lost");
+    expect(play("Mexico", "Japan", "Philippines", "Egypt", "Vietnam").status).toBe("lost");
   });
 
-  it("junk input costs nothing and isn't logged", () => {
-    const s = play("asdf", "qwerty", "lkjh");
+  it("unrecognized input costs nothing and isn't logged", () => {
+    const s = play("asdf", "qwerty", "Canada", "Elon Musk");
     expect(s.lives).toBe(5);
     expect(s.log).toHaveLength(0);
   });

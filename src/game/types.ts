@@ -1,4 +1,5 @@
 export interface Entry {
+  /** 1-based position in the source ranking; 0 for a real answer the source doesn't rank. */
   rank: number;
   name: string;
   aliases: string[];
@@ -17,7 +18,10 @@ export interface Puzzle {
   source: { name: string; url: string; asOf: string };
   /** Ranks 1-10, in order. */
   answers: Entry[];
-  /** Ranks 11+ from the same source. Guessing one costs a life but shows its rank. */
+  /**
+   * Every other accepted answer: ranks 11+ from the source, plus unranked real answers (rank 0).
+   * Guessing one costs a life. Anything outside answers + extras is free.
+   */
   extras: Entry[];
 }
 
@@ -27,5 +31,5 @@ export type GuessResult =
   | { kind: "duplicate"; entry: Entry }
   | { kind: "near"; entry: Entry; corrected: boolean }
   | { kind: "typo"; suggestions: string[] }
-  | { kind: "junk" }
-  | { kind: "wrong" };
+  /** Not an accepted answer for this list. Free; `junk` picks the message. */
+  | { kind: "unknown"; junk: boolean };

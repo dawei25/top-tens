@@ -21,8 +21,9 @@ export function newGame(puzzle: Puzzle): GameState {
   return { puzzleId: puzzle.id, found: [], lives: MAX_LIVES, log: [], status: "playing" };
 }
 
+/** Only an accepted answer that isn't in the top 10 costs a life. */
 export function costsLife(r: GuessResult): boolean {
-  return r.kind === "wrong" || r.kind === "near";
+  return r.kind === "near";
 }
 
 export function applyGuess(
@@ -33,10 +34,10 @@ export function applyGuess(
 ): { state: GameState; result: GuessResult } {
   if (state.status !== "playing") return { state, result: { kind: "empty" } };
   const result = judgeGuess(text, puzzle, new Set(state.found), lex);
-  if (result.kind === "empty" || result.kind === "junk") return { state, result };
+  if (result.kind !== "correct" && result.kind !== "near") return { state, result };
 
   // Re-guessing an answer that already cost a life shouldn't cost another.
-  if (costsLife(result) && result.kind === "near" && state.log.some((l) => l.result.kind === "near" && l.result.entry.rank === result.entry.rank)) {
+  if (result.kind === "near" && state.log.some((l) => l.result.kind === "near" && l.result.entry.name === result.entry.name)) {
     return { state, result: { kind: "duplicate", entry: result.entry } };
   }
 

@@ -68,25 +68,35 @@ describe("judgeGuess", () => {
     expect(judge("Germny")).toMatchObject({ kind: "near", corrected: true });
   });
 
-  it("treats far-off misspellings as typos, not wrong", () => {
-    expect(judge("Packeestan")).toMatchObject({ kind: "typo", suggestions: ["Pakistan"] });
+  it("fills in a clear misspelling of one top-10 answer", () => {
+    expect(judge("Packeestan")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Pakistan" } });
+  });
+
+  it("treats numbers as identity, not spelling", () => {
+    const games: Puzzle = {
+      ...puzzle,
+      answers: [e(1, "Grand Theft Auto V", ["GTA V"]), e(2, "Mario Kart 8")],
+      extras: [e(11, "Grand Theft Auto IV", ["GTA IV"]), e(12, "Grand Theft Auto: San Andreas")],
+    };
+    const g = (s: string) => judgeGuess(s, games, new Set());
+    expect(g("gta5")).toMatchObject({ kind: "correct", entry: { rank: 1 } });
+    expect(g("Grand Theft Auto 5")).toMatchObject({ kind: "correct", entry: { rank: 1 } });
+    expect(g("gta 4")).toMatchObject({ kind: "near", entry: { rank: 11 } });
+    expect(g("gta 6").kind).toBe("unknown");
+    expect(g("mario kart 7").kind).toBe("unknown");
   });
 
   it("never credits a different real answer (Listable accepts Indonesia for India)", () => {
     const withoutIndonesia = { ...puzzle, answers: puzzle.answers.filter((a) => a.rank !== 4) };
-    expect(judgeGuess("Indonesia", withoutIndonesia, new Set()).kind).toBe("wrong");
+    expect(judgeGuess("Indonesia", withoutIndonesia, new Set()).kind).toBe("unknown");
     expect(judgeGuess("Iran", puzzle, new Set())).toMatchObject({ kind: "near", entry: { name: "Iran" } });
   });
 
-  it("marks unrelated answers wrong", () => {
-    expect(judge("Japan").kind).toBe("wrong");
-    expect(judge("Elon Musk").kind).toBe("wrong");
+  it("lets anything that isn't an accepted answer through for free", () => {
+    expect(judge("Japan")).toMatchObject({ kind: "unknown", junk: false });
+    expect(judge("Elon Musk")).toMatchObject({ kind: "unknown", junk: false });
+    expect(judge("asdfgh")).toMatchObject({ kind: "unknown", junk: true });
+    expect(judge("qwerty")).toMatchObject({ kind: "unknown", junk: true });
     expect(judge("   ").kind).toBe("empty");
-  });
-
-  it("calls keyboard mash junk instead of wrong", () => {
-    expect(judge("asdfgh").kind).toBe("junk");
-    expect(judge("qwerty").kind).toBe("junk");
-    expect(judge("jjjj").kind).toBe("junk");
   });
 });

@@ -24,6 +24,8 @@ export interface Topic {
   aliasCols?: (string | number)[];
   /** Add surnames as aliases (when unique within the list). */
   people?: boolean;
+  /** Also accept every country as a real (life-costing) answer, even ones missing from the table. */
+  universe?: "countries";
 }
 
 export const TOPICS: Topic[] = [
@@ -39,6 +41,7 @@ export const TOPICS: Topic[] = [
     value: "Population",
     metric: "Population",
     skip: ["World"],
+    universe: "countries",
   },
   {
     id: "countries-area",
@@ -52,6 +55,7 @@ export const TOPICS: Topic[] = [
     metric: "Total area",
     unit: " km²",
     rankedOnly: true,
+    universe: "countries",
   },
   {
     id: "countries-gdp",
@@ -64,6 +68,7 @@ export const TOPICS: Topic[] = [
     value: "IMF",
     metric: "GDP (US$ millions)",
     skip: ["World"],
+    universe: "countries",
   },
   {
     id: "africa-population",
@@ -76,6 +81,7 @@ export const TOPICS: Topic[] = [
     value: "Population",
     metric: "Population",
     rankedOnly: true,
+    universe: "countries",
   },
   {
     id: "asia-population",
@@ -88,6 +94,7 @@ export const TOPICS: Topic[] = [
     value: "Totalpopulation",
     metric: "Population",
     rankedOnly: true,
+    universe: "countries",
   },
   {
     id: "europe-population",
@@ -100,6 +107,7 @@ export const TOPICS: Topic[] = [
     value: "UN estimate",
     metric: "Population (UN 2025)",
     skip: ["Europe"],
+    universe: "countries",
   },
   {
     id: "us-states-population",
@@ -207,6 +215,7 @@ export const TOPICS: Topic[] = [
     name: "Destination",
     value: "2024",
     metric: "Arrivals (millions, 2024)",
+    universe: "countries",
   },
   {
     id: "billionaire-countries",
@@ -219,6 +228,7 @@ export const TOPICS: Topic[] = [
     value: "2026",
     metric: "Billionaires",
     skip: ["World"],
+    universe: "countries",
   },
 
   // Entertainment
@@ -296,7 +306,7 @@ export const TOPICS: Topic[] = [
     title: "Best-selling books",
     prompt: "Name the 10 best-selling individual books of all time",
     page: "List of best-selling books",
-    tables: [0, 1],
+    tables: [0, 1, 2],
     name: "Book",
     value: "Approximate sales",
     metric: "Approximate sales",
@@ -338,6 +348,7 @@ export const TOPICS: Topic[] = [
     name: 0,
     value: 15,
     metric: "Total medals",
+    universe: "countries",
   },
   {
     id: "nba-points",
@@ -357,7 +368,7 @@ export const TOPICS: Topic[] = [
     title: "Largest stadiums",
     prompt: "Name the 10 largest stadiums in the world by capacity",
     page: "List of stadiums by capacity",
-    tables: [0, 1],
+    tables: [0, 1, 2, 3, 4, 5],
     name: "Stadium",
     value: "Capacity",
     metric: "Capacity",

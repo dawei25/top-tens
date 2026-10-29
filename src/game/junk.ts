@@ -124,11 +124,16 @@ function knownNames(lex: Lexicon): Set<string> {
   return nameSetCache.set;
 }
 
+/** Whether the text is exactly some answer or alias in the bank, or a country or capital. */
+export function isKnownName(text: string, lex: Lexicon): boolean {
+  return knownNames(lex).has(fnv(normalize(text)).toString(36));
+}
+
 export function isJunk(text: string, lex?: Lexicon): boolean {
   const s = normalize(text);
   const letters = s.replace(/[^a-z0-9]/g, "");
   if (letters.length < 2 || NON_ANSWERS.has(s)) return true;
-  if (lex && knownNames(lex).has(fnv(s).toString(36))) return false;
+  if (lex && isKnownName(text, lex)) return false;
   if (/(.)\1\1/.test(letters)) return true;
   // "jfjfj", "sdfsdfsdf". Two repeats are left to the model: Nkunku, Coco and Bora Bora are real.
   if (/^(.{1,3})\1\1+/.test(letters)) return true;

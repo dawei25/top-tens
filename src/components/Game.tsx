@@ -17,23 +17,31 @@ interface Props {
 interface Feedback {
   tone: "good" | "bad" | "warn";
   text: string;
+  /** Tappable answers for an ambiguous typo. */
+  suggestions?: string[];
   key: number;
 }
 
-function describe(r: GuessResult, raw: string): Omit<Feedback, "key"> | null {
+function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   switch (r.kind) {
     case "correct":
-      return { tone: "good", text: r.corrected ? `Counted as ${r.entry.name}` : `#${r.entry.rank}` };
+      return { tone: "good", text: r.corrected ? `#${r.entry.rank} ${r.entry.name}` : `#${r.entry.rank}` };
     case "duplicate":
       return { tone: "warn", text: `Already guessed ${r.entry.name}` };
     case "near":
-      return { tone: "bad", text: `${r.entry.name} is #${r.entry.rank}. So close.` };
+      return {
+        tone: "bad",
+        text: !r.entry.rank
+          ? `${r.entry.name} isn't in the top 10`
+          : `${r.entry.name} is #${r.entry.rank}.${r.entry.rank <= 15 ? " So close." : ""}`,
+      };
     case "typo":
-      return { tone: "warn", text: `Check your spelling${r.suggestions.length ? `: ${r.suggestions.join(" or ")}?` : ""}` };
-    case "junk":
-      return { tone: "warn", text: "That doesn't look like an answer. No life lost." };
-    case "wrong":
-      return { tone: "bad", text: `${raw} isn't on the list` };
+      return { tone: "warn", text: "Did you mean", suggestions: r.suggestions };
+    case "unknown":
+      return {
+        tone: "warn",
+        text: r.junk ? "That doesn't look like an answer. No life lost." : "Not a recognized answer for this list. No life lost.",
+      };
     default:
       return null;
   }
@@ -80,23 +88,21 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
   if (!puzzle || !game) return <div className="loading">Loading…</div>;
 
   const over = game.status !== "playing";
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const { state, result } = applyGuess(game, puzzle, input, lexicon);
-    const fb = describe(result, input.trim());
+  const guess = (text: string) => {
+    const { state, result } = applyGuess(game, puzzle, text, lexicon);
+    const fb = describe(result);
     if (!fb) return;
     setGame(state);
     setFeedback({ ...fb, key: Date.now() });
-    if (result.kind === "correct") {
-      setLastFound(result.entry.rank);
-      setInput("");
-    } else if (result.kind === "typo") {
-      setShake((n) => n + 1);
-    } else {
-      if (result.kind !== "duplicate") setShake((n) => n + 1);
-      setInput("");
-    }
+    if (result.kind === "correct") setLastFound(result.entry.rank);
+    if (result.kind === "near" || result.kind === "unknown" || result.kind === "typo") setShake((n) => n + 1);
+    // Keep the text on a typo so it can be fixed by hand as well as by tapping a suggestion.
+    if (result.kind !== "typo") setInput("");
     inputRef.current?.focus();
+  };
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    guess(input);
   };
 
   const share = async () => {
@@ -116,10 +122,8 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
 
   const misses = game.log.flatMap((l, i) =>
     l.result.kind === "near"
-      ? [{ key: i, text: `#${l.result.entry.rank} ${l.result.entry.name}`, near: true }]
-      : l.result.kind === "wrong"
-        ? [{ key: i, text: l.text.trim(), near: false }]
-        : [],
+      ? [{ key: i, text: l.result.entry.rank ? `#${l.result.entry.rank} ${l.result.entry.name}` : l.result.entry.name }]
+      : [],
   );
 
   return (
@@ -164,7 +168,7 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
       {misses.length > 0 && (
         <div className="miss-list" aria-label="Wrong guesses">
           {misses.map((m) => (
-            <span key={m.key} className={`miss-chip ${m.near ? "near" : ""}`}>
+            <span key={m.key} className="miss-chip">
               {m.text}
             </span>
           ))}
@@ -176,6 +180,11 @@ export function Game({ id, daily, lexicon, onHome, onRoll }: Props) {
           {feedback && (
             <div key={feedback.key} className={`toast ${feedback.tone}`} role="status">
               {feedback.text}
+              {feedback.suggestions?.map((s) => (
+                <button key={s} type="button" className="suggestion" onClick={() => guess(s)}>
+                  {s}
+                </button>
+              ))}
             </div>
           )}
           <div key={shake} className={`guess-row ${shake ? "shake" : ""}`}>

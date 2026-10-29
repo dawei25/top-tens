@@ -349,15 +349,24 @@ button {
   font-size: 0.8rem;
   padding: 4px 10px;
   border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--muted);
-  font-weight: 600;
-  text-decoration: line-through;
-}
-.miss-chip.near {
   background: var(--bad-soft);
   color: var(--bad);
-  text-decoration: none;
+  font-weight: 600;
+}
+.toast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.suggestion {
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-weight: 700;
+  background: var(--surface);
+  color: var(--text);
 }
 
 .guess {

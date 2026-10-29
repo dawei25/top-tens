@@ -1,8 +1,13 @@
-import { isJunk, type Lexicon } from "./junk";
+import { isJunk, isKnownName, type Lexicon } from "./junk";
 import type { Entry, GuessResult, Puzzle } from "./types";
 
 const LEADING_ARTICLE = /^(the|a|an)\s+/;
 
+const ROMAN: Record<string, string> = Object.fromEntries(
+  "i ii iii iv v vi vii viii ix x xi xii xiii xiv xv xvi xvii xviii xix xx".split(" ").map((r, i) => [r, String(i + 1)]),
+);
+
+/** Lowercase, no accents or punctuation, no leading article, Roman numerals as digits ("GTA V" → "gta 5"). */
 export function normalize(s: string): string {
   return s
     .normalize("NFD")
@@ -12,7 +17,14 @@ export function normalize(s: string): string {
     .replace(/['’.]/g, "")
     .replace(/[^a-z0-9]+/g, " ")
     .trim()
-    .replace(LEADING_ARTICLE, "");
+    .replace(LEADING_ARTICLE, "")
+    .split(" ")
+    .map((t) => ROMAN[t] ?? t)
+    .join(" ");
+}
+
+function digitsOf(s: string): string {
+  return (s.match(/\d+/g) ?? []).join(" ");
 }
 
 /** Optimal string alignment distance (Levenshtein plus adjacent transpositions). */
@@ -54,11 +66,14 @@ interface Candidate {
 }
 
 function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Candidate[] {
+  const guessDigits = digitsOf(guess);
   return entries.map((entry) => {
     let best = Infinity;
     let len = 0;
     for (const form of [entry.name, ...entry.aliases]) {
       const f = normalize(form);
+      // Numbers are identity, not spelling: GTA 6 is not GTA 5, Mario Kart 7 is not Mario Kart.
+      if (guessDigits && digitsOf(f) !== guessDigits) continue;
       const dist = editDistance(guess, f);
       if (dist < best) {
         best = dist;
@@ -72,10 +87,12 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
 /**
  * Classify a guess against a puzzle.
  * - correct / duplicate: matches a top-10 entry (exactly or via autocorrect)
- * - near: matches a rank 11+ entry, costs a life
- * - typo: close to something but not confidently one entry, no life lost
- * - junk: matches nothing and doesn't look like a real word or name ("asdf"), no life lost
- * - wrong: a plausible answer that isn't on the list, costs a life
+ * - near: matches another accepted answer (rank 11+ or unranked), costs a life
+ * - typo: close to more than one entry, or probably a misspelled non-top-10 answer; the player picks, no life lost
+ * - unknown: not an accepted answer for this list at all ("asdf", or something the source doesn't cover), no life lost
+ *
+ * A misspelling that clearly points at one top-10 entry counts as that entry, unless what was typed is
+ * itself a different real name (Austria when Australia is on the list).
  */
 export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?: Lexicon): GuessResult {
   const guess = normalize(raw);
@@ -96,17 +113,17 @@ export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?
   if (best && best.dist === 0) return resolve(best, false);
 
   const len = Math.min(guess.length, best?.len ?? guess.length);
-  const auto = candidates.filter((c) => c.dist <= autoCorrectBudget(len));
-  if (auto.length > 0) {
-    const tied = auto.filter((c) => c.dist === auto[0].dist);
-    if (tied.length === 1) return resolve(tied[0], true);
-    return { kind: "typo", suggestions: tied.map((c) => c.entry.name) };
-  }
-
   const close = candidates.filter((c) => c.dist <= typoBudget(len));
-  if (close.length > 0) {
-    return { kind: "typo", suggestions: close.slice(0, 3).map((c) => c.entry.name) };
+  if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
+    const tied = close.filter((c) => c.dist === close[0].dist);
+    if (tied.length === 1) {
+      const c = tied[0];
+      if (c.inTop10 || c.dist <= autoCorrectBudget(len)) return resolve(c, true);
+      // Probably a misspelled rank 11+ answer: let the player confirm before it costs a life.
+      return { kind: "typo", suggestions: [c.entry.name] };
+    }
+    return { kind: "typo", suggestions: tied.slice(0, 3).map((c) => c.entry.name) };
   }
 
-  return isJunk(raw, lex) ? { kind: "junk" } : { kind: "wrong" };
+  return { kind: "unknown", junk: isJunk(raw, lex) };
 }

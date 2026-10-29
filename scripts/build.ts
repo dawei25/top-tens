@@ -8,9 +8,11 @@ import { cleanText, splitHeader, tableGrid, wikitables, type Cell } from "./tabl
 import { TOPICS, type Topic } from "./topics";
 import { fetchPage, fetchRedirects, pageUrl } from "./wiki";
 import { writeLexicon } from "./lexicon";
+import { countries } from "./gazetteer";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
-const EXTRAS = 40;
+/** Every table row is an accepted answer; this only guards against runaway tables. */
+const MAX_ROWS = 500;
 
 interface Row {
   name: string;
@@ -109,7 +111,7 @@ async function readRows(topic: Topic): Promise<Row[]> {
 }
 
 async function buildPuzzle(topic: Topic): Promise<Puzzle> {
-  const rows = (await readRows(topic)).slice(0, 10 + EXTRAS);
+  const rows = (await readRows(topic)).slice(0, MAX_ROWS);
   if (rows.length < 10) throw new Error(`only ${rows.length} rows`);
   if (rows.length > 10 && rows[9].value === rows[10].value) {
     throw new Error(`tie at #10/#11: ${rows[9].name} / ${rows[10].name}`);
@@ -118,7 +120,7 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
   const entries: Entry[] = [];
   for (const [i, row] of rows.entries()) {
     const aliases = new Set(row.aliasSeeds);
-    if (i < 10) for (const r of await fetchRedirects(row.redirectTarget)) aliases.add(r);
+    for (const r of await fetchRedirects(row.redirectTarget, i >= 10)) aliases.add(r);
     if (topic.people) {
       const last = row.name.split(" ").at(-1)!;
       if (last.length >= 4) aliases.add(last);
@@ -131,21 +133,34 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
     });
   }
 
-  // Drop aliases that point at more than one entry, and dedupe by normalized form.
-  const owners = new Map<string, Set<number>>();
+  // Unranked but real: countries the table leaves out still count as (wrong) answers.
+  if (topic.universe === "countries") {
+    const taken = new Set(entries.flatMap((e) => [e.name, ...e.aliases].map(normalize)));
+    for (const c of countries()) {
+      if ([c.name, ...c.aliases].some((f) => taken.has(normalize(f)))) continue;
+      entries.push({ rank: 0, name: c.name, aliases: c.aliases });
+    }
+  }
+
+  // Drop aliases that point at more than one entry, aliases that are just the start of another
+  // entry's name ("Grand Theft Auto" for San Andreas when GTA V is also listed), and duplicates.
+  const owners = new Map<string, Set<Entry>>();
   for (const e of entries) {
     for (const form of [e.name, ...e.aliases]) {
       const n = normalize(form);
       if (!owners.has(n)) owners.set(n, new Set());
-      owners.get(n)!.add(e.rank);
+      owners.get(n)!.add(e);
     }
   }
+  const names = entries.map((e) => normalize(e.name));
   for (const e of entries) {
     const kept = new Map<string, string>();
     const own = normalize(e.name);
     for (const a of e.aliases) {
       const n = normalize(a);
-      if (n && n !== own && !kept.has(n) && owners.get(n)!.size === 1) kept.set(n, a);
+      if (!n || n === own || kept.has(n) || owners.get(n)!.size > 1) continue;
+      if (names.some((other) => other !== own && other.startsWith(n + " "))) continue;
+      kept.set(n, a);
     }
     e.aliases = [...kept.values()];
   }

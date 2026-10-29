@@ -11,10 +11,11 @@ let lastRequest = 0;
 
 export class NotFound extends Error {}
 
-async function fetchCached(url: string): Promise<string> {
+async function fetchCached(url: string, cacheOnly = false): Promise<string> {
   mkdirSync(CACHE_DIR, { recursive: true });
   const file = join(CACHE_DIR, createHash("sha1").update(url).digest("hex") + ".html");
   if (existsSync(file)) return readFileSync(file, "utf8");
+  if (cacheOnly) throw new NotFound(url);
 
   for (let attempt = 0; attempt < 5; attempt++) {
     const wait = lastRequest + MIN_GAP_MS - Date.now();
@@ -44,15 +45,18 @@ export async function fetchPage(title: string): Promise<cheerio.CheerioAPI> {
 const JUNK_REDIRECT =
   /^(the )?(\w+ )?(etymology|history|economy|gdp|politics|political system|culture|society|geography|demographics|population|list|outline|names?|flag|government|wildlife|biodiversity|environment|pollution|infrastructure|administrative divisions?|subdivisions?|tourism|transport|education|health|religion|military|cuisine|music|sports?|media|climate|information)\b.*\b(of|in)\b/i;
 
-/** Redirect titles pointing at an article; used as answer aliases. */
-export async function fetchRedirects(title: string): Promise<string[]> {
+/**
+ * Redirect titles pointing at an article; used as answer aliases.
+ * With cacheOnly, returns only what an earlier build already fetched (used for ranks 11+, to stay polite).
+ */
+export async function fetchRedirects(title: string, cacheOnly = false): Promise<string[]> {
   const url =
     "https://en.wikipedia.org/w/index.php?title=Special:WhatLinksHere/" +
     encodeURIComponent(title.replace(/ /g, "_")) +
     "&hidelinks=1&hidetrans=1&limit=500";
   let html: string;
   try {
-    html = await fetchCached(url);
+    html = await fetchCached(url, cacheOnly);
   } catch (e) {
     if (e instanceof NotFound) return [];
     throw e;

@@ -4,6 +4,7 @@ import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { trainLexicon } from "../src/game/junk";
+import { capitals, countries } from "./gazetteer";
 import type { Puzzle } from "../src/game/types";
 
 const require = createRequire(import.meta.url);
@@ -18,17 +19,11 @@ export function bankNames(dir: string): string[] {
   return names;
 }
 
-/** Every country and capital, so "Fiji" or "Ljubljana" never reads as junk in a list that doesn't include them. */
-function gazetteer(): string[] {
-  const { countries } = require("countries-list") as {
-    countries: Record<string, { name: string; native: string; capital: string }>;
-  };
-  return Object.values(countries).flatMap((c) => [c.name, c.native, c.capital].filter(Boolean));
-}
-
 export function writeLexicon(dir: string): number {
   const words: string[] = require("an-array-of-english-words");
-  const names = [...bankNames(dir), ...gazetteer()];
+  // Countries and capitals too, so "Fiji" or "Ljubljana" never reads as junk.
+  const places = [...countries().flatMap((c) => [c.name, ...c.aliases]), ...capitals()];
+  const names = [...bankNames(dir), ...places];
   writeFileSync(join(dir, "lexicon.json"), JSON.stringify(trainLexicon(words, names)));
   return names.length;
 }

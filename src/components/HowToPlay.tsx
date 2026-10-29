@@ -15,14 +15,14 @@ export function HowToPlay({ onClose }: { onClose: () => void }) {
             Name everything in the <b>top 10</b> of the list. Order doesn't matter.
           </li>
           <li>
-            You have <b>5 lives</b>. A wrong answer costs one.
+            You have <b>5 lives</b>. A real answer that isn't in the top 10 costs one, and you'll see where it
+            ranks.
           </li>
           <li>
-            Real answers ranked <b>#11 or lower</b> also cost a life, but you'll see where they rank.
+            <b>Typos are free.</b> Close spellings count, and if a guess could be two things you pick which.
           </li>
           <li>
-            <b>Typos are free.</b> Close spellings count, and anything unclear asks you to check instead of
-            taking a life.
+            Anything that isn't a recognized answer for the list costs nothing.
           </li>
         </ul>
         <button className="btn btn-primary" onClick={close}>
