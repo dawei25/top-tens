@@ -17,10 +17,13 @@ export interface GameState {
   status: "playing" | "won" | "lost" | "gave-up";
   /** Ranks whose first letter was bought with a life. */
   hints?: number[];
+  /** Epoch ms the game was created and finished (won, lost or given up). Older saves lack them. */
+  startedAt?: number;
+  finishedAt?: number;
 }
 
 export function newGame(puzzle: Puzzle): GameState {
-  return { puzzleId: puzzle.id, found: [], lives: MAX_LIVES, log: [], status: "playing" };
+  return { puzzleId: puzzle.id, found: [], lives: MAX_LIVES, log: [], status: "playing", startedAt: Date.now() };
 }
 
 /** Only an accepted answer that isn't in the top 10 costs a life. */
@@ -47,7 +50,8 @@ export function applyGuess(
   const found = result.kind === "correct" ? [...state.found, result.entry.rank] : state.found;
   const lives = costsLife(result) ? state.lives - 1 : state.lives;
   const status = found.length === puzzle.answers.length ? "won" : lives <= 0 ? "lost" : "playing";
-  return { state: { ...state, found, lives, status, log: [...state.log, { text, result }] }, result };
+  const finishedAt = status === "playing" ? undefined : Date.now();
+  return { state: { ...state, found, lives, status, log: [...state.log, { text, result }], ...(finishedAt ? { finishedAt } : {}) }, result };
 }
 
 /** The letter a hint reveals: the first letter or digit of the name, past a leading "The"/"A"/"An". */
@@ -68,7 +72,7 @@ export function applyHint(state: GameState, rank: number): GameState {
 }
 
 export function giveUp(state: GameState): GameState {
-  return state.status === "playing" ? { ...state, status: "gave-up" } : state;
+  return state.status === "playing" ? { ...state, status: "gave-up", finishedAt: Date.now() } : state;
 }
 
 /**
