@@ -1,0 +1,52 @@
+{
+  "Great Smoky Mountains": {
+    "text": "The first national park whose land was paid for partly with federal funds.",
+    "source": "https://en.wikipedia.org/wiki/Great_Smoky_Mountains_National_Park",
+    "evidence": "The Great Smoky Mountains was the first national park having land and other costs paid in part with federal funds; previous parks were funded wholly with state money or private funds."
+  },
+  "Zion": {
+    "text": "First protected in 1909 as Mukuntuweap National Monument, before being renamed Zion.",
+    "source": "https://en.wikipedia.org/wiki/Zion_National_Park",
+    "evidence": "In 1909, President William Howard Taft named the area Mukuntuweap National Monument in order to protect the canyon. ... On November 19, 1919, Congress redesignated the monument as Zion National Park, and the act was signed by President Woodrow Wilson."
+  },
+  "Yellowstone": {
+    "text": "Home to well over half of the world's geysers and hydrothermal features.",
+    "source": "https://en.wikipedia.org/wiki/Yellowstone_National_Park",
+    "evidence": "Well over half of the world's geysers and hydrothermal features are in Yellowstone, fueled by this ongoing volcanism."
+  },
+  "Grand Canyon": {
+    "text": "The first bill to make it a national park came in 1882; it finally became one in 1919.",
+    "source": "https://en.wikipedia.org/wiki/Grand_Canyon_National_Park",
+    "evidence": "The first bill to establish Grand Canyon National Park was introduced in 1882 by then-Senator Benjamin Harrison, which would have established Grand Canyon as the third national park in the United States, after Yellowstone and Mackinac. ... Further Senate bills to establish the site as a national park were introduced and defeated in 1910 and 1911, before the Grand Canyon National Park Act (Pub. L. 65–277) was finally signed by President Woodrow Wilson on February 26, 1919."
+  },
+  "Yosemite": {
+    "text": "The name comes from the Miwok yohhe'meti, meaning \"they are killers\".",
+    "source": "https://en.wikipedia.org/wiki/Yosemite_National_Park",
+    "evidence": "The word Yosemite (derived from yohhe'meti, 'they are killers' in Miwok) historically referred to the name that t"
+  },
+  "Rocky Mountain": {
+    "text": "The Continental Divide runs directly through the center of the park.",
+    "source": "https://en.wikipedia.org/wiki/Rocky_Mountain_National_Park",
+    "evidence": "The eastern and western slopes of the Continental Divide run directly through the center of the park with the headwaters of the Colorado River located in the park's northwestern region."
+  },
+  "Acadia": {
+    "text": "Its historic carriage roads, financed by John D. Rockefeller Jr., are closed to motor vehicles.",
+    "source": "https://en.wikipedia.org/wiki/Acadia_National_Park",
+    "evidence": "Woven into this landscape is a historic carriage road system financed by John D. Rockefeller Jr. ... hiking, bicycling, and horseback riding on carriage roads (motor vehicles are prohibited)"
+  },
+  "Grand Teton": {
+    "text": "Some of its rocks are the oldest in any American national park, dated at nearly 2.7 billion years.",
+    "source": "https://en.wikipedia.org/wiki/Grand_Teton_National_Park",
+    "evidence": "Some of the rocks in the park are the oldest found in any American national park and have been dated at nearly 2.7 billion years."
+  },
+  "Olympic": {
+    "text": "Theodore Roosevelt made it a national monument in 1909; Franklin D. Roosevelt made it a national park in 1938.",
+    "source": "https://en.wikipedia.org/wiki/Olympic_National_Park",
+    "evidence": "President Theodore Roosevelt originally designated the park as Mount Olympus National Monument on March 2, 1909. The monument was redesignated a national park by Congress and President Franklin D. Roosevelt on June 29, 1938."
+  },
+  "Glacier": {
+    "text": "Of about 150 glaciers in the park in the mid-19th century, only 25 active ones remained by 2010.",
+    "source": "https://en.wikipedia.org/wiki/Glacier_National_Park_(U.S.)",
+    "evidence": "Of the estimated 150 glaciers over 25 acres (10 ha) in size which existed in the park in the mid-19th century during the late Little Ice Age, only 25 active glaciers remained by 2010."
+  }
+}
