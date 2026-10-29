@@ -1,4 +1,5 @@
 import type { Universe } from "./gazetteer";
+import type { ValueKind } from "./values";
 
 export interface Topic {
   /** When the table's numbers are from, if the page doesn't say in a way scripts/dates.ts can read. */
@@ -52,6 +53,14 @@ export interface Topic {
   categoryDepth?: number;
   /** Extra aliases by entry name, for well-known short forms Wikipedia has no redirect for. */
   aliases?: Record<string, string[]>;
+  /**
+   * Give the likeliest unranked answers (scripts/likely.ts) a value read from their article's infobox, so a miss
+   * can say "Matterhorn: 4,478 m". Only where the infobox number means the same as the list's metric.
+   * `scale` turns the infobox number into the table's unit (1e6 for a table in millions). A value must be below
+   * #10's (`below: "last"`: below the last ranked row's, for tables that rank everyone above a cutoff); one that
+   * isn't measures something else and is dropped.
+   */
+  values?: { kind: ValueKind; scale?: number; below?: "tenth" | "last" };
 }
 
 /** A source of unranked accepted answers: one name column of some tables on a page (default: the topic's). */
@@ -248,6 +257,7 @@ export const TOPICS: Topic[] = [
     value: "Height",
     metric: "Height",
     unit: " m",
+    values: { kind: "elevation" },
     universeCategories: ["Eight-thousanders", "Eight-thousanders of the Himalayas", "Seven Summits", "Alpine four-thousanders", "Great north faces of the Alps", "Mountains of the Alps", "Stratovolcanoes of Japan"],
   },
   {
@@ -275,6 +285,7 @@ export const TOPICS: Topic[] = [
     value: "Area",
     metric: "Area",
     unit: " km²",
+    values: { kind: "area" },
     universe: "countries",
     also: [{ page: "List of archipelagos", tables: [0], name: 0 }],
     universeCategories: ["Archipelagoes of the Pacific Ocean", "Archipelagoes of the Atlantic Ocean", "Archipelagoes of the Indian Ocean"],
@@ -347,6 +358,7 @@ export const TOPICS: Topic[] = [
     name: "Name",
     value: "Subscribers",
     metric: "Subscribers (millions)",
+    values: { kind: "subscribers", scale: 1e6 },
     also: [{ tables: [1, 2], name: 0 }, ...CELEBRITIES],
     universeCategories: ["YouTube channels", "YouTubers"],
     categoryDepth: 2,
@@ -473,6 +485,7 @@ export const TOPICS: Topic[] = [
     name: "Player",
     value: "Total points",
     metric: "Points",
+    values: { kind: "nba-points", below: "last" },
     people: true,
     also: [
       { page: "List of National Basketball Association career assists leaders", tables: [1], name: "Player" },
@@ -519,8 +532,15 @@ export const TOPICS: Topic[] = [
     name: "Airport",
     value: "Totalpassengers",
     metric: "Passengers (2025)",
+    values: { kind: "passengers" },
     aliasCols: ["Code", "Location"],
     also: [{ tables: [1, 2, 3, 4, 5], name: "Airport" }],
+    // Earlier years' tables use old names; without these they come back as unranked duplicates of ranked rows.
+    aliases: {
+      "Harry Reid International Airport": ["McCarran International Airport", "McCarran"],
+      "Adolfo Suárez Madrid–Barajas Airport": ["Madrid Barajas Airport", "Madrid Barajas", "Madrid"],
+      "Leonardo da Vinci Rome Fiumicino Airport": ["Rome Fiumicino", "Rome"],
+    },
   },
 
   // Batch 2: sports

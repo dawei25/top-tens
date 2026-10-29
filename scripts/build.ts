@@ -6,13 +6,17 @@ import type { Entry, Fact, Puzzle } from "../src/game/types";
 import { normalize } from "../src/game/match";
 import { cleanText, splitHeader, tableGrid, wikitables, type Cell } from "./table";
 import { TEST_SET, TOPICS, type Topic } from "./topics";
-import { fetchCategory, fetchPage, fetchRedirects, pageUrl } from "./wiki";
+import { fetchCategory, fetchPage, fetchRedirects, pageUrl, requestCount } from "./wiki";
+import { addValues } from "./values";
 import { writeLexicon } from "./lexicon";
 import { tableDataDate } from "./dates";
 import { COUNTRY_FORMS, INTENT } from "./intent";
 import { UNIVERSES, type Place } from "./gazetteer";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
+/** Wikipedia article behind each entry, where known; only used during the build (values for unranked answers). */
+const ARTICLE = new WeakMap<Entry, string>();
+const articleOf = (e: Entry) => ARTICLE.get(e) ?? e.name;
 /** Every table row is an accepted answer; this only guards against runaway tables. */
 const MAX_ROWS = 1000;
 
@@ -173,7 +177,9 @@ async function readAlso(topic: Topic): Promise<Entry[]> {
         if (topic.skip?.includes(name) || src.skip?.includes(name)) continue;
         if (/\d{3,}.*\d{3,}/.test(name)) continue;
         const aliases = [cell.text, cell.linkText ?? "", ...shortForms(name, topic.stripWords)].map(cleanName);
-        out.push({ rank: 0, name, aliases: aliases.filter((a) => a && a !== name) });
+        const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
+        ARTICLE.set(entry, redirectTarget(name, cell));
+        out.push(entry);
       }
     }
   }
@@ -184,7 +190,9 @@ async function readAlso(topic: Topic): Promise<Entry[]> {
       if (CATEGORY_SKIP.test(title)) continue;
       const name = cleanName(title);
       if (!normalize(name) || SKIP_NAME.test(name)) continue;
-      out.push({ rank: 0, name, aliases: name === title ? [] : [title] });
+      const entry: Entry = { rank: 0, name, aliases: name === title ? [] : [title] };
+      ARTICLE.set(entry, title);
+      out.push(entry);
     }
   }
   return out;
@@ -372,6 +380,10 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
 
   pruneAliases(entries);
   applyIntent(topic, entries);
+  if (topic.values) {
+    const [found, tried] = await addValues(topic, entries, articleOf, rows.map((r) => r.value));
+    console.log(`     ${topic.id}: values for ${found} of ${tried} likely unranked answers`);
+  }
   const dataAsOf = await dataDate(topic);
 
   return {
@@ -410,3 +422,4 @@ for (const topic of TOPICS) {
 }
 if (!only.length || testMode) writeFileSync(join(OUT_DIR, "index.json"), JSON.stringify(index, null, 1));
 console.log(`lexicon trained on ${writeLexicon(OUT_DIR)} names`);
+console.log(`${requestCount()} Wikipedia requests (the rest came from the cache)`);
