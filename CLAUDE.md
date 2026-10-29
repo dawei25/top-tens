@@ -5,6 +5,8 @@ Static site (Vite + React + TypeScript), no backend. Puzzles are prebuilt from W
 
 Read `docs/DESIGN.md` for the rules of the game and the visual direction.
 
+Changes that need a full puzzle rebuild are batched in `docs/REBUILD_QUEUE.md`: add to it instead of rebuilding.
+
 ## Layout
 
 | Path | What | Owner |
