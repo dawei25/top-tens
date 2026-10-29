@@ -1,0 +1,52 @@
+{
+  "Russia": {
+    "text": "Three-fourths of its people live in urban areas.",
+    "source": "https://en.wikipedia.org/wiki/Russia",
+    "evidence": "It is a highly urbanised country, with three-fourths of its population living in urban areas."
+  },
+  "Turkey": {
+    "text": "Only a smaller part, East Thrace, is in Europe; most of the country lies in Anatolia in West Asia.",
+    "source": "https://en.wikipedia.org/wiki/Turkey",
+    "evidence": "Turkey, officially the Republic of Türkiye, is a country mainly located in Anatolia in West Asia, with a smaller part called East Thrace in Southeast Europe."
+  },
+  "Germany": {
+    "text": "Berlin is its most populous city, but its largest urban area is the Ruhr.",
+    "source": "https://en.wikipedia.org/wiki/Germany",
+    "evidence": "The nation's capital and most populous city is Berlin and its main financial centre is Frankfurt; the largest urban area is the Ruhr."
+  },
+  "United Kingdom": {
+    "text": "At its 1920s height, its empire covered around a quarter of the world's landmass and population.",
+    "source": "https://en.wikipedia.org/wiki/United_Kingdom",
+    "evidence": "At its height in the 1920s, the empire encompassed around a quarter of the world's landmass and population, and was the largest in history."
+  },
+  "France": {
+    "text": "Five of its 18 regions are overseas, among them French Guiana in South America.",
+    "source": "https://en.wikipedia.org/wiki/France",
+    "evidence": "Its overseas regions and territories include French Guiana in South America, ... Its 18 integral regions—five of which are overseas—span a combined area of 632,702 km2 (244,288 sq mi),"
+  },
+  "Italy": {
+    "text": "Besides the peninsula, it takes in nearly 800 islands, notably Sicily and Sardinia.",
+    "source": "https://en.wikipedia.org/wiki/Italy",
+    "evidence": "It consists of a peninsula, which extends into the Mediterranean Sea, with the Alps on its northern land border, as well as nearly 800 islands, notably Sicily and Sardinia."
+  },
+  "Spain": {
+    "text": "Its territory includes Ceuta and Melilla, two autonomous cities in mainland Africa.",
+    "source": "https://en.wikipedia.org/wiki/Spain",
+    "evidence": "its territory also includes the Canary Islands, in the Eastern Atlantic Ocean; the Balearic Islands, in the Western Mediterranean Sea; and the autonomous cities of Ceuta and Melilla, in mainland Africa."
+  },
+  "Ukraine": {
+    "text": "Humans have inhabited it since at least 32,000 BC.",
+    "source": "https://en.wikipedia.org/wiki/Ukraine",
+    "evidence": "Humans have inhabited Ukraine since at least 32,000 BC."
+  },
+  "Poland": {
+    "text": "Its Commonwealth with Lithuania adopted Europe's first modern constitution in 1791.",
+    "source": "https://en.wikipedia.org/wiki/Poland",
+    "evidence": "The Kingdom of Poland emerged in 1025, and in 1569 cemented its long-standing association with Lithuania, thus forming the Polish–Lithuanian Commonwealth. At the time, the Commonwealth was one of the great powers of Europe, with an elective monarchy and a uniquely liberal political system, which adopted Europe's first modern constitution in 1791."
+  },
+  "Kazakhstan": {
+    "text": "With fewer than 8 people per square kilometre, it has one of the lowest population densities in the world.",
+    "source": "https://en.wikipedia.org/wiki/Kazakhstan",
+    "evidence": "Kazakhstan has a population of 20.6 million and one of the lowest population densities in the world, with fewer than 8 people per square kilometre (21 people/mi2)."
+  }
+}
