@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm install:*)",
+      "Bash(npm pkg:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)",
+      "Bash(npx tsx:*)",
+      "Bash(NODE_NO_WARNINGS=1 npx tsx:*)",
+      "Bash(NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 npx tsx:*)",
+      "Bash(node:*)",
+      "Bash(python3:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git -c user.name=\"David\" -c user.email=\"dw22422@gmail.com\" commit:*)",
+      "Bash(git merge:*)",
+      "Bash(git push -q origin main:*)",
+      "Bash(git push origin main:*)",
+      "Bash(git push -u origin main:*)",
+      "Bash(git fetch:*)",
+      "Bash(git worktree list:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(sed -n:*)",
+      "Bash(wc:*)",
+      "Bash(du:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(rm -rf dist:*)",
+      "Bash(printf:*)",
+      "Bash(python3 -m http.server:*)",
+      "Bash(curl -sS:*)"
+    ]
+  }
+}
