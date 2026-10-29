@@ -38,7 +38,12 @@ export function Home({ index, entry, archiveCount, onDaily, onRoll, onBlitz, onA
     const t = setTimeout(() => setConfirmReset(false), 3000);
     return () => clearTimeout(t);
   }, [confirmReset]);
-  const hasProgress = Object.keys(saved.games).length > 0 || Object.keys(saved.daily).length > 0;
+  const blitzRuns = Object.values(saved.blitzRuns ?? {}).reduce((k, runs) => k + runs.length, 0);
+  const hasProgress =
+    Object.keys(saved.games).length > 0 ||
+    Object.keys(saved.daily).length > 0 ||
+    blitzRuns > 0 ||
+    Object.keys(saved.blitzLive ?? {}).length > 0;
   const resetAll = () => {
     if (!confirmReset) return setConfirmReset(true);
     setConfirmReset(false);
@@ -124,11 +129,18 @@ export function Home({ index, entry, archiveCount, onDaily, onRoll, onBlitz, onA
         </div>
       </section>
 
-      {(s.played > 0 || st.best > 0) && (
+      {(s.played > 0 || st.best > 0 || blitzRuns > 0) && (
         <section className="panel home-stats" aria-labelledby="stats-title">
-          <h2 id="stats-title" className="label">
-            Your record
-          </h2>
+          <div className="panel-head">
+            <h2 id="stats-title" className="label">
+              Your record
+            </h2>
+            {blitzRuns > 0 && (
+              <a className="text-btn" href="#blitz-history">
+                blitz runs ({blitzRuns})
+              </a>
+            )}
+          </div>
           <dl className="stat-row">
             <div>
               <dt>played</dt>
