@@ -35,3 +35,19 @@ describe("codes", () => {
     expect(judge("airports", "ATL")).toMatchObject({ kind: "correct" });
   });
 });
+
+describe("first names and partial names", () => {
+  it.each([
+    ["wilt", "Wilt Chamberlain"],
+    ["kareem", "Kareem Abdul-Jabbar"],
+    ["dirk", "Dirk Nowitzki"],
+    ["kobe", "Kobe Bryant"],
+    ["kobe brynt", "Kobe Bryant"],
+  ])("nba-points: %s -> %s", (guess, name) => {
+    expect(judge("nba-points", guess)).toMatchObject({ kind: "correct", entry: { name } });
+  });
+
+  it("a shared first name offers the choices", () => {
+    expect(judge("nba-points", "kevin")).toMatchObject({ kind: "typo", suggestions: ["Kevin Durant", "Kevin Garnett"] });
+  });
+});

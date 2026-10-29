@@ -55,9 +55,12 @@ export function autoCorrectBudget(len: number): number {
   return 3;
 }
 
-/** Edits within which we treat a guess as a probable misspelling (no life lost). */
+/**
+ * Edits within which a guess is treated as a misspelling and corrected in the input. Short words get no extra
+ * slack: two changed letters out of four ("wilt" / "west") is a different word, not a typo.
+ */
 export function typoBudget(len: number): number {
-  return autoCorrectBudget(len) + 1;
+  return autoCorrectBudget(len) + (len <= 5 ? 0 : 1);
 }
 
 interface Candidate {
@@ -130,15 +133,16 @@ export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?
   const exact = candidates.filter((c) => c.dist === 0);
   if (exact.length > 0) return choose(exact, false);
 
+  // A whole word from a longer name ("Wilt" for Wilt Chamberlain, "Haneda" for Tokyo Haneda Airport) is
+  // stronger evidence than a near-spelling of something else ("wilt" is two letters from "West").
+  const partial = wordMatches(guess, candidates);
+  if (partial.length > 0 && partial.length <= MAX_CHOICES) return choose(partial, true);
+
   const len = Math.min(guess.length, best?.len ?? guess.length);
   const close = candidates.filter((c) => c.dist <= typoBudget(len));
   if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
     return choose(close.filter((c) => c.dist === close[0].dist), true);
   }
-
-  // A distinctive word from a longer name: "Haneda" for Tokyo Haneda Airport.
-  const partial = wordMatches(guess, candidates);
-  if (partial.length > 0 && partial.length <= MAX_CHOICES) return choose(partial, true);
 
   return { kind: "unknown", junk: isJunk(raw, lex) };
 }
@@ -156,11 +160,12 @@ const GENERIC = new Set(
   ).split(" "),
 );
 
-/** Entries where the guess appears as whole words inside the name or an alias. */
+/**
+ * Entries whose name contains the guess as whole words. Names only: redirect aliases include phrases like
+ * "Russell–Chamberlain rivalry", which would make "Russell" point at Wilt Chamberlain.
+ */
 function wordMatches(guess: string, candidates: Candidate[]): Candidate[] {
   const words = guess.split(" ");
   if (guess.replace(/ /g, "").length < 4 || words.every((w) => GENERIC.has(w))) return [];
-  return candidates.filter(({ entry }) =>
-    [entry.name, ...entry.aliases].some((form) => ` ${normalize(form)} `.includes(` ${guess} `)),
-  );
+  return candidates.filter(({ entry }) => ` ${normalize(entry.name)} `.includes(` ${guess} `));
 }
