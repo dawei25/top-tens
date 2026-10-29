@@ -1635,3 +1635,14 @@ a.text-btn {
     padding: 12px;
   }
 }
+
+/* Archive: that day's Blitz score under the daily result */
+.arch-result .arch-blitz {
+  display: block;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  color: var(--pink);
+}
+.results-meta p.pink b {
+  color: var(--pink);
+}

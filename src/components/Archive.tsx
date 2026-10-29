@@ -56,7 +56,10 @@ export function Archive({ index, schedule, today, onHome }: Props) {
                   {index.find((p) => p.id === e.id)?.title ?? e.id}
                   {isToday && <span className="arch-tag">today</span>}
                 </span>
-                <span className={`arch-result ${r.tone}`}>{r.text}</span>
+                <span className={`arch-result ${r.tone}`}>
+                  {r.text}
+                  {saved.blitzDaily?.[e.date] && <small className="arch-blitz">blitz {saved.blitzDaily[e.date].score}</small>}
+                </span>
               </a>
             </li>
           );

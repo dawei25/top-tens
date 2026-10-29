@@ -15,9 +15,25 @@ interface Props {
   /** Goes to a random Blitz-ready list; false when there is none. */
   onBlitz: () => Promise<boolean>;
   onArchive: () => void;
+  /** The player's local date. */
+  today: string;
+  /** Whether today has a Blitz list. */
+  hasDailyBlitz: boolean;
+  onDailyBlitz: () => void;
 }
 
-export function Home({ index, entry, archiveCount, onDaily, onRoll, onBlitz, onArchive }: Props) {
+export function Home({
+  index,
+  entry,
+  archiveCount,
+  onDaily,
+  onRoll,
+  onBlitz,
+  onArchive,
+  today,
+  hasDailyBlitz,
+  onDailyBlitz,
+}: Props) {
   const [noBlitz, setNoBlitz] = useState(false);
   const saved = load();
   const s = stats(saved);
@@ -43,6 +59,7 @@ export function Home({ index, entry, archiveCount, onDaily, onRoll, onBlitz, onA
     Object.keys(saved.games).length > 0 ||
     Object.keys(saved.daily).length > 0 ||
     blitzRuns > 0 ||
+    Object.keys(saved.blitzDaily ?? {}).length > 0 ||
     Object.keys(saved.blitzLive ?? {}).length > 0;
   const resetAll = () => {
     if (!confirmReset) return setConfirmReset(true);
@@ -54,6 +71,7 @@ export function Home({ index, entry, archiveCount, onDaily, onRoll, onBlitz, onA
   const categories = [...new Set(index.map((p) => p.category))];
   const dailyGame = entry && saved.games[entry.id];
   const dailyDone = !!dailyGame && dailyGame.status !== "playing";
+  const dailyBlitzDone = saved.blitzDaily?.[today];
 
   // Starting a game with the rules on screen counts as having seen them.
   const start = (fn: () => void) => () => {
@@ -89,6 +107,14 @@ export function Home({ index, entry, archiveCount, onDaily, onRoll, onBlitz, onA
             {dailyDone && ` · ${dailyGame.found.length}/10`}
           </span>
         </button>
+        {hasDailyBlitz && (
+          <button className="key key-big key-blitz" onClick={start(onDailyBlitz)}>
+            <span className="key-label">Today's Blitz</span>
+            <span className="key-sub">
+              {dailyBlitzDone ? `${dailyBlitzDone.score} pts` : `${entry ? `no. ${entry.n} · ` : ""}90 s`}
+            </span>
+          </button>
+        )}
         <div className="daily-meta">
           <Countdown className="caption" />
           <p className="press-enter caption" aria-hidden="true">
@@ -107,7 +133,7 @@ export function Home({ index, entry, archiveCount, onDaily, onRoll, onBlitz, onA
           })}
         >
           <span className="key-label">Blitz a random list</span>
-          <span className="key-sub">90 seconds</span>
+          <span className="key-sub">90 s</span>
         </button>
         {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
         <button className="key key-big" onClick={start(onArchive)}>

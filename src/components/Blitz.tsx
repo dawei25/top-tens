@@ -6,11 +6,13 @@ import {
   blitzHistory,
   blitzScore,
   blitzShareText,
+  dailyBlitzShareText,
   finishBlitz,
   isOver,
   missedTop,
   newBlitz,
   recordBlitz,
+  recordDailyBlitz,
   resumeBlitz,
   saveLiveBlitz,
   startBlitz,
@@ -20,7 +22,7 @@ import {
   type BlitzRun,
   type BlitzState,
 } from "../game/blitz";
-import type { DailyEntry } from "../game/daily";
+import { localDate, type DailyEntry } from "../game/daily";
 import type { Lexicon } from "../game/junk";
 import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { load, save } from "../game/storage";
@@ -36,6 +38,8 @@ interface Props {
   lexicon?: Lexicon;
   /** Open the past-runs panel (arriving from the Blitz runs screen). */
   showRuns?: boolean;
+  /** Set when this is a date's Today's Blitz (n is that date's daily number). */
+  dailyBlitz?: { date: string; n: number };
   onHome: () => void;
 }
 
@@ -172,7 +176,7 @@ function PastRuns({ runs, best, open, onOpen }: { runs: BlitzRun[]; best?: numbe
   );
 }
 
-export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, onHome }: Props) {
+export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, dailyBlitz, onHome }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<BlitzState | null>(null);
@@ -180,7 +184,12 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, on
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [copied, setCopied] = useState(false);
   /** The best-score check for the finished round. */
-  const [record, setRecord] = useState<{ best: boolean; previous?: number } | null>(null);
+  const [record, setRecord] = useState<{
+    best: boolean;
+    previous?: number;
+    /** Today's Blitz: whether this round was the one that counts, and the day's score. */
+    daily?: { counted: boolean; score: number };
+  } | null>(null);
   /** How this round came back after the player left, if it did. */
   const [note, setNote] = useState<"resumed" | "away" | null>(null);
   /** A past run being looked at. */
@@ -221,9 +230,17 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, on
   useEffect(() => {
     if (!state?.endedAt || record) return;
     const r = recordBlitz(load(), id, state);
-    save(r.saved);
-    setRecord({ best: r.best, previous: r.previous });
-  }, [state, record, id]);
+    let next = r.saved;
+    let daily: { counted: boolean; score: number } | undefined;
+    // Only a round finished on its own date can be that date's Today's Blitz; the first one counts.
+    if (dailyBlitz && dailyBlitz.date === localDate()) {
+      const d = recordDailyBlitz(next, dailyBlitz.date, state);
+      next = d.saved;
+      daily = { counted: d.counted, score: next.blitzDaily?.[dailyBlitz.date]?.score ?? blitzScore(state) };
+    }
+    save(next);
+    setRecord({ best: r.best, previous: r.previous, daily });
+  }, [state, record, id, dailyBlitz]);
 
   const expire = useCallback(() => setState((s) => (s ? finishBlitz(s) : s)), []);
 
@@ -316,7 +333,10 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, on
     scrollTo({ top: 0, behavior: "auto" });
   };
   const share = async () => {
-    const text = blitzShareText(state, puzzle, `${location.origin}${location.pathname}#blitz-${puzzle.id}`);
+    const base = `${location.origin}${location.pathname}`;
+    const text = dailyBlitz
+      ? dailyBlitzShareText(state, puzzle, `${base}#dailyblitz-${dailyBlitz.date}`, dailyBlitz.n)
+      : blitzShareText(state, puzzle, `${base}#blitz-${puzzle.id}`);
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ text });
       else {
@@ -444,6 +464,16 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, on
             <p>
               <b>{n}</b> answer{n === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
             </p>
+            {record?.daily &&
+              (record.daily.counted ? (
+                <p className="pink">
+                  today's blitz: <b>{record.daily.score}</b>
+                </p>
+              ) : (
+                <p>
+                  replay: today's score stays <b>{record.daily.score}</b>
+                </p>
+              ))}
             {record &&
               (record.best && score > 0 ? (
                 <p className="gold">
@@ -480,7 +510,9 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, on
           <BackArrow />
         </button>
         <div className="game-head-mid">
-          <span className="label mode pink">Blitz</span>
+          <span className="label mode pink">
+            {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
+          </span>
         </div>
         <a className="key key-sm" href={`#p-${puzzle.id}`}>
           List
@@ -494,7 +526,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, on
         </div>
         <h1>{puzzle.title}</h1>
         <p className="caption">
-          name as many as you can. bigger {(puzzle.metric ?? "number").toLowerCase()}, more points.
+          name as many as you can. scored by {(puzzle.metric ?? "the number").toLowerCase()}: bigger is better.
         </p>
       </section>
 
