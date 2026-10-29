@@ -66,7 +66,10 @@ const GENERIC_WORDS =
 
 /** "PUBG: Battlegrounds" → PUBG, Battlegrounds; "Atlanta International Airport" → Atlanta. Collisions are pruned later. */
 function shortForms(name: string, strip?: RegExp): string[] {
-  const out = name.split(/\s*[:–]\s*|\s+-\s+/).filter((p) => p !== name);
+  // "Family Computer/Nintendo Entertainment System", "Mississippi–Missouri", "PUBG: Battlegrounds".
+  const out = name.split(/\s*[:–/]\s*|\s+-\s+/).filter((p) => p !== name);
+  // Hawaiʻi is typed "Hawaii": normalize() keeps the ʻokina as a word break.
+  if (/[ʻʼ`]/.test(name)) out.push(name.replace(/[ʻʼ`]/g, ""));
   for (const words of [GENERIC_WORDS, strip]) {
     if (!words) continue;
     const stripped = name.replace(words, " ").replace(/\s+/g, " ").trim();
@@ -128,6 +131,8 @@ async function readRows(topic: Topic): Promise<Row[]> {
       const v = parseValue(valueCell.text);
       if (!v) continue;
       const seeds = [nameCell.text, nameCell.linkText ?? "", ...shortForms(name, topic.stripWords)];
+      // The cell can say more than the name: "Mississippi–Missouri–Jefferson" names the Mississippi row.
+      if (cleanName(nameCell.text) !== name) seeds.push(...shortForms(cleanName(nameCell.text)));
       for (const c of aliasCs) {
         const cell = r[c];
         // "Atlanta, Georgia" names the row by "Atlanta", not by "Georgia": keep the first part of a place.

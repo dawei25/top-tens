@@ -37,13 +37,16 @@ const US_STATES: [string, string][] = [
   ["South Dakota", "SD"], ["Tennessee", "TN"], ["Texas", "TX"], ["Utah", "UT"], ["Vermont", "VT"],
   ["Virginia", "VA"], ["Washington", "WA"], ["West Virginia", "WV"], ["Wisconsin", "WI"], ["Wyoming", "WY"],
   ["District of Columbia", "DC"],
+  // Territories: not states, but a sincere guess on a state list.
+  ["Puerto Rico", "PR"], ["Guam", "GU"], ["U.S. Virgin Islands", "VI"], ["American Samoa", "AS"],
+  ["Northern Mariana Islands", "MP"],
 ];
 
-/** The 50 states plus DC. Postal codes are left out: two-letter aliases make every short typo a near match. */
+/** The 50 states, DC and the inhabited territories. Postal codes are left out: two-letter aliases make every short typo a near match. */
 export function usStates(): Place[] {
   return US_STATES.map(([name]) => ({
     name,
-    aliases: name === "District of Columbia" ? ["Washington, D.C.", "Washington DC"] : [],
+    aliases: name === "District of Columbia" ? ["Washington, D.C.", "Washington DC", "DC", "D.C."] : [],
   }));
 }
 

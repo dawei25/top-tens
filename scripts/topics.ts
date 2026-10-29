@@ -229,7 +229,7 @@ export const TOPICS: Topic[] = [
     value: "Height",
     metric: "Height",
     unit: " m",
-    universeCategories: ["Eight-thousanders", "Eight-thousanders of the Himalayas", "Seven Summits"],
+    universeCategories: ["Eight-thousanders", "Eight-thousanders of the Himalayas", "Seven Summits", "Alpine four-thousanders", "Great north faces of the Alps", "Mountains of the Alps", "Stratovolcanoes of Japan"],
   },
   {
     id: "rivers",
@@ -243,6 +243,7 @@ export const TOPICS: Topic[] = [
     metric: "Length",
     unit: " km",
     keepOrder: true,
+    universeCategories: ["International rivers of Asia", "International rivers of Europe", "International rivers of Africa", "International rivers of South America", "International rivers of North America", "Sacred rivers", "Rivers of London"],
   },
   {
     id: "islands",
@@ -271,7 +272,7 @@ export const TOPICS: Topic[] = [
     metric: "Area",
     unit: " km²",
     also: [{ tables: [3], name: "Name" }],
-    universeCategories: ["Great Lakes", "African Great Lakes", "Rift lakes", "Ancient lakes", "Lakes of Russia", "Glacial lakes"],
+    universeCategories: ["Great Lakes", "African Great Lakes", "Rift lakes", "Ancient lakes", "Lakes of Russia", "International lakes of Europe", "International lakes of Asia", "International lakes of Africa", "International lakes of North America", "International lakes of South America", "Saline lakes of Asia", "Endorheic lakes of Asia", "Freshwater lochs of Scotland", "Lakes of Switzerland", "Lakes of Italy", "Glacial lakes"],
   },
   {
     id: "tourism",
@@ -371,7 +372,7 @@ export const TOPICS: Topic[] = [
     name: "Title",
     value: "Sales",
     metric: "Sales (millions)",
-    universeCategories: ["The Game Awards winners", "Golden Joystick Award for Game of the Year winners", "Spike Video Game Awards Game of the Year winners", "Video games adapted into films", "Open-world video games"],
+    universeCategories: ["The Game Awards winners", "Golden Joystick Award for Game of the Year winners", "Spike Video Game Awards Game of the Year winners", "Video games adapted into films", "Open-world video games", "Namco arcade games", "Arcade video games"],
   },
   {
     id: "consoles",
@@ -396,6 +397,7 @@ export const TOPICS: Topic[] = [
     value: "sales",
     metric: "Approximate sales",
     also: [{ tables: [9, 10, 11, 12], name: "Book" }],
+    universeCategories: ["Novels adapted into films"],
   },
   {
     id: "languages",
