@@ -7,14 +7,18 @@ Pure UI or matcher changes don't belong here; they ship without a rebuild.
 
 ## Pending
 
-- [ ] **Per-table "as of" date.** Pull each source table's own date where Wikipedia states one (caption or nearby
-      text like "as of September 2026", a dated column header such as "2025 estimate", or a footnote) and store it on
-      the puzzle, e.g. `source.dataAsOf: "September 2026"`. Fall back to the pull date (`source.asOf`) when the
-      table states none. The UI then shows "data as of September 2026" when present, otherwise
-      "as of <pull date>". Needs: an optional field in `src/game/types.ts` (coordinator), extraction in
-      `scripts/build.ts` (data), display (frontend).
-- [ ] **Fun facts.** Facts are written into `scripts/facts/<topic id>.json` and merged by the build; they only reach
-      the game after a rebuild.
+- [ ] **Values for unranked answers.** A miss on an unranked pool entry (rank 0) can't show its number, e.g.
+      "Klein Matterhorn isn't in the top 10" instead of its height, because universes and categories only give
+      names. (a) Carry the value from `also` tables that have the topic's metric column (cheap). (b) Optional,
+      owner to decide: read the value from each pool entry's article infobox (height, population, area...). All
+      ~25,000 pool entries is ~10 h of fetching at 1.5 s; capped at the ~300 likeliest per topic, ~75 min.
+      The UI already shows `value` for rank-0 entries when present.
+- [ ] **Wrong source articles.** CITIC Tower (buildings) resolves to a 33-storey Hong Kong office block and Arctic
+      Desert (deserts) to a small WWF ecoregion; both entries' redirects/aliases and facts come from the wrong page.
+      Fix `redirectTarget` for them (topic `aliases`/article override), then write their facts.
+- [x] **Per-table data date** (code done in `scripts/dates.ts`: an "as of" date in the caption or nearby text,
+      a month and year in the caption, or a year in the value header; applies at the rebuild).
+- [x] **Fun facts** (796 written and reviewed in `scripts/facts/`; they reach the game at the rebuild).
 
 ## Done
 

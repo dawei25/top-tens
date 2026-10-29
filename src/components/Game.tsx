@@ -38,9 +38,12 @@ function describe(r: GuessResult): Omit<Feedback, "key"> | null {
     case "near":
       return {
         tone: "bad",
+        // Show the entry's own number when the data has it: "Gasherbrum IV is #17, 7,932 m."
         text: !r.entry.rank
-          ? `${r.entry.name} isn't in the top 10`
-          : `${r.entry.name} is #${r.entry.rank}.${r.entry.rank <= 15 ? " So close." : ""}`,
+          ? r.entry.value
+            ? `${r.entry.name}: ${r.entry.value}. Not in the top 10.`
+            : `${r.entry.name} isn't in the top 10`
+          : `${r.entry.name} is #${r.entry.rank}${r.entry.value ? `, ${r.entry.value}` : ""}.${r.entry.rank <= 15 ? " So close." : ""}`,
       };
     case "typo":
       return { tone: "warn", text: "Did you mean", suggestions: r.suggestions };
