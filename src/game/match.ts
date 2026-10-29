@@ -23,6 +23,8 @@ export function normalize(s: string): string {
     .join(" ");
 }
 
+const CODE = /^[A-Z0-9]{2,4}$/;
+
 function digitsOf(s: string): string {
   return (s.match(/\d+/g) ?? []).join(" ");
 }
@@ -75,6 +77,8 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
       // Numbers are identity, not spelling: GTA 6 is not GTA 5, Mario Kart 7 is not Mario Kart.
       if (guessDigits && digitsOf(f) !== guessDigits) continue;
       const dist = editDistance(guess, f);
+      // Codes (ATL, EDDF, PRC) match exactly or not at all; fuzzy they catch keyboard mash like "asdf".
+      if (dist > 0 && CODE.test(form)) continue;
       if (dist < best) {
         best = dist;
         len = f.length;

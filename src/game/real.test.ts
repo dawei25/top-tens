@@ -28,3 +28,10 @@ describe("built puzzles", () => {
     expect(judge("countries-population", "asdf")).toMatchObject({ kind: "unknown", junk: true });
   });
 });
+
+describe("codes", () => {
+  it("keyboard mash never fuzzy-matches an airport code", () => {
+    expect(judge("airports", "asdf")).toMatchObject({ kind: "unknown", junk: true });
+    expect(judge("airports", "ATL")).toMatchObject({ kind: "correct" });
+  });
+});
