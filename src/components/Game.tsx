@@ -136,13 +136,14 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
   };
   const guess = (text: string) => {
     // A misspelling is corrected in the box, never submitted for the player.
-    const preview = judgeGuess(text, puzzle, new Set(game.found), lexicon);
+    const offered = feedback?.suggestions;
+    const preview = judgeGuess(text, puzzle, new Set(game.found), lexicon, offered);
     if ((preview.kind === "correct" || preview.kind === "near") && preview.corrected) {
       fill(preview.entry.name);
       setFeedback({ tone: "warn", text: `Did you mean ${preview.entry.name}? Press Enter to guess it.`, key: Date.now() });
       return;
     }
-    const { state, result } = applyGuess(game, puzzle, text, lexicon);
+    const { state, result } = applyGuess(game, puzzle, text, lexicon, offered);
     const fb = describe(result);
     if (!fb) return;
     commit(state);

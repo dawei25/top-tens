@@ -31,9 +31,10 @@ export function applyGuess(
   puzzle: Puzzle,
   text: string,
   lex?: Lexicon,
+  offered?: string[],
 ): { state: GameState; result: GuessResult } {
   if (state.status !== "playing") return { state, result: { kind: "empty" } };
-  const result = judgeGuess(text, puzzle, new Set(state.found), lex);
+  const result = judgeGuess(text, puzzle, new Set(state.found), lex, offered);
   if (result.kind !== "correct" && result.kind !== "near") return { state, result };
 
   // Re-guessing an answer that already cost a life shouldn't cost another.

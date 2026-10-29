@@ -106,3 +106,17 @@ describe("owner playtest cases", () => {
     expect(judge("islands", "New Zealand")).toEqual({ kind: "typo", suggestions: ["North Island", "South Island"] });
   });
 });
+
+describe("picking a choice", () => {
+  it("an exact unranked name counts when the longer names are unranked too (Matterhorn)", () => {
+    expect(judge("mountains", "Matterhorn")).toMatchObject({ kind: "near", entry: { name: "Matterhorn" } });
+  });
+  it("a picked choice resolves to that entry", () => {
+    const p = read<Puzzle>("video-games.json");
+    const r = judgeGuess("witcher", p, new Set(), lex);
+    expect(r.kind).toBe("typo");
+    if (r.kind !== "typo") return;
+    const pick = judgeGuess("The Witcher", p, new Set(), lex, r.suggestions);
+    expect(pick).toMatchObject({ kind: "near", entry: { name: "The Witcher" } });
+  });
+});

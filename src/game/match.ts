@@ -115,7 +115,14 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
  * input with that name for the player to confirm), unless what was typed is itself a different real name
  * (Austria when Australia is on the list).
  */
-export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?: Lexicon): GuessResult {
+/** `offered`: choices the game just showed for the previous guess; typing or tapping one picks that entry. */
+export function judgeGuess(
+  raw: string,
+  puzzle: Puzzle,
+  found: Set<number>,
+  lex?: Lexicon,
+  offered?: string[],
+): GuessResult {
   const guess = normalize(raw);
   if (!guess) return { kind: "empty" };
 
@@ -130,6 +137,13 @@ export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?
     if (found.has(c.entry.rank)) return { kind: "duplicate", entry: c.entry };
     return { kind: "correct", entry: c.entry, corrected };
   };
+
+  // A choice the game just offered, picked by the player, is that entry: no second round of choices.
+  const picked = offered?.find((name) => normalize(name) === guess);
+  if (picked) {
+    const c = candidates.find((x) => x.entry.name === picked);
+    if (c) return resolve(c, false);
+  }
 
   /** One candidate resolves; several become choices (ones already found are left out). */
   const choose = (cs: Candidate[], corrected: boolean): GuessResult => {
@@ -151,11 +165,13 @@ export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?
   const exact = strong.length ? strong : allExact;
   const named = exact.filter((c) => c.fullName);
   if (named.length === 1) {
-    // The exact name of a ranked entry counts ("MrBeast", "Avatar"). The exact name of an unranked pool entry that
-    // other entries' names contain ("The Witcher", the 2007 game, vs The Witcher 3: Wild Hunt) is ambiguous: offer
-    // them all rather than charge a life for the less likely reading.
+    // The exact name of a ranked entry counts ("MrBeast", "Avatar"). The exact name of an unranked pool entry that a
+    // ranked entry's name contains ("The Witcher", the 2007 game, vs The Witcher 3: Wild Hunt) is ambiguous: offer
+    // them rather than charge a life for the less likely reading. When every longer name is unranked too
+    // ("Matterhorn" vs Klein Matterhorn), the exact name is the obvious reading and counts.
     const containing = wordMatches(guess, candidates).filter((c) => c !== named[0]);
-    if (named[0].entry.rank === 0 && containing.length > 0 && containing.length < MAX_CHOICES) {
+    const ambiguous = containing.some((c) => c.entry.rank > 0);
+    if (named[0].entry.rank === 0 && ambiguous && containing.length < MAX_CHOICES) {
       return choose([named[0], ...containing], false);
     }
     return resolve(named[0], false);

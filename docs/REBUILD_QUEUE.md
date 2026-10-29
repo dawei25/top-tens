@@ -10,7 +10,7 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
-- [ ] **Values for unranked answers.** A miss on an unranked pool entry (rank 0) can't show its number, e.g.
+- [x] **Values for unranked answers** (test set: mountains, islands, nba-points, youtube-channels, airports; `scripts/likely.ts`, `scripts/values.ts`). A miss on an unranked pool entry (rank 0) can't show its number, e.g.
       "Klein Matterhorn isn't in the top 10" instead of its height, because universes and categories only give
       names. (a) Carry the value from `also` tables that have the topic's metric column (cheap). (b) Optional,
       owner to decide: read the value from each pool entry's article infobox (height, population, area...). All
@@ -21,7 +21,8 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       Fix `redirectTarget` for them (topic `aliases`/article override), then write their facts.
 - [x] **Per-table data date** (test set; code done in `scripts/dates.ts`: an "as of" date in the caption or nearby text,
       a month and year in the caption, or a year in the value header; applies at the rebuild).
-- [x] **Fun facts** (test set; 796 written and reviewed in `scripts/facts/`; they reach the game at the rebuild).
+- [x] **Fun facts** (test set rewritten for fun with full articles and Did-you-know hooks; the other 72 lists still have
+      the first-pass facts and need the same rewrite; 796 written and reviewed in `scripts/facts/`; they reach the game at the rebuild).
 
 ## Done
 
