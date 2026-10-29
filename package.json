@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "inspect": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/inspect.ts",
-    "build:puzzles": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/build.ts"
+    "build:puzzles": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/build.ts",
+    "build:test": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/build.ts --test"
   },
   "dependencies": {
     "react": "^19.3.1",

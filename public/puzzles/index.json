@@ -5,48 +5,8 @@
   "category": "Geography"
  },
  {
-  "id": "countries-area",
-  "title": "Largest countries by area",
-  "category": "Geography"
- },
- {
-  "id": "countries-gdp",
-  "title": "Largest economies",
-  "category": "Geography"
- },
- {
-  "id": "africa-population",
-  "title": "Most populous African countries",
-  "category": "Geography"
- },
- {
-  "id": "asia-population",
-  "title": "Most populous Asian countries",
-  "category": "Geography"
- },
- {
-  "id": "europe-population",
-  "title": "Most populous European countries",
-  "category": "Geography"
- },
- {
   "id": "us-states-population",
   "title": "Most populous US states",
-  "category": "Geography"
- },
- {
-  "id": "us-states-area",
-  "title": "Largest US states",
-  "category": "Geography"
- },
- {
-  "id": "us-cities",
-  "title": "Most populous US cities",
-  "category": "Geography"
- },
- {
-  "id": "world-cities",
-  "title": "Largest cities in the world",
   "category": "Geography"
  },
  {
@@ -55,29 +15,9 @@
   "category": "Geography"
  },
  {
-  "id": "rivers",
-  "title": "Longest rivers",
-  "category": "Geography"
- },
- {
   "id": "islands",
   "title": "Largest islands",
   "category": "Geography"
- },
- {
-  "id": "lakes",
-  "title": "Largest lakes",
-  "category": "Geography"
- },
- {
-  "id": "tourism",
-  "title": "Most visited countries",
-  "category": "Geography"
- },
- {
-  "id": "billionaire-countries",
-  "title": "Countries with the most billionaires",
-  "category": "Business"
  },
  {
   "id": "films-gross",
@@ -90,39 +30,9 @@
   "category": "Entertainment"
  },
  {
-  "id": "youtube-videos",
-  "title": "Most-viewed YouTube videos",
-  "category": "Entertainment"
- },
- {
   "id": "video-games",
   "title": "Best-selling video games",
   "category": "Entertainment"
- },
- {
-  "id": "consoles",
-  "title": "Best-selling game consoles",
-  "category": "Entertainment"
- },
- {
-  "id": "books",
-  "title": "Best-selling books",
-  "category": "Culture"
- },
- {
-  "id": "languages",
-  "title": "Most spoken languages",
-  "category": "Culture"
- },
- {
-  "id": "buildings",
-  "title": "Tallest buildings",
-  "category": "Culture"
- },
- {
-  "id": "olympic-medals",
-  "title": "Most Olympic medals (all-time)",
-  "category": "Sports"
  },
  {
   "id": "nba-points",
@@ -130,283 +40,13 @@
   "category": "Sports"
  },
  {
-  "id": "stadiums",
-  "title": "Largest stadiums",
-  "category": "Sports"
- },
- {
-  "id": "companies-revenue",
-  "title": "Largest companies by revenue",
-  "category": "Business"
- },
- {
   "id": "airports",
   "title": "Busiest airports",
   "category": "Business"
  },
  {
-  "id": "super-bowl-wins",
-  "title": "Most Super Bowl wins",
-  "category": "Sports"
- },
- {
-  "id": "world-series-wins",
-  "title": "Most World Series titles",
-  "category": "Sports"
- },
- {
-  "id": "f1-wins-by-country",
-  "title": "F1 race wins by country",
-  "category": "Sports"
- },
- {
-  "id": "premier-league-goals",
-  "title": "Premier League all-time top scorers",
-  "category": "Sports"
- },
- {
-  "id": "nfl-passing-yards",
-  "title": "NFL career passing yards leaders",
-  "category": "Sports"
- },
- {
-  "id": "nfl-rushing-yards",
-  "title": "NFL career rushing yards leaders",
-  "category": "Sports"
- },
- {
-  "id": "mlb-home-runs",
-  "title": "MLB career home run leaders",
-  "category": "Sports"
- },
- {
-  "id": "nhl-goals",
-  "title": "NHL career goal leaders",
-  "category": "Sports"
- },
- {
-  "id": "x-accounts",
-  "title": "Most-followed X accounts",
-  "category": "Entertainment"
- },
- {
-  "id": "tiktok-accounts",
-  "title": "Most-followed TikTok accounts",
-  "category": "Entertainment"
- },
- {
-  "id": "spotify-songs",
-  "title": "Most-streamed songs on Spotify",
-  "category": "Entertainment"
- },
- {
-  "id": "albums",
-  "title": "Best-selling albums",
-  "category": "Entertainment"
- },
- {
-  "id": "animated-films",
-  "title": "Highest-grossing animated films",
-  "category": "Entertainment"
- },
- {
-  "id": "media-franchises",
-  "title": "Highest-grossing media franchises",
-  "category": "Entertainment"
- },
- {
-  "id": "game-franchises",
-  "title": "Best-selling video game franchises",
-  "category": "Entertainment"
- },
- {
-  "id": "websites",
-  "title": "Most-visited websites",
-  "category": "Entertainment"
- },
- {
-  "id": "us-states-gdp",
-  "title": "Largest US state economies",
-  "category": "Geography"
- },
- {
-  "id": "europe-cities",
-  "title": "Largest cities in Europe",
-  "category": "Geography"
- },
- {
-  "id": "india-cities",
-  "title": "Largest cities in India",
-  "category": "Geography"
- },
- {
-  "id": "canada-cities",
-  "title": "Largest cities in Canada",
-  "category": "Geography"
- },
- {
-  "id": "china-cities",
-  "title": "Largest cities in China",
-  "category": "Geography"
- },
- {
-  "id": "deserts",
-  "title": "Largest deserts",
-  "category": "Geography"
- },
- {
-  "id": "city-visitors",
-  "title": "Most visited cities",
-  "category": "Geography"
- },
- {
-  "id": "national-parks",
-  "title": "Most visited US national parks",
-  "category": "Geography"
- },
- {
-  "id": "empires",
-  "title": "Largest empires in history",
-  "category": "Culture"
- },
- {
-  "id": "moons",
-  "title": "Largest moons",
-  "category": "Culture"
- },
- {
-  "id": "museums",
-  "title": "Most visited museums",
-  "category": "Culture"
- },
- {
-  "id": "market-cap-peak",
-  "title": "Most valuable companies ever",
-  "category": "Business"
- },
- {
-  "id": "banks",
-  "title": "Largest banks",
-  "category": "Business"
- },
- {
-  "id": "richest-people",
-  "title": "Richest people",
-  "category": "Business"
- },
- {
-  "id": "oil-production",
-  "title": "Biggest oil producers",
-  "category": "Business"
- },
- {
-  "id": "nobel-countries",
-  "title": "Most Nobel laureates by country",
-  "category": "Culture"
- },
- {
-  "id": "military-spending",
-  "title": "Biggest military budgets",
-  "category": "Geography"
- },
- {
-  "id": "co2-emissions",
-  "title": "Biggest CO2 emitters",
-  "category": "Geography"
- },
- {
-  "id": "gdp-per-capita",
-  "title": "Richest countries per person",
-  "category": "Geography"
- },
- {
-  "id": "population-density",
-  "title": "Most densely populated places",
-  "category": "Geography"
- },
- {
-  "id": "broadway",
-  "title": "Longest-running Broadway shows",
-  "category": "Entertainment"
- },
- {
-  "id": "manga",
-  "title": "Best-selling manga",
-  "category": "Entertainment"
- },
- {
-  "id": "nba-assists",
-  "title": "NBA career assists leaders",
-  "category": "Sports"
- },
- {
-  "id": "nba-rebounds",
-  "title": "NBA career rebounding leaders",
-  "category": "Sports"
- },
- {
-  "id": "nhl-points",
-  "title": "NHL career points leaders",
-  "category": "Sports"
- },
- {
-  "id": "mlb-hits",
-  "title": "MLB career hits leaders",
-  "category": "Sports"
- },
- {
-  "id": "theme-parks",
-  "title": "Most visited theme parks",
-  "category": "Entertainment"
- },
- {
-  "id": "us-metros",
-  "title": "Largest US metro areas",
-  "category": "Geography"
- },
- {
-  "id": "capitals",
-  "title": "Most populous capital cities",
-  "category": "Geography"
- },
- {
-  "id": "brazil-cities",
-  "title": "Largest cities in Brazil",
-  "category": "Geography"
- },
- {
-  "id": "us-box-office",
-  "title": "Biggest US box office hits",
-  "category": "Entertainment"
- },
- {
   "id": "spotify-artists",
   "title": "Most monthly listeners on Spotify",
   "category": "Entertainment"
- },
- {
-  "id": "facebook-pages",
-  "title": "Most-followed Facebook pages",
-  "category": "Entertainment"
- },
- {
-  "id": "ballon-dor-countries",
-  "title": "Ballon d'Or wins by country",
-  "category": "Sports"
- },
- {
-  "id": "island-countries",
-  "title": "Countries with the most islands",
-  "category": "Geography"
- },
- {
-  "id": "expensive-films",
-  "title": "Most expensive films",
-  "category": "Entertainment"
- },
- {
-  "id": "car-makers",
-  "title": "Biggest car makers",
-  "category": "Business"
  }
 ]

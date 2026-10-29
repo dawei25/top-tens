@@ -86,6 +86,23 @@ const CELEBRITIES: Also[] = [
   { page: "List of most-subscribed YouTube channels", tables: [0], name: "Name" },
 ];
 
+/**
+ * The test set: 10 lists that between them exercise every feature, for fast iteration
+ * (`npm run build:puzzles -- --test`). Run a full build before launch.
+ */
+export const TEST_SET = [
+  "countries-population", // every-country pool, country aliases
+  "islands", // UK -> Great Britain, New Zealand group, Faroe Islands
+  "mountains", // Matterhorn, article values
+  "nba-points", // first names
+  "video-games", // numbers in titles, big category pool
+  "youtube-channels", // Smosh, category pool
+  "films-gross", // titles
+  "airports", // codes and cities
+  "us-states-population", // every-state pool
+  "spotify-artists", // long metric label, data date
+];
+
 export const TOPICS: Topic[] = [
   // Geography
   {

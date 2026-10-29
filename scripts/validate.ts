@@ -1,6 +1,7 @@
 // Checks every built puzzle in public/puzzles for likely data problems.
 // Usage: NODE_NO_WARNINGS=1 npx tsx scripts/validate.ts
 // Exits 1 if any hard error is found; warnings are printed but don't fail.
+import { TEST_SET } from "./topics";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { normalize } from "../src/game/match";
@@ -108,7 +109,11 @@ function main(): number {
   const fileIds = new Set(files.map((f) => f.replace(/\.json$/, "")));
   const topicIds = new Set(TOPICS.map((t) => t.id));
   for (const id of indexIds) if (!fileIds.has(id)) globalIssues.push({ level: "error", msg: `index.json lists "${id}" but there is no ${id}.json` });
-  for (const id of fileIds) if (!indexIds.has(id)) globalIssues.push({ level: "error", msg: `${id}.json is not in index.json` });
+  // After `build:test` the index lists only the test set; the other puzzle files are expected to sit unindexed.
+  const testIndex = indexIds.size === TEST_SET.length && TEST_SET.every((id) => indexIds.has(id));
+  if (!testIndex) {
+    for (const id of fileIds) if (!indexIds.has(id)) globalIssues.push({ level: "error", msg: `${id}.json is not in index.json` });
+  }
   for (const id of fileIds) if (!topicIds.has(id)) globalIssues.push({ level: "warn", msg: `${id}.json has no topic in topics.ts (stale file?)` });
   for (const id of topicIds) if (!fileIds.has(id)) globalIssues.push({ level: "warn", msg: `topic "${id}" has no built puzzle (build failed?)` });
   if (indexIds.size !== index.length) globalIssues.push({ level: "error", msg: "index.json has duplicate ids" });

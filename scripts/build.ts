@@ -5,7 +5,7 @@ import { join } from "node:path";
 import type { Entry, Fact, Puzzle } from "../src/game/types";
 import { normalize } from "../src/game/match";
 import { cleanText, splitHeader, tableGrid, wikitables, type Cell } from "./table";
-import { TOPICS, type Topic } from "./topics";
+import { TEST_SET, TOPICS, type Topic } from "./topics";
 import { fetchCategory, fetchPage, fetchRedirects, pageUrl } from "./wiki";
 import { writeLexicon } from "./lexicon";
 import { tableDataDate } from "./dates";
@@ -390,7 +390,11 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
   };
 }
 
-const only = process.argv.slice(2);
+// `--test` builds only the test set (fast iteration) and indexes just those lists; ids build only those ids
+// (index untouched); no arguments builds everything.
+const args = process.argv.slice(2);
+const testMode = args.includes("--test");
+const only = testMode ? TEST_SET : args.filter((a) => !a.startsWith("--"));
 mkdirSync(OUT_DIR, { recursive: true });
 const index: { id: string; title: string; category: string }[] = [];
 for (const topic of TOPICS) {
@@ -404,5 +408,5 @@ for (const topic of TOPICS) {
     console.log(`FAIL ${topic.id.padEnd(24)} ${(err as Error).message}`);
   }
 }
-if (!only.length) writeFileSync(join(OUT_DIR, "index.json"), JSON.stringify(index, null, 1));
+if (!only.length || testMode) writeFileSync(join(OUT_DIR, "index.json"), JSON.stringify(index, null, 1));
 console.log(`lexicon trained on ${writeLexicon(OUT_DIR)} names`);

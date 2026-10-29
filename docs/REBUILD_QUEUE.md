@@ -5,6 +5,9 @@ rebuild when the batch is ready (then `scripts/validate.ts`, `npm test`, commit 
 
 Pure UI or matcher changes don't belong here; they ship without a rebuild.
 
+**Test phase:** iterate with `npm run build:test` (10 lists, under a minute from cache). Items marked "test set"
+are live on those 10 only; a full `npm run build:puzzles` before launch applies everything to all 82.
+
 ## Pending
 
 - [ ] **Values for unranked answers.** A miss on an unranked pool entry (rank 0) can't show its number, e.g.
@@ -16,9 +19,9 @@ Pure UI or matcher changes don't belong here; they ship without a rebuild.
 - [ ] **Wrong source articles.** CITIC Tower (buildings) resolves to a 33-storey Hong Kong office block and Arctic
       Desert (deserts) to a small WWF ecoregion; both entries' redirects/aliases and facts come from the wrong page.
       Fix `redirectTarget` for them (topic `aliases`/article override), then write their facts.
-- [x] **Per-table data date** (code done in `scripts/dates.ts`: an "as of" date in the caption or nearby text,
+- [x] **Per-table data date** (test set; code done in `scripts/dates.ts`: an "as of" date in the caption or nearby text,
       a month and year in the caption, or a year in the value header; applies at the rebuild).
-- [x] **Fun facts** (796 written and reviewed in `scripts/facts/`; they reach the game at the rebuild).
+- [x] **Fun facts** (test set; 796 written and reviewed in `scripts/facts/`; they reach the game at the rebuild).
 
 ## Done
 

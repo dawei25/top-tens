@@ -49,6 +49,7 @@ npm test                     # vitest: matcher, game state, junk detector, check
 npx tsc -p tsconfig.app.json --noEmit
 npx vite build               # production build into dist/
 npx vite --port <your port>  # dev server
+npm run build:test           # rebuild only the 10-list test set (TEST_SET in scripts/topics.ts) and index just those
 npm run build:puzzles        # rebuild every puzzle + lexicon.json (append topic ids to rebuild only those)
 npm run inspect -- "List of ..."   # print a Wikipedia page's tables, for writing new topics
 ```
