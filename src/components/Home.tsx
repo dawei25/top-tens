@@ -90,7 +90,8 @@ export function Home({
   const saved = load();
   const s = stats(saved);
   const st = streak(saved);
-  const [help, setHelp] = useState(!saved.seenHelp);
+  // The rules stay closed until asked for, even on a first visit.
+  const [help, setHelp] = useState(false);
   const [helpAsked, setHelpAsked] = useState(false);
   const dailyRef = useRef<HTMLButtonElement>(null);
   const blitzRef = useRef<HTMLButtonElement>(null);
