@@ -56,6 +56,16 @@ npm run inspect -- "List of ..."   # print a Wikipedia page's tables, for writin
 
 Before reporting done: `npm test`, the typecheck and `npx vite build` all pass.
 
+## Browser checks (keep them lean)
+
+- The maintained browser suite lives in `e2e/` and runs with `npm run e2e` (once it exists). It selects elements by
+  `data-testid` and aria labels, never by visible text or layout, so design changes don't break it. If you change a
+  flow it covers, update the suite in the same change.
+- For a new feature: run the suite, plus a few targeted checks of the new behavior. Don't re-run or report old
+  throwaway scripts from earlier tasks; delete them.
+- Screenshots: only what the coordinator needs to review the change (typically 2 to 4: phone and desktop).
+- Report test results briefly: what passed, and any real failure with its cause. Not every check.
+
 ## Wikipedia etiquette
 
 The build reads normal page HTML (the API is rate-limited from this container), waits 1.5 s between requests and
