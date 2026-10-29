@@ -62,3 +62,15 @@ describe("hints", () => {
     expect(shareText(s, puzzle, "u", 12)).toContain("1 hint");
   });
 });
+
+describe("random rolls", () => {
+  it("never repeats the last few picks and still covers the whole pool", async () => {
+    const { pickRandom } = await import("./puzzles");
+    const ids = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+    const picks = Array.from({ length: 200 }, () => pickRandom(ids, "test")!);
+    for (let i = 1; i < picks.length; i++) expect(picks.slice(Math.max(0, i - 5), i)).not.toContain(picks[i]);
+    expect(new Set(picks).size).toBe(10);
+    expect(pickRandom(["only"], "solo")).toBe("only");
+    expect(pickRandom(["only"], "solo")).toBe("only");
+  });
+});
