@@ -5,7 +5,7 @@
 import { pulseCoefficients } from "./music";
 
 /** Master volume. Voices peak well under 1 on top of this, so the loudest chord stays modest. */
-export const MASTER_GAIN = 0.18;
+export const MASTER_GAIN = 0.45;
 
 type Ctor = typeof AudioContext;
 function audioCtor(): Ctor | undefined {

@@ -93,7 +93,7 @@ export function render(c: Cue, at = 0): void {
     }
     case "ink":
       // A low, soft bloop, with a wet splat of filtered noise under it.
-      tone({ freq: 330, slideTo: 80, at, dur: 0.16, gain: 0.5, wave: "triangle", release: 0.08 });
+      tone({ freq: 330, slideTo: 80, at, dur: 0.16, gain: 0.38, wave: "triangle", release: 0.08 });
       burst({ at, dur: 0.14, gain: 0.07, filter: 500 });
       return;
     case "tick":
