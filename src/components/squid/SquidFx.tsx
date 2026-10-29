@@ -313,8 +313,9 @@ function ink(layer: HTMLElement, scope: ParentNode) {
     const a = aim + (Math.random() - 0.5) * spread;
     const near = k < count / 3;
     const d = reach * (near ? 0.05 + 0.3 * Math.random() : 0.25 + 0.75 * Math.sqrt(Math.random()));
-    // Bigger near the source, so the cloud is one mass that thins out.
-    const size = Math.round(((big ? 54 : 42) + Math.random() * (big ? 84 : 54) * (1.3 - d / reach)) / 6) * 6;
+    // Bigger near the source, so the cloud is one mass that thins out; sized to the screen so it stays a mass.
+    const unit = Math.min(innerWidth, innerHeight);
+    const size = Math.round((unit * (big ? 0.14 : 0.11) + Math.random() * unit * (big ? 0.22 : 0.14) * (1.3 - d / reach)) / 6) * 6;
     const delay = (d / reach) * DUR * 0.15;
     puff.style.width = puff.style.height = `${size}px`;
     puff.style.marginLeft = puff.style.marginTop = `${-size / 2}px`;

@@ -241,8 +241,12 @@
   .g-limb.fresh {
     animation: squid-glow-in 0.8s steps(8, end) var(--light-delay, 0ms) both;
   }
+  /* Classic lights the limb as the grabbed word lands (see SquidFx: about 0.41 s, 0.52 s for a straining #1/#2). */
   .squid[data-mode="classic"] {
-    --light-delay: 0.36s;
+    --light-delay: 0.4s;
+  }
+  .squid[data-mode="classic"] .tentacle {
+    --light-delay: 0.52s;
   }
 
   .squid-sparks {
@@ -406,7 +410,7 @@
   clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
 }
 .ink-puff.lit {
-  background: rgba(30, 14, 44, 0.92);
+  background: rgba(24, 11, 36, 0.92);
 }
 .ink-drop {
   position: absolute;

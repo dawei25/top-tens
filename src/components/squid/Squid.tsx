@@ -32,6 +32,10 @@ const { w: W, h: H } = SQUID;
 const VIEW = `0 0 ${W} ${H}`;
 const TONES = ["h", "l", "d", "k"] as const;
 
+/** #1 is gold; #1 and #2 are the long tentacles (their grab strains, so they light a beat later); fresh ones flash. */
+const limbClass = (id: number, fresh: ReadonlySet<number>) =>
+  `${id === 1 ? " first" : ""}${id <= 2 ? " tentacle" : ""}${fresh.has(id) ? " fresh" : ""}`;
+
 /** Run a one-off move on an element, unless motion is reduced. */
 function play(el: Element | null, frames: Keyframe[], opts: KeyframeAnimationOptions) {
   if (!el || reducedMotion() || typeof el.animate !== "function") return;
@@ -157,7 +161,7 @@ export function Squid({ mode, lit, mood = "play", heat = 0, flinch = 0, flare = 
         <svg className="squid-glow" viewBox={VIEW}>
           <path className="g-body" d={SQUID.silhouette} />
           {SQUID.limbs.map((l) =>
-            on.has(l.id) ? <path key={l.id} className={`g-limb${l.id === 1 ? " first" : ""}${fresh.has(l.id) ? " fresh" : ""}`} d={l.all} /> : null,
+            on.has(l.id) ? <path key={l.id} className={`g-limb${limbClass(l.id, fresh)}`} d={l.all} /> : null,
           )}
         </svg>
         <svg className="squid-px" viewBox={VIEW} shapeRendering="crispEdges">
@@ -174,7 +178,7 @@ export function Squid({ mode, lit, mood = "play", heat = 0, flinch = 0, flare = 
           {SQUID.limbs.map((l) => (
             <g
               key={l.id}
-              className={`limb${l.id === 1 ? " first" : ""}${fresh.has(l.id) ? " fresh" : ""}`}
+              className={`limb${limbClass(l.id, fresh)}`}
               data-limb={l.id}
               data-on={on.has(l.id)}
             >
