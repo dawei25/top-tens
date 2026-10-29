@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export function reducedMotion(): boolean {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -61,11 +61,52 @@ export function Heart({ className }: { className?: string }) {
   );
 }
 
+const HOUSE = pixels(["...##...", "..####..", ".######.", "########", ".##..##.", ".##..##.", ".##..##."]);
+
 export function BackArrow() {
   return (
     <svg className="pixel-icon" viewBox="0 0 8 7" shapeRendering="crispEdges" aria-hidden="true">
       <path d={ARROW} fill="currentColor" />
     </svg>
+  );
+}
+
+export function HomeIcon() {
+  return (
+    <svg className="pixel-icon" viewBox="0 0 8 7" shapeRendering="crispEdges" aria-hidden="true">
+      <path d={HOUSE} fill="currentColor" />
+    </svg>
+  );
+}
+
+/**
+ * Every screen's header: BACK (one step up) on the left, the screen's own middle, HOME on the right. Escape is
+ * Back too, except while typing in a field or when something on the screen already used the Escape (a hint
+ * confirm marks it with preventDefault).
+ */
+export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; onHome: () => void; children: ReactNode }) {
+  const back = useRef(onBack);
+  back.current = onBack;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      const el = document.activeElement;
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return;
+      back.current();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+  return (
+    <header className="game-head">
+      <button className="key key-icon" onClick={onBack} aria-label="Back" title="Back (Esc)">
+        <BackArrow />
+      </button>
+      <div className="game-head-mid">{children}</div>
+      <button className="key key-icon" onClick={onHome} aria-label="Home" title="Home">
+        <HomeIcon />
+      </button>
+    </header>
   );
 }
 

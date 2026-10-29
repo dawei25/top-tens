@@ -28,7 +28,7 @@ import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { load, save } from "../game/storage";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
-import { BackArrow, ModeTag } from "./pixel";
+import { ModeTag, ScreenHead } from "./pixel";
 
 interface Props {
   id: string;
@@ -36,12 +36,15 @@ interface Props {
   schedule: DailyEntry[];
   today: string;
   lexicon?: Lexicon;
-  /** Open the past-runs panel (arriving from the Blitz runs screen). */
+  /** Open the past-runs panel (<base>/runs). */
   showRuns?: boolean;
-  /** Open this past run's results (its startedAt), arriving from Past runs. */
+  /** Show this past run's results (its startedAt), at <base>/run-<startedAt>. */
   openRun?: number;
   /** Set when this is a date's Today's Blitz (n is that date's daily number). */
   dailyBlitz?: { date: string; n: number };
+  /** This screen's own address, "#blitz-<id>" or "#dailyblitz-<date>"; sub-views hang off it. */
+  base: string;
+  onBack: () => void;
   onHome: () => void;
 }
 
@@ -150,11 +153,23 @@ function RoundLists({ puzzle, hits, byName }: { puzzle: Puzzle; hits: BlitzHit[]
 }
 
 /** Quiet, collapsed list of finished rounds on this list; the best one in gold. */
-function PastRuns({ runs, best, open, onOpen }: { runs: BlitzRun[]; best?: number; open: boolean; onOpen: (r: BlitzRun) => void }) {
+function PastRuns({
+  runs,
+  best,
+  open,
+  onToggle,
+  onOpen,
+}: {
+  runs: BlitzRun[];
+  best?: number;
+  open: boolean;
+  onToggle: (open: boolean) => void;
+  onOpen: (r: BlitzRun) => void;
+}) {
   if (!runs.length) return null;
   const bestAt = runs.find((r) => r.score === best)?.startedAt;
   return (
-    <details className="panel blitz-runs" open={open || undefined}>
+    <details className="panel blitz-runs" open={open} onToggle={(e) => onToggle(e.currentTarget.open)}>
       <summary>
         <span className="label">Past runs</span>
         <span className="caption">
@@ -178,7 +193,19 @@ function PastRuns({ runs, best, open, onOpen }: { runs: BlitzRun[]; best?: numbe
   );
 }
 
-export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, openRun: openAt, dailyBlitz, onHome }: Props) {
+export function Blitz({
+  id,
+  meta,
+  schedule,
+  today,
+  lexicon,
+  showRuns = false,
+  openRun: openAt,
+  dailyBlitz,
+  base,
+  onBack,
+  onHome,
+}: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<BlitzState | null>(null);
@@ -194,8 +221,11 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
   } | null>(null);
   /** How this round came back after the player left, if it did. */
   const [note, setNote] = useState<"resumed" | "away" | null>(null);
-  /** A past run being looked at. */
-  const [viewRun, setViewRun] = useState<BlitzRun | null>(null);
+  /** Past-runs panel; stays open across a visit to one of its runs, so Back lands on the open list. */
+  const [runsOpen, setRunsOpen] = useState(showRuns);
+  useEffect(() => {
+    if (showRuns) setRunsOpen(true);
+  }, [showRuns]);
   const inputRef = useRef<HTMLInputElement>(null);
   const stateRef = useRef<BlitzState | null>(null);
   stateRef.current = state;
@@ -212,10 +242,6 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
       .catch((e) => setError(String(e.message ?? e)));
   }, [id]);
 
-  // Arriving at #blitz-<id>/run-<startedAt> (from Past runs): show that run.
-  useEffect(() => {
-    if (openAt) setViewRun(blitzHistory(load(), id).find((r) => r.startedAt === openAt) ?? null);
-  }, [id, openAt]);
 
   // Keep the live round in storage if the page goes away (tab closed, app switched).
   useEffect(() => {
@@ -330,13 +356,13 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
     setRecord(null);
     setFeedback(null);
     setNote(null);
-    setViewRun(null);
     setInput("");
     setCopied(false);
     scrollTo({ top: 0, behavior: "auto" });
   };
-  const openRun = (r: BlitzRun | null) => {
-    setViewRun(r);
+  // A past run is its own address (<base>/run-<startedAt>), so browser back and the Back key both close it.
+  const openRun = (r: BlitzRun) => {
+    location.hash = `${base}/run-${r.startedAt}`;
     scrollTo({ top: 0, behavior: "auto" });
   };
   const share = async () => {
@@ -361,7 +387,8 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
   const n = state.hits.length;
   const runs = blitzHistory(saved, id);
   const best = saved.blitzBest?.[id];
-  const pastRuns = <PastRuns runs={runs} best={best} open={showRuns} onOpen={openRun} />;
+  const pastRuns = <PastRuns runs={runs} best={best} open={runsOpen} onToggle={setRunsOpen} onOpen={openRun} />;
+  const viewRun = openAt ? runs.find((r) => r.startedAt === openAt) : undefined;
 
   let body: React.ReactNode;
   if (viewRun) {
@@ -382,12 +409,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
             {isBest && <p className="gold">best on this list</p>}
           </div>
           <div className="results-actions">
-            <button
-              className="key"
-              // Opened from Past runs: back goes there. Opened from this list's panel: back to the list's screen.
-              onClick={() => (openAt === viewRun.startedAt ? history.back() : openRun(null))}
-              autoFocus
-            >
+            <button className="key" onClick={onBack} autoFocus>
               Back
             </button>
           </div>
@@ -517,19 +539,11 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
 
   return (
     <main className={`screen game blitz ${over ? "blitz-over" : ""}`}>
-      <header className="game-head">
-        <button className="key key-icon" onClick={onHome} aria-label="Home">
-          <BackArrow />
-        </button>
-        <div className="game-head-mid">
-          <span className="label mode gold">
-            {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
-          </span>
-        </div>
-        <a className="key key-sm" href={`#p-${puzzle.id}`}>
-          List
-        </a>
-      </header>
+      <ScreenHead onBack={onBack} onHome={onHome}>
+        <span className="label mode gold">
+          {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
+        </span>
+      </ScreenHead>
 
       <section className="panel prompt">
         <div className="prompt-top">

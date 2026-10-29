@@ -19,7 +19,7 @@ import { recordListRun } from "../game/history";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { BackArrow, formatAsOf, Heart, ordinal, reducedMotion, sourceSite, TypeIn } from "./pixel";
+import { formatAsOf, Heart, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
 
 interface Props {
   id: string;
@@ -30,6 +30,7 @@ interface Props {
   today: string;
   schedule: DailyEntry[];
   lexicon?: Lexicon;
+  onBack: () => void;
   onHome: () => void;
   onRoll: () => void;
 }
@@ -73,7 +74,7 @@ function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   }
 }
 
-export function Game({ id, meta, daily, today, schedule, lexicon, onHome, onRoll }: Props) {
+export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -119,18 +120,21 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onHome, onRoll
     if (hintAsk === null) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
+      // Escape closes the hint confirm first; marking it keeps the header from also going Back.
+      e.preventDefault();
       setHintAsk(null);
       inputRef.current?.focus();
     };
     const onDown = (e: PointerEvent) => {
       if (!(e.target as Element).closest?.(`[data-hint-rank="${hintAsk}"]`)) setHintAsk(null);
     };
-    document.addEventListener("keydown", onKey);
+    // Capture phase, so it runs before the header's Escape-is-Back listener.
+    document.addEventListener("keydown", onKey, true);
     document.addEventListener("pointerdown", onDown);
     // Opened from the keyboard: take focus to YES. Opened by click or tap, focus stays in the guess box.
     if (document.activeElement?.classList.contains("blank-toggle")) yesRef.current?.focus();
     return () => {
-      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("keydown", onKey, true);
       document.removeEventListener("pointerdown", onDown);
     };
   }, [hintAsk]);
@@ -303,12 +307,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onHome, onRoll
 
   return (
     <main className={`screen game status-${game.status}`}>
-      <header className="game-head">
-        <button className="key key-icon" onClick={onHome} aria-label="Home">
-          <BackArrow />
-        </button>
-        <div className="game-head-mid">
-          <span className="label mode">{mode}</span>
+      <ScreenHead onBack={onBack} onHome={onHome}>
+        <span className="label mode">{mode}</span>
           <div
             key={lostLife?.key}
             className={`lives ${lostLife ? "lives-hit" : ""}`}
@@ -319,15 +319,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onHome, onRoll
               <Heart key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
             ))}
           </div>
-        </div>
-        {!over ? (
-          <button className={`key key-sm ${confirmQuit ? "key-danger" : ""}`} onClick={quit} onBlur={() => setConfirmQuit(false)}>
-            {confirmQuit ? "Sure?" : "Give up"}
-          </button>
-        ) : (
-          <span className="key-sm-spacer" aria-hidden="true" />
-        )}
-      </header>
+      </ScreenHead>
 
       <section className="panel prompt">
         <div className="prompt-top">
@@ -469,17 +461,31 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onHome, onRoll
             );
           })}
         </ol>
-        {over && factRanks.length > 0 && (
+        {/* Board actions sit under the board: GIVE UP while playing, the facts toggle once it's over. */}
+        {!over ? (
           <div className="board-foot">
             <button
               type="button"
-              className="fact-all"
-              aria-pressed={allFactsOpen}
-              onClick={() => setOpenFacts(allFactsOpen ? new Set() : new Set(factRanks))}
+              className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
+              onClick={quit}
+              onBlur={() => setConfirmQuit(false)}
             >
-              {allFactsOpen ? "hide facts" : "show all facts"}
+              {confirmQuit ? "Sure?" : "Give up"}
             </button>
           </div>
+        ) : (
+          factRanks.length > 0 && (
+            <div className="board-foot">
+              <button
+                type="button"
+                className="fact-all"
+                aria-pressed={allFactsOpen}
+                onClick={() => setOpenFacts(allFactsOpen ? new Set() : new Set(factRanks))}
+              >
+                {allFactsOpen ? "hide facts" : "show all facts"}
+              </button>
+            </div>
+          )
         )}
       </section>
 

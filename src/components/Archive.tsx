@@ -3,12 +3,13 @@ import { archive, type DailyEntry } from "../game/daily";
 import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
 import type { GameState } from "../game/state";
-import { BackArrow, formatAsOf } from "./pixel";
+import { ScreenHead, formatAsOf } from "./pixel";
 
 interface Props {
   index: PuzzleMeta[];
   schedule: DailyEntry[];
   today: string;
+  onBack: () => void;
   onHome: () => void;
 }
 
@@ -20,7 +21,7 @@ function result(g?: GameState): { text: string; tone: string } {
 }
 
 /** Every daily so far, newest first. Old ones play like any list but don't count toward streaks. */
-export function Archive({ index, schedule, today, onHome }: Props) {
+export function Archive({ index, schedule, today, onBack, onHome }: Props) {
   const saved = load();
   const list = archive(schedule, today);
   const firstRef = useRef<HTMLAnchorElement>(null);
@@ -28,15 +29,9 @@ export function Archive({ index, schedule, today, onHome }: Props) {
 
   return (
     <main className="screen archive">
-      <header className="game-head">
-        <button className="key key-icon" onClick={onHome} aria-label="Home">
-          <BackArrow />
-        </button>
-        <div className="game-head-mid">
-          <span className="label mode">Archive</span>
-        </div>
-        <span className="key-sm-spacer" aria-hidden="true" />
-      </header>
+      <ScreenHead onBack={onBack} onHome={onHome}>
+        <span className="label mode">Archive</span>
+      </ScreenHead>
 
       <section className="panel prompt">
         <h1>Past dailies</h1>
