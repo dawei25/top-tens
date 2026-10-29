@@ -28,7 +28,7 @@ import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { load, save } from "../game/storage";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
-import { BackArrow, ModeTag } from "./pixel";
+import { ModeTag, ScreenHead } from "./pixel";
 
 interface Props {
   id: string;
@@ -36,12 +36,15 @@ interface Props {
   schedule: DailyEntry[];
   today: string;
   lexicon?: Lexicon;
-  /** Open the past-runs panel (arriving from the Blitz runs screen). */
+  /** Open the past-runs panel (<base>/runs). */
   showRuns?: boolean;
-  /** Open this past run's results (its startedAt), arriving from Past runs. */
+  /** Show this past run's results (its startedAt), at <base>/run-<startedAt>. */
   openRun?: number;
   /** Set when this is a date's Today's Blitz (n is that date's daily number). */
   dailyBlitz?: { date: string; n: number };
+  /** This screen's own address, "#blitz-<id>" or "#dailyblitz-<date>"; sub-views hang off it. */
+  base: string;
+  onBack: () => void;
   onHome: () => void;
 }
 
@@ -99,7 +102,7 @@ function Clock({ state, onExpire }: { state: BlitzState; onExpire: () => void })
   const ms = timeLeft(state);
   const secs = !state.startedAt ? String(BLITZ_SECONDS) : (Math.ceil(ms / 100) / 10).toFixed(1);
   return (
-    <span className={`blitz-clock ${running && ms < 10_000 ? "low" : ""}`} role="timer" aria-label={`${Math.ceil(ms / 1000)} seconds left`}>
+    <span className={`blitz-clock ${running && ms < 10_000 ? "low" : ""}`} role="timer" data-testid="blitz-clock" data-started={!!state.startedAt} aria-label={`${Math.ceil(ms / 1000)} seconds left`}>
       {secs}
     </span>
   );
@@ -107,7 +110,7 @@ function Clock({ state, onExpire }: { state: BlitzState; onExpire: () => void })
 
 function HitRow({ points, name, value }: { points: string; name: string; value?: string }) {
   return (
-    <li className="blitz-hit">
+    <li className="blitz-hit" data-testid="blitz-hit">
       <span className="blitz-pts">{points}</span>
       <span className="blitz-name">{name}</span>
       {value && <span className="value">{value}</span>}
@@ -150,12 +153,24 @@ function RoundLists({ puzzle, hits, byName }: { puzzle: Puzzle; hits: BlitzHit[]
 }
 
 /** Quiet, collapsed list of finished rounds on this list; the best one in gold. */
-function PastRuns({ runs, best, open, onOpen }: { runs: BlitzRun[]; best?: number; open: boolean; onOpen: (r: BlitzRun) => void }) {
+function PastRuns({
+  runs,
+  best,
+  open,
+  onToggle,
+  onOpen,
+}: {
+  runs: BlitzRun[];
+  best?: number;
+  open: boolean;
+  onToggle: (open: boolean) => void;
+  onOpen: (r: BlitzRun) => void;
+}) {
   if (!runs.length) return null;
   const bestAt = runs.find((r) => r.score === best)?.startedAt;
   return (
-    <details className="panel blitz-runs" open={open || undefined}>
-      <summary>
+    <details className="panel blitz-runs" data-testid="past-runs" open={open} onToggle={(e) => onToggle(e.currentTarget.open)}>
+      <summary data-testid="past-runs-toggle">
         <span className="label">Past runs</span>
         <span className="caption">
           {runs.length} · best <b className="gold">{best ?? Math.max(...runs.map((r) => r.score))}</b>
@@ -164,7 +179,7 @@ function PastRuns({ runs, best, open, onOpen }: { runs: BlitzRun[]; best?: numbe
       <ol>
         {runs.map((r) => (
           <li key={r.startedAt}>
-            <button type="button" className={`blitz-run ${r.startedAt === bestAt ? "best" : ""}`} onClick={() => onOpen(r)}>
+            <button type="button" className={`blitz-run ${r.startedAt === bestAt ? "best" : ""}`} data-testid="past-run" onClick={() => onOpen(r)}>
               <span className="run-when">{runTime(r.startedAt)}</span>
               <span className="run-n">
                 {r.hits.length} answer{r.hits.length === 1 ? "" : "s"}
@@ -178,7 +193,19 @@ function PastRuns({ runs, best, open, onOpen }: { runs: BlitzRun[]; best?: numbe
   );
 }
 
-export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, openRun: openAt, dailyBlitz, onHome }: Props) {
+export function Blitz({
+  id,
+  meta,
+  schedule,
+  today,
+  lexicon,
+  showRuns = false,
+  openRun: openAt,
+  dailyBlitz,
+  base,
+  onBack,
+  onHome,
+}: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<BlitzState | null>(null);
@@ -194,8 +221,11 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
   } | null>(null);
   /** How this round came back after the player left, if it did. */
   const [note, setNote] = useState<"resumed" | "away" | null>(null);
-  /** A past run being looked at. */
-  const [viewRun, setViewRun] = useState<BlitzRun | null>(null);
+  /** Past-runs panel; stays open across a visit to one of its runs, so Back lands on the open list. */
+  const [runsOpen, setRunsOpen] = useState(showRuns);
+  useEffect(() => {
+    if (showRuns) setRunsOpen(true);
+  }, [showRuns]);
   const inputRef = useRef<HTMLInputElement>(null);
   const stateRef = useRef<BlitzState | null>(null);
   stateRef.current = state;
@@ -212,10 +242,6 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
       .catch((e) => setError(String(e.message ?? e)));
   }, [id]);
 
-  // Arriving at #blitz-<id>/run-<startedAt> (from Past runs): show that run.
-  useEffect(() => {
-    if (openAt) setViewRun(blitzHistory(load(), id).find((r) => r.startedAt === openAt) ?? null);
-  }, [id, openAt]);
 
   // Keep the live round in storage if the page goes away (tab closed, app switched).
   useEffect(() => {
@@ -277,7 +303,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
     const why = refusal(puzzle, schedule, today);
     return (
       <main className="screen game">
-        <section className="panel error blitz-closed">
+        <section className="panel error blitz-closed" data-testid="blitz-closed">
           <p className="label gold">Blitz closed</p>
           <h1 className="blitz-closed-title">{puzzle.title}</h1>
           <p>{why.text}</p>
@@ -330,13 +356,13 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
     setRecord(null);
     setFeedback(null);
     setNote(null);
-    setViewRun(null);
     setInput("");
     setCopied(false);
     scrollTo({ top: 0, behavior: "auto" });
   };
-  const openRun = (r: BlitzRun | null) => {
-    setViewRun(r);
+  // A past run is its own address (<base>/run-<startedAt>), so browser back and the Back key both close it.
+  const openRun = (r: BlitzRun) => {
+    location.hash = `${base}/run-${r.startedAt}`;
     scrollTo({ top: 0, behavior: "auto" });
   };
   const share = async () => {
@@ -361,7 +387,8 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
   const n = state.hits.length;
   const runs = blitzHistory(saved, id);
   const best = saved.blitzBest?.[id];
-  const pastRuns = <PastRuns runs={runs} best={best} open={showRuns} onOpen={openRun} />;
+  const pastRuns = <PastRuns runs={runs} best={best} open={runsOpen} onToggle={setRunsOpen} onOpen={openRun} />;
+  const viewRun = openAt ? runs.find((r) => r.startedAt === openAt) : undefined;
 
   let body: React.ReactNode;
   if (viewRun) {
@@ -369,7 +396,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
     const k = viewRun.hits.length;
     body = (
       <>
-        <section className="panel results" aria-live="polite">
+        <section className="panel results" data-testid="run-view" aria-live="polite">
           <p className="label gold">Past run · {runTime(viewRun.startedAt)}</p>
           <p className="score" aria-label={`${viewRun.score} points`}>
             <span className={`score-n ${isBest ? "gold" : ""}`}>{viewRun.score}</span>
@@ -382,12 +409,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
             {isBest && <p className="gold">best on this list</p>}
           </div>
           <div className="results-actions">
-            <button
-              className="key"
-              // Opened from Past runs: back goes there. Opened from this list's panel: back to the list's screen.
-              onClick={() => (openAt === viewRun.startedAt ? history.back() : openRun(null))}
-              autoFocus
-            >
+            <button className="key" onClick={onBack} autoFocus>
               Back
             </button>
           </div>
@@ -405,7 +427,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
           </div>
           <div className="blitz-meter-cell right">
             <span className="label">Score</span>
-            <span className="blitz-score" aria-live="polite">
+            <span className="blitz-score" data-testid="blitz-score" aria-live="polite">
               {score}
             </span>
             <span className="caption">
@@ -414,7 +436,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
           </div>
         </section>
 
-        {note === "resumed" && <p className="blitz-note caption">resumed. the clock kept running while you were away.</p>}
+        {note === "resumed" && <p className="blitz-note caption" data-testid="blitz-note">resumed. the clock kept running while you were away.</p>}
 
         {hits.length > 0 && (
           <ol className="panel blitz-hits" aria-label="Your answers, newest first">
@@ -465,11 +487,13 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
   } else {
     body = (
       <>
-        <section className="panel results enter" aria-live="polite">
+        <section className="panel results enter" data-testid="blitz-results" aria-live="polite">
           <p className="label gold">Time's up</p>
           {note === "away" && <p className="caption">time ran out while you were away.</p>}
           <p className="score" aria-label={`${score} points`}>
-            <span className={`score-n ${record?.best && score > 0 ? "gold" : ""}`}>{score}</span>
+            <span className={`score-n ${record?.best && score > 0 ? "gold" : ""}`} data-testid="blitz-final">
+              {score}
+            </span>
             <span className="score-of">pts</span>
           </p>
           <div className="results-meta">
@@ -478,11 +502,11 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
             </p>
             {record?.daily &&
               (record.daily.counted ? (
-                <p className="gold">
+                <p className="gold" data-testid="daily-blitz-line" data-counted="true">
                   today's blitz: <b>{record.daily.score}</b>
                 </p>
               ) : (
-                <p>
+                <p data-testid="daily-blitz-line" data-counted="false">
                   replay: today's score stays <b>{record.daily.score}</b>
                 </p>
               ))}
@@ -501,7 +525,7 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
             <button className="key key-gold" onClick={share}>
               {copied ? "Copied" : "Share"}
             </button>
-            <button className="key" onClick={again} autoFocus>
+            <button className="key" data-testid="blitz-again" onClick={again} autoFocus>
               Play again
             </button>
             <a className="key" href={`#p-${puzzle.id}`}>
@@ -516,20 +540,12 @@ export function Blitz({ id, meta, schedule, today, lexicon, showRuns = false, op
   }
 
   return (
-    <main className={`screen game blitz ${over ? "blitz-over" : ""}`}>
-      <header className="game-head">
-        <button className="key key-icon" onClick={onHome} aria-label="Home">
-          <BackArrow />
-        </button>
-        <div className="game-head-mid">
-          <span className="label mode gold">
-            {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
-          </span>
-        </div>
-        <a className="key key-sm" href={`#p-${puzzle.id}`}>
-          List
-        </a>
-      </header>
+    <main className={`screen game blitz ${over ? "blitz-over" : ""}`} data-testid="blitz-screen" data-list={puzzle.id}>
+      <ScreenHead onBack={onBack} onHome={onHome}>
+        <span className="label mode gold">
+          {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
+        </span>
+      </ScreenHead>
 
       <section className="panel prompt">
         <div className="prompt-top">

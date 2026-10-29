@@ -321,12 +321,12 @@ a {
 
 /*
  * Home system.
- * - Groups (Today, Free play, Roll by category, Your record) share one label style and one spacing scale:
+ * - Groups (Today, Free play, Your games, Your record) share one label style and one spacing scale:
  *   28px between groups, 12px inside a group.
  * - Every play key is a mode key: a mode tag and a status on top (status right-aligned), the action below.
  * - Mode identity: classic is pink, Blitz is gold, on the tag, the accent and the fill.
- * - Today's keys carry their accent while unplayed and fill with it when focused (the one loud element);
- *   played, they settle to a quiet key with the result as the status. Free-play keys are always quiet.
+ * - Today's two keys are always filled with their mode's color; played, they dim a step and show the result.
+ *   Free-play keys are quiet; Your games (archive, past runs) are quieter still.
  * - The keyboard hint lives on the focused key, with a fine pointer only.
  */
 .home-group {
@@ -361,6 +361,15 @@ a {
   .mode-pair {
     grid-template-columns: 1fr 1fr;
   }
+}
+/* Today's two keys are the page's hero: stacked, full width, on every screen size. */
+.today-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.today-stack .key-sub {
+  font-size: 20px;
 }
 
 .mode-tag {
@@ -418,47 +427,40 @@ a {
   opacity: 1;
 }
 
-/* Today, unplayed: the mode's accent on the edge and the label. */
-.mode-key.today {
-  min-height: 96px;
-  box-shadow:
-    inset 0 0 0 2px var(--accent),
-    0 5px 0 var(--key-shadow);
-}
-.mode-key.today .key-label {
-  color: var(--accent);
-  font-size: 26px;
-}
-.mode-key.today .key-sub {
-  color: var(--accent);
-}
-/* Focused: filled, the loudest thing on the screen. */
-.mode-key.today:not(.done):focus {
+/* Today's pair: always filled with the mode's color, on every device. */
+.mode-key.today,
+.mode-key.today:hover:not(:disabled) {
+  min-height: 116px;
+  padding: 16px 22px 18px;
   background: var(--accent);
   box-shadow: 0 5px 0 var(--accent-shadow);
-  outline: none;
 }
-.mode-key.today:not(.done):focus .key-label,
-.mode-key.today:not(.done):focus .key-sub,
-.mode-key.today:not(.done):focus .mode-tag,
-.mode-key.today:not(.done):focus .enter-hint {
+.mode-key.today .key-label {
+  font-size: clamp(28px, 7.4vw, 36px);
+  letter-spacing: 0.18em;
+}
+.mode-key.today .key-label,
+.mode-key.today .key-sub,
+.mode-key.today .mode-tag,
+.mode-key.today .enter-hint {
   color: var(--accent-ink);
 }
-.mode-key.today:not(.done):focus-visible {
+.mode-key.today:active:not(:disabled) {
+  box-shadow: 0 2px 0 var(--accent-shadow);
+}
+/* Focus: a ring in the mode's color around the filled key. */
+.mode-key.today:focus,
+.mode-key.today:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
-/* Played: settled. The result keeps the status slot, in the accent. */
-.mode-key.today.done {
-  box-shadow:
-    inset 0 0 0 1px var(--hairline),
-    0 5px 0 var(--key-shadow);
-}
-.mode-key.today.done .key-label {
-  color: var(--label);
+/* Played: still filled, dimmed a step; the result takes the status slot. */
+.mode-key.today.done,
+.mode-key.today.done:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 72%, var(--key));
+  box-shadow: 0 5px 0 var(--key-shadow);
 }
 .mode-key.today.done .key-sub {
-  color: var(--accent);
   font-size: 22px;
   letter-spacing: 0.1em;
 }
@@ -478,15 +480,34 @@ a {
 }
 @media (pointer: fine) {
   .mode-key:focus-visible .enter-hint,
-  .mode-key.today:not(.done):focus .enter-hint {
+  .mode-key.today:focus .enter-hint {
     display: inline-block;
   }
 }
 
-.home-cats {
+/* Free play's quiet second row: categories roll straight into a list. */
+.cat-row {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+}
+.cat-row .caption {
+  font-size: 17px;
+}
+
+/* Your games: two small keys, quieter than anything that starts a game. */
+.games-row {
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
+}
+.games-key {
+  gap: 10px;
+}
+.games-n {
+  color: var(--muted);
+  letter-spacing: 0.1em;
 }
 
 .home-stats {
@@ -1759,10 +1780,7 @@ a.text-btn {
   color: var(--gold);
 }
 
-/* Past runs: a mode-neutral tag for keys that cover both modes. */
-.mode-tag.both {
-  color: var(--cyan);
-}
+/* Past runs */
 .play-row .play-date {
   font-size: 20px;
   line-height: 1.1;

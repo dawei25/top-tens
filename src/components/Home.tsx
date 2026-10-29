@@ -19,6 +19,7 @@ function ModeKey({
   done = false,
   disabled = false,
   btnRef,
+  testId,
   onClick,
 }: {
   mode: Mode;
@@ -28,6 +29,7 @@ function ModeKey({
   done?: boolean;
   disabled?: boolean;
   btnRef?: React.Ref<HTMLButtonElement>;
+  testId: string;
   onClick: () => void;
 }) {
   return (
@@ -36,10 +38,14 @@ function ModeKey({
       className={`key mode-key ${mode} ${today ? "today" : ""} ${done ? "done" : ""}`}
       onClick={onClick}
       disabled={disabled}
+      data-testid={testId}
+      data-done={done || undefined}
     >
       <span className="mode-key-top">
         <ModeTag mode={mode} />
-        <span className="key-sub">{status}</span>
+        <span className="key-sub" data-testid={`${testId}-status`}>
+          {status}
+        </span>
       </span>
       <span className="mode-key-main">
         <span className="key-label">{title}</span>
@@ -160,11 +166,12 @@ export function Home({
           </h2>
           <Countdown label="new lists in" />
         </div>
-        <div className="mode-pair">
+        <div className="today-stack">
           <ModeKey
             mode="classic"
             today
             btnRef={dailyRef}
+            testId="today-list"
             title="Today's list"
             status={!entry ? "none yet" : dailyDone ? `${dailyGame.found.length}/10` : dailyGame ? "playing" : "new"}
             done={dailyDone}
@@ -176,6 +183,7 @@ export function Home({
               mode="blitz"
               today
               btnRef={blitzRef}
+              testId="today-blitz"
               title="Today's Blitz"
               status={dailyBlitzDone ? `${dailyBlitzDone.score} pts` : "new"}
               done={!!dailyBlitzDone}
@@ -192,9 +200,16 @@ export function Home({
           </h2>
         </div>
         <div className="mode-pair">
-          <ModeKey mode="classic" title="Random list" status={`${index.length} lists`} onClick={start(() => onRoll())} />
+          <ModeKey
+            mode="classic"
+            testId="random-list"
+            title="Random list"
+            status={`${index.length} lists`}
+            onClick={start(() => onRoll())}
+          />
           <ModeKey
             mode="blitz"
+            testId="random-blitz"
             title="Random Blitz"
             status={`${blitzCount} lists`}
             onClick={start(() => {
@@ -202,27 +217,36 @@ export function Home({
               onBlitz().then((ok) => setNoBlitz(!ok));
             })}
           />
-          <ModeKey mode="classic" title="Archive" status={`${archiveCount} dailies`} onClick={start(onArchive)} />
-          <ModeKey
-            mode="both"
-            title="Past runs"
-            status={plays ? `${plays} played` : "none yet"}
-            onClick={start(() => (location.hash = "#history"))}
-          />
         </div>
         {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
+        {/* A chip rolls a random classic list in that category, straight away. */}
+        <div className="cat-row">
+          <span className="caption">or by category</span>
+          <div className="chips">
+            {categories.map((c) => (
+              <button key={c} className="chip" data-testid="category" onClick={start(() => onRoll(c))}>
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section className="home-cats" aria-labelledby="cats-title">
-        <h2 id="cats-title" className="label">
-          Roll by category
+      <section className="home-group" aria-labelledby="games-title">
+        <h2 id="games-title" className="label">
+          Your games
         </h2>
-        <div className="chips">
-          {categories.map((c) => (
-            <button key={c} className="chip" onClick={start(() => onRoll(c))}>
-              {c}
-            </button>
-          ))}
+        <div className="games-row">
+          <button className="key key-sm games-key" data-testid="archive-key" onClick={start(onArchive)}>
+            Archive <span className="games-n">{archiveCount}</span>
+          </button>
+          <button
+            className="key key-sm games-key"
+            data-testid="history-key"
+            onClick={start(() => (location.hash = "#history"))}
+          >
+            Past runs {plays > 0 && <span className="games-n">{plays}</span>}
+          </button>
         </div>
       </section>
 
@@ -274,6 +298,7 @@ export function Home({
             <button
               type="button"
               className={`text-btn ${confirmReset ? "danger" : ""}`}
+              data-testid="reset-all"
               onClick={resetAll}
               onBlur={() => setConfirmReset(false)}
             >

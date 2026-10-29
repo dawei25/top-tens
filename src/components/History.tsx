@@ -3,13 +3,14 @@ import { recentPlays, type Play } from "../game/history";
 import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
 import { runTime } from "./Blitz";
-import { BackArrow, ModeTag } from "./pixel";
+import { ScreenHead, ModeTag } from "./pixel";
 
 interface Props {
   index: PuzzleMeta[];
   schedule: DailyEntry[];
   /** Today's daily, for the empty state's key. */
   entry?: DailyEntry;
+  onBack: () => void;
   onHome: () => void;
 }
 
@@ -33,20 +34,14 @@ function href(p: Play, schedule: DailyEntry[]): string {
 }
 
 /** Everything played, list games and Blitz rounds alike, newest first. */
-export function History({ index, schedule, entry, onHome }: Props) {
+export function History({ index, schedule, entry, onBack, onHome }: Props) {
   const plays = recentPlays(load(), 100);
 
   return (
     <main className="screen archive">
-      <header className="game-head">
-        <button className="key key-icon" onClick={onHome} aria-label="Home">
-          <BackArrow />
-        </button>
-        <div className="game-head-mid">
-          <span className="label mode">Past runs</span>
-        </div>
-        <span className="key-sm-spacer" aria-hidden="true" />
-      </header>
+      <ScreenHead onBack={onBack} onHome={onHome}>
+        <span className="label mode">Past runs</span>
+      </ScreenHead>
 
       <section className="panel prompt">
         <h1>Past runs</h1>
@@ -60,7 +55,7 @@ export function History({ index, schedule, entry, onHome }: Props) {
             const [date, time] = runTime(p.at).split(", ");
             return (
               <li key={`${p.kind}-${p.id}-${p.at}`}>
-                <a className="arch-row play-row" href={href(p, schedule)}>
+                <a className="arch-row play-row" data-testid="history-row" data-kind={p.kind} href={href(p, schedule)}>
                   <span className="arch-n play-date">{date}</span>
                   <span className="arch-date">{time}</span>
                   <span className="arch-title">
