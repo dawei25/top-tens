@@ -24,6 +24,9 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 - [x] **Fun facts** (test set rewritten for fun with full articles and Did-you-know hooks; the other 72 lists still have
       the first-pass facts and need the same rewrite; 796 written and reviewed in `scripts/facts/`; they reach the game at the rebuild).
 
+- [x] **Clearer metric labels** (test set; "Sales (millions)" is now "Copies sold (millions)", box office and
+      money labels say US$; 12 labels across the 82 lists).
+
 ## Done
 
 (none yet)

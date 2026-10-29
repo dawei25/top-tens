@@ -340,7 +340,7 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Title",
     value: "Worldwide gross",
-    metric: "Worldwide gross",
+    metric: "Worldwide box office (US$)",
     also: [
       { tables: [1, 2, 3], name: "Title" },
       { page: "List of highest-grossing animated films", tables: [0, 1, 2, 3], name: "Title" },
@@ -402,7 +402,7 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Title",
     value: "Sales",
-    metric: "Sales (millions)",
+    metric: "Copies sold (millions)",
     universeCategories: ["The Game Awards winners", "Golden Joystick Award for Game of the Year winners", "Spike Video Game Awards Game of the Year winners", "Video games adapted into films", "Open-world video games", "Namco arcade games", "Arcade video games"],
   },
   {
@@ -414,7 +414,7 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Platform",
     value: "Units sold",
-    metric: "Units sold",
+    metric: "Consoles sold",
     universeCategories: ["Home video game consoles", "Handheld game consoles"],
   },
   {
@@ -426,7 +426,7 @@ export const TOPICS: Topic[] = [
     tables: [0, 1, 2, 3],
     name: "Book",
     value: "sales",
-    metric: "Approximate sales",
+    metric: "Copies sold (approx.)",
     also: [{ tables: [9, 10, 11, 12], name: "Book" }],
     universeCategories: ["Novels adapted into films"],
   },
@@ -708,7 +708,7 @@ export const TOPICS: Topic[] = [
     tables: [1, 2, 3],
     name: "Album",
     value: "sales",
-    metric: "Claimed sales (millions)",
+    metric: "Copies sold, claimed (millions)",
     also: [
       { tables: [5], name: "Album" },
       { page: "List of Spotify streaming records", tables: [21], name: "Album" },
@@ -723,7 +723,7 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Title",
     value: "Worldwide gross",
-    metric: "Worldwide gross",
+    metric: "Worldwide box office (US$)",
     also: [{ tables: [1, 2, 3], name: "Title" }],
   },
   {
@@ -735,7 +735,7 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Franchise",
     value: "Total revenue",
-    metric: "Total revenue",
+    metric: "Total revenue (US$)",
     universeCategories: ["Media franchises"],
   },
   {
@@ -747,7 +747,7 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Franchise",
     value: "Sales",
-    metric: "Sales (millions)",
+    metric: "Copies sold (millions)",
     universeCategories: ["Video game franchises"],
   },
   {
@@ -947,7 +947,7 @@ export const TOPICS: Topic[] = [
     tables: [38],
     name: "Name",
     value: "Net worth",
-    metric: "Net worth",
+    metric: "Net worth (US$)",
     people: true,
     also: [{ tables: range(1, 37), name: "Name" }],
     universeCategories: ["American billionaires"],
@@ -1046,7 +1046,7 @@ export const TOPICS: Topic[] = [
     tables: [0, 1, 2, 3],
     name: "Manga series",
     value: "sales",
-    metric: "Copies sold",
+    metric: "Copies sold (volumes)",
   },
   {
     id: "nba-assists",
@@ -1171,7 +1171,7 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Title",
     value: "Lifetime gross",
-    metric: "Domestic gross",
+    metric: "US box office (US$)",
     also: [
       { tables: [1], name: "Title" },
       { page: "List of highest-grossing films", tables: [0, 1, 2, 3], name: "Title" },
@@ -1239,7 +1239,7 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Title",
     value: "Cost",
-    metric: "Estimated cost",
+    metric: "Estimated budget (US$)",
     unit: " million",
     also: [
       { tables: [2], name: "Title" },
