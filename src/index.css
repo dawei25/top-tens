@@ -362,6 +362,15 @@ a {
     grid-template-columns: 1fr 1fr;
   }
 }
+/* Today's two keys are the page's hero: stacked, full width, on every screen size. */
+.today-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.today-stack .key-sub {
+  font-size: 20px;
+}
 
 .mode-tag {
   display: inline-block;
@@ -421,12 +430,14 @@ a {
 /* Today's pair: always filled with the mode's color, on every device. */
 .mode-key.today,
 .mode-key.today:hover:not(:disabled) {
-  min-height: 96px;
+  min-height: 116px;
+  padding: 16px 22px 18px;
   background: var(--accent);
   box-shadow: 0 5px 0 var(--accent-shadow);
 }
 .mode-key.today .key-label {
-  font-size: 26px;
+  font-size: clamp(28px, 7.4vw, 36px);
+  letter-spacing: 0.18em;
 }
 .mode-key.today .key-label,
 .mode-key.today .key-sub,

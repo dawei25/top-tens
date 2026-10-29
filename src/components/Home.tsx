@@ -160,7 +160,7 @@ export function Home({
           </h2>
           <Countdown label="new lists in" />
         </div>
-        <div className="mode-pair">
+        <div className="today-stack">
           <ModeKey
             mode="classic"
             today
