@@ -5,6 +5,8 @@ export interface PuzzleMeta {
   id: string;
   title: string;
   category: string;
+  /** Mirrors Puzzle.blitz, so Blitz can pick a list without downloading each one. */
+  blitz?: boolean;
 }
 
 const base = import.meta.env.BASE_URL;

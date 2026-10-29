@@ -2,51 +2,61 @@
  {
   "id": "countries-population",
   "title": "Most populous countries",
-  "category": "Geography"
+  "category": "Geography",
+  "blitz": true
  },
  {
   "id": "us-states-population",
   "title": "Most populous US states",
-  "category": "Geography"
+  "category": "Geography",
+  "blitz": true
  },
  {
   "id": "mountains",
   "title": "Highest mountains",
-  "category": "Geography"
+  "category": "Geography",
+  "blitz": true
  },
  {
   "id": "islands",
   "title": "Largest islands",
-  "category": "Geography"
+  "category": "Geography",
+  "blitz": true
  },
  {
   "id": "films-gross",
   "title": "Highest-grossing films",
-  "category": "Entertainment"
+  "category": "Entertainment",
+  "blitz": true
  },
  {
   "id": "youtube-channels",
   "title": "Most-subscribed YouTube channels",
-  "category": "Entertainment"
+  "category": "Entertainment",
+  "blitz": true
  },
  {
   "id": "video-games",
   "title": "Best-selling video games",
-  "category": "Entertainment"
+  "category": "Entertainment",
+  "blitz": true
  },
  {
   "id": "nba-points",
   "title": "NBA career scoring leaders",
-  "category": "Sports"
+  "category": "Sports",
+  "blitz": true
  },
  {
   "id": "airports",
   "title": "Busiest airports",
-  "category": "Business"
+  "category": "Business",
+  "blitz": true
  },
  {
   "id": "spotify-artists",
   "title": "Most monthly listeners on Spotify",
-  "category": "Entertainment"
+  "category": "Entertainment",
+  "blitz": true
  }
 ]

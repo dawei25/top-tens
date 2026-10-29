@@ -416,13 +416,13 @@ const scheduled: string[] = existsSync(join(OUT_DIR, "daily.json"))
   : [];
 const only = testMode ? [...new Set([...TEST_SET, ...scheduled])] : args.filter((a) => !a.startsWith("--"));
 mkdirSync(OUT_DIR, { recursive: true });
-const index: { id: string; title: string; category: string }[] = [];
+const index: { id: string; title: string; category: string; blitz: boolean }[] = [];
 for (const topic of TOPICS) {
   if (only.length && !only.includes(topic.id)) continue;
   try {
     const p = await buildPuzzle(topic);
     writeFileSync(join(OUT_DIR, `${p.id}.json`), JSON.stringify(p));
-    index.push({ id: p.id, title: p.title, category: topic.category });
+    index.push({ id: p.id, title: p.title, category: topic.category, blitz: !!p.blitz });
     console.log(`ok   ${p.id.padEnd(24)} ${p.answers.map((a) => a.name).join(", ")}`);
   } catch (err) {
     console.log(`FAIL ${topic.id.padEnd(24)} ${(err as Error).message}`);
