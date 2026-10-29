@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PuzzleMeta } from "../game/puzzles";
 import { dailyPuzzleId } from "../game/puzzles";
-import { load, stats } from "../game/storage";
+import { load, save, stats } from "../game/storage";
 import { HowToPlay, markHelpSeen } from "./HowToPlay";
 
 interface Props {
@@ -22,6 +22,22 @@ export function Home({ index, day, onDaily, onRoll }: Props) {
   useEffect(() => {
     focusDaily();
   }, []);
+  // Inline confirm, like GIVE UP: the first click arms it for 3 s, the second clears everything but seenHelp.
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [, setVersion] = useState(0);
+  useEffect(() => {
+    if (!confirmReset) return;
+    const t = setTimeout(() => setConfirmReset(false), 3000);
+    return () => clearTimeout(t);
+  }, [confirmReset]);
+  const hasProgress = Object.keys(saved.games).length > 0 || Object.keys(saved.daily).length > 0;
+  const resetAll = () => {
+    if (!confirmReset) return setConfirmReset(true);
+    setConfirmReset(false);
+    save({ games: {}, daily: {}, seenHelp: load().seenHelp });
+    setVersion((v) => v + 1);
+    focusDaily();
+  };
   const categories = [...new Set(index.map((p) => p.category))];
   const dailyGame = saved.games[dailyPuzzleId(index, day)];
   const dailyDone = dailyGame && dailyGame.status !== "playing";
@@ -113,7 +129,19 @@ export function Home({ index, day, onDaily, onRoll }: Props) {
             How to play
           </button>
         )}
-        <span className="caption">data from wikipedia</span>
+        <span className="home-foot-end">
+          <span className="caption">data from wikipedia</span>
+          {hasProgress && (
+            <button
+              type="button"
+              className={`text-btn ${confirmReset ? "danger" : ""}`}
+              onClick={resetAll}
+              onBlur={() => setConfirmReset(false)}
+            >
+              {confirmReset ? "sure?" : "reset all progress"}
+            </button>
+          )}
+        </span>
       </footer>
     </main>
   );

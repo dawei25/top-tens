@@ -164,6 +164,24 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
     setConfirmQuit(false);
     commit(giveUp(game));
   };
+  /** Forget this list's result (and its daily entry) and start it over, fresh. */
+  const playAgain = () => {
+    const s = load();
+    delete s.games[id];
+    for (const [day, pid] of Object.entries(s.daily)) if (pid === id) delete s.daily[Number(day)];
+    save(s);
+    setGame(newGame(puzzle));
+    setInput("");
+    setFeedback(null);
+    setLastFound(null);
+    setShake({ n: 0, hit: false });
+    setLostLife(null);
+    setEndedHere(false);
+    setCopied(false);
+    setOpenFacts(new Set());
+    scrollTo({ top: 0, behavior: "auto" });
+    // The guess box mounts with autoFocus.
+  };
 
   const share = async () => {
     const url = `${location.origin}${location.pathname}#p-${puzzle.id}`;
@@ -402,6 +420,9 @@ export function Game({ id, meta, daily, lexicon, onHome, onRoll }: Props) {
           <div className="results-actions">
             <button ref={shareRef} className="key key-pink" onClick={share}>
               {copied ? "Copied" : "Share"}
+            </button>
+            <button className="key" onClick={playAgain}>
+              Play again
             </button>
             <button className="key" onClick={onRoll}>
               Roll another
