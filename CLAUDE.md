@@ -64,7 +64,9 @@ use redirects already in the cache.
 - Every row of a topic's source table is an accepted answer. Only accepted answers outside the top 10 cost a life;
   anything else is free. So answer sets should be broad: country lists also include every country.
 - A topic whose #10 and #11 tie is rejected.
-- Aliases come from Wikipedia redirects plus short forms; any alias shared by two entries is dropped.
+- Aliases come from Wikipedia redirects, short forms and `scripts/intent.ts`. An alias shared by 2-4 entries is kept
+  on all of them (the game offers the choices); more owners than that, and it is dropped.
+- `NODE_NO_WARNINGS=1 npx tsx scripts/validate.ts` checks every built puzzle; run it after a rebuild.
 
 ## Writing
 

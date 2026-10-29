@@ -48,7 +48,12 @@ describe("first names and partial names", () => {
   });
 
   it("a shared first name offers the choices", () => {
-    expect(judge("nba-points", "kevin")).toMatchObject({ kind: "typo", suggestions: ["Kevin Durant", "Kevin Garnett"] });
+    const r = judge("nba-points", "kevin");
+    expect(r.kind).toBe("typo");
+    if (r.kind === "typo") {
+      expect(r.suggestions).toEqual(expect.arrayContaining(["Kevin Durant", "Kevin Garnett"]));
+      expect(r.suggestions.length).toBeLessThanOrEqual(4);
+    }
   });
 });
 
@@ -56,8 +61,12 @@ describe("intent edge cases", () => {
   it("a misspelled first name fills its own entry, not a lookalike surname", () => {
     expect(judge("nba-points", "kareen")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Kareem Abdul-Jabbar" } });
   });
-  it("an exact title beats other entries' aliases", () => {
+  it("the exact name of a ranked entry counts; an unranked one that others contain offers choices", () => {
     expect(judge("films-gross", "avatar")).toMatchObject({ kind: "correct", entry: { name: "Avatar" } });
+    expect(judge("youtube-channels", "mrbeast")).toMatchObject({ kind: "correct", entry: { name: "MrBeast" } });
+    const w = judge("video-games", "witcher");
+    expect(w.kind).toBe("typo");
+    if (w.kind === "typo") expect(w.suggestions).toContain("The Witcher 3: Wild Hunt");
   });
   it("spacing never matters", () => {
     const r = judge("films-gross", "spiderman");
@@ -69,5 +78,31 @@ describe("intent edge cases", () => {
       const r = judge("nba-points", g);
       if (r.kind === "typo") expect(r.suggestions.length).toBeLessThanOrEqual(2);
     }
+  });
+});
+
+describe("owner playtest cases", () => {
+  it.each([
+    ["islands", "UK", "Great Britain"],
+    ["islands", "United Kingdom", "Great Britain"],
+    ["islands", "Britain", "Great Britain"],
+    ["olympic-medals", "USSR", "Soviet Union"],
+    ["nba-points", "wilt", "Wilt Chamberlain"],
+    ["nba-points", "kareem", "Kareem Abdul-Jabbar"],
+  ])("%s: %s counts as %s", (id, guess, name) => {
+    expect(judge(id, guess)).toMatchObject({ kind: "correct", entry: { name } });
+  });
+
+  it.each([
+    ["islands", "Faroe Islands"],
+    ["youtube-channels", "Smosh"],
+  ])("%s: %s is an accepted answer", (id, guess) => {
+    const r = judge(id, guess);
+    if (r.kind === "typo") expect(r.suggestions).toContain(guess);
+    else expect(r.kind).toBe("near");
+  });
+
+  it("islands: New Zealand offers both islands", () => {
+    expect(judge("islands", "New Zealand")).toEqual({ kind: "typo", suggestions: ["North Island", "South Island"] });
   });
 });

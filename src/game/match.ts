@@ -70,6 +70,8 @@ interface Candidate {
   len: number;
   /** The guess is exactly this entry's full name, not just an alias or a word of it. */
   fullName: boolean;
+  /** The best match was only one word of the name ("Britain" in "New Britain"), not a name or alias. */
+  viaWord: boolean;
 }
 
 function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Candidate[] {
@@ -79,8 +81,11 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
     let best = Infinity;
     let len = 0;
     let fullName = false;
+    let viaWord = false;
+    const forms = [entry.name, ...entry.aliases];
+    const words = nameWords(entry.name);
     // Words of the name count as forms too, so a misspelled first name ("kareen") lands on its own entry.
-    for (const form of [entry.name, ...entry.aliases, ...nameWords(entry.name)]) {
+    for (const [i, form] of [...forms, ...words].entries()) {
       const f = normalize(form);
       // Numbers are identity, not spelling: GTA 6 is not GTA 5, Mario Kart 7 is not Mario Kart.
       if (guessDigits && digitsOf(f) !== guessDigits) continue;
@@ -92,9 +97,10 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
         best = dist;
         len = f.length;
         fullName = dist === 0 && form === entry.name;
+        viaWord = i >= forms.length;
       }
     }
-    return { entry, inTop10, dist: best, len, fullName };
+    return { entry, inTop10, dist: best, len, fullName, viaWord };
   });
 }
 
@@ -138,9 +144,22 @@ export function judgeGuess(raw: string, puzzle: Puzzle, found: Set<number>, lex?
 
   // An entry's full name beats other entries' aliases: "Avatar" is the 2009 film, not a choice of three.
   // Otherwise a name several entries share ("New Zealand" for North and South Island) offers each of them.
-  const exact = candidates.filter((c) => c.dist === 0);
+  // A real name or alias beats a single word of another entry's name: "Britain" is Great Britain (alias),
+  // not a choice with New Britain.
+  const allExact = candidates.filter((c) => c.dist === 0);
+  const strong = allExact.filter((c) => !c.viaWord);
+  const exact = strong.length ? strong : allExact;
   const named = exact.filter((c) => c.fullName);
-  if (named.length === 1) return resolve(named[0], false);
+  if (named.length === 1) {
+    // The exact name of a ranked entry counts ("MrBeast", "Avatar"). The exact name of an unranked pool entry that
+    // other entries' names contain ("The Witcher", the 2007 game, vs The Witcher 3: Wild Hunt) is ambiguous: offer
+    // them all rather than charge a life for the less likely reading.
+    const containing = wordMatches(guess, candidates).filter((c) => c !== named[0]);
+    if (named[0].entry.rank === 0 && containing.length > 0 && containing.length < MAX_CHOICES) {
+      return choose([named[0], ...containing], false);
+    }
+    return resolve(named[0], false);
+  }
   if (exact.length > 0) return choose(exact, false);
 
   // A whole word from a longer name ("Kareem" for Kareem Abdul-Jabbar, "Haneda" for Tokyo Haneda Airport) is a
