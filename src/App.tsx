@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Home } from "./components/Home";
-import { Game } from "./components/Game";
+import { Game, Loading } from "./components/Game";
 import type { Lexicon } from "./game/junk";
 import { dailyPuzzleId, dayNumber, loadIndex, loadLexicon, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
 import { load } from "./game/storage";
@@ -25,7 +25,7 @@ export default function App() {
     return () => removeEventListener("hashchange", onHash);
   }, []);
 
-  if (!index) return <div className="loading">Loading…</div>;
+  if (!index) return <Loading />;
 
   const go = (id: string, daily = false) => {
     location.hash = `#${daily ? "daily" : "p"}-${id}`;
