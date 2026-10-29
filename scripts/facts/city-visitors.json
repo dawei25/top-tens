@@ -1,0 +1,52 @@
+{
+  "Bangkok": {
+    "text": "In Thai it is known as Krung Thep Maha Nakhon, or colloquially just Krung Thep.",
+    "source": "https://en.wikipedia.org/wiki/Bangkok",
+    "evidence": "Bangkok, known in Thai as Krung Thep Maha Nakhon and colloquially as Krung Thep, is the capital and largest city of Thailand."
+  },
+  "Hong Kong": {
+    "text": "It has the highest life expectancy in the world.",
+    "source": "https://en.wikipedia.org/wiki/Hong_Kong",
+    "evidence": "The city has the highest life expectancy in the world, and has a public transport usage exceeding 90 percent."
+  },
+  "London": {
+    "text": "Its ancient core, the City of London, was founded by the Romans as Londinium and keeps its medieval boundaries.",
+    "source": "https://en.wikipedia.org/wiki/London",
+    "evidence": "Its ancient core and financial centre, the City of London, was founded by the Romans as Londinium and has retained its medieval boundaries."
+  },
+  "Macau": {
+    "text": "Its gambling industry is around seven times larger than that of Las Vegas.",
+    "source": "https://en.wikipedia.org/wiki/Macau",
+    "evidence": "The gambling industry of Macau is around seven times larger than that of Las Vegas, Nevada."
+  },
+  "Istanbul": {
+    "text": "A city on two continents: about two-thirds of its people live in Europe and the rest in Asia.",
+    "source": "https://en.wikipedia.org/wiki/Istanbul",
+    "evidence": "It is a city on two continents; about two-thirds of its population live in Europe and the rest in Asia."
+  },
+  "Dubai": {
+    "text": "Land reclamation projects have added more than 300 km of artificial coastline.",
+    "source": "https://en.wikipedia.org/wiki/Dubai",
+    "evidence": "Extensive land-reclamation projects have added more than 300 kilometres (190 mi) of artificial coastline."
+  },
+  "Mecca": {
+    "text": "Pilgrims more than triple its population every year during the Hajj.",
+    "source": "https://en.wikipedia.org/wiki/Mecca",
+    "evidence": "Pilgrims more than triple the population number every year during the Ḥajj pilgrimage,"
+  },
+  "Antalya": {
+    "text": "It was founded as Attaleia, named after King Attalus II of Pergamon.",
+    "source": "https://en.wikipedia.org/wiki/Antalya",
+    "evidence": "The city was founded as \"Attaleia\" (Ancient Greek: Ἀττάλεια), named after its founder Attalos II, king of Pergamon."
+  },
+  "Paris": {
+    "text": "Nicknamed the \"City of Light\" mainly for its leading role in the Age of Enlightenment.",
+    "source": "https://en.wikipedia.org/wiki/Paris",
+    "evidence": "Paris is nicknamed the \"City of Light\" mainly due to its leading role in the Age of Enlightenment."
+  },
+  "Kuala Lumpur": {
+    "text": "It was first developed around 1857 as a town serving the region's tin mines.",
+    "source": "https://en.wikipedia.org/wiki/Kuala_Lumpur",
+    "evidence": "Kuala Lumpur was first developed around 1857 as a town serving the tin mines of the region by Raja Abdullah ,"
+  }
+}

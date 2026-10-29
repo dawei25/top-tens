@@ -1,0 +1,52 @@
+{
+  "Amazon": {
+    "text": "Founded by Jeff Bezos in 1994, it started out as an online book marketplace.",
+    "source": "https://en.wikipedia.org/wiki/Amazon_(company)",
+    "evidence": "Founded in 1994 by Jeff Bezos in Bellevue, Washington, the company started as an online book marketplace that gradually expanded to include virtually all consumer products"
+  },
+  "Walmart": {
+    "text": "The largest private employer in the world, with 2.1 million employees.",
+    "source": "https://en.wikipedia.org/wiki/Walmart",
+    "evidence": "As of 2026, Walmart is the second-largest company by revenue globally and the largest private employer in the world, with 2.1 million employees."
+  },
+  "State Grid Corporation of China": {
+    "text": "In 2023 it was reported to have 1.1 billion customers and 1.3 million employees.",
+    "source": "https://en.wikipedia.org/wiki/State_Grid_Corporation_of_China",
+    "evidence": "In 2023 it was reported as having 1.3 million employees, 1.1 billion customers and revenue equivalent to US$546 billion."
+  },
+  "Saudi Aramco": {
+    "text": "It operates Ghawar and Safaniya, the world's largest onshore and offshore oil fields.",
+    "source": "https://en.wikipedia.org/wiki/Saudi_Aramco",
+    "evidence": "Along the Eastern Province, Saudi Aramco most notably operates the Ghawar Field (the world's largest onshore oil field) and the Safaniya Field (the world's largest offshore oil field)."
+  },
+  "China National Petroleum Corporation": {
+    "text": "It was created in 1988, when the government disbanded the Ministry of Petroleum.",
+    "source": "https://en.wikipedia.org/wiki/China_National_Petroleum_Corporation",
+    "evidence": "CNPC was created on 17 September 1988, when the government decided to create a state-owned company to handle all Petroleum activities in China and disbanded the Ministry of Petroleum."
+  },
+  "China Petrochemical Corporation": {
+    "text": "Through 1997 it held 90% of China's oil refining capacity.",
+    "source": "https://en.wikipedia.org/wiki/China_Petrochemical_Corporation",
+    "evidence": "Through 1997, Sinopec held 90% of China' oil refining capacity."
+  },
+  "Apple": {
+    "text": "It was founded in 1976 to market Steve Wozniak's Apple I computer.",
+    "source": "https://en.wikipedia.org/wiki/Apple_Inc.",
+    "evidence": "Founded in 1976 as Apple Computer Company by Steve Jobs, Steve Wozniak and Ronald Wayne, ... The company was founded to market Wozniak's Apple I computer."
+  },
+  "Alphabet": {
+    "text": "It was created in 2015 through a restructuring of Google, becoming Google's parent company.",
+    "source": "https://en.wikipedia.org/wiki/Alphabet_Inc.",
+    "evidence": "It was created through a restructuring of Google on October 2, 2015, and became the parent holding company of Google and several former Google subsidiaries."
+  },
+  "UnitedHealth Group": {
+    "text": "It began in 1974 as Charter Med, processing claims for doctors in Minnesota.",
+    "source": "https://en.wikipedia.org/wiki/UnitedHealth_Group",
+    "evidence": "UnitedHealth Group originated in late 1974, when Minnesota-based Charter Med Incorporated was founded by Richard Taylor Burke together with a group of physicians and healthcare professionals. It originally processed claims for doctors at the Hennepin County Medical Society."
+  },
+  "Berkshire Hathaway": {
+    "text": "Once a textile maker, it now has the highest per-share price of any public company.",
+    "source": "https://en.wikipedia.org/wiki/Berkshire_Hathaway",
+    "evidence": "Originally a textile manufacturer, the company transitioned into a conglomerate starting in 1965 ... Its class A shares have the highest per-share price of any public company in the world, reaching $700,000 in August 2024,"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "France": {
+    "text": "The Revolution of 1789 produced the Declaration of the Rights of Man, which still expresses the nation's ideals.",
+    "source": "https://en.wikipedia.org/wiki/France",
+    "evidence": "The French Revolution of 1789 overthrew the ancien régime and produced the Declaration of the Rights of Man, which expresses the nation's ideals to this day."
+  },
+  "Argentina": {
+    "text": "Waves of millions of European immigrants, mainly Italians and Spaniards, shaped its culture.",
+    "source": "https://en.wikipedia.org/wiki/Argentina",
+    "evidence": "The country thereafter enjoyed relative peace and stability, with several subsequent mass waves of millions of European immigrants (mainly Italians and Spaniards) significantly influencing its culture and demography."
+  },
+  "Germany": {
+    "text": "After reunification on 3 October 1990, it regained full sovereignty on 15 March 1991.",
+    "source": "https://en.wikipedia.org/wiki/Germany",
+    "evidence": "After the fall of the communist-led government in East Germany, German reunification saw the former East German states join the FRG on 3 October 1990. Germany regained its full sovereignty on 15 March 1991."
+  },
+  "Netherlands": {
+    "text": "Its name means \"lower countries\", and 26% of it lies below sea level.",
+    "source": "https://en.wikipedia.org/wiki/Netherlands",
+    "evidence": "Netherlands literally means \"lower countries\", in reference to its low elevation and flat topography, 26% of which is below sea level."
+  },
+  "Portugal": {
+    "text": "The name comes from Portus Cale, Roman for 'port of Cale', which also gave the city of Porto its name.",
+    "source": "https://en.wikipedia.org/wiki/Portugal",
+    "evidence": "The word Portugal derives from Latin Portus Cale, a Roman name meaning 'port of Cale', itself the origin of the name of the Portuguese city of Porto, while Cale was a town on the Douro."
+  },
+  "England": {
+    "text": "Association football originated here, as did the English language.",
+    "source": "https://en.wikipedia.org/wiki/England",
+    "evidence": "England is the origin of the English language, the English legal system (which served as the basis for the common law systems of many other countries), association football, and the Anglican branch of Christianity;"
+  },
+  "Italy": {
+    "text": "Two independent enclaves sit inside it: Vatican City and San Marino.",
+    "source": "https://en.wikipedia.org/wiki/Italy",
+    "evidence": "Italy shares land borders with France to the west; Switzerland and Austria to the north; Slovenia to the east; and the two enclaves of Vatican City and San Marino."
+  },
+  "Brazil": {
+    "text": "Its first city, São Vicente, was founded by Portugal in 1532.",
+    "source": "https://en.wikipedia.org/wiki/Brazil",
+    "evidence": "The territory was subsequently claimed and settled by Portugal, which founded the country's first city, São Vicente, in 1532"
+  },
+  "Spain": {
+    "text": "The Umayyad province of Al-Andalus, centred in Córdoba, became a major intellectual and economic power.",
+    "source": "https://en.wikipedia.org/wiki/Spain",
+    "evidence": "The Umayyad province of Al-Andalus later became independent and a major intellectual and economic power, centred in Córdoba."
+  },
+  "Soviet Union": {
+    "text": "It was the largest country by area and bordered twelve other countries.",
+    "source": "https://en.wikipedia.org/wiki/Soviet_Union",
+    "evidence": "It was the world's third-most populous country, the largest by area, and bordered twelve other countries."
+  }
+}

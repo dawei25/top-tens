@@ -1,0 +1,52 @@
+{
+  "China": {
+    "text": "Shanghai, not the capital Beijing, is its most populous city by urban area.",
+    "source": "https://en.wikipedia.org/wiki/China",
+    "evidence": "Beijing is the capital, while Shanghai is the most populous city by urban area."
+  },
+  "United States": {
+    "text": "British colonization, beginning in 1607, established the Thirteen Colonies.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "Beginning in 1607, British colonization established the Thirteen Colonies."
+  },
+  "India": {
+    "text": "Settled life emerged in the Indus river basin 9,000 years ago, later becoming the Indus Valley Civilisation.",
+    "source": "https://en.wikipedia.org/wiki/India",
+    "evidence": "Settled life emerged in the western margins of the Indus river basin 9,000 years ago, evolving into the Indus Valley Civilisation of the third millennium BCE."
+  },
+  "Russia": {
+    "text": "The 1917 Revolution created the Russian SFSR, the first socialist state.",
+    "source": "https://en.wikipedia.org/wiki/Russia",
+    "evidence": "The Russian Revolution of 1917 led to the abolition of the Russian monarchy and the creation of the Russian SFSR, the first socialist state."
+  },
+  "Japan": {
+    "text": "Around 75% of its terrain is mountainous and heavily forested.",
+    "source": "https://en.wikipedia.org/wiki/Japan",
+    "evidence": "Japan is divided into 47 administrative prefectures and eight traditional regions, and around 75% of its terrain is mountainous and heavily forested,"
+  },
+  "Iran": {
+    "text": "An attempt to nationalize its oil industry led to the Anglo-American coup in 1953.",
+    "source": "https://en.wikipedia.org/wiki/Iran",
+    "evidence": "Attempts by Mohammad Mosaddegh to nationalize the oil industry led to the Anglo-American coup in 1953."
+  },
+  "Indonesia": {
+    "text": "European powers competed to monopolise trade in its Spice Islands of Maluku.",
+    "source": "https://en.wikipedia.org/wiki/Indonesia",
+    "evidence": "European powers later competed to monopolise trade in the Spice Islands of Maluku during the Age of Discovery."
+  },
+  "Saudi Arabia": {
+    "text": "Home to Mecca and Medina, the two holiest cities in Islam.",
+    "source": "https://en.wikipedia.org/wiki/Saudi_Arabia",
+    "evidence": "Riyadh is the capital and largest city, while other major centers include Jeddah and the two holiest cities in Islam, Mecca and Medina."
+  },
+  "Germany": {
+    "text": "Northern German regions were the centre of the Protestant Reformation in the 16th century.",
+    "source": "https://en.wikipedia.org/wiki/Germany",
+    "evidence": "During the 16th century, northern German regions became the centre of the Protestant Reformation."
+  },
+  "Canada": {
+    "text": "It is officially bilingual, in English and French, at the federal level.",
+    "source": "https://en.wikipedia.org/wiki/Canada",
+    "evidence": "The country is a Commonwealth realm and is officially bilingual (English and French) in the federal jurisdiction."
+  }
+}

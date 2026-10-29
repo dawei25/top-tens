@@ -1,0 +1,52 @@
+{
+  "India": {
+    "text": "Modern humans had arrived on the Indian subcontinent from Africa by 55,000 years ago.",
+    "source": "https://en.wikipedia.org/wiki/India",
+    "evidence": "Modern humans arrived on the Indian subcontinent from Africa by 55,000 years ago."
+  },
+  "China": {
+    "text": "Gunpowder, paper, printing and the compass were all invented during its imperial era.",
+    "source": "https://en.wikipedia.org/wiki/China",
+    "evidence": "The imperial era saw the expansion of the Silk Road and the invention of gunpowder, paper, printing, and the compass."
+  },
+  "Indonesia": {
+    "text": "More than half its people live on Java, the most heavily populated island in the world.",
+    "source": "https://en.wikipedia.org/wiki/Indonesia",
+    "evidence": "More than half of Indonesians live on Java, the most heavily populated island in the world, while the capital Jakarta is the world's most populous city."
+  },
+  "Pakistan": {
+    "text": "Home to Mehrgarh in Balochistan, a Neolithic site about 8,500 years old.",
+    "source": "https://en.wikipedia.org/wiki/Pakistan",
+    "evidence": "Pakistan is the site of several ancient cultures, including the 8,500-year-old Neolithic site of Mehrgarh in Balochistan,"
+  },
+  "Bangladesh": {
+    "text": "Bengal was the largest subdivision of the Mughal Empire, known for its textile industry.",
+    "source": "https://en.wikipedia.org/wiki/Bangladesh",
+    "evidence": "As the largest subdivision of the Mughal Empire, Bengal became a major commercial centre, known for its textile industry and agricultural output."
+  },
+  "Russia": {
+    "text": "It spans eleven time zones and shares land borders with fourteen countries.",
+    "source": "https://en.wikipedia.org/wiki/Russia",
+    "evidence": "It is the largest country in the world, spanning eleven time zones and sharing land borders with fourteen countries."
+  },
+  "Japan": {
+    "text": "Besides its four major islands, the archipelago has over 14,000 smaller ones.",
+    "source": "https://en.wikipedia.org/wiki/Japan",
+    "evidence": "The Japanese archipelago consists of four major islands alongside over 14,000 smaller islands."
+  },
+  "Philippines": {
+    "text": "Named las Islas Filipinas in 1543 in honor of King Philip II of Spain.",
+    "source": "https://en.wikipedia.org/wiki/Philippines",
+    "evidence": "In 1543, Spanish explorer Ruy López de Villalobos named the archipelago las Islas Filipinas in honor of King Philip II."
+  },
+  "Vietnam": {
+    "text": "Northern and central Vietnam were under Chinese rule from 111 BC until its first dynasty emerged in 939.",
+    "source": "https://en.wikipedia.org/wiki/Vietnam",
+    "evidence": "The Han dynasty annexed northern and central Vietnam, which were subsequently under Chinese rule from 111 BC until the first dynasty emerged in 939."
+  },
+  "Iran": {
+    "text": "Historically known as Persia, it was first unified under the Medes in the 7th century BC.",
+    "source": "https://en.wikipedia.org/wiki/Iran",
+    "evidence": "Iran, officially the Islamic Republic of Iran, and historically known as Persia, is a country in West Asia. ... the territory of present-day Iran was first unified under the Medes in the 7th century BC"
+  }
+}

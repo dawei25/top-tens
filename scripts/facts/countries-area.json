@@ -1,0 +1,52 @@
+{
+  "Russia": {
+    "text": "The Russian Empire, proclaimed in 1721, became the third-largest empire in history.",
+    "source": "https://en.wikipedia.org/wiki/Russia",
+    "evidence": "It was proclaimed as the Russian Empire in 1721, which became the third-largest empire in history."
+  },
+  "Canada": {
+    "text": "It has the longest coastline of any country, and its border with the US is the longest land border.",
+    "source": "https://en.wikipedia.org/wiki/Canada",
+    "evidence": "making it the second-largest country by total area, with the longest coastline of any country. Its border with the United States is the longest international land border."
+  },
+  "China": {
+    "text": "Unified under the Qin in 221 BCE, beginning two millennia of imperial rule.",
+    "source": "https://en.wikipedia.org/wiki/China",
+    "evidence": "In 221 BCE, China was unified under the Qin, followed by the Han dynasty, ushering in two millennia of imperial rule across periods of unity and division."
+  },
+  "United States": {
+    "text": "Beyond its 50 states, it claims five major island territories in Oceania and the Caribbean.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "The United States also asserts sovereignty over five major island territories and various uninhabited islands in Oceania and the Caribbean."
+  },
+  "Brazil": {
+    "text": "Covering roughly half of South America, it borders every country on the continent except Ecuador and Chile.",
+    "source": "https://en.wikipedia.org/wiki/Brazil",
+    "evidence": "Covering roughly half of South America's land area, it borders all other countries and territories on the continent except Ecuador and Chile."
+  },
+  "Australia": {
+    "text": "It sits on the world's flattest and driest inhabited continent.",
+    "source": "https://en.wikipedia.org/wiki/Australia",
+    "evidence": "It has a land area of 7,688,287 km2 (2,968,464 sq mi), making it the sixth-largest country in the world, and is the world's flattest and driest inhabited continent."
+  },
+  "India": {
+    "text": "Its Middle kingdoms carried Dravidian scripts and traditions to Southeast Asia in the first millennium CE.",
+    "source": "https://en.wikipedia.org/wiki/India",
+    "evidence": "In South India, across the first millennium CE, the Middle kingdoms transmitted Dravidian language scripts and cultural traditions to Southeast Asia."
+  },
+  "Argentina": {
+    "text": "It claims sovereignty over the Falkland Islands and a part of Antarctica.",
+    "source": "https://en.wikipedia.org/wiki/Argentina",
+    "evidence": "Argentina claims sovereignty over the Falkland Islands, South Georgia and the South Sandwich Islands, the Southern Patagonian Ice Field, and a part of Antarctica."
+  },
+  "Kazakhstan": {
+    "text": "The largest landlocked country in the world, yet it has a coastline along the Caspian Sea.",
+    "source": "https://en.wikipedia.org/wiki/Kazakhstan",
+    "evidence": "Kazakhstan, officially the Republic of Kazakhstan, is a landlocked country situated primarily in Central Asia, ... and it has a coastline along the Caspian Sea. ... Kazakhstan is the world's ninth-largest country by land area and the largest landlocked country."
+  },
+  "Algeria": {
+    "text": "France annexed it in 1848 but did not fully conquer it until 1903.",
+    "source": "https://en.wikipedia.org/wiki/Algeria",
+    "evidence": "After nearly three centuries as a major power in the Mediterranean, the country was invaded by France in 1830 and formally annexed in 1848, though it was not fully conquered and pacified until 1903."
+  }
+}

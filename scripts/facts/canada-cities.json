@@ -1,0 +1,52 @@
+{
+  "Toronto": {
+    "text": "About half its residents were born outside Canada, and over 160 languages are spoken in the city.",
+    "source": "https://en.wikipedia.org/wiki/Toronto",
+    "evidence": "About half of its residents were born outside of Canada and over 200 ethnic origins are represented among its inhabitants. While the majority of Torontonians speak English as their primary language, over 160 languages are spoken in the city."
+  },
+  "Montreal": {
+    "text": "Founded in 1642 as Ville-Marie, it takes its name from Mount Royal, a triple-peaked mountain.",
+    "source": "https://en.wikipedia.org/wiki/Montreal",
+    "evidence": "Founded in 1642 as Ville-Marie, or \"City of Mary\", it now takes its name from Mount Royal, the triple-peaked mountain around which the early settlement was built."
+  },
+  "Calgary": {
+    "text": "It is named after Calgary Castle on the Isle of Mull in Scotland.",
+    "source": "https://en.wikipedia.org/wiki/Calgary",
+    "evidence": "Calgary was named after Calgary Castle (in Scottish Gaelic, Caisteal Chalgairidh) on the Isle of Mull in Scotland."
+  },
+  "Ottawa": {
+    "text": "Founded as Bytown, it was renamed in 1855 after the Ottawa River, from the Algonquin adawe, 'to trade'.",
+    "source": "https://en.wikipedia.org/wiki/Ottawa",
+    "evidence": "Founded in 1826 as \"Bytown\", incorporated in 1850, and renamed \"Ottawa\" in 1855, ... The city name \"Ottawa\" was chosen in 1855 in reference to the Ottawa River, whose name is itself derived from the Algonquin adawe, meaning \"to trade\"."
+  },
+  "Edmonton": {
+    "text": "The northernmost city in North America with a population of over one million.",
+    "source": "https://en.wikipedia.org/wiki/Edmonton",
+    "evidence": "It is the northernmost city and metropolitan area in North America to have a population of over one million."
+  },
+  "Winnipeg": {
+    "text": "Its name comes from the Western Cree words for \"muddy water\".",
+    "source": "https://en.wikipedia.org/wiki/Winnipeg",
+    "evidence": "The city is named after the nearby Lake Winnipeg; the name \"Winnipeg\" comes from the Western Cree words for \"muddy water\""
+  },
+  "Mississauga": {
+    "text": "Toronto Pearson International Airport, Canada's busiest, is in its Malton neighbourhood.",
+    "source": "https://en.wikipedia.org/wiki/Mississauga",
+    "evidence": "Malton, a neighbourhood of the city located in its northeast end, is home to Toronto Pearson International Airport, Canada's busiest airport,"
+  },
+  "Vancouver": {
+    "text": "The city began as Gastown, which grew around a makeshift tavern owned by Gassy Jack.",
+    "source": "https://en.wikipedia.org/wiki/Vancouver",
+    "evidence": "The beginnings of the modern city, which was originally named Gastown, grew around the site of a makeshift tavern on the western edges of Hastings Mill that was built on July 1, 1867, and owned by proprietor Gassy Jack."
+  },
+  "Brampton": {
+    "text": "Its many greenhouses once earned it the title \"The Flower Town of Canada\".",
+    "source": "https://en.wikipedia.org/wiki/Brampton",
+    "evidence": "The city was once known as \"The Flower Town of Canada\", a title referring to its abundance of greenhouses and strong floriculture industry in the 1860s."
+  },
+  "Hamilton": {
+    "text": "The town was conceived by George Hamilton, who bought the Durand farm shortly after the War of 1812.",
+    "source": "https://en.wikipedia.org/wiki/Hamilton%2C_Ontario",
+    "evidence": "Conceived by George Hamilton when he purchased the Durand farm shortly after the War of 1812,"
+  }
+}

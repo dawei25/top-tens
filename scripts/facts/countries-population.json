@@ -1,0 +1,52 @@
+{
+  "India": {
+    "text": "Buddhism and Jainism both arose here, proclaiming social orders unlinked to heredity.",
+    "source": "https://en.wikipedia.org/wiki/India",
+    "evidence": "During this period, Buddhism and Jainism arose, proclaiming social orders unlinked to heredity."
+  },
+  "China": {
+    "text": "About 17% of the world's population lives here.",
+    "source": "https://en.wikipedia.org/wiki/China",
+    "evidence": "It is the world's second-most populous country after India, with a population exceeding 1.4 billion (17% of the world's population)."
+  },
+  "United States": {
+    "text": "Independence was formally declared on July 2, 1776, two days before the Declaration of Independence.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "Independence from Great Britain was formally declared in the Lee Resolution of July 2, 1776, two days before the Declaration of Independence."
+  },
+  "Indonesia": {
+    "text": "Home to hundreds of ethnic groups and more than 700 languages.",
+    "source": "https://en.wikipedia.org/wiki/Indonesia",
+    "evidence": "Indonesia has hundreds of ethnic groups and more than 700 languages, as well as diverse regional cultures."
+  },
+  "Pakistan": {
+    "text": "It has the second-largest Muslim population in the world.",
+    "source": "https://en.wikipedia.org/wiki/Pakistan",
+    "evidence": "It is the fifth-most populous country, with a population of over 241.5 million, having the second-largest Muslim population in the world as of 2023."
+  },
+  "Nigeria": {
+    "text": "The Hausa, Yoruba and Igbo together make up over 60% of the population.",
+    "source": "https://en.wikipedia.org/wiki/Nigeria",
+    "evidence": "The three largest ethnic groups are the Hausa, Yoruba, and Igbo together constituting over 60% of the total population."
+  },
+  "Brazil": {
+    "text": "The only Portuguese-speaking country in the Americas, with the largest Lusophone population in the world.",
+    "source": "https://en.wikipedia.org/wiki/Brazil",
+    "evidence": "Brazil has the largest Lusophone population in the world and is the only Portuguese-speaking country in the Americas, where it is the official language."
+  },
+  "Bangladesh": {
+    "text": "Before independence in 1971 it was East Pakistan, the eastern wing of Pakistan.",
+    "source": "https://en.wikipedia.org/wiki/Bangladesh",
+    "evidence": "After the partition of India in 1947, East Bengal became the eastern wing of the newly formed Dominion of Pakistan and was later renamed East Pakistan. ... Bangladesh became a sovereign nation on 16 December 1971."
+  },
+  "Russia": {
+    "text": "Moscow, its capital, is the most populous metropolitan area in Europe.",
+    "source": "https://en.wikipedia.org/wiki/Russia",
+    "evidence": "Moscow, the most populous metropolitan area in Europe, is the capital and largest city of Russia, while Saint Petersburg is its second-largest city and a major cultural centre."
+  },
+  "Mexico": {
+    "text": "Home to more native Spanish speakers than any other country.",
+    "source": "https://en.wikipedia.org/wiki/Mexico",
+    "evidence": "With a population around 131 million as of 2025, Mexico is the tenth-most populous country in the world and is home to the largest number of native Spanish speakers."
+  }
+}

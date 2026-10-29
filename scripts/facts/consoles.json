@@ -1,0 +1,52 @@
+{
+  "PlayStation 2": {
+    "text": "Its last game, Pro Evolution Soccer 2014, came out in Europe in November 2013.",
+    "source": "https://en.wikipedia.org/wiki/PlayStation_2",
+    "evidence": "it remained in production and continued to receive new game releases for several years with the last game for the system Pro Evolution Soccer 2014 being released exclusively in Europe on 8 November 2013."
+  },
+  "Nintendo Switch": {
+    "text": "Its Joy-Con controllers work as two halves of one controller or as two separate ones.",
+    "source": "https://en.wikipedia.org/wiki/Nintendo_Switch",
+    "evidence": "Its wireless Joy-Con controllers function as two halves of a standard controller and alternatively as individual controllers,"
+  },
+  "Nintendo DS": {
+    "text": "The \"DS\" stands for \"Dual Screen\"; the lower of its two screens is a touchscreen.",
+    "source": "https://en.wikipedia.org/wiki/Nintendo_DS",
+    "evidence": "The \"DS\" in the name is an initialism for \"Dual Screen\", reflecting the system's most distinctive feature: two LCD screens working in tandem, with the lower screen functioning as a touchscreen."
+  },
+  "Game Boy": {
+    "text": "In North America and Europe it came bundled with Tetris.",
+    "source": "https://en.wikipedia.org/wiki/Game_Boy",
+    "evidence": "In North America and Europe, the Game Boy was backed by a large marketing campaign and bundled with Tetris, which increased its appeal beyond traditional video game audiences."
+  },
+  "PlayStation 4": {
+    "text": "According to lead architect Mark Cerny, work on it began as early as 2008.",
+    "source": "https://en.wikipedia.org/wiki/PlayStation_4",
+    "evidence": "According to lead architect Mark Cerny, the development of Sony's fourth video game console began as early as 2008."
+  },
+  "PlayStation": {
+    "text": "Sony built it after a failed venture with Nintendo on a CD-ROM add-on for the Super Nintendo.",
+    "source": "https://en.wikipedia.org/wiki/PlayStation_(console)",
+    "evidence": "Sony began developing the PlayStation after a failed venture with Nintendo to create a CD-ROM peripheral for the Super Nintendo Entertainment System in the early 1990s."
+  },
+  "Wii": {
+    "text": "During development it was codenamed Revolution.",
+    "source": "https://en.wikipedia.org/wiki/Wii",
+    "evidence": "Shigeru Miyamoto and Genyo Takeda led development, which was initially codenamed Revolution."
+  },
+  "PlayStation 5": {
+    "text": "A central challenge in its development was cutting game loading times.",
+    "source": "https://en.wikipedia.org/wiki/PlayStation_5",
+    "evidence": "During the development of the PlayStation 5, a central challenge revolved around addressing the length of loading times for games."
+  },
+  "PlayStation 3": {
+    "text": "The first console to use Blu-ray as its main storage medium, and the first with an HDMI port.",
+    "source": "https://en.wikipedia.org/wiki/PlayStation_3",
+    "evidence": "It was the first console to use the Blu-ray disc as its primary storage medium, the first to be equipped with an HDMI port, and the first capable of outputting games in 1080p (Full HD) resolution."
+  },
+  "Xbox 360": {
+    "text": "Early units failed so often, with the \"Red Ring of Death\", that Microsoft had to extend the warranty.",
+    "source": "https://en.wikipedia.org/wiki/Xbox_360",
+    "evidence": "The earliest versions of the console suffered from a high failure rate, indicated by the so-called \"Red Ring of Death\", necessitating an extension of the device's warranty period."
+  }
+}

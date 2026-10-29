@@ -1,0 +1,52 @@
+{
+  "Toyota": {
+    "text": "Its Corolla, developed in the 1960s, became the best-selling automobile of all time.",
+    "source": "https://en.wikipedia.org/wiki/Toyota",
+    "evidence": "In the 1960s, Toyota took advantage of the rapidly growing Japanese economy to sell cars to a growing middle-class, leading to the development of the Toyota Corolla, which became the best-selling automobile of all time."
+  },
+  "Volkswagen Group": {
+    "text": "It was founded in 1937 to manufacture the car that would become known as the Beetle.",
+    "source": "https://en.wikipedia.org/wiki/Volkswagen_Group",
+    "evidence": "Volkswagen was founded in Berlin in 1937 and incorporated in Wolfsburg to manufacture the car that would become known as the Beetle."
+  },
+  "Hyundai Motor Group": {
+    "text": "In December 2024 it started letting customers buy its cars on Amazon, for pickup at a local dealer.",
+    "source": "https://en.wikipedia.org/wiki/Hyundai_Motor_Group",
+    "evidence": "On December 10, 2024, Hyundai allowed customers to buy Hyundai cars on Amazon. They could pick it up at their local Hyundai dealership."
+  },
+  "General Motors": {
+    "text": "It was the largest automaker in the world for 77 years, until Toyota took the title in 2008.",
+    "source": "https://en.wikipedia.org/wiki/General_Motors",
+    "evidence": "By total sales, it has continuously been the largest automaker in the United States, and was the largest in the world for 77 years before losing the title to Toyota in 2008."
+  },
+  "Stellantis": {
+    "text": "The name comes from the Latin verb stello, 'to brighten with stars'.",
+    "source": "https://en.wikipedia.org/wiki/Stellantis",
+    "evidence": "The company says the name Stellantis is derived from the Latin verb stello 'to brighten with stars'."
+  },
+  "BYD Auto": {
+    "text": "In 2025 it overtook Tesla to become the world's largest electric carmaker.",
+    "source": "https://en.wikipedia.org/wiki/BYD_Auto",
+    "evidence": "In 2025, BYD became the world's largest electric carmaker, overtaking Tesla, and overtook Ford to be 6th in total automobile sales."
+  },
+  "SAIC Motor": {
+    "text": "Its venture with Volkswagen, running since 1984, is the oldest surviving Sino-foreign car joint venture.",
+    "source": "https://en.wikipedia.org/wiki/SAIC_Motor",
+    "evidence": "Currently, it participates in the oldest surviving sino-foreign automotive joint venture with Volkswagen (SAIC-Volkswagen) since 1984,"
+  },
+  "Ford": {
+    "text": "Henry Ford's first car company became the Cadillac Motor Company after he left it in 1902.",
+    "source": "https://en.wikipedia.org/wiki/Ford_Motor_Company",
+    "evidence": "The Henry Ford Company was Henry Ford's first attempt at a car manufacturing company and was established on November 3, 1901. This became the Cadillac Motor Company on August 22, 1902, after Ford left with the rights to his name"
+  },
+  "Geely": {
+    "text": "Founded in 1986 as a refrigerator parts company, it bought Volvo Cars from Ford in 2010.",
+    "source": "https://en.wikipedia.org/wiki/Geely",
+    "evidence": "Geely was founded in 1986 as a refrigerator parts company, before transitioning to motorcycles in 1994 and entering the automotive industry in 1997. ... ZGH acquired the Swedish passenger car maker Volvo Cars from Ford Motor Company in 2010."
+  },
+  "Honda": {
+    "text": "It built and sold the Super Cub, the most produced motor vehicle in history.",
+    "source": "https://en.wikipedia.org/wiki/Honda",
+    "evidence": "Honda has built and sold the most produced motor vehicle in history, the Honda Super Cub."
+  }
+}

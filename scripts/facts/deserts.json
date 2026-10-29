@@ -1,0 +1,42 @@
+{
+  "Sahara Desert": {
+    "text": "It is so large and bright that, in theory, it could be detected from other stars.",
+    "source": "https://en.wikipedia.org/wiki/Sahara_Desert",
+    "evidence": "The Sahara is so large and bright that, in theory, it could be detected from other stars as a surface feature of Earth, with near-current technology."
+  },
+  "Arabian Desert": {
+    "text": "At its southern end lies the Empty Quarter, the largest continuous body of sand in the world.",
+    "source": "https://en.wikipedia.org/wiki/Arabian_Desert",
+    "evidence": "At its southern end is Ar-Rub' al-Khali (The Empty Quarter), the largest continuous body of sand in the world."
+  },
+  "Great Australian Desert": {
+    "text": "It has the largest population of feral camels in the world.",
+    "source": "https://en.wikipedia.org/wiki/Great_Australian_Desert",
+    "evidence": "The Australian desert has the largest population of feral camels in the world."
+  },
+  "Gobi Desert": {
+    "text": "Temperatures can change by as much as 35 °C within 24 hours.",
+    "source": "https://en.wikipedia.org/wiki/Gobi_Desert",
+    "evidence": "However, the climate of the Gobi is one of great extremes, with rapid changes of temperature of as much as 35 °C (63 °F) in 24-hour spans."
+  },
+  "Kalahari Desert": {
+    "text": "The name comes from Tswana words meaning \"the great thirst\" or \"a waterless place\".",
+    "source": "https://en.wikipedia.org/wiki/Kalahari_Desert",
+    "evidence": "Kalahari is derived from the Tswana word Kgala, meaning \"the great thirst\", or Kgalagadi, meaning \"a waterless place\";"
+  },
+  "Patagonian Desert": {
+    "text": "The Andes block Pacific moisture, creating the rain shadow that formed it.",
+    "source": "https://en.wikipedia.org/wiki/Patagonian_Desert",
+    "evidence": "The Andes, to the desert's west, are the primary reason for the Patagonian desert status as they inhibit the westerly flow of moisture from the southern Pacific from reaching inland. This creates a rain shadow that accounts for the formation of the desert"
+  },
+  "Syrian Desert": {
+    "text": "The golden hamster comes from here.",
+    "source": "https://en.wikipedia.org/wiki/Syrian_Desert",
+    "evidence": "The Syrian Desert is the origin of the golden hamster."
+  },
+  "Great Basin Desert": {
+    "text": "More than 33 of its peaks rise above 9,800 feet (3,000 m).",
+    "source": "https://en.wikipedia.org/wiki/Great_Basin_Desert",
+    "evidence": "There are more than 33 peaks within the desert with summits higher than 9,800 feet (3,000 m),"
+  }
+}

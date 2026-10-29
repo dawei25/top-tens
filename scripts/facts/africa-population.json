@@ -1,0 +1,52 @@
+{
+  "Nigeria": {
+    "text": "Home to more than 250 ethnic groups speaking 500 distinct languages.",
+    "source": "https://en.wikipedia.org/wiki/Nigeria",
+    "evidence": "Nigeria is a multinational state inhabited by more than 250 ethnic groups speaking 500 distinct languages, all identifying with a wide variety of cultures."
+  },
+  "Ethiopia": {
+    "text": "Anatomically modern humans emerged in what is now Ethiopia.",
+    "source": "https://en.wikipedia.org/wiki/Ethiopia",
+    "evidence": "Anatomically modern humans emerged in what is now Ethiopia."
+  },
+  "Egypt": {
+    "text": "No country in the Arab world has more people.",
+    "source": "https://en.wikipedia.org/wiki/Egypt",
+    "evidence": "With over 107 million inhabitants, Egypt is the most populous country in the Arab world, third-most populous country in Africa, and 15th-most populated in the world."
+  },
+  "DR Congo": {
+    "text": "More people live here than in any other French-speaking country in the world.",
+    "source": "https://en.wikipedia.org/wiki/DR_Congo",
+    "evidence": "With a population of about 124 million people, the Democratic Republic of the Congo is the fourth-most populous country in Africa and the most populous Francophone country in the world. French is the official and most widely spoken language."
+  },
+  "Tanzania": {
+    "text": "No country lying entirely south of the equator has more people.",
+    "source": "https://en.wikipedia.org/wiki/Tanzania",
+    "evidence": "According to a 2024 estimate, Tanzania has a population of around 67.5 million, making it the most populous country located entirely south of the equator."
+  },
+  "South Africa": {
+    "text": "It has three capitals: Pretoria is administrative, Cape Town legislative and Bloemfontein judicial.",
+    "source": "https://en.wikipedia.org/wiki/South_Africa",
+    "evidence": "Pretoria is the administrative capital, while Cape Town, as the seat of Parliament, is the legislative capital, and Bloemfontein is regarded as the judicial capital."
+  },
+  "Kenya": {
+    "text": "Fossils found at Koobi Fora show its earliest inhabitants included some of the first humans.",
+    "source": "https://en.wikipedia.org/wiki/Kenya",
+    "evidence": "Kenya's earliest inhabitants included some of the first humans to evolve from ancestral members of the genus Homo. Ample fossil evidence for this evolutionary history has been found at Koobi Fora."
+  },
+  "Sudan": {
+    "text": "The area saw the war of Jebel Sahaba around 11500 BC, the earliest known war in the world.",
+    "source": "https://en.wikipedia.org/wiki/Sudan",
+    "evidence": "The area that is now Sudan witnessed the Khormusan (c. 40000–16000 BC), Halfan culture (c. 20500–17000 BC), Sebilian (c. 13000–10000 BC), Qadan culture (c. 13000–9000 BC), the war of Jebel Sahaba, the earliest known war in the world, around 11500 BC,"
+  },
+  "Uganda": {
+    "text": "Named after the Buganda kingdom, which covers a large part of the south, including Kampala.",
+    "source": "https://en.wikipedia.org/wiki/Uganda",
+    "evidence": "Uganda is named after the Buganda kingdom, which encompasses a large portion of the south, including Kampala, and whose language Luganda is widely spoken;"
+  },
+  "Algeria": {
+    "text": "The Sahara covers most of the country, so people are concentrated in the fertile, mountainous north.",
+    "source": "https://en.wikipedia.org/wiki/Algeria",
+    "evidence": "The Sahara covers most of Algeria except for the fertile and mountainous north, where the population is concentrated."
+  }
+}

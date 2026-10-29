@@ -1,0 +1,52 @@
+{
+  "Shanghai": {
+    "text": "The Port of Shanghai is the world's busiest container port.",
+    "source": "https://en.wikipedia.org/wiki/Shanghai",
+    "evidence": "The Port of Shanghai is the world's busiest container port."
+  },
+  "Beijing": {
+    "text": "It was the largest city in the world by population for much of the second millennium AD.",
+    "source": "https://en.wikipedia.org/wiki/Beijing",
+    "evidence": "As the last remaining one of the Four Great Ancient Capitals of China, Beijing has been the political center of the country for most of the past eight centuries and was the largest city in the world by population for much of the second millennium AD."
+  },
+  "Shenzhen": {
+    "text": "A largely rural village area until 1979, it became China's first special economic zone.",
+    "source": "https://en.wikipedia.org/wiki/Shenzhen",
+    "evidence": "Shenzhen was developed from a largely rural village area into a city in 1979. In the early 1980s, the reform and opening up introduced by Deng Xiaoping resulted in the city becoming the first special economic zone of China"
+  },
+  "Guangzhou": {
+    "text": "For a long time it was the only Chinese port accessible to Europeans.",
+    "source": "https://en.wikipedia.org/wiki/Guangzhou",
+    "evidence": "For a long time, it was the only Chinese port accessible to the Europeans."
+  },
+  "Chengdu": {
+    "text": "The only Chinese settlement to keep its name unchanged for more than two thousand years.",
+    "source": "https://en.wikipedia.org/wiki/Chengdu",
+    "evidence": "Founded by the Kingdom of Shu in the 4th century BC, Chengdu is unique as the only Chinese settlement that has maintained its name unchanged throughout the imperial, republican, and communist eras for more than two thousand years."
+  },
+  "Tianjin": {
+    "text": "Its Yujiapu Financial District has become known as China's Manhattan.",
+    "source": "https://en.wikipedia.org/wiki/Tianjin",
+    "evidence": "Since 2010, Tianjin's Yujiapu Financial District has become known as China's Manhattan"
+  },
+  "Wuhan": {
+    "text": "The name joins three historic towns: Wuchang, Hankou and Hanyang.",
+    "source": "https://en.wikipedia.org/wiki/Wuhan",
+    "evidence": "The name \"Wuhan\" came from the city's historical origin from the conglomeration of Wuchang, Hankou, and Hanyang, which are collectively known as the \"Three Towns of Wuhan\""
+  },
+  "Dongguan": {
+    "text": "A major toy-making hub, with 4,000 toy-production enterprises.",
+    "source": "https://en.wikipedia.org/wiki/Dongguan",
+    "evidence": "It is also a strong hub of toy making, with 4,000 toy-production enterprises, and near to 1,500 related factories."
+  },
+  "Chongqing": {
+    "text": "Its monorail is the world's longest and busiest, with 70 stations.",
+    "source": "https://en.wikipedia.org/wiki/Chongqing",
+    "evidence": "The city's monorail system is the world's longest and busiest, with 70 stations—the most of any system."
+  },
+  "Xi'an": {
+    "text": "Home to the Mausoleum of the First Qin Emperor and its Terracotta Army.",
+    "source": "https://en.wikipedia.org/wiki/Xi'an",
+    "evidence": "Xi'an contains the Mausoleum of the First Qin Emperor, including the Terracotta Army,"
+  }
+}

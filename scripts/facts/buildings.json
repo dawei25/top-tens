@@ -1,0 +1,47 @@
+{
+  "Burj Khalifa": {
+    "text": "Some of its structural steel was salvaged from the demolished Palace of the Republic in East Berlin.",
+    "source": "https://en.wikipedia.org/wiki/Burj_Khalifa",
+    "evidence": "Some of the structural steel for the building was salvaged from the demolished Palace of the Republic in East Berlin."
+  },
+  "Merdeka Maybank Tower": {
+    "text": "Merdeka means \"independence\" in Malay; the name comes from the nearby Stadium Merdeka.",
+    "source": "https://en.wikipedia.org/wiki/Merdeka_Maybank_Tower",
+    "evidence": "The building's name, Merdeka, which means \"independence\" in Malay, is inspired by its proximity to Stadium Merdeka."
+  },
+  "Shanghai Tower": {
+    "text": "Its elevators, at 20.5 metres per second, were the fastest in the world until 2017.",
+    "source": "https://en.wikipedia.org/wiki/Shanghai_Tower",
+    "evidence": "The Shanghai Tower also had the world's fastest elevators at a top speed of 20.5 meters per second (74 kilometers per hour; 46 miles per hour) until 2017,"
+  },
+  "Mecca Royal Clock Tower": {
+    "text": "Its clock faces are the largest in the world.",
+    "source": "https://en.wikipedia.org/wiki/Mecca_Royal_Clock_Tower",
+    "evidence": "The clock faces are the largest in the world, and the top four floors of the clock tower house the Clock Tower Museum."
+  },
+  "Ping An Finance Centre": {
+    "text": "Its stainless-steel facade weighs approximately 1,700 metric tons.",
+    "source": "https://en.wikipedia.org/wiki/Ping_An_Finance_Centre",
+    "evidence": "A stainless-steel facade that weighs approximately 1,700 metric tons (3,700,000 lb) provides a modern design to the building."
+  },
+  "Lotte World Tower": {
+    "text": "Its rooftop Sky Bridge Tour, at 541 m, is about as high as One World Trade Center.",
+    "source": "https://en.wikipedia.org/wiki/Lotte_World_Tower",
+    "evidence": "A \"Sky Bridge Tour\" is located on the roof of Lotte World Tower at 541 m (1,775 ft), which is about the same height of One World Trade Center in New York City (1,776 feet or 541 meters), the tallest building in the United States."
+  },
+  "One World Trade Center": {
+    "text": "The building has 94 stories, but its top floor is numbered 104.",
+    "source": "https://en.wikipedia.org/wiki/One_World_Trade_Center",
+    "evidence": "The building has 94 stories, with the top floor numbered 104."
+  },
+  "Guangzhou CTF Finance Centre": {
+    "text": "It houses the world's fastest elevators, which can reach 21 metres per second.",
+    "source": "https://en.wikipedia.org/wiki/Guangzhou_CTF_Finance_Centre",
+    "evidence": "The Guangzhou CTF Finance Centre is owned by Chow Tai Fook Enterprises, and houses the world's fastest elevators, which can reach speeds up to 21 metres per second (69 feet per second)."
+  },
+  "Tianjin CTF Finance Centre": {
+    "text": "Its tapering, rounded shape cuts wind vortex shedding by \"confusing the wind\".",
+    "source": "https://en.wikipedia.org/wiki/Tianjin_CTF_Finance_Centre",
+    "evidence": "The building's aerodynamic shape greatly reduces this vortex shedding by \"confusing the wind\" and disrupting the opportunity for any resonating wind forces and loads on the structure."
+  }
+}
