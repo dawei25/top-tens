@@ -237,10 +237,10 @@ export function blitzHistory(saved: Saved, puzzleId: string): BlitzRun[] {
   return saved.blitzRuns?.[puzzleId] ?? [];
 }
 
-/** "Top Tens Blitz: Busiest airports · 742 pts · 14 answers" plus a link. */
+/** "TENtacle Blitz: Busiest airports · 742 pts · 14 answers" plus a link. */
 export function blitzShareText(state: BlitzState, puzzle: Puzzle, url: string): string {
   const n = state.hits.length;
-  return `Top Tens Blitz: ${puzzle.title}\n${blitzScore(state)} pts · ${n} answer${n === 1 ? "" : "s"} in ${BLITZ_SECONDS}s\n${url}`;
+  return `TENtacle Blitz: ${puzzle.title}\n${blitzScore(state)} pts · ${n} answer${n === 1 ? "" : "s"} in ${BLITZ_SECONDS}s\n${url}`;
 }
 
 /**
@@ -253,7 +253,7 @@ export function recordDailyBlitz(saved: Saved, date: string, state: BlitzState):
   return { saved: { ...saved, blitzDaily: { ...saved.blitzDaily, [date]: entry } }, counted: true };
 }
 
-/** "Top Tens Blitz #12: Busiest airports" share text for Today's Blitz. */
+/** "TENtacle Blitz #12: Busiest airports" share text for Today's Blitz. */
 export function dailyBlitzShareText(state: BlitzState, puzzle: Puzzle, url: string, n: number): string {
-  return blitzShareText(state, puzzle, url).replace("Top Tens Blitz: ", `Top Tens Blitz #${n}: `);
+  return blitzShareText(state, puzzle, url).replace("TENtacle Blitz: ", `TENtacle Blitz #${n}: `);
 }

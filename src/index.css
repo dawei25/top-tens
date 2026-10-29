@@ -1,4 +1,4 @@
-/* Top Tens: Krillion's visual language on an arcade high-score table. Dark only. */
+/* TENtacle: Krillion's visual language on an arcade high-score table. Dark only. */
 :root {
   --page: #050a14;
   --page-top: #0d1e38;
@@ -308,7 +308,6 @@ a {
   letter-spacing: 0.08em;
   /* VT323's advance includes the spacing on the last glyph; nudge back to optical center. */
   margin-right: -0.08em;
-  text-transform: uppercase;
   color: var(--text);
   text-shadow:
     -3px 0 var(--pink),

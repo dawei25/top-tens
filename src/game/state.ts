@@ -77,7 +77,7 @@ export function giveUp(state: GameState): GameState {
 
 /**
  * Share text: one square per rank (#1 gold, found blue, missed black), lives left and hints used.
- * `daily` is the daily number when the game was a daily ("Top Tens #12").
+ * `daily` is the daily number when the game was a daily ("TENtacle #12").
  */
 export function shareText(state: GameState, puzzle: Puzzle, url: string, daily?: number): string {
   const squares = puzzle.answers
@@ -85,6 +85,6 @@ export function shareText(state: GameState, puzzle: Puzzle, url: string, daily?:
     .join("");
   const hearts = "♥".repeat(state.lives) + "♡".repeat(MAX_LIVES - state.lives);
   const hints = state.hints?.length ? ` · ${state.hints.length} hint${state.hints.length > 1 ? "s" : ""}` : "";
-  const head = daily ? `Top Tens #${daily}: ${puzzle.title}` : `Top Tens: ${puzzle.title}`;
+  const head = daily ? `TENtacle #${daily}: ${puzzle.title}` : `TENtacle: ${puzzle.title}`;
   return `${head}\n${state.found.length}/10 ${hearts}${hints}\n${squares}\n${url}`;
 }

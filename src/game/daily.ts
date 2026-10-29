@@ -2,7 +2,7 @@ import type { Saved } from "./storage";
 
 /** One day of the daily schedule (public/puzzles/daily.json). The file is the record of what ran when. */
 export interface DailyEntry {
-  /** Daily number, 1-based: "Top Tens #12". */
+  /** Daily number, 1-based: "TENtacle #12". */
   n: number;
   /** Local calendar date, YYYY-MM-DD. Everyone gets the same list on the same date, at their own midnight. */
   date: string;

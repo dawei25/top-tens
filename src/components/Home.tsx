@@ -162,8 +162,8 @@ export function Home({
     <main className="screen home">
       <header className="title">
         <p className="label title-kicker">High score table</p>
-        <h1 className="logo" aria-label="Top Tens">
-          <span>Top</span> <span>Tens</span>
+        <h1 className="logo" aria-label="TENtacle">
+          <span>TEN</span><span>tacle</span>
         </h1>
         <p className="caption">name the top 10. five lives. typos are free.</p>
       </header>

@@ -58,7 +58,7 @@ describe("hints", () => {
   });
   it("share text names the daily and counts hints", () => {
     const s = applyHint(newGame(puzzle), 2);
-    expect(shareText(s, puzzle, "u", 12)).toContain("Top Tens #12: T");
+    expect(shareText(s, puzzle, "u", 12)).toContain("TENtacle #12: T");
     expect(shareText(s, puzzle, "u", 12)).toContain("1 hint");
   });
 });
