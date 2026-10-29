@@ -1,0 +1,52 @@
+{
+  "Macau": {
+    "text": "Two-thirds of its total area is built on land reclaimed from the sea.",
+    "source": "https://en.wikipedia.org/wiki/Macau",
+    "evidence": "The territory is highly urbanised, holding the status of the most densely populated territory on Earth; two-thirds of the region's total area is built on land reclaimed from the sea."
+  },
+  "Monaco": {
+    "text": "Over 30% of its residents are millionaires.",
+    "source": "https://en.wikipedia.org/wiki/Monaco",
+    "evidence": "Over 30% of residents are millionaires, with real estate prices reaching €100,000 ($116,374) per square metre in 2018."
+  },
+  "Singapore": {
+    "text": "It joined the new federation of Malaysia in 1963 and was expelled two years later.",
+    "source": "https://en.wikipedia.org/wiki/Singapore",
+    "evidence": "Singapore gained self-governance in 1959 and in 1963 became part of the new federation of Malaysia, alongside Malaya, North Borneo and Sarawak. Ideological differences led to Singapore's expulsion from the federation two years later; it became an independent sovereign country in 1965."
+  },
+  "Hong Kong": {
+    "text": "It has the most skyscrapers of any city in the world.",
+    "source": "https://en.wikipedia.org/wiki/Hong_Kong",
+    "evidence": "Hong Kong has the most skyscrapers of any city in the world."
+  },
+  "Gibraltar": {
+    "text": "Captured from Spain in 1704, it was ceded to Great Britain in perpetuity under the Treaty of Utrecht in 1713.",
+    "source": "https://en.wikipedia.org/wiki/Gibraltar",
+    "evidence": "In 1704, Anglo-Dutch forces captured Gibraltar from Spain during the War of the Spanish Succession, and it was ceded to Great Britain in perpetuity under the Treaty of Utrecht in 1713."
+  },
+  "Vatican City": {
+    "text": "After Italy captured Rome in 1870, the pope declared himself a \"prisoner in the Vatican\".",
+    "source": "https://en.wikipedia.org/wiki/Vatican_City",
+    "evidence": "Italian unification concluded with the capture of Rome by the Kingdom of Italy in 1870, after which the pope declared himself a \"prisoner in the Vatican\"."
+  },
+  "Bahrain": {
+    "text": "Besides its 33 natural islands, the country has 50 artificial ones.",
+    "source": "https://en.wikipedia.org/wiki/Bahrain",
+    "evidence": "Situated near the western shore of the Persian Gulf, the country comprises a small archipelago of 33 natural islands and an additional 50 artificial islands, centred on Bahrain Island, which makes up around 80 percent of the country's landmass."
+  },
+  "Maldives": {
+    "text": "With a highest natural point of only 2.4 m, it is the world's lowest-lying country.",
+    "source": "https://en.wikipedia.org/wiki/Maldives",
+    "evidence": "The Maldives has an average ground-level elevation of around 1.5 metres (4 ft 11 in) above sea level, and a highest natural point of only 2.4 metres (7 ft 10 in), making it the world's lowest-lying country."
+  },
+  "Malta": {
+    "text": "The whole country is a single urban region, so it is often described as a city-state.",
+    "source": "https://en.wikipedia.org/wiki/Malta",
+    "evidence": "It consists of a single urban region, because of which it is often described as a city-state."
+  },
+  "Bangladesh": {
+    "text": "As the Mughal Empire's largest subdivision, Bengal was a commercial centre known for its textiles.",
+    "source": "https://en.wikipedia.org/wiki/Bangladesh",
+    "evidence": "As the largest subdivision of the Mughal Empire, Bengal became a major commercial centre, known for its textile industry and agricultural output."
+  }
+}
