@@ -1,0 +1,52 @@
+{
+  "São Paulo": {
+    "text": "Home to the largest Arab, Italian and Japanese diasporas in the world.",
+    "source": "https://en.wikipedia.org/wiki/S%C3%A3o_Paulo",
+    "evidence": "In the 20th century, industrialisation consolidated its role as the main national economic hub, which made the city a cosmopolitan melting pot, home to the largest Arab, Italian, and Japanese diasporas in the world,"
+  },
+  "Rio de Janeiro": {
+    "text": "From 1808 it hosted the Portuguese court: the only modern case of a colonizer's capital moving to a colony.",
+    "source": "https://en.wikipedia.org/wiki/Rio_de_Janeiro",
+    "evidence": "In 1808, when the Portuguese Royal Court moved to Brazil, Rio de Janeiro became the seat of the court of Queen Maria I of Portugal. ... This is the only instance in modern history that the capital of a colonizing country officially shifted to a city in one of its colonies."
+  },
+  "Brasília": {
+    "text": "The city is laid out in the shape of an airplane, with the Monumental Axis as its fuselage.",
+    "source": "https://en.wikipedia.org/wiki/Bras%C3%ADlia",
+    "evidence": "Laid out in the shape of an airplane, its \"fuselage\" is the Monumental Axis, a pair of wide avenues flanking a large park."
+  },
+  "Fortaleza": {
+    "text": "Its trade port, 5,608 km from Lisbon, is the closest to mainland Europe.",
+    "source": "https://en.wikipedia.org/wiki/Fortaleza",
+    "evidence": "The municipality is part of the Mercosur common market, and a vital trade port which is closest to mainland Europe, being 5,608 kilometres (3,485 mi) from Lisbon, Portugal."
+  },
+  "Salvador": {
+    "text": "Guinness World Records calls its Carnival the biggest street party in the world.",
+    "source": "https://en.wikipedia.org/wiki/Salvador%2C_Bahia",
+    "evidence": "The stage of one of the biggest Carnivals in the world (the biggest street party in the world, according to the Guinness World Records),"
+  },
+  "Belo Horizonte": {
+    "text": "Brazil's first planned modern city, laid out with inspiration from Washington, D.C.",
+    "source": "https://en.wikipedia.org/wiki/Belo_Horizonte",
+    "evidence": "It is the first planned modern city in Brazil. ... In planning the city, Aarão Reis and Francisco Bicalho sought inspiration in the urban planning of Washington, D.C."
+  },
+  "Manaus": {
+    "text": "Rubber made it the richest city in South America in the late 1800s, earning it the name Paris of the Tropics.",
+    "source": "https://en.wikipedia.org/wiki/Manaus",
+    "evidence": "Rubber made it the richest city in South America during the late 1800s. Rubber helped Manaus earn its nickname, the Paris of the Tropics."
+  },
+  "Curitiba": {
+    "text": "Approximately half of its residents were not born in the city.",
+    "source": "https://en.wikipedia.org/wiki/Curitiba",
+    "evidence": "Economic growth occurred in parallel to a substantial inward flow of Brazilians from other parts of the country, as approximately half of the city's population was not born in Curitiba."
+  },
+  "Recife": {
+    "text": "More than 50 bridges link its rivers and small islands, earning it the name \"Venice of Brazil\".",
+    "source": "https://en.wikipedia.org/wiki/Recife",
+    "evidence": "Together with the urban presence of the Beberibe and Capibaribe rivers and their tributaries, the many additional unique, small islands—and more than 50 bridges linking them throughout the city—create a distinct maritime or \"riviera\" atmosphere, leading to Recife being known as the \"Venice of Brazil\"."
+  },
+  "Goiânia": {
+    "text": "A planned city, founded in 1933 to replace the town of Goiás as the state capital.",
+    "source": "https://en.wikipedia.org/wiki/Goi%C3%A2nia",
+    "evidence": "Goiânia has its origins as a planned city, founded on October 24, 1933, by then Governor Pedro Ludovico to serve as the new state capital and administrative center. Before this, the state capital was the town of Goiás."
+  }
+}
