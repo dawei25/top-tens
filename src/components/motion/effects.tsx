@@ -35,30 +35,6 @@ export function CountUp({ value }: { value: number }) {
   );
 }
 
-/** Pieces of a heart flying apart: [dx, dy] in px. Roughly the heart's own pixels, thrown outward. */
-const SHARDS: [number, number][] = [
-  [-28, -24],
-  [-8, -32],
-  [12, -30],
-  [30, -18],
-  [-34, 4],
-  [34, 6],
-  [-22, 24],
-  [-4, 32],
-  [18, 26],
-];
-
-/** The lost heart shatters into pixels. Mount it fresh for each lost life (index = the heart that went out). */
-export function PixelBurst({ index }: { index: number }) {
-  return (
-    <span className="motion-burst" style={{ "--i": index } as CSSProperties} aria-hidden="true">
-      {SHARDS.map(([x, y], k) => (
-        <i key={k} style={{ "--dx": `${x}px`, "--dy": `${y}px` } as CSSProperties} />
-      ))}
-    </span>
-  );
-}
-
 /** "+57" rising off a score each time it goes up. Nothing on the first render or when the score drops or resets. */
 export function ScoreFloat({ score }: { score: number }) {
   const [seen, setSeen] = useState(score);

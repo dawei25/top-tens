@@ -31,6 +31,7 @@ import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
 import { ModeTag, ScreenHead } from "./pixel";
 import { CountUp, ScoreFloat } from "./motion/effects";
+import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
 
 interface Props {
   id: string;
@@ -434,10 +435,11 @@ export function Blitz({
           </div>
           <div className="blitz-meter-cell right">
             <span className="label">Score</span>
-            <span className="blitz-score" data-testid="blitz-score" aria-live="polite">
+            <span className="blitz-score" data-testid="blitz-score" data-motion="score" aria-live="polite">
               {score}
             </span>
             <ScoreFloat score={score} />
+            <ScoreBump score={score} />
             <span className="caption">
               {n} answer{n === 1 ? "" : "s"}
             </span>
@@ -496,6 +498,7 @@ export function Blitz({
     body = (
       <>
         <section className="panel results enter" data-testid="blitz-results" aria-live="polite">
+          <BlitzResultsSquid hits={state.hits} best={!!record?.best && score > 0 && record.previous !== undefined} />
           <p className="label gold" data-motion="banner">Time's up</p>
           {note === "away" && <p className="caption">time ran out while you were away.</p>}
           <p className="score" aria-label={`${score} points`}>
@@ -550,6 +553,7 @@ export function Blitz({
   return (
     <main className={`screen game blitz ${over ? "blitz-over" : ""}`} data-testid="blitz-screen" data-list={puzzle.id}>
       <ScreenHead onBack={onBack} onHome={onHome}>
+        <BlitzSquid hits={viewRun ? viewRun.hits : state.hits} />
         <span className="label mode gold">
           {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
         </span>

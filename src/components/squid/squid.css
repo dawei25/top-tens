@@ -1,0 +1,631 @@
+/*
+ * TENtacle's glow squid (animations agent): the sprite, its moods, the ink-sac lives, and the one-off effects layer.
+ * Persistent states (lit limbs, moods, momentum glow, empty sacs) are plain styles and show with reduced motion too;
+ * every move sits under prefers-reduced-motion: no-preference or is skipped in JS.
+ */
+
+/* ---------- Placement: in the screen header, left of the mode label and the lives ---------- */
+/* With the squid in it, the header's middle takes all the room between BACK and the sound and HOME keys (the equal
+   side columns would squeeze it at 360 px). */
+.game-head:has(> .game-head-mid > .squid) {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  margin-bottom: 6px;
+}
+.game-head-mid:has(> .squid) {
+  display: grid;
+  grid-template-columns: auto minmax(0, max-content);
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  align-content: center;
+  column-gap: 10px;
+  row-gap: 2px;
+}
+/* The squid is taller than the keys: it hangs into the screen padding above and the gap below. */
+.game-head-mid > .squid {
+  grid-row: 1 / span 2;
+  margin: -12px 0 -18px;
+}
+/* A long mode label ("Today's Blitz #12") wraps rather than pushing into the keys. */
+.game-head-mid:has(> .squid) > .mode {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.15;
+}
+/* Blitz has only its label beside the squid. */
+.game-head-mid > .squid + .label:last-child {
+  grid-row: 1 / span 2;
+}
+@media (max-width: 380px) {
+  .game-head-mid:has(> .squid) {
+    column-gap: 8px;
+  }
+  .game-head-mid:has(> .squid) > .mode {
+    letter-spacing: 0.18em;
+  }
+}
+/* Big screens have the room: a chunkier squid (4 px pixels). */
+@media (min-width: 900px) and (min-height: 760px) {
+  .game-head-mid > .squid {
+    --px: 4px;
+    margin: -20px 0 -6px;
+  }
+}
+
+/* On a results panel: the hero squid, top right, beside the banner and the big score. */
+.results:has(> .squid.hero) {
+  position: relative;
+}
+.results > .squid.hero {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+}
+@media (min-width: 640px) {
+  .results > .squid.hero {
+    --px: 5px;
+    right: 28px;
+  }
+}
+
+/* ---------- The sprite ---------- */
+.squid {
+  --px: 3px;
+  position: relative;
+  display: block;
+  flex: none;
+  width: calc(20 * var(--px));
+  height: calc(24 * var(--px));
+  pointer-events: none;
+}
+.squid.hero {
+  --px: 4px;
+}
+.squid-move {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 40%;
+}
+.squid-px,
+.squid-glow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.squid-px {
+  transition: filter 0.6s steps(6, end);
+}
+
+/* Unlit, it is a switched-off neon squid: a dark teal body with a teal rim, eyes faintly aglow. */
+.s-rim { fill: #2a8aa2; }
+.s-left { fill: #15465a; }
+.s-right { fill: #0f3445; }
+.s-spot { fill: #2d93ad; }
+.s-eye { fill: #a6f1ff; }
+.s-pupil { fill: #06101e; }
+.s-lid { fill: #2a8aa2; }
+.squid path {
+  transition: fill 0.4s steps(4, end);
+}
+
+/* Limbs: two pixels wide, a teal lit face and a dark shaded face, until found. */
+.limb .l-a { fill: #237f96; }
+.limb .l-b { fill: #10384a; }
+.limb .l-s { fill: #3b2d55; }
+/* Found: white-hot face, cyan shade, glowing. Nothing else on the squid is that bright. */
+.limb[data-on="true"] .l-a { fill: #d4faff; }
+.limb[data-on="true"] .l-b { fill: var(--cyan); }
+.limb[data-on="true"] .l-s { fill: var(--pink); }
+/* #1 is gold, like the top row of the table. */
+.limb.first[data-on="true"] .l-a { fill: #fff2c4; }
+.limb.first[data-on="true"] .l-b { fill: var(--gold); }
+
+/* Glow: a blurred copy of the eyes and only the lit parts, under the pixels. The body's halo grows per limb lit. */
+.squid-glow {
+  filter: blur(3px);
+  transition:
+    opacity 0.35s ease-out,
+    filter 0.35s ease-out;
+}
+.g-body {
+  fill: var(--cyan);
+  opacity: calc(var(--charge, 0) * 0.45);
+  transition: opacity 0.4s ease-out;
+}
+.g-eye {
+  fill: #6fe9ff;
+  opacity: 0.7;
+}
+.g-limb { fill: var(--cyan); }
+.g-limb.first { fill: var(--gold); }
+
+/* ---------- Moods ---------- */
+/* 10/10: the whole squid lights up. */
+.squid[data-mood="won"] .s-rim { fill: #d4faff; }
+.squid[data-mood="won"] .s-left { fill: #5fe6ff; }
+.squid[data-mood="won"] .s-right { fill: #29b7df; }
+.squid[data-mood="won"] .s-spot { fill: #fff; }
+.squid[data-mood="won"] .s-pupil { fill: #0b2a4a; }
+.squid[data-mood="won"] .squid-glow { filter: blur(4px); }
+.squid[data-mood="won"] .g-body { opacity: 0.75; }
+/* Out of lives: dim and sleepy. Given up: dim, a little less so. */
+.squid[data-mood="lost"] .squid-px {
+  filter: saturate(0.35) brightness(0.55);
+}
+.squid[data-mood="gave-up"] .squid-px {
+  filter: saturate(0.5) brightness(0.7);
+}
+.squid[data-mood="lost"] .squid-glow,
+.squid[data-mood="gave-up"] .squid-glow {
+  opacity: 0.12;
+}
+
+/* ---------- Blitz momentum (data-heat 0-4): the body charges up, and motes of light rise off it ---------- */
+.squid[data-heat="1"] .g-body { opacity: max(0.3, calc(var(--charge, 0) * 0.45)); }
+.squid[data-heat="2"] .g-body { opacity: max(0.5, calc(var(--charge, 0) * 0.45)); }
+.squid[data-heat="3"] .g-body { opacity: 0.75; }
+.squid[data-heat="4"] .g-body { opacity: 1; }
+.squid[data-heat="2"] .squid-glow { filter: blur(4px); }
+.squid[data-heat="3"] .squid-glow { filter: blur(5px) brightness(1.4); }
+.squid[data-heat="4"] .squid-glow { filter: blur(6px) brightness(1.8); }
+.squid[data-heat="2"] .squid-px { filter: brightness(1.12); }
+.squid[data-heat="3"] .squid-px { filter: brightness(1.25); }
+.squid[data-heat="4"] .squid-px { filter: brightness(1.35) saturate(1.2); }
+.squid[data-heat="3"] .s-rim { fill: #5fd8f0; }
+.squid[data-heat="4"] .s-rim { fill: #d4faff; }
+.squid[data-heat="4"] .s-left { fill: #2a7d95; }
+.squid-motes {
+  position: absolute;
+  inset: 0;
+}
+.squid-motes i {
+  position: absolute;
+  left: calc(12% + var(--k) * 10.5%);
+  top: 72%;
+  width: 4px;
+  height: 4px;
+  background: #e0fbff;
+  box-shadow:
+    0 0 4px var(--cyan),
+    0 0 8px var(--cyan);
+  opacity: 0;
+}
+.squid-motes i:nth-child(3n) {
+  background: var(--cyan);
+}
+.squid[data-heat="4"] .squid-motes i:nth-child(3n + 1) {
+  background: var(--gold);
+  box-shadow: 0 0 4px var(--gold);
+}
+
+/* ---------- Ink-sac lives (replace the hearts; the lives element itself is unchanged) ---------- */
+/* An indigo ink drop with a pink rim and gloss; spent, it is a hollow dim outline. 8 x 9 art pixels. */
+.lives:has(.ink-sac) {
+  gap: 4px;
+}
+.lives .ink-sac {
+  width: 16px;
+  height: 18px;
+  display: block;
+  filter: none;
+}
+@media (min-width: 900px) and (min-height: 760px) {
+  .lives .ink-sac {
+    width: 24px;
+    height: 27px;
+  }
+}
+.ink-sac.on {
+  filter: drop-shadow(0 0 3px rgba(255, 93, 143, 0.45));
+}
+.ink-sac.on .rim { fill: var(--pink); }
+.ink-sac.on .ink { fill: #241650; }
+.ink-sac.on .deep { fill: #140b2e; }
+.ink-sac.on .glint { fill: #ffa8c6; }
+.ink-sac.off .rim { fill: #2b3c60; }
+.ink-sac.off .ink,
+.ink-sac.off .deep,
+.ink-sac.off .glint { fill: transparent; }
+
+/* ---------- Blitz score bump: grows mostly from its right edge, where the digits are anchored, so it stays clear
+   of the +N float on its left ---------- */
+.blitz-meter [data-motion="score"] {
+  transform-origin: 85% 75%;
+}
+
+/* ---------- One-off effects layer ---------- */
+.squid-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  overflow: hidden;
+}
+.squid-sparks {
+  display: none;
+}
+/* While a word is pulled out of the guess box, its placeholder stays out of the way. */
+.guess-row input[data-grabbing]::placeholder {
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Idle: a two-frame bob, and the limb tips sway on the off-beat, like an arcade sprite treading water. */
+  .squid[data-mood="play"] .squid-move,
+  .squid[data-mood="won"] .squid-move {
+    animation: squid-bob 2.4s steps(1, end) infinite;
+  }
+  .squid[data-mood="play"] .tip,
+  .squid[data-mood="won"] .tip {
+    animation: squid-sway 2.4s steps(1, end) -0.6s infinite;
+  }
+  .squid [data-limb="2"] .tip,
+  .squid [data-limb="4"] .tip,
+  .squid [data-limb="6"] .tip,
+  .squid [data-limb="8"] .tip,
+  .squid [data-limb="10"] .tip {
+    animation-delay: -1.8s;
+  }
+  .squid[data-mood="won"] .squid-glow {
+    animation: squid-breathe 2.4s steps(4, end) infinite alternate;
+  }
+
+  /* Momentum motes: more of them, and quicker, the hotter it gets. */
+  .squid[data-heat="1"] .squid-motes i:nth-child(-n + 2),
+  .squid[data-heat="2"] .squid-motes i:nth-child(-n + 4),
+  .squid[data-heat="3"] .squid-motes i:nth-child(-n + 6),
+  .squid[data-heat="4"] .squid-motes i {
+    animation: squid-mote 1.6s steps(8, end) calc(var(--k) * -0.37s) infinite;
+  }
+  .squid[data-heat="4"] .squid-motes i {
+    animation-duration: 1s;
+  }
+
+  /* A limb lighting up: white-hot, then its colour. In classic it waits for the grabbed word to land. */
+  .limb.fresh path {
+    animation: squid-limb-in 0.6s steps(6, end) var(--light-delay, 0ms) both;
+  }
+  .limb.fresh .l-b {
+    animation-name: squid-shade-in;
+  }
+  .limb.fresh .l-s {
+    animation-name: squid-sucker-in;
+  }
+  /* Lit limbs shimmer, each out of step with its neighbours, like living light. */
+  .g-limb {
+    animation: squid-shimmer 3.2s steps(4, end) infinite alternate;
+  }
+  .g-limb:nth-child(3n) {
+    animation-delay: -1.1s;
+  }
+  .g-limb:nth-child(3n + 1) {
+    animation-delay: -2.2s;
+  }
+  .g-limb.fresh {
+    animation:
+      squid-glow-in 0.8s steps(8, end) var(--light-delay, 0ms) both,
+      squid-shimmer 3.2s steps(4, end) 1.6s infinite alternate;
+  }
+  .squid[data-mood="lost"] .g-limb,
+  .squid[data-mood="gave-up"] .g-limb {
+    animation: none;
+  }
+  /* Classic lights the limb as the grabbed word lands (see SquidFx: about 0.41 s, 0.52 s for a straining #1/#2). */
+  .squid[data-mode="classic"] {
+    --light-delay: 0.4s;
+  }
+  .squid[data-mode="classic"] .tentacle {
+    --light-delay: 0.52s;
+  }
+
+  .squid-sparks {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    width: 0;
+    height: 0;
+  }
+  .squid-sparks i {
+    position: absolute;
+    left: calc(var(--px) / -2);
+    top: calc(var(--px) / -2);
+    width: var(--px);
+    height: var(--px);
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+    animation: squid-spark 0.7s steps(7, end) calc(var(--k) * 12ms) both;
+  }
+  .squid-sparks i:nth-child(3n) {
+    background: var(--gold);
+    box-shadow: 0 0 6px var(--gold);
+  }
+  .squid-sparks i:nth-child(4n) {
+    background: var(--pink);
+    box-shadow: 0 0 6px var(--pink);
+  }
+  .squid-sparks.best i {
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold);
+    animation-duration: 0.55s;
+  }
+  .squid-sparks.best i:nth-child(odd) {
+    background: #fff;
+  }
+
+  /* A sac emptying: squeezed flat, then spent. */
+  .lives .ink-sac.lost {
+    animation: ink-sac-lost 0.5s steps(5, end) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .squid-fx {
+    display: none;
+  }
+}
+
+/* Tentacle grab */
+.grab-arm {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(77, 227, 255, 0.7));
+}
+.grab .arm-hi { fill: #a8f4ff; }
+.grab .arm-main { fill: var(--cyan); }
+.grab .arm-shade { fill: #1b9cc7; }
+.grab .arm-sucker { fill: var(--pink); }
+.grab.gold .grab-arm { filter: drop-shadow(0 0 3px rgba(255, 209, 102, 0.7)); }
+.grab.gold .arm-hi { fill: #fff0c2; }
+.grab.gold .arm-main { fill: var(--gold); }
+.grab.gold .arm-shade { fill: #d39a2f; }
+.grab-word {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+/* The word is lifted out as a tile of the guess box itself, so it passes cleanly over whatever is under it. */
+.grab-text {
+  position: absolute;
+  left: -6px;
+  top: 0;
+  padding: 3px 6px 2px;
+  transform: translateY(-50%);
+  line-height: 1;
+  white-space: nowrap;
+  color: #fff;
+  background: var(--well);
+  box-shadow: 0 0 0 2px var(--cyan-edge);
+  border-radius: 3px;
+  text-shadow:
+    0 0 6px var(--cyan),
+    0 0 14px var(--cyan-glow);
+}
+.grab.gold .grab-text {
+  color: #fff6dc;
+  box-shadow: 0 0 0 2px var(--gold);
+  text-shadow:
+    0 0 6px var(--gold),
+    0 0 14px rgba(255, 209, 102, 0.4);
+}
+.grab-claw {
+  position: absolute;
+  left: -26px;
+  top: -20px;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(77, 227, 255, 0.7));
+}
+.grab.gold .grab-claw { filter: drop-shadow(0 0 3px rgba(255, 209, 102, 0.7)); }
+.grab-splash {
+  position: absolute;
+  background: linear-gradient(90deg, rgba(77, 227, 255, 0.4), rgba(77, 227, 255, 0.08) 70%, transparent);
+  box-shadow: inset 4px 0 0 var(--cyan);
+}
+.grab-splash.gold {
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.4), rgba(255, 209, 102, 0.08) 70%, transparent);
+  box-shadow: inset 4px 0 0 var(--gold);
+}
+.grab-bit {
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  width: 4px;
+  height: 4px;
+  background: var(--cyan);
+  box-shadow: 0 0 4px var(--cyan);
+}
+.grab.gold .grab-bit {
+  background: var(--gold);
+  box-shadow: 0 0 4px var(--gold);
+}
+
+/* 10/10 fireworks */
+.fireworks .spark {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+}
+.fireworks .cyan {
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+.fireworks .gold {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+.fireworks .pink {
+  background: var(--pink);
+  box-shadow: 0 0 8px var(--pink);
+}
+.fireworks .white {
+  background: #fff;
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+/* Ink: the screen only darkens a little; the ink itself is the blobs. */
+.ink-dim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ox) var(--oy), rgba(12, 6, 30, 0.55), rgba(4, 2, 12, 0.3) 40%, rgba(3, 2, 8, 0.22));
+}
+.ink.big .ink-dim {
+  background: radial-gradient(circle at var(--ox) var(--oy), rgba(12, 6, 30, 0.95), rgba(4, 2, 12, 0.8) 50%, rgba(3, 2, 8, 0.7));
+}
+/* An ink blob: a chunky pixel circle (an octagon), deep indigo with a pink gloss pixel, like wet ink. */
+.ink-puff {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: #1a0f36;
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+.ink-puff::before,
+.ink-puff::after {
+  content: "";
+  position: absolute;
+  background: rgba(255, 140, 190, 0.55);
+}
+.ink-puff::before {
+  left: 24%;
+  top: 20%;
+  width: 18%;
+  height: 14%;
+}
+.ink-puff::after {
+  left: 42%;
+  top: 20%;
+  width: 9%;
+  height: 7%;
+  background: rgba(255, 255, 255, 0.5);
+}
+.ink-puff.lit {
+  background: #2a1650;
+}
+.ink-puff.dark {
+  background: #0d0720;
+}
+.ink-puff.dark::before,
+.ink-puff.dark::after {
+  display: none;
+}
+.ink-drop {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  background: #2a1650;
+}
+.ink-drop::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 2px;
+  height: 2px;
+  background: var(--pink);
+}
+
+@keyframes squid-bob {
+  50% {
+    transform: translateY(calc(-1 * var(--px)));
+  }
+}
+@keyframes squid-sway {
+  50% {
+    transform: translateX(1px);
+  }
+}
+@keyframes squid-breathe {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes squid-shimmer {
+  to {
+    opacity: 0.45;
+  }
+}
+@keyframes squid-mote {
+  0% {
+    opacity: 0;
+    transform: none;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(-14 * var(--px)));
+  }
+}
+@keyframes squid-limb-in {
+  0% {
+    fill: #237f96;
+  }
+  1% {
+    fill: #fff;
+  }
+}
+@keyframes squid-shade-in {
+  0% {
+    fill: #10384a;
+  }
+  1% {
+    fill: #fff;
+  }
+}
+@keyframes squid-sucker-in {
+  0% {
+    fill: #3b2d55;
+  }
+  1% {
+    fill: #fff;
+  }
+}
+@keyframes squid-glow-in {
+  0% {
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+    fill: #fff;
+  }
+}
+@keyframes squid-spark {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--dx) * var(--px)), calc(var(--dy) * var(--px)));
+  }
+}
+@keyframes ink-sac-lost {
+  0% {
+    transform: scale(1.3, 0.7);
+    filter: brightness(2.5);
+  }
+  40% {
+    transform: scale(0.8, 1.2);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
