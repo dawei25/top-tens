@@ -12,6 +12,11 @@ export interface Entry {
   aliases: string[];
   /** Display value from the source table, e.g. "1,441,719,852". */
   value?: string;
+  /**
+   * The same stat as a plain number, in the unit the list's ranked rows use (a list counted in millions stores 524
+   * for MrBeast and 27.2 for Smosh). Present on every entry whose stat is known, ranked or not. Blitz scores it.
+   */
+  n?: number;
   /** Wikipedia article title for this entry (top 10 only). */
   article?: string;
   /** One short, sourced fun fact, shown on hover or tap once the row is revealed (top 10 only). */
@@ -26,6 +31,11 @@ export interface Puzzle {
   prompt: string;
   /** Column the ranking is by, e.g. "Population" */
   metric?: string;
+  /**
+   * Playable in Blitz: at least 30 entries carry `n`, and a bigger number ranks higher (not a list ranked by
+   * something like Similarweb rank, where #1 is the smallest number).
+   */
+  blitz?: boolean;
   /**
    * asOf: the day the list was read from the source. dataAsOf: when the source says its numbers are from
    * ("March 2026", "2025"), if it says.
