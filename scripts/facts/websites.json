@@ -1,0 +1,52 @@
+{
+  "Google Search": {
+    "text": "Despite its huge index, it is generally assumed to cover less than 5% of the total Internet.",
+    "source": "https://en.wikipedia.org/wiki/Google_Search",
+    "evidence": "Despite Google search's immense index, sources generally assume that Google is only indexing less than 5% of the total Internet, with the rest belonging to the deep web, inaccessible through its search tools."
+  },
+  "YouTube": {
+    "text": "By 2019, more than 500 hours of video were being uploaded to it every minute.",
+    "source": "https://en.wikipedia.org/wiki/YouTube",
+    "evidence": "As of May 2019, videos were being uploaded to the platform at a rate of more than 500 hours of video per minute, and as of mid-2024, there were approximately 14.8 billion videos in total."
+  },
+  "Facebook": {
+    "text": "Its name comes from the face book directories often given to American university students.",
+    "source": "https://en.wikipedia.org/wiki/Facebook",
+    "evidence": "The name Facebook derives from the face book directories often given to American university students."
+  },
+  "Instagram": {
+    "text": "It began in San Francisco as Burbn, a mobile check-in app.",
+    "source": "https://en.wikipedia.org/wiki/Instagram",
+    "evidence": "Instagram began development in San Francisco as Burbn, a mobile check-in app created by Kevin Systrom and Mike Krieger."
+  },
+  "ChatGPT": {
+    "text": "It reached 100 million monthly active users two months after its release.",
+    "source": "https://en.wikipedia.org/wiki/ChatGPT",
+    "evidence": "ChatGPT was quickly adopted, reaching 100 million monthly active users two months after its release and 900 million weekly active users in February 2026."
+  },
+  "X": {
+    "text": "It launched in 2006 as twttr, and was renamed Twitter some months later.",
+    "source": "https://en.wikipedia.org/wiki/X_(social_network)",
+    "evidence": "The platform was created in March 2006 by Jack Dorsey, Noah Glass, Biz Stone, and Evan Williams, and was launched in July of that year; initially named twttr, it was renamed Twitter some months later."
+  },
+  "Reddit": {
+    "text": "Its founders' first pitch, My Mobile Menu, was a failed idea for ordering food by text message.",
+    "source": "https://en.wikipedia.org/wiki/Reddit",
+    "evidence": "Their initial idea, My Mobile Menu, was unsuccessful, and was intended to allow users to order food by SMS text messaging."
+  },
+  "TikTok": {
+    "text": "TikTok Ltd is incorporated in the Cayman Islands and based in both Singapore and Los Angeles.",
+    "source": "https://en.wikipedia.org/wiki/TikTok",
+    "evidence": "TikTok Ltd was incorporated in the Cayman Islands in the Caribbean and is based in both Singapore and Los Angeles."
+  },
+  "WhatsApp": {
+    "text": "When early versions kept crashing, Jan Koum considered giving up until Brian Acton urged him to wait.",
+    "source": "https://en.wikipedia.org/wiki/WhatsApp",
+    "evidence": "However, when early versions of WhatsApp kept crashing, Koum considered giving up and looking for a new job. Acton encouraged him to wait for a \"few more months\"."
+  },
+  "Microsoft Bing": {
+    "text": "About 27% of its monthly global traffic comes from China, more than from the United States.",
+    "source": "https://en.wikipedia.org/wiki/Microsoft_Bing",
+    "evidence": "Approximately 27.43% of Bing's monthly global traffic comes from China, 22.16% from the United States, 4.85% from Japan, 4.18% from Germany and 3.61% from France."
+  }
+}

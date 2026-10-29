@@ -1,0 +1,52 @@
+{
+  "Tetris": {
+    "text": "Alexey Pajitnov wrote the first version in his spare time, in about three weeks, for the Elektronika 60.",
+    "source": "https://en.wikipedia.org/wiki/Tetris",
+    "evidence": "In the mid-1980s, Pajitnov created Tetris in his spare time while working at the Dorodnitsyn Computing Center of the Academy of Sciences. He initially programmed it in Pascal for the Elektronika 60 in about three weeks, then spent over two months porting it to the IBM PC using Turbo Pascal with help from Dmitry Pavlovsky and Vadim Gerasimov."
+  },
+  "Minecraft": {
+    "text": "Microsoft bought Mojang and the Minecraft intellectual property in 2014 for US$2.5 billion.",
+    "source": "https://en.wikipedia.org/wiki/Minecraft",
+    "evidence": "In November 2014, Mojang and the Minecraft intellectual property were purchased by Microsoft for US$2.5 billion; Xbox Game Studios holds the publishing rights for the Bedrock Edition, the unified cross-platform version which evolved from the Pocket Edition codebase and replaced the legacy console editions."
+  },
+  "Grand Theft Auto V": {
+    "text": "It earned $1 billion in its first three days, becoming the fastest-selling entertainment product in history.",
+    "source": "https://en.wikipedia.org/wiki/Grand_Theft_Auto_V",
+    "evidence": "Extensively marketed and widely anticipated, the game broke industry sales records and became the fastest-selling entertainment product in history, earning $800 million in its first day and $1 billion in its first three days."
+  },
+  "Red Dead Redemption 2": {
+    "text": "Development lasted over eight years and included a crunch schedule of 100-hour weeks.",
+    "source": "https://en.wikipedia.org/wiki/Red_Dead_Redemption_2",
+    "evidence": "The game's development lasted over eight years, beginning soon after Red Dead Redemption's release, and it became one of the most expensive video games ever made. ... Development included a crunch schedule of 100-hour weeks, leading to reports of mandatory and unpaid overtime."
+  },
+  "Wii Sports": {
+    "text": "It came bundled with the Wii console everywhere except Japan and Korea.",
+    "source": "https://en.wikipedia.org/wiki/Wii_Sports",
+    "evidence": "It was included as a pack-in game with the console in all territories except Japan and Korea, making it the first sports game included with the launch of a Nintendo system since Mario's Tennis for the Virtual Boy in 1995."
+  },
+  "Mario Kart 8": {
+    "text": "It added anti-gravity sections in which players drive on walls and ceilings.",
+    "source": "https://en.wikipedia.org/wiki/Mario_Kart_8",
+    "evidence": "In the new anti-gravity sequences, players drive on walls and ceilings."
+  },
+  "PUBG: Battlegrounds": {
+    "text": "It grew out of mods by Brendan \"PlayerUnknown\" Greene and was inspired by the Japanese film Battle Royale.",
+    "source": "https://en.wikipedia.org/wiki/PUBG%3A_Battlegrounds",
+    "evidence": "Inspired by the Japanese film Battle Royale (2000), the game is based on mods created by Brendan \"PlayerUnknown\" Greene and was developed under his creative direction."
+  },
+  "Terraria": {
+    "text": "Development was meant to end in 2012, and its 2020 update was billed as the last, but work has continued.",
+    "source": "https://en.wikipedia.org/wiki/Terraria",
+    "evidence": "The game was originally set to end development in 2012, but it resumed in 2013. ... Despite announcing in 2020 that the game's fourth major update would be its last, Re-Logic has continued developing Terraria."
+  },
+  "The Elder Scrolls V: Skyrim": {
+    "text": "It shipped over seven million units in its first week.",
+    "source": "https://en.wikipedia.org/wiki/The_Elder_Scrolls_V%3A_Skyrim",
+    "evidence": "The game shipped over seven million units within the first week of its release and over 20 million by June 2013, while by July 2026 total sales reached 65 million copies."
+  },
+  "The Witcher 3: Wild Hunt": {
+    "text": "It holds more than 200 game of the year awards.",
+    "source": "https://en.wikipedia.org/wiki/The_Witcher_3%3A_Wild_Hunt",
+    "evidence": "It holds more than 200 game of the year awards and has been cited as one of the greatest video games ever made."
+  }
+}
