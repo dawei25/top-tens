@@ -1,0 +1,52 @@
+{
+  "Barry Bonds": {
+    "text": "The first and only MLB player with at least 500 home runs and 500 stolen bases.",
+    "source": "https://en.wikipedia.org/wiki/Barry_Bonds",
+    "evidence": "He also had 514 stolen bases, becoming the first and only MLB player to date with at least 500 home runs and 500 stolen bases."
+  },
+  "Hank Aaron": {
+    "text": "Hit 24 or more home runs every year from 1955 through 1973.",
+    "source": "https://en.wikipedia.org/wiki/Hank_Aaron",
+    "evidence": "He hit 24 or more home runs every year from 1955 through 1973 and is one of only two players (the other being Alex Rodriguez) to hit 30 or more home runs in a season at least 15 times."
+  },
+  "Babe Ruth": {
+    "text": "Began as a star pitcher for the Red Sox, twice winning 23 games in a season.",
+    "source": "https://en.wikipedia.org/wiki/Babe_Ruth",
+    "evidence": "Nicknamed \"the Bambino\" and \"the Sultan of Swat\", he began his MLB career as a star left-handed pitcher for the Boston Red Sox, but achieved his greatest fame as a slugging outfielder for the New York Yankees. ... Although Ruth twice won 23 games in a season as a pitcher and was a member of three World Series championship teams with the Red Sox, he wanted to play every day and was allowed to convert to an outfielder."
+  },
+  "Albert Pujols": {
+    "text": "As a high school senior he was walked intentionally 55 times, yet still hit eight home runs in 33 at-bats.",
+    "source": "https://en.wikipedia.org/wiki/Albert_Pujols",
+    "evidence": "Pujols played baseball at Fort Osage High School in Independence and was named an All-State athlete twice. As a senior, he was walked 55 times intentionally, but he still hit eight home runs in 33 at-bats."
+  },
+  "Alex Rodriguez": {
+    "text": "Holds the career record for grand slams.",
+    "source": "https://en.wikipedia.org/wiki/Alex_Rodriguez",
+    "evidence": "Rodriguez is also the career record holder for grand slams."
+  },
+  "Willie Mays": {
+    "text": "His over-the-shoulder catch in Game 1 of the 1954 World Series is one of baseball's most famous plays.",
+    "source": "https://en.wikipedia.org/wiki/Willie_Mays",
+    "evidence": "His over-the-shoulder catch in Game 1 of the 1954 World Series is one of the most famous baseball plays of all time."
+  },
+  "Ken Griffey Jr.": {
+    "text": "Shares the record for most consecutive games with a home run: eight.",
+    "source": "https://en.wikipedia.org/wiki/Ken_Griffey_Jr.",
+    "evidence": "He is tied for the record of most consecutive games with a home run (eight, with Don Mattingly and Dale Long)."
+  },
+  "Jim Thome": {
+    "text": "Pointed his bat at right field before each pitch, something he first saw in The Natural.",
+    "source": "https://en.wikipedia.org/wiki/Jim_Thome",
+    "evidence": "One of his trademarks was his unique batting stance, in which he held the bat out with his right hand and pointed it at right field before the pitcher threw, something he first saw in The Natural."
+  },
+  "Sammy Sosa": {
+    "text": "The only player with three 60-homer seasons, yet he led the league in none of them.",
+    "source": "https://en.wikipedia.org/wiki/Sammy_Sosa",
+    "evidence": "He is also the only player to have hit 60 or more home runs in a single season three times, which he accomplished in 1998, 1999, and 2001. Sosa did not lead the league in home runs in any of those seasons, although he did lead the league in 2000 with 50 home runs, and in 2002 with 49."
+  },
+  "Frank Robinson": {
+    "text": "Became the first Black manager in big-league history in 1975, as player-manager of the Indians.",
+    "source": "https://en.wikipedia.org/wiki/Frank_Robinson",
+    "evidence": "In 1975, Robinson became the first Black manager in big-league history, as the player-manager of the Indians."
+  }
+}
