@@ -167,7 +167,7 @@ export function Home({
         <h1 className="logo" aria-label="TENtacle">
           <span>TEN</span><span>tacle</span>
         </h1>
-        <p className="caption">name the top 10. five lives. typos are free.</p>
+        <p className="caption" data-glass>name the top 10. five lives. typos are free.</p>
       </header>
 
       {help && (
@@ -180,7 +180,7 @@ export function Home({
         />
       )}
 
-      <section className="home-group" aria-labelledby="today-title">
+      <section className="home-group" data-glass aria-labelledby="today-title">
         <div className="group-head">
           <h2 id="today-title" className="label">
             Today{entry ? ` · no. ${entry.n}` : ""}
@@ -214,65 +214,68 @@ export function Home({
         </div>
       </section>
 
-      <section className="home-group" aria-labelledby="free-title">
-        <div className="group-head">
-          <h2 id="free-title" className="label">
-            Free play
-          </h2>
-        </div>
-        <div className="mode-pair">
-          <ModeKey
-            mode="classic"
-            testId="random-list"
-            title="Random list"
-            status={`${index.length} lists`}
-            onClick={start(() => onRoll())}
-          />
-          <ModeKey
-            mode="blitz"
-            testId="random-blitz"
-            title="Random Blitz"
-            status={`${blitzCount} lists`}
-            onClick={start(() => {
-              setNoBlitz(false);
-              onBlitz().then((ok) => setNoBlitz(!ok));
-            })}
-          />
-        </div>
-        {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
-        {/* A chip rolls a random classic list in that category, straight away. */}
-        <div className="cat-row">
-          <span className="caption">or by category</span>
-          <div className="chips">
-            {categories.map((c) => (
-              <button key={c} className="chip" data-testid="category" onClick={start(() => onRoll(c))}>
-                {c}
-              </button>
-            ))}
+      {/* Side by side on wide screens: free play takes most of the row, your games the rest. */}
+      <div className="home-pair">
+        <section className="home-group" data-glass aria-labelledby="free-title">
+          <div className="group-head">
+            <h2 id="free-title" className="label">
+              Free play
+            </h2>
           </div>
-        </div>
-      </section>
+          <div className="mode-pair">
+            <ModeKey
+              mode="classic"
+              testId="random-list"
+              title="Random list"
+              status={`${index.length} lists`}
+              onClick={start(() => onRoll())}
+            />
+            <ModeKey
+              mode="blitz"
+              testId="random-blitz"
+              title="Random Blitz"
+              status={`${blitzCount} lists`}
+              onClick={start(() => {
+                setNoBlitz(false);
+                onBlitz().then((ok) => setNoBlitz(!ok));
+              })}
+            />
+          </div>
+          {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
+          {/* A chip rolls a random classic list in that category, straight away. */}
+          <div className="cat-row">
+            <span className="caption">or by category</span>
+            <div className="chips">
+              {categories.map((c) => (
+                <button key={c} className="chip" data-testid="category" onClick={start(() => onRoll(c))}>
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      <section className="home-group" aria-labelledby="games-title">
-        <h2 id="games-title" className="label">
-          Your games
-        </h2>
-        <div className="games-row">
-          <button className="key key-sm games-key" data-testid="archive-key" onClick={start(onArchive)}>
-            Archive <span className="games-n">{archiveCount}</span>
-          </button>
-          <button
-            className="key key-sm games-key"
-            data-testid="history-key"
-            onClick={start(() => (location.hash = "#history"))}
-          >
-            Past runs {plays > 0 && <span className="games-n">{plays}</span>}
-          </button>
-        </div>
-      </section>
+        <section className="home-group games-group" data-glass aria-labelledby="games-title">
+          <h2 id="games-title" className="label">
+            Your games
+          </h2>
+          <div className="games-row">
+            <button className="key key-sm games-key" data-testid="archive-key" onClick={start(onArchive)}>
+              Archive <span className="games-n">{archiveCount}</span>
+            </button>
+            <button
+              className="key key-sm games-key"
+              data-testid="history-key"
+              onClick={start(() => (location.hash = "#history"))}
+            >
+              Past runs {plays > 0 && <span className="games-n">{plays}</span>}
+            </button>
+          </div>
+        </section>
+      </div>
 
       {(s.played > 0 || st.best > 0) && (
-        <section className="panel home-stats" aria-labelledby="stats-title">
+        <section data-glass className="panel home-stats" aria-labelledby="stats-title">
           <h2 id="stats-title" className="label">
             Your record
           </h2>
@@ -301,7 +304,7 @@ export function Home({
         </section>
       )}
 
-      <footer className="home-foot">
+      <footer className="home-foot" data-glass>
         {!help && (
           <button
             className="key key-sm"
