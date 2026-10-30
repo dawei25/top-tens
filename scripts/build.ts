@@ -12,7 +12,7 @@ import { writeLexicon } from "./lexicon";
 import { tableDataDate } from "./dates";
 import { COUNTRY_FORMS, INTENT } from "./intent";
 import { UNIVERSES, US_STATE_CODES, type Place } from "./gazetteer";
-import { bareWord, baseTitle, isEnglishWord, junkRedirect } from "./aliases";
+import { bareWord, baseTitle, COUNTRY_JUNK, isEnglishWord, junkRedirect } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
 /** Fewest entries with a stat (`n`) for a list to be playable in Blitz. */
@@ -126,6 +126,8 @@ function redirectTarget(name: string, cell: Cell, countries = false): string {
   const link = normalize(cleanName(cell.link));
   // "Lake Baikal" for "Baikal" is the same thing; "Demographics of India" is not.
   if (link === normalize(name) || (link.includes(normalize(name)) && !/\b(of|in|at)\b/.test(link))) return cell.link;
+  // "Dhaulagiri I" linking "Dhaulagiri": the main peak's article (the numbered title has none).
+  if (/^\d+$/.test(normalize(name).slice(link.length + 1)) && normalize(name).startsWith(link + " ")) return cell.link;
   if (countries && COUNTRY_NAMES.has(link)) return cell.link;
   // "Congo" linking "Petroleum industry in the Republic of the Congo" is that country.
   const tail = cleanName(cell.link).match(/\s(?:in|of)\s(?:the\s)?(.+)$/)?.[1];
@@ -161,7 +163,9 @@ function checkNumbers(topic: Topic, header: string[], body: Cell[][], vc: number
   for (const r of body) {
     const km = parseValue(r[vc]?.text ?? "")?.value;
     const mi = parseValue(r[mc]?.text ?? "")?.value;
-    if (km && mi && Math.abs(km / mi / 2.589988 - 1) > 0.02) {
+    // Areas: km² = 2.59 × mi². Densities (people per km²) go the other way.
+    const ratio = km && mi ? km / mi : 0;
+    if (ratio && Math.abs(ratio / 2.589988 - 1) > 0.02 && Math.abs(ratio * 2.589988 - 1) > 0.04) {
       console.log(`warn ${topic.id}: ${r[0]?.text}: ${r[vc].text} km² is ${(km / mi).toFixed(2)} × ${r[mc].text} mi² (expected 2.59)`);
     }
   }
@@ -503,8 +507,9 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     taken.add(normalize(e.name));
   }
 
-  if (topic.junkAliases) {
-    const junk = new Set(topic.junkAliases.map(normalize));
+  const junkList = [...(topic.junkAliases ?? []), ...(hasCountries(topic) ? COUNTRY_JUNK : [])];
+  if (junkList.length) {
+    const junk = new Set(junkList.map(normalize));
     for (const e of entries) {
       for (const a of e.aliases) if (junk.has(normalize(a))) logDrop(topic.id, e.rank, e.name, a, "listed in junkAliases");
       e.aliases = e.aliases.filter((a) => !junk.has(normalize(a)));

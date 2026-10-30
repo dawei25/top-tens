@@ -54,10 +54,15 @@ function sharesWord(alias: string, names: string[]): boolean {
 
 /** "GTA V" for Grand Theft Auto V, "SSBU" for Super Smash Bros. Ultimate: the letters follow the name's initials. */
 function isInitialism(alias: string, names: string[]): boolean {
-  const a = normalize(alias).replace(/ /g, "");
+  // "GTAV", "RDRII": a Roman numeral glued to the letters counts as the number.
+  const ROMAN_END: Record<string, string> = { i: "1", ii: "2", iii: "3", iv: "4", v: "5", vi: "6", vii: "7", viii: "8", ix: "9", x: "10" };
+  const a = normalize(alias)
+    .replace(/ /g, "")
+    .replace(/(?<=[a-z]{2})(viii|vii|vi|iv|ix|iii|ii|i|v|x)$/, (r) => ROMAN_END[r]);
   if (a.length < 2 || a.length > 8 || /\s/.test(alias.trim()) && a.length > 5) return false;
   return names.some((n) => {
-    const initials = normalize(n)
+    // normalize() drops a leading "The"; an initialism keeps it ("TES V").
+    const initials = (/^the\s/i.test(n) ? "t" : "") + normalize(n)
       .split(" ")
       .map((w) => (/^\d+$/.test(w) ? w : w[0]))
       .join("");
@@ -91,11 +96,11 @@ const CONNECTOR = /\s(of|in|involving|during|under|for|on|at|against|from|about)
 const TOPIC_WORDS = new Set(
   (
     "act acts tragedy disaster accident incident expedition expeditions hearing hearings timeline history climate " +
-    "archive archives ridge spur route camp campground circuit trek pass byway ecosystem wilderness massacre attack " +
+    "archive archives ridge spur route camp campground circuit trek pass byway hole ecosystem wilderness massacre attack " +
     "bombing crash avalanche riot riots protest protests scandal lawsuit lawsuits trial battle campaign election " +
     "referendum economy factsheet slogan mansion department ministry politics origin information symbols heritage " +
     "bibliography infrastructure topography wildfire wildfires establishment foundation fund advisors review " +
-    "trends revolution census statistics art band"
+    "trends revolution census statistics art band wildlife animals fauna flora"
   ).split(" "),
 );
 /** Multi-word topic phrases. */
@@ -163,6 +168,14 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
   return null;
 }
 
+/**
+ * Redirects to country articles that no rule can tell from a name (jokes, people, buildings, events), found by the
+ * list judges. Dropped on every list with the countries universe.
+ */
+export const COUNTRY_JUNK = [
+  "Snow Mexico", "Finnishness", "The Land of Chocolate", "Day of the Capital", "Abdullah al-Saleh", "Al Rawda Palace",
+];
+
 let english: Set<string> | undefined;
 
 /** Lowercase English words (a dictionary list). */
@@ -183,9 +196,17 @@ export function bareWord(alias: string, places: Set<string>): boolean {
 }
 
 /**
- * Alias text glued from several names without spaces: "Mount EverestSagarmathaChomolungma" (another form of the
- * entry, then a capital letter straight after it).
+ * Alias text glued from several names without spaces: "Mount EverestSagarmathaChomolungma" is the entry's name
+ * with another of its names straight after it, no space between.
  */
 export function gluedAlias(alias: string, forms: string[]): boolean {
-  return forms.some((f) => f.length >= 3 && f !== alias && alias.startsWith(f) && /^[\p{Lu}\d]/u.test(alias.slice(f.length)) && /[\p{L}\d]$/u.test(f));
+  const others = forms.filter((f) => f !== alias && f.length >= 3);
+  // "LeBronJames" is a handle: one name written without its space.
+  const compact = (s: string) => normalize(s).replace(/ /g, "");
+  if (others.some((f) => compact(f) === compact(alias))) return false;
+  return others.some((f) => {
+    if (!alias.startsWith(f) || !/[\p{L}\d]$/u.test(f)) return false;
+    const rest = alias.slice(f.length);
+    return /^\p{Lu}/u.test(rest) && forms.some((g) => g !== f && g !== alias && g.length >= 2 && rest.startsWith(g));
+  });
 }

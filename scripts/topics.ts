@@ -458,7 +458,8 @@ export const TOPICS: Topic[] = [
     name: "Book",
     value: "sales",
     metric: "Copies sold (approx.)",
-    also: [{ tables: [9, 10, 11, 12], name: "Book" }],
+    // A half-translated Japanese title with a stray parenthesis.
+    also: [{ tables: [9, 10, 11, 12], name: "Book", skip: ["六星占術によるあなたの運命 Tells Your Fortune)"] }],
     works: true,
     junkAliases: ["The Da Vinci Code paintings", "Lord of the Rings Prequel"],
   },
@@ -494,6 +495,7 @@ export const TOPICS: Topic[] = [
     universeCategories: ["Skyscrapers"],
     // The table links CITIC Tower to its article, China Zun; the plain title is a 33-storey Hong Kong office block.
     articles: { "CITIC Tower": "China Zun" },
+    junkAliases: ["B-12PP"], // the plane that hit China Zun in 2026
   },
 
   // Sports
@@ -806,7 +808,7 @@ export const TOPICS: Topic[] = [
     universeCategories: ["Social networking services", "Internet search engines"],
     // The categories also hold articles about the field ("Search engine bias", "Anchor text") and protocols.
     categoryNames: true,
-    categorySkip: /^(comparison|issues|privacy|criticism|evaluation)\b|\b(protocol|clearinghouse|search engine|engine|software|framework|project|technologies|corporation|inc\.?|library|index|service|communities)$/i,
+    categorySkip: /^(comparison|issues|privacy|criticism|evaluation|clearinghouse)\b|\b(protocol|search engine|engine|software|framework|project|technologies|corporation|inc\.?|library|index|service|communities)$/i,
     junkAliases: [
       "Giigke,cin", "Ghits", "Google videos", "GoogleYouTube", "Youtubing", "Facephiliac", "Mini-feed",
       "Instagram trends", "Layout from Instagram", "Do Anything Now", "Fail Whale", "Twitpocalypse",

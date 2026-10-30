@@ -52,6 +52,8 @@ describe("junkRedirect", () => {
     expect(junk("Mama Mia", ["Mamma Mia!"], [], true)).toBeNull();
     expect(junk("GTA V", ["Grand Theft Auto V"], [], true)).toBeNull();
     expect(junk("RDR2", ["Red Dead Redemption 2"], [], true)).toBeNull();
+    expect(junk("GTAV", ["Grand Theft Auto V"], [], true)).toBeNull();
+    expect(junk("TESV", ["The Elder Scrolls V: Skyrim"], [], true)).toBeNull();
     // Not works: nicknames stay.
     expect(junk("Pocket Monsters", ["Pokémon"])).toBeNull();
   });
@@ -69,7 +71,8 @@ describe("bareWord and gluedAlias", () => {
   it("finds names glued without spaces", () => {
     const forms = ["Mount Everest", "Sagarmatha"];
     expect(gluedAlias("Mount EverestSagarmathaChomolungma", forms)).toBe(true);
-    expect(gluedAlias("Gasherbrum IIK4", ["Gasherbrum II"])).toBe(true);
+    expect(gluedAlias("Gasherbrum IIK4", ["Gasherbrum II", "K4"])).toBe(true);
+    expect(gluedAlias("LeBronJames", ["LeBron James", "LeBron", "James"])).toBe(false);
     expect(gluedAlias("Mount Everest", forms)).toBe(false);
     expect(gluedAlias("Lotte World 2", ["Lotte World"])).toBe(false);
   });

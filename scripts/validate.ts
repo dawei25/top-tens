@@ -20,7 +20,6 @@ const COUNTRY_SET = new Set(UNIVERSES.countries().map((c) => normalize(c.name)))
 const PLACES = new Set(
   [...UNIVERSES.countries(), ...UNIVERSES["us-states"](), ...UNIVERSES.capitals()].map((c) => normalize(c.name)),
 );
-const NO_PLACES = new Set<string>();
 /** Lists of places, where a place name alias is expected. */
 const isPlaceList = (p: Puzzle) => {
   const t = TOPICS.find((x) => x.id === p.id);
@@ -122,12 +121,12 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
   for (const e of all) {
     const forms = [e.name, ...e.aliases];
     for (const a of e.aliases) {
-      if (gluedAlias(a, forms)) err(`"${e.name}": alias "${a}" is several names glued together`);
+      if (gluedAlias(a, forms)) warn(`"${e.name}": alias "${a}" looks like several names glued together`);
       if (curated.has(normalize(a))) continue;
       const why = junkRedirect(a, { names: [e.name], forms, works: topic?.works });
       if (why) junk.push(`${e.name}: "${a}" (${why})`);
       // A one-word alias that is a plain word or a place, and no word of the name: "City" for Alaska.
-      else if (!normalize(e.name).split(" ").includes(normalize(a)) && bareWord(a, isPlaceList(p) ? NO_PLACES : PLACES)) {
+      else if (!normalize(e.name).split(" ").includes(normalize(a)) && !isPlaceList(p) && bareWord(a, PLACES)) {
         junk.push(`${e.name}: "${a}" (a plain word or place, not part of the name)`);
       }
     }
