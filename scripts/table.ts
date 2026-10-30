@@ -3,6 +3,11 @@ import type { Element } from "domhandler";
 
 export interface Cell {
   text: string;
+  /**
+   * The cell's text split at line breaks and list items: "Mount Everest / Sagarmatha / Chomolungma" as three
+   * names. `text` joins them with spaces.
+   */
+  lines: string[];
   /** Title of the first article link in the cell, if any. */
   link?: string;
   /** Visible text of that link. */
@@ -26,14 +31,26 @@ export function cleanText(s: string): string {
 function readCell($: CheerioAPI, el: Element): Cell {
   const $el = $(el).clone();
   $el.find("sup, .reference, style, .sortkey, [style*='display:none']").remove();
+  // Line breaks and list items separate names; without a marker their text runs together ("EverestSagarmatha").
+  const BREAK = "\u0001";
+  $el.find("br").replaceWith(BREAK);
+  $el.find("li, p, div").each((_, x) => {
+    $(x).prepend(BREAK).append(BREAK);
+  });
+  const raw = $el.text();
+  const lines = raw
+    .split(BREAK)
+    .map(cleanText)
+    .filter(Boolean);
   const a = $el
     .find("a[href*='/wiki/'][title]")
     .filter((_, x) => !$(x).find("img").length && !/^(File|Help|Wikipedia|Template):/.test($(x).attr("title") ?? ""))
     .first();
   return {
-    text: cleanText($el.text()),
+    text: cleanText(raw.split(BREAK).join(" ")),
+    lines,
     link: a.attr("title"),
-    linkText: a.length ? cleanText(a.text()) : undefined,
+    linkText: a.length ? cleanText(a.text().split(BREAK).join(" ")) : undefined,
     isHeader: el.tagName === "th",
   };
 }
