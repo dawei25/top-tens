@@ -1,0 +1,25 @@
+{
+  "id": "olympic-medals",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 15 },
+  "blitzCasual": { "scored": 26, "named": 26 },
+  "difficulty": 2,
+  "tags": ["sports", "olympics"],
+  "audience": "anyone",
+  "summary": "A strong daily either way: eight gimmes, then Soviet Union and Sweden as the fair stretch, with Russia (#14) and Canada (#12) as near misses players learn from. In Blitz every country a casual player names scores.",
+  "reasons": [
+    "Casual run: USA, China, UK, Germany, Australia, France, Japan, Italy, Soviet Union found; lives went on Russia #14, Canada #12, Jamaica, South Korea, Netherlands. Out of lives at 9/10, missing only Sweden.",
+    "The Soviet Union vs Russia split is the list's talking point: it costs a life once, but the prompt says 'of all time' and the reveal teaches something. Fan got 10/10 with 2 lives lost.",
+    "Blitz is excellent: 26 of 26 casual names scored, including Kenya, Jamaica and India. Values look current (2026 Winter Games included) and US/UK/USSR spellings are well covered."
+  ],
+  "fixes": [
+    "Add 'Team GB' as an alias of Great Britain (currently not recognized).",
+    "Add 'Aussie' / 'Aussies' as aliases of Australia: 'aussie' currently offers Olympic Athletes from Russia / Russia.",
+    "Junk redirect aliases on top-10 entries: Sweden 'Swedish sin', 'Folkland'; Great Britain 'Britain's languages', 'Great Britain's languages'; Soviet Union 'Council Union', 'Soviet order', 'People's republic of russia', 'United states of soviet russia', 'European USSR'; Germany 'De', 'German'; China 'Modern day China'."
+  ]
+}

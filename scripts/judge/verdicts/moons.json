@@ -1,0 +1,24 @@
+{
+  "id": "moons",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 3 },
+  "casual": { "found": 7, "livesLost": 4, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 15 },
+  "blitzCasual": { "scored": 13, "named": 14 },
+  "difficulty": 3,
+  "tags": ["science", "space", "astronomy"],
+  "audience": "space nerds and the curious",
+  "summary": "A good change-of-pace daily: the Moon, Titan, Europa and Io are gettable, the Moon being only #5 is a nice surprise, and Titania, Rhea and Oberon are fair stretch answers. Too shallow for Blitz.",
+  "reasons": [
+    "Casual run: Moon, Titan, Europa, Io, Ganymede, Callisto, Triton found; lives went on Phobos #84, Deimos #97, Charon #12, Enceladus #18. 7/10 with 1 life left.",
+    "Mars's moons are the natural trap and cost a life each, but the reveal (they are tiny) is the lesson. Fan got 10/10 with only Iapetus #11 and Charon #12 as misses.",
+    "Radii and order are correct, and Luna / Earth's Moon / misspellings are handled. Blitz runs dry after about a dozen names even with 441 scoring moons."
+  ],
+  "fixes": [
+    "Category is 'Culture'; it should be 'Science' (or the pipeline's space/science category).",
+    "Junk redirect aliases on top-10 entries: Moon 'Selenology', 'Selenologist', 'Lunar Science', 'Lunar mass', 'Moon mass', 'Lunar radius', 'Moon radius', 'Moon distance from earth', 'Moon in literature', 'Moon in culture', 'Earth and moon', 'Earth-Moon system', 'Terran System', 'Lunar humanization'; Triton 'Andvari', 'Cantaloupe terrain'; Titania 'Calphurnia'; Oberon 'Lear'; Titan 'Titan exploration'; Ganymede magnetosphere/magnetic-field redirects."
+  ]
+}

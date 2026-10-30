@@ -1,0 +1,25 @@
+{
+  "id": "facebook-pages",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 4,
+  "scores": { "recognizability": 3, "curve": 2, "fairness": 1, "data": 2, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 3, "livesLost": 5, "guesses": 15 },
+  "fan": null,
+  "blitzCasual": { "scored": 21, "named": 28 },
+  "difficulty": 4,
+  "tags": ["entertainment", "social media", "celebrities"],
+  "audience": "pop culture and social media fans",
+  "summary": "Not a classic daily: the prompt invites every famous celebrity and brand, and each one costs a life. After the alias cleanup below it is a decent Blitz daily, where Messi, Rihanna and Coca-Cola all score.",
+  "reasons": [
+    "Casual run: Ronaldo, Facebook, Shakira found; lives went on Messi #11, Coca-Cola #15, Rihanna #18, Eminem #24, YouTube #14. Game over at 3/10 by guess 8.",
+    "5-Minute Crafts, Mr. Bean, Samsung and CGTN are fun reveals, but nobody would type them, so the classic curve is a wall after the first few.",
+    "Blitz works: 21 of 28 casual names scored. Obama, Trump, Lady Gaga, Beyonce, Nike and Kim Kardashian are accepted but score nothing, and the alias lists carry offensive and wrong names."
+  ],
+  "fixes": [
+    "Remove offensive or wrong-person aliases: T-Series 'T-gay'; Cristiano Ronaldo 'Kathryn Mayorga', 'Cristiano Ronaldo sexual misconduct allegations', 'Cristiano Ronaldo Jr.', 'Cristiano Ronaldo Junior', 'Cristianinho', 'Cristiano Jr.', 'Cristiano Ronaldo dos Santos Junior/Jr', 'UR', 'CR'; Shakira 'Milan Pique', 'Shakira ft. Wyclef Jean', 'Shakira & Alejandro Sanz', 'Shakira notable concerts', 'Pies Descalzos World Tour'; Taylor Swift 'Andrea Gardner Swift', 'Monologue Song'; Mr. Bean 'Irma Gobb'; FC Barcelona 'Carles Vilarrubi Carrio', 'Johan Cruyff's Dream Team', 'FC Barcelona trophies'; Facebook 'Caryn Marooney', 'Facebook conspiracy theories', 'Conspiracy theories in Facebook groups', 'Facebook litigation', '10 year challenge' and variants, 'Predictions of Facebook's end'; Samsung 'Controversies surrounding Samsung', 'Democratic People's Republic of Samsung', 'Republic of Samsung', product names ('Samsung Wave M', 'SAMSUNG WB750', 'ES70'); Meta 'Move fast and break things'; Narendra Modi 'Narendra Modi's Google+ Hangout', 'Use of Technology by Narenda Modi'; Netflix 'Cinematch', 'Qwikster', 'Fast.com', 'Magic Quill Productions', 'The Parades'.",
+    "Accepted pages without a follower count score 0 in Blitz: Barack Obama, Donald Trump, Lady Gaga, Beyonce, Nike, Kim Kardashian (and the rest of the 188 unranked). Carry a follower count for them if any source table has one.",
+    "Add 'The Rock' as an alias of Dwayne Johnson (#43); currently not recognized."
+  ]
+}
