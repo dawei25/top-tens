@@ -114,13 +114,20 @@ test("the squid roams, grabs words without leaving anything behind, and parks wi
   const squid = page.getByTestId("ocean").getByTestId("squid");
   await squid.waitFor();
   const p = await puzzle(page, LIST);
+  // Count the word tiles the squid carries (however fast they come and go on a slow machine).
+  await page.evaluate(() => {
+    window.__tiles = 0;
+    new MutationObserver((list) => {
+      for (const m of list) for (const n of m.addedNodes) if (n.classList?.contains("grab-word")) window.__tiles++;
+    }).observe(document.querySelector(".ocean-tiles"), { childList: true });
+  });
   // Two quick finds: two grabs at once. Each word is in its row at once; the box is cleared.
   for (const r of [2, 5]) await guess(page, p.answers.find((a) => a.rank === r).name);
   assert.equal(await page.getByLabel("Your guess").inputValue(), "");
   assert.equal(await page.locator('[data-testid="slot"][data-rank="5"]').getAttribute("class").then((c) => c.includes("found")), true);
-  // The grabbed word tiles ride above the UI, then are gone once set (about 0.8 s).
-  await page.locator(".ocean-tiles .grab-word").first().waitFor({ state: "attached", timeout: 1000 });
-  await page.waitForFunction(() => !document.querySelector(".ocean-tiles .grab-word"), null, { timeout: 3000 });
+  // The grabbed word tiles ride above the UI, then are gone once set (about 0.8 s), the rows unmarked.
+  assert.ok((await page.evaluate(() => window.__tiles)) >= 1);
+  await page.waitForFunction(() => !document.querySelector(".ocean-tiles .grab-word, [data-grabbing]"), null, { timeout: 4000 });
   assert.ok(await page.evaluate(() => getComputedStyle(document.querySelector(".ocean-over")).pointerEvents === "none"));
 
   // Moving: the squid canvas changes from frame to frame.
