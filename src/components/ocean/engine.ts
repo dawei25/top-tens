@@ -85,7 +85,9 @@ interface Stats {
   offLog: string[];
   /** Reactions seen: finds, inks, wins, Blitz hits, dozes. */
   seen: Record<string, number>;
+  /** What the squid is doing, and its heading (degrees, 0 is up). */
   state: string;
+  tilt: number;
 }
 
 export function startOcean(els: OceanEls): Ocean {
@@ -119,15 +121,17 @@ export function startOcean(els: OceanEls): Ocean {
   // Dev only: production builds drop this (and the hooks below) entirely.
   const stats: Stats | null =
     import.meta.env.DEV && typeof location !== "undefined" && location.search.includes("oceanstats")
-      ? { frames: 0, drawMs: 0, maxMs: 0, maxGap: 0, slow: 0, at: 0, x: 0, y: 0, jet: 0, checked: 0, offHeading: 0, worstDeg: 0, offLog: [], seen: {}, state: "" }
+      ? { frames: 0, drawMs: 0, maxMs: 0, maxGap: 0, slow: 0, at: 0, x: 0, y: 0, jet: 0, checked: 0, offHeading: 0, worstDeg: 0, offLog: [], seen: {}, state: "", tilt: 0 }
       : null;
   /** The squid as drawn last frame (CSS px, heading), for the heading check; null after a jump (a resize). */
   let drawn: { x: number; y: number; a: number } | null = null;
   if (stats) {
-    const g = globalThis as unknown as { __ocean: Stats; __oceanGo: (x: number, y: number) => void };
+    const g = globalThis as unknown as { __ocean: Stats; __oceanGo: (x: number, y: number) => void; __oceanSwim: (x: number, y: number) => void };
     g.__ocean = stats;
     // Debug: send the squid somewhere (for screenshots of it in open water).
     g.__oceanGo = (x, y) => swimmer.dart({ x, y });
+    // Debug: a calm swim there (turn on the fins, then jet), and hover.
+    g.__oceanSwim = (x, y) => swimmer.perk({ x, y });
   }
 
   const world = () => ({
@@ -161,10 +165,9 @@ export function startOcean(els: OceanEls): Ocean {
     asleep: swimmer.asleep,
   });
 
-  /** The squid's pose on the canvas: the swim's, with a slow bob while it hangs in the water. */
+  /** The squid's pose on the canvas: the swim's (its idle surge is part of the swim, along its heading). */
   function pose() {
-    const bob = swimmer.asleep ? 0 : Math.sin(t * 1.25) * 0.8;
-    body.pose = { x: swimmer.x / px, y: swimmer.y / px + bob, angle: (swimmer.tilt * Math.PI) / 180, sx: swimmer.sx, sy: swimmer.sy };
+    body.pose = { x: swimmer.x / px, y: swimmer.y / px, angle: (swimmer.tilt * Math.PI) / 180, sx: swimmer.sx, sy: swimmer.sy };
     squidAt.x = swimmer.x;
     squidAt.y = swimmer.y;
     squidAt.live = true;
@@ -310,6 +313,7 @@ export function startOcean(els: OceanEls): Ocean {
       }
       drawn = { x: cx, y: cy, a };
       stats.state = swimmer.state;
+      stats.tilt = swimmer.tilt;
       stats.frames++;
       stats.drawMs += ms;
       stats.maxMs = Math.max(stats.maxMs, ms);

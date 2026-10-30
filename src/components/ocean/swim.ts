@@ -50,7 +50,7 @@ const TURN_URGENT = 900;
 /** Above this speed (px/s) the turn rate is capped, so the keel keeps the travel within a few degrees of the heading. */
 const MOVING = 12;
 const TURN_MOVING = 190;
-const TURN_MOVING_URGENT = 290;
+const TURN_MOVING_URGENT = 230;
 /** Steering while it glides (small corrections, a gentle arc). */
 const STEER = 45;
 /** It jets only once it faces within this many degrees of where it is going. */
@@ -381,7 +381,10 @@ export class Swimmer {
       const p = this.inflating;
       this.sx = 1 + 0.13 * p;
       this.sy = 1 - 0.06 * p;
-      if (this.left <= 0 && (off <= ALIGN || this.left < -0.5)) {
+      // It jets once it faces the way and any sideways drift from the turn has died (the keel), never across it.
+      const side = Math.abs(-this.vx * Math.cos(this.tilt * RAD) - this.vy * Math.sin(this.tilt * RAD));
+      const settled = side < Math.max(MOVING, 0.12 * Math.hypot(this.vx, this.vy));
+      if (this.left <= 0 && ((off <= ALIGN && settled) || this.left < -0.5)) {
         // The jet: the mantle contracts hard (narrow and long) and the burst begins, along the heading.
         this.thrust = THRUST;
         this.jetAge = 0;
@@ -442,9 +445,11 @@ export class Swimmer {
     this.vx = u * hx - s * hy;
     this.vy = u * hy + s * hx;
 
-    // A whisper of drift while slow, so a hovering squid is never frozen.
-    this.x += this.vx * dt + Math.sin(t * 0.5) * 2 * dt;
-    this.y += this.vy * dt + Math.sin(t * 0.8 + 1) * 3 * dt;
+    // A whisper of drift and a slow surge with its breathing, along the heading (never across it), so a hovering
+    // squid is never frozen. As a speed, not an offset: turning in place, it stays in place.
+    const creep = (1.4 + 1.4 * Math.sin(t * 0.6) + 3 * Math.cos(t * 1.25)) * dt;
+    this.x += this.vx * dt + hx * creep;
+    this.y += this.vy * dt + hy * creep;
 
     // Out of bounds (rare: glides are aimed inside): it stops dead there, no bounce, no slide.
     const b = this.bounds();
@@ -477,7 +482,8 @@ export class Swimmer {
         this.vx = this.vy = 0;
       }
     } else {
-      this.y = rest;
+      // On the seabed as it drifts (in whole pixels): followed smoothly, never a hop.
+      this.y += clamp(rest - this.y, -SINK * dt, SINK * dt);
       // Asleep: it lolls a little to one side.
       this.turnTo(14, 6, dt);
     }
