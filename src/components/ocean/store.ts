@@ -43,5 +43,5 @@ export function subscribeOceanSquid(fn: () => void) {
 
 export const getOceanSquid = () => state;
 
-/** The squid's centre in viewport CSS px, kept current by the ocean; null while no ocean is running. */
+/** The squid's centre in viewport CSS px, kept current by the ocean (live is false while none is running). */
 export const squidAt = { x: 0, y: 0, live: false };

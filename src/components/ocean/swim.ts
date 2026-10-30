@@ -59,6 +59,7 @@ export class Swimmer {
   private contractFor = 0.22;
   private target: Pt;
   private perkAt: Pt | null = null;
+  private dozeX: number | null = null;
   private loop: { c: Pt; r0: number; r: number; a0: number; dir: number; turns: number; t: number; dur: number } | null = null;
   private onLoopDone: (() => void) | null = null;
 
@@ -174,11 +175,13 @@ export class Swimmer {
     this.onLoopDone = done ?? null;
   }
 
-  /** Sink to the seabed and sleep. */
-  doze() {
+  /** Sink to the seabed and sleep; drifting over toward column `x` on the way down, if given. */
+  doze(x?: number) {
     if (this.behaviour === "loop" || this.behaviour === "doze") return;
     this.behaviour = "doze";
     this.phase = "glide";
+    const b = this.bounds();
+    this.dozeX = x === undefined ? null : clamp(x, b.x0, b.x1);
   }
 
   /** Wake (any input): a little hop up off the seabed. */
@@ -219,7 +222,8 @@ export class Swimmer {
     if (this.behaviour === "doze") {
       // Sink slowly, arms first, and settle on the seabed.
       const rest = this.floorY(this.x);
-      this.vx *= Math.exp(-2 * dt);
+      if (this.dozeX !== null && !this.asleep) this.vx += ((this.dozeX - this.x) * 0.5 - this.vx) * (1 - Math.exp(-1.5 * dt));
+      else this.vx *= Math.exp(-2 * dt);
       if (!this.asleep) {
         this.vy += (this.unit * 0.16 - this.vy) * (1 - Math.exp(-1.5 * dt));
         if (this.y >= rest - 1) {

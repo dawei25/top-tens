@@ -246,7 +246,8 @@ export function startOcean(els: OceanEls): Ocean {
   /* ---------------- idle ---------------- */
 
   function doze() {
-    swimmer.doze();
+    // Read once, as it nods off: settle in open water beside the column if there is any.
+    swimmer.doze(openWater()?.x);
     squid.dataset.doze = "";
     bubbleIn = 2;
   }

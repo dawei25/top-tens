@@ -429,7 +429,7 @@
   box-shadow: 0 0 8px var(--cyan);
 }
 
-/* Ink: the screen only darkens a little; the ink itself is the blobs. */
+/* Ink: the cloud itself is out in the ocean (components/ocean); in front, the screen dims around the squid a beat. */
 .ink-dim {
   position: absolute;
   inset: 0;
@@ -437,43 +437,6 @@
 }
 .ink.big .ink-dim {
   background: radial-gradient(circle at var(--ox) var(--oy), rgba(12, 6, 30, 0.95), rgba(4, 2, 12, 0.8) 50%, rgba(3, 2, 8, 0.7));
-}
-/* An ink blob: a chunky pixel circle (an octagon), deep indigo with a pink gloss pixel, like wet ink. */
-.ink-puff {
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: #1a0f36;
-  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
-}
-.ink-puff::before,
-.ink-puff::after {
-  content: "";
-  position: absolute;
-  background: rgba(255, 140, 190, 0.55);
-}
-.ink-puff::before {
-  left: 24%;
-  top: 20%;
-  width: 18%;
-  height: 14%;
-}
-.ink-puff::after {
-  left: 42%;
-  top: 20%;
-  width: 9%;
-  height: 7%;
-  background: rgba(255, 255, 255, 0.5);
-}
-.ink-puff.lit {
-  background: #2a1650;
-}
-.ink-puff.dark {
-  background: #0d0720;
-}
-.ink-puff.dark::before,
-.ink-puff.dark::after {
-  display: none;
 }
 .ink-drop {
   position: absolute;
