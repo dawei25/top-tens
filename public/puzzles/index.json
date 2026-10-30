@@ -6,6 +6,18 @@
   "blitz": true
  },
  {
+  "id": "countries-gdp",
+  "title": "Largest economies",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "europe-population",
+  "title": "Most populous European countries",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
   "id": "us-states-population",
   "title": "Most populous US states",
   "category": "Geography",
@@ -51,6 +63,30 @@
   "id": "airports",
   "title": "Busiest airports",
   "category": "Business",
+  "blitz": true
+ },
+ {
+  "id": "websites",
+  "title": "Most-visited websites",
+  "category": "Entertainment",
+  "blitz": false
+ },
+ {
+  "id": "national-parks",
+  "title": "Most visited US national parks",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "oil-production",
+  "title": "Biggest oil producers",
+  "category": "Business",
+  "blitz": true
+ },
+ {
+  "id": "broadway",
+  "title": "Longest-running Broadway shows",
+  "category": "Entertainment",
   "blitz": true
  },
  {
