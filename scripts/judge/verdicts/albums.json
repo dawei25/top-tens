@@ -1,0 +1,25 @@
+{
+  "id": "albums",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-blitz",
+  "alsoBlitz": true,
+  "priority": 5,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 2, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 12, "named": 15 },
+  "difficulty": 3,
+  "tags": ["music", "albums", "classic rock"],
+  "audience": "music fans",
+  "summary": "Better as a Blitz: naming famous albums is fun, but in classic nearly every famous album that isn't top 10 costs a life.",
+  "reasons": [
+    "Casual player gets Thriller, Back in Black, Dark Side, Rumours, The Bodyguard and Hotel California, then runs out of lives on 21, Abbey Road, 1989, Bad and The Wall.",
+    "The bottom of the top 10 (Come On Over, Bat Out of Hell, Saturday Night Fever, Eagles Greatest Hits) is old and obscure for players under 35.",
+    "Recent albums (1989, Midnights, Lemonade, Folklore) come from the streaming-era table: they cost a life in classic and score nothing in Blitz, which younger players will hit often."
+  ],
+  "fixes": [
+    "Sgt. Pepper's Lonely Hearts Club Band (#31) does not match 'sgt pepper' or 'sergeant pepper'. Add those short forms.",
+    "Beatles '1' (#18) has no alias; add 'beatles 1' and 'the beatles 1'.",
+    "Bat Out of Hell carries 'For Crying Out Loud' (a track on the album), not a name of the album. Drop it."
+  ]
+}

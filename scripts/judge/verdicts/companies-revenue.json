@@ -1,0 +1,28 @@
+{
+  "id": "companies-revenue",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 10 },
+  "fan": { "found": 10, "livesLost": 4, "guesses": 15 },
+  "blitzCasual": { "scored": 21, "named": 28 },
+  "difficulty": 3,
+  "tags": ["business", "companies", "money"],
+  "audience": "people who follow business news",
+  "summary": "Fun Blitz after a cleanup: casual players name 20+ scoring companies. Weak as a classic daily, because players think of market value and lose lives on Microsoft, Tesla and Meta.",
+  "reasons": [
+    "Casual run: Apple, Amazon, Walmart, Google and Aramco found, but Microsoft (#19), Exxon (#13), Toyota (#17), Tesla (unranked) and Meta (#46) used up all five lives by guess 10. Big tech by market value is the obvious wrong idea, and every one of those guesses costs a life.",
+    "Top 10 is right (Fortune Global 500 order). State Grid, CNPC and Sinopec are fair stretch answers for fans; a fan got 10/10 with 4 lives lost, one of them a PetroChina bug.",
+    "Blitz suits it well: 21 of 28 quick casual names scored (oil majors, carmakers, banks, Costco). Data issues below keep it at fix-first."
+  ],
+  "fixes": [
+    "'PetroChina' is an alias of #5 China National Petroleum Corporation, but the unranked extra 'Petro China' catches the guess first and costs a life. Drop the unranked 'Petro China' entry so 'petrochina' finds #5.",
+    "Add 'CVS' as an alias of #11 CVS Health (currently not recognized).",
+    "Countries in the unranked pool: 'United States', 'United Kingdom', 'Japan', 'Germany'. They are not companies and cost a life. Remove them.",
+    "Duplicate entities in the unranked pool: merge 'Royal Dutch Shell' into #15 Shell, and 'Samsung' into #33 Samsung Electronics (today 'samsung' brings up a choice and the unranked one scores nothing).",
+    "ICBC (#24) alias 'The Bank of East Asia' is a different bank; drop it.",
+    "Junk redirect aliases on top-10 entries: Amazon 'Sonic', 'Just Do It Award', 'Indigo Starfish', 'Lobbying by Amazon', 'Lobbying by Amazon.com', 'Controversies surrounding Amazon, Inc.', 'Amazon leadership principles', 'Commingled inventory', 'Co-mingled inventory', 'Comingled inventory'; Apple ' Inc.' (leading-space fragment, so typing 'inc' finds Apple), 'Katherine L. Adams', 'Boycott Apple', 'Directly Responsible Individual', 'Apple tax', 'Apple tax practices', 'Tax avoidance by Apple Inc.'; Walmart 'GamePlay', 'Supercenter', 'Discount City', 'Save Money. Live Better.', 'Always Low Prices, Always'; Saudi Aramco 'Carbon emissions by Saudi Aramco'; UnitedHealth 'Tim Noel', 'Controversies surrounding UnitedHealth Group'; Berkshire Hathaway 'Woodstock for Capitalists', 'Berkshire Hathaway Annual Shareholders Meeting'."
+  ]
+}

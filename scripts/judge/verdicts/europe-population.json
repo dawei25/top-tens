@@ -4,9 +4,24 @@
   "decision": "daily-list",
   "alsoBlitz": false,
   "priority": 7,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
-  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "scores": {
+    "recognizability": 5,
+    "curve": 3,
+    "fairness": 4,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 9,
+    "livesLost": 5,
+    "guesses": 14
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 12
+  },
   "blitzCasual": null,
   "summary": "An easy, friendly start with a real fight for the last slot: nine big names, then Kazakhstan hiding at #10 while Romania and the Netherlands sit just below.",
   "reasons": [
@@ -19,5 +34,12 @@
   "fixes": [
     "Drop non-name redirect aliases from the top 10: Germany 'The Land of Chocolate', 'Federal state', 'German infrastructure'; United Kingdom 'Topography of the UK' family; Italy 'Law and criminal justice of Italy', 'Administrative units of Italy'; Spain 'Mountains of Spain'; Kazakhstan 'Day of the Capital'",
     "Same for extras: Finland 'Bibliography of Finland', 'Finnishness'; Ireland 'Irish politics', 'Ireland politics'; Malta 'Science and technology in Malta', 'Maltese art'; Sweden 'Swedish origin'; Greece 'Law of Greece'"
-  ]
+  ],
+  "difficulty": 1,
+  "tags": [
+    "geography",
+    "population",
+    "europe"
+  ],
+  "audience": "anyone"
 }

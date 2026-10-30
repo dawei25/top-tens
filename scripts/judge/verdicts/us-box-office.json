@@ -1,0 +1,25 @@
+{
+  "id": "us-box-office",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 29, "named": 31 },
+  "difficulty": 2,
+  "tags": ["movies", "box office", "blockbusters"],
+  "audience": "anyone",
+  "summary": "Everyone knows these films and the misses are close calls (Jurassic World #11, Barbie #13). A tense, satisfying classic and an excellent Blitz.",
+  "reasons": [
+    "Casual found 8 (Avatar, Titanic, Endgame, No Way Home, Black Panther, Infinity War, Top Gun, Avatar 2) but spent all 5 lives on Star Wars (#30, the 1977 film), Barbie #13, Jurassic World #11, Frozen #58 and Lion King #20: every miss tells you something.",
+    "Spider-Man: Brand New Day at #1 is the stretch answer and a real 'oh, it's that big' moment; fan went 10/10 with one life lost.",
+    "Blitz is deep: 29 of 31 quick casual names scored. Matcher handles short forms well (endgame, no way home, avatar 2, top gun, mario movie)."
+  ],
+  "fixes": [
+    "Add aliases 'ET' and 'E.T.' to E.T. the Extra-Terrestrial (#36); 'et' is not recognized.",
+    "Drop junk aliases: 'Part 2' (Deathly Hallows Part 2), 'Avatar IV' (Way of Water), 'Inside Out 3', 'Frozen IIII', 'Jikŋon 2', 'Star Wars 10' and 'Last Skywalker' (Rise of Skywalker), 'Top Gun 3' and 'Untitled third Top Gun film', 'The Lion King 4', 'The Super Mario Bros. Movie 3', 'Zootopia Three', 'Deadpool & Friend', and the Titanic DVD/VHS edition redirects ('Titanic DVD releases', 'Titanic VHS', 'Titanic 5 Disc' and the rest).",
+    "Unranked answers hold both 'Harry Potter and the Philosopher's Stone' and 'Harry Potter and the Sorcerer's Stone' as separate entries; merge them into one."
+  ]
+}

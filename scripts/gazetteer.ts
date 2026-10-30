@@ -42,7 +42,13 @@ const US_STATES: [string, string][] = [
   ["Northern Mariana Islands", "MP"],
 ];
 
-/** The 50 states, DC and the inhabited territories. Postal codes are left out: two-letter aliases make every short typo a near match. */
+/**
+ * USPS codes of the 50 states and DC, by name. build.ts gives them to state entries as aliases; the matcher takes
+ * an all-caps code only exactly, never as a fuzzy match, so "NV" can't catch a typo.
+ */
+export const US_STATE_CODES: [string, string][] = US_STATES.slice(0, 51);
+
+/** The 50 states, DC and the inhabited territories (postal codes are added by build.ts, see US_STATE_CODES). */
 export function usStates(): Place[] {
   return US_STATES.map(([name]) => ({
     name,

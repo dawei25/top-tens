@@ -1,0 +1,25 @@
+{
+  "id": "europe-cities",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 4, "guesses": 15 },
+  "blitzCasual": { "scored": 19, "named": 31 },
+  "difficulty": 2,
+  "tags": ["geography", "europe", "cities"],
+  "audience": "anyone",
+  "summary": "A solid classic daily: the big capitals are gimmes, Istanbul at #1 and Paris only at #10 are good surprises, and Baku is a stretch that starts a debate. It works in Blitz too, but well-known cities under a million score nothing.",
+  "reasons": [
+    "Casual run: London, Paris, Berlin, Madrid, Rome, Moscow, Istanbul, Kyiv found; lives went on Barcelona #15, Milan #23, Amsterdam, Vienna #11, Munich #19. Out of lives at 8/10, missing Saint Petersburg and Baku.",
+    "Near misses teach the 'city limits' rule well. Baku counts as Europe on this source, which some players will argue with. Paris (2,048,472) and Vienna (2,041,286) are only 7k apart.",
+    "Blitz 19 of 31: Amsterdam, Lisbon, Athens, Brussels, Dublin, Copenhagen, Oslo and Frankfurt are accepted but score 0, and Lyon, Marseille, Naples and Turin are missing from the pool entirely."
+  ],
+  "fixes": [
+    "Major European cities are missing from the answer pool, so the matcher corrects them to unrelated world cities: 'lyon' -> Lynn, 'marseille' -> Bareilly; 'naples', 'turin' are not recognized; Valencia and Rotterdam are absent too. Add European cities below 1M (e.g. a second table or category of European cities over 300k) as accepted answers.",
+    "Accepted European cities without a population score 0 in Blitz: Amsterdam, Lisbon, Athens, Brussels, Dublin, Copenhagen, Oslo, Manchester, Frankfurt. Carry their city-limits population as the stat.",
+    "Junk aliases on top-10 entries: Madrid 'Immigration to Madrid', 'Madrilenian cuisine'; Paris 'Paris culture', 'Paris agglomeration'; Berlin 'Washington Place, Berlin'; Rome 'Cecchignola'; Istanbul 'Rumeli'; Moscow 'Kotly, Moscow', 'Kotly, Moscow Oblast', 'Western Moscow'; Baku 'Baku Oilfields', 'Baku Today'; Kyiv 'Kyiv vs. Kiev', 'Kiev vs. Kyiv'."
+  ]
+}

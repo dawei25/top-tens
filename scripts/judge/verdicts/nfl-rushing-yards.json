@@ -1,0 +1,23 @@
+{
+  "id": "nfl-rushing-yards",
+  "judgedAt": "2026-10-30",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 3,
+  "scores": { "recognizability": 3, "curve": 4, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 2 },
+  "casual": { "found": 6, "livesLost": 3, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 10, "named": 15 },
+  "difficulty": 3,
+  "tags": ["sports", "football", "nfl"],
+  "audience": "football fans",
+  "summary": "A correct, well-built list that NFL fans will clear, but Frank Gore, Curtis Martin and Bettis are not names a general player knows. Good for random play, not a daily.",
+  "reasons": [
+    "Casual found the famous five (Smith, Payton, Sanders, Peterson, Henry) plus Tomlinson, then lost lives on Jim Brown, O. J. Simpson and Marshawn Lynch; current stars like Barkley and McCaffrey are not in the pool at all.",
+    "Near misses are fair and teach something (Dorsett #11, Jim Brown #12).",
+    "Only 32 scoring answers, all 10,000+ yard rushers, so a casual Blitz runs dry fast."
+  ],
+  "fixes": [
+    "Drop junk aliases 'Emmitt III Smith' (Emmitt Smith) and 'Jerome Bettis Day' (Jerome Bettis)."
+  ]
+}

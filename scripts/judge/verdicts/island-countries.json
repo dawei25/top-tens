@@ -1,0 +1,24 @@
+{
+  "id": "island-countries",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 5, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 35, "named": 36 },
+  "difficulty": 2,
+  "tags": ["geography", "islands"],
+  "audience": "anyone",
+  "summary": "A great surprise list: everyone guesses island nations, but Sweden, Norway and Finland take the top three. Players find most of it and argue about the rest.",
+  "reasons": [
+    "Every answer is a country everyone knows, and the twist (Scandinavia, Canada, Chile ahead of Indonesia) makes a strong reveal.",
+    "The prompt pulls players toward small island nations (Maldives #29, Fiji #47, New Zealand #39), which cost lives; Greece #13 and UK #12 are fair near misses. The casual player ran out of lives at 7/10.",
+    "Excellent Blitz: almost any country scores."
+  ],
+  "fixes": [
+    "Drop junk aliases copied from table notes: 'See United Kingdom.' (Scotland) and 'See China.' (Hong Kong); also 'Swedish sin' (Sweden).",
+    "Scotland (#34) and Hong Kong (#48) are not countries and double count the UK and China; consider dropping them from the answers."
+  ]
+}

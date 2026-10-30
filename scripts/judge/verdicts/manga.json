@@ -1,0 +1,24 @@
+{
+  "id": "manga",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 2, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 10 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 19, "named": 22 },
+  "difficulty": 3,
+  "tags": ["entertainment", "manga", "anime"],
+  "audience": "anime and manga fans",
+  "summary": "A great Blitz once fixed: a casual player scores 19 of 22 famous titles. In classic, the anime hits a Western player knows best (Attack on Titan, Bleach, My Hero Academia, Death Note) all sit outside the top 10, so the casual run died after 10 guesses.",
+  "reasons": [
+    "One Piece, Dragon Ball, Naruto, Demon Slayer and Jujutsu Kaisen are gimmes; Golgo 13, KochiKame and Slam Dunk are Japan-only names a typical player has never heard of.",
+    "The prompt invites a whole class of famous anime that each cost a life in classic (AoT #12, Bleach #14, MHA #23).",
+    "'hunter x hunter' and 'spy x family' are not recognized because the titles use the × sign, so the game wrongly tells the player they are not answers."
+  ],
+  "fixes": [
+    "Add plain-x spellings for titles written with ×: 'Hunter x Hunter', 'HxH' (#21 Hunter × Hunter) and 'Spy x Family' (#76 Spy × Family); or fold × to x in normalization.",
+    "Drop junk redirect aliases: 'Naruto geography', 'Naruto summons', 'Naruto jutsu', 'Naruto films', \"Naruto's World\", 'Narutonic', the Naruto card game aliases, 'One Piece Party', 'One Piece Premier Show', 'One Piece Anime Guide', 'One Piece Collectible Card Game', 'One Piece card game', 'Song of Doraemon 2', 'Doraemon Theme', 'Doraemon 3D Short Movies', 'Doraemon 3D Short'."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "languages",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 10, "livesLost": 4, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 21, "named": 29 },
+  "difficulty": 2,
+  "tags": ["culture", "language"],
+  "audience": "anyone",
+  "summary": "A classic everyone can play: most players find all ten, and the tension comes from Russian, Japanese and German just missing out.",
+  "reasons": [
+    "Every answer is familiar; Bengali, Urdu and Indonesian are the 'oh right' picks. The casual player found 10/10 but with one life left.",
+    "Fair near misses: Russian #11, German #12, Japanese #13. 'chinese', 'arabic' and 'bangla' all match.",
+    "The top 10 is clean; the problems are in the wider pool and missing aliases."
+  ],
+  "fixes": [
+    "'german' offers 'German-Russian macaronic language' next to Standard German, and 'punjabi' offers 'Punjabi dialects'; drop those pool entries so the guesses go straight to the ranked answer.",
+    "'farsi' costs a life as the unranked 'Hijra Farsi' instead of matching Iranian Persian (#27): add alias 'Farsi'. Also add 'Cantonese' to Yue Chinese (#25), 'Filipino' to Tagalog (#23) and 'Shanghainese' to Wu Chinese (#26); these are not recognized now.",
+    "The universe pool has non-language titles: 'Classical languages of India', 'Indian states by most spoken scheduled languages', 'Languages of India', 'Multilingualism in India', 'Aimol people'. Filter them out."
+  ]
+}

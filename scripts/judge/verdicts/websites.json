@@ -4,9 +4,24 @@
   "decision": "daily-list",
   "alsoBlitz": false,
   "priority": 7,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
-  "fan": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "scores": {
+    "recognizability": 5,
+    "curve": 3,
+    "fairness": 3,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 8,
+    "livesLost": 5,
+    "guesses": 13
+  },
+  "fan": {
+    "found": 8,
+    "livesLost": 5,
+    "guesses": 13
+  },
   "blitzCasual": null,
   "summary": "Everyone knows every answer, and the fight is over the famous sites just outside: Wikipedia #11, Amazon #15, Netflix #22. Players score well but often lose their last life to it, which makes for a strong reveal.",
   "reasons": [
@@ -21,5 +36,12 @@
     "universeCategories (Social networking services, Internet search engines) pull in article titles that are not websites, e.g. 'Social networking service', 'Comparison of social networking software', 'Issues relating to social networking services', 'Distributed Social Networking Protocol', 'Clearinghouse for Networked Information Discovery and Retrieval'. The guess 'discord' is offered a correction to that last one and would cost a life if confirmed. Filter out non-site titles (Comparison of/List of/Issues/Privacy concerns/protocol pages) or drop the category universe.",
     "Junk aliases on the top 10 (harmless but messy): 'Giigke,cin', 'Ghits', 'Google videos' (Google Search); 'GoogleYouTube', 'Youtubing' (YouTube); 'Facephiliac', 'Mini-feed' (Facebook); 'Instagram trends', 'Layout from Instagram' (Instagram); 'Do Anything Now' (ChatGPT); 'Fail Whale', 'Twitpocalypse', 'Twittered revolution' (X); 'AMA', 'Subreddit', 'Reddit gold', 'Infogami' (Reddit); 'TikTok Review' (TikTok); 'Timeline of WhatsApp' (WhatsApp); 'Terabyte unlimited', 'Bing Bar' (Microsoft Bing).",
     "The built puzzle has no category, but scripts/topics.ts says Entertainment. The rebuild should pick it up, which daily category rotation needs."
-  ]
+  ],
+  "difficulty": 2,
+  "tags": [
+    "internet",
+    "websites",
+    "tech"
+  ],
+  "audience": "anyone"
 }

@@ -1,0 +1,26 @@
+{
+  "id": "nba-assists",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-blitz",
+  "alsoBlitz": false,
+  "priority": 5,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 9, "livesLost": 4, "guesses": 13 },
+  "fan": null,
+  "blitzCasual": { "scored": 19, "named": 24 },
+  "difficulty": 3,
+  "tags": ["sports", "basketball", "nba"],
+  "audience": "basketball fans",
+  "summary": "Clean, current data with a nice twist in LeBron at #4 and Mark Jackson at #7. Half the top 10 are point guards from the 80s and 90s, so it works better as a Blitz for basketball fans than as a classic daily.",
+  "reasons": [
+    "Casual classic: 9/10 found, but Curry (#27), Rondo (#15), Parker (#21) and Jordan (unranked) cost four lives. A player who doesn't follow the NBA knows LeBron, Magic, Chris Paul and Westbrook, then guesses famous scorers and loses lives.",
+    "Nicknames work well (cp3, big o, zeke, russ, kidd, stockton), and the numbers are current (Westbrook #5 ahead of Nash, Harden #12).",
+    "Blitz: 19 of 24 named players scored. Only the top 50 carry a stat, so Iverson, Kyrie, Luka and Trae Young score nothing."
+  ],
+  "fixes": [
+    "nba-assists: \"steph curry\" is only a spelling correction to Stephen Curry (#27) and \"steph\" is not recognized. Add \"Steph Curry\" and \"Steph\".",
+    "nba-assists: the short form for Nick Van Exel is \"Exel\". Make it \"Van Exel\".",
+    "nba-assists: drop junk aliases: \"Khelcey Barrs III\", \"Khelcey Barrs\", \"Honor the Gift\" (Westbrook), \"The Announcement\", \"Magic Johnson Entertainment\" (Magic Johnson), \"Gloria James\", \"Bronny's dad\", \"LeBron's son\", \"Bronny James Sr.\" (LeBron), \"Natalia Diamante Bryant\", \"Kobe bryant philanthropy\", \"Mamba Sports Academy\" (Kobe).",
+    "nba-assists (optional, for Blitz): take stats past rank 50 if the source page lists them, so common guesses just outside (Allen Iverson, Kyrie Irving, Trae Young) score."
+  ]
+}

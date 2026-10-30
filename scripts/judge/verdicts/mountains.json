@@ -1,30 +1,24 @@
 {
   "id": "mountains",
   "judgedAt": "2026-10-30",
-  "decision": "fix-first",
+  "decision": "daily-blitz",
   "alsoBlitz": true,
   "priority": 4,
-  "scores": { "recognizability": 2, "curve": 2, "fairness": 1, "data": 3, "fun": 2, "blitzDepth": 4 },
-  "casual": { "found": 3, "livesLost": 5, "guesses": 13 },
-  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
-  "blitzCasual": { "scored": 12, "named": 19 },
-  "summary": "Not a classic daily: a typical player knows Everest and K2, then loses all five lives on Kilimanjaro, Mont Blanc, Denali and friends. After the fixes below it is a decent Blitz daily, where those famous peaks score.",
+  "scores": { "recognizability": 2, "curve": 2, "fairness": 2, "data": 4, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 3, "livesLost": 5, "guesses": 7 },
+  "fan": null,
+  "blitzCasual": { "scored": 13, "named": 18 },
+  "difficulty": 4,
+  "tags": ["geography", "mountains", "himalaya"],
+  "audience": "geography and climbing fans",
+  "summary": "As a classic daily it is a trap: the casual player got Everest, K2 and Annapurna, then lost every life on Kilimanjaro, Mont Blanc, Fuji, Denali and the Matterhorn. As a Blitz it works, since those famous peaks still score.",
   "reasons": [
-    "Casual run: Everest, K2, Annapurna, then five lives gone on Kilimanjaro, Mont Blanc, Denali, Aconcagua and Matterhorn by guess 8. Game over at 3/10.",
-    "The prompt invites the Seven Summits and the Alps, and the universe categories make every one of them cost a life. That is the textbook fairness 1.",
-    "Ranks 5 to 10 (Makalu, Cho Oyu, Dhaulagiri, Manaslu, Nanga Parbat, Annapurna) are mountaineer knowledge; the curve is 2 gimmes then a wall.",
-    "Fans enjoy it: 10/10 with Broad Peak, Shishapangma and Gasherbrum I as fair near misses. The facts are good.",
-    "Heights and order are correct and current. Everest, K2 and Kangchenjunga spellings are well covered.",
-    "Matcher leak: 'mount whitney' autocorrects to Lhotse (top 10, +92 in Blitz) and 'mount olympus' to Mount Elbrus, because the shared 'mount ' prefix fits inside the typo budget.",
-    "Blitz suits it: no lives, and Kilimanjaro, Denali, Aconcagua, Elbrus and Vinson all score. 12 of 19 casual names scored, right at the bar."
+    "The top 10 are all Himalaya/Karakoram 8,000ers; past Everest, K2 and Kangchenjunga the names are unknown to a typical player.",
+    "The prompt invites every famous mountain, and each one costs a life in classic, so the casual run ended after 7 guesses.",
+    "In Blitz the 169 scoring answers include Kilimanjaro, Mont Blanc, Denali and Elbrus, so a casual player scores 13 in 90 seconds."
   ],
   "fixes": [
-    "Glued aliases from multi-name cells (18): 'Mount EverestSagarmathaChomolungma', 'EverestSagarmathaChomolungma', 'Gasherbrum IHidden PeakK5', 'Gasherbrum IIK4', 'Gasherbrum IIIK3a', 'Gasherbrum IVK3', 'ShishapangmaGosainthan', 'MasherbrumK1', 'Saltoro KangriK10', 'KumbhakarnaJannu', 'Gongga ShanMinya Konka', 'Saser Kangri IK22', 'Jengish ChokusuTömürPik Pobedy', 'Sunanda DeviNanda Devi East', 'YangraGanesh I', 'Gimmigela ChuliThe Twins', 'JomolhariChomo Lhari', 'Baintha BrakkThe Ogre' etc. Split the cell on line breaks so each name is its own alias (Hidden Peak, K5, Gosainthan, Jannu, Minya Konka, The Ogre...).",
-    "Junk redirect aliases on top-10 entries: Everest 'Kazi Sherpa', 'Yellow Band', 'Traffic in Mount Everest', 'Southeast ridge', 'Northeast ridge', 'Mt. Everest expedition', 'Mount Everest expedition', 'Highest mountain in Asia'; K2 'Abruzzi Spur', 'Kanchenjunga 2'; Lhotse 'Lotse ridge'; Makalu 'Makalu Base Camp'; Manaslu 'Manaslu Circuit'; Nanga Parbat '1937 Nanga Parbat tragedy'. Drop redirects naming events, routes, ridges, camps, circuits and people.",
-    "Non-mountain articles in the unranked pool from universeCategories: 'Eight-thousander', 'Death zone', 'Seven Summits', 'Seven Second Summits', 'Seven Third Summits', 'Volcanic Seven Summits', 'Eight Summits', \"Explorer's Grand Slam\", 'Indonesia Seven Summits Expedition', 'Indonesia Women Seven Summits Expedition', 'Goûter Route', 'Goûter Hut', 'Grands Mulets Hut'. Keep only articles with a mountain infobox.",
-    "Add 'Mount McKinley' / 'McKinley' as aliases of Denali (currently unrecognized while Denali is accepted).",
-    "Give Mount Fuji a value (3,776 m); it is accepted but has no stat, so it scores nothing in Blitz.",
-    "Widen the Blitz pool with famous peaks casual players name that are currently unrecognized: Mount Rainier, Mount Whitney, Mount Kenya, Ben Nevis, Mount Olympus, Aoraki / Mount Cook, Mount Shasta, Mount Hood (e.g. a category of ultra-prominent peaks or national high points).",
-    "Coordinator (src/game/match.ts, not a rebuild item): a shared generic prefix like 'Mount ' / 'Mont ' should not count toward the typo budget; 'mount whitney' currently resolves to Lhotse and 'mount olympus' to Mount Elbrus. Adding those peaks to the pool or lexicon (fix above) also stops it for this list."
+    "Drop the alias entries that name a face of Nanga Parbat rather than the mountain itself: 'Diamer face' and 'Rupal face'.",
+    "For classic play, consider making unranked answers (famous peaks outside the source table, such as Kilimanjaro, Mont Blanc, Denali and Fuji) free instead of costing a life, or say in the prompt that all ten are in Asia."
   ]
 }

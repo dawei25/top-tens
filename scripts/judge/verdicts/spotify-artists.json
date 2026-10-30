@@ -1,0 +1,24 @@
+{
+  "id": "spotify-artists",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 3,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 27, "named": 30 },
+  "difficulty": 2,
+  "tags": ["music", "pop", "streaming"],
+  "audience": "anyone",
+  "summary": "Household names with good surprises: Bruno Mars on top, Coldplay in, Ed Sheeran and Billie Eilish out. Daily quality, but it already ran on 2026-10-26.",
+  "reasons": [
+    "Casual found 8 and spent all 5 lives on Ed Sheeran #17, Billie Eilish #15, Dua Lipa #19, Beyonce #33 and Eminem #20: all near misses you learn from.",
+    "Fan went 10/10 losing 2; Lady Gaga and Coldplay are the forgotten ones. Blitz is deep: 27 of 30 casual names scored.",
+    "Low priority only because it ran as daily #7 four days ago; the scheduler won't reuse it, so it now serves random play and Random Blitz."
+  ],
+  "fixes": [
+    "Drop song and side-project aliases: 'Starboy', 'King Of The Fall', 'We're Alone Together' (The Weeknd), 'Monologue Song' (Taylor Swift), 'Lady Gaga as a gay icon', 'Coldplay.com', 'Pectoralz', 'Los Unidades', 'Big Fat Noises' (Coldplay), 'Shakira Bio', 'Shakira ft. Wyclef Jean', 'Shakira & Alejandro Sanz', 'Gypsy Love', 'Killa on the Run', 'The Hooligans' (Bruno Mars), 'Hottest Heart' (Bad Bunny).",
+    "Drop bare-surname aliases that are common words or other people: 'Park' (Linkin Park), 'Paul', 'Brown', 'Smith', 'Keys', 'Scott', 'Harris', 'West', 'Jackson', 'Monkeys', 'Peas', 'Yankee', 'Impala'. Typing 'park' or 'smith' currently costs a life."
+  ]
+}

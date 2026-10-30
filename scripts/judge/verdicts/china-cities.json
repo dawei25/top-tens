@@ -1,0 +1,26 @@
+{
+  "id": "china-cities",
+  "judgedAt": "2026-10-30",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 2,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 2, "data": 3, "fun": 3, "blitzDepth": 2 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": null,
+  "blitzCasual": { "scored": 11, "named": 14 },
+  "difficulty": 4,
+  "tags": ["geography", "cities", "china"],
+  "audience": "geography buffs",
+  "summary": "Big names up top, but Tianjin and Dongguan are unknowns to most players, and Hong Kong, Macau and Taipei cost a life without saying why.",
+  "reasons": [
+    "Casual found 7 but lost lives on Hong Kong, Macau and Taipei ('accepted answer outside the ranking', no reason given), then Nanjing #13 and Hangzhou #11.",
+    "Beyond Beijing, Shanghai, Shenzhen, Guangzhou and Wuhan, a typical player runs dry; a quick Blitz scored about 11, with no scores for Hong Kong, Macau or Taipei.",
+    "Foreign cities (Tokyo) also cost a life here because of the shared world-city tables."
+  ],
+  "fixes": [
+    "Say 'mainland China' in the prompt and stop counting Hong Kong, Macau and Taipei as accepted answers (they come in via the CITIES tables). If they stay accepted, the game should explain why they are not ranked.",
+    "On country-specific city lists, foreign cities from CITIES (Tokyo and others) should be free, not cost a life.",
+    "Drop junk aliases: 'Fuxingmen Inner Street', 'Fuxingmen Outer Street', 'Fuxing Road' (Beijing), 'Sichuanese teahouse' (Chengdu), 'Chien Mei village' (Dongguan).",
+    "Add 'Tsingtao' as an alias for Qingdao."
+  ]
+}

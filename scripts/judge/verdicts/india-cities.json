@@ -1,0 +1,24 @@
+{
+  "id": "india-cities",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 3, "data": 3, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": { "scored": 15, "named": 16 },
+  "difficulty": 2,
+  "tags": ["geography", "cities", "india"],
+  "audience": "anyone",
+  "summary": "Solid, familiar list with a nasty trap: typing New Delhi costs a life because it is a separate tiny row at #175. Fix that and trim the junk aliases, then it works as a daily or a Blitz.",
+  "reasons": [
+    "Casual found 8 (Mumbai, Bangalore, Calcutta, Chennai, Hyderabad, Jaipur, Pune, Ahmedabad) but lost 4 lives on New Delhi (#175), Agra (#23), Varanasi (#30) and Amritsar (#34), ending on 1 life. Surat was the stretch.",
+    "Matcher is good on old names and misspellings: bombay, madras, calcutta, poona, banglore, kolkatta, ahmadabad, hyderbad all land. Tourist cities as near misses are fair and teach something.",
+    "The top 10 aliases are cluttered with schools, hotels, temples, snacks and neighbourhoods (Surat has 70+), which is sloppy even if few players hit them."
+  ],
+  "fixes": [
+    "Make the guess 'New Delhi' land on #2 Delhi (or at least be free) instead of costing a life as the separate NDMC row at #175: nearly every casual player types it.",
+    "Prune non-name redirect aliases on the top 10: schools (St. Xavier's High School Loyola Hall, Prakash Higher Secondary School, Phss, Tilak Public School, Evergreen School, Rawat Public School, Rajhans Balvatika, Shri Navinchandra Popatlal Kapadia High School, Lady Andal Venkatasubbarao MHSS, Momin High School, Vidyaniketan Public School, Zydus School, Hebron High School and the rest), places and venues (KSLTA Tennis Center, Jai Prakash Narayan National Park, Ahmedabad Monorail, Veer Savarkar Sports Complex, The Gateway Hotel, Lords Plaza, Hotel Ginger, Rang Upvan Stadium and the other Surat parks, temples, grounds and hotels), food (Cold Coco, Bataka Puri, Surti Cuisine, Farmas Biscuit), neighbourhoods (Adajan, Athwa, Kolathur, Mathikere, Bibwewadi, Nanded, Pune, Ghouse Nagar Bandlaguda) and oddities (Pune weather, Western Presidency, Kakamuchee, Galajunkja, Calixestra, Dainik Vishwamitra, Dili, India, Delhi, Punjab, DL, DEL, INDEL, IN-DL, Eastindians)."
+  ]
+}

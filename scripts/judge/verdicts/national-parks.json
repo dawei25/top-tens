@@ -4,9 +4,24 @@
   "decision": "daily-list",
   "alsoBlitz": false,
   "priority": 7,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
-  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "scores": {
+    "recognizability": 4,
+    "curve": 4,
+    "fairness": 3,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 8,
+    "livesLost": 5,
+    "guesses": 14
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 12
+  },
   "blitzCasual": null,
   "summary": "A good daily: the big names come fast, Zion at #2 and Olympic make it interesting. The catch is that famous parks like Joshua Tree, Arches and Everglades rank low and eat lives.",
   "reasons": [
@@ -20,5 +35,12 @@
   "fixes": [
     "Drop redirect aliases that are not names of the park: Yellowstone Act, Yellowstone History, Thunder Hole, Schoodic Scenic Byway, Acadia National Park Act of 1919, Gray Wolf Pass, Graywolf Pass, Daniel J. Evans Wilderness, Glacier National Park Act of 1914, Disappearing Glaciers in Glacier National Park, Crown of the Continent Ecosystem, Establishment of Grand Teton National Park, and the bare 'Clark' on Lake Clark",
     "Add the short form 'rocky mtn' for Rocky Mountain (only 'Rocky Mtn National Park' is an alias today; 'rocky mtn' is not recognized)"
-  ]
+  ],
+  "difficulty": 2,
+  "tags": [
+    "geography",
+    "travel",
+    "united states"
+  ],
+  "audience": "anyone, especially Americans"
 }

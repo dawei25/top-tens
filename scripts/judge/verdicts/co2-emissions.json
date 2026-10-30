@@ -1,0 +1,21 @@
+{
+  "id": "co2-emissions",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 28, "named": 28 },
+  "difficulty": 2,
+  "tags": ["geography", "environment", "climate"],
+  "audience": "anyone",
+  "summary": "A solid daily: everyone gets the big six, then Iran, Indonesia, Saudi Arabia and Canada make it a real test.",
+  "reasons": [
+    "Casual player finds 8 quickly (China, US, India, Russia, Japan, Germany, Saudi Arabia, Canada) and then spends lives on UK, Brazil, Australia, France and South Korea.",
+    "Misses are near misses that teach something: South Korea is #11 by under 2 Mt, Brazil #13, the UK only #19.",
+    "Blitz works, but any country scores, so it plays like a country dump. Classic suits it better."
+  ],
+  "fixes": []
+}

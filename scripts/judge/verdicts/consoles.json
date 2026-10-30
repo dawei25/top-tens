@@ -1,0 +1,27 @@
+{
+  "id": "consoles",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 21, "named": 25 },
+  "difficulty": 2,
+  "tags": ["gaming", "consoles"],
+  "audience": "anyone who grew up with a console",
+  "summary": "Fun and very recognizable, and an excellent Blitz, but the build has traps: 'game boy color' costs a life even though its sales are part of #4 Game Boy, and '3ds' is not recognized at all.",
+  "reasons": [
+    "Every top-10 console is a household name; the tension comes from Xbox One, NES, SNES and GameCube sitting just outside, and the casual player finished 10/10 with one life left.",
+    "Split entries make some natural guesses wrong: Game Boy Color, New Nintendo 3DS, Game Boy Advance SP and 'Xbox Series X and Series S' are separate unranked rows, and 'mega drive' lands on a 3 million Tectoy row (#43) instead of #19.",
+    "Blitz is deep: a casual player names 21 scoring consoles in 90 seconds."
+  ],
+  "fixes": [
+    "Map 'Game Boy Color' and 'GBC' to #4 Game Boy (the source row is Game Boy & Game Boy Color) and remove the unranked Game Boy Color entry.",
+    "Add '3DS' to #13 Nintendo 3DS and fold the unranked 'New Nintendo 3DS' into it; add 'DSi' to #3 Nintendo DS; fold unranked 'Game Boy Advance SP' into #11 GBA.",
+    "Remove the unranked duplicate 'Xbox Series X and Series S' and add 'Xbox Series S' to #17 Xbox Series X/S.",
+    "Rename the Brazil-only Tectoy rows #43 'Mega Drive' and #33 'Master System' (e.g. 'Mega Drive (Tectoy)') so 'mega drive' goes to #19 and 'sega master system' / 'master system' go to #28.",
+    "Drop junk aliases: 'Touching is good', 'Tag mode', 'Memory Pak', 'Download Play', 'DS Option Pak', 'Yellow Light of Death', 'YLOD', 'ApocalyPS3', 'Ring-con', 'PlayGo', 'Shareplay', 'Pulse 3D', 'SoundScope', 'Dot matrix with stereo sound', 'PartnerNet'; and remove 'Home video game console generations' from the pool."
+  ]
+}

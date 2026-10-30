@@ -1,0 +1,25 @@
+{
+  "id": "islands",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-blitz",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": { "scored": 18, "named": 20 },
+  "difficulty": 3,
+  "tags": ["geography", "islands"],
+  "audience": "geography fans",
+  "summary": "An excellent Blitz: nearly every island a casual player names scores. It also passes as a classic list, but it already ran as Today's list on 2026-10-25, and the classic game punishes Australia and Japan.",
+  "reasons": [
+    "Casual classic: Greenland, New Guinea, Borneo, Madagascar and Great Britain, then lives gone on Australia, Iceland, Japan, Cuba and Ireland. 5/10.",
+    "Iceland (#18), Cuba (#16) and Ireland (#20) are fair near misses, but Australia and Japan cost a life with no rank and no stat, which feels like a trick.",
+    "In Blitz 18 of 20 casual names score (Iceland, Cuba, Sri Lanka, Tasmania, Sicily, Java, Taiwan, Hawaii), so it is deep and fun."
+  ],
+  "fixes": [
+    "'Australia' and 'Antarctica' are accepted unranked answers, so the most common first wrong guess costs a life. Make continents free, or add '(continents don't count)' to the prompt.",
+    "'Japan', 'Indonesia' and 'Philippines' are accepted country entries that cost a life, while 'UK' and 'PNG' resolve to Great Britain and New Guinea. Either add 'Japan' as an alias choice for Honshu or make these archipelago countries free.",
+    "Junk aliases on top-10 entries: Borneo 'Borneo flags'; New Guinea 'New Guinea Man'; Sumatra 'Sumatera Celebes', 'ID-SM', 'Eastern Sumatra'; Greenland 'Kangat Bay', 'Lupanglunti', 'Lupanlunti'; Baffin Island 'Nunavut' (and typing 'nunavut' currently autocorrects to Greenland)."
+  ]
+}

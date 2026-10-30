@@ -1,0 +1,46 @@
+{
+  "id": "asia-population",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": {
+    "recognizability": 5,
+    "curve": 3,
+    "fairness": 4,
+    "data": 4,
+    "fun": 3,
+    "blitzDepth": 4
+  },
+  "casual": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 12
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 1,
+    "guesses": 11
+  },
+  "blitzCasual": {
+    "scored": 18,
+    "named": 18
+  },
+  "difficulty": 1,
+  "tags": [
+    "geography",
+    "population",
+    "asia"
+  ],
+  "audience": "anyone",
+  "summary": "Clean, fair and easy: everyone knows these countries, and Russia counting as Asian gives one bit of debate. Works as a gentle daily list, and suits Blitz slightly better.",
+  "reasons": [
+    "Casual found all 10 with 2 lives lost (South Korea #14, Thailand #12); the fan lost one on Turkey (#11). Near misses are exactly the kind you learn from.",
+    "Curve leans easy: 8 answers come almost automatically, with Russia (counted whole as Asian) and Iran as the late finds. Fine for a light day, not a challenge.",
+    "Blitz has a 50-deep pool of countries anyone can name; a casual 90 s run scored 18 of 18."
+  ],
+  "fixes": [
+    "Source dataAsOf shows the build date; the figures are UN 2023 estimates, so set dataAsOf to 2023.",
+    "Hong Kong and Macau are not rows of the source table but cost a life as accepted answers; make them free (or rank them by population) so a reasonable guess is not punished without a rank."
+  ]
+}

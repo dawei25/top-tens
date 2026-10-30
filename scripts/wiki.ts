@@ -21,20 +21,26 @@ async function fetchCached(url: string, cacheOnly = false): Promise<string> {
   mkdirSync(CACHE_DIR, { recursive: true });
   const file = join(CACHE_DIR, createHash("sha1").update(url).digest("hex") + ".html");
   if (existsSync(file)) return readFileSync(file, "utf8");
-  if (cacheOnly) throw new NotFound(url);
+  // Pages that don't exist are remembered too, so a rebuild doesn't ask again ("Dhaulagiri I" has no article).
+  const missing = file.replace(/\.html$/, ".404");
+  if (cacheOnly || existsSync(missing)) throw new NotFound(url);
 
   for (let attempt = 0; attempt < 5; attempt++) {
     const wait = lastRequest + MIN_GAP_MS - Date.now();
     if (wait > 0) await new Promise((r) => setTimeout(r, wait));
     lastRequest = Date.now();
     networkRequests++;
+    if (process.env.WIKI_LOG) console.log(`     fetch ${decodeURIComponent(url)}`);
     const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
     if (res.ok) {
       const body = await res.text();
       writeFileSync(file, body);
       return body;
     }
-    if (res.status === 404) throw new NotFound(url);
+    if (res.status === 404) {
+      writeFileSync(missing, url + "\n");
+      throw new NotFound(url);
+    }
     if (res.status !== 429 && res.status < 500) throw new Error(`${res.status} for ${url}`);
     await new Promise((r) => setTimeout(r, 5000 * (attempt + 1)));
   }
@@ -83,7 +89,8 @@ const ASPECT_REDIRECT = new RegExp(
 );
 
 /**
- * Redirect titles pointing at an article; used as answer aliases.
+ * Redirect titles pointing at an article, as Wikipedia has them ("City (Alaska)", qualifier included); used as
+ * answer aliases once build.ts has dropped the ones that aren't names (scripts/aliases.ts) and the qualifiers.
  * With cacheOnly, returns only what an earlier build already fetched (used for ranks 11+, to stay polite).
  */
 export async function fetchRedirects(title: string, cacheOnly = false): Promise<string[]> {
@@ -101,10 +108,10 @@ export async function fetchRedirects(title: string, cacheOnly = false): Promise<
   const $ = cheerio.load(html);
   const out = new Set<string>();
   $("#mw-whatlinkshere-list > li").each((_, li) => {
-    let t = $(li).find("bdi > a").first().attr("title") ?? "";
+    const t = $(li).find("bdi > a").first().attr("title") ?? "";
     if (/[:/#]/.test(t) || JUNK_REDIRECT.test(t) || ASPECT_REDIRECT.test(t)) return;
-    t = t.replace(/\s*\(.*?\)\s*/g, " ").trim();
-    if (!t || t.split(/\s+/).length > 6) return;
+    const base = t.replace(/\s*\(.*?\)\s*/g, " ").trim();
+    if (!base || base.split(/\s+/).length > 6) return;
     out.add(t);
   });
   return [...out];

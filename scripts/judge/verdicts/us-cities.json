@@ -1,0 +1,25 @@
+{
+  "id": "us-cities",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 9,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 29, "named": 30 },
+  "difficulty": 2,
+  "tags": ["geography", "us", "cities"],
+  "audience": "anyone",
+  "summary": "An ideal daily, and just as good as a Blitz. Everyone gets New York, LA, Chicago and Houston, then the fun is learning that Miami is #41 and San Antonio and Fort Worth beat San Francisco.",
+  "reasons": [
+    "Casual run: New York, LA, Chicago, Houston, Dallas, Phoenix, Philadelphia and San Diego found. Lives went on Miami (#41), San Francisco (#17), Boston (#25), Seattle (#18) and Atlanta (#36), all 'oh, city proper' lessons. 8/10 with the last life on guess 13. Fan got 10/10 with Austin and Jacksonville as the near misses.",
+    "2025 estimates, correct order, clear 'city proper' wording. Common short forms (NYC, LA, Philly, Ft. Worth) all work.",
+    "Blitz is superb: 334 ranked cities, and 29 of 30 quick casual names scored."
+  ],
+  "fixes": [
+    "Missing nicknames: 'DC' (#22 Washington), 'SF', 'San Fran' (#17 San Francisco), 'Indy' (#16 Indianapolis), 'NOLA' (#54 New Orleans), 'Saint Louis' (#80 St. Louis). All are unrecognized today. 'vegas' offers Las Vegas / North Las Vegas; it should go straight to #24 Las Vegas.",
+    "Unranked pool contains world cities (Tokyo, London, Toronto, Jakarta, Mexico City...) that cost a life in a US-only list. Drop non-US cities.",
+    "Junk aliases on top-10 entries: San Antonio 'Monroe May Elementary', 'Monroe may'; San Diego 'San diego beaches'; Fort Worth 'Fort Worth United Soccer Club'; Chicago 'Sister Cities Chicago', 'Land of smelly onions'; Houston 'Houstonians'."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "gdp-per-capita",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": { "scored": 26, "named": 27 },
+  "difficulty": 2,
+  "tags": ["geography", "economics", "wealth"],
+  "audience": "anyone",
+  "summary": "Every answer is a country people know, with fun surprises like Ireland at #3 and Qatar at #19. Tight on lives in classic, excellent as a Blitz.",
+  "reasons": [
+    "Casual found 9/10 but burned all 5 lives on Monaco, Qatar, UAE, Sweden and Germany; it suits Blitz slightly better than classic.",
+    "Monaco is the top row of the source page (World Bank) but has no IMF figure, so it costs a life while showing as unranked. That one feels unfair.",
+    "Clean names and current IMF 2026 data; Liechtenstein's IMF figure is real (member since 2024)."
+  ],
+  "fixes": [
+    "Rows with no IMF figure (Monaco, Bermuda, Cayman Islands and the other N/a rows) should be free, not cost a life: they are famous rich places with no rank in the chosen column.",
+    "Add 'swiss' as an alias of Switzerland (not recognized).",
+    "Drop the junk alias 'Swedish sin' from Sweden (#15)."
+  ]
+}

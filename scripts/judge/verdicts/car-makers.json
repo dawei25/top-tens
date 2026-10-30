@@ -1,0 +1,26 @@
+{
+  "id": "car-makers",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": false,
+  "priority": 5,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 1, "data": 2, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": ["business", "cars", "companies"],
+  "audience": "car fans",
+  "summary": "The ranking is right, but players think in brands and every brand owned by a top-10 group (Kia, Chevrolet, Jeep, Audi, Lexus) costs a life. Fix the brand mapping and it is a fair daily.",
+  "reasons": [
+    "Casual run: Toyota, Ford, Honda, Volkswagen, GM, Hyundai (6/10), then Tesla, BMW, Mercedes, Nissan and Kia took all five lives. Kia should count toward Hyundai Motor Group (#3), not against the player.",
+    "'chevy' is autocorrected to Chery (#15) and 'chevrolet', 'jeep', 'dodge', 'chrysler', 'fiat', 'peugeot', 'audi', 'porsche', 'lexus', 'cadillac', 'volvo' all cost a life though their parent group is in the top 10. With 'groups' in the prompt this is the textbook fairness 1.",
+    "Values look right for 2025 (Toyota 11.3M, VW 9.0M, Hyundai 7.3M). Fan run is clean at 10/10 with Nissan (#13) as a good near miss."
+  ],
+  "fixes": [
+    "Map brands to their parent group in scripts/intent.ts (or a brand table), so they count as that top-10 answer: Kia, Genesis -> Hyundai Motor Group; Chevrolet, Chevy, Cadillac, Buick, GMC -> General Motors; Jeep, Dodge, Ram, Chrysler, Fiat, Peugeot, Citroen, Opel, Vauxhall, Alfa Romeo, Maserati, Fiat Chrysler, FCA, PSA -> Stellantis; Audi, Porsche, Skoda, SEAT, Bentley, Lamborghini -> Volkswagen Group; Lexus, Daihatsu -> Toyota; Acura -> Honda; Volvo, Polestar, Lotus, Zeekr -> Geely; MG -> SAIC Motor; Lincoln -> Ford. At minimum make them free instead of costly.",
+    "'chevy' must not autocorrect to Chery (#15); add 'Chevy' as a known name (alias of the GM group per above, or of Chevrolet in the lexicon).",
+    "Rank the next groups with values instead of leaving them unranked with no stat: Renault Group (about 2.3M), BMW Group (about 2.5M), Mercedes-Benz Group (about 2.2M), Tesla (about 1.6M), Tata Motors, Great Wall, Dongfeng, Mazda, Mitsubishi, Subaru. Tesla, BMW and Mercedes are the most common casual guesses and the near-miss reveal should show their numbers. Ranks 11+ currently stop at #15 (Chery).",
+    "Junk redirect aliases: Toyota 'Toyota sewing machine', 'Shigeru Hayakawa', 'Controversies surrounding Toyota', 'Toyota automobile collectibles', 'Toyota Financial Savings Bank', 'Zeronise'; General Motors 'Shilpan Amin', 'EVerybody in', 'Controversies surrounding General Motors', 'General Motors Pension Trust', 'GM Pension Trust'; Ford 'Driving Skills for Life', 'Ford Philanthropy', 'Auto Motive Power', 'Ford bestselling models'; Honda 'Hero honda passion plus', 'Cbr 150', 'Honda 300ex', 'Honda CL145', 'Soltec', 'Honda Soltec', 'Honda Werther'; Hyundai 'INNOCEAN', 'Hyundai Innocean Communications'; SAIC 'Yanfeng Global Automotive Interior Systems', 'Yanfeng Automotive Interiors'; BYD 'Songsan Dolphin', \"BYD God's Eye\", 'DiLink', 'DiPilot', 'E-Platform 2.0', 'BYD e-Platform', 'DM-i', 'BYD J6'; VW 'Moia', 'CARIAD', 'Volkswagen Marine'. Drop redirects naming people, products, models, controversies, subsidiaries and programs."
+  ]
+}

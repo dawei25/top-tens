@@ -1,0 +1,26 @@
+{
+  "id": "x-accounts",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 20, "named": 24 },
+  "difficulty": 2,
+  "tags": ["entertainment", "internet", "celebrities", "social media"],
+  "audience": "anyone",
+  "summary": "Great pop-culture list everyone can play, with Modi and NASA as the 'oh right' answers. Needs a garbage row and some bad aliases cleaned before it runs as a daily.",
+  "reasons": [
+    "Casual found 8 of 10 quickly, then ran out of lives on Kim Kardashian (#13), Lady Gaga (#11), Selena Gomez (#17), Ariana Grande and Messi (both unranked, pulled in from other platforms' lists). Near misses at #11 to #17 feel fair; Ariana and Messi cost a life with no rank to explain it.",
+    "Blitz works well: 20 of 24 casual names scored, though the scoring pool is only 49 deep.",
+    "Data problems: a footnote parsed as row #50 ('Last updated on 14 September 2026', value 14), 'twitter' not recognized for the @X account at #20, and top-10 aliases that are not names of the account."
+  ],
+  "fixes": [
+    "Drop the junk row #50 'Last updated on 14 September 2026' (value 14); it is the table footnote, not an account. Set source dataAsOf to 2026-09-14 from that footnote.",
+    "Add 'Twitter' and '@Twitter' as aliases of #20 X (the account's old handle).",
+    "Prune non-name aliases on the top 10: Kathryn Mayorga and 'Cristiano Ronaldo sexual misconduct allegations' (Ronaldo), RIP Harambe, Strider Sekhar, Comet Azure, Blastar (Musk), 'Environmental policy of the Obama administration', 'Michelle Obama's husband' (Obama), Doe 174, 'Trump investigations', 'Biden's predecessor', 'Incumbent POTUS', 'Current POTUS' and the approval-rating/opinion-polling redirects (Trump), Hiraben/Heeraben Modi, Damodardas Mulchand Modi, 'Narendra Modi's Google+ Hangout', policy redirects (Modi), Lost Files, Fr8me, Westbury Road, Insane, Coffret 4 CD, 3 CD Collector's Set (Rihanna), NASA Personnel, NASA Grand Prize, Aerospace Safety Advisory Panel, Space Systems Center (NASA), Jeremy bieber, Skylrk, 'Justin Bieber's hair' (Bieber), David Hudson, David Daniel Hudson, Daisy Dove Bloom, Dolly, Meow, Purr, Mad Potion, Immortal Flame, De Soi (Katy Perry), Andrea Swift, Andrea Gardner Swift, Andrea Finlay, Scott Kingsley Swift, Monologue Song, Track 5, Wonderstruck, Incredible Things (Taylor Swift).",
+    "Drop generic one-word aliases from ranks 11+: 'India' on PMO India, 'F.C.' on Manchester United, 'Times' on The New York Times."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "us-states-gdp",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 35, "named": 35 },
+  "difficulty": 2,
+  "tags": ["geography", "economics", "united states"],
+  "audience": "anyone",
+  "summary": "An easy list: every answer is a state you know, and the game is about avoiding New Jersey (#11), Massachusetts (#12) and Virginia (#13). The cutoff is razor thin, which makes the reveal sting in a fair way.",
+  "reasons": [
+    "Casual: 10/10 with 4 lives lost on New Jersey, Massachusetts, Michigan and Virginia, finding North Carolina (#10) with the last life. Fan: 10/10, two lives lost.",
+    "The values look right (2025, California 4.25T), and #9 Washington, #10 North Carolina and #11 New Jersey are within 1% of each other. Short forms work: ny, nc, penn, cali, washington state.",
+    "The answers are easy and the order is predictable, so it is more tense than surprising. As a Blitz it is just naming states, so anyone scores 30+."
+  ],
+  "fixes": [
+    "us-states-gdp: District of Columbia takes rank #36 although the prompt says states. Keep it as a free accepted answer without a rank, and add \"Washington DC\" / \"Washington, D.C.\" as aliases (\"washington dc\" is not recognized now).",
+    "us-states-gdp: drop junk aliases: \"America's Wang\", \"Florida map\", \"Myflorida.com\" (Florida), \"Rockford Academy\", \"Illinois demographics\" (Illinois), \"California–Guangdong relations\" (California), \"Eastern vs Western North Carolina barbecue\" (North Carolina), \"Colorado military facilities\", \"Colorado protected areas\" (Colorado), \"Nevada Annulment\" (Nevada), \"Phoenix Scorpions\", \"Tucson Javelinas\", \"Arizona State Government\", \"Arizona State Board of Education\" (Arizona), \"Idaho Constitution\", \"Idaho State Constitution\", \"Idaho government\", \"Idaho State Tax Commission\" (Idaho), \"Montana Folk Festival\" (Montana), \"Wyoming State Constitution\" (Wyoming), \"Alaska borough\" (Alaska), \"Michigan.org\" (Michigan).",
+    "us-states-gdp: \"virgina\" (a common misspelling) is not recognized. It is free, but the game could offer Virginia."
+  ]
+}
