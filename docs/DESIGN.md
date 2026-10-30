@@ -90,3 +90,20 @@ arms, two long tentacles), and a top 10 has ten slots.** Every answer found is o
 - Decorations are aria-hidden and never delay game state; tests and screen readers see the final state at once.
   `prefers-reduced-motion` gets static states.
 - Play events (`src/game/events.ts`, `onPlay`) are how feedback layers hear about finds, misses, hints and ends.
+
+## 7. The ocean (MVP, October 2026)
+
+The squid leaves the header and lives in a deep-ocean world behind the whole app.
+
+- Backdrop: a retro pixel deep-sea scene behind every screen, drawn at low resolution and scaled up (chunky
+  pixels): faint light from far above fading to near-black, drifting marine snow, distant glowing jellies, rocks and
+  kelp on the seabed, parallax layers for depth.
+- Panels become tinted glass: slightly see-through, so the ocean and the squid show faintly behind the board and the
+  text box. Text contrast stays readable.
+- One squid, always **behind the UI**. It wanders with squid-like pulse-and-glide swimming. It never needs to dodge
+  typing, because it is behind the glass.
+- Reactions (behind the glass): its limbs light for answers found; a find makes it dart and glow; a lost life inks
+  where it is and darts away; a perfect 10 does loops; Blitz momentum makes it swim faster and glow brighter; idle,
+  it sinks and dozes.
+- The tentacle grab (input to row) stays in front: it is the one moment that crosses the glass.
+- Later (not in the MVP): a seafloor that grows from your history, a lanternfish school for the streak, tap tricks.
