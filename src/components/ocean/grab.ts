@@ -6,8 +6,10 @@
  * none, aria-hidden), with the word tile a DOM element above it, so it is the real text in the game font.
  *
  * Timing (s), after a real squid's tentacle strike (the feeding tentacles shoot out in a few tens of ms; the arms
- * are slower): reach, grip, carry, set, retract. About 0.8 s in all. The game is not waiting: the row's text is in
- * the DOM at once (kept transparent until the word lands) and the guess box is already cleared.
+ * are slower): a wait while the squid darts over (none if it is already near), then reach, grip, carry, set,
+ * retract. The word lands within about 1.1 s. The game is not waiting: the row's text is in the DOM at once (kept
+ * transparent until the word lands) and the guess box is already cleared; the word sits where it was typed until
+ * the club takes it.
  *
  * Each grab is its own limb, so a fast typist's overlapping finds each get one. The limb itself is a rope of nodes
  * with both ends pinned (the squid's limb root, and the scripted tip), relaxed each frame (Jakobsen's stick
@@ -35,7 +37,11 @@ const clamp01 = (s: number) => Math.min(1, Math.max(0, s));
 interface Grab {
   rank: number;
   color: string;
+  /** Seconds into the strike; while waiting for the squid, the seconds waited so far. */
   t: number;
+  /** Waiting for the squid to come close before it strikes, at most `wait` s. */
+  waiting: boolean;
+  wait: number;
   reach: number;
   grip: number;
   carry: number;
@@ -49,6 +55,11 @@ interface Grab {
   tile: HTMLElement;
   /** The row being filled: marked while the word is on its way, so its numeral lights when the word lands. */
   row: HTMLElement;
+  /** The row's rect (CSS px), for the splash as the word lands. */
+  rowRect: DOMRect;
+  input: HTMLElement;
+  /** Keeps the row's real text hidden until the word lands. */
+  hide: Animation | null;
   /** Rope nodes, canvas px. */
   x: Float32Array;
   y: Float32Array;
@@ -67,7 +78,12 @@ export interface GrabHost {
   away(rank: number, out: boolean): void;
   /** The limb lights up: the word is set. */
   lit(rank: number): void;
+  /** Close enough to strike (the squid has come over to the guess box). */
+  ready(): boolean;
 }
+
+/** The guess box's text field: inside the floating dock when there is one, else the guess row's. */
+export const GUESS_INPUT = "[data-guess-dock] input, input[data-guess-dock], .guess-row input";
 
 export class Grabs {
   private list: Grab[] = [];
@@ -100,9 +116,12 @@ export class Grabs {
     this.ctx.imageSmoothingEnabled = false;
   }
 
-  /** Start a grab for a find, reading the guess box and the row once, now. Returns false when there is no room. */
-  start(rank: number, scope: ParentNode): boolean {
-    const input = scope.querySelector<HTMLInputElement>(".guess-row input");
+  /**
+   * Start a grab for a find, reading the guess box and the row once, now. With `wait`, the strike holds off until the
+   * squid is close (host.ready) or `wait` s pass. Returns false when there is no room.
+   */
+  start(rank: number, scope: ParentNode, wait = 0): boolean {
+    const input = scope.querySelector<HTMLInputElement>(GUESS_INPUT);
     const row = scope.querySelector<HTMLElement>(`[data-testid="slot"][data-rank="${rank}"]`);
     const name = row?.querySelector<HTMLElement>(".name");
     const text = input?.value.trim();
@@ -110,8 +129,9 @@ export class Grabs {
     const ir = input.getBoundingClientRect();
     const rr = row.getBoundingClientRect();
     const nr = name.getBoundingClientRect();
-    // A row scrolled out of view has nothing to set the word into.
-    if (rr.top < 0 || rr.bottom > ir.top) return false;
+    // A row scrolled out of view (or under a guess bar across the bottom) has nothing to set the word into.
+    const under = rr.left < ir.right && rr.right > ir.left && rr.bottom > ir.top && rr.top < ir.bottom + 8;
+    if (rr.top < 0 || rr.bottom > innerHeight || under) return false;
 
     const cs = getComputedStyle(input);
     const fromSize = parseFloat(cs.fontSize) || 28;
@@ -137,7 +157,10 @@ export class Grabs {
       rank,
       color,
       t: 0,
-      reach: tentacle ? 0.16 : 0.24,
+      waiting: wait > 0,
+      wait,
+      // Struck from close by after a dart: a shorter reach.
+      reach: wait > 0 ? 0.14 : tentacle ? 0.16 : 0.24,
       grip: tentacle ? 0.1 : 0.07,
       carry: 0.28,
       set: 0.07,
@@ -148,6 +171,9 @@ export class Grabs {
       toSize,
       tile,
       row,
+      rowRect: rr,
+      input,
+      hide: null,
       x: new Float32Array(N),
       y: new Float32Array(N),
       ox: new Float32Array(N),
@@ -155,35 +181,45 @@ export class Grabs {
       landed: false,
       lastTip: from,
     };
-    const root = this.host.rootOf(rank);
+    this.list.push(g);
+    if (!g.waiting) this.strike(g);
+
+    // The box's placeholder would show through where the word was: keep it hidden until the club takes the word.
+    input.dataset.grabbing = "";
+    row.dataset.grabbing = "";
+    // The real name waits for the word to land (a hold, cancelled as it lands; capped, in case the ocean stops).
+    const most = (wait + g.reach + g.grip + g.carry + g.set + 0.3) * 1000;
+    if (typeof name.animate === "function") g.hide = name.animate([{ opacity: 0 }, { opacity: 0 }], { duration: most });
+    return true;
+  }
+
+  /** The limb leaves the ocean: its rope starts at the squid's root for it. */
+  private strike(g: Grab) {
+    g.waiting = false;
+    g.t = 0;
+    const root = this.host.rootOf(g.rank);
     for (let i = 0; i < N; i++) {
       g.x[i] = g.ox[i] = root.x;
       g.y[i] = g.oy[i] = root.y;
     }
-    this.list.push(g);
-    this.host.away(rank, true);
+    this.host.away(g.rank, true);
+  }
 
-    // The box's placeholder would show through where the word was: keep it hidden until the word is gone.
-    input.dataset.grabbing = "";
-    row.dataset.grabbing = "";
-    setTimeout(() => delete input.dataset.grabbing, (g.reach + g.grip) * 1000 + 80);
-    // The real name waits for the word to land.
-    const land = (g.reach + g.grip + g.carry + g.set) * 1000;
-    if (typeof name.animate === "function") name.animate([{ opacity: 0 }, { opacity: 0, offset: land / (land + 60) }, { opacity: 1 }], { duration: land + 60 });
-    // A splash of the limb's light across the row as it lands.
+  /** The word is set: the row's text shows, and a splash of the limb's light runs across the row. */
+  private land(g: Grab) {
+    g.hide?.cancel();
+    g.hide = null;
+    const name = g.row.querySelector<HTMLElement>(".name");
+    if (name && typeof name.animate === "function") name.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 60 });
+    const rr = g.rowRect;
     const splash = document.createElement("div");
     splash.className = "grab-splash";
-    splash.style.setProperty("--limb", color);
+    splash.style.setProperty("--limb", g.color);
     Object.assign(splash.style, { left: `${rr.left}px`, top: `${rr.top}px`, width: `${rr.width}px`, height: `${rr.height}px` });
     this.layer.appendChild(splash);
     if (typeof splash.animate === "function")
-      splash.animate([{ opacity: 0 }, { opacity: 0, offset: land / (land + 360) }, { opacity: 1, offset: (land + 30) / (land + 360) }, { opacity: 0 }], {
-        duration: land + 360,
-        fill: "both",
-        easing: "steps(8, end)",
-      });
-    setTimeout(() => splash.remove(), land + 400);
-    return true;
+      splash.animate([{ opacity: 0 }, { opacity: 1, offset: 30 / 360 }, { opacity: 0 }], { duration: 360, fill: "both", easing: "steps(8, end)" });
+    setTimeout(() => splash.remove(), 400);
   }
 
   /** Where the club is (CSS px) and how far out toward the viewer the limb is (0-1), at time t into grab g. */
@@ -230,6 +266,10 @@ export class Grabs {
     const px = this.host.px();
     for (const g of [...this.list]) {
       g.t += dt;
+      if (g.waiting) {
+        if (g.t >= g.wait || this.host.ready()) this.strike(g);
+        else continue;
+      }
       const total = g.reach + g.grip + g.carry + g.set + g.back;
       const landAt = g.reach + g.grip + g.carry + g.set;
       const rootC = this.host.rootOf(g.rank);
@@ -237,6 +277,7 @@ export class Grabs {
       const { p, tug } = this.tip(g, base);
       g.lastTip = p;
 
+      if (g.t >= g.reach + g.grip && g.input.dataset.grabbing !== undefined) delete g.input.dataset.grabbing;
       // The word rides the club; it swells a little as it swings toward the viewer, then shrinks to the row's size.
       if (g.t >= g.reach && !g.landed) {
         const c = clamp01((g.t - g.reach - g.grip) / g.carry);
@@ -250,6 +291,7 @@ export class Grabs {
         g.tile.classList.add("landed");
         delete g.row.dataset.grabbing;
         setTimeout(() => g.tile.remove(), 200);
+        this.land(g);
         this.host.lit(g.rank);
       }
 
@@ -311,6 +353,7 @@ export class Grabs {
     this.dirty = this.list.length > 0;
     const out = this.rects;
     for (const g of this.list) {
+      if (g.waiting) continue;
       const landAt = g.reach + g.grip + g.carry + g.set;
       const base = { x: g.x[0] * this.host.px(), y: g.y[0] * this.host.px() };
       const out01 = this.tip(g, base).out;
@@ -346,7 +389,9 @@ export class Grabs {
   clear() {
     for (const g of this.list) {
       g.tile.remove();
+      g.hide?.cancel();
       delete g.row.dataset.grabbing;
+      delete g.input.dataset.grabbing;
       this.host.away(g.rank, false);
     }
     this.list = [];

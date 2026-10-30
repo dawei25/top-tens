@@ -3,10 +3,12 @@
  * frames, so the page isn't woken on every vsync), paused while the tab is hidden. Each frame it steps the scene, the
  * swim, the squid's limbs and the effects, and draws the low-res canvases: the backdrop (at 15 fps), the squid with
  * the effects in front of it, and, while a word is being grabbed, the overlay above the UI. No layout reads per
- * frame: sizes are read on resize, and on-screen targets (a found row, the guess box, a hovered key) once, when
- * their event happens, or when the squid picks a new waypoint.
+ * frame: sizes are read on resize; the glass panels ([data-glass]) and the guess dock ([data-guess-dock]) are read
+ * lazily after a resize, a scroll or an event, when the squid next needs them (a new waypoint, a find); a found
+ * row or a hovered key once, when its event happens.
  *
- * It listens to play events for the reactions (a find: the squid darts to the guess box and grabs the word; a lost
+ * It listens to play events for the reactions (a find: the squid darts head-first to the guess box, then strikes
+ * and grabs the word, at once if it is already near; a lost
  * life inks and flees; a perfect 10 loops and bursts; Blitz hits) and to input for idling: after IDLE_MS without a
  * key or a tap, the squid sinks to the seabed and dozes until the next one. With reduced motion it draws one still
  * frame: the squid parked, its limbs at rest, lit.
@@ -16,7 +18,7 @@ import { reducedMotion } from "../pixel";
 import { limbColor } from "../squid/colors";
 import { SquidBody, type Motion } from "./body";
 import { Fx } from "./fx";
-import { Grabs } from "./grab";
+import { GUESS_INPUT, Grabs } from "./grab";
 import { Scene } from "./scene";
 import { squidAt, type OceanSquidState } from "./store";
 import { Swimmer, type Pt } from "./swim";
@@ -51,7 +53,17 @@ const GOLD = "#ffd166";
 const PINK = "#ff5d8f";
 const WHITE = "#e8fbff";
 
-/** Debug numbers for frame-time checks, exposed as window.__ocean when the URL has ?oceanstats. */
+/** Panels the ocean shows through: marked [data-glass], or (a layout without the marks) the app's column. */
+const GLASS = "[data-glass]";
+const DOCK = "[data-guess-dock]";
+const DOCK_FALLBACK = ".guess-row";
+/** The heading check (dev stats): travel faster than this (CSS px/s) must be within OFF_DEG of the heading. */
+const CHECK_SPEED = 15;
+const OFF_DEG = 30;
+/** A find: the squid darts over first, unless it is near the box already; it strikes after at most WAIT_S. */
+const WAIT_S = 0.42;
+
+/** Debug numbers for frame-time and motion checks, exposed as window.__ocean in dev when the URL has ?oceanstats. */
 interface Stats {
   frames: number;
   /** Time spent in the frame callback, total and worst. */
@@ -65,6 +77,15 @@ interface Stats {
   x: number;
   y: number;
   jet: number;
+  /** Frames checked for head-first travel (moving faster than CHECK_SPEED), and those off by more than OFF_DEG. */
+  checked: number;
+  offHeading: number;
+  worstDeg: number;
+  /** The last few off-heading frames: what the squid was doing. */
+  offLog: string[];
+  /** Reactions seen: finds, inks, wins, Blitz hits, dozes. */
+  seen: Record<string, number>;
+  state: string;
 }
 
 export function startOcean(els: OceanEls): Ocean {
@@ -95,7 +116,13 @@ export function startOcean(els: OceanEls): Ocean {
   const timers: { at: number; fn: () => void }[] = [];
   const later = (s: number, fn: () => void) => timers.push({ at: t + s, fn });
 
-  const stats: Stats | null = typeof location !== "undefined" && location.search.includes("oceanstats") ? { frames: 0, drawMs: 0, maxMs: 0, maxGap: 0, slow: 0, at: 0, x: 0, y: 0, jet: 0 } : null;
+  // Dev only: production builds drop this (and the hooks below) entirely.
+  const stats: Stats | null =
+    import.meta.env.DEV && typeof location !== "undefined" && location.search.includes("oceanstats")
+      ? { frames: 0, drawMs: 0, maxMs: 0, maxGap: 0, slow: 0, at: 0, x: 0, y: 0, jet: 0, checked: 0, offHeading: 0, worstDeg: 0, offLog: [], seen: {}, state: "" }
+      : null;
+  /** The squid as drawn last frame (CSS px, heading), for the heading check; null after a jump (a resize). */
+  let drawn: { x: number; y: number; a: number } | null = null;
   if (stats) {
     const g = globalThis as unknown as { __ocean: Stats; __oceanGo: (x: number, y: number) => void };
     g.__ocean = stats;
@@ -121,6 +148,7 @@ export function startOcean(els: OceanEls): Ocean {
       body.flash(rank, t);
       glow(limbColor(rank), 1, 0);
     },
+    ready: () => nearStrike(),
   });
 
   /** Canvas px of a viewport point. */
@@ -145,6 +173,8 @@ export function startOcean(els: OceanEls): Ocean {
   function resize() {
     vw = innerWidth;
     vh = innerHeight;
+    layout.dirty = true;
+    drawn = null;
     px = vw < 700 ? 3 : 4;
     const cw = Math.ceil(vw / px);
     const ch = Math.ceil(vh / px);
@@ -256,6 +286,30 @@ export function startOcean(els: OceanEls): Ocean {
     draw(backToo);
     if (stats) {
       const ms = performance.now() - t0;
+      // Head-first: the drawn squid's travel this frame against its heading (halfway through the frame's turn).
+      const cx = body.pose.x * px;
+      const cy = body.pose.y * px;
+      const a = swimmer.tilt;
+      if (drawn && dt > 0) {
+        const vx = (cx - drawn.x) / dt;
+        const vy = (cy - drawn.y) / dt;
+        const v = Math.hypot(vx, vy);
+        if (v > CHECK_SPEED) {
+          const d = a - drawn.a;
+          const mid = ((drawn.a + (d - 360 * Math.round(d / 360)) / 2) * Math.PI) / 180;
+          const cos = (vx * Math.sin(mid) - vy * Math.cos(mid)) / v;
+          const off = (Math.acos(Math.max(-1, Math.min(1, cos))) * 180) / Math.PI;
+          stats.checked++;
+          stats.worstDeg = Math.max(stats.worstDeg, off);
+          if (off > OFF_DEG) {
+            stats.offHeading++;
+            stats.offLog.push(`${swimmer.state} v=${v.toFixed(0)} off=${off.toFixed(0)}`);
+            if (stats.offLog.length > 20) stats.offLog.shift();
+          }
+        }
+      }
+      drawn = { x: cx, y: cy, a };
+      stats.state = swimmer.state;
       stats.frames++;
       stats.drawMs += ms;
       stats.maxMs = Math.max(stats.maxMs, ms);
@@ -288,13 +342,15 @@ export function startOcean(els: OceanEls): Ocean {
   /* ---------------- idle ---------------- */
 
   function doze() {
-    // Read once, as it nods off: settle in open water beside the column if there is any.
-    swimmer.doze(openWater()?.x);
+    // Read once, as it nods off: settle in open water if there is any.
+    if (stats) stats.seen.doze = (stats.seen.doze ?? 0) + 1;
+    swimmer.doze(openSpot(true)?.x);
     squid.dataset.doze = "";
     bubbleIn = 2;
   }
   function onInput() {
     lastInput = performance.now();
+    layout.dirty = true;
     if (swimmer.behaviour === "doze") {
       swimmer.wake();
       delete squid.dataset.doze;
@@ -304,23 +360,97 @@ export function startOcean(els: OceanEls): Ocean {
   /* ---------------- where to be seen ---------------- */
 
   /**
-   * On a phone the column fills the width and the panels cover most of the ocean, so most new waypoints are in the
-   * strips where the squid shows: around the input bar (clearer glass, close to the next grab), or the open water
-   * around Home's title. Read when a waypoint is picked (every few seconds), not per frame.
+   * The glass panels and the guess dock, in viewport CSS px. Read lazily, at most once per resize, scroll or event
+   * (and never older than a few seconds when asked for), never per frame. Without [data-glass] marks, the app's
+   * column (main) stands in for the glass; without [data-guess-dock], the guess row.
+   */
+  const layout = { dirty: true, at: 0, glass: [] as DOMRect[], dock: null as DOMRect | null };
+  function readLayout() {
+    const now = performance.now();
+    if (!layout.dirty && now - layout.at < 3000) return layout;
+    layout.dirty = false;
+    layout.at = now;
+    const marked = document.querySelectorAll(GLASS);
+    const els = marked.length ? [...marked] : [document.querySelector("main")].filter((e) => e !== null);
+    layout.glass = els.map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < vh);
+    const dock = document.querySelector(DOCK) ?? document.querySelector(DOCK_FALLBACK);
+    const dr = dock?.getBoundingClientRect();
+    layout.dock = dr && dr.width > 0 && dr.bottom > 0 && dr.top < vh ? dr : null;
+    return layout;
+  }
+
+  /** How far a point is from the nearest glass panel (0 inside one). */
+  function clearance(x: number, y: number, glass: DOMRect[]) {
+    let best = Infinity;
+    for (const r of glass) {
+      const dx = Math.max(r.left - x, 0, x - r.right);
+      const dy = Math.max(r.top - y, 0, y - r.bottom);
+      best = Math.min(best, Math.hypot(dx, dy));
+    }
+    return best;
+  }
+
+  /**
+   * A spot in open water (the viewport minus the glass), where the squid shows: sampled, scored by how clear of the
+   * glass it is, and on wide screens favouring the water right of the board (the tallest panel, when it sits left).
+   * `near` favours spots close to the squid (dozing, the loops); `room` is the clearance it needs. Null when the
+   * glass covers everything (phones).
+   */
+  function openSpot(near = false, room = 0): Pt | null {
+    const { glass } = readLayout();
+    const sw = SQUID_W * px;
+    const sh = SQUID_H * px;
+    const need = Math.max(sw * 0.9, room);
+    const tall = glass.reduce<DOMRect | null>((a, r) => (!a || r.height > a.height ? r : a), null);
+    const boardRight = vw >= 900 && tall && tall.left + tall.width / 2 < vw / 2 ? tall.right : null;
+    let best: Pt | null = null;
+    let score = -Infinity;
+    for (let i = 0; i < 18; i++) {
+      const x = sw + Math.random() * Math.max(1, vw - sw * 2);
+      const y = sh * 0.6 + Math.random() * Math.max(1, vh * 0.88 - sh * 0.6);
+      const c = clearance(x, y, glass);
+      if (c < need) continue;
+      let k = Math.min(c, 160) + Math.random() * 50;
+      if (boardRight !== null && x > boardRight + sw) k += 140;
+      if (near) k -= Math.hypot(x - swimmer.x, y - swimmer.y) * 0.4;
+      if (k > score) {
+        score = k;
+        best = { x, y };
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Each new waypoint: mostly in open water. With none (a phone, where the glass covers most of the ocean), most go
+   * to the strips where the squid shows: around the guess dock (clear glass, close to the next grab), or the open
+   * water around Home's title.
    */
   function prefer(): Pt | null {
-    if (openWater() || Math.random() > 0.7) return null;
+    const open = openSpot();
+    if (open) return Math.random() < 0.85 ? open : null;
+    if (Math.random() > 0.7) return null;
     const sw = SQUID_W * px;
     const x = sw + Math.random() * Math.max(1, vw - sw * 2);
-    const bar = document.querySelector(".guess")?.getBoundingClientRect();
-    if (bar && bar.top < vh && bar.bottom > 0) {
-      const top = Math.max(bar.top + 20, 0);
-      const bottom = Math.min(bar.bottom, vh) - 10;
+    const bar = readLayout().dock;
+    if (bar) {
+      const top = Math.max(bar.top - 20, 0);
+      const bottom = Math.min(bar.bottom + 10, vh) - 10;
       return { x, y: top + Math.random() * Math.max(1, bottom - top) };
     }
     const title = document.querySelector(".home .title")?.getBoundingClientRect();
     if (title && title.bottom > 0) return { x, y: Math.max(SQUID_H * px * 0.5, title.top + Math.random() * title.height) };
     return null;
+  }
+
+  /** Where the squid strikes from at the guess dock: beside it in open water, or just above it behind the glass. */
+  function dockPoint(): Pt | null {
+    const r = readLayout().dock;
+    if (!r) return null;
+    const sh = SQUID_H * px;
+    const p = besideRect(r);
+    // Its limbs hang below it: hold the mantle above the box, so they hang beside it, not off the screen.
+    return { x: p.x, y: Math.min(p.y - sh * 0.3, vh - sh * 1.25) };
   }
 
   /* ---------------- reactions ---------------- */
@@ -359,6 +489,9 @@ export function startOcean(els: OceanEls): Ocean {
     if (!el) return null;
     const r = el.getBoundingClientRect();
     if (r.bottom < 0 || r.top > vh) return null;
+    return besideRect(r);
+  }
+  function besideRect(r: DOMRect): Pt {
     const y = r.top + r.height / 2;
     const off = SQUID_W * px * 1.15;
     const sides = [r.left - off, r.right + off].filter((x) => x > off && x < vw - off);
@@ -366,30 +499,25 @@ export function startOcean(els: OceanEls): Ocean {
     return { x: sides.reduce((a, b) => (Math.abs(a - swimmer.x) <= Math.abs(b - swimmer.x) ? a : b)), y };
   }
 
-  /** The middle of the open water beside the app's column nearest the squid, or null if the column fills the width. */
-  function openWater(): Pt | null {
-    const main = document.querySelector("main");
-    if (!main) return null;
-    const r = main.getBoundingClientRect();
-    const need = SQUID_W * px * 2.2;
-    const xs = [r.left >= need ? r.left / 2 : null, vw - r.right >= need ? (r.right + vw) / 2 : null].filter((x) => x !== null);
-    if (!xs.length) return null;
-    const x = xs.reduce((a, b) => (Math.abs(a - swimmer.x) <= Math.abs(b - swimmer.x) ? a : b));
-    return { x, y: Math.min(vh * 0.6, Math.max(vh * 0.3, swimmer.y)) };
-  }
-
   let pendingInk: "small" | "big" | null = null;
+  /** Where the squid is headed to strike from (a find), or null: grabs strike once it is within strikeR() of it. */
+  let strikeAt: Pt | null = null;
+  const strikeR = () => Math.max(110, Math.min(vw, vh) * 0.2);
+  const nearStrike = () => !strikeAt || Math.hypot(strikeAt.x - swimmer.x, strikeAt.y - swimmer.y) < strikeR();
+
   function onEvent(e: PlayEvent) {
     onInput();
     if (still) return;
+    if (stats) stats.seen[e.kind] = (stats.seen[e.kind] ?? 0) + 1;
     switch (e.kind) {
       case "found": {
-        // It goes for the word: darts to the guess box (beside it, in open water, on wide screens) and reaches.
-        const guessRow = document.querySelector(".guess-row");
-        if (grabs.start(e.rank, document)) {
-          const p = besidePoint(guessRow);
-          // Its limbs hang below it: hold the mantle above the box, so they hang beside it, not off the screen.
-          if (p) swimmer.dart({ x: p.x, y: Math.min(p.y - SQUID_H * px * 0.3, vh - SQUID_H * px * 1.25) });
+        // It goes for the word: darts head-first to the guess box (beside it, in open water, on wide screens), then
+        // strikes; already near, it strikes at once. The box is cleared and the row filled in meanwhile.
+        const p = document.querySelector(GUESS_INPUT) ? dockPoint() : null;
+        strikeAt = p;
+        const near = nearStrike();
+        if (grabs.start(e.rank, document, near ? 0 : WAIT_S)) {
+          if (p && !near) swimmer.dart(p);
         } else {
           const p = besidePoint(document.querySelector(`[data-testid="slot"][data-rank="${e.rank}"]`));
           swimmer.dart(p ?? { x: Math.random() * vw, y: vh * (0.2 + Math.random() * 0.5) });
@@ -411,8 +539,8 @@ export function startOcean(els: OceanEls): Ocean {
           queueMicrotask(flushInk);
         } else if (e.status === "won") {
           // Out into open water first if there is any beside the column, so the loops show (after the last grab).
-          later(0.6, () => {
-            const open = openWater();
+          later(1.1, () => {
+            const open = openSpot(true, Math.min(Math.max(Math.min(vw, vh) * 0.11, 36), 110) * 2);
             if (open) swimmer.dart(open);
             later(open ? 1.1 : 0.35, () => swimmer.loops(2, () => burst([CYAN, GOLD, PINK], true)));
           });
@@ -443,6 +571,7 @@ export function startOcean(els: OceanEls): Ocean {
 
   function setState(s: OceanSquidState) {
     const prev = state;
+    layout.dirty = true;
     state = s;
     heat = s.heat;
     lit = new Set(s.lit.filter((r) => r >= 1 && r <= 10));
@@ -488,7 +617,10 @@ export function startOcean(els: OceanEls): Ocean {
   const onVis = () => (document.visibilityState === "hidden" ? pause() : start());
   const inputs = ["keydown", "pointerdown", "wheel", "touchstart"] as const;
 
+  const onScroll = () => (layout.dirty = true);
   addEventListener("resize", resize);
+  addEventListener("scroll", onScroll, { passive: true, capture: true });
+  addEventListener("hashchange", onScroll);
   document.addEventListener("visibilitychange", onVis);
   mq?.addEventListener("change", onMotion);
   for (const ev of inputs) addEventListener(ev, onInput, { passive: true, capture: true });
@@ -510,6 +642,8 @@ export function startOcean(els: OceanEls): Ocean {
     stop() {
       pause();
       removeEventListener("resize", resize);
+      removeEventListener("scroll", onScroll, { capture: true });
+      removeEventListener("hashchange", onScroll);
       document.removeEventListener("visibilitychange", onVis);
       mq?.removeEventListener("change", onMotion);
       for (const ev of inputs) removeEventListener(ev, onInput, { capture: true });
