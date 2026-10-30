@@ -1,8 +1,9 @@
 /**
- * The ocean's engine: one requestAnimationFrame loop for the whole layer, at about 30 fps, paused while the tab is
- * hidden. Each frame it steps the scene, the squid and the effects, draws the two low-res canvases (behind and in
- * front of the squid) and writes a single transform on the squid. No layout reads per frame: sizes are read on
- * resize, and on-screen targets (a found row, a hovered key) once, when their event happens.
+ * The ocean's engine: one requestAnimationFrame loop for the whole layer, at about 30 fps (a timer sleeps between
+ * frames, so the page isn't woken on every vsync), paused while the tab is hidden. Each frame it steps the scene, the
+ * squid and the effects, draws the low-res canvases (the backdrop at 15 fps, the effects in front of the squid when
+ * there are any) and writes a single transform on the squid. No layout reads per frame: sizes are read on resize,
+ * and on-screen targets (a found row, a hovered key) once, when their event happens.
  *
  * It listens to play events for the reactions (a find darts and glows, a lost life inks and flees, a perfect 10
  * loops and bursts, Blitz hits) and to input for idling: after IDLE_MS without a key or a tap, the squid sinks to
@@ -29,6 +30,8 @@ export interface Ocean {
 }
 
 const FRAME_MS = 1000 / 30;
+/** The backdrop's own rate: its pieces move a pixel at a time, a few times a second. */
+const BG_FPS = 15;
 const IDLE_MS = 20000;
 /** Sprite grid of the squid (sprite.ts). */
 const SPRITE_W = 20;
@@ -44,9 +47,13 @@ const WHITE = "#e8fbff";
 /** Debug numbers for frame-time checks, exposed as window.__ocean when the URL has ?oceanstats. */
 interface Stats {
   frames: number;
+  /** Time spent in the frame callback, total and worst. */
   drawMs: number;
   maxMs: number;
-  since: number;
+  /** Gaps between frames: the worst, and how many ran over 50 ms (a dropped beat at 30 fps). */
+  maxGap: number;
+  slow: number;
+  at: number;
 }
 
 export function startOcean(els: OceanEls): Ocean {
@@ -61,8 +68,11 @@ export function startOcean(els: OceanEls): Ocean {
   let vh = 0;
   let t = 20 + Math.random() * 40;
   let raf = 0;
+  let wait: ReturnType<typeof setTimeout> | 0 = 0;
   let last = 0;
+  let bgIn = 0;
   let frontDirty = false;
+  let backDirty = false;
   let running = false;
   let still = reducedMotion();
   let lastInput = performance.now();
@@ -74,7 +84,7 @@ export function startOcean(els: OceanEls): Ocean {
   const timers: { at: number; fn: () => void }[] = [];
   const later = (s: number, fn: () => void) => timers.push({ at: t + s, fn });
 
-  const stats: Stats | null = typeof location !== "undefined" && location.search.includes("oceanstats") ? { frames: 0, drawMs: 0, maxMs: 0, since: performance.now() } : null;
+  const stats: Stats | null = typeof location !== "undefined" && location.search.includes("oceanstats") ? { frames: 0, drawMs: 0, maxMs: 0, maxGap: 0, slow: 0, at: 0 } : null;
   if (stats) (globalThis as unknown as { __ocean: Stats }).__ocean = stats;
 
   const world = () => ({
@@ -125,7 +135,8 @@ export function startOcean(els: OceanEls): Ocean {
   function place() {
     const sw = SPRITE_W * px;
     const sh = SPRITE_H * px;
-    const tf = `translate3d(${Math.round(swimmer.x - sw / 2)}px, ${Math.round(swimmer.y - sh * PIVOT_Y)}px, 0) rotate(${swimmer.tilt.toFixed(1)}deg) scale(${swimmer.sx.toFixed(3)}, ${swimmer.sy.toFixed(3)})`;
+    // Whole px, whole degrees, scale in hundredths: a slow drift doesn't rewrite the transform every frame.
+    const tf = `translate3d(${Math.round(swimmer.x - sw / 2)}px, ${Math.round(swimmer.y - sh * PIVOT_Y)}px, 0) rotate(${Math.round(swimmer.tilt)}deg) scale(${swimmer.sx.toFixed(2)}, ${swimmer.sy.toFixed(2)})`;
     if (tf !== lastTransform) {
       squid.style.transform = tf;
       lastTransform = tf;
@@ -135,9 +146,16 @@ export function startOcean(els: OceanEls): Ocean {
     squidAt.live = true;
   }
 
-  function draw() {
-    scene.draw(bctx, t);
-    fx.drawBack(bctx);
+  /**
+   * Draw a frame. The backdrop only moves by a pixel now and then (snow, kelp, the ridges' drift), so it is redrawn
+   * at BG_FPS, or every frame while a bloom glows on it; the squid and the effects in front run at the full rate.
+   */
+  function draw(backToo = true) {
+    if (backToo || fx.back || backDirty) {
+      scene.draw(bctx, t);
+      fx.drawBack(bctx);
+      backDirty = fx.back;
+    }
     if (fx.front || frontDirty) {
       fctx.clearRect(0, 0, front.width, front.height);
       fx.drawFront(fctx);
@@ -146,16 +164,30 @@ export function startOcean(els: OceanEls): Ocean {
     place();
   }
 
+  /** 30 fps; asleep on the seabed nothing hurries, so the whole ocean idles at the backdrop's rate. */
+  const frameMs = () => (swimmer.asleep ? 1000 / BG_FPS : FRAME_MS);
+
   function frame(now: number) {
-    raf = requestAnimationFrame(frame);
-    if (now - last < FRAME_MS - 2) return;
+    raf = 0;
+    if (!running) return;
+    // Woken early (timers are coarse): wait for the next vsync.
+    if (now - last < frameMs() - 6) {
+      raf = requestAnimationFrame(frame);
+      return;
+    }
     try {
       tick(now);
     } catch (err) {
       // Decorative: a bug here stops the ocean (a still frame stays), never the game.
       pause();
       console.error(err);
+      return;
     }
+    // Sleep until just before the next frame is due, so the page is only woken ~30 times a second.
+    wait = setTimeout(() => {
+      wait = 0;
+      if (running) raf = requestAnimationFrame(frame);
+    }, Math.max(0, frameMs() - (performance.now() - now) - 10));
   }
 
   function tick(now: number) {
@@ -181,12 +213,19 @@ export function startOcean(els: OceanEls): Ocean {
       fx.sparksAt(p.x, p.y, 1, 3, heat >= 4 ? [GOLD, CYAN, WHITE] : [CYAN, WHITE]);
     }
     fx.step(dt);
-    draw();
+    bgIn -= dt;
+    const backToo = bgIn <= 0;
+    if (backToo) bgIn += 1 / BG_FPS;
+    draw(backToo);
     if (stats) {
       const ms = performance.now() - t0;
       stats.frames++;
       stats.drawMs += ms;
       stats.maxMs = Math.max(stats.maxMs, ms);
+      const gap = stats.at ? now - stats.at : 0;
+      stats.at = now;
+      stats.maxGap = Math.max(stats.maxGap, gap);
+      if (gap > 50) stats.slow++;
     }
   }
 
@@ -194,11 +233,14 @@ export function startOcean(els: OceanEls): Ocean {
     if (running || still || document.visibilityState === "hidden") return;
     running = true;
     last = performance.now();
+    bgIn = 0;
     raf = requestAnimationFrame(frame);
   }
   function pause() {
     running = false;
     cancelAnimationFrame(raf);
+    clearTimeout(wait);
+    raf = wait = 0;
   }
 
   /* ---------------- idle ---------------- */

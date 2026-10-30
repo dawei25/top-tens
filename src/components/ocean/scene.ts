@@ -48,6 +48,10 @@ const TIP_COLORS = ["#4de3ff", "#ff5d8f", "#ffd166", "#4de3ff", "#b48cff"];
 
 interface Ray {
   c: HTMLCanvasElement;
+  /** Bounding box within the canvas: left edge, width, height (from the top). */
+  x: number;
+  w: number;
+  h: number;
   phase: number;
   base: number;
 }
@@ -89,6 +93,7 @@ export class Scene {
   private water!: HTMLCanvasElement;
   private rays: Ray[] = [];
   private ridges: HTMLCanvasElement[] = [];
+  private ridgeTop: number[] = [];
   /** The near ridge's top edge per tile column, for rooting kelp and resting the squid. */
   private floor: Int16Array = new Int16Array(0);
   private kelp: Kelp[] = [];
@@ -108,6 +113,8 @@ export class Scene {
     const mid = this.ridge(w, h, r, { top: 0.14, rough: 0.03, rocks: 6, rockR: [6, 14], colors: MID });
     const near = this.ridge(w, h, r, { top: 0.075, rough: 0.015, rocks: 4, rockR: [8, 18], colors: NEAR });
     this.ridges = [far.c, mid.c, near.c];
+    // The highest pixel of each (sponges stand up to 10 px over the near ridge).
+    this.ridgeTop = [far, mid, near].map((l) => Math.max(0, Math.min(...l.top) - 12));
     this.floor = near.top;
     this.kelp = Array.from({ length: Math.round(w / 38) + 3 }, () => {
       const x = Math.floor(r() * w);
@@ -198,7 +205,8 @@ export class Scene {
     // Light from far above: shafts that breathe and lean a little.
     for (const ray of this.rays) {
       ctx.globalAlpha = ray.base * (0.55 + 0.45 * Math.sin(t * 0.19 + ray.phase));
-      ctx.drawImage(ray.c, Math.round(Math.sin(t * 0.06 + ray.phase) * 2), 0);
+      const dx = Math.round(Math.sin(t * 0.06 + ray.phase) * 2);
+      ctx.drawImage(ray.c, ray.x, 0, ray.w, ray.h, ray.x + dx, 0, ray.w, ray.h);
     }
     ctx.globalAlpha = 1;
     this.tile(ctx, 0, t);
@@ -213,10 +221,15 @@ export class Scene {
     ctx.globalAlpha = 1;
   }
 
+  /** A ridge tile, drifted and wrapped; only its band at the bottom is copied. */
   private tile(ctx: Ctx, i: number, t: number) {
-    const off = Math.floor(t * DRIFT[i]) % this.w;
-    ctx.drawImage(this.ridges[i], -off, 0);
-    if (off > 0) ctx.drawImage(this.ridges[i], this.w - off, 0);
+    const { w } = this;
+    const c = this.ridges[i];
+    const y = this.ridgeTop[i];
+    const hh = this.h - y;
+    const off = Math.floor(t * DRIFT[i]) % w;
+    ctx.drawImage(c, off, y, w - off, hh, 0, y, w - off, hh);
+    if (off > 0) ctx.drawImage(c, 0, y, off, hh, w - off, y, off, hh);
   }
 
   private drawSnow(ctx: Ctx, layer: number, color: string) {
@@ -347,7 +360,18 @@ export class Scene {
         }
       }
       ctx.putImageData(img, 0, 0);
-      return { c, phase: r() * 6.28, base: 0.07 + r() * 0.05 };
+      // Its bounding box, so a frame copies only the shaft, not the whole screen.
+      let x1 = 0;
+      let x2 = 0;
+      for (let y = 0; y < len; y++) {
+        const half = width * (1 + (y / h) * 1.6);
+        const cx = x0 + slant * y;
+        x1 = y ? Math.min(x1, cx - half) : cx - half;
+        x2 = y ? Math.max(x2, cx + half) : cx + half;
+      }
+      const left = Math.max(0, Math.floor(x1) - 1);
+      const box = { x: left, w: Math.max(1, Math.min(w, Math.ceil(x2) + 1) - left), h: Math.max(1, Math.ceil(len)) };
+      return { c, ...box, phase: r() * 6.28, base: 0.07 + r() * 0.05 };
     });
   }
 

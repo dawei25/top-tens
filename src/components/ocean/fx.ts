@@ -82,6 +82,10 @@ export class Fx {
     return this.blobs.length + this.rings.length + this.sparks.length + this.bubbles.length > 0;
   }
 
+  get back() {
+    return this.blooms.length > 0;
+  }
+
   clear() {
     this.blobs = [];
     this.rings = [];
