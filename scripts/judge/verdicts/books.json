@@ -1,0 +1,27 @@
+{
+  "id": "books",
+  "judgedAt": "2026-10-30",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 3,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 3, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 9, "livesLost": 5, "guesses": 18 },
+  "blitzCasual": null,
+  "summary": "Great topic, punishing classic game: the obvious guesses are famous modern bestsellers that sit at #11 to #108 and each cost a life. Belongs in Blitz once the rebuild gives it stats.",
+  "reasons": [
+    "Casual player found 3 (Harry Potter 1, Da Vinci Code, The Hobbit) and lost all 5 lives on Hunger Games, Fifty Shades, Mockingbird, Gatsby and Catcher in the Rye before getting to The Alchemist.",
+    "The top 10 leans on old and translated classics (Tale of Two Cities, Dream of the Red Chamber, She) while the 160-deep pool holds every famous modern novel, so the natural guesses are costly misses.",
+    "The Bible, Quran, Lord of the Rings, Twilight and Don Quixote are free but say 'not an answer for this list' with no reason given; players will think the list is broken.",
+    "Fan found 9 but still ran out of lives; She: A History of Adventure is a stretch almost nobody under 35 knows.",
+    "Matcher is solid: sorcerer's stone, harry potter 1, philosophers stone, alice in wonderland, little prince, davinci code, tale of two cities all match.",
+    "Strong Blitz candidate after the rebuild: an informal 90 s run scored 26 of 30 named titles."
+  ],
+  "fixes": [
+    "Prompt should say religious and political texts and multi-volume works are excluded, e.g. 'Name the 10 best-selling single books of all time (no religious or political texts)', so Bible, Quran, Little Red Book and Lord of the Rings don't feel like wrong rejections.",
+    "Drop universeCategories 'Novels adapted into films': the category page only adds obscure titles (Doom 94, Heart Lock, Junkers Come Here, Lalsalu, Nondito Noroke, The Garden of Evening Mists, Women Without Men) that cost a life and add nothing.",
+    "Clean the garbled extra name '六星占術によるあなたの運命 Tells Your Fortune)' (stray parenthesis, half-translated).",
+    "Prune junk redirect aliases on the top 10: character and plot names (Vengeance, Roger Cly, Mrs. Cruncher, Théophile Gabelle, Emily Brent, Vera Claythorne, Sophie Neveu, Bezu Fache, Leigh Teabing, Cryptex, Arkenstone, Asteroid B, B 612), 'The Da Vinci Code paintings', 'Lord of the Rings Prequel' and the inverted 'Tale of Two Cities, A'.",
+    "After the rebuild attaches sales figures, re-judge for daily-blitz."
+  ]
+}

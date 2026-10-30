@@ -1,0 +1,24 @@
+{
+  "id": "countries-gdp",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 5, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": null,
+  "summary": "A clean, famous prompt where everyone gets the first seven and the fight is over Russia, Italy and Brazil versus Canada, Korea and Australia. Good daily, a bit easy for fans.",
+  "reasons": [
+    "Every top-10 country is a household name; US, China, Japan, Germany, UK, India and France are near-automatic",
+    "The challenge is the near misses: Canada #11, South Korea #12, Mexico #13, Australia #14, Spain #15 all feel fair when they cost a life",
+    "Casual sim found all 10 but with 4 lives gone, so the last few picks are tense; a weaker casual stalls at 7",
+    "Data is current (IMF 2026 column), no dependency traps in the top 10, and common forms (usa, america, uk, england, britain, prc, brasil) all match",
+    "Not Blitz-ready in this build (no stats); it should make a strong Blitz after the pending rebuild"
+  ],
+  "fixes": [
+    "Add 's korea' and 's. korea' as aliases for South Korea (currently not recognized; free, but it reads as a bug)",
+    "Drop junk redirect aliases on ranks 11+: 'Snow Mexico' (Canada), 'Languages of Saudi Arabia', 'Irish politics', 'Finnishness', 'Bibliography of Finland', 'Swedish origin', 'Argentina Information', 'National symbols of Chile', 'Cultural heritage of Chile', 'Third Republic' (South Africa), 'Languages of Vietnam'",
+    "Build has no category; topics.ts says Geography, so the pending rebuild should carry it through for schedule rotation"
+  ]
+}

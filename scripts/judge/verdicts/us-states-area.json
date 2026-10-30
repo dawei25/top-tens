@@ -1,0 +1,27 @@
+{
+  "id": "us-states-area",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 2, "data": 1, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": null,
+  "summary": "The build has the wrong top 10: Nevada (really #7) is missing and charges a life, and Idaho (really #14) is in its place. Fixed, it is a solid, easy-ish daily.",
+  "reasons": [
+    "The Wikipedia table has bad km2 cells: Nevada 382.936, Idaho 275,213, Florida 183.924. The mi2 column is right.",
+    "So Nevada ranks #54 and costs a life, the most natural guess on the list after the big four.",
+    "Idaho sits at #7 instead of #14, so the board teaches a wrong fact.",
+    "Correct top 10: Alaska, Texas, California, Montana, New Mexico, Arizona, Nevada, Colorado, Oregon, Wyoming.",
+    "Once fixed: everyone knows the names, near misses are fair and fun (Michigan #11 via the Great Lakes, Utah #13).",
+    "A bit gimme-heavy for Americans: listing the big western states nearly clears it.",
+    "Not Blitz-ready yet (no stats); with stats from the rebuild, 50 states would make a deep Blitz."
+  ],
+  "fixes": [
+    "us-states-area: take values from the mi2 column (\"Total area / mi\", unit mi2) or convert mi2 x 2.58999 to km2; the km2 cells for Nevada (382.936), Idaho (275,213) and Florida (183.924) are wrong on the source page. Expected after fix: #7 Nevada 286,380 km2, Idaho #14 216,443, Florida #22 170,312.",
+    "Pipeline guard: flag a value parsed with a dot as thousands separator (382.936) or a km2/mi2 ratio far from 2.59 in the same row, instead of ranking it silently.",
+    "Postal codes are inconsistent: AZ, TX, AK, WY match but NM, NV, CO, OR, MT do not. Add all 50 USPS codes for the us-states universe (free misses, but uneven).",
+    "Drop junk aliases: \"City\" (Georgia, and it also offers Alaska), \"Arizona Governor's Mansion\", \"Arizona Department of Commerce\", \"Wyoming factsheet\", \"Wyoming metropolitan areas\", \"Montana state slogan\", \"Recording District\", \"Michigan economy\", and the \"Transportation in / Crime in / Law of X\" redirects."
+  ]
+}

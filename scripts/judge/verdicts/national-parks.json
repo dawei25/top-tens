@@ -1,0 +1,24 @@
+{
+  "id": "national-parks",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": null,
+  "summary": "A good daily: the big names come fast, Zion at #2 and Olympic make it interesting. The catch is that famous parks like Joshua Tree, Arches and Everglades rank low and eat lives.",
+  "reasons": [
+    "Yellowstone, Grand Canyon, Yosemite and Zion are instant; the Smokies, Rockies, Tetons and Glacier come with a little thought; Acadia and Olympic are fair stretches",
+    "Casual sim found 8 but lost all 5 lives on Joshua Tree (#12), Arches (#21), Everglades (#31), Sequoia (#23) and Death Valley (#24) before typing Acadia",
+    "Non-park landmarks (Mount Rushmore, Golden Gate, Statue of Liberty, Niagara Falls) are free, so the prompt's main trap is iconic but remote parks",
+    "Data is current (2025 visits, all 64 parks including Chiricahua), names are clean and common forms work: smokies, rockies, tetons, yosemity, yellow stone",
+    "US-centric, which lowers recognizability for non-US English speakers",
+    "Not Blitz-ready yet: no stats on the answers"
+  ],
+  "fixes": [
+    "Drop redirect aliases that are not names of the park: Yellowstone Act, Yellowstone History, Thunder Hole, Schoodic Scenic Byway, Acadia National Park Act of 1919, Gray Wolf Pass, Graywolf Pass, Daniel J. Evans Wilderness, Glacier National Park Act of 1914, Disappearing Glaciers in Glacier National Park, Crown of the Continent Ecosystem, Establishment of Grand Teton National Park, and the bare 'Clark' on Lake Clark",
+    "Add the short form 'rocky mtn' for Rocky Mountain (only 'Rocky Mtn National Park' is an alias today; 'rocky mtn' is not recognized)"
+  ]
+}

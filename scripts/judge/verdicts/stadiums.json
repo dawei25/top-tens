@@ -1,0 +1,29 @@
+{
+  "id": "stadiums",
+  "judgedAt": "2026-10-30",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 2,
+  "scores": { "recognizability": 2, "curve": 2, "fairness": 1, "data": 3, "fun": 2, "blitzDepth": 0 },
+  "casual": { "found": 1, "livesLost": 5, "guesses": 6 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 12 },
+  "blitzCasual": null,
+  "summary": "Eight of the ten are American college football stadiums, so a typical player names Wembley, Camp Nou, Maracana and Azteca, loses a life on each and is out in six guesses. Great for a college football fan, a trap for everyone else.",
+  "reasons": [
+    "Top 10 is Narendra Modi, Rungrado, then 8 US college football stadiums most players have never heard of",
+    "Every famous stadium a player thinks of first (Wembley #17, Camp Nou #12, Rose Bowl #18, Azteca #22, Bernabeu #28, MetLife #29, Maracana #66) is in the pool and costs a life",
+    "Casual sim: 1 found (Michigan) before game over on guess 6; fan sim who follows college football: 10/10 with 1 life lost",
+    "The reveal is a genuinely good fact, but it lands after the player is already out",
+    "Values match Wikipedia; #10 Bryant-Denny 100,077 vs #11 MCG 100,024 is close but not a tie",
+    "Not Blitz-ready (no stats on answers)"
+  ],
+  "fixes": [
+    "Penn State is fuzzy-corrected to Penang State Stadium (#517) and costs a life if confirmed; add 'Penn State' as an alias of Beaver Stadium",
+    "Team names are not recognized for top-10 stadiums: add 'Ohio State' (Ohio Stadium), 'LSU' (Tiger Stadium), 'Texas A&M' (Kyle Field), 'Tennessee' (Neyland Stadium), 'Alabama' (Bryant-Denny Stadium)",
+    "Melbourne Cricket Ground (#11) has no aliases; add 'MCG'",
+    "Camp Nou: add 'Nou Camp' and 'Spotify Camp Nou'; Bernabeu: display name is 'Bernabéu' and 'Santiago Bernabeu' is not recognized, add it",
+    "AT&T Stadium: 'att stadium' is not recognized; add 'ATT Stadium' / 'AT and T Stadium'",
+    "Drop junk aliases: 'Buckeye Country Superfest' (Ohio Stadium), '12th Man TV' (Kyle Field), 'Walk of Champions' (Bryant-Denny), 'Godzillatron' and 'Adzillatron' (DKR, scoreboard names), 'Salt' (Salt Lake Stadium), 'Australia' (Stadium Australia), 'Lincoln' (Memorial Stadium)",
+    "Check Camp Nou capacity: 99,354 is the pre-renovation figure; after the rebuild it is about 105,000, which would move it to #3"
+  ]
+}

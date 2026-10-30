@@ -1,0 +1,28 @@
+{
+  "id": "richest-people",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 2, "data": 3, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": null,
+  "summary": "A great daily topic with a fair top 10, but every famous near miss (Bill Gates, Ballmer, Dell, celebrity billionaires) costs a life with no rank shown, so a casual player burns out at 6 of 10.",
+  "reasons": [
+    "Top 10 matches the Forbes 2026 list, and the prompt pins the year clearly.",
+    "Good spread: Musk, Bezos, Zuckerberg, Buffett are gimmes; Page and Brin are a fun 'oh right' pair; Ortega is a fair stretch.",
+    "Bill Gates not making it is a nice surprise, but it costs a life and the game only says 'outside the ranking', so there is nothing to learn from it.",
+    "No ranks 11+ at all: Dell, the Waltons, Ballmer and Ambani are real near misses but are treated the same as 1987 Japanese tycoons.",
+    "The 'American billionaires' universe makes Taylor Swift, Oprah, Jay-Z, Beyonce, Kim Kardashian and MrBeast cost a life, while non-Americans like Jack Ma and Adani are free.",
+    "Matcher handles common spellings well (zuckerburg, buffet, bernard arnaud, jenson huang, page, brin)."
+  ],
+  "fixes": [
+    "Add ranks 11+ for the Forbes 2026 list (at least to #20 or #25) from a source that has them, so misses like Michael Dell, the Waltons, Bill Gates and Steve Ballmer show their rank. The World's Billionaires table 38 only has the top 10.",
+    "Drop universeCategories 'American billionaires' for this topic, or make those unranked extras free: celebrity billionaires (Taylor Swift, Oprah Winfrey, Jay-Z, Beyonce, Kim Kardashian, MrBeast) currently cost a life with no rank, and only for Americans.",
+    "Remove garbled single-first-name extras from the split historical family rows: Hans, Minoru, Samuel, Sid, Karl, Jay ('karl' costs a life).",
+    "Remove junk aliases that are relatives: Gloria Page, Lucinda Southworth, Lucy Southworth, Lucy Page, Lucinda Page (Page); Michael Brin (Brin); Maxima Chan, Max/Maxima/August Zuckerberg, Chen Mingyu (Zuckerberg); Melanie Craft, Melanie Ellison, Melanie Ellison Craft (Ellison); Lori Huang (Huang); Astrid Buffett, Astrid Menks, Astrid Menks Buffett (Buffett); Flora Oretaga (Ortega).",
+    "Remove junk aliases that are organizations, article sections or unrelated redirects: Founder of SpaceX, Philanthropy of/Political views of/Political positions of/Lawsuits involving/Controversies involving/Other activities of <name>, Elon Musk advisors, Zuckerberg hearing, Strider Sekhar, Comet Azure, Blastar, RIP Harambe, Nash Holdings, Bezos Earth Fund, No thank you, Mr. Pecker, The Brin Wojcicki Foundation, Global Support and Development, Philanthopy of Warren Buffett.",
+    "'bettencourt' resolves to Liliane Bettencourt (deceased) and costs a life, while 'Francoise Bettencourt Meyers' is not recognized; add her (and other current top 25 names such as Gautam Adani) as ranked entries once ranks 11+ exist."
+  ]
+}

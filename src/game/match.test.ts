@@ -147,3 +147,19 @@ describe("intent", () => {
     expect(j("island").kind).toBe("unknown");
   });
 });
+
+describe("shared words are not typo evidence", () => {
+  const peaks: Puzzle = {
+    ...puzzle,
+    answers: [e(1, "Mount Everest"), e(4, "Lhotse", ["Mount Lhotse"])],
+    extras: [e(0, "Mount Elbrus")],
+  };
+  const j = (g: string) => judgeGuess(g, peaks, new Set());
+  it("a different mountain sharing 'mount' is not corrected into a listed one", () => {
+    expect(j("mount whitney").kind).toBe("unknown");
+    expect(j("mount olympus").kind).toBe("unknown");
+  });
+  it("a real misspelling after the shared word still corrects", () => {
+    expect(j("mount everst")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Mount Everest" } });
+  });
+});
