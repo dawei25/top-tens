@@ -1,0 +1,26 @@
+{
+  "id": "nhl-points",
+  "judgedAt": "2026-10-30",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 4,
+  "scores": { "recognizability": 3, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 3 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 12, "named": 14 },
+  "difficulty": 3,
+  "tags": ["sports", "hockey", "nhl"],
+  "audience": "hockey fans",
+  "summary": "A great list for hockey fans (Gretzky, Jagr, Crosby passing Yzerman), but a typical player knows four or five names and burns lives on McDavid and Bobby Orr. Free play, and a strong pick for a sports-themed day.",
+  "reasons": [
+    "Casual run (sports-aware): Gretzky, Crosby, Ovechkin, Lemieux, Howe, Jagr, Messier (7/10), with McDavid (#47), Orr, Kane, Brett Hull and Malkin taking all five lives. A non-fan stops after Gretzky, Crosby, Ovechkin and Lemieux.",
+    "Fan gets 10/10 with Sakic (#11) as the perfect near miss. Values look current through the 2025-26 season (Crosby 1,761 above Yzerman), though the packet says data as of 2025.",
+    "Bobby Orr is accepted with no stat, so he costs a life in classic and scores nothing in Blitz, and the reveal can't show why (915 points)."
+  ],
+  "fixes": [
+    "Aliases that name a different person: Wayne Gretzky 'Trevor Gretzky' (his son); Sidney Crosby 'Troy Crosby' (his father); Gordie Howe 'Missus Hockey' (Colleen Howe), 'The Howe Family'. Drop them.",
+    "Junk or derogatory redirect aliases: Wayne Gretzky \"Gretzky's Office\", 'The Trade', 'Gretzky trade', 'Wayne Gretzky Award'; Alexander Ovechkin \"Ovechkin's office\", '@ovi8', 'Snovechkin'; Sidney Crosby 'Cindy Crosby', 'Sidney Cry baby', 'Sidney Crybaby'.",
+    "Give famous sub-1,000-point players in the pool a points value so the reveal teaches something and they score in Blitz: Bobby Orr (915), Maurice Richard (965), and other unranked Hall of Famers casual players name. Auston Matthews is currently unrecognized (free); add him to the pool with his total.",
+    "Matcher leak: 'eichel' (Jack Eichel, not in the pool) autocorrects to Michel Goulet (#62). Adding Eichel to the unranked pool stops it."
+  ]
+}
