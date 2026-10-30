@@ -1,0 +1,26 @@
+{
+  "id": "lakes",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 3 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 13, "named": 22 },
+  "difficulty": 2,
+  "tags": ["geography", "lakes", "nature"],
+  "audience": "anyone",
+  "summary": "A solid classic daily once the names and the answer pool are cleaned up. The Great Lakes and Caspian are easy starts, Erie and Ontario are near misses players learn from, and Great Bear and Great Slave are the fair stretches.",
+  "reasons": [
+    "Casual run: Superior, Michigan, Huron, Caspian, Victoria, Baikal, Tanganyika and Malawi found. Lives went on Erie (#11), Ontario (#13), Titicaca (#18), Loch Ness and the Dead Sea, so 8/10 found with the last life on guess 14. Fan got 10/10 with 2 lives lost.",
+    "The ranking is right and the Caspian-as-lake debate is fun. But the display names drop 'Lake' ('Superior', 'Michigan', 'Victoria') while 'Great Bear Lake' keeps it, and the unranked pool is full of non-lakes from the Great Lakes category.",
+    "Blitz is thin: only 47 lakes over about 3,000 km² carry a stat, so a casual player's Tahoe, Geneva, Loch Ness and Chad score nothing. 13 of 22 scored."
+  ],
+  "fixes": [
+    "Display names: restore 'Lake' to the top 10 and ranks 11+ ('Lake Superior', 'Lake Victoria', 'Lake Huron', 'Lake Michigan', 'Lake Tanganyika', 'Lake Baikal', 'Lake Malawi', 'Lake Erie', 'Lake Winnipeg', 'Lake Ontario'...). 'Michigan' alone reads as the state. Keep the bare forms as aliases. Same cause: 'Lake of the Woods' got the alias 'of Woods'.",
+    "Unranked pool pulled in non-lake articles from the Great Lakes and African Great Lakes categories: 'Great Lakes' (a natural casual guess that now costs a life), 'Alliance for the Great Lakes', 'Bay Shipbuilding Company', 'Lee Botts', 'Robert Wilson', 'Canada Steamship Lines', 'Great Lakes Storm of 1913', 'Great Lakes Bat Festival', 'Asian carp in North America', 'East North Central states', 'Hulett', 'Lake surfing', 'Third Coast', 'Sooper Yooper', 'Great Lakes refugee crisis', 'Chwezi', 'Biito clan', 'Lake Malawi territorial dispute' and similar. Keep only articles with a lake infobox.",
+    "Junk aliases on top-10 entries: Huron 'Ontario', 'Hammond Bay'; Michigan 'Lake Illinois', 'Good Harbor Bay', 'Sleeping Bear Bay', 'Platte Bay'; Caspian Sea 'Caspian region'; Superior 'International Lake Superior Board of Control'; Baikal 'Sarma', 'Sarma wind', 'Baikal Basin'; Great Bear Lake 'Dease River'; Malawi 'Boadzulu island', 'Lake Niassa and its Coastal Zone'.",
+    "Great Salt Lake is not recognized while Loch Ness, Lake Tahoe and the Dead Sea are accepted (and cost a life). Add it to the unranked pool for consistency."
+  ]
+}

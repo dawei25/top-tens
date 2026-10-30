@@ -1,0 +1,26 @@
+{
+  "id": "video-games",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 15, "named": 25 },
+  "difficulty": 2,
+  "tags": ["gaming", "video games"],
+  "audience": "anyone who has played a game",
+  "summary": "A strong daily: Tetris, Minecraft, GTA V, Wii Sports and Mario Kart are gimmes, Terraria and The Witcher 3 are fair stretches, and misses like Super Mario Bros. (#11) and The Sims (#14) feel like near misses. Ran as a daily on 2026-10-21, so not urgent.",
+  "reasons": [
+    "The casual player found 8 of 10 and only ran out of lives on the 15th guess; misses were famous games just outside the top 10.",
+    "Fortnite costs a life as an unranked answer; fair under the rules but it will catch many players.",
+    "Blitz is fine but not deep: franchise guesses (Zelda, Sonic, Mario Kart, Cyberpunk) go to a choice prompt and Fortnite, Halo and Among Us score nothing."
+  ],
+  "fixes": [
+    "Drop single-word fragments made by splitting slash and colon titles: 'Deluxe' (Mario Kart 8), 'Human' (Human: Fall Flat), 'Plus' (Wii Fit), 'Blue', 'Yellow', 'Silver', 'Crystal', 'Shield', 'Pearl', 'Platinum', 'Violet', 'Ultra Sun', 'Ultra Moon', and glued aliases like 'Pokémon Red, Blue, Yellow'.",
+    "Drop junk redirect aliases: 'Tetris music', 'Controversies surrounding Grand Theft Auto V', 'Controversies surrounding GTA V', 'Controversies surrounding Minecraft', the 'Minecraft chat report(ing)' family, 'Minecraft and LGBT(Q/QIA+)', \"Minecraft's cultural impact\".",
+    "Remove non-games from the unranked pool: people (Ludwig Ahgren, Laura Bailey, Greg Miller, Amir Satvat, Carol Shaw, Boogie2988, Bugha, Chovy, SonicFox), esports teams (Cloud9, G2 Esports, Ninjas in Pyjamas), studios (CD Projekt Red) and TV (Arcane).",
+    "'sonic' offers Mario & Sonic and Sonic Boom titles but not #21 Sonic the Hedgehog; give #21 the 'Sonic' alias priority."
+  ]
+}

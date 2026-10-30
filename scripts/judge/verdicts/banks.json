@@ -1,0 +1,26 @@
+{
+  "id": "banks",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 4,
+  "scores": { "recognizability": 2, "curve": 2, "fairness": 3, "data": 3, "fun": 2, "blitzDepth": 4 },
+  "casual": { "found": 3, "livesLost": 5, "guesses": 9 },
+  "fan": null,
+  "blitzCasual": { "scored": 17, "named": 22 },
+  "difficulty": 4,
+  "tags": ["business", "finance", "banks"],
+  "audience": "finance and business people",
+  "summary": "Too hard as a classic daily: four state-owned Chinese banks top the list and a casual player runs out of lives on Wall Street names. Fine as a Blitz after the alias fixes, since the famous Western banks all score there.",
+  "reasons": [
+    "Casual run: Chase, Bank of America and HSBC found, then Wells Fargo (#15), Goldman Sachs (#22), Barclays (#16), Deutsche Bank (#24) and Morgan Stanley (#32) used up all five lives by guess 9. 'citibank' was not recognized and the game offered CaixaBank / Scotiabank.",
+    "Ranking and figures match the source (2026 data). The near misses are fair lessons, but the top 4 (ICBC, Agricultural, Construction, Bank of China) plus Postal Savings are names a typical player has never typed.",
+    "Blitz works: 100 ranked banks, and 17 of 22 quick casual names scored. Missing short names (Citi, TD, RBC, PNC, US Bank, MUFG, BBVA) are what hold it back."
+  ],
+  "fixes": [
+    "'citi' resolves to #29 China CITIC Bank and 'citibank' is unrecognized (it suggests CaixaBank / Scotiabank). Add 'Citi', 'Citibank', 'Citicorp' as aliases of #12 Citigroup.",
+    "'sumitomo mitsui' resolves to #72 Sumitomo Mitsui Trust Holdings. Add 'Sumitomo Mitsui', 'Sumitomo Mitsui Banking Corporation', 'SMFG' to #17 SMBC Group, and make 'sumitomo' ambiguous between the two.",
+    "Missing common short names: 'MUFG' (#11 Mitsubishi UFJ Financial Group), 'TD', 'TD Bank' (#27 Toronto-Dominion Bank), 'RBC' (#23 Royal Bank of Canada), 'BBVA' (#41 Banco Bilbao Vizcaya Argentaria), 'US Bank' (#59 U.S. Bancorp), 'PNC' (#64 PNC Financial Services), 'Truist' (#68), 'Schwab' (#81), 'BNY Mellon' (#83 BNY), 'Santander' already works.",
+    "Junk aliases on top-10 entries: ICBC 'The Bank of East Asia' (a different bank); Bank of America 'Erica', 'Blue chip investor', 'Bank of opportunity', 'Quick Business Deposit', 'BAC Capital Trust I' through 'XII', and the person name starting 'Savita Subrama'; HSBC 'Global Service Centres', 'Global Service Centre', 'Orchard Bank'; BNP Paribas 'Alphonse Pinard', '.bnpparibas'; Credit Agricole 'Uni-Éditions', 'Lukas Bank', 'Index Bank'; China Construction Bank 'Project Solidgold'; JPMorgan Chase 'Beacon Group', 'Collegiate Funding Services', 'EMC Mortgage Corporation'."
+  ]
+}

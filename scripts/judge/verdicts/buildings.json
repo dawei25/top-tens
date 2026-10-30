@@ -1,0 +1,27 @@
+{
+  "id": "buildings",
+  "judgedAt": "2026-10-30",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 3,
+  "scores": { "recognizability": 2, "curve": 2, "fairness": 2, "data": 4, "fun": 3, "blitzDepth": 2 },
+  "casual": { "found": 3, "livesLost": 5, "guesses": 13 },
+  "fan": null,
+  "blitzCasual": { "scored": 10, "named": 18 },
+  "difficulty": 4,
+  "tags": ["architecture", "skyscrapers", "world"],
+  "audience": "skyscraper nerds",
+  "summary": "Correct and current, but the top 10 is mostly new Chinese and Asian supertalls nobody knows, while every famous building a player names (Empire State, Taipei 101, Willis, Chrysler, Shard) costs a life.",
+  "reasons": [
+    "Casual found 3 (Burj Khalifa, One WTC, Shanghai Tower) and lost all 5 lives on Empire State (#60), Taipei 101 (#11), Chrysler, The Shard and Willis Tower (#26). Sears Tower was not recognized at all.",
+    "Top 10 matches the current CTBUH ranking, but Merdeka 118, Ping An, both CTF Finance Centres and CITIC Tower are names only enthusiasts know, so the curve is a few gimmes then a wall.",
+    "Thin Blitz: 10 of 18 casual names scored; Chrysler, Shard, Trump Tower and John Hancock carry no height."
+  ],
+  "fixes": [
+    "Add 'Sears Tower' as an alias of #26 Willis Tower (its name until 2009 and what most people call it).",
+    "'burj al arab' is fuzzy-corrected to Burj Almasa: add Burj Al Arab to the pool or stop that correction.",
+    "Drop the alias 'Central Park' on Central Park Tower (it is the park) and the truncated alias 'Trump International Hotel and'.",
+    "Add 'Petronas Towers' and 'Petronas Twin Towers' as a shared alias of Petronas Tower 1 and 2 so the natural guess offers the choice.",
+    "Jeddah Tower is unfinished but costs a life as an accepted answer; make unbuilt towers free or say 'completed buildings' in the prompt."
+  ]
+}

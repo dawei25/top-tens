@@ -1,0 +1,24 @@
+{
+  "id": "nhl-goals",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-blitz",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 10 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 12, "named": 16 },
+  "difficulty": 3,
+  "tags": ["sports", "hockey", "nhl"],
+  "audience": "hockey fans",
+  "summary": "A better Blitz than a classic daily. Casual players know Gretzky, Ovechkin and Howe, then lose lives on Crosby, Lemieux and McDavid; in Blitz those names score.",
+  "reasons": [
+    "Casual classic: Gretzky, Ovechkin, Howe, Jagr and Messier, but Crosby (#15), Lemieux (#11), McDavid, Orr and Kane each cost a life. Out of lives at 5/10 after 10 guesses.",
+    "Dionne, Gartner and Esposito are names most non-fans have never heard; fans get 10/10 easily, with Lemieux and Selanne as good near misses.",
+    "Blitz works: Crosby, Lemieux, Malkin, Stamkos and Kane all carry a stat, so a casual run scores 12 of 16."
+  ],
+  "fixes": [
+    "Junk redirect aliases on top-10 entries: Gretzky 'Trevor Gretzky', \"Gretzky's Office\", 'The Trade'; Howe 'Missus Hockey', 'The Howe Family'. On #15 Crosby: 'Troy Crosby', 'Cindy Crosby'. Drop redirects that name relatives, events or insults.",
+    "Source line says 'data as of 2025' but the totals (Ovechkin 929, Crosby 654) look like they include 2025-26; check and update the date label."
+  ]
+}

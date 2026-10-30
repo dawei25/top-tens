@@ -1,0 +1,23 @@
+{
+  "id": "population-density",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 30, "named": 31 },
+  "difficulty": 3,
+  "tags": ["geography", "countries", "population"],
+  "audience": "anyone",
+  "summary": "A good thinking daily: every answer is a name people know, and the trap (big crowded countries like India and Japan are nowhere near) is the lesson. Better as a classic list than as Blitz.",
+  "reasons": [
+    "Casual run: Monaco, Singapore, Hong Kong, Bangladesh, Vatican, Macau, Malta (7/10), but India (#31), China (#86), Japan, Netherlands and South Korea took all five lives. Harsh, yet each miss teaches density vs population.",
+    "Fan gets 10/10 with Bermuda (#12) and San Marino (#24) as fair misses. Gibraltar, Bahrain and Maldives are the satisfying stretch answers. Values match the Wikipedia table.",
+    "Blitz works (30 of 31 scored) but nearly every country scores, so it plays like naming countries; the classic version has the better puzzle."
+  ],
+  "fixes": [
+    "Junk redirect aliases on top-10 entries: Monaco 'France–Monaco border', 'Monaco–France border', 'Fort-Hercule', 'Monegasque culture', 'Monegasque geography'; Singapore 'HUB in a Singapore context'; Gibraltar 'Gibraltar Health Authority', 'Gibraltar Group Practice Medical Scheme'; Vatican City 'Vatican City culture', 'Vatican City cuisine', 'Vatican citizenship', 'Roman Catholicism in Rome', \"St. Joseph's Fountain\"; Maldives 'Fushifarurah', 'Iru fushi', 'Irufushi' (single islands). Drop redirects naming borders, forts, institutions, culture/cuisine/geography subtopics and sub-islands."
+  ]
+}

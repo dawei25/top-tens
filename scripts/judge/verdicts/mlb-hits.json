@@ -1,0 +1,26 @@
+{
+  "id": "mlb-hits",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 5,
+  "scores": { "recognizability": 3, "curve": 2, "fairness": 4, "data": 3, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 4, "livesLost": 5, "guesses": 9 },
+  "fan": null,
+  "blitzCasual": { "scored": 13, "named": 19 },
+  "difficulty": 3,
+  "tags": ["sports", "baseball", "mlb"],
+  "audience": "baseball fans",
+  "summary": "Too hard as a classic daily (half the top 10 played before 1930), but a good Blitz: almost any baseball name a casual fan knows scores, as long as 'A-Rod' and a few junk aliases get fixed.",
+  "reasons": [
+    "Casual player found Rose, Cobb, Aaron and Jeter, then lost all 5 lives on the famous sluggers Ruth (#46), Bonds (#37), Mays (#13), Ichiro (#25) and Jackie Robinson. The ranked misses are fair and teach something, but Speaker, Anson, Wagner and Yastrzemski are out of reach for a typical player.",
+    "Deep Blitz pool (299 players with a stat): an American casual's 90 s run scored 13 of 19, failing only on current stars outside the list (Trout, Judge, Ohtani) and 'arod'.",
+    "Short forms work well ('yaz', 'musial', 'jeter', 'pujols', 'rose', 'cobb')."
+  ],
+  "fixes": [
+    "Add 'A-Rod' / 'ARod' as aliases of Alex Rodriguez (#23): 'arod' is not recognized, and 'a rod' prompts a choice with Rod Carew.",
+    "Remove 'A rod' from Rod Carew (#28).",
+    "Remove junk aliases: '4,256' (Pete Rose); 'Stan Musial Lifetime Achievement Award' (Musial); 'RE2PECT' (Jeter); 'Isabella Pujols' (Pujols); 'Cynthia Scurtis', 'Boli' (Alex Rodriguez); 'Barry Bonds 714th home run' (Bonds).",
+    "Strip the disambiguation from the alias 'Ben Taylor (first baseman, born 1888)'."
+  ]
+}

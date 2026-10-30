@@ -1,0 +1,24 @@
+{
+  "id": "countries-population",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 5,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 5, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 29, "named": 29 },
+  "difficulty": 2,
+  "tags": ["geography", "population", "countries"],
+  "audience": "anyone",
+  "summary": "The classic opener: everyone knows the prompt, Japan at #11 is the perfect trap, and Blitz is bottomless. It ran as Today's list on 10-20, so its next slot should be Blitz.",
+  "reasons": [
+    "Casual found 10/10 with Japan (#11) and Germany costing lives; the tension is Nigeria, Bangladesh and Pakistan versus Japan, so it is on the easy side",
+    "Every country typed in a 90 s Blitz scored (29/29); short forms like usa, us, prc, uk, britain, dr congo, burma all match",
+    "Already ran as Today's list on 2026-10-20, which is why priority is mid; as Today's Blitz it could run any time"
+  ],
+  "fixes": [
+    "Drop junk redirect aliases on ranks 11+: 'Official language of Southern Sudan' (Sudan), 'Ugandan nationalism' (Uganda), 'Độc lập, tự do, hạnh phúc' and 'Doc lap, tu do, hanh phuc' (Vietnam motto), 'Kenya-Africa' and 'North Kenya' (Kenya)",
+    "'congo' resolves only to DR Congo (#12); it should be shared with Republic of the Congo (#113) so the game offers the choice"
+  ]
+}

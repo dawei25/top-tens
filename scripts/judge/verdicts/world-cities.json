@@ -1,0 +1,24 @@
+{
+  "id": "world-cities",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-blitz",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 4, "curve": 2, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 3, "livesLost": 5, "guesses": 8 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 32, "named": 34 },
+  "difficulty": 4,
+  "tags": ["geography", "cities", "population"],
+  "audience": "anyone",
+  "summary": "An excellent Blitz: almost every big city anyone can name scores. As a classic daily it is a trap, because the UN 2025 method pushes Mumbai, Beijing, Sao Paulo, Mexico City and New York out of the top 10.",
+  "reasons": [
+    "Casual classic run found Tokyo, Shanghai and Delhi, then lost all 5 lives on New York #22, Beijing #16, Mumbai #12, Mexico City #15 and Sao Paulo #13. The ranks teach something, but the player is out by guess 8.",
+    "Blitz is a joy: 85 cities carry a stat, and a casual 90 s run scored 32 of 34 (Jakarta at #1 is a fun surprise).",
+    "Top 10 matches the UN 2025 column, and the prompt names the source. Bombay, Calcutta, Saigon and New Delhi all match; 'rio' does not."
+  ],
+  "fixes": [
+    "Add 'Rio' as an alias of Rio de Janeiro (#33); 'rio' is not recognized.",
+    "Remove junk aliases that are schools, streets, districts or other things: 'Western Grammar School', 'Agradut Bidyanikaton High School' (Dhaka); 'Guangzhou No.7 High school' (Guangzhou); 'Momin High School', 'Dainik Vishwamitra' (Kolkata); 'Sangwon Middle School', 'Five Grand Palaces of Joseon-Dynasty Seoul', 'Five Grand Palaces' (Seoul); '6-resurrection' (Manila); 'Tokyo in pop culture', 'Juujou, Tokyo' (Tokyo); 'Qinglong, Shanghai', 'West Bund' (Shanghai); 'Abdeen' (Cairo); 'Fatehpur beri' (Delhi); 'Fuxingmen Inner Street', 'Fuxingmen Outer Street', 'Fuxing Road' (Beijing); 'St. Xavier's High School Loyola Hall', 'Prakash Higher Secondary School', 'Prakash school', 'Phss' (Ahmedabad); 'SJK Lai Meng' (Kuala Lumpur); 'Sichuanese teahouse' (Chengdu); 'Mexican Federal District Transit System' (Mexico City); 'Sister Cities Chicago' (Chicago)."
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "us-metros",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 29, "named": 30 },
+  "difficulty": 2,
+  "tags": ["geography", "cities", "united states"],
+  "audience": "anyone",
+  "summary": "Friendly and clean: city names just work, and Boston at #11 and San Francisco at #13 are good near misses. A bit easy for classic; great as a Blitz.",
+  "reasons": [
+    "Casual player finds all 10 by typing plain city names, losing lives on San Francisco (#13), Boston (#11) and Seattle (#15).",
+    "Phoenix beating Boston and SF is the one real surprise; otherwise the classic is close to all gimmes, so it suits Blitz better.",
+    "Blitz is deep: nearly any US city a player can name scores (29 of 30)."
+  ],
+  "fixes": [
+    "'Bay Area' fuzzy-corrects to Santa Maria–Santa Barbara (#123) and scores it in Blitz. Add 'Bay Area', 'San Francisco Bay Area' and 'SF' as aliases of San Francisco–Oakland–Fremont (#13).",
+    "Add 'Twin Cities' as an alias of Minneapolis–St. Paul–Bloomington (#16).",
+    "#37 name keeps its suffix: 'Virginia Beach–Norfolk–Newport News, VA-NC, MSA' (and 'va-nc' matches it). Strip ', VA-NC, MSA' from the name and aliases.",
+    "Garbled aliases from word stripping: 'Salt City–Murray' (#46), 'Houston–Pasadena– Woodlands' (#5). Drop them.",
+    "Grand Rapids–Wyoming–Kentwood (#49) takes 'Wyoming' as an alias, so typing a state costs a life. Drop principal-city aliases that are also US state names."
+  ]
+}

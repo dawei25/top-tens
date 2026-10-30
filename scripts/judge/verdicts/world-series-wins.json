@@ -1,0 +1,25 @@
+{
+  "id": "world-series-wins",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 4, "data": 3, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": { "scored": 20, "named": 20 },
+  "difficulty": 3,
+  "tags": ["sports", "baseball", "mlb"],
+  "audience": "baseball fans",
+  "summary": "A solid, fair list for anyone who knows MLB team names, but the data is from the middle of the 2026 World Series and must be rebuilt once it ends.",
+  "reasons": [
+    "Yankees, Red Sox, Dodgers, Cardinals and Giants are gimmes; A's, Reds, Pirates, Tigers and Braves take thought. Cubs at #11 is a good near miss.",
+    "US-centric: easy for American players, much harder for other English speakers.",
+    "Blitz works, since every team scores, but teams with zero titles score too."
+  ],
+  "fixes": [
+    "Rebuild after the 2026 World Series ends: the data is dated 2026-10-30, mid-series. If a 3-title team (Cubs, Orioles, Twins, White Sox) wins, #9-#12 tie at 4 and the topic trips the #10/#11 tie rule.",
+    "Rays, Padres, Rockies and Mariners carry n=0 and score in Blitz; a team with no titles should not score.",
+    "Drop junk aliases: 'Yankees Suck', 'New York Yankees Roster', 'Yankees Roster', 'Dodgers Roster', 'Reds Roster', 'St. Louis Cardinals roster', 'Detroit Tigers roster', 'Pittsburgh Pirates roster', 'Kruk and Kuip', 'Talksox', 'Piratefest', 'Atlanta Braves 1990s pitching rotation', and raw table text like 'Philadelphia / Kansas City / Oakland / Athletics'."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "mlb-home-runs",
+  "judgedAt": "2026-10-30",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 4,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 2, "data": 3, "fun": 4, "blitzDepth": 3 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 10 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 13, "named": 14 },
+  "difficulty": 3,
+  "tags": ["sports", "baseball", "mlb"],
+  "audience": "baseball fans",
+  "summary": "Fans will love it (McGwire at #11 is a great near miss), but a casual player runs out of lives on today's stars and legends who aren't top 10.",
+  "reasons": [
+    "Casual player gets Ruth, Bonds, Aaron, Sosa and A-Rod, then loses all 5 lives on Judge, Jeter, McGwire, Ohtani and Mantle.",
+    "Thome, Frank Robinson, Mays and Pujols are fan answers; the list is US-centric and dull for anyone who doesn't follow baseball.",
+    "Hall of Fame names with no home run rank (Jackie Robinson, Sparky Anderson) cost a life in classic and score nothing in Blitz."
+  ],
+  "fixes": [
+    "The 274 unranked accepted answers look like the page's Hall of Fame table, including managers and executives (Walter Alston, Sparky Anderson, Ed Barrow, Morgan Bulkeley, Al Barlick). They cost a life and score nothing. Drop that table, or give each a home run total.",
+    "Junk aliases on top 10: 'Cynthia Scurtis' and 'Boli' (Alex Rodriguez), 'Isabella Pujols' and 'Jose pujols' (Albert Pujols), 'Barry Bonds 714th home run' and 'Barroid' (Barry Bonds), 'Ken Griffey Jr. Bar' (Ken Griffey Jr.). Drop them."
+  ]
+}

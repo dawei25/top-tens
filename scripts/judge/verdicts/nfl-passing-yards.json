@@ -1,0 +1,24 @@
+{
+  "id": "nfl-passing-yards",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 7, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 13, "named": 17 },
+  "difficulty": 2,
+  "tags": ["sports", "american football", "nfl"],
+  "audience": "football fans",
+  "summary": "A good classic daily: five gimme QBs, a few you have to dig for, and Eli Manning, Elway and Montana as near misses that make people argue.",
+  "reasons": [
+    "Casual: Brady, Peyton Manning, Rodgers, Brees, Favre, Marino and Big Ben for 7/10; Mahomes, Eli, Montana and Elway each cost a life, but each one is a real near miss with a rank.",
+    "Stafford, Rivers and Matt Ryan are the 'oh, of course' answers; fans get 10/10. Short forms like 'manning', 'big ben', 'farve' and 'breese' all work.",
+    "Blitz is fine (13 of 17 scored), but current stars like Josh Allen, Lamar Jackson and Joe Burrow are not in the pool at all."
+  ],
+  "fixes": [
+    "Junk redirect aliases on top-10 entries: Brees 'Brittany Dudchenko', 'Brittany Brees', 'MVP of Super Bowl XLIV'; Peyton Manning 'Ashley Manning', 'Laser rocket arm'; Favre 'Irvin Favre', 'Favregate'; Rodgers 'Aaron Rodgers Day', 'Aaron Rodgers and COVID-19', 'Throw Rogan'; Stafford 'Kelly Stafford'; Rivers 'Stephen Rivers', 'Gunner Rivers'; Brady '199 Productions', 'Autograph'; Marino 'Dan Marino Football', \"Dan Marino's Touchdown Football\". Drop redirects naming relatives, events, companies and games.",
+    "Active starters (Josh Allen, Lamar Jackson, Joe Burrow, Jalen Hurts) get 'not an answer for this list' and score nothing in Blitz. Extend the ranked pool past 50 (e.g. top 100) so they are recognized and carry a stat."
+  ]
+}

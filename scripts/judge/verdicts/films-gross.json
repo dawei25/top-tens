@@ -1,0 +1,26 @@
+{
+  "id": "films-gross",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 5,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 5, "blitzDepth": 5 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 19, "named": 20 },
+  "difficulty": 2,
+  "tags": ["movies", "box office"],
+  "audience": "anyone",
+  "summary": "A classic daily with real debate: Endgame, Avatar and Titanic are gimmes, Ne Zha 2 and the new Spider-Man are the surprises, and Jurassic World, The Lion King and Barbie are painful near misses. Even better as a Blitz. Ran as a daily on 2026-10-24.",
+  "reasons": [
+    "The casual player found 6 before running out of lives, all on famous films just outside the top 10, which feels like a lesson rather than a trick.",
+    "Very current top 10 (Spider-Man: Brand New Day #3, Zootopia 2 #10, The Odyssey #11) keeps it fresh but will date quickly.",
+    "Blitz is deep: nearly every big blockbuster a casual player names scores."
+  ],
+  "fixes": [
+    "Remove wrong sequel aliases: 'Spider-Man 3' on #9 No Way Home (a different 2007 film; it currently gives free credit), 'Avatar IV' on #4, 'Zootopia Three' on #10, 'Top Gun 3' and 'Untitled third Top Gun film' on #17, 'Star Wars 10' on #45, 'Inside Out 3' on #12, 'The Lion King 4' on #14, 'Frozen IIII' on #19.",
+    "Add 'Avatar 3' to #18 Avatar: Fire and Ash (currently not recognized).",
+    "Drop Titanic home-video aliases ('Titanic DVD releases', 'Titanic VHS', 'Titanic 5 Disc', etc.) and 'Frozen fandom'.",
+    "'spiderman' offers Spider-Man 2 / Brand New Day / Far From Home but not #9 No Way Home; the choice list should include it."
+  ]
+}

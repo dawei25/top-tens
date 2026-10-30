@@ -1,0 +1,24 @@
+{
+  "id": "nobel-countries",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 5, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 29, "named": 29 },
+  "difficulty": 3,
+  "tags": ["science", "nobel prize", "countries"],
+  "audience": "trivia fans",
+  "summary": "Big four gimmes, then a tense guessing game among European countries where every miss is a near miss. Casual got 9 and lost on the last life, which is exactly the right feel.",
+  "reasons": [
+    "Good curve: US, UK, Germany and France are free, Sweden, Japan, Russia and Canada take thought, Austria is the fair stretch",
+    "Misses teach something: Netherlands #11, Italy #12, Israel #16, Norway #18 (despite the Peace Prize), China only #31",
+    "Every country a casual typed in Blitz scored (29/29); usa, uk, england, britain and ussr all match"
+  ],
+  "fixes": [
+    "Drop junk aliases on Sweden (#6): 'Swedish sin', 'Folkland'",
+    "'west germany' is not recognized; add it as a Germany alias for this list (several laureates are listed under West Germany)"
+  ]
+}

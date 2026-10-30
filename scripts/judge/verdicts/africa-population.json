@@ -1,0 +1,24 @@
+{
+  "id": "africa-population",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 3, "data": 3, "fun": 3, "blitzDepth": 5 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 20, "named": 20 },
+  "difficulty": 2,
+  "tags": ["geography", "africa", "population"],
+  "audience": "geography fans",
+  "summary": "A solid, gettable list and a very deep Blitz, but typing 'congo' goes straight to the small Republic of the Congo (#36) and costs a life, when almost every player means DR Congo (#4).",
+  "reasons": [
+    "Nigeria, Egypt, Ethiopia, South Africa and Kenya are gimmes; Tanzania, Sudan, Uganda and Algeria take some thought; Morocco (#11) and Ghana (#13) are fair near misses.",
+    "The 'congo' trap costs a casual player a life early and makes DR Congo look missed; the rules say a name shared by 2-4 entries should offer a choice.",
+    "Blitz is deep: a casual player names 20 African countries in 90 seconds and every one scores."
+  ],
+  "fixes": [
+    "Rename #36 'Congo' to 'Republic of the Congo' and make bare 'Congo' (and 'the Congo') a shared alias of #4 DR Congo and #36, so the game offers the choice.",
+    "Drop junk aliases: 'Ugandan nationalism', 'Ker Alur' (Uganda), 'Official language of Southern Sudan' (Sudan), 'North Kenya', 'Kenya-Africa' (Kenya), 'Belgian Ubanghi', 'CKN' (DR Congo)."
+  ]
+}

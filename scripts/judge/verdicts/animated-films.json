@@ -1,0 +1,24 @@
+{
+  "id": "animated-films",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": { "scored": 30, "named": 36 },
+  "difficulty": 2,
+  "tags": ["film", "animation", "box office"],
+  "audience": "anyone",
+  "summary": "An easy, crowd-pleasing list: nearly everyone knows nine of the ten, and Ne Zha 2 at #1 is the surprise. Works even better as a Blitz.",
+  "reasons": [
+    "Frozen, Inside Out 2, Zootopia 2, Mario, Minions and Toy Story 5 are gimmes; the fight is over near misses (Toy Story 4 #11, Moana 2 #13, Despicable Me 3 #14), which is where the casual player lost all five lives at 9/10.",
+    "Curve leans easy, with Ne Zha 2 as the one stretch; The Lion King (2019) counting as animated will spark some debate.",
+    "Current and clean at the top; short forms like 'mario', 'frozen 2' and 'lion king' all match."
+  ],
+  "fixes": [
+    "Drop junk aliases: 'Inside Out 3' (Inside Out 2), 'Zootopia Three' (Zootopia 2), 'Frozen IIII' and 'Jikŋon 2' (Frozen II), 'Frozen fandom' and 'Frozen Reo Māori' (Frozen), 'The Lion King 4' (The Lion King), 'The Super Mario Bros. Movie 3' and 'Pratt Mario' (The Super Mario Bros. Movie).",
+    "'toy story' offers only Toy Story 3 / Toy Story 4; add 'Toy Story' as an alias of Toy Story 5 (#10) so the choice includes it."
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "nba-rebounds",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 13, "named": 16 },
+  "difficulty": 3,
+  "tags": ["sports", "basketball", "nba"],
+  "audience": "basketball fans",
+  "summary": "A fun classic daily with real surprises: Shaq, Hakeem, Rodman and LeBron all miss the top 10, while Elvin Hayes and Robert Parish are in it.",
+  "reasons": [
+    "Casual: Wilt, Russell, Kareem, Duncan, Howard, Garnett and Karl Malone for 7/10; Shaq (#15), Rodman (#24), LeBron (#23), Hakeem (#14) and Ben Wallace cost the five lives on guess 12.",
+    "Those misses are the fun of it: famous big men with a rank to learn from. Fans get 10/10 losing only Hakeem and Shaq.",
+    "Aliases are good ('malone' offers both Malones, 'kg', 'the mailman', 'kareem'); Blitz scores 13 of 16 casual names."
+  ],
+  "fixes": [
+    "Junk redirect aliases on top-10 entries: Dwight Howard 'Royce Reed', 'Dwightmare'; Bill Russell 'Russell rule', \"Bill Russell's rule\"; Tim Duncan 'Rim Duncan'. Drop redirects naming other people and rules."
+  ]
+}

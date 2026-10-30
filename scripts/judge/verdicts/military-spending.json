@@ -1,0 +1,24 @@
+{
+  "id": "military-spending",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": { "scored": 22, "named": 24 },
+  "difficulty": 2,
+  "tags": ["geography", "politics", "military"],
+  "audience": "anyone who follows the news",
+  "summary": "Every answer is a country a casual player knows, with a few news-driven surprises (Germany at #4, Ukraine at #7). Easy, but the near misses (Israel #11, South Korea #13) teach something. Strong for Blitz too.",
+  "reasons": [
+    "Casual player cleared 10/10 losing 3 lives: Israel (#11) and Iran (#38) are fair, informative misses; North Korea costs a life with no rank because it has no data.",
+    "Curve leans easy: US, China, Russia, UK, France, India are gimmes, and Germany, Saudi Arabia, Ukraine and Japan only need a moment of thought.",
+    "Deep Blitz pool: 40 countries carry a stat, a casual 90 s run scored 22 of 24."
+  ],
+  "fixes": [
+    "Remove junk aliases: 'Project Meridian', 'United States military ranks', 'US military branches' (United States); 'Customs and etiquette in the services' (India); 'Prince Pickles' (Japan); 'Russian Foreign Legion', 'Muscovian army' (Russia); 'Swedish sin' (Sweden).",
+    "Drop 'Zhongguo' from Taiwan (#22); it is the name of China and only adds a choice prompt."
+  ]
+}
