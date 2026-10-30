@@ -6,8 +6,26 @@
   "blitz": true
  },
  {
+  "id": "countries-area",
+  "title": "Largest countries by area",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
   "id": "countries-gdp",
   "title": "Largest economies",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "africa-population",
+  "title": "Most populous African countries",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "asia-population",
+  "title": "Most populous Asian countries",
   "category": "Geography",
   "blitz": true
  },
@@ -24,8 +42,32 @@
   "blitz": true
  },
  {
+  "id": "us-states-area",
+  "title": "Largest US states",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "us-cities",
+  "title": "Most populous US cities",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "world-cities",
+  "title": "Largest cities in the world",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
   "id": "mountains",
   "title": "Highest mountains",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "rivers",
+  "title": "Longest rivers",
   "category": "Geography",
   "blitz": true
  },
@@ -33,6 +75,24 @@
   "id": "islands",
   "title": "Largest islands",
   "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "lakes",
+  "title": "Largest lakes",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "tourism",
+  "title": "Most visited countries",
+  "category": "Geography",
+  "blitz": false
+ },
+ {
+  "id": "billionaire-countries",
+  "title": "Countries with the most billionaires",
+  "category": "Business",
   "blitz": true
  },
  {
@@ -48,9 +108,45 @@
   "blitz": true
  },
  {
+  "id": "youtube-videos",
+  "title": "Most-viewed YouTube videos",
+  "category": "Entertainment",
+  "blitz": false
+ },
+ {
   "id": "video-games",
   "title": "Best-selling video games",
   "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "consoles",
+  "title": "Best-selling game consoles",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "books",
+  "title": "Best-selling books",
+  "category": "Culture",
+  "blitz": true
+ },
+ {
+  "id": "languages",
+  "title": "Most spoken languages",
+  "category": "Culture",
+  "blitz": true
+ },
+ {
+  "id": "buildings",
+  "title": "Tallest buildings",
+  "category": "Culture",
+  "blitz": true
+ },
+ {
+  "id": "olympic-medals",
+  "title": "Most Olympic medals (all-time)",
+  "category": "Sports",
   "blitz": true
  },
  {
@@ -60,9 +156,111 @@
   "blitz": true
  },
  {
+  "id": "stadiums",
+  "title": "Largest stadiums",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "companies-revenue",
+  "title": "Largest companies by revenue",
+  "category": "Business",
+  "blitz": true
+ },
+ {
   "id": "airports",
   "title": "Busiest airports",
   "category": "Business",
+  "blitz": true
+ },
+ {
+  "id": "super-bowl-wins",
+  "title": "Most Super Bowl wins",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "world-series-wins",
+  "title": "Most World Series titles",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "f1-wins-by-country",
+  "title": "F1 race wins by country",
+  "category": "Sports",
+  "blitz": false
+ },
+ {
+  "id": "premier-league-goals",
+  "title": "Premier League all-time top scorers",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "nfl-passing-yards",
+  "title": "NFL career passing yards leaders",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "nfl-rushing-yards",
+  "title": "NFL career rushing yards leaders",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "mlb-home-runs",
+  "title": "MLB career home run leaders",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "nhl-goals",
+  "title": "NHL career goal leaders",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "x-accounts",
+  "title": "Most-followed X accounts",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "tiktok-accounts",
+  "title": "Most-followed TikTok accounts",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "spotify-songs",
+  "title": "Most-streamed songs on Spotify",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "albums",
+  "title": "Best-selling albums",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "animated-films",
+  "title": "Highest-grossing animated films",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "media-franchises",
+  "title": "Highest-grossing media franchises",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "game-franchises",
+  "title": "Best-selling video game franchises",
+  "category": "Entertainment",
   "blitz": true
  },
  {
@@ -72,15 +270,123 @@
   "blitz": false
  },
  {
+  "id": "us-states-gdp",
+  "title": "Largest US state economies",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "europe-cities",
+  "title": "Largest cities in Europe",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "india-cities",
+  "title": "Largest cities in India",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "canada-cities",
+  "title": "Largest cities in Canada",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "china-cities",
+  "title": "Largest cities in China",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "deserts",
+  "title": "Largest deserts",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "city-visitors",
+  "title": "Most visited cities",
+  "category": "Geography",
+  "blitz": false
+ },
+ {
   "id": "national-parks",
   "title": "Most visited US national parks",
   "category": "Geography",
   "blitz": true
  },
  {
+  "id": "empires",
+  "title": "Largest empires in history",
+  "category": "Culture",
+  "blitz": true
+ },
+ {
+  "id": "moons",
+  "title": "Largest moons",
+  "category": "Culture",
+  "blitz": true
+ },
+ {
+  "id": "museums",
+  "title": "Most visited museums",
+  "category": "Culture",
+  "blitz": true
+ },
+ {
+  "id": "market-cap-peak",
+  "title": "Most valuable companies ever",
+  "category": "Business",
+  "blitz": false
+ },
+ {
+  "id": "banks",
+  "title": "Largest banks",
+  "category": "Business",
+  "blitz": true
+ },
+ {
+  "id": "richest-people",
+  "title": "Richest people",
+  "category": "Business",
+  "blitz": false
+ },
+ {
   "id": "oil-production",
   "title": "Biggest oil producers",
   "category": "Business",
+  "blitz": true
+ },
+ {
+  "id": "nobel-countries",
+  "title": "Most Nobel laureates by country",
+  "category": "Culture",
+  "blitz": true
+ },
+ {
+  "id": "military-spending",
+  "title": "Biggest military budgets",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "co2-emissions",
+  "title": "Biggest CO2 emitters",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "gdp-per-capita",
+  "title": "Richest countries per person",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "population-density",
+  "title": "Most densely populated places",
+  "category": "Geography",
   "blitz": true
  },
  {
@@ -90,9 +396,99 @@
   "blitz": true
  },
  {
+  "id": "manga",
+  "title": "Best-selling manga",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "nba-assists",
+  "title": "NBA career assists leaders",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "nba-rebounds",
+  "title": "NBA career rebounding leaders",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "nhl-points",
+  "title": "NHL career points leaders",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "mlb-hits",
+  "title": "MLB career hits leaders",
+  "category": "Sports",
+  "blitz": true
+ },
+ {
+  "id": "theme-parks",
+  "title": "Most visited theme parks",
+  "category": "Entertainment",
+  "blitz": false
+ },
+ {
+  "id": "us-metros",
+  "title": "Largest US metro areas",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "capitals",
+  "title": "Most populous capital cities",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "brazil-cities",
+  "title": "Largest cities in Brazil",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "us-box-office",
+  "title": "Biggest US box office hits",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
   "id": "spotify-artists",
   "title": "Most monthly listeners on Spotify",
   "category": "Entertainment",
   "blitz": true
+ },
+ {
+  "id": "facebook-pages",
+  "title": "Most-followed Facebook pages",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "ballon-dor-countries",
+  "title": "Ballon d'Or wins by country",
+  "category": "Sports",
+  "blitz": false
+ },
+ {
+  "id": "island-countries",
+  "title": "Countries with the most islands",
+  "category": "Geography",
+  "blitz": true
+ },
+ {
+  "id": "expensive-films",
+  "title": "Most expensive films",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "car-makers",
+  "title": "Biggest car makers",
+  "category": "Business",
+  "blitz": false
  }
 ]
