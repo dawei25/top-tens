@@ -1,0 +1,24 @@
+{
+  "id": "spotify-songs",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-blitz",
+  "alsoBlitz": false,
+  "priority": 8,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 2, "livesLost": 5, "guesses": 7 },
+  "fan": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "blitzCasual": { "scored": 22, "named": 27 },
+  "difficulty": 4,
+  "tags": ["music", "pop", "streaming"],
+  "audience": "pop music fans",
+  "summary": "A great Blitz: almost any hit you name scores. As a classic it is brutal, because the most famous songs (Despacito, Old Town Road, Bad Guy) all cost a life.",
+  "reasons": [
+    "Casual found 2 (Blinding Lights, Shape of You) and was out of lives by guess 7 on Despacito, Old Town Road, Bad Guy #83, Uptown Funk #96 and Dance Monkey #34.",
+    "Fan reached 10/10 with 1 life left; Sweater Weather, One Dance and Stay are the 'oh, that one' answers.",
+    "Blitz: 22 of 27 quick casual names scored, with a nice spread of values."
+  ],
+  "fixes": [
+    "Guesses with the artist ('perfect ed sheeran', 'starboy the weeknd') are not recognized; players type songs that way. Needs a matcher change in src/game (coordinator) or 'title artist' aliases for the top 100.",
+    "Use consistent title case in names: 'Shape Of You', 'Die With A Smile', 'In The End', 'Locked Out Of Heaven' should read 'Shape of You', 'Die with a Smile', 'In the End', 'Locked Out of Heaven'."
+  ]
+}

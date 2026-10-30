@@ -1,0 +1,25 @@
+{
+  "id": "nba-points",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 5,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 13 },
+  "blitzCasual": { "scored": 24, "named": 27 },
+  "difficulty": 2,
+  "tags": ["sports", "basketball", "nba"],
+  "audience": "sports fans",
+  "summary": "Famous names, current numbers (Durant and Harden past Jordan and Shaq), and a good trap in Steph Curry at #19. It ran as the daily a week ago, so Blitz is the better next use.",
+  "reasons": [
+    "Casual: all 10 found, but Curry (#19), Magic, Bird and Carmelo (#11) took four lives. Fan: 10/10 with Carmelo and Moses Malone as the only misses.",
+    "The values are up to date (LeBron 43,502, Durant #5, Harden #9), and shortcuts work: kd, mj, lbj, shaq, wilt, dirk, kareem. \"malone\" offers Karl or Moses.",
+    "Blitz is deep: a casual player names 24 scoring players in 90 seconds. But current stars like Jokic, Luka and Kyrie score nothing."
+  ],
+  "fixes": [
+    "nba-points: \"steph curry\" is only a spelling correction to Stephen Curry and \"steph\" is not recognized. Add \"Steph Curry\" and \"Steph\" as aliases.",
+    "nba-points: active stars outside the top 50 have no stat, so they score nothing in Blitz (Nikola Jokić, Luka Dončić, Kyrie Irving, Anthony Davis, Jayson Tatum, Paul George, Devin Booker), but retired players such as Magic Johnson and Muggsy Bogues do. Give the active players their career points too.",
+    "nba-points: drop junk aliases that name relatives or other things: \"Gloria James\", \"Bronny's dad\", \"LeBron's son\", \"Bronny James Sr.\" (LeBron), \"Natalia Diamante Bryant\", \"Natalia Diamante\", \"Kobe bryant philanthropy\", \"Mamba Sports Academy\" (Kobe), \"Deloris Jordan\", \"Juanita Vanoy\", \"James R. Jordan, Jr.\" (Jordan), \"Silke Nowitzki\", \"Helga Nowitzki\", \"Helga Bredenbröcker\" (Dirk), \"Joe Toney\", \"Joseph Toney\", \"The Big Podcast with Shaq\", \"Shaqtoberfest\", \"Shaq's Size\" (Shaq), \"My Next Chapter\", \"You the real MVP\", \"Triple-double cocaine bear\" (Durant)."
+  ]
+}

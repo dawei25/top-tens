@@ -1,0 +1,27 @@
+{
+  "id": "media-franchises",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 9,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 5, "blitzDepth": 5 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 26, "named": 28 },
+  "difficulty": 2,
+  "tags": ["entertainment", "franchises", "movies", "games"],
+  "audience": "anyone",
+  "summary": "A great daily either way. Everyone knows these names, and Winnie-the-Pooh, Disney Princess and Anpanman outselling Harry Potter is a real surprise. In Blitz nearly everything a casual player names scores.",
+  "reasons": [
+    "Casual run: Star Wars, Marvel, Harry Potter, Pokemon, Barbie and 'disney' (Disney Princess) found. Lives went on Mario (#42), Batman (#12), Spider-Man (#13), James Bond (#41) and Hello Kitty (#11), all near misses with a lesson. Out of lives on guess 12 with 6/10.",
+    "Fan got 10/10 with 2 lives lost, so the curve works. Pokemon, Star Wars and Harry Potter are gimmes, merch giants like Pooh and Mickey take some thought, and Anpanman is the fair stretch.",
+    "Top 10 matches the source table. The source page carries an out-of-date warning, and Mario at $9.7B will raise eyebrows. Blitz is excellent: 26 of 28 casual names scored."
+  ],
+  "fixes": [
+    "Add aliases from the source's own parentheticals and common names: Middle-earth (#47) 'The Lord of the Rings', 'Lord of the Rings', 'LOTR'; Despicable Me (#32) 'Minions'; The Railway Series (#44) 'Thomas the Tank Engine', 'Thomas'; Ultra Series 'Ultraman'; Sesame Street 'The Muppets', 'Muppets'. All are unrecognized today.",
+    "'disney' alone resolves straight to #5 Disney Princess, though #2 Mickey Mouse & Friends is just as much Disney. Make it an ambiguous alias (offer both) or drop it.",
+    "Junk redirect aliases on top-10 entries: Pokemon 'Joe Merrick', 'Serebii', 'Fubata town', 'Foento City', 'Japan Pokemon', 'Pokemon Fans'; Winnie-the-Pooh 'Winnie- -Pooh', 'Winnie Sanders'; Call of Duty 'Nova 6', 'Urzikstan', 'Russell Adler'; Marvel Cinematic Universe 'Captain Marvel', 'Gamora', 'A Mini Marvel', 'Summer of Heroes', 'MPower', 'The Women of Black Panther'; Barbie 'Christie Brezault', 'Princess Annika', 'Mermaidia', 'Mariposa and the Butterfly Fairy Friends'. Ranks 11+ have the same problem (Naruto: dozens of jutsu names; Grand Theft Auto 'Lance Vance', 'San Andreas').",
+    "Unranked pool contains the generic article 'Media franchise'; drop it.",
+    "#2 Mickey Mouse & Friends has no fun fact."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "ballon-dor-countries",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": ["sports", "soccer", "awards"],
+  "audience": "soccer fans and casual sports followers",
+  "summary": "Nine of the ten are the big football nations anyone can name, and the Soviet Union at #10 is a nice reveal. It plays easy, and a few famous football countries with no winner cost lives.",
+  "reasons": [
+    "Casual player found 9/10 but used all 5 lives: Croatia (#12) is a fair near miss, while Belgium, Uruguay, Poland and Russia have no winner and cost a life with no rank to learn from.",
+    "Curve leans easy: Argentina, Portugal, France, Brazil, Germany, Spain and Italy are gimmes, England and the Netherlands need a moment's thought, and the Soviet Union is the one stretch.",
+    "Data matches the Wikipedia 'Wins by country' table; 'ussr' and 'holland' match, but 'west germany' is not recognized."
+  ],
+  "fixes": [
+    "Add 'West Germany' as an alias of Germany (#3): six of its seven wins were West German players, and a fan types it.",
+    "Consider making 'Russia' free (not a costly unranked answer) on this list, since Yashin's wins count for the Soviet Union (#10) and a player guessing Russia is half right."
+  ]
+}

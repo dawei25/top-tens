@@ -47,7 +47,8 @@ const blitzOk = (v?: Verdict) => v?.decision === "daily-blitz" || (v?.decision =
 
 /** Built topics the judge approved for Today's list and that have never been a daily. */
 export function bank(schedule: DailyEntry[], verdicts = readVerdicts()): { id: string; category: string }[] {
-  const used = new Set(schedule.map((e) => e.id));
+  // A list that already ran as a Blitz isn't a fresh daily either.
+  const used = new Set(schedule.flatMap((e) => (e.blitz ? [e.id, e.blitz] : [e.id])));
   return TOPICS.filter((t) => !used.has(t.id) && existsSync(join(DIR, `${t.id}.json`)) && listOk(verdicts.get(t.id))).map(
     (t) => ({ id: t.id, category: t.category }),
   );
@@ -61,6 +62,7 @@ export function bank(schedule: DailyEntry[], verdicts = readVerdicts()): { id: s
 export function nextEntries(schedule: DailyEntry[], days: number, today: string, verdicts = readVerdicts()): DailyEntry[] {
   const pool = bank(schedule, verdicts);
   const priority = (id: string) => verdicts.get(id)?.priority ?? 0;
+  const blitzFirst = (id: string) => (verdicts.get(id)?.decision === "daily-blitz" ? 1 : 0);
   const category = new Map(TOPICS.map((t) => [t.id, t.category]));
   const last = schedule.at(-1);
   let date = last && last.date >= today ? addDays(last.date, 1) : today;
@@ -85,8 +87,10 @@ export function nextEntries(schedule: DailyEntry[], days: number, today: string,
     (t) => blitzOk(verdicts.get(t.id)) && !lists.has(t.id) && !blitzUsed.has(t.id) && existsSync(join(DIR, `${t.id}.json`)),
   )
     .map((t) => t.id)
-    .sort((a, b) => priority(b) - priority(a));
+    // Lists judged Blitz-only come first: daily-list candidates are kept for Today's list.
+    .sort((a, b) => blitzFirst(b) - blitzFirst(a) || priority(b) - priority(a));
   for (const e of out) {
+    // Keep the day's two picks in different categories when the pool allows.
     const other = blitzPool.find((id) => category.get(id) !== category.get(e.id)) ?? blitzPool[0];
     if (!other) break;
     e.blitz = other;

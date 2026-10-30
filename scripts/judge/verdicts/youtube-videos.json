@@ -1,0 +1,24 @@
+{
+  "id": "youtube-videos",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": ["internet", "youtube", "music"],
+  "audience": "anyone who grew up online",
+  "summary": "A fun list of famous hits mixed with toddler videos, but typing 'baby shark' costs a life because a second Baby Shark video at #22 takes the guess. Fix that and it is a good daily.",
+  "reasons": [
+    "Bug: 'baby shark' matches #22 'Baby Shark' (the Cocomelon upload, 4.39B) instead of #1 Baby Shark Dance, so the most obvious answer costs a life. Both simulated players lost a life to it.",
+    "Good mix: Despacito, Gangnam Style, See You Again, Shape of You are gimmes; Wheels on the Bus, Johny Johny and Crazy Frog are the fun 'oh right, kids' moments; Bath Song and Phonics Song are fair stretches.",
+    "Near misses teach well (Uptown Funk #11, Counting Stars, Roar, Sorry). Not Blitz-ready."
+  ],
+  "fixes": [
+    "Rename #22 'Baby Shark' (uploader Cocomelon - Nursery Rhymes, 4.39B) to something like 'Baby Shark (Cocomelon)' and keep plain 'Baby Shark' only as an alias of #1 Baby Shark Dance (or drop it from #22), so the guess 'baby shark' finds #1.",
+    "The universe categories (Viral videos, YouTube videos) add non-video titles as costly unranked answers, e.g. 'Ronaldinho', 'I/O Brush', 'Myspace – The Movie'. Filter non-video article titles."
+  ]
+}

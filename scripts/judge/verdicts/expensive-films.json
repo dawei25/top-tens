@@ -1,0 +1,24 @@
+{
+  "id": "expensive-films",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-blitz",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 2, "fairness": 2, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 1, "livesLost": 5, "guesses": 9 },
+  "fan": null,
+  "blitzCasual": { "scored": 16, "named": 20 },
+  "difficulty": 4,
+  "tags": ["entertainment", "film", "blockbusters"],
+  "audience": "movie fans",
+  "summary": "Hopeless as a classic daily, because the obvious guesses (Avatar, Titanic, Infinity War) all cost lives. As a Blitz it shines: almost every blockbuster you can name scores.",
+  "reasons": [
+    "Casual went Avatar, Titanic, Avatar 2, Infinity War, Justice League and was out of lives with only Endgame found; the real top 10 (Dominion, Fallen Kingdom, Fast X, Dial of Destiny) is driven by tax-filing budgets nobody knows",
+    "In Blitz the same instincts pay off: 16 of 20 casual guesses scored, and franchise names like star wars, jurassic world and pirates of the caribbean offer sensible choices",
+    "Dominion at #1 and Pirates 4 above Endgame are good 'wait, really?' reveals"
+  ],
+  "fixes": [
+    "Drop wrong or junk aliases: 'Star Wars 10' (Rise of Skywalker is IX), 'Avatar IV' (Way of Water), 'Untitled eleventh Fast & Furious film' (Fast X is the tenth), 'The Lion King 4' (2019 remake), 'Mission' and 'Impossible' split from the Mission: Impossible titles",
+    "'fast and furious' is not recognized; it should offer the franchise entries (Fast X, Furious 7, The Fate of the Furious)"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "game-franchises",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 5, "blitzDepth": 4 },
+  "casual": { "found": 9, "livesLost": 4, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 16 },
+  "blitzCasual": { "scored": 22, "named": 30 },
+  "difficulty": 2,
+  "tags": ["gaming", "video games"],
+  "audience": "gamers and anyone under 40",
+  "summary": "A fun, debate-starting daily: Mario, Pokemon, Call of Duty, GTA and Minecraft are gimmes, Tetris at #2 surprises, and Zelda, Halo and The Sims missing the top 10 are great near misses. Suits the classic list better than Blitz.",
+  "reasons": [
+    "Casual run: Mario, Pokemon, Call of Duty, GTA, Minecraft, FIFA, Tetris, Assassin's Creed, Final Fantasy found; lives went on Zelda #15, Halo #35, The Sims #13, Street Fighter #47. 9/10 with 1 life left, missing Resident Evil.",
+    "Fortnite (free-to-play) is not an answer and costs nothing, which is right. Top-10 values and order match the source.",
+    "Blitz 22 of 30: Pac-Man, Skyrim, Red Dead Redemption, Mario Kart-style sub-series names and free games (Candy Crush, Angry Birds) score nothing; 'uncharted' costs a life in classic by matching Koei's Uncharted Waters."
+  ],
+  "fixes": [
+    "Drop 'Educational games in the Sonic the Hedgehog series' from the unranked pool: it makes 'sonic' ambiguous with Sonic the Hedgehog (#18).",
+    "'uncharted' resolves to Uncharted Waters (unranked, costs a life). Add Naughty Dog's Uncharted to the pool, or drop the bare 'Uncharted' short form from Uncharted Waters.",
+    "Pac-Man is not in the pool at all ('pacman' offers Batman: Arkham / Rayman). Add it as an accepted answer.",
+    "Missing aliases for sub-series and flagship games: 'Mario Kart', 'Mario Party', 'Luigi' -> Mario; 'Wii Sports', 'Wii Fit' -> Wii; 'Red Dead Redemption' -> Red Dead; 'Skyrim' -> The Elder Scrolls; 'GTA V' / 'GTA 5' -> Grand Theft Auto.",
+    "Junk redirect aliases on top-10 entries: Mario 'Kamek', 'King Boo', 'Boo', 'Boo Diddley', 'E. Gadd', 'I have fury!', 'Caety Sagoian', 'Catey Sagoian', 'Mario Clock', 'Mario Calculator', 'POW Block' and the other character/enemy names; Pokemon 'Pokemon types', 'Poke Ball', 'Pokedex', 'Gym Badge', 'Elite Four', 'Giovanni', 'Steven Stone', 'Noland', 'Sakaki'; Resident Evil soundtrack/orchestra redirects, 'Arklay forest', 'Raccoon Dam', 'Caliban Cove'; Call of Duty 'Nova 6', 'Urzikstan', 'Russell Adler'; GTA 'Lance Vance', 'Wanted level'; FIFA 'Alex Hunter', 'Piemonte Calcio'; Tetris 'L-Block', 'Tetris music', 'Tetrimino'; Assassin's Creed 'Abstergo', 'Precursor Genome'. Drop redirects naming characters, items, places, soundtracks and mechanics."
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "empires",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 2, "data": 3, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 5, "livesLost": 4, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 4, "guesses": 16 },
+  "blitzCasual": { "scored": 15, "named": 21 },
+  "difficulty": 3,
+  "tags": ["history", "empires", "geography"],
+  "audience": "history buffs",
+  "summary": "A great Blitz topic with real surprises, but in classic the famous empires (Roman, Ottoman, Byzantine) all cost lives, and a few aliases are broken.",
+  "reasons": [
+    "Casual player gets British, Mongol, Russian, Spanish and French, then burns 4 lives on Roman, Ottoman, Byzantine and Holy Roman; Qing, the caliphates, Yuan and the US are stretch answers.",
+    "Blitz is deep and forgiving: almost any empire a player knows scores (15 of 21 in the casual run).",
+    "Common names miss: Persian Empire, Persia, Japanese Empire and Soviet Union are not recognized at all."
+  ],
+  "fixes": [
+    "Empire of Brazil and Empire of Japan carry junk aliases split from the name: 'Empire', 'of Brazil', 'of Japan'. Drop them.",
+    "Xiongnu appears twice: #11 'Xiongnu Empire' (9.0) and #44 'Xiongnu' (3.5, alias 'Western Xiongnu'). Typing 'xiongnu' matches #44, not #11. Rename #44 to 'Western Xiongnu' and give 'Xiongnu' to #11.",
+    "Add 'Persian Empire', 'Persia' and 'Persian' as aliases of Achaemenid Empire (#20).",
+    "Add 'Japanese Empire' and 'Imperial Japan' as aliases of Empire of Japan (#13).",
+    "British Empire aliases 'British occupation' and 'British Asia' are redirects, not names of the empire; drop them."
+  ]
+}

@@ -4,9 +4,24 @@
   "decision": "daily-list",
   "alsoBlitz": false,
   "priority": 8,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
-  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "scores": {
+    "recognizability": 5,
+    "curve": 4,
+    "fairness": 3,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 8,
+    "livesLost": 5,
+    "guesses": 14
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 0,
+    "guesses": 10
+  },
   "blitzCasual": null,
   "summary": "A strong daily: every top-10 country is a household name, and the old OPEC names that dropped out (Venezuela, Nigeria, Libya, Qatar) make it tense without feeling rigged.",
   "reasons": [
@@ -19,5 +34,12 @@
   "fixes": [
     "Congo (#31, 243) and Republic of the Congo (unranked) are the same country listed twice; map the source row 'Congo' to Republic of the Congo with its aliases (Congo-Brazzaville, Congo Republic).",
     "Junk redirect aliases on country entries (matching only, never shown, but should go): Saudi Arabia 'Social problems in Saudi Arabia', 'Child abuse in Saudi Arabia', 'Languages of Saudi Arabia'; Kuwait 'Abdullah al-Saleh', 'National parks in Kuwait', 'Water supply and sanitation in Kuwait', 'Water resources of Kuwait', 'Languages of Kuwait'; Iran 'Law of Iran'; Canada 'Snow Mexico'; Bahrain 'Al Rawda Palace', 'Science and technology in Bahrain'; Argentina 'Argentina Information'. Filtering 'X of/in <Country>' topic redirects would catch most."
-  ]
+  ],
+  "difficulty": 2,
+  "tags": [
+    "geography",
+    "energy",
+    "countries"
+  ],
+  "audience": "anyone"
 }

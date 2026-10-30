@@ -1,0 +1,25 @@
+{
+  "id": "canada-cities",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 24, "named": 26 },
+  "difficulty": 2,
+  "tags": ["geography", "cities", "canada"],
+  "audience": "anyone",
+  "summary": "A friendly list: the big seven are gimmes, and Mississauga, Brampton and Vancouver at only #8 make the twist. Works as a daily list and is an even better Blitz.",
+  "reasons": [
+    "Casual run: 8/10 (Toronto through Hamilton), but Quebec City (#12), Halifax (#13), Victoria, Niagara Falls and Regina burned all five lives. The near misses teach the municipality-vs-metro point, so it stings but is fair.",
+    "Fan gets 10/10 losing only Quebec City. Values match the 2021 census, the latest released; the 2026 counts are not out yet.",
+    "Blitz is deep: 24 of 26 casual names scored (Saskatoon, Kelowna, Fredericton, Thunder Bay all count). Only Whistler and Banff are unrecognized."
+  ],
+  "fixes": [
+    "Junk redirect aliases on top-10 entries (not names of the city): Toronto 'Highways within Greater Toronto Area', 'Toronto, ontario Part 2'; Montreal 'Montreal Skyline', 'Team990'; Calgary 'Foothills Major Baseball Association', 'Fmba', 'Calgary Cardinals FMBA', 'Prairie Winds Park'; Ottawa 'National Capital Baseball League', 'NCBL', 'Antrim, Ontario', 'Cedardale, Ottawa, Ontario', 'Technically Beautiful'; Edmonton '18 Street, Edmonton', '159 Street, Edmonton', '18 Street NW, Edmonton', \"Canada's Largest Baseball Bat\"; Mississauga 'Neighbourhoods of Churchill, Mississauga, Ontario', 'Sommerville Manor School', 'Sommerville Manor', 'Applewood Acres', \"St. Jude's Academy\", 'The Maples Academy'; Vancouver 'Greater Vancouver Bridges', 'Vancouver Christian School', 'Vancouver City Centre, British Columbia'; Brampton 'Rowntree Montessori Schools'; Hamilton 'Beverly Hills 4, Ontario', 'MacNab Street Presbyterian Church', 'Eastport Drive', 'Pleasant Valley, Hamilton, Ontario'. Drop redirects naming schools, streets, churches, leagues, radio stations, parks and neighbourhoods.",
+    "Drop derogatory nickname redirects 'Bramladesh' (Brampton) and 'Hong couver' / 'Hong kouver' (Vancouver).",
+    "Optional intent aliases that are currently unrecognized (free, but the player gets no credit): 'The Six' / 'The 6ix' for Toronto, 'MTL' for Montreal, 'YYC' for Calgary."
+  ]
+}

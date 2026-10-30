@@ -1,0 +1,23 @@
+{
+  "id": "billionaire-countries",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 5 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 10 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 31, "named": 31 },
+  "difficulty": 3,
+  "tags": ["business", "wealth", "geography"],
+  "audience": "news followers",
+  "summary": "Easy top five, then surprises: Italy, Hong Kong and Taiwan are in, the UK, France and Japan are not. Plays even better as a Blitz, where every country scores.",
+  "reasons": [
+    "Casual found 5 (US, China, Russia, India, Germany) and ran out of lives in 10 guesses on UK #11, Japan #19, Saudi Arabia #29, France #13 and Switzerland #17: fair near misses, but the classic is short and harsh.",
+    "Fan went 10/10 losing 2; Hong Kong and Taiwan counted as separate entries (Forbes convention) are the stretch answers.",
+    "Blitz: all 31 casual names scored and bigger answers pay more, so it suits Blitz better than the classic."
+  ],
+  "fixes": [
+    "Drop alias 'Zhongguo' from Taiwan (it means China); typing it now offers China or Taiwan."
+  ]
+}

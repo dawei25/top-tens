@@ -11,7 +11,8 @@ import { addValues } from "./values";
 import { writeLexicon } from "./lexicon";
 import { tableDataDate } from "./dates";
 import { COUNTRY_FORMS, INTENT } from "./intent";
-import { UNIVERSES, type Place } from "./gazetteer";
+import { UNIVERSES, US_STATE_CODES, type Place } from "./gazetteer";
+import { bareWord, baseTitle, COUNTRY_JUNK, isEnglishWord, junkRedirect } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
 /** Fewest entries with a stat (`n`) for a list to be playable in Blitz. */
@@ -32,7 +33,9 @@ interface Row {
 
 function column(header: string[], spec: string | number): number {
   if (typeof spec === "number") return spec;
-  const i = header.findIndex((h) => h.toLowerCase().includes(spec.toLowerCase()));
+  // Spacing is ignored: a header's line break ("Total<br>passengers") reads as a space.
+  const squash = (s: string) => s.toLowerCase().replace(/\s+/g, "");
+  const i = header.findIndex((h) => squash(h).includes(squash(spec)));
   if (i < 0) throw new Error(`no column matching "${spec}" in [${header.join(" | ")}]`);
   return i;
 }
@@ -42,8 +45,17 @@ function cleanName(s: string): string {
     .replace(/\s*\(.*?\)\s*/g, " ")
     .replace(/[†‡*^#⁂§¤]+/g, "")
     .replace(/^"|"$/g, "")
-    .replace(/\s+(&|and) family$/i, "")
+    .replace(/\s+(&|and) (family|brothers|sisters|sons)$/i, "")
     .trim();
+}
+
+/**
+ * A family row names several people: "Karl and Theo Albrecht" links only "Karl". Each first name gets the shared
+ * surname ("Karl Albrecht"), instead of a bare "Karl" that would cost a life.
+ */
+function familyName(name: string, cellText: string): string {
+  const m = cleanName(cellText).match(/^(\S+) (?:and|&) .+ (\S+)$/);
+  return m && name === m[1] && !name.includes(" ") ? `${m[1]} ${m[2]}` : name;
 }
 
 /** First number in a cell. A range ("2–4 billion") ranks by its low end and displays in full. */
@@ -68,6 +80,11 @@ function usableAlias(alias: string, name: string): boolean {
   return !/^\d+$/.test(n) || /^\d+$/.test(normalize(name));
 }
 
+/** Country, state and capital names: a short form that is one of these names a place, not the entry. */
+const PLACES = new Set(
+  [...UNIVERSES.countries(), ...UNIVERSES["us-states"](), ...UNIVERSES.capitals()].map((p) => normalize(p.name)),
+);
+
 const GENERIC_WORDS =
   /\b(international airport|airport|stadium|mount|lake|island|corporation|corp|company|inc|group|tower|the)\b/gi;
 
@@ -80,7 +97,8 @@ function shortForms(name: string, strip?: RegExp): string[] {
   for (const words of [GENERIC_WORDS, strip]) {
     if (!words) continue;
     const stripped = name.replace(words, " ").replace(/\s+/g, " ").trim();
-    if (stripped !== name) out.push(stripped);
+    // "Salt" (Salt Lake Stadium), "Australia" (Stadium Australia), "South" (South Island) mean something else alone.
+    if (stripped !== name && !bareWord(stripped, PLACES)) out.push(stripped);
   }
   return out.filter((s) => s.replace(/\W/g, "").length >= 3);
 }
@@ -95,15 +113,62 @@ function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink"
 }
 
 /** Total rows, notes and tier headings ("$50 billion+") that tables mix in with real rows. */
-const SKIP_NAME = /^(totals?|grand total|subtotal|as of\b|world( total)?$|others?$|various$|unknown$|[$€£]\d)/i;
+const SKIP_NAME =
+  /^(totals?|grand total|subtotal|as of\b|world( total)?$|others?$|various$|unknown$|[$€£]\d|(player|name|rank|country|team|title)$)/i;
 
-/** Use the linked article for redirects only if it is about the thing itself ("Avatar (2009 film)", not "Demographics of India"). */
-function redirectTarget(name: string, cell: Cell): string {
+/**
+ * Use the linked article for redirects only if it is about the thing itself ("Avatar (2009 film)", not
+ * "Demographics of India"). On country lists a link to a country is that country, whatever the row calls it
+ * ("Congo" linking Republic of the Congo).
+ */
+function redirectTarget(name: string, cell: Cell, countries = false): string {
   if (!cell.link) return name;
   const link = normalize(cleanName(cell.link));
   // "Lake Baikal" for "Baikal" is the same thing; "Demographics of India" is not.
   if (link === normalize(name) || (link.includes(normalize(name)) && !/\b(of|in|at)\b/.test(link))) return cell.link;
+  // "Dhaulagiri I" linking "Dhaulagiri": the main peak's article (the numbered title has none).
+  if (/^\d+$/.test(normalize(name).slice(link.length + 1)) && normalize(name).startsWith(link + " ")) return cell.link;
+  if (countries && COUNTRY_NAMES.has(link)) return cell.link;
+  // "Congo" linking "Petroleum industry in the Republic of the Congo" is that country.
+  const tail = cleanName(cell.link).match(/\s(?:in|of)\s(?:the\s)?(.+)$/)?.[1];
+  if (countries && tail && COUNTRY_NAMES.has(normalize(tail)) && normalize(tail).includes(normalize(name))) return tail;
   return name;
+}
+
+const hasCountries = (topic: Topic) => [topic.universe ?? []].flat().includes("countries");
+
+/** A value from another column, converted (`fallback` in topics.ts), shown rounded with commas. */
+function convertedValue(cell: Cell | undefined, factor: number): { value: number; display: string } | null {
+  const v = cell && parseValue(cell.text);
+  if (!v) return null;
+  const value = Math.round(v.value * factor);
+  return { value, display: value.toLocaleString("en-US") };
+}
+
+/**
+ * Warnings for numbers that were probably misread: "382.936" in a column of "1,723,337"s (a dot used as the
+ * thousands separator), and a km² cell that disagrees with the same row's square miles.
+ */
+function checkNumbers(topic: Topic, header: string[], body: Cell[][], vc: number): void {
+  const texts = body.map((r) => r[vc]?.text ?? "");
+  const commas = texts.filter((t) => /\d,\d{3}\b/.test(t)).length;
+  for (const [i, t] of texts.entries()) {
+    if (/^\D{0,3}\d{1,3}\.\d{3}(?!\d)/.test(t) && commas > texts.length / 2) {
+      console.log(`warn ${topic.id}: "${t}" (${body[i][0]?.text}) looks like a dot thousands separator`);
+    }
+  }
+  if (!/\bkm\b/i.test(header[vc] ?? "")) return;
+  const mc = header.findIndex((h) => h === header[vc].replace(/\bkm\b/i, "mi"));
+  if (mc < 0) return;
+  for (const r of body) {
+    const km = parseValue(r[vc]?.text ?? "")?.value;
+    const mi = parseValue(r[mc]?.text ?? "")?.value;
+    // Areas: km² = 2.59 × mi². Densities (people per km²) go the other way.
+    const ratio = km && mi ? km / mi : 0;
+    if (ratio && Math.abs(ratio / 2.589988 - 1) > 0.02 && Math.abs(ratio * 2.589988 - 1) > 0.04) {
+      console.log(`warn ${topic.id}: ${r[0]?.text}: ${r[vc].text} km² is ${(km / mi).toFixed(2)} × ${r[mc].text} mi² (expected 2.59)`);
+    }
+  }
 }
 
 /**
@@ -126,6 +191,8 @@ async function readRows(topic: Topic): Promise<Row[]> {
     const nc = column(header, topic.name);
     const vc = column(header, topic.value);
     const aliasCs = (topic.aliasCols ?? []).map((a) => column(header, a));
+    const fromCol = topic.fallback ? column(header, topic.fallback.from) : -1;
+    if (!topic.fallback) checkNumbers(topic, header, body, vc);
     for (const r of body) {
       const nameCell = r[nc];
       const valueCell = r[vc];
@@ -135,18 +202,28 @@ async function readRows(topic: Topic): Promise<Row[]> {
       if (!name || !normalize(name) || topic.skip?.includes(name) || SKIP_NAME.test(name)) continue;
       if (topic.where && !topic.where.match.test(r[column(header, topic.where.col)]?.text ?? "")) continue;
       if (/\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
-      const v = parseValue(valueCell.text);
+      let v = parseValue(valueCell.text);
+      if (topic.fallback) {
+        // A cell that disagrees with the other column by more than 2% was misread on the page ("382.936").
+        const alt = convertedValue(r[fromCol], topic.fallback.factor);
+        if (alt && (!v || Math.abs(v.value / alt.value - 1) > 0.02)) {
+          console.log(`     ${topic.id}: ${name} ${valueCell.text} → ${alt.display} (from ${r[fromCol].text} × ${topic.fallback.factor})`);
+          v = alt;
+        }
+      }
       if (!v) continue;
-      const seeds = [nameCell.text, nameCell.linkText ?? "", ...shortForms(name, topic.stripWords)];
+      // One name per line of the cell: "Mount Everest / Sagarmatha / Chomolungma" are three aliases, not one glued string.
+      const lines = nameCell.lines.length > 1 ? nameCell.lines : [nameCell.text];
+      const seeds = [...lines, nameCell.linkText ?? "", ...shortForms(name, topic.stripWords)];
       // The cell can say more than the name: "Mississippi–Missouri–Jefferson" names the Mississippi row.
-      if (cleanName(nameCell.text) !== name) seeds.push(...shortForms(cleanName(nameCell.text)));
+      for (const line of lines) if (cleanName(line) !== name) seeds.push(...shortForms(cleanName(line)));
       for (const c of aliasCs) {
         const cell = r[c];
         // "Atlanta, Georgia" names the row by "Atlanta", not by "Georgia": keep the first part of a place.
-        if (cell) seeds.push(cell.linkText ?? "", ...cell.text.split("/").map((part) => part.split(",")[0]));
+        if (cell) seeds.push(cell.linkText ?? "", ...cell.lines.flatMap((l) => l.split("/")).map((part) => part.split(",")[0]));
       }
       // The article's own title is never among its redirects ("Acadia National Park" for "Acadia").
-      const target = redirectTarget(name, nameCell);
+      const target = topic.articles?.[name] ?? redirectTarget(name, nameCell, hasCountries(topic));
       if (target !== name) seeds.push(target);
       rows.push({
         name,
@@ -174,13 +251,16 @@ async function readAlso(topic: Topic): Promise<Entry[]> {
       for (const r of body) {
         const cell = r[nc];
         if (!cell || (cell.isHeader && !cell.text)) continue;
-        const name = cellName(cell, src);
+        const name = familyName(cellName(cell, src), cell.text);
         if (!name || !normalize(name) || SKIP_NAME.test(name)) continue;
         if (topic.skip?.includes(name) || src.skip?.includes(name)) continue;
         if (/\d{3,}.*\d{3,}/.test(name)) continue;
-        const aliases = [cell.text, cell.linkText ?? "", ...shortForms(name, topic.stripWords)].map(cleanName);
+        // A family row's text ("Karl and Theo Albrecht") names several people: not an alias of one of them.
+        const family = name !== cellName(cell, src);
+        const lines = family ? [] : cell.lines.length > 1 ? cell.lines : [cell.text];
+        const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords)].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
-        ARTICLE.set(entry, redirectTarget(name, cell));
+        ARTICLE.set(entry, family ? name : redirectTarget(name, cell, hasCountries(topic)));
         out.push(entry);
       }
     }
@@ -189,7 +269,8 @@ async function readAlso(topic: Topic): Promise<Entry[]> {
     const titles = await fetchCategory(cat, topic.categoryDepth ?? 0, CATEGORY_CAP);
     if (!titles.length) console.log(`warn ${topic.id}: category "${cat}" is empty or missing`);
     for (const title of titles) {
-      if (CATEGORY_SKIP.test(title)) continue;
+      if (CATEGORY_SKIP.test(title) || topic.categorySkip?.test(title)) continue;
+      if (topic.categoryNames && !looksLikeName(baseTitle(title))) continue;
       const name = cleanName(title);
       if (!normalize(name) || SKIP_NAME.test(name)) continue;
       const entry: Entry = { rank: 0, name, aliases: name === title ? [] : [title] };
@@ -197,7 +278,21 @@ async function readAlso(topic: Topic): Promise<Entry[]> {
       out.push(entry);
     }
   }
+  for (const [name, aliases] of Object.entries(topic.more ?? {})) out.push({ rank: 0, name, aliases: [...aliases] });
   return out;
+}
+
+/** Lowercase words a name can have in the middle ("Leaning Tower of Pisa", "Mont Blanc du Tacul"). */
+const NAME_PARTICLES = new Set("of the and in on at for to a an de du des la le el del di da von van der den y e al".split(" "));
+
+/**
+ * A category member that reads like a name: "Yahoo Search", "BeReal", not "Search engine bias" (a concept article,
+ * in sentence case) or "Display" (a plain dictionary word).
+ */
+function looksLikeName(title: string): boolean {
+  const ws = title.split(/\s+/);
+  if (ws.length === 1) return !/^\p{Lu}\p{Ll}+$/u.test(title) || !isEnglishWord(title);
+  return ws.slice(1).every((w) => !/^\p{Ll}/u.test(w) || NAME_PARTICLES.has(w) || /['’.]/.test(w));
 }
 
 /** Most titles taken from a topic's categories. */
@@ -263,6 +358,12 @@ function curated(topic: Topic, entries: Entry[], final: boolean): Curated[] {
       if (!hits.length) hits = entries.filter((e) => e.aliases.some((a) => set.has(normalize(a))));
       if (hits.length !== 1) continue;
       for (const alias of forms) out.push({ alias, targets: hits, strict: false });
+    }
+  }
+  if ([topic.universe ?? []].flat().includes("us-states")) {
+    for (const [state, code] of US_STATE_CODES) {
+      const hits = entries.filter((e) => e.name === state);
+      if (hits.length === 1) out.push({ alias: code, targets: hits, strict: false });
     }
   }
   const intent = INTENT[topic.id];
@@ -331,7 +432,23 @@ async function dataDate(topic: Topic): Promise<string | undefined> {
   return tableDataDate($, table, vh ?? "");
 }
 
-async function buildPuzzle(topic: Topic): Promise<Puzzle> {
+/** Aliases left out by the hygiene rules, counted by reason (and listed in $ALIAS_LOG, if set, for review). */
+const DROPS = new Map<string, number>();
+const dropLog: string[] = [];
+
+function logDrop(id: string, rank: number, name: string, alias: string, why: string): void {
+  const reason = why.replace(/ \(".*"\)$/, "");
+  DROPS.set(reason, (DROPS.get(reason) ?? 0) + 1);
+  dropLog.push([id, rank, name, alias, why].join("\t"));
+}
+
+/**
+ * The puzzle as written: the shared format plus the topic's category (daily rotation and the list judge read it)
+ * and whether a lower number ranks higher.
+ */
+type BuiltPuzzle = Puzzle & { category: Topic["category"]; lowerIsBetter?: true };
+
+async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   const rows = (await readRows(topic)).slice(0, MAX_ROWS);
   if (rows.length < 10) throw new Error(`only ${rows.length} rows`);
   if (rows.length > 10 && rows[9].value === rows[10].value) {
@@ -342,10 +459,19 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
   const entries: Entry[] = [];
   for (const [i, row] of rows.entries()) {
     const aliases = new Set(row.aliasSeeds);
-    for (const r of await fetchRedirects(row.redirectTarget, i >= 10)) {
+    const redirects = await fetchRedirects(row.redirectTarget, i >= 10);
+    const ctx = { names: [row.name, row.redirectTarget, ...row.aliasSeeds], forms: redirects, works: topic.works };
+    for (const raw of redirects) {
+      const r = baseTitle(raw);
       // A redirect from another country's name ("China" to Taiwan) would hand that name to the wrong entry.
       const n = normalize(r);
       if (COUNTRY_NAMES.has(n) && n !== normalize(row.name)) continue;
+      // Not a name for the thing: "Child abuse in Saudi Arabia", "1937 Nanga Parbat tragedy", a song from a musical.
+      const why = junkRedirect(raw, ctx);
+      if (why) {
+        logDrop(topic.id, i + 1, row.name, raw, why);
+        continue;
+      }
       aliases.add(r);
     }
     for (const a of topic.aliases?.[row.name] ?? []) aliases.add(a);
@@ -381,6 +507,14 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
     taken.add(normalize(e.name));
   }
 
+  const junkList = [...(topic.junkAliases ?? []), ...(hasCountries(topic) ? COUNTRY_JUNK : [])];
+  if (junkList.length) {
+    const junk = new Set(junkList.map(normalize));
+    for (const e of entries) {
+      for (const a of e.aliases) if (junk.has(normalize(a))) logDrop(topic.id, e.rank, e.name, a, "listed in junkAliases");
+      e.aliases = e.aliases.filter((a) => !junk.has(normalize(a)));
+    }
+  }
   pruneAliases(entries);
   applyIntent(topic, entries);
   if (topic.values) {
@@ -393,7 +527,9 @@ async function buildPuzzle(topic: Topic): Promise<Puzzle> {
     id: topic.id,
     title: topic.title,
     prompt: topic.prompt,
+    category: topic.category,
     metric: topic.metric,
+    ...(topic.lowerIsBetter ? { lowerIsBetter: true as const } : {}),
     ...(!topic.lowerIsBetter && entries.filter((e) => e.n !== undefined).length >= BLITZ_MIN ? { blitz: true } : {}),
     source: {
       name: `Wikipedia: ${topic.page}`,
@@ -429,5 +565,8 @@ for (const topic of TOPICS) {
   }
 }
 if (!only.length || testMode) writeFileSync(join(OUT_DIR, "index.json"), JSON.stringify(index, null, 1));
+const dropped = [...DROPS].sort((a, b) => b[1] - a[1]).map(([why, n]) => `${n} ${why}`);
+console.log(`aliases dropped: ${dropped.join("; ") || "none"}`);
+if (process.env.ALIAS_LOG) writeFileSync(process.env.ALIAS_LOG, dropLog.join("\n") + "\n");
 console.log(`lexicon trained on ${writeLexicon(OUT_DIR)} names`);
 console.log(`${requestCount()} Wikipedia requests (the rest came from the cache)`);

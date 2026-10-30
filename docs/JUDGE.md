@@ -75,6 +75,9 @@ Write `scripts/judge/verdicts/<id>.json`:
   "casual": { "found": 7, "livesLost": 1, "guesses": 13 },
   "fan": { "found": 9, "livesLost": 1, "guesses": 16 },
   "blitzCasual": { "scored": 24, "named": 26 },
+  "difficulty": 2,
+  "tags": ["geography", "population"],
+  "audience": "anyone",
   "summary": "One or two plain sentences a person can read in five seconds.",
   "reasons": ["short bullet", "short bullet"],
   "fixes": ["precise data fix for the rebuild queue, if any"]
@@ -83,6 +86,30 @@ Write `scripts/judge/verdicts/<id>.json`:
 
 `blitzCasual` is null when the list isn't Blitz-ready. Keep `summary` and `reasons` short and plain, and no em
 dashes.
+
+## Sorting fields (every verdict)
+
+Every verdict also carries, for sorting the free-play pool and, later, letting players roll by interest:
+
+- `difficulty`: 1 (anyone gets most of it) to 5 (enthusiasts only), for a typical player.
+- `tags`: 2-4 lowercase topic tags a player might pick a list by: broad first, then specific. For example
+  `["sports", "basketball", "nba"]`, `["history", "war"]`, `["geography", "europe"]`, `["music", "pop"]`.
+- `audience`: one short phrase for who will love it ("anyone", "sports fans", "history buffs", "film nerds").
+
+## Triage mode
+
+For sorting many lists at once, a lighter pass. Same honesty, less writing:
+
+1. Read the packet.
+2. Simulate one **casual** player (12-15 guesses) and replay them. If the list is Blitz-ready, also do a quick 90 s
+   casual Blitz.
+3. Simulate the **fan** only when the list might be `daily-list` (to check the curve).
+4. Check the data as in step 5, briefly.
+5. Write the full verdict file (all scores, decision, sorting fields). Keep `reasons` to two or three bullets and
+   `fixes` to real problems.
+
+A judge in triage mode may handle several lists one after another, but must judge each on its own and never compare
+them to each other in a verdict.
 
 ## How the schedule uses verdicts
 

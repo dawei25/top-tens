@@ -1,0 +1,30 @@
+{
+  "id": "capitals",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 30, "named": 30 },
+  "difficulty": 2,
+  "tags": ["geography", "cities", "capitals"],
+  "audience": "anyone",
+  "summary": "A great daily in the making: famous cities with Kinshasa and Lima as fun surprises, and a superb Blitz. Fix the junk aliases and Hong Kong first.",
+  "reasons": [
+    "Casual found 8/10 quickly, then lost lives on true near misses (Dhaka #11, Bangkok #13) and on the city-proper rule (Paris #50, Manila #57, Buenos Aires #28).",
+    "'Delhi' is the classic trap: it offers Delhi / New Delhi, and both cost a life, since New Delhi proper is only #149. Correct, but it will sting.",
+    "Every capital scores in Blitz; a casual player named 30 in 90 seconds and all 30 scored."
+  ],
+  "fixes": [
+    "Hong Kong is ranked #17 but is not a national capital; drop it from the ranking (and from Blitz scoring).",
+    "Drop junk aliases from Beijing: 'Fuxingmen Inner Street', 'Fuxingmen Outer Street' and 'Fuxing Road, Beijing'.",
+    "Drop junk aliases from Tokyo: 'Tokyo Plain', 'Jūjō, Tokyo' and 'Tokyo in pop culture'.",
+    "Drop junk aliases from Moscow: 'Kotly, Moscow', 'Kotly, Moscow Oblast' and 'Western Moscow'.",
+    "Drop junk aliases from Cairo: 'Abdeen' and 'Cairo in the middle ages'.",
+    "Drop junk aliases from Seoul: 'Sangwon Middle School', 'Five Grand Palaces of Joseon-Dynasty Seoul', 'Five Grand Palaces', 'Seoul castle', 'South Seoul' and 'North Seoul'.",
+    "Drop junk aliases from Mexico City ('Mexican Federal District Transit System') and London ('Londonise', 'Londonize').",
+    "Drop junk alias 'Baku Oilfields' (Baku, #47)."
+  ]
+}

@@ -4,9 +4,24 @@
   "decision": "daily-list",
   "alsoBlitz": false,
   "priority": 8,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 5, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 10, "livesLost": 4, "guesses": 14 },
-  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "scores": {
+    "recognizability": 5,
+    "curve": 3,
+    "fairness": 5,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 10,
+    "livesLost": 4,
+    "guesses": 14
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 1,
+    "guesses": 11
+  },
   "blitzCasual": null,
   "summary": "A clean, famous prompt where everyone gets the first seven and the fight is over Russia, Italy and Brazil versus Canada, Korea and Australia. Good daily, a bit easy for fans.",
   "reasons": [
@@ -20,5 +35,12 @@
     "Add 's korea' and 's. korea' as aliases for South Korea (currently not recognized; free, but it reads as a bug)",
     "Drop junk redirect aliases on ranks 11+: 'Snow Mexico' (Canada), 'Languages of Saudi Arabia', 'Irish politics', 'Finnishness', 'Bibliography of Finland', 'Swedish origin', 'Argentina Information', 'National symbols of Chile', 'Cultural heritage of Chile', 'Third Republic' (South Africa), 'Languages of Vietnam'",
     "Build has no category; topics.ts says Geography, so the pending rebuild should carry it through for schedule rotation"
-  ]
+  ],
+  "difficulty": 2,
+  "tags": [
+    "geography",
+    "economics",
+    "countries"
+  ],
+  "audience": "anyone"
 }

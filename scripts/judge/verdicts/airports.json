@@ -1,0 +1,27 @@
+{
+  "id": "airports",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 12 },
+  "fan": null,
+  "blitzCasual": { "scored": 26, "named": 29 },
+  "difficulty": 3,
+  "tags": ["travel", "airports", "aviation"],
+  "audience": "travelers and plane spotters",
+  "summary": "A great Blitz: city names score fast and a casual player hits 26 in 90 seconds. As a classic daily it bleeds lives on famous airports outside the top 10, and typing \"london\" picks Gatwick and costs a life.",
+  "reasons": [
+    "Casual classic: Atlanta, Dubai, Chicago, Tokyo, Dallas, Heathrow found, then LAX #13, JFK #23, Beijing Capital #15, Singapore #16 and Frankfurt #21 each cost a life. Out on guess 12 with 6/10.",
+    "City names match well (atlanta, chicago, tokyo, dallas, denver, seoul, doha, las vegas), which makes Blitz deep. Gaps: \"london\" goes to Gatwick and costs a life; \"paris\", \"paris cdg\" and \"delhi\" are not recognized.",
+    "Data looks current (2025 totals) and the Shanghai, Guangzhou, Istanbul entries are fun surprises for most players."
+  ],
+  "fixes": [
+    "airports: \"london\" is matched to London Gatwick Airport (unranked) and costs a life in classic. Add \"London\" as an alias shared by Heathrow and Gatwick (the game offers the choice), or at least to Heathrow.",
+    "airports: Gatwick appears twice in the unranked pool (\"Gatwick Airport\" and \"London Gatwick Airport\", same 43,242,000 value). Merge them.",
+    "airports: add \"Paris\" and \"Paris CDG\" to Charles de Gaulle Airport (#14) (shared with Orly), and \"Delhi\" / \"New Delhi\" to Indira Gandhi International Airport (#11). Consider \"New York\" shared by JFK, Newark and LaGuardia.",
+    "airports: drop junk aliases on the top 10: \"United Airlines Flight 1015\", \"Atlas Air Flight 6972\" (O'Hare), \"Frontier Airlines Flight 4345\", \"Shibby\", \"Denver international airport murals\" (Denver), \"Atlanta Motordrome\" (Atlanta), \"Heathrow arrival stacks\", \"London Heathrow Crashes\", \"Bovingdon stack\", \"Heathrow.com\" (Heathrow), \"Dubai Air wing Hangar\", \"Dubai Royal Airwing Hangar\", \"Dubai International Terminal 1\" (Dubai), \"O'Hare Modernization Program\", \"Dfwairport.com\".",
+    "airports: the location column is being turned into aliases (\"Hillingdon\", \"Ōta\", \"Arnavutköy\", \"Queens\", \"Community of Madrid\", \"Catalonia\", \"Jung District\", \"Daxing District\", \"San Mateo County\", \"Mississauga\"). Districts and regions are not names of the airport; keep only the city name."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "market-cap-peak",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 2, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": ["business", "companies", "stocks"],
+  "audience": "tech and finance followers",
+  "summary": "A timely, playable list: big tech is free, Aramco and Meta take thought, TSMC, Broadcom and SpaceX are the stretch. The data around it is messy enough to fix before it runs.",
+  "reasons": [
+    "Casual found 7 (Apple, Microsoft, Amazon, Google, Nvidia, Facebook, Aramco) before Tesla #11, Samsung #12, Berkshire #15, Walmart #17 and Exxon used up the lives; good near misses",
+    "Countries are accepted answers ('united states' costs a life), PetroChina is duplicated, and top-10 alias lists are full of products, subsidiaries and article titles",
+    "Not Blitz-ready: only 19 entries carry a value"
+  ],
+  "fixes": [
+    "Remove 'United States' and 'United Kingdom' from the accepted answers (country cells read as companies)",
+    "Merge the unranked 'Petro China' row into PetroChina (#14); 'petro china' currently offers both",
+    "Drop junk aliases on the top 10: Broadcom 'Afterburner', 'SpeedBooster', '125 High Speed Mode', '125HSM', 'Symantec Security', 'Symantec Security Response', 'HP Associates'; Amazon 'Sonic', 'Just Do It Award', 'Wag.com', 'Casa.com', 'Look.com', 'Commingled inventory', 'Lobbying by Amazon'; Apple 'Katherine L. Adams', 'Directly Responsible Individual', 'Boycott Apple', 'Apple tax', 'Spruce Technologies', 'Raycer'; Microsoft 'Blibbet', 'Lift London', '.bing', 'Extended Security Updates', 'Microsoft.sucks', 'WebsiteSpark'; Nvidia 'Forceware', 'IReady', 'Controversies surrounding Nvidia', 'Project GROOT' variants, 'Nvidia Grace'; Meta 'Move fast and break things', 'Hacker Way' variants; SpaceX 'Mars Oasis', 'SpaceX Hawthorne facility', 'SpaceX headquarters'; TSMC 'WaferTech', 'TSMC Washington'",
+    "Confirm SpaceX's $2.44T is a public-market peak, since the prompt and source are about public companies; if it is a private valuation, it should not be in the ranking"
+  ]
+}

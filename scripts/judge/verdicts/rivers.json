@@ -1,0 +1,27 @@
+{
+  "id": "rivers",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 3, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 12 },
+  "blitzCasual": { "scored": 20, "named": 27 },
+  "difficulty": 3,
+  "tags": ["geography", "rivers", "nature"],
+  "audience": "geography fans",
+  "summary": "Correct top 10, but as a classic list a typical player gets the big four plus Congo and then loses every life on Ganges, Danube, Mekong, Volga and Rhine. It fits Blitz well once the Ganges and St. Lawrence entries are fixed.",
+  "reasons": [
+    "Casual run: Nile, Amazon, Mississippi, Yangtze, Congo (5/10), then Ganges (#35), Danube (#31), Mekong (#12), Volga (#18) and Rhine (#142) end the game. Yenisey, Ob, Paraná and Amur are Siberia/atlas knowledge.",
+    "Lengths and order match the Wikipedia table; river systems are handled well ('missouri' is a free duplicate of Mississippi, 'irtysh' gives Ob, 'parana' gives Río de la Plata). Fan: 10/10 with Lena (#11) as the fair near miss.",
+    "Blitz: 20 of 27 casual names scored, but 'ganges' shows up as 'Padma' and 'st lawrence' lands on a stat-less duplicate, which is why data is 3."
+  ],
+  "fixes": [
+    "Rename the 'Padma' entry (#35, 'Padma-Ganges-Alaknanda') to 'Ganges' so a player typing Ganges sees 'Ganges is #35', not 'Padma is #35'. Keep Padma as an alias.",
+    "Duplicate entity: 'st lawrence' resolves to an unranked 'St. Lawrence River' with no stat instead of ranked #27 'Saint Lawrence' (3,058 km). Merge them so all spellings hit the ranked entry.",
+    "Junk aliases from river-system cells on Saint Lawrence: 'Niagara', 'Detroit', 'Saint Clair', 'Saint Marys', 'Saint Louis', 'North' ('saint louis' costs a life as Saint Lawrence; 'north' and 'detroit' trigger choice prompts). Do not alias a system to every connecting river and lake outlet; at most keep the headstream, and never single generic words like 'North', 'Peace', 'Slave', 'Bow', 'Ene', 'Tambo'.",
+    "Other junk aliases on top-10 entries: Congo 'Exploration of the Congo basin'; Mississippi 'Hell Roaring', 'Red Rock', 'Jefferson', 'Beaverhead' (headstreams, not names of the Mississippi; 'jefferson' currently scores #4).",
+    "Add a few famous short rivers casual players name in Blitz with their lengths: Thames is accepted with no stat; Hudson, Seine and Potomac are unrecognized. Jordan River also has no stat."
+  ]
+}

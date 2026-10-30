@@ -1,0 +1,25 @@
+{
+  "id": "us-states-population",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 3,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 5, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": { "scored": 30, "named": 32 },
+  "difficulty": 2,
+  "tags": ["geography", "united states", "population"],
+  "audience": "anyone, especially Americans",
+  "summary": "Clean and tense: the big four are free, then Georgia, North Carolina and Michigan fight Washington, Arizona and New Jersey. It ran as Today's list yesterday, so it should rest before running again.",
+  "reasons": [
+    "Casual found all 10 but only on the last life, after Washington #13, Arizona #14, New Jersey #11 and Massachusetts #16; every miss is a believable near miss",
+    "Postal codes and common forms (ca, tx, ny, nc, penn, cali) all match, and Blitz is deep: 30 of 32 casual guesses scored (DC and Puerto Rico score nothing)",
+    "Ran as Today's list on 2026-10-29, hence the low priority; a non-US player will find the back half harder"
+  ],
+  "fixes": [
+    "'mass' is corrected to Mississippi; add 'mass' as a Massachusetts alias",
+    "'virgina' (common misspelling of Virginia, #12) is not recognized at all",
+    "Drop junk aliases: 'America's Wang', 'Flowery Easter', 'Florida map' (Florida), 'Texas-sized' (Texas), 'Nevada Annulment' (Nevada), 'Idaho Constitution' (Idaho)"
+  ]
+}

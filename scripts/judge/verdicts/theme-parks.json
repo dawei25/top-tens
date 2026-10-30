@@ -1,0 +1,29 @@
+{
+  "id": "theme-parks",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": false,
+  "priority": 5,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 2, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 6, "livesLost": 3, "guesses": 15 },
+  "fan": null,
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": ["travel", "theme parks", "disney"],
+  "audience": "Disney fans and travelers",
+  "summary": "Playable and recognizable, but the answer pool is full of Disney resorts, companies and services, so typing 'tokyo disney' or 'shanghai disney' costs a life on a resort entry instead of finding the top-10 park. Fix the pool and it can run as a daily.",
+  "reasons": [
+    "Casual run: Magic Kingdom (via 'disney world'), Disneyland, Epcot, Tokyo Disneyland, Disneyland Paris, Hollywood Studios found; lives went on Animal Kingdom #15, Universal Studios Hollywood #16, Cedar Point. 6/10 with 2 lives left.",
+    "Eight of ten answers are Disney parks, so after the first few it gets a bit rote; Chimelong Ocean Kingdom is the one real surprise.",
+    "Resort entries in the pool turn natural short names into lost lives, '#10 Disneyland Park' reads like a duplicate of '#2 Disneyland', and 'walt disney studios' lands on the Florida park instead of the Paris one."
+  ],
+  "fixes": [
+    "Resort entries make natural guesses cost a life: 'tokyo disney' -> Tokyo Disney Resort, 'shanghai disney' -> Shanghai Disney Resort, 'disneyland resort' -> Disneyland Resort (all unranked). Remove resort entries from the pool (Tokyo Disney Resort, Shanghai Disney Resort, Disneyland Resort, Hong Kong Disneyland Resort) and add 'Tokyo Disney', 'Shanghai Disney', 'Hong Kong Disney', 'Disney Paris' as aliases of the flagship parks.",
+    "Remove non-park entries from the unranked pool: Disney Vacation Club, Disney PhotoPass, Virtual queue systems at Disney Parks, Give a Day Get a Disney Day, Disneyland Inc., Euro Disney S.A.S., Disney's Fairy Tale Weddings & Honeymoons, Disneyland Resort Paris 15th Anniversary, Disney Dream Portrait Series, Disney Live Entertainment, Disney Regional Entertainment, Disney Experiences, Adventures by Disney, Disney Magic Kingdoms (a mobile game), Club Disney, World of Disney, Downtown Disney, Walt Disney Attractions Japan, Universal Kids Resort, Hale's Tours of the World.",
+    "'Universal Beijing' (unranked) duplicates #12 Universal Studios Beijing; merge it as an alias.",
+    "Display #10 as 'Disneyland Paris' or 'Disneyland Park (Paris)' so it does not read as a duplicate of #2 Disneyland.",
+    "Move the alias 'Walt Disney Studios' from Disney's Hollywood Studios (#9) to Disney Adventure World (#20); it is the Paris park's former name.",
+    "Junk aliases on top-10 entries: Tokyo Disneyland 'It's a Small World' (a ride in several parks), 'Find Stitch!', 'Tokyo Disney Resort Fireworks'; Magic Kingdom 'Villain's Mix and Mingle', 'Magic Kingdom Parade', 'Disney's Dreams Come True Parade'; Universal Studios Japan 'Hard Rock Cafe Osaka', 'Hard Rock Cafe Universal CityWalk Osaka', 'Universal CityWalk Osaka'; Disneyland 'Team Disney Anaheim'; Tokyo DisneySea 'DisneySea Transit Steamer Line'; Hollywood Studios 'Hollywood Hills Amphitheater', 'Disney's Doug Live!'; Disneyland Park 'Chante, C'est Noel'; Epcot 'Epcot '94', 'Epcot '95'.",
+    "Data is the 2024 TEA/AECOM report; if the 2025 report is out, update the figures and the year in the prompt."
+  ]
+}

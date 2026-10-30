@@ -1,0 +1,24 @@
+{
+  "id": "f1-wins-by-country",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": ["sports", "motorsport", "formula one"],
+  "audience": "F1 fans, and anyone who knows a few drivers",
+  "summary": "Countries are easy to guess even without following F1, and the reveal has good moments: Finland at #6, Argentina (Fangio) at #10, Spain only #11. A solid, gettable daily.",
+  "reasons": [
+    "Casual found 9/10 but spent all 5 lives on Spain, USA, Mexico, Monaco and Japan, all plausible and mostly near misses (Spain #11, USA #12).",
+    "Totals check out by driver (Prost, Senna, Lauda, Fangio, Häkkinen and Räikkönen) and are current mid-2026; the US count includes the 1950-60 Indy 500, as Wikipedia does.",
+    "Only 23 countries have a win, so it is not Blitz-ready."
+  ],
+  "fixes": [
+    "Typing 'british' (natural for driver nationality) offers British Indian Ocean Territory / British Virgin Islands instead of United Kingdom; add 'British' as a United Kingdom alias.",
+    "Drop the junk alias 'Swedish sin' from Sweden (#15)."
+  ]
+}

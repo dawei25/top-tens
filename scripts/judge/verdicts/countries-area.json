@@ -1,0 +1,23 @@
+{
+  "id": "countries-area",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 26, "named": 27 },
+  "difficulty": 2,
+  "tags": ["geography", "area", "countries"],
+  "audience": "anyone",
+  "summary": "Six instant gimmes, then a real scramble for India, Argentina, Kazakhstan and Algeria, with Greenland, DR Congo and Saudi Arabia as traps. A strong daily that also makes a deep Blitz.",
+  "reasons": [
+    "Curve is good: Russia to Australia are automatic, the last four take map thinking, and Algeria is the satisfying stretch",
+    "Near misses teach something: DR Congo #11, Saudi Arabia #12, Mexico #13; Greenland costs a life as a non-country, which stings but is a fair lesson",
+    "Casual Blitz scored 26 of 27 (only Greenland scored nothing); data matches the standard total-area ranking"
+  ],
+  "fixes": [
+    "'aussie' is offered as a correction to Russia instead of Australia; add 'aussie' as an Australia alias or keep it out of fuzzy matching"
+  ]
+}

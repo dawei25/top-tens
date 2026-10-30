@@ -1,0 +1,26 @@
+{
+  "id": "deserts",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 4,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 3, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 13 },
+  "fan": null,
+  "blitzCasual": { "scored": 12, "named": 16 },
+  "difficulty": 3,
+  "tags": ["geography", "deserts"],
+  "audience": "geography fans",
+  "summary": "The polar hint gives a nice start, but the famous small deserts (Mojave, Atacama, Namib, Thar) eat every life, and the Australian entry is hard to type. Fix the aliases, then run it as a Blitz.",
+  "reasons": [
+    "Casual classic: Sahara, Antarctica, Gobi, Arctic, Kalahari and Arabian, then Mojave, Atacama, Namib, Sonoran and Thar each cost a life. Out at 6/10.",
+    "#5 'Great Australian Desert' is not a name people use; 'outback', 'australian outback' and 'australia' are not recognized, while 'Great Victoria' (part of it) costs a life at #13.",
+    "In Blitz those famous small deserts score, so 12 of 16 casual names count; the pool is only 38 deep."
+  ],
+  "fixes": [
+    "Add 'Outback', 'Australian Outback' and 'Australian deserts' as aliases of Great Australian Desert (the alias 'Australian Outback deserts' exists but the short forms do not match).",
+    "The top 10 counts the Great Australian Desert as a whole, yet its parts (Great Victoria, Great Sandy, Gibson, Tanami, Simpson, Little Sandy, Strzelecki) are separate ranked entries, so naming one costs a life. Make them alias choices of Great Australian Desert in classic, or drop the parts.",
+    "Add 'Rub al Khali' and 'Empty Quarter' as aliases of Arabian Desert; they are currently not recognized.",
+    "Ranked entries that are not deserts by name: 'Colorado Plateau', 'Columbia Basin', 'Ustyurt Plateau', 'Ladakh'. Check the source rows and drop or rename them."
+  ]
+}

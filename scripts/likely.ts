@@ -42,6 +42,17 @@ export const NO_VALUE: Record<string, Record<string, string>> = {
 };
 
 /**
+ * Picks whose infobox lacks the number although the article states it, found in review: entry name → the value
+ * in the list's unit, with where it comes from. Used instead of reading the infobox.
+ */
+export const FIXED_VALUE: Record<string, Record<string, { display: string; number: number; source: string }>> = {
+  mountains: {
+    // The cached article's infobox has no Elevation row; its lead gives "a summit elevation of 3,776.24 m".
+    "Mount Fuji": { display: "3,776", number: 3776, source: "article lead, summit elevation of 3,776.24 m" },
+  },
+};
+
+/**
  * What a normal person would type, roughly most famous first. Ranked entries are ignored, so these lists can
  * name things that happen to be in the top 100 today. Spelling follows Wikipedia titles; aliases also match.
  */

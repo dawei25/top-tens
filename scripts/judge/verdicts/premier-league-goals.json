@@ -1,0 +1,24 @@
+{
+  "id": "premier-league-goals",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-blitz",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": null,
+  "blitzCasual": { "scored": 16, "named": 21 },
+  "difficulty": 3,
+  "tags": ["sports", "football", "premier league"],
+  "audience": "football fans",
+  "summary": "Better as a Blitz than a classic daily: anyone with some football knowledge can rattle off 15+ Premier League scorers, but in classic the famous names outside the top 10 (Haaland, Ronaldo, Gerrard, Drogba) burn lives fast.",
+  "reasons": [
+    "Kane, Rooney, Salah, Henry, Agüero and Lampard are known well beyond football fans; Andy Cole, Fowler and Defoe are not, so it is too niche for the main daily.",
+    "Blitz works well: 35 scoring answers, and most of the famous strikers a casual fan thinks of are in the pool.",
+    "Data is current and clean at the top; 'son' and 'heung min son' are not recognized for Son Heung-min (#17)."
+  ],
+  "fixes": [
+    "Add aliases 'Son', 'Heung-min Son', 'Son Heung Min' to Son Heung-min (#17); only 'Heung-min' works now.",
+    "Drop junk aliases: 'Elen Rivas' (Frank Lampard), 'Nicole Merry' (Thierry Henry), 'Tommy Rooney' (a different player, on Wayne Rooney), 'Sergioaguero.com' (Sergio Agüero)."
+  ]
+}

@@ -6,7 +6,7 @@ import type { CheerioAPI } from "cheerio";
 import type { Entry } from "../src/game/types";
 import { cleanText, statNumber } from "./table";
 import { normalize } from "../src/game/match";
-import { NO_VALUE, pickLikely } from "./likely";
+import { FIXED_VALUE, NO_VALUE, pickLikely } from "./likely";
 import type { Topic } from "./topics";
 import { fetchPage, NotFound } from "./wiki";
 
@@ -229,7 +229,9 @@ export async function addValues(
     const article = articleOf(entry);
     const qualifier = article.match(/\(([^)]*)\)$/)?.[1];
     let r: Reading;
+    const fixed = FIXED_VALUE[topic.id]?.[entry.name];
     if (NO_VALUE[topic.id]?.[entry.name]) r = { skip: NO_VALUE[topic.id][entry.name] };
+    else if (fixed) r = { display: fixed.display, number: fixed.number / scale, raw: `fixed: ${fixed.source}` };
     else if (qualifier && !entry.name.includes("(") && !KIND_QUALIFIER.test(qualifier)) {
       // "Channel Islands (California)": a player typing the plain name means the better-known namesake.
       r = { skip: `article is the "${qualifier}" one; the plain name usually means a better-known namesake` };

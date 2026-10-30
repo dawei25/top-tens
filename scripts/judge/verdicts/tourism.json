@@ -1,0 +1,22 @@
+{
+  "id": "tourism",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": null,
+  "difficulty": 1,
+  "tags": ["geography", "travel", "countries"],
+  "audience": "anyone",
+  "summary": "An easy, friendly daily: every answer is a country people know, and the only debate is that China and Thailand are not in it. Good for a gentle day.",
+  "reasons": [
+    "Casual finds all 10 in 12 guesses, losing lives only on China and Thailand. On the easy side, but Turkey at #4 and Greece at #10 give a little surprise.",
+    "Every other country is unranked, so China and Thailand cost a life with no '#11' to learn from, and the list is not Blitz-ready."
+  ],
+  "fixes": [
+    "Only the top 10 carry a value. Add ranks 11+ from the page's regional tables (Thailand, China, Austria, UAE, etc.) so near misses show a rank and the list can be Blitz-ready."
+  ]
+}

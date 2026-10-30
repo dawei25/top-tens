@@ -1,0 +1,27 @@
+{
+  "id": "tiktok-accounts",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 2, "data": 3, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 12 },
+  "fan": null,
+  "blitzCasual": { "scored": 18, "named": 21 },
+  "difficulty": 3,
+  "tags": ["internet", "social media", "tiktok"],
+  "audience": "TikTok users",
+  "summary": "A fun Blitz for anyone on TikTok, with 50 ranked accounts, but it needs cleanup first: celebrity guesses like Taylor Swift cost a life with no rank, 'the rock' is not recognized, and several aliases point to the wrong person.",
+  "reasons": [
+    "Casual player found 6/10 (Khaby, Charli, MrBeast, Addison Rae, Bella Poarch, Zach King) and lost all 5 lives on Selena Gomez #26, Kylie Jenner #23, Dixie #35, plus Taylor Swift and Kim Kardashian, which are unranked and cost a life with nothing learned.",
+    "Willie Salim and Kimberly Loaiza are unknown to most English-speaking players, and the TikTok and FIFA World Cup accounts are a fun reveal but rarely guessed, so it is too hard for Today's list.",
+    "Good Blitz pool (50 ranked accounts, casual 90 s scored 18 of 21), so it suits Today's Blitz once the data is clean."
+  ],
+  "fixes": [
+    "Make the CELEBRITIES extras (topic 'also') free or drop them for this topic: Taylor Swift, Kim Kardashian, Cristiano Ronaldo, Lionel Messi, Lisa etc. cost a life in classic and score nothing in Blitz, with no rank shown.",
+    "Fix the garbled name 'IShowSpeed (Darren Watkins Jr.' to 'IShowSpeed' (#33), and add 'Speed' as an alias.",
+    "Add 'The Rock' as an alias of Dwayne Johnson (#12); 'the rock' is currently not recognized.",
+    "Remove aliases that are other people: Chandler Hallow, Ava Kris Tyson, Chris Tyson, Nolan Hansen (MrBeast); Zaira Nucci (Khaby Lame); Heidi D'Amelio, Marc D'Amelio (Charli D'Amelio).",
+    "Remove junk aliases: 'MrBeast allegations', 'T-Series vs MrBeast', 'Would You Risk Dying for $500,000?' (MrBeast); 'Legal issues with TikTok', 'Project Texas', 'TikTok Star', 'TikToker', 'Tiktokers', 'TikTok dance', 'TikTok trend' (TikTok); 'Dolls', 'Dolls EP' (Bella Poarch); 'FIFA World Cup tiebreakers' (FIFA World Cup); 'Sports' (Barstool Sports), 'League' (Champions League)."
+  ]
+}

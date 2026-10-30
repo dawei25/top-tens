@@ -1,0 +1,25 @@
+{
+  "id": "brazil-cities",
+  "judgedAt": "2026-10-30",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 3,
+  "scores": { "recognizability": 3, "curve": 4, "fairness": 4, "data": 3, "fun": 3, "blitzDepth": 3 },
+  "casual": { "found": 8, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 14, "named": 17 },
+  "difficulty": 3,
+  "tags": ["geography", "cities", "brazil"],
+  "audience": "geography fans",
+  "summary": "Correct and fair, with nice near misses (Belém #11, Porto Alegre #12), but past São Paulo, Rio and Brasília most players are working from World Cup memories. Good for free play; 'Rio' must be accepted.",
+  "reasons": [
+    "Casual run: 8/10 with 1 life left, but only by drawing on 2014 World Cup host cities; a player without that runs dry after São Paulo, Rio, Brasília and Salvador. Goiânia (#10) is a fan-only answer.",
+    "'rio' is NOT RECOGNIZED and the game tells the player it isn't an answer, the most common way to type #2. 'amazonas' autocorrects to Arapongas (#256).",
+    "Blitz is borderline: 14 of 17 casual names scored, and casual players run dry around 15."
+  ],
+  "fixes": [
+    "Add 'Rio' as an alias of Rio de Janeiro in scripts/intent.ts (it is dropped as a shared short form). Also 'SP' for São Paulo and 'BH' for Belo Horizonte if cheap.",
+    "State names a player might type ('Amazonas', 'Bahia') should be junk or free, not autocorrect to an unrelated city: 'amazonas' currently becomes Arapongas (#256), which costs a life if confirmed.",
+    "Junk redirect aliases on top-10 entries: Rio de Janeiro 'Fazenda Botafogo', 'Fazenda Botafogo, Rio de Janeiro', 'Boca do Mato', 'Boca do Mato, Rio de Janeiro', 'Consolação, Rio de Janeiro', 'Dadur', 'Dadur, Rio de Janeiro', 'Distrito Industrial', 'Distrito Industrial rio de janeiro', 'Rio Grande, Rio de Janeiro', 'Terreirão do Rio Bonito', 'Faz Quem Quer'; São Paulo 'Higienopolis', 'São Paulo International Transport Industry Show'; Belo Horizonte 'Vista Alegre', 'Vista Alegre, Belo Horizonte', 'Vista Alegre, Mina Gerais'; Curitiba 'Feirinha do largo da ordem', 'Rua XV de Novembro', 'Curitiba Master Plan', 'Rua das Flores', 'The Flower Street'; Recife 'Escola Americana do Recife', 'Rua da Aurora', 'Recife cuisine'; Fortaleza 'Praia do Futuro'; Brasília 'Brasília, Taguatinga'; plus every '<city> weather' redirect. Drop neighbourhoods, streets, schools, events and weather/cuisine subtopics."
+  ]
+}

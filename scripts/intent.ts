@@ -23,8 +23,8 @@ export const COUNTRY_FORMS: string[][] = [
   ["Taiwan", "Republic of China", "ROC", "Chinese Taipei", "Formosa"],
   ["Russia", "Russian Federation"],
   ["Soviet Union", "USSR", "U.S.S.R.", "Soviet", "CCCP"],
-  ["South Korea", "Korea", "Republic of Korea", "ROK"],
-  ["North Korea", "DPRK", "Democratic People's Republic of Korea"],
+  ["South Korea", "Korea", "Republic of Korea", "ROK", "S. Korea"],
+  ["North Korea", "DPRK", "Democratic People's Republic of Korea", "N. Korea"],
   ["DR Congo", "Democratic Republic of the Congo", "DRC", "Congo-Kinshasa", "Zaire", "Congo DR", "DR of Congo"],
   ["Republic of the Congo", "Congo-Brazzaville", "Congo Republic"],
   ["Ivory Coast", "Côte d'Ivoire", "Cote d'Ivoire"],
@@ -92,6 +92,7 @@ export const INTENT: Record<string, Intent> = {
       "Dhaulagiri I": ["Dhaulagiri"],
       "Annapurna I": ["Annapurna"],
       "Gasherbrum I": ["Hidden Peak"],
+      Denali: ["Mount McKinley", "McKinley", "Mt McKinley"],
     },
   },
   rivers: {
@@ -253,9 +254,17 @@ export const INTENT: Record<string, Intent> = {
     same: {
       "Narendra Modi Stadium": ["Motera Stadium", "Motera"],
       "Michigan Stadium": ["The Big House", "Big House"],
-      "Ohio Stadium": ["The Horseshoe", "The Shoe"],
-      "Tiger Stadium": ["Death Valley", "LSU Tiger Stadium"],
+      "Ohio Stadium": ["The Horseshoe", "The Shoe", "Ohio State"],
+      "Tiger Stadium": ["Death Valley", "LSU Tiger Stadium", "LSU"],
       "Darrell K Royal–Texas Memorial Stadium": ["Texas Memorial Stadium", "DKR"],
+      "Beaver Stadium": ["Penn State"],
+      "Kyle Field": ["Texas A&M"],
+      "Neyland Stadium": ["Tennessee"],
+      "Bryant–Denny Stadium": ["Alabama"],
+      "Melbourne Cricket Ground": ["MCG"],
+      "Camp Nou": ["Nou Camp", "Spotify Camp Nou"],
+      "Bernabéu": ["Santiago Bernabéu", "Santiago Bernabeu", "Estadio Santiago Bernabéu"],
+      "AT&T Stadium": ["ATT Stadium", "AT and T Stadium"],
     },
   },
   "companies-revenue": {
@@ -457,7 +466,7 @@ export const INTENT: Record<string, Intent> = {
     same: {
       "Great Smoky Mountains": ["Smoky Mountains", "Smokies", "Great Smokies"],
       "Grand Teton": ["Tetons", "Grand Tetons"],
-      "Rocky Mountain": ["Rocky Mountain NP"],
+      "Rocky Mountain": ["Rocky Mountain NP", "Rocky Mtn"],
     },
   },
   empires: {
@@ -512,6 +521,10 @@ export const INTENT: Record<string, Intent> = {
       "Mark Zuckerberg": ["Zuck"],
       "Jensen Huang": ["Jensen"],
       "Warren Buffett": ["Buffet"],
+    },
+    groups: {
+      // Today's richest Bettencourt, or her late mother: ask.
+      Bettencourt: ["Françoise Bettencourt Meyers", "Liliane Bettencourt"],
     },
   },
   broadway: {

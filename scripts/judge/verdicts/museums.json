@@ -1,0 +1,27 @@
+{
+  "id": "museums",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": false,
+  "priority": 5,
+  "scores": { "recognizability": 3, "curve": 2, "fairness": 2, "data": 3, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 12 },
+  "fan": null,
+  "blitzCasual": { "scored": 14, "named": 15 },
+  "difficulty": 4,
+  "tags": ["culture", "museums", "travel"],
+  "audience": "travelers and art lovers",
+  "summary": "As a classic list it is a trap: half the top 10 are Chinese and Korean museums, and every famous European gallery costs a life. As a Blitz it is good, once MoMA and the Smithsonian names match.",
+  "reasons": [
+    "Casual found 5 (Louvre, British Museum, the Met, Vatican Museums, Natural History Museum) and lost all 5 lives on Tate Modern (#13), Uffizi (#29), Prado (#22), National Gallery (#24) and Rijksmuseum (#35). National Museum of China, Shenzhen, National Museum of Korea, China Science and Technology and Nanjing are near impossible for a typical player.",
+    "Blitz suits it: the 72-deep scored pool holds almost every museum people know, and a casual run scored 14 of 15.",
+    "Matching gaps hurt the natural guesses: 'moma' is not recognized, and 'smithsonian' only offers American Art and American History, not Natural History or Air and Space."
+  ],
+  "fixes": [
+    "Add 'MoMA' as an alias of #32 Museum of Modern Art.",
+    "Add 'Smithsonian' to #17 National Museum of Natural History and #26 National Air and Space Museum (it then has 4 owners, inside the 2-4 limit), plus 'Smithsonian Natural History' and 'Smithsonian Air and Space'.",
+    "Drop the garbled alias 'National 9, 11 Museum' and non-name aliases: Suzanne Brenner (Met), Sloane library, British Museum Publications, The British Museum Press, Www.britishmuseum.org, Sainsbury African Galleries (British Museum), Carre gallery, Salle des etats (Louvre).",
+    "Normalize values: '3.2 million' (Musée National d'Histoire Naturelle) and '2.61 million' (M+) display differently from the rest.",
+    "Drop the Paris galleries category from the answer pool (59 Rivoli, Galerie Huit, Galerie Kamel Mennour, Air de Paris, Brame & Lorenceau Gallery and the rest): they are commercial galleries with no visitor figures and only add costly misses."
+  ]
+}
