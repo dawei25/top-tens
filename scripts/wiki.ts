@@ -28,6 +28,7 @@ async function fetchCached(url: string, cacheOnly = false): Promise<string> {
     if (wait > 0) await new Promise((r) => setTimeout(r, wait));
     lastRequest = Date.now();
     networkRequests++;
+    if (process.env.WIKI_LOG) console.log(`     fetch ${decodeURIComponent(url)}`);
     const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
     if (res.ok) {
       const body = await res.text();
@@ -83,7 +84,8 @@ const ASPECT_REDIRECT = new RegExp(
 );
 
 /**
- * Redirect titles pointing at an article; used as answer aliases.
+ * Redirect titles pointing at an article, as Wikipedia has them ("City (Alaska)", qualifier included); used as
+ * answer aliases once build.ts has dropped the ones that aren't names (scripts/aliases.ts) and the qualifiers.
  * With cacheOnly, returns only what an earlier build already fetched (used for ranks 11+, to stay polite).
  */
 export async function fetchRedirects(title: string, cacheOnly = false): Promise<string[]> {
@@ -101,10 +103,10 @@ export async function fetchRedirects(title: string, cacheOnly = false): Promise<
   const $ = cheerio.load(html);
   const out = new Set<string>();
   $("#mw-whatlinkshere-list > li").each((_, li) => {
-    let t = $(li).find("bdi > a").first().attr("title") ?? "";
+    const t = $(li).find("bdi > a").first().attr("title") ?? "";
     if (/[:/#]/.test(t) || JUNK_REDIRECT.test(t) || ASPECT_REDIRECT.test(t)) return;
-    t = t.replace(/\s*\(.*?\)\s*/g, " ").trim();
-    if (!t || t.split(/\s+/).length > 6) return;
+    const base = t.replace(/\s*\(.*?\)\s*/g, " ").trim();
+    if (!base || base.split(/\s+/).length > 6) return;
     out.add(t);
   });
   return [...out];

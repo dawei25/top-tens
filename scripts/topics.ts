@@ -63,6 +63,27 @@ export interface Topic {
   values?: { kind: ValueKind; scale?: number; below?: "tenth" | "last" };
   /** #1 has the smallest number (a rank such as Similarweb's). Such a list is never Blitz: a bigger n isn't better. */
   lowerIsBetter?: boolean;
+  /**
+   * Another column that says the same in another unit: a `value` cell that disagrees with it × `factor` by more
+   * than 2% is replaced by the converted number (shown rounded). The US states' km² column has misread cells
+   * ("382.936" for Nevada); their square miles × 2.589988 are right.
+   */
+  fallback?: { from: string | number; factor: number };
+  /** Creative works (books, shows, films, albums, games): redirects sharing no word with the title are songs or characters. */
+  works?: boolean;
+  /** Aliases to drop by exact text (after normalize): junk the rules in scripts/aliases.ts can't tell from a name. */
+  junkAliases?: string[];
+  /** The Wikipedia article for an entry, by name, when the table links the wrong one (or none). */
+  articles?: Record<string, string>;
+  /** Unranked accepted answers no source lists, with their aliases (a famous name that only misses the cut). */
+  more?: Record<string, string[]>;
+  /** Category members to leave out of the pool (titles that aren't the kind of thing the list is about). */
+  categorySkip?: RegExp;
+  /**
+   * Keep only category members that look like names: no sentence-case concept titles ("Search engine bias") and
+   * no plain dictionary words ("Display", "Universe").
+   */
+  categoryNames?: boolean;
 }
 
 /** A source of unranked accepted answers: one name column of some tables on a page (default: the topic's). */
@@ -217,6 +238,8 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "State",
     value: "Total area / km",
+    // The km² column has misread cells (Nevada "382.936", Idaho 275,213 for 216,443): square miles are clean.
+    fallback: { from: "Total area / mi", factor: 2.589988 },
     metric: "Total area",
     unit: " km²",
     skip: ["United States", "50 States and DC", "50 States", "Contiguous US"],
@@ -261,6 +284,9 @@ export const TOPICS: Topic[] = [
     unit: " m",
     values: { kind: "elevation" },
     universeCategories: ["Eight-thousanders", "Eight-thousanders of the Himalayas", "Seven Summits", "Alpine four-thousanders", "Great north faces of the Alps", "Mountains of the Alps", "Stratovolcanoes of Japan"],
+    // Climbing lore the categories carry along: peak lists, challenges, huts, routes, expeditions.
+    categorySkip: /\b(summits|eight-thousanders?|death zone|grand slam|expedition|hut|huts|route|refuge|cable car|railway|glacier|tunnel|ski)\b/i,
+    junkAliases: ["Kazi Sherpa", "Kanchenjunga 2", "Mount Hymalaya"],
   },
   {
     id: "rivers",
@@ -343,6 +369,7 @@ export const TOPICS: Topic[] = [
     name: "Title",
     value: "Worldwide gross",
     metric: "Worldwide box office (US$)",
+    works: true,
     also: [
       { tables: [1, 2, 3], name: "Title" },
       { page: "List of highest-grossing animated films", tables: [0, 1, 2, 3], name: "Title" },
@@ -375,6 +402,7 @@ export const TOPICS: Topic[] = [
     name: "Video name",
     value: "Views",
     metric: "Views (billions)",
+    works: true,
     also: [
       { tables: [1], name: "Video name" },
       { page: "List of most-liked YouTube videos", tables: [0, 1], name: "Video name" },
@@ -405,6 +433,7 @@ export const TOPICS: Topic[] = [
     name: "Title",
     value: "Sales",
     metric: "Copies sold (millions)",
+    works: true,
     universeCategories: ["The Game Awards winners", "Golden Joystick Award for Game of the Year winners", "Spike Video Game Awards Game of the Year winners", "Video games adapted into films", "Open-world video games", "Namco arcade games", "Arcade video games"],
   },
   {
@@ -430,7 +459,8 @@ export const TOPICS: Topic[] = [
     value: "sales",
     metric: "Copies sold (approx.)",
     also: [{ tables: [9, 10, 11, 12], name: "Book" }],
-    universeCategories: ["Novels adapted into films"],
+    works: true,
+    junkAliases: ["The Da Vinci Code paintings", "Lord of the Rings Prequel"],
   },
   {
     id: "languages",
@@ -462,6 +492,8 @@ export const TOPICS: Topic[] = [
       { page: "List of tallest buildings in New York City", tables: [0], name: "Name" },
     ],
     universeCategories: ["Skyscrapers"],
+    // The table links CITIC Tower to its article, China Zun; the plain title is a 33-storey Hong Kong office block.
+    articles: { "CITIC Tower": "China Zun" },
   },
 
   // Sports
@@ -505,6 +537,8 @@ export const TOPICS: Topic[] = [
     name: "Stadium",
     value: "Capacity",
     metric: "Capacity",
+    // Events, TV shows and scoreboards named after the stadiums.
+    junkAliases: ["Buckeye Country Superfest", "12th Man TV", "Walk of Champions", "Godzillatron", "Adzillatron"],
   },
 
   // Business
@@ -698,6 +732,7 @@ export const TOPICS: Topic[] = [
     name: "Song",
     value: "Streams",
     metric: "Streams (billions)",
+    works: true,
     also: [{ tables: [4], name: "Song" }],
     universeCategories: ["Billboard Hot 100 number-one singles"],
   },
@@ -711,6 +746,7 @@ export const TOPICS: Topic[] = [
     name: "Album",
     value: "sales",
     metric: "Copies sold, claimed (millions)",
+    works: true,
     also: [
       { tables: [5], name: "Album" },
       { page: "List of Spotify streaming records", tables: [21], name: "Album" },
@@ -726,6 +762,7 @@ export const TOPICS: Topic[] = [
     name: "Title",
     value: "Worldwide gross",
     metric: "Worldwide box office (US$)",
+    works: true,
     also: [{ tables: [1, 2, 3], name: "Title" }],
   },
   {
@@ -767,6 +804,15 @@ export const TOPICS: Topic[] = [
     lowerIsBetter: true,
     aliasCols: ["Domain"],
     universeCategories: ["Social networking services", "Internet search engines"],
+    // The categories also hold articles about the field ("Search engine bias", "Anchor text") and protocols.
+    categoryNames: true,
+    categorySkip: /^(comparison|issues|privacy|criticism|evaluation)\b|\b(protocol|clearinghouse|search engine|engine|software|framework|project|technologies|corporation|inc\.?|library|index|service|communities)$/i,
+    junkAliases: [
+      "Giigke,cin", "Ghits", "Google videos", "GoogleYouTube", "Youtubing", "Facephiliac", "Mini-feed",
+      "Instagram trends", "Layout from Instagram", "Do Anything Now", "Fail Whale", "Twitpocalypse",
+      "Twittered revolution", "AMA", "Subreddit", "Reddit gold", "Infogami", "TikTok Review", "Timeline of WhatsApp",
+      "Terabyte unlimited", "Bing Bar",
+    ],
   },
 
   // Batch 2: geography
@@ -847,6 +893,9 @@ export const TOPICS: Topic[] = [
     unit: " km²",
     stripWords: /\bdesert\b/gi,
     aliases: { "Antarctic Desert": ["Antarctica", "Antarctic"], "Arctic Desert": ["Arctic"] },
+    // "Arctic Desert" on Wikipedia is a WWF ecoregion of 161,400 km² (Svalbard and other islands); the list means the
+    // whole Arctic polar desert.
+    articles: { "Arctic Desert": "Arctic" },
   },
   {
     id: "city-visitors",
@@ -953,7 +1002,20 @@ export const TOPICS: Topic[] = [
     metric: "Net worth (US$)",
     people: true,
     also: [{ tables: range(1, 37), name: "Name" }],
-    universeCategories: ["American billionaires"],
+    // Bettencourt Meyers ranks below the top 10 the page tables, so nothing lists her; "bettencourt" alone
+    // otherwise finds only her late mother.
+    more: { "Françoise Bettencourt Meyers": ["Francoise Bettencourt Meyers", "Bettencourt Meyers"] },
+    // Relatives, organizations and jokes among the redirects to the top 10.
+    junkAliases: [
+      "Gloria Page", "Lucinda Southworth", "Lucy Southworth", "Lucy Page", "Lucinda Page", "Michael Brin",
+      "Maxima Chan", "Max Zuckerberg", "Maxima Zuckerberg", "Maxima Chan Zuckerberg", "August Zuckerberg",
+      "Chen Mingyu", "Melanie Craft", "Melanie Ellison", "Melanie Ellison Craft", "Lori Huang", "Astrid Buffett",
+      "Astrid Menks", "Astrid Menks Buffett", "Flora Oretaga", "Founder of SpaceX", "Elon Musk advisors",
+      "Zuckerberg hearing", "Strider Sekhar", "Comet Azure", "Blastar", "RIP Harambe", "Nash Holdings",
+      "Bezos Earth Fund", "No thank you, Mr. Pecker", "The Brin Wojcicki Foundation", "Global Support and Development",
+      "Philanthopy of Warren Buffett", "Don’t doubt yer vibe", "Don’t Doubt ur Vibe", "First Lady Elonia Musk",
+      "First Lady Elonia", "Elonia Musk", "Toddler ceo", "Arnault family",
+    ],
   },
   // Batch 3
   {
@@ -1039,6 +1101,9 @@ export const TOPICS: Topic[] = [
     name: "Title",
     value: "Performances",
     metric: "Performances",
+    works: true,
+    // Single productions, and a song title two shows share.
+    junkAliases: ["Chicago The Musical Bangalore", "Phantom — The Las Vegas Spectacular", "Hello!"],
   },
   {
     id: "manga",
@@ -1050,6 +1115,7 @@ export const TOPICS: Topic[] = [
     name: "Manga series",
     value: "sales",
     metric: "Copies sold (volumes)",
+    works: true,
   },
   {
     id: "nba-assists",
@@ -1175,6 +1241,7 @@ export const TOPICS: Topic[] = [
     name: "Title",
     value: "Lifetime gross",
     metric: "US box office (US$)",
+    works: true,
     also: [
       { tables: [1], name: "Title" },
       { page: "List of highest-grossing films", tables: [0, 1, 2, 3], name: "Title" },
@@ -1243,6 +1310,7 @@ export const TOPICS: Topic[] = [
     name: "Title",
     value: "Cost",
     metric: "Estimated budget (US$)",
+    works: true,
     unit: " million",
     also: [
       { tables: [2], name: "Title" },

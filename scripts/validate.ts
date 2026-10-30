@@ -7,10 +7,25 @@ import { join } from "node:path";
 import { normalize } from "../src/game/match";
 import type { Entry, Puzzle } from "../src/game/types";
 import { INTENT } from "./intent";
+import { bareWord, gluedAlias, junkRedirect } from "./aliases";
+import { UNIVERSES } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
 import { TOPICS } from "./topics";
 
 const DIR = join(import.meta.dirname, "..", "public", "puzzles");
+/** Neighbours in a ranking more than this far apart (ratio of their numbers) get a second look. */
+const JUMP = 20;
+const COUNTRY_SET = new Set(UNIVERSES.countries().map((c) => normalize(c.name)));
+/** Country, state and capital names. */
+const PLACES = new Set(
+  [...UNIVERSES.countries(), ...UNIVERSES["us-states"](), ...UNIVERSES.capitals()].map((c) => normalize(c.name)),
+);
+const NO_PLACES = new Set<string>();
+/** Lists of places, where a place name alias is expected. */
+const isPlaceList = (p: Puzzle) => {
+  const t = TOPICS.find((x) => x.id === p.id);
+  return !!t?.universe || /cities|capitals|countries|population|states|metros|islands/.test(p.id);
+};
 /** Below this many accepted answers, wrong-but-real guesses are likely to be free. */
 const MIN_ACCEPTED = 30;
 
@@ -91,6 +106,61 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
       if (other && other !== e && !curatedGroups.has(normalize(a))) {
         err(`alias "${a}" of "${e.name}" is the name of "${other.name}"`);
       }
+    }
+  }
+
+  const topic = TOPICS.find((t) => t.id === p.id);
+  const built = p as Puzzle & { category?: string };
+  if (!built.category) err("missing category");
+  else if (topic && built.category !== topic.category) err(`category "${built.category}" differs from topics.ts ("${topic.category}")`);
+
+  // Alias hygiene (scripts/aliases.ts): glued names are broken data; the rest are likely redirects that aren't names.
+  const curated = new Set(
+    [...Object.values(INTENT[p.id]?.same ?? {}).flat(), ...Object.keys(INTENT[p.id]?.groups ?? {})].map(normalize),
+  );
+  const junk: string[] = [];
+  for (const e of all) {
+    const forms = [e.name, ...e.aliases];
+    for (const a of e.aliases) {
+      if (gluedAlias(a, forms)) err(`"${e.name}": alias "${a}" is several names glued together`);
+      if (curated.has(normalize(a))) continue;
+      const why = junkRedirect(a, { names: [e.name], forms, works: topic?.works });
+      if (why) junk.push(`${e.name}: "${a}" (${why})`);
+      // A one-word alias that is a plain word or a place, and no word of the name: "City" for Alaska.
+      else if (!normalize(e.name).split(" ").includes(normalize(a)) && bareWord(a, isPlaceList(p) ? NO_PLACES : PLACES)) {
+        junk.push(`${e.name}: "${a}" (a plain word or place, not part of the name)`);
+      }
+    }
+  }
+  if (junk.length) {
+    warn(`${junk.length} alias(es) that look like junk, e.g. ${junk.slice(0, 4).join("; ")}`);
+  }
+
+  // Misread numbers: "382.936" among "1,723,337"s is a dot used as a thousands separator.
+  const shown = all.filter((e) => e.rank > 0 && e.value).map((e) => [e, e.value!.replace(/^\D+/, "")] as const);
+  const grouped = shown.filter(([, v]) => /^\d{1,3}(,\d{3})+/.test(v)).length;
+  for (const [e, v] of shown) {
+    if (/^\d{1,3}\.\d{3}(?!\d)/.test(v) && grouped > shown.length / 2) {
+      err(`#${e.rank} ${e.name}: value "${e.value}" looks misread (a dot as thousands separator)`);
+    }
+  }
+  // A big jump between neighbours in the ranking suggests a misread or mixed units.
+  const ranked = all.filter((e) => e.rank > 0 && e.n !== undefined && e.n > 0).sort((a, b) => a.rank - b.rank);
+  if (!topic?.lowerIsBetter) {
+    for (let i = 1; i < Math.min(ranked.length, 30); i++) {
+      const [a, b] = [ranked[i - 1], ranked[i]];
+      if (a.n! / b.n! > JUMP) warn(`#${a.rank} ${a.name} (${a.n}) is ${Math.round(a.n! / b.n!)}× #${b.rank} ${b.name} (${b.n}): misread?`);
+    }
+  }
+
+  // The same country twice: a ranked "Congo" without the aliases of the pool's "Republic of the Congo".
+  if ([topic?.universe ?? []].flat().includes("countries")) {
+    const countries = all.filter((e) => e.rank === 0 && COUNTRY_SET.has(normalize(e.name)));
+    for (const e of all) {
+      if (e.rank === 0 || COUNTRY_SET.has(normalize(e.name))) continue;
+      const n = normalize(e.name);
+      const same = countries.find((c) => ` ${normalize(c.name)} `.includes(` ${n} `));
+      if (same) warn(`#${e.rank} "${e.name}" and unranked "${same.name}" may be the same country`);
     }
   }
 
