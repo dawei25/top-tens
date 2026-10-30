@@ -1,0 +1,23 @@
+{
+  "id": "oil-production",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": null,
+  "summary": "A strong daily: every top-10 country is a household name, and the old OPEC names that dropped out (Venezuela, Nigeria, Libya, Qatar) make it tense without feeling rigged.",
+  "reasons": [
+    "Casual player found 8 fast, then burned all 5 lives on Venezuela, Qatar, Nigeria, Libya and Norway; China and Brazil were the forgotten ones.",
+    "The misses are near misses you learn from: Venezuela at #22 and the US at #1 are real surprises.",
+    "Top 10 matches current crude output (January 2026, crude incl. condensate), with a clear gap from Kuwait (2,660) to Norway (1,994).",
+    "Common typings all matched: usa, america, us, saudi, ksa, uae, emirates, persia, prc, brasil. Dubai and Abu Dhabi are free misses, which is fair.",
+    "Not Blitz-ready yet (no stats on answers); with stats it would be a deep Blitz, 95 ranked producers."
+  ],
+  "fixes": [
+    "Congo (#31, 243) and Republic of the Congo (unranked) are the same country listed twice; map the source row 'Congo' to Republic of the Congo with its aliases (Congo-Brazzaville, Congo Republic).",
+    "Junk redirect aliases on country entries (matching only, never shown, but should go): Saudi Arabia 'Social problems in Saudi Arabia', 'Child abuse in Saudi Arabia', 'Languages of Saudi Arabia'; Kuwait 'Abdullah al-Saleh', 'National parks in Kuwait', 'Water supply and sanitation in Kuwait', 'Water resources of Kuwait', 'Languages of Kuwait'; Iran 'Law of Iran'; Canada 'Snow Mexico'; Bahrain 'Al Rawda Palace', 'Science and technology in Bahrain'; Argentina 'Argentina Information'. Filtering 'X of/in <Country>' topic redirects would catch most."
+  ]
+}

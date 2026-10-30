@@ -1,0 +1,25 @@
+{
+  "id": "broadway",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": null,
+  "summary": "Famous shows a casual player mostly knows, with Hamilton at #16 and Oh! Calcutta! at #8 as the talking points. Lives run out fast because so many hits sit just outside the top 10.",
+  "reasons": [
+    "8 of the top 10 are household names (Phantom, Chicago, Lion King, Wicked, Cats, Les Mis, Mamma Mia, Book of Mormon)",
+    "A Chorus Line is gettable with thought, Oh! Calcutta! is a fair stretch and a good reveal",
+    "Hamilton, Rent, Grease, Hairspray, Beauty and the Beast and Aladdin all cost a life; each shows its rank (#11 to #25), so they feel like near misses, but a casual player burns all 5 lives",
+    "Counts look current for October 2026 and the order matches what a theatre fan would expect; no tie at #10/#11",
+    "Usual spellings all matched: phantom, les mis, les miserable, mama mia, momma mia, chorus line, oh calcutta, mormon",
+    "Not Blitz-ready: no answers carry a stat yet"
+  ],
+  "fixes": [
+    "Drop song and character redirects used as aliases; they are not names of the show and some are common words: Phantom (Masquerade, Hannibal, Think of Me, Angel of Music, Prima Donna, Il muto, Wishing You Were Somehow Here Again), Chicago (Mr. Cellophane, We Both Reached for the Gun), Lion King (The Morning Report, Chow Down, One by One), Wicked (Thank Goodness, Wonderful, A Sentimental Man, What Is This Feeling?, Dancing Through Life, I'm Not That Girl, Dear Old Shiz, No One Mourns the Wicked, Angel Reda), Cats (Cassandra, Coricopat, Griddlebone, Heaviside Layer), Les Mis (Red and Black), A Chorus Line (Mother, Tits and Ass, At The Ballet, Gimme the Ball, The Music and the Mirror), Book of Mormon (Hello!, You and Me, Elder Price, Elder Cunningham and the other song titles), Mamma Mia! (Kalokairi). A redirect into a section anchor of the show article is a good signal for this.",
+    "Drop production-specific aliases: 'Chicago The Musical Bangalore' and 'Phantom — The Las Vegas Spectacular'.",
+    "Drop 'Hello!' as an alias of Hello, Dolly! (#22); it is shared with Book of Mormon and is not a name for either show."
+  ]
+}
