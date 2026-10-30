@@ -5,6 +5,39 @@
  * every move sits under prefers-reduced-motion: no-preference or is skipped in JS.
  */
 
+/* ---------- Ten limbs, ten lights ----------
+   Each limb's colour by rank (keep in step with colors.ts): gold, then lime, mint, cyan, sky, periwinkle, violet,
+   orchid, rose, pink. The found row's rank numeral (and its arrival flash) takes its limb's colour, so limb and row
+   visibly match; every one keeps 5:1 or better on the glass panels with white right behind them. */
+:root {
+  --limb-1: #ffd166;
+  --limb-2: #b6f36a;
+  --limb-3: #5cf2a8;
+  --limb-4: #4de3ff;
+  --limb-5: #5cb8ff;
+  --limb-6: #8a9cff;
+  --limb-7: #b28bff;
+  --limb-8: #e07bff;
+  --limb-9: #ff6fc0;
+  --limb-10: #ff5d8f;
+}
+.slot[data-rank="1"] { --limb: var(--limb-1); }
+.slot[data-rank="2"] { --limb: var(--limb-2); }
+.slot[data-rank="3"] { --limb: var(--limb-3); }
+.slot[data-rank="4"] { --limb: var(--limb-4); }
+.slot[data-rank="5"] { --limb: var(--limb-5); }
+.slot[data-rank="6"] { --limb: var(--limb-6); }
+.slot[data-rank="7"] { --limb: var(--limb-7); }
+.slot[data-rank="8"] { --limb: var(--limb-8); }
+.slot[data-rank="9"] { --limb: var(--limb-9); }
+.slot[data-rank="10"] { --limb: var(--limb-10); }
+.slot.found[data-rank] .rank {
+  color: var(--limb);
+}
+.slot.found.just[data-rank]::before {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--limb) 30%, transparent), transparent 85%);
+}
+
 /* On a results panel: the hero squid, top right, beside the banner and the big score. */
 .results:has(> .squid.hero) {
   position: relative;
@@ -70,13 +103,10 @@
 .limb .l-a { fill: #237f96; }
 .limb .l-b { fill: #10384a; }
 .limb .l-s { fill: #3b2d55; }
-/* Found: white-hot face, cyan shade, glowing. Nothing else on the squid is that bright. */
-.limb[data-on="true"] .l-a { fill: #d4faff; }
-.limb[data-on="true"] .l-b { fill: var(--cyan); }
+/* Found: its own colour (--limb, set per limb), a white-hot face over it, glowing. #1 is gold, like the top row. */
+.limb[data-on="true"] .l-a { fill: color-mix(in srgb, var(--limb, var(--cyan)) 45%, #fff); }
+.limb[data-on="true"] .l-b { fill: var(--limb, var(--cyan)); }
 .limb[data-on="true"] .l-s { fill: var(--pink); }
-/* #1 is gold, like the top row of the table. */
-.limb.first[data-on="true"] .l-a { fill: #fff2c4; }
-.limb.first[data-on="true"] .l-b { fill: var(--gold); }
 
 /* Glow: a blurred copy of the eyes and only the lit parts, under the pixels. The body's halo grows per limb lit. */
 .squid-glow {
@@ -94,8 +124,7 @@
   fill: #6fe9ff;
   opacity: 0.7;
 }
-.g-limb { fill: var(--cyan); }
-.g-limb.first { fill: var(--gold); }
+.g-limb { fill: var(--limb, var(--cyan)); }
 
 /* ---------- Moods ---------- */
 /* 10/10: the whole squid lights up. */
@@ -327,29 +356,14 @@
   }
 }
 
-/* Tentacle grab */
-.grab-arm {
-  position: absolute;
-  left: 0;
-  top: 0;
-  overflow: visible;
-  filter: drop-shadow(0 0 3px rgba(77, 227, 255, 0.7));
-}
-.grab .arm-hi { fill: #a8f4ff; }
-.grab .arm-main { fill: var(--cyan); }
-.grab .arm-shade { fill: #1b9cc7; }
-.grab .arm-sucker { fill: var(--pink); }
-.grab.gold .grab-arm { filter: drop-shadow(0 0 3px rgba(255, 209, 102, 0.7)); }
-.grab.gold .arm-hi { fill: #fff0c2; }
-.grab.gold .arm-main { fill: var(--gold); }
-.grab.gold .arm-shade { fill: #d39a2f; }
+/* The grab (components/ocean/grab.ts): the word, cut out of the guess box as a tile, edged in the grabbing limb's
+   colour (--limb), carried up to its row; and a splash of that colour across the row as it lands. */
 .grab-word {
   position: absolute;
   left: 0;
   top: 0;
   transform-origin: 0 0;
 }
-/* The word is lifted out as a tile of the guess box itself, so it passes cleanly over whatever is under it. */
 .grab-text {
   position: absolute;
   left: -6px;
@@ -360,48 +374,23 @@
   white-space: nowrap;
   color: #fff;
   background: var(--well);
-  box-shadow: 0 0 0 2px var(--cyan-edge);
+  box-shadow: 0 0 0 2px var(--limb, var(--cyan-edge));
   border-radius: 3px;
   text-shadow:
-    0 0 6px var(--cyan),
-    0 0 14px var(--cyan-glow);
+    0 0 6px var(--limb, var(--cyan)),
+    0 0 14px color-mix(in srgb, var(--limb, var(--cyan)) 40%, transparent);
 }
-.grab.gold .grab-text {
-  color: #fff6dc;
-  box-shadow: 0 0 0 2px var(--gold);
-  text-shadow:
-    0 0 6px var(--gold),
-    0 0 14px rgba(255, 209, 102, 0.4);
+/* Set: the tile melts into the row's own text. */
+.grab-word.landed .grab-text {
+  background: transparent;
+  box-shadow: 0 0 0 2px transparent;
+  opacity: 0;
+  transition: opacity 0.18s steps(3, end), background-color 0.06s linear;
 }
-.grab-claw {
-  position: absolute;
-  left: -26px;
-  top: -20px;
-  overflow: visible;
-  filter: drop-shadow(0 0 3px rgba(77, 227, 255, 0.7));
-}
-.grab.gold .grab-claw { filter: drop-shadow(0 0 3px rgba(255, 209, 102, 0.7)); }
 .grab-splash {
   position: absolute;
-  background: linear-gradient(90deg, rgba(77, 227, 255, 0.4), rgba(77, 227, 255, 0.08) 70%, transparent);
-  box-shadow: inset 4px 0 0 var(--cyan);
-}
-.grab-splash.gold {
-  background: linear-gradient(90deg, rgba(255, 209, 102, 0.4), rgba(255, 209, 102, 0.08) 70%, transparent);
-  box-shadow: inset 4px 0 0 var(--gold);
-}
-.grab-bit {
-  position: absolute;
-  left: -2px;
-  top: -2px;
-  width: 4px;
-  height: 4px;
-  background: var(--cyan);
-  box-shadow: 0 0 4px var(--cyan);
-}
-.grab.gold .grab-bit {
-  background: var(--gold);
-  box-shadow: 0 0 4px var(--gold);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--limb, var(--cyan)) 40%, transparent), color-mix(in srgb, var(--limb, var(--cyan)) 8%, transparent) 70%, transparent);
+  box-shadow: inset 4px 0 0 var(--limb, var(--cyan));
 }
 
 /* 10/10 fireworks */

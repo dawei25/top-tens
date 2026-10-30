@@ -1,17 +1,22 @@
 /**
  * The ocean's engine: one requestAnimationFrame loop for the whole layer, at about 30 fps (a timer sleeps between
  * frames, so the page isn't woken on every vsync), paused while the tab is hidden. Each frame it steps the scene, the
- * squid and the effects, draws the low-res canvases (the backdrop at 15 fps, the effects in front of the squid when
- * there are any) and writes a single transform on the squid. No layout reads per frame: sizes are read on resize,
- * and on-screen targets (a found row, a hovered key) once, when their event happens.
+ * swim, the squid's limbs and the effects, and draws the low-res canvases: the backdrop (at 15 fps), the squid with
+ * the effects in front of it, and, while a word is being grabbed, the overlay above the UI. No layout reads per
+ * frame: sizes are read on resize, and on-screen targets (a found row, the guess box, a hovered key) once, when
+ * their event happens, or when the squid picks a new waypoint.
  *
- * It listens to play events for the reactions (a find darts and glows, a lost life inks and flees, a perfect 10
- * loops and bursts, Blitz hits) and to input for idling: after IDLE_MS without a key or a tap, the squid sinks to
- * the seabed and dozes until the next one. With reduced motion it draws one still frame and parks the squid.
+ * It listens to play events for the reactions (a find: the squid darts to the guess box and grabs the word; a lost
+ * life inks and flees; a perfect 10 loops and bursts; Blitz hits) and to input for idling: after IDLE_MS without a
+ * key or a tap, the squid sinks to the seabed and dozes until the next one. With reduced motion it draws one still
+ * frame: the squid parked, its limbs at rest, lit.
  */
 import { onPlay, type PlayEvent } from "../../game/events";
 import { reducedMotion } from "../pixel";
+import { limbColor } from "../squid/colors";
+import { SquidBody, type Motion } from "./body";
 import { Fx } from "./fx";
+import { Grabs } from "./grab";
 import { Scene } from "./scene";
 import { squidAt, type OceanSquidState } from "./store";
 import { Swimmer, type Pt } from "./swim";
@@ -20,6 +25,10 @@ export interface OceanEls {
   root: HTMLElement;
   back: HTMLCanvasElement;
   front: HTMLCanvasElement;
+  /** Above the UI: the grabbing limb, and a layer for the word tiles. */
+  overlay: HTMLCanvasElement;
+  tiles: HTMLElement;
+  /** The squid's aria-hidden stand-in in the DOM (its state as data attributes). */
   squid: HTMLElement;
 }
 
@@ -33,11 +42,9 @@ const FRAME_MS = 1000 / 30;
 /** The backdrop's own rate: its pieces move a pixel at a time, a few times a second. */
 const BG_FPS = 15;
 const IDLE_MS = 20000;
-/** Sprite grid of the squid (sprite.ts). */
-const SPRITE_W = 20;
-const SPRITE_H = 24;
-/** The squid's pivot and centre, as a share of its sprite: the middle of the mantle. */
-const PIVOT_Y = 0.42;
+/** The squid in sprite px: mantle width, and the height it keeps clear (mantle and the arms' reach). */
+const SQUID_W = 20;
+const SQUID_H = 30;
 
 const CYAN = "#4de3ff";
 const GOLD = "#ffd166";
@@ -54,14 +61,19 @@ interface Stats {
   maxGap: number;
   slow: number;
   at: number;
+  /** Where the squid is (CSS px), for zoomed screenshots. */
+  x: number;
+  y: number;
+  jet: number;
 }
 
 export function startOcean(els: OceanEls): Ocean {
-  const { root, back, front, squid } = els;
+  const { root, back, front, overlay, tiles, squid } = els;
   const bctx = back.getContext("2d")!;
   const fctx = front.getContext("2d")!;
   const scene = new Scene();
   const fx = new Fx();
+  const body = new SquidBody();
 
   let px = 3;
   let vw = 0;
@@ -71,33 +83,64 @@ export function startOcean(els: OceanEls): Ocean {
   let wait: ReturnType<typeof setTimeout> | 0 = 0;
   let last = 0;
   let bgIn = 0;
-  let frontDirty = false;
   let backDirty = false;
   let running = false;
   let still = reducedMotion();
   let lastInput = performance.now();
   let state: OceanSquidState | null = null;
+  let lit = new Set<number>();
   let heat = 0;
   let bubbleIn = 0;
   let trailIn = 0;
-  let lastTransform = "";
   const timers: { at: number; fn: () => void }[] = [];
   const later = (s: number, fn: () => void) => timers.push({ at: t + s, fn });
 
-  const stats: Stats | null = typeof location !== "undefined" && location.search.includes("oceanstats") ? { frames: 0, drawMs: 0, maxMs: 0, maxGap: 0, slow: 0, at: 0 } : null;
-  if (stats) (globalThis as unknown as { __ocean: Stats }).__ocean = stats;
+  const stats: Stats | null = typeof location !== "undefined" && location.search.includes("oceanstats") ? { frames: 0, drawMs: 0, maxMs: 0, maxGap: 0, slow: 0, at: 0, x: 0, y: 0, jet: 0 } : null;
+  if (stats) {
+    const g = globalThis as unknown as { __ocean: Stats; __oceanGo: (x: number, y: number) => void };
+    g.__ocean = stats;
+    // Debug: send the squid somewhere (for screenshots of it in open water).
+    g.__oceanGo = (x, y) => swimmer.dart({ x, y });
+  }
 
   const world = () => ({
     w: vw,
     h: vh,
-    sw: SPRITE_W * px,
-    sh: SPRITE_H * px,
+    sw: SQUID_W * px,
+    sh: SQUID_H * px,
     floor: (x: number) => scene.floorAt(x / px, t) * px,
+    prefer,
   });
-  const swimmer = new Swimmer({ w: 400, h: 800, sw: 60, sh: 72, floor: () => 800 });
+  const swimmer = new Swimmer({ w: 400, h: 800, sw: 60, sh: 90, floor: () => 800 });
+
+  const grabs = new Grabs(overlay, tiles, {
+    px: () => px,
+    rootOf: (rank) => body.rootOf(rank),
+    away: (rank, out) => (out ? body.away.add(rank) : body.away.delete(rank)),
+    lit: (rank) => {
+      body.flash(rank, t);
+      glow(limbColor(rank), 1, 0);
+    },
+  });
 
   /** Canvas px of a viewport point. */
   const cv = (p: Pt) => ({ x: p.x / px, y: p.y / px });
+
+  const motion = (): Motion => ({
+    jetAge: swimmer.jetAge,
+    inflating: swimmer.inflating,
+    hovering: swimmer.hovering,
+    asleep: swimmer.asleep,
+  });
+
+  /** The squid's pose on the canvas: the swim's, with a slow bob while it hangs in the water. */
+  function pose() {
+    const bob = swimmer.asleep ? 0 : Math.sin(t * 1.25) * 0.8;
+    body.pose = { x: swimmer.x / px, y: swimmer.y / px + bob, angle: (swimmer.tilt * Math.PI) / 180, sx: swimmer.sx, sy: swimmer.sy };
+    squidAt.x = swimmer.x;
+    squidAt.y = swimmer.y;
+    squidAt.live = true;
+  }
 
   function resize() {
     vw = innerWidth;
@@ -113,59 +156,50 @@ export function startOcean(els: OceanEls): Ocean {
       c.style.width = `${cw * px}px`;
       c.style.height = `${ch * px}px`;
     }
+    grabs.resize(cw, ch, px);
     bctx.imageSmoothingEnabled = false;
     fctx.imageSmoothingEnabled = false;
     root.style.setProperty("--ocean-px", `${px}px`);
     scene.resize(cw, ch);
     swimmer.setWorld(world());
-    frontDirty = true;
+    pose();
+    body.settle(t, motion());
     if (still) park();
-    draw();
+    draw(true);
   }
 
-  /** Reduced motion: the squid rests in the lower right, upright, over a still scene. */
+  /** Reduced motion: the squid rests in the lower right, upright, limbs at rest, over a still scene. */
   function park() {
     swimmer.x = vw * 0.8;
-    swimmer.y = Math.min(vh * 0.62, world().floor(vw * 0.8) - SPRITE_H * px * 0.6);
+    // Wide screens: in the open water beside the column. Phones: low, behind the clearer glass round the guess box.
+    swimmer.y = vw >= 700 ? Math.min(vh * 0.55, world().floor(vw * 0.8) - SQUID_H * px) : vh - SQUID_H * px * 1.15;
     swimmer.tilt = 0;
     swimmer.sx = swimmer.sy = 1;
+    swimmer.jetAge = 9;
     fx.clear();
-  }
-
-  function place() {
-    const sw = SPRITE_W * px;
-    const sh = SPRITE_H * px;
-    // Whole px, whole degrees, scale in hundredths: a slow drift doesn't rewrite the transform every frame.
-    const tf = `translate3d(${Math.round(swimmer.x - sw / 2)}px, ${Math.round(swimmer.y - sh * PIVOT_Y)}px, 0) rotate(${Math.round(swimmer.tilt)}deg) scale(${swimmer.sx.toFixed(2)}, ${swimmer.sy.toFixed(2)})`;
-    if (tf !== lastTransform) {
-      squid.style.transform = tf;
-      lastTransform = tf;
-    }
-    squidAt.x = swimmer.x;
-    squidAt.y = swimmer.y;
-    squidAt.live = true;
+    grabs.clear();
+    pose();
+    body.settle(t, { jetAge: 9, inflating: 0, hovering: false, asleep: false });
   }
 
   /**
    * Draw a frame. The backdrop only moves by a pixel now and then (snow, kelp, the ridges' drift), so it is redrawn
    * at BG_FPS, or every frame while a bloom glows on it; the squid and the effects in front run at the full rate.
    */
-  function draw(backToo = true) {
+  function draw(backToo: boolean) {
     if (backToo || fx.back || backDirty) {
       scene.draw(bctx, t);
       fx.drawBack(bctx);
       backDirty = fx.back;
     }
-    if (fx.front || frontDirty) {
-      fctx.clearRect(0, 0, front.width, front.height);
-      fx.drawFront(fctx);
-      frontDirty = fx.front;
-    }
-    place();
+    fctx.clearRect(0, 0, front.width, front.height);
+    body.draw(fctx, t, { lit, mood: state?.mood ?? "play", heat, doze: swimmer.behaviour === "doze" });
+    fx.drawFront(fctx);
+    grabs.draw();
   }
 
   /** 30 fps; asleep on the seabed nothing hurries, so the whole ocean idles at the backdrop's rate. */
-  const frameMs = () => (swimmer.asleep ? 1000 / BG_FPS : FRAME_MS);
+  const frameMs = () => (swimmer.asleep && !grabs.active ? 1000 / BG_FPS : FRAME_MS);
 
   function frame(now: number) {
     raf = 0;
@@ -201,16 +235,19 @@ export function startOcean(els: OceanEls): Ocean {
     if (swimmer.behaviour !== "doze" && now - lastInput > IDLE_MS) doze();
     scene.step(dt, t);
     swimmer.step(dt, t);
+    pose();
+    const m = motion();
+    body.step(dt, t, m, swimmer.behaviour === "doze" ? (x) => scene.floorAt(x, t) : null);
+    grabs.step(dt, now);
     if (swimmer.asleep && (bubbleIn -= dt) <= 0) {
       bubbleIn = 1.6 + Math.random();
-      const p = cv({ x: swimmer.x + SPRITE_W * px * 0.15, y: swimmer.y - SPRITE_H * px * 0.4 });
+      const p = cv({ x: swimmer.x + SQUID_W * px * 0.15, y: swimmer.y - 7 * px });
       fx.bubble(p.x, p.y);
     }
     // Momentum: a trail of light bits behind a hot squid.
     if (heat >= 2 && (trailIn -= dt) <= 0) {
       trailIn = heat >= 4 ? 0.05 : heat >= 3 ? 0.09 : 0.16;
-      const p = cv({ x: swimmer.x, y: swimmer.y + SPRITE_H * px * 0.25 });
-      fx.sparksAt(p.x, p.y, 1, 3, heat >= 4 ? [GOLD, CYAN, WHITE] : [CYAN, WHITE]);
+      fx.sparksAt(body.pose.x, body.pose.y + 4, 1, 3, heat >= 4 ? [GOLD, CYAN, WHITE] : [CYAN, WHITE]);
     }
     fx.step(dt);
     bgIn -= dt;
@@ -226,6 +263,9 @@ export function startOcean(els: OceanEls): Ocean {
       stats.at = now;
       stats.maxGap = Math.max(stats.maxGap, gap);
       if (gap > 50) stats.slow++;
+      stats.x = swimmer.x;
+      stats.y = swimmer.y;
+      stats.jet = swimmer.jetAge;
     }
   }
 
@@ -241,6 +281,8 @@ export function startOcean(els: OceanEls): Ocean {
     cancelAnimationFrame(raf);
     clearTimeout(wait);
     raf = wait = 0;
+    // A grab cut short leaves nothing behind (its word's row is already filled in).
+    if (grabs.active) grabs.clear();
   }
 
   /* ---------------- idle ---------------- */
@@ -259,6 +301,28 @@ export function startOcean(els: OceanEls): Ocean {
     }
   }
 
+  /* ---------------- where to be seen ---------------- */
+
+  /**
+   * On a phone the column fills the width and the panels cover most of the ocean, so most new waypoints are in the
+   * strips where the squid shows: around the input bar (clearer glass, close to the next grab), or the open water
+   * around Home's title. Read when a waypoint is picked (every few seconds), not per frame.
+   */
+  function prefer(): Pt | null {
+    if (openWater() || Math.random() > 0.7) return null;
+    const sw = SQUID_W * px;
+    const x = sw + Math.random() * Math.max(1, vw - sw * 2);
+    const bar = document.querySelector(".guess")?.getBoundingClientRect();
+    if (bar && bar.top < vh && bar.bottom > 0) {
+      const top = Math.max(bar.top + 20, 0);
+      const bottom = Math.min(bar.bottom, vh) - 10;
+      return { x, y: top + Math.random() * Math.max(1, bottom - top) };
+    }
+    const title = document.querySelector(".home .title")?.getBoundingClientRect();
+    if (title && title.bottom > 0) return { x, y: Math.max(SQUID_H * px * 0.5, title.top + Math.random() * title.height) };
+    return null;
+  }
+
   /* ---------------- reactions ---------------- */
 
   /** The squid's centre in canvas px. */
@@ -267,9 +331,9 @@ export function startOcean(els: OceanEls): Ocean {
   function glow(color: string, strength: number, delay = 0) {
     later(delay, () => {
       const p = here();
-      const s = SPRITE_H * strength;
+      const s = 24 * strength;
       fx.bloom(p.x, p.y, s * 1.6, color, 0.9, 0.85);
-      fx.ring(p.x, p.y, SPRITE_W * 0.4, s * 0.9, color, 0.55);
+      fx.ring(p.x, p.y, SQUID_W * 0.4, s * 0.9, color, 0.55);
     });
   }
 
@@ -284,7 +348,6 @@ export function startOcean(els: OceanEls): Ocean {
   function ink(big: boolean) {
     const p = here();
     fx.ink(p.x, p.y, Math.min(scene.w, scene.h) * (big ? 0.5 : 0.2), big);
-    frontDirty = true;
     swimmer.flee();
   }
 
@@ -297,7 +360,7 @@ export function startOcean(els: OceanEls): Ocean {
     const r = el.getBoundingClientRect();
     if (r.bottom < 0 || r.top > vh) return null;
     const y = r.top + r.height / 2;
-    const off = SPRITE_W * px * 0.8;
+    const off = SQUID_W * px * 1.15;
     const sides = [r.left - off, r.right + off].filter((x) => x > off && x < vw - off);
     if (!sides.length) return { x: r.left + r.width * 0.35, y };
     return { x: sides.reduce((a, b) => (Math.abs(a - swimmer.x) <= Math.abs(b - swimmer.x) ? a : b)), y };
@@ -308,7 +371,7 @@ export function startOcean(els: OceanEls): Ocean {
     const main = document.querySelector("main");
     if (!main) return null;
     const r = main.getBoundingClientRect();
-    const need = SPRITE_W * px * 2.2;
+    const need = SQUID_W * px * 2.2;
     const xs = [r.left >= need ? r.left / 2 : null, vw - r.right >= need ? (r.right + vw) / 2 : null].filter((x) => x !== null);
     if (!xs.length) return null;
     const x = xs.reduce((a, b) => (Math.abs(a - swimmer.x) <= Math.abs(b - swimmer.x) ? a : b));
@@ -321,10 +384,17 @@ export function startOcean(els: OceanEls): Ocean {
     if (still) return;
     switch (e.kind) {
       case "found": {
-        const p = besidePoint(document.querySelector(`[data-testid="slot"][data-rank="${e.rank}"]`));
-        swimmer.dart(p ?? { x: Math.random() * vw, y: vh * (0.2 + Math.random() * 0.5) });
-        // The glow pulse lands with the grabbed word (SquidFx: about 0.4 s, later for a straining #1 / #2).
-        glow(e.rank === 1 ? GOLD : CYAN, e.rank <= 2 ? 1.6 : 1.2, e.rank <= 2 ? 0.52 : 0.4);
+        // It goes for the word: darts to the guess box (beside it, in open water, on wide screens) and reaches.
+        const guessRow = document.querySelector(".guess-row");
+        if (grabs.start(e.rank, document)) {
+          const p = besidePoint(guessRow);
+          // Its limbs hang below it: hold the mantle above the box, so they hang beside it, not off the screen.
+          if (p) swimmer.dart({ x: p.x, y: Math.min(p.y - SQUID_H * px * 0.3, vh - SQUID_H * px * 1.25) });
+        } else {
+          const p = besidePoint(document.querySelector(`[data-testid="slot"][data-rank="${e.rank}"]`));
+          swimmer.dart(p ?? { x: Math.random() * vw, y: vh * (0.2 + Math.random() * 0.5) });
+          glow(e.rank === 1 ? GOLD : CYAN, e.rank <= 2 ? 1.6 : 1.2, 0.1);
+        }
         break;
       }
       case "miss":
@@ -340,10 +410,12 @@ export function startOcean(els: OceanEls): Ocean {
           pendingInk = "big";
           queueMicrotask(flushInk);
         } else if (e.status === "won") {
-          // Out into open water first if there is any beside the column, so the loops show.
-          const open = openWater();
-          if (open) swimmer.dart(open);
-          later(open ? 1.1 : 0.35, () => swimmer.loops(2, () => burst([CYAN, GOLD, PINK], true)));
+          // Out into open water first if there is any beside the column, so the loops show (after the last grab).
+          later(0.6, () => {
+            const open = openWater();
+            if (open) swimmer.dart(open);
+            later(open ? 1.1 : 0.35, () => swimmer.loops(2, () => burst([CYAN, GOLD, PINK], true)));
+          });
         }
         break;
       case "blitz-hit": {
@@ -373,12 +445,16 @@ export function startOcean(els: OceanEls): Ocean {
     const prev = state;
     state = s;
     heat = s.heat;
+    lit = new Set(s.lit.filter((r) => r >= 1 && r <= 10));
+    // A limb coming on while the screen is up flashes into its colour; a screen arriving with limbs lit shows them.
+    body.noteLit(lit, t, !still && !!prev && prev.session === s.session);
     const hot = 1 + 0.22 * s.heat;
     swimmer.speed = s.mood === "lost" ? 0.45 : s.mood === "gave-up" ? 0.7 : hot;
     swimmer.cadence = s.mood === "lost" ? 0.45 : s.mood === "gave-up" ? 0.7 : s.mood === "won" ? 1.2 : 1 + 0.35 * s.heat;
     swimmer.low = s.mood === "lost";
     // Passing your best (Blitz): a gold flare, once per round.
     if (!still && prev && prev.session === s.session && s.flare > prev.flare) burst([GOLD, WHITE, CYAN], false);
+    if (still) draw(false);
   }
 
   /* ---------------- hover perk (Home) ---------------- */
@@ -406,8 +482,7 @@ export function startOcean(els: OceanEls): Ocean {
       pause();
       delete squid.dataset.doze;
       park();
-      frontDirty = true;
-      draw();
+      draw(true);
     } else start();
   };
   const onVis = () => (document.visibilityState === "hidden" ? pause() : start());
@@ -424,8 +499,10 @@ export function startOcean(els: OceanEls): Ocean {
   resize();
   swimmer.x = vw * 0.7;
   swimmer.y = vh * 0.55;
+  pose();
+  body.settle(t, motion());
   if (still) park();
-  draw();
+  draw(true);
   start();
 
   return {

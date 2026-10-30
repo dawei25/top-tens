@@ -235,7 +235,9 @@ export class Scene {
   private drawSnow(ctx: Ctx, layer: number, color: string) {
     const a = this.snow[layer];
     ctx.fillStyle = color;
-    for (let i = 0; i < a.length; i += 4) ctx.fillRect(Math.floor(a[i]), Math.floor(a[i + 1]), 1, 1);
+    ctx.beginPath();
+    for (let i = 0; i < a.length; i += 4) ctx.rect(Math.floor(a[i]), Math.floor(a[i + 1]), 1, 1);
+    ctx.fill();
   }
 
   private drawJellies(ctx: Ctx, t: number) {
@@ -277,26 +279,46 @@ export class Scene {
     ctx.globalAlpha = 1;
   }
 
+  /**
+   * Kelp: a two-pixel stalk swaying more toward its tip, with blades every few rows. Rows that sway alike are one
+   * rect, and each colour is one path and one fill.
+   */
   private drawKelp(ctx: Ctx, t: number) {
     const { w } = this;
     const off = Math.floor(t * DRIFT[2]);
+    const stalks: Path2D[] = [new Path2D(), new Path2D()];
+    const blades = new Path2D();
     for (const k of this.kelp) {
       let bx = (((k.x - off) % w) + w) % w;
       if (bx > w - 4) bx -= w;
+      const sway = (s: number) => Math.round(k.amp * (s / k.len) ** 1.3 * Math.sin(t * k.speed + s * 0.11 + k.phase));
       for (const cx of bx < 8 ? [bx, bx + w] : [bx]) {
-        ctx.fillStyle = KELP[k.tone];
-        const sway = (s: number) => Math.round(k.amp * (s / k.len) ** 1.3 * Math.sin(t * k.speed + s * 0.11 + k.phase));
-        for (let s = 0; s < k.len; s++) ctx.fillRect(cx + sway(s), k.y - s, 2, 1);
+        const path = stalks[k.tone];
+        let runX = cx + sway(0);
+        let runFrom = 0;
+        for (let s = 1; s <= k.len; s++) {
+          const x = s < k.len ? cx + sway(s) : NaN;
+          if (x === runX) continue;
+          // Rows runFrom..s-1 share an x: one rect, from the top of the run down.
+          path.rect(runX, k.y - (s - 1), 2, s - runFrom);
+          runX = x;
+          runFrom = s;
+        }
         // Blades every few rows, alternating sides, lit on top.
-        ctx.fillStyle = KELP[2];
         for (let s = 5; s < k.len - 2; s += 5) {
           const side = (s / 5) % 2 ? 1 : -1;
           const x = cx + sway(s) + (side > 0 ? 2 : -2);
-          ctx.fillRect(x, k.y - s, 2, 1);
-          ctx.fillRect(x + side, k.y - s - 1, 1, 1);
+          blades.rect(x, k.y - s, 2, 1);
+          blades.rect(x + side, k.y - s - 1, 1, 1);
         }
       }
     }
+    ctx.fillStyle = KELP[0];
+    ctx.fill(stalks[0]);
+    ctx.fillStyle = KELP[1];
+    ctx.fill(stalks[1]);
+    ctx.fillStyle = KELP[2];
+    ctx.fill(blades);
   }
 
   private drawTips(ctx: Ctx, t: number) {

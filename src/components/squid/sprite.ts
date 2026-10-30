@@ -12,8 +12,8 @@
 
 type Pt = [number, number];
 
-/** '#' body, 'f' fin, 'e' eye, 'p' pupil, 's' photophore. */
-const BODY = [
+/** '#' body, 'f' fin, 'e' eye, 'p' pupil, 's' photophore. The roaming squid (components/ocean) draws this too. */
+export const BODY = [
   ".........##.........",
   "........####........",
   "...ff..######..ff...",
@@ -46,6 +46,17 @@ const LIMBS: { id: number; pts: Pt[]; club?: -1 | 1 }[] = [
   { id: 1, pts: [[8, TOP], [8, TOP + TENT - 2], [7, TOP + TENT]], club: -1 },
   { id: 2, pts: [[10, TOP], [10, TOP + TENT - 2], [11, TOP + TENT]], club: 1 },
 ];
+/**
+ * Where each limb leaves the head, back (outer arms) to front (the tentacles): its id (rank), the column of its
+ * two-pixel root, and its rest angle from straight down in the sprite (negative leans left). For the roaming squid,
+ * whose limbs are long procedural chains.
+ */
+export const LIMB_ROOTS: { id: number; x: number; y: number; angle: number }[] = LIMBS.map((l) => {
+  const [x0, y0] = l.pts[0];
+  const [x1, y1] = l.pts[l.pts.length - 1];
+  return { id: l.id, x: x0 + 1, y: y0 + 0.5, angle: Math.atan2(x1 - x0, y1 - y0) };
+});
+
 /** Rows at the end of a limb that sway, and that taper to one pixel. */
 const TIP = 3;
 

@@ -1,10 +1,16 @@
 /**
- * How the roaming squid swims: pulse and glide. It squeezes its mantle (contract), jets, then glides on with drag,
- * steering a little between pulses toward a random waypoint. It leans mantle-first into sideways travel and floats
- * upright when slow. Reactions are behaviours on top: a dart (to a point), a flee (away from its own ink), loops,
- * dozing on the seabed, and hovering near something the player points at.
+ * How the roaming squid swims, after the squid's jet cycle: the mantle hyperinflates (radial muscles draw water in;
+ * the mantle swells and the arms open), then contracts hard (circular muscles) and the jet shoots it mantle-first in
+ * a front-loaded burst; it glides on under drag while the mantle refills more slowly (elastic recoil) and the arms
+ * relax and spread again. Between pulses it steers toward a random waypoint, turning no faster than TURN degrees a
+ * second. Slow or hovering, the fins do the work (the body draws them flapping); jetting, they fold. It leans
+ * mantle-first into sideways travel and floats upright when slow.
  *
- * Pure motion in CSS px and seconds, no DOM: the engine reads x, y, tilt, sx, sy each frame and writes one transform.
+ * Reactions are behaviours on top: a dart (to a point), a flee (away from its own ink), loops, dozing on the seabed,
+ * and hovering near something the player points at.
+ *
+ * Pure motion in CSS px and seconds, no DOM: each frame the engine reads x, y, tilt, sx, sy, and the jet state that
+ * drives the limbs and fins (jetAge, inflating, hovering).
  */
 
 export interface Pt {
@@ -15,20 +21,26 @@ export interface Pt {
 export interface World {
   w: number;
   h: number;
-  /** The squid sprite's size in CSS px. */
+  /** The squid's size in CSS px: mantle width, and the height it keeps clear of the seabed. */
   sw: number;
   sh: number;
   /** The seabed's top edge (CSS px) under a column. */
   floor: (x: number) => number;
+  /** Asked for each new waypoint: a point where the squid will show (open strips on a phone), or null for anywhere. */
+  prefer?: () => Pt | null;
 }
 
-type Phase = "glide" | "contract" | "hover";
+type Phase = "glide" | "inflate" | "hover";
 export type Behaviour = "roam" | "perk" | "doze" | "loop";
 
 /** Glide drag, per second: a pulse's speed falls off as exp(-DRAG t). */
 const DRAG = 1.4;
 /** Lean into sideways travel, at most this many degrees. */
-const LEAN = 62;
+const LEAN = 78;
+/** The fastest it turns outside its loops, degrees per second: smooth steering, never a snap. */
+const TURN = 160;
+/** A jet's thrust is spent over this long, front-loaded (an eased-out burst). */
+const THRUST = 0.14;
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 const ease = (s: number) => (s < 0.5 ? 2 * s * s : 1 - (-2 * s + 2) ** 2 / 2);
@@ -51,12 +63,15 @@ export class Swimmer {
   cadence = 1;
   /** Out of lives: it keeps low. */
   low = false;
+  /** Seconds since the last jet: the limbs bunch into a cone on the jet, then splay as it glides. */
+  jetAge = 9;
 
   private phase: Phase = "glide";
   private left = 0.6;
   private aim: Pt = { x: 0, y: -1 };
   private jet = 0;
-  private contractFor = 0.22;
+  private thrust = 0;
+  private inflateFor = 0.22;
   private target: Pt;
   private perkAt: Pt | null = null;
   private dozeX: number | null = null;
@@ -82,23 +97,40 @@ export class Swimmer {
     this.target = this.waypoint();
   }
 
+  /** Inflating for a jet, 0-1: the arms open as the mantle fills. */
+  get inflating() {
+    return this.phase === "inflate" ? 1 - Math.max(0, this.left) / this.inflateFor : 0;
+  }
+
+  /** Hovering or barely moving: the fins flap. */
+  get hovering() {
+    return this.behaviour !== "loop" && Math.hypot(this.vx, this.vy) < this.unit * 0.3;
+  }
+
   /** Base jet length in px: a calm pulse crosses about a third of the short side. */
   private get unit() {
     return clamp(Math.min(this.world.w, this.world.h) * 0.36, 90, 320);
   }
 
   private bounds() {
-    const { w, h, sw, sh } = this.world;
+    const { w, sw, sh } = this.world;
     const mx = sw * 0.7;
-    return { x0: mx, x1: Math.max(mx, w - mx), y0: sh * 0.6, y1: h };
+    return { x0: mx, x1: Math.max(mx, w - mx), y0: sh * 0.45 };
   }
 
-  /** Lowest the squid's centre goes at column x: arms resting on the seabed. */
+  /** Where a dozing squid's centre rests at column x: arms on the seabed. */
   private floorY(x: number) {
     return this.world.floor(x) - this.world.sh * 0.5;
   }
 
+  /** Lowest it swims: in front of the near seabed, right down to the bottom of the screen (behind the input bar). */
+  private maxY() {
+    return this.world.h - this.world.sh * 0.3;
+  }
+
   private waypoint(): Pt {
+    const pref = this.low ? null : this.world.prefer?.();
+    if (pref) return this.clampPt(pref);
     const b = this.bounds();
     const x = b.x0 + this.rand() * (b.x1 - b.x0);
     const top = this.low ? this.world.h * 0.5 : this.world.h * 0.1 + b.y0;
@@ -106,25 +138,25 @@ export class Swimmer {
     return { x, y: top + this.rand() * (bottom - top) };
   }
 
-  /** Squeeze, then jet toward `dir` at `v` px/s. */
-  private pulse(dir: Pt, v: number, squeeze = 0.22) {
+  /** Inflate, then jet toward `dir`, enough to glide about `v / DRAG` px. */
+  private pulse(dir: Pt, v: number, inflate = 0.22) {
     const n = Math.hypot(dir.x, dir.y) || 1;
     this.aim = { x: dir.x / n, y: dir.y / n };
     this.jet = v;
-    this.phase = "contract";
-    this.contractFor = squeeze;
-    this.left = squeeze;
+    this.phase = "inflate";
+    this.inflateFor = inflate;
+    this.left = inflate;
   }
 
   /** Pulse toward a point, far enough to get about `share` of the way there. */
-  private pulseTo(p: Pt, share = 1, squeeze = 0.22, max = 1) {
+  private pulseTo(p: Pt, share = 1, inflate = 0.22, max = 1) {
     const dx = p.x - this.x;
     const dy = p.y - this.y;
     const d = Math.hypot(dx, dy);
     const travel = clamp(d * share, 24, this.unit * max * this.speed);
     // A slight wobble in the aim, so it never swims dead straight.
     const a = Math.atan2(dy, dx) + (this.rand() - 0.5) * 0.35;
-    this.pulse({ x: Math.cos(a), y: Math.sin(a) }, travel * DRAG, squeeze);
+    this.pulse({ x: Math.cos(a), y: Math.sin(a) }, travel * DRAG, inflate);
   }
 
   /** A quick dart toward a point (a find). */
@@ -211,16 +243,24 @@ export class Swimmer {
   private clampPt(p: Pt): Pt {
     const b = this.bounds();
     const x = clamp(p.x, b.x0, b.x1);
-    return { x, y: clamp(p.y, b.y0, this.floorY(x)) };
+    return { x, y: clamp(p.y, b.y0, this.maxY()) };
+  }
+
+  /** Ease toward an angle, no faster than TURN degrees a second. */
+  private turn(to: number, rate: number, dt: number) {
+    const want = (to - this.tilt) * (1 - Math.exp(-rate * dt));
+    const max = TURN * dt;
+    this.tilt += clamp(want, -max, max);
   }
 
   step(dt: number, t: number) {
     if (this.behaviour === "loop" && this.loop) return this.stepLoop(dt);
-    const relax = 1 - Math.exp(-7 * dt);
+    this.jetAge += dt;
     let lean = 0;
 
     if (this.behaviour === "doze") {
       // Sink slowly, arms first, and settle on the seabed.
+      const relax = 1 - Math.exp(-7 * dt);
       const rest = this.floorY(this.x);
       if (this.dozeX !== null && !this.asleep) this.vx += ((this.dozeX - this.x) * 0.5 - this.vx) * (1 - Math.exp(-1.5 * dt));
       else this.vx *= Math.exp(-2 * dt);
@@ -237,34 +277,45 @@ export class Swimmer {
       this.x += this.vx * dt;
       this.y = Math.min(rest, this.y + this.vy * dt);
       lean = this.asleep ? 14 : 0;
-      // Breathing.
-      this.sx += (1 - this.sx) * relax;
-      this.sy += (1 + (this.asleep ? 0.03 * Math.sin(t * 1.6) : 0) - this.sy) * relax;
-      this.tilt += (lean - this.tilt) * (1 - Math.exp(-2 * dt));
+      // Breathing: the mantle swells and eases, slowly.
+      this.sx += (1 + (this.asleep ? 0.035 * Math.sin(t * 1.4) : 0) - this.sx) * relax;
+      this.sy += (1 - this.sy) * relax;
+      this.turn(lean, 2, dt);
       return;
     }
 
     this.left -= dt;
-    if (this.phase === "contract") {
-      const p = 1 - Math.max(0, this.left) / this.contractFor;
-      this.sx = 1 - 0.17 * p;
-      this.sy = 1 + 0.1 * p;
+    if (this.thrust > 0) {
+      // The jet's burst, front-loaded: most of the push in the first frames, tailing off (an ease-out).
+      const step = Math.min(dt, this.thrust);
+      const w = (2 * (this.thrust - step / 2)) / (THRUST * THRUST);
+      this.vx += this.aim.x * this.jet * w * step;
+      this.vy += this.aim.y * this.jet * w * step;
+      this.thrust -= step;
+    }
+    if (this.phase === "inflate") {
+      // Hyperinflation: the mantle swells (wider, a touch shorter) as it turns toward where it will go.
+      const p = 1 - Math.max(0, this.left) / this.inflateFor;
+      this.sx = 1 + 0.13 * p;
+      this.sy = 1 - 0.06 * p;
       lean = LEAN * this.aim.x;
       if (this.left <= 0) {
-        // Jet: the mantle snaps open.
-        this.vx += this.aim.x * this.jet;
-        this.vy += this.aim.y * this.jet;
-        this.sx = 1.08;
-        this.sy = 0.93;
+        // The jet: the mantle contracts hard (narrow and long) and the burst begins.
+        this.thrust = THRUST;
+        this.jetAge = 0;
+        this.sx = 0.8;
+        this.sy = 1.14;
         this.phase = "glide";
         this.left = (1.1 + this.rand() * 0.8) / this.cadence;
       }
     } else {
-      this.sx += (1 - this.sx) * relax;
-      this.sy += (1 - this.sy) * relax;
+      // Refill: the mantle eases back to rest, more slowly than it contracted.
+      const refill = 1 - Math.exp(-3.2 * dt);
+      this.sx += (1 - this.sx) * refill;
+      this.sy += (1 - this.sy) * refill;
       const v = Math.hypot(this.vx, this.vy);
       lean = (LEAN * this.vx) / Math.max(v, this.unit * 0.45);
-      if (this.phase === "hover") lean += Math.sin(t * 1.1) * 4;
+      if (this.phase === "hover") lean += Math.sin(t * 1.1) * 5;
       if (this.left <= 0) this.next();
     }
 
@@ -280,12 +331,12 @@ export class Swimmer {
       this.x = clamp(this.x, b.x0, b.x1);
       this.vx *= -0.3;
     }
-    const fy = this.floorY(this.x);
+    const fy = this.maxY();
     if (this.y < b.y0 || this.y > fy) {
       this.y = clamp(this.y, b.y0, fy);
       this.vy *= -0.3;
     }
-    this.tilt += (lean - this.tilt) * (1 - Math.exp(-6 * dt));
+    this.turn(lean, 6, dt);
   }
 
   /** The glide has run out: pulse on toward the waypoint, pick a new one, or hover a moment. */
@@ -330,7 +381,8 @@ export class Swimmer {
     this.y = ny;
     this.vx = vx * 0.4;
     this.vy = vy * 0.4;
-    this.sx = 1 - 0.08 * Math.sin(s * Math.PI * L.turns * 2) ** 2;
+    this.jetAge = 0.15;
+    this.sx = 1 - 0.1 * Math.sin(s * Math.PI * L.turns * 2) ** 2;
     this.sy = 2 - this.sx;
     if (s >= 1) {
       this.loop = null;
