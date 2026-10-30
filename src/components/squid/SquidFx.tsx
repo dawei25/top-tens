@@ -3,13 +3,14 @@
  * - The tentacle grab: on a find, a pixel tentacle reaches from the row down to the guess box, grabs the word and
  *   pulls it up into its row. #1 and #2 strain before they come loose. The row itself is already revealed in the DOM;
  *   this only plays over it (the row's name is kept transparent until the word lands).
- * - Ink: a life lost (a costly miss or a hint) squirts an ink cloud from that sac that dims the screen for a beat.
- *   The last life goes in a bigger cloud from the squid itself.
+ * - Ink: a life lost (a costly miss or a hint) inks in the ocean, behind the glass; in front, the screen dims around
+ *   the squid for a beat and the emptied sac drips. The last life dims it nearly to black.
  * Everything is built on the spot, animated with the Web Animations API and removed when done. Nothing runs with
  * reduced motion, and nothing here touches game state or focus.
  */
 import { useEffect, useRef } from "react";
 import { onPlay } from "../../game/events";
+import { squidAt } from "../ocean/store";
 import { reducedMotion } from "../pixel";
 
 const SVG = "http://www.w3.org/2000/svg";
@@ -256,28 +257,21 @@ function grab(layer: HTMLElement, scope: ParentNode, rank: number) {
 
 /* ---------------------------------------------------------------- ink */
 
-/** Blob looks: mostly indigo with a pink gloss, every third a lighter violet, every fourth a flat deep shadow. */
-const puffClass = (k: number) => `ink-puff${k % 3 === 0 ? " lit" : k % 4 === 0 ? " dark" : ""}`;
-/** Ink blob sizes snap to this, so they stay chunky pixels. */
-const BLOB = 8;
-
+/**
+ * A life lost: the squid inks where it is, out in the ocean behind the glass (components/ocean draws the cloud).
+ * In front, only what the player needs to read it on a phone, where the board covers most of the ocean: the screen
+ * dims a little around the squid for a beat (nearly black for the last life), and ink drips from the emptied sac.
+ */
 function ink(layer: HTMLElement, scope: ParentNode) {
   const sacs = scope.querySelectorAll<SVGElement>('[data-testid="lives"] .ink-sac.on');
-  const squid = scope.querySelector<HTMLElement>('[data-testid="squid"]');
-  if (!squid) return;
   // Read before the life goes: the last full sac is the one that empties. On the last life the squid bursts.
   const big = sacs.length <= 1;
-  const sq = squid.getBoundingClientRect();
-  // The squid squirts from under its head (its funnel), between the arms.
-  const o: P = { x: sq.left + sq.width / 2, y: sq.top + sq.height * (big ? 0.5 : 0.62) };
-  const DUR = big ? 1500 : 600;
-  const unit = Math.min(innerWidth, innerHeight);
+  const o: P = squidAt.live ? { x: squidAt.x, y: squidAt.y } : { x: innerWidth / 2, y: innerHeight / 2 };
+  const DUR = big ? 1600 : 700;
 
   const fx = el("div", `ink${big ? " big" : ""}`, layer);
   fx.style.setProperty("--ox", `${o.x}px`);
   fx.style.setProperty("--oy", `${o.y}px`);
-
-  // The screen darkens a touch around the ink and clears; for the last life, it goes nearly black.
   const dim = el("div", "ink-dim", fx);
   dim.animate(
     big
@@ -285,48 +279,6 @@ function ink(layer: HTMLElement, scope: ParentNode) {
       : [{ opacity: 0 }, { opacity: 1, offset: 0.25 }, { opacity: 0.8, offset: 0.6 }, { opacity: 0 }],
     { duration: DUR, fill: "both", easing: "steps(8, end)" },
   );
-
-  // Aimed at the board, down and across from the squid.
-  const aim = Math.atan2(innerHeight * 0.55 - o.y, innerWidth / 2 - o.x);
-  const blob = (k: number, a: number, d: number, size: number, delay: number) => {
-    const puff = el("i", puffClass(k), fx);
-    const s = Math.max(BLOB * 2, Math.round(size / BLOB) * BLOB);
-    puff.style.width = puff.style.height = `${s}px`;
-    puff.style.marginLeft = puff.style.marginTop = `${-s / 2}px`;
-    const end = { x: o.x + Math.cos(a) * d, y: o.y + Math.sin(a) * d };
-    const out = Math.min(0.62, delay / DUR + 0.32);
-    puff.animate(
-      [
-        { transform: `translate(${o.x}px, ${o.y}px) scale(0.2)`, opacity: 0 },
-        { transform: `translate(${o.x}px, ${o.y}px) scale(0.2)`, opacity: 1, offset: delay / DUR },
-        { transform: `translate(${end.x}px, ${end.y}px) scale(1)`, opacity: 1, offset: out },
-        { transform: `translate(${end.x}px, ${end.y + s * 0.3}px) scale(1.1)`, opacity: 0 },
-      ],
-      { duration: DUR, fill: "both", easing: "steps(10, end)" },
-    );
-  };
-
-  if (big) {
-    // Everywhere: the squid empties itself into one big cloud.
-    const reach = Math.max(innerWidth, innerHeight) * 0.8;
-    for (let k = 0; k < 52; k++) {
-      const near = k < 18;
-      const d = reach * (near ? 0.05 + 0.3 * Math.random() : 0.25 + 0.75 * Math.sqrt(Math.random()));
-      const size = unit * 0.14 + Math.random() * unit * 0.22 * (1.3 - d / reach);
-      blob(k, Math.random() * Math.PI * 2, d, size, (d / reach) * DUR * 0.15);
-    }
-  } else {
-    // A squirt: a stream of blobs along the aim, swelling as they go, with a few thrown wide.
-    const reach = Math.min(360, innerHeight * 0.45);
-    const STREAM = 11;
-    for (let k = 0; k < STREAM + 5; k++) {
-      const inStream = k < STREAM;
-      const t = inStream ? (k + 1) / STREAM : 0.4 + Math.random() * 0.5;
-      const a = aim + (Math.random() - 0.5) * (inStream ? 0.35 : 1.3);
-      const size = unit * (0.06 + 0.12 * t) * (0.8 + Math.random() * 0.4);
-      blob(k, a, reach * t, size, (inStream ? k : k - 6) * 18);
-    }
-  }
 
   // Ink drips from the sac that just emptied (on the last life, the squid bursts instead).
   const sac = !big ? sacs[sacs.length - 1]?.getBoundingClientRect() : null;

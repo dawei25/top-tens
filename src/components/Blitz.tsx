@@ -553,7 +553,6 @@ export function Blitz({
   return (
     <main className={`screen game blitz ${over ? "blitz-over" : ""}`} data-testid="blitz-screen" data-list={puzzle.id}>
       <ScreenHead onBack={onBack} onHome={onHome}>
-        <BlitzSquid hits={viewRun ? viewRun.hits : state.hits} />
         <span className="label mode gold">
           {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
         </span>
@@ -571,6 +570,7 @@ export function Blitz({
       </section>
 
       {body}
+      <BlitzSquid hits={viewRun ? viewRun.hits : state.hits} />
     </main>
   );
 }

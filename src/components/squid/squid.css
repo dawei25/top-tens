@@ -1,56 +1,9 @@
 /*
  * TENtacle's glow squid (animations agent): the sprite, its moods, the ink-sac lives, and the one-off effects layer.
+ * The playing squid roams the ocean behind the app (components/ocean); the hero squid sits on the results panels.
  * Persistent states (lit limbs, moods, momentum glow, empty sacs) are plain styles and show with reduced motion too;
  * every move sits under prefers-reduced-motion: no-preference or is skipped in JS.
  */
-
-/* ---------- Placement: in the screen header, left of the mode label and the lives ---------- */
-/* With the squid in it, the header's middle takes all the room between BACK and the sound and HOME keys (the equal
-   side columns would squeeze it at 360 px). */
-.game-head:has(> .game-head-mid > .squid) {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  margin-bottom: 6px;
-}
-.game-head-mid:has(> .squid) {
-  display: grid;
-  grid-template-columns: auto minmax(0, max-content);
-  justify-content: center;
-  justify-items: center;
-  align-items: center;
-  align-content: center;
-  column-gap: 10px;
-  row-gap: 2px;
-}
-/* The squid is taller than the keys: it hangs into the screen padding above and the gap below. */
-.game-head-mid > .squid {
-  grid-row: 1 / span 2;
-  margin: -12px 0 -18px;
-}
-/* A long mode label ("Today's Blitz #12") wraps rather than pushing into the keys. */
-.game-head-mid:has(> .squid) > .mode {
-  white-space: normal;
-  text-align: center;
-  line-height: 1.15;
-}
-/* Blitz has only its label beside the squid. */
-.game-head-mid > .squid + .label:last-child {
-  grid-row: 1 / span 2;
-}
-@media (max-width: 380px) {
-  .game-head-mid:has(> .squid) {
-    column-gap: 8px;
-  }
-  .game-head-mid:has(> .squid) > .mode {
-    letter-spacing: 0.18em;
-  }
-}
-/* Big screens have the room: a chunkier squid (4 px pixels). */
-@media (min-width: 900px) and (min-height: 760px) {
-  .game-head-mid > .squid {
-    --px: 4px;
-    margin: -20px 0 -6px;
-  }
-}
 
 /* On a results panel: the hero squid, top right, beside the banner and the big score. */
 .results:has(> .squid.hero) {
@@ -105,7 +58,10 @@
 .s-spot { fill: #2d93ad; }
 .s-eye { fill: #a6f1ff; }
 .s-pupil { fill: #06101e; }
-.s-lid { fill: #2a8aa2; }
+.s-lid { fill: #2a8aa2; visibility: hidden; }
+/* Down (lost, gave up): half-shut eyes. */
+.squid[data-mood="lost"] .s-lid,
+.squid[data-mood="gave-up"] .s-lid { visibility: visible; }
 .squid path {
   transition: fill 0.4s steps(4, end);
 }
@@ -205,16 +161,20 @@
 .lives:has(.ink-sac) {
   gap: 4px;
 }
+/* With the squid out in the ocean, the sacs carry the header's middle: 3 px art pixels, 4 px on wider screens. */
 .lives .ink-sac {
-  width: 16px;
-  height: 18px;
+  width: 24px;
+  height: 27px;
   display: block;
   filter: none;
 }
-@media (min-width: 900px) and (min-height: 760px) {
+@media (min-width: 640px) {
+  .lives:has(.ink-sac) {
+    gap: 6px;
+  }
   .lives .ink-sac {
-    width: 24px;
-    height: 27px;
+    width: 32px;
+    height: 36px;
   }
 }
 .ink-sac.on {

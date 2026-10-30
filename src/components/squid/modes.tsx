@@ -1,31 +1,41 @@
 /**
  * The squid as each screen uses it. Lit limbs and mood come from game state (props); play events only drive the
- * one-offs (a flinch, Blitz momentum, the personal-best flare, the score bump).
+ * one-offs (Blitz momentum, the personal-best flare, the score bump). The playing squid roams the ocean behind the
+ * app: ClassicSquid and BlitzSquid render nothing themselves, they hand their state to the ocean.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { onPlay } from "../../game/events";
 import type { BlitzHit } from "../../game/blitz";
 import type { GameState } from "../../game/state";
+import { setOceanSquid, type OceanSquidState } from "../ocean/store";
 import { reducedMotion } from "../pixel";
-import { Squid } from "./Squid";
+import { Squid, type SquidMood } from "./Squid";
+
+let sessions = 0;
+
+/** Show this screen's squid state in the ocean while mounted; back to plain roaming after. */
+function useOceanSquid(s: Omit<OceanSquidState, "session">) {
+  const [session] = useState(() => ++sessions);
+  const { mode, mood, heat, flare } = s;
+  const lit = s.lit.join(",");
+  useLayoutEffect(() => {
+    setOceanSquid({ session, mode, mood, heat, flare, lit: lit ? lit.split(",").map(Number) : [] });
+  }, [session, mode, lit, mood, heat, flare]);
+  useLayoutEffect(() => () => setOceanSquid(null), []);
+}
+
+const moodOf = (status: GameState["status"]): SquidMood => (status === "playing" ? "play" : status);
 
 /** Classic: one limb per answer found; dims when the round is lost or given up. */
 export function ClassicSquid({ found, status }: { found: readonly number[]; status: GameState["status"] }) {
-  const [flinch, setFlinch] = useState(0);
-  useEffect(
-    () =>
-      onPlay((e) => {
-        if ((e.kind === "miss" && e.lifeLost) || e.kind === "hint") setFlinch((n) => n + 1);
-      }),
-    [],
-  );
-  return <Squid mode="classic" lit={found} mood={status === "playing" ? "play" : status} flinch={flinch} />;
+  useOceanSquid({ mode: "classic", lit: found, mood: moodOf(status), heat: 0, flare: 0 });
+  return null;
 }
 
 /**
- * The big squid on the classic results panel: the found ranks lit, the same moods as the header squid. A game won
- * on screen gets its celebration here (the page scrolls down to the results as the round ends, taking the header
- * squid out of view): `cheerAt` is when, in ms after the panel mounts.
+ * The big squid on the classic results panel: the found ranks lit, the same moods as the roaming squid. A game won
+ * on screen gets its hop and fireworks here (the roaming squid loops behind the glass): `cheerAt` is when, in ms
+ * after the panel mounts.
  */
 export function ResultsSquid({ found, status, cheerAt }: { found: readonly number[]; status: GameState["status"]; cheerAt?: number }) {
   return (
@@ -107,7 +117,8 @@ export function BlitzSquid({ hits }: { hits: readonly BlitzHit[] }) {
     };
   }, []);
   const lit = hits.filter((h) => h.rank >= 1 && h.rank <= 10).map((h) => h.rank);
-  return <Squid mode="blitz" lit={lit} heat={heat} flare={flare} />;
+  useOceanSquid({ mode: "blitz", lit, mood: "play", heat, flare });
+  return null;
 }
 
 /**
