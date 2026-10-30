@@ -1,0 +1,27 @@
+{
+  "id": "youtube-channels",
+  "judgedAt": "2026-10-30",
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 5,
+  "scores": { "recognizability": 2, "curve": 2, "fairness": 2, "data": 3, "fun": 3, "blitzDepth": 5 },
+  "casual": { "found": 3, "livesLost": 5, "guesses": 8 },
+  "fan": null,
+  "blitzCasual": { "scored": 20, "named": 22 },
+  "difficulty": 4,
+  "tags": ["internet", "youtube", "pop culture"],
+  "audience": "people who grew up on YouTube",
+  "summary": "A great Blitz once fixed: almost every YouTuber or pop star a casual player names scores. A harsh classic, because the top 10 is kids' channels and Indian TV, and PewDiePie, Dude Perfect and Bieber each cost a life.",
+  "reasons": [
+    "Casual run: MrBeast, T-Series and Cocomelon found, then PewDiePie (#14), Dude Perfect (#58), Markiplier (unranked), Justin Bieber (#36) and Blackpink (#17) used up all five lives by guess 8.",
+    "The ranking looks current and correct, and the kids' channels are a real surprise. But SET India, Kimpro, Alejo Igoa and the Stokes Twins are unknown to a typical player, and the famous creators they would type all cost lives.",
+    "Blitz shines: 174 channels carry a stat, and 20 of 22 quick casual names scored. It already ran on 2026-10-28, so it can wait anyway."
+  ],
+  "fixes": [
+    "T-Series (#2) has the slur redirect alias 'T-gay'. Drop it (and screen redirects for vandalism generally).",
+    "'BTS' is an unranked extra with no stat while #23 BANGTANTV is BTS's channel. Make 'BTS' an alias of BANGTANTV. Same for 'Cristiano Ronaldo' / 'Ronaldo' and #27 'UR · Cristiano'.",
+    "Unranked pool includes people and organisations that are not YouTube channels from this table, probably from another follower list: 'Elon Musk', 'Barack Obama', 'Donald Trump', 'Narendra Modi', 'Bill Gates', 'Kim Kardashian', 'NASA', 'CNN', 'CNN Breaking News', 'X', 'YouTube', 'YouTube Spotlight', 'UTC'. They cost a life in classic. Keep only YouTube channel entries.",
+    "'eminem' brings up a choice between 'Eminem' and 'Eminem Music'. Merge them into one entry.",
+    "Generic aliases that hijack plain words: 'Hindi' on #45 Infobells - Hindi, 'Nursery Rhymes' on #3 Cocomelon (#19 ChuChu TV is also 'Nursery Rhymes'). Drop them."
+  ]
+}
