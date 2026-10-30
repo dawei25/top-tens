@@ -149,6 +149,16 @@ export function startOcean(els: OceanEls): Ocean {
   function frame(now: number) {
     raf = requestAnimationFrame(frame);
     if (now - last < FRAME_MS - 2) return;
+    try {
+      tick(now);
+    } catch (err) {
+      // Decorative: a bug here stops the ocean (a still frame stays), never the game.
+      pause();
+      console.error(err);
+    }
+  }
+
+  function tick(now: number) {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     const t0 = stats ? performance.now() : 0;
@@ -235,13 +245,31 @@ export function startOcean(els: OceanEls): Ocean {
     swimmer.flee();
   }
 
-  /** A row's middle, read once now: where a find darts to. */
-  function rowPoint(sel: string): Pt | null {
-    const el = document.querySelector(sel);
+  /**
+   * Beside an element, read once now: just outside its nearer side when there is open water there (wide screens),
+   * so the reaction shows; otherwise a third of the way across it, behind the glass.
+   */
+  function besidePoint(el: Element | null): Pt | null {
     if (!el) return null;
     const r = el.getBoundingClientRect();
     if (r.bottom < 0 || r.top > vh) return null;
-    return { x: r.left + r.width * 0.35, y: r.top + r.height / 2 };
+    const y = r.top + r.height / 2;
+    const off = SPRITE_W * px * 0.8;
+    const sides = [r.left - off, r.right + off].filter((x) => x > off && x < vw - off);
+    if (!sides.length) return { x: r.left + r.width * 0.35, y };
+    return { x: sides.reduce((a, b) => (Math.abs(a - swimmer.x) <= Math.abs(b - swimmer.x) ? a : b)), y };
+  }
+
+  /** The middle of the open water beside the app's column nearest the squid, or null if the column fills the width. */
+  function openWater(): Pt | null {
+    const main = document.querySelector("main");
+    if (!main) return null;
+    const r = main.getBoundingClientRect();
+    const need = SPRITE_W * px * 2.2;
+    const xs = [r.left >= need ? r.left / 2 : null, vw - r.right >= need ? (r.right + vw) / 2 : null].filter((x) => x !== null);
+    if (!xs.length) return null;
+    const x = xs.reduce((a, b) => (Math.abs(a - swimmer.x) <= Math.abs(b - swimmer.x) ? a : b));
+    return { x, y: Math.min(vh * 0.6, Math.max(vh * 0.3, swimmer.y)) };
   }
 
   let pendingInk: "small" | "big" | null = null;
@@ -250,7 +278,7 @@ export function startOcean(els: OceanEls): Ocean {
     if (still) return;
     switch (e.kind) {
       case "found": {
-        const p = rowPoint(`[data-testid="slot"][data-rank="${e.rank}"]`);
+        const p = besidePoint(document.querySelector(`[data-testid="slot"][data-rank="${e.rank}"]`));
         swimmer.dart(p ?? { x: Math.random() * vw, y: vh * (0.2 + Math.random() * 0.5) });
         // The glow pulse lands with the grabbed word (SquidFx: about 0.4 s, later for a straining #1 / #2).
         glow(e.rank === 1 ? GOLD : CYAN, e.rank <= 2 ? 1.6 : 1.2, e.rank <= 2 ? 0.52 : 0.4);
@@ -269,14 +297,17 @@ export function startOcean(els: OceanEls): Ocean {
           pendingInk = "big";
           queueMicrotask(flushInk);
         } else if (e.status === "won") {
-          later(0.35, () => swimmer.loops(2, () => burst([CYAN, GOLD, PINK], true)));
+          // Out into open water first if there is any beside the column, so the loops show.
+          const open = openWater();
+          if (open) swimmer.dart(open);
+          later(open ? 1.1 : 0.35, () => swimmer.loops(2, () => burst([CYAN, GOLD, PINK], true)));
         }
         break;
       case "blitz-hit": {
         const top = e.rank >= 1 && e.rank <= 10;
         // The newest hit row is drawn after this event: read it on the next frame.
         later(0.04, () => {
-          const p = rowPoint(".blitz-hits .blitz-hit:first-child");
+          const p = besidePoint(document.querySelector(".blitz-hits .blitz-hit:first-child"));
           if (p) swimmer.dart(p);
         });
         glow(e.rank === 1 ? GOLD : CYAN, top ? 1.2 + heat * 0.15 : 0.8, 0.1);
@@ -314,8 +345,8 @@ export function startOcean(els: OceanEls): Ocean {
     if (still || e.pointerType !== "mouse") return;
     const key = todayKey(e);
     if (!key) return;
-    const r = key.getBoundingClientRect();
-    swimmer.perk({ x: r.left + r.width * (0.55 + Math.random() * 0.3), y: r.top + r.height / 2 });
+    const p = besidePoint(key);
+    if (p) swimmer.perk(p);
   }
   function onOut(e: PointerEvent) {
     const key = todayKey(e);

@@ -62,7 +62,7 @@ interface Bubble {
 const INK = ["#1a0f36", "#2a1650", "#0d0720"];
 const GLOSS = "#ff8cbe";
 
-/** 4 x 4 dither masks for 1/4, 2/4 and 3/4 coverage. */
+/** 4 x 4 dither masks for 1/4, 2/4 and 3/4 coverage (levels 0, 1, 2; level 3 is solid). */
 const MASKS = [
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
   [1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1],
@@ -227,7 +227,7 @@ export class Fx {
       c.width = c.height = 4;
       const p = c.getContext("2d")!;
       p.fillStyle = color;
-      MASKS[level - 1].forEach((on, i) => on && p.fillRect(i % 4, Math.floor(i / 4), 1, 1));
+      MASKS[level].forEach((on, i) => on && p.fillRect(i % 4, Math.floor(i / 4), 1, 1));
       this.patterns.set(key, ctx.createPattern(c, "repeat"));
     }
     return this.patterns.get(key) ?? color;

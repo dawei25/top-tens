@@ -1171,24 +1171,19 @@ a {
   margin-top: 2px;
   --pad-bottom: max(14px, env(safe-area-inset-bottom));
   padding: 10px 0 var(--pad-bottom);
-  clip-path: inset(0 -100vmax);
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-/* Its glass, full-bleed without widening the layout: tinted behind the feedback line, clearer around the guess box
-   (which has no text of its own around it; the box is its own glass). The change sits in the gap between them. */
-.guess::before {
-  content: "";
-  position: absolute;
-  inset: 0 -100vmax;
-  z-index: -1;
-  border-top: 1px solid var(--hairline);
-  background: linear-gradient(
-    to top,
-    var(--glass-bar-clear) calc(var(--pad-bottom) + 54px),
-    var(--glass-bar) calc(var(--pad-bottom) + 60px)
-  );
+  /* Its glass, full-bleed without widening the layout (a border image's outset paints past the box but never
+     scrolls): a hairline on top, tinted behind the feedback line, clearer around the guess box (no text of its own
+     there; the box is its own glass). The change sits in the gap between them. */
+  border-image: linear-gradient(
+      to bottom,
+      rgba(125, 147, 184, 0.3) 0 1px,
+      var(--glass-bar) 1px calc(100% - var(--pad-bottom) - 60px),
+      var(--glass-bar-clear) calc(100% - var(--pad-bottom) - 54px)
+    )
+    fill 0 / 0 / 0 100vmax;
 }
 .feedback-line {
   min-height: 28px;
