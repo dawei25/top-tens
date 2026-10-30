@@ -118,9 +118,10 @@ export function startOcean(els: OceanEls): Ocean {
   const timers: { at: number; fn: () => void }[] = [];
   const later = (s: number, fn: () => void) => timers.push({ at: t + s, fn });
 
-  // Dev only: production builds drop this (and the hooks below) entirely.
+  // Dev only: production builds drop this (and the hooks below) entirely, unless built with VITE_OCEANSTATS=1 (for
+  // frame-time checks of a production build).
   const stats: Stats | null =
-    import.meta.env.DEV && typeof location !== "undefined" && location.search.includes("oceanstats")
+    (import.meta.env.DEV || import.meta.env.VITE_OCEANSTATS === "1") && typeof location !== "undefined" && location.search.includes("oceanstats")
       ? { frames: 0, drawMs: 0, maxMs: 0, maxGap: 0, slow: 0, at: 0, x: 0, y: 0, jet: 0, checked: 0, offHeading: 0, worstDeg: 0, offLog: [], seen: {}, state: "", tilt: 0 }
       : null;
   /** The squid as drawn last frame (CSS px, heading), for the heading check; null after a jump (a resize). */
