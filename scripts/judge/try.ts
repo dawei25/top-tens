@@ -15,7 +15,12 @@ export function play(id: string, guesses: string[]): string[] {
   const found = new Set<number>();
   let lives = 5;
   const out: string[] = [];
-  for (const g of guesses) {
+  for (const [i, g] of guesses.entries()) {
+    // The real game ends at 10/10 or 0 lives: later guesses never get played.
+    if (lives <= 0 || found.size === 10) {
+      out.push(`(game over: ${guesses.length - i} more guess${guesses.length - i === 1 ? "" : "es"} never played)`);
+      break;
+    }
     const r = judgeGuess(g, p, found, lex);
     let text: string;
     switch (r.kind) {
@@ -43,7 +48,7 @@ export function play(id: string, guesses: string[]): string[] {
     }
     out.push(`"${g}" -> ${text}`);
   }
-  out.push(`RESULT: ${found.size}/10 found, ${lives} lives left${lives <= 0 ? " (game over before the end)" : ""}`);
+  out.push(`RESULT: ${found.size}/10 found, ${lives} lives left${lives <= 0 ? " (out of lives)" : found.size === 10 ? " (all found)" : ""}`);
   return out;
 }
 

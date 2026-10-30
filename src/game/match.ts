@@ -47,6 +47,21 @@ export function editDistance(a: string, b: string): number {
   return d[m][n];
 }
 
+/** Drop the whole words two names share at the start and the end ("mount everst" / "mount everest" → "everst" / "everest"). */
+export function withoutSharedWords(a: string, b: string): [string, string] {
+  const x = a.split(" ");
+  const y = b.split(" ");
+  while (x.length > 1 && y.length > 1 && x[0] === y[0]) {
+    x.shift();
+    y.shift();
+  }
+  while (x.length > 1 && y.length > 1 && x[x.length - 1] === y[y.length - 1]) {
+    x.pop();
+    y.pop();
+  }
+  return [x.join(" "), y.join(" ")];
+}
+
 /** Edits we silently accept as the same word. */
 export function autoCorrectBudget(len: number): number {
   if (len <= 3) return 0;
@@ -89,13 +104,16 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
       const f = normalize(form);
       // Numbers are identity, not spelling: GTA 6 is not GTA 5, Mario Kart 7 is not Mario Kart.
       if (guessDigits && digitsOf(f) !== guessDigits) continue;
-      // Spacing never matters: "spiderman" is "Spider-Man".
-      const dist = f.replace(/ /g, "") === compactGuess ? 0 : editDistance(guess, f);
+      // Spacing never matters: "spiderman" is "Spider-Man". Words both sides share ("mount", "canyon") aren't
+      // evidence of a typo: only the rest is compared, so "mount whitney" is not a misspelling of "mount lhotse".
+      const spacing = f.replace(/ /g, "") === compactGuess;
+      const [g, rest] = spacing ? [guess, f] : withoutSharedWords(guess, f);
+      const dist = spacing ? 0 : editDistance(g, rest);
       // Codes (ATL, EDDF, PRC) match exactly or not at all; fuzzy they catch keyboard mash like "asdf".
       if (dist > 0 && CODE.test(form)) continue;
       if (dist < best || (dist === 0 && form === entry.name)) {
         best = dist;
-        len = f.length;
+        len = rest.length;
         fullName = dist === 0 && form === entry.name;
         viaWord = i >= forms.length;
       }
