@@ -4,9 +4,24 @@
   "decision": "free-play",
   "alsoBlitz": false,
   "priority": 3,
-  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 3, "livesLost": 5, "guesses": 14 },
-  "fan": { "found": 9, "livesLost": 5, "guesses": 18 },
+  "scores": {
+    "recognizability": 4,
+    "curve": 3,
+    "fairness": 2,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 3,
+    "livesLost": 5,
+    "guesses": 14
+  },
+  "fan": {
+    "found": 9,
+    "livesLost": 5,
+    "guesses": 18
+  },
   "blitzCasual": null,
   "summary": "Great topic, punishing classic game: the obvious guesses are famous modern bestsellers that sit at #11 to #108 and each cost a life. Belongs in Blitz once the rebuild gives it stats.",
   "reasons": [
@@ -23,5 +38,12 @@
     "Clean the garbled extra name '六星占術によるあなたの運命 Tells Your Fortune)' (stray parenthesis, half-translated).",
     "Prune junk redirect aliases on the top 10: character and plot names (Vengeance, Roger Cly, Mrs. Cruncher, Théophile Gabelle, Emily Brent, Vera Claythorne, Sophie Neveu, Bezu Fache, Leigh Teabing, Cryptex, Arkenstone, Asteroid B, B 612), 'The Da Vinci Code paintings', 'Lord of the Rings Prequel' and the inverted 'Tale of Two Cities, A'.",
     "After the rebuild attaches sales figures, re-judge for daily-blitz."
-  ]
+  ],
+  "difficulty": 4,
+  "tags": [
+    "culture",
+    "books",
+    "literature"
+  ],
+  "audience": "readers"
 }
