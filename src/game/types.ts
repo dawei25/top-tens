@@ -31,6 +31,10 @@ export interface Puzzle {
   prompt: string;
   /** Column the ranking is by, e.g. "Population" */
   metric?: string;
+  /** Home category, e.g. "Geography" (also in index.json). */
+  category?: string;
+  /** The ranking's #1 has the smallest number (a Similarweb rank); such lists never play in Blitz. */
+  lowerIsBetter?: boolean;
   /**
    * Playable in Blitz: at least 30 entries carry `n`, and a bigger number ranks higher (not a list ranked by
    * something like Similarweb rank, where #1 is the smallest number).
