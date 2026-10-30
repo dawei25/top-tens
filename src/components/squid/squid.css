@@ -37,6 +37,14 @@
 .slot.found.just[data-rank]::before {
   background: linear-gradient(90deg, color-mix(in srgb, var(--limb) 30%, transparent), transparent 85%);
 }
+/* While the squid carries the word up (components/ocean/grab.ts), the row waits: its numeral and its arrival flash
+   come on as the word lands, with the limb. */
+.slot.found[data-grabbing] .rank {
+  color: var(--faint);
+}
+.slot.found[data-grabbing]::before {
+  visibility: hidden;
+}
 
 /* On a results panel: the hero squid, top right, beside the banner and the big score. */
 .results:has(> .squid.hero) {

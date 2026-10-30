@@ -18,7 +18,7 @@
  * Everything is drawn as whole pixels: tapered strokes stamped along each segment, batched into one path per colour.
  */
 import { BODY, LIMB_ROOTS } from "../squid/sprite";
-import { limbColor, mix } from "../squid/colors";
+import { LIMB_COLORS, limbColor, mix } from "../squid/colors";
 import type { SquidMood } from "../squid/Squid";
 import { glowSprite } from "./scene";
 
@@ -165,8 +165,9 @@ export class Rects {
       ctx.beginPath();
       for (let i = 0; i < r.length; i += 4) ctx.rect(r[i], r[i + 1], r[i + 2], r[i + 3]);
       ctx.fill();
-      r.length = 0;
     }
+    // Forget this frame's colours: passing tints (a limb flashing into its colour) would otherwise pile up.
+    this.by.clear();
   }
 }
 
@@ -256,6 +257,8 @@ export class SquidBody {
     this.sctx = this.scratch.getContext("2d")!;
     this.img = this.sctx.createImageData(48, 48);
     this.buf = new Uint32Array(this.img.data.buffer);
+    // Make the glows now, not in the frame where a limb first lights.
+    for (const c of LIMB_COLORS) this.glow.set(`${c}8`, glowSprite(c, 4));
   }
 
   /** Where limb `id` leaves the head, in canvas px. */

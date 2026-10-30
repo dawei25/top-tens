@@ -47,6 +47,8 @@ interface Grab {
   fromSize: number;
   toSize: number;
   tile: HTMLElement;
+  /** The row being filled: marked while the word is on its way, so its numeral lights when the word lands. */
+  row: HTMLElement;
   /** Rope nodes, canvas px. */
   x: Float32Array;
   y: Float32Array;
@@ -145,6 +147,7 @@ export class Grabs {
       fromSize,
       toSize,
       tile,
+      row,
       x: new Float32Array(N),
       y: new Float32Array(N),
       ox: new Float32Array(N),
@@ -162,6 +165,7 @@ export class Grabs {
 
     // The box's placeholder would show through where the word was: keep it hidden until the word is gone.
     input.dataset.grabbing = "";
+    row.dataset.grabbing = "";
     setTimeout(() => delete input.dataset.grabbing, (g.reach + g.grip) * 1000 + 80);
     // The real name waits for the word to land.
     const land = (g.reach + g.grip + g.carry + g.set) * 1000;
@@ -244,6 +248,7 @@ export class Grabs {
         g.landed = true;
         g.tile.style.transform = `translate(${g.to.x}px, ${g.to.y}px) scale(${(g.toSize / g.fromSize).toFixed(3)})`;
         g.tile.classList.add("landed");
+        delete g.row.dataset.grabbing;
         setTimeout(() => g.tile.remove(), 200);
         this.host.lit(g.rank);
       }
@@ -267,9 +272,12 @@ export class Grabs {
         const vy = (g.y[i] - g.oy[i]) * 0.8;
         g.ox[i] = g.x[i];
         g.oy[i] = g.y[i];
-        const ripple = Math.sin(now * 0.016 - i * 0.7) * 0.35 * f * Math.sin((Math.PI * i) / (N - 1));
-        g.x[i] += vx + (nx / nl) * ripple;
-        g.y[i] += vy + (ny / nl) * ripple;
+        const ripple = Math.sin(now * 0.016 - i * 0.7) * 0.25 * f * Math.sin((Math.PI * i) / (N - 1));
+        // A gentle pull toward its share of the line from the squid to the club, so it unfurls without kinks.
+        const u = i / (N - 1);
+        const pull = Math.min(0.6, (g.t < g.reach ? 0.45 : 0.22) * f);
+        g.x[i] += vx + (nx / nl) * ripple + (bx + (tx - bx) * u - g.x[i]) * pull;
+        g.y[i] += vy + (ny / nl) * ripple + (by + (ty - by) * u - g.y[i]) * pull;
       }
       for (let k = 0; k < 4; k++) {
         for (let i = 0; i < N - 1; i++) {
@@ -338,6 +346,7 @@ export class Grabs {
   clear() {
     for (const g of this.list) {
       g.tile.remove();
+      delete g.row.dataset.grabbing;
       this.host.away(g.rank, false);
     }
     this.list = [];

@@ -170,7 +170,7 @@ export function startOcean(els: OceanEls): Ocean {
 
   /** Reduced motion: the squid rests in the lower right, upright, limbs at rest, over a still scene. */
   function park() {
-    swimmer.x = vw * 0.8;
+    swimmer.x = vw * (vw >= 700 ? 0.8 : 0.5);
     // Wide screens: in the open water beside the column. Phones: low, behind the clearer glass round the guess box.
     swimmer.y = vw >= 700 ? Math.min(vh * 0.55, world().floor(vw * 0.8) - SQUID_H * px) : vh - SQUID_H * px * 1.15;
     swimmer.tilt = 0;
