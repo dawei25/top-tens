@@ -173,7 +173,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   if (error) {
     return (
       <main className="screen game">
-        <section className="panel error">
+        <section data-glass className="panel error">
           <p className="label pink">Error</p>
           <p>{error}</p>
           <button className="key" onClick={onHome}>
@@ -315,10 +315,24 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     return blitzAvailable(puzzle, schedule, today, sv);
   })();
 
+  const missChips = misses.length > 0 && (
+    <section className="misses" aria-label="Wrong guesses" data-glass>
+      <span className="label">Misses</span>
+      {misses.map((m) => (
+        <span key={m.key} className="miss-chip">
+          {m.rank ? <b>#{m.rank}</b> : null} {m.name}
+        </span>
+      ))}
+    </section>
+  );
+
   return (
-    <main className={`screen game status-${game.status}`}>
-      <ScreenHead onBack={onBack} onHome={onHome}>
-        <span className="label mode">{mode}</span>
+    <main className={`screen game stage status-${game.status}`}>
+      {/* The stage: the board in a column on the left on wide screens, the guess box floating in the open water
+          beside it. Narrower, both wrappers dissolve (display: contents) into one centered column. */}
+      <div className="board-col">
+        <ScreenHead onBack={onBack} onHome={onHome}>
+          <span className="label mode">{mode}</span>
           <div
             key={lostLife?.key}
             className={`lives ${lostLife ? "lives-hit" : ""}`}
@@ -331,288 +345,287 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               <InkSac key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
             ))}
           </div>
-      </ScreenHead>
+        </ScreenHead>
 
-      <section className="panel prompt">
-        <div className="prompt-top">
-          <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-          {blitzOpen && !over && (
-            <a className="key key-xs key-blitz-sm" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
-              Blitz
-            </a>
-          )}
-          <span className="count" aria-label={`${game.found.length} of 10 found`}>
-            <b>{game.found.length}</b>/10
-          </span>
-        </div>
-        <h1>{puzzle.title}</h1>
-        <p className="caption">{puzzle.prompt}</p>
-        <p className="asof">
-          <a href={puzzle.source.url} target="_blank" rel="noreferrer">
-            {sourceSite(puzzle.source.name)}
-          </a>
-          , {asOf}
-        </p>
-      </section>
-
-      <section className="panel board" aria-label="Top 10">
-        <div className="board-head" aria-hidden="true">
-          <span>Rank</span>
-          <span className="slot-body">
-            <span>Name</span>
-            <span className="board-metric">{puzzle.metric ?? "Value"}</span>
-          </span>
-        </div>
-        <ol className="slots">
-          {puzzle.answers.map((a) => {
-            const found = game.found.includes(a.rank);
-            const revealed = found || over;
-            const just = found && lastFound === a.rank;
-            const missIdx = missedRanks.indexOf(a.rank);
-            const revealDelay = !found && endedHere ? missIdx * REVEAL_STEP : 0;
-            const typing = animate && (just || (!found && endedHere));
-            const fact = revealed ? a.fact : undefined;
-            const open = !!fact && openFacts.has(a.rank);
-            const hinted = !revealed && hints.includes(a.rank);
-            const hintable = !revealed && !hinted;
-            const asking = hintable && hintAsk === a.rank;
-            return (
-              <li
-                key={a.rank}
-                data-testid="slot"
-                data-rank={a.rank}
-                data-state={found ? "found" : revealed ? "missed" : hinted ? "hinted" : "hidden"}
-                className={[
-                  "slot",
-                  found ? "found" : revealed ? "missed" : "hidden",
-                  a.rank === 1 ? "top" : "",
-                  just ? "just" : "",
-                  !found && endedHere ? "late" : "",
-                  fact ? "has-fact" : "",
-                  open ? "fact-open" : "",
-                  hintable ? "hintable" : "",
-                  hinted ? "hinted" : "",
-                  asking ? "asking" : "",
-                ].join(" ")}
-                style={{ "--d": `${revealDelay}ms` } as CSSProperties}
-                data-hint-rank={revealed ? undefined : a.rank}
-                {...(hintable && {
-                  onClick: () => setHintAsk((r) => (r === a.rank ? null : a.rank)),
-                  // Same as facts: a click or tap here leaves the guess box focused (and the phone keyboard up).
-                  onMouseDown: (e: React.MouseEvent) => e.preventDefault(),
-                })}
-                {...(fact && {
-                  onClick: () => toggleFact(a.rank),
-                  // Keep focus where it is (the guess box during play), so opening a fact never costs a keystroke.
-                  onMouseDown: (e: React.MouseEvent) => e.preventDefault(),
-                  // Hover is pure CSS; this only arms it once the mouse actually moves here (see index.css), and
-                  // touches the DOM directly so hovering never re-renders the board.
-                  onPointerMove: (e: React.PointerEvent<HTMLLIElement>) => {
-                    const el = e.currentTarget;
-                    if (e.pointerType === "mouse" && !("hover" in el.dataset)) el.dataset.hover = "";
-                  },
-                })}
-              >
-                <span className="rank">{ordinal(a.rank)}</span>
-                <span className="slot-body">
-                  <span className="name">
-                    {revealed ? (
-                      fact ? (
-                        // The name itself is the keyboard toggle; the row draws its focus ring.
-                        <button type="button" className="name-toggle" aria-expanded={open} aria-controls={`fact-${a.rank}`}>
-                          <TypeIn text={a.name} animate={typing} delay={revealDelay} />
-                        </button>
-                      ) : (
-                        <TypeIn text={a.name} animate={typing} delay={revealDelay} />
-                      )
-                    ) : hinted ? (
-                      <span className="blank" aria-label={`not found yet, starts with ${hintLetter(a.name)}`}>
-                        <b className="hint-letter" data-testid="hint-letter">{hintLetter(a.name)}</b> . . . . . . .
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        className="blank-toggle"
-                        data-testid="hint-open"
-                        aria-label={`Not found yet. Hint for #${a.rank}`}
-                        aria-expanded={asking}
-                      >
-                        <span className="blank" aria-hidden="true">
-                          . . . . . . . .
-                        </span>
-                      </button>
-                    )}
-                  </span>
-                  {revealed && a.value && <span className="value">{a.value}</span>}
-                </span>
-                {asking && (
-                  <div className="hint-ask">
-                    {canHint(game, a.rank) ? (
-                      <>
-                        <span>hint: first letter? costs 1 life</span>
-                        <button
-                          ref={yesRef}
-                          data-testid="hint-yes"
-                          type="button"
-                          className="key key-xs key-gold"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            takeHint(a.rank);
-                          }}
-                        >
-                          Yes
-                        </button>
-                      </>
-                    ) : (
-                      <span role="status" data-testid="hint-refused">no hints on your last life</span>
-                    )}
-                  </div>
-                )}
-                {/* Always in the DOM once revealed, so desktop hover is pure CSS (no re-render); hidden until opened or hovered. */}
-                {fact && (
-                  <p className="fact" id={`fact-${a.rank}`}>
-                    {fact.text}
-                  </p>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-        {/* Board actions sit under the board: GIVE UP while playing, the facts toggle once it's over. */}
-        {!over ? (
-          <div className="board-foot">
-            <button
-              type="button"
-              className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
-              onClick={quit}
-              data-testid="give-up"
-              onBlur={() => setConfirmQuit(false)}
-            >
-              {confirmQuit ? "Sure?" : "Give up"}
-            </button>
-          </div>
-        ) : (
-          factRanks.length > 0 && (
-            <div className="board-foot">
-              <button
-                type="button"
-                className="fact-all"
-                aria-pressed={allFactsOpen}
-                onClick={() => setOpenFacts(allFactsOpen ? new Set() : new Set(factRanks))}
-              >
-                {allFactsOpen ? "hide facts" : "show all facts"}
-              </button>
-            </div>
-          )
-        )}
-      </section>
-
-      {misses.length > 0 && (
-        <section className="misses" aria-label="Wrong guesses">
-          <span className="label">Misses</span>
-          {misses.map((m) => (
-            <span key={m.key} className="miss-chip">
-              {m.rank ? <b>#{m.rank}</b> : null} {m.name}
-            </span>
-          ))}
-        </section>
-      )}
-
-      {!over ? (
-        <form className="guess" onSubmit={submit}>
-          <div className="feedback-line">
-            {feedback ? (
-              <div key={feedback.key} className={`feedback ${feedback.tone}`} role="status" data-testid="feedback" data-tone={feedback.tone}>
-                <span>{feedback.text}</span>
-                {feedback.suggestions?.map((s) => (
-                  <button key={s} type="button" className="suggestion" data-testid="suggestion" onClick={() => fill(s)}>
-                    {s}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="feedback hint">type a name, press enter. typos are free.</p>
-            )}
-          </div>
-          <div key={shake.n} className={`guess-row ${shake.n ? "shake" : ""} ${shake.hit ? "hit" : ""}`}>
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="type a guess..."
-              autoFocus
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              enterKeyHint="send"
-              aria-label="Your guess"
-            />
-            <button className="key key-pink" type="submit" data-testid="guess-submit" disabled={!input.trim()}>
-              Guess
-            </button>
-          </div>
-        </form>
-      ) : (
-        <section
-          ref={resultsRef}
-          data-testid="results"
-          className={`panel results ${endedHere ? "enter" : ""}`}
-          style={{ "--d": `${resultsDelay}ms` } as CSSProperties}
-          aria-live="polite"
-        >
-          <ResultsSquid found={game.found} status={game.status} cheerAt={endedHere ? resultsDelay + 550 : undefined} />
-          <p className={`label ${game.status === "won" ? "gold" : "pink"}`} data-motion={game.status === "gave-up" ? undefined : "banner"}>
-            {game.status === "won" ? "Perfect 10" : game.status === "gave-up" ? "Gave up" : "Game over"}
-          </p>
-          <p className="score" data-testid="score" data-found={game.found.length} aria-label={`${game.found.length} out of 10`}>
-            <span className={`score-n ${game.status === "won" ? "gold" : ""}`}><CountUp value={game.found.length} /></span>
-            <span className="score-of">/10</span>
-          </p>
-          <p className="caption">
-            {game.status === "won"
-              ? `with ${game.lives} ${game.lives === 1 ? "life" : "lives"} to spare.`
-              : game.status === "gave-up"
-                ? "you gave up. the full list is above."
-                : "out of lives. the full list is above."}
-          </p>
-          {(dailyStreak || hints.length > 0) && (
-            <div className="results-meta">
-              {hints.length > 0 && <p>hints used: {hints.length}</p>}
-              {dailyStreak && (
-                <p>
-                  streak <b className="pink">{dailyStreak.current}</b> · best <b>{dailyStreak.best}</b>
-                </p>
-              )}
-              {daily && <Countdown />}
-            </div>
-          )}
-          <div className="results-actions">
-            <button ref={shareRef} className="key key-pink" onClick={share}>
-              {copied ? "Copied" : "Share"}
-            </button>
-            {blitzOpen && (
-              <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`}>
+        <section className="panel prompt" data-glass>
+          <div className="prompt-top">
+            <span className="label cyan">{meta?.category ?? "Top 10"}</span>
+            {blitzOpen && !over && (
+              <a className="key key-xs key-blitz-sm" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
                 Blitz
               </a>
             )}
-            <button className="key" data-testid="play-again" onClick={playAgain}>
-              Play again
-            </button>
-            <button className="key" onClick={onRoll}>
-              Roll another
-            </button>
+            <span className="count" aria-label={`${game.found.length} of 10 found`}>
+              <b>{game.found.length}</b>/10
+            </span>
           </div>
-          <p className="source">
-            {puzzle.metric && <>ranked by {puzzle.metric.toLowerCase()}. </>}
-            source:{" "}
+          <h1>{puzzle.title}</h1>
+          <p className="caption">{puzzle.prompt}</p>
+          <p className="asof">
             <a href={puzzle.source.url} target="_blank" rel="noreferrer">
-              {puzzle.source.name}
+              {sourceSite(puzzle.source.name)}
             </a>
-            , {asOf}.
+            , {asOf}
           </p>
         </section>
-      )}
+
+        <section className="panel board" aria-label="Top 10" data-glass>
+          <div className="board-head" aria-hidden="true">
+            <span>Rank</span>
+            <span className="slot-body">
+              <span>Name</span>
+              <span className="board-metric">{puzzle.metric ?? "Value"}</span>
+            </span>
+          </div>
+          <ol className="slots">
+            {puzzle.answers.map((a) => {
+              const found = game.found.includes(a.rank);
+              const revealed = found || over;
+              const just = found && lastFound === a.rank;
+              const missIdx = missedRanks.indexOf(a.rank);
+              const revealDelay = !found && endedHere ? missIdx * REVEAL_STEP : 0;
+              const typing = animate && (just || (!found && endedHere));
+              const fact = revealed ? a.fact : undefined;
+              const open = !!fact && openFacts.has(a.rank);
+              const hinted = !revealed && hints.includes(a.rank);
+              const hintable = !revealed && !hinted;
+              const asking = hintable && hintAsk === a.rank;
+              return (
+                <li
+                  key={a.rank}
+                  data-testid="slot"
+                  data-rank={a.rank}
+                  data-state={found ? "found" : revealed ? "missed" : hinted ? "hinted" : "hidden"}
+                  className={[
+                    "slot",
+                    found ? "found" : revealed ? "missed" : "hidden",
+                    a.rank === 1 ? "top" : "",
+                    just ? "just" : "",
+                    !found && endedHere ? "late" : "",
+                    fact ? "has-fact" : "",
+                    open ? "fact-open" : "",
+                    hintable ? "hintable" : "",
+                    hinted ? "hinted" : "",
+                    asking ? "asking" : "",
+                  ].join(" ")}
+                  style={{ "--d": `${revealDelay}ms` } as CSSProperties}
+                  data-hint-rank={revealed ? undefined : a.rank}
+                  {...(hintable && {
+                    onClick: () => setHintAsk((r) => (r === a.rank ? null : a.rank)),
+                    // Same as facts: a click or tap here leaves the guess box focused (and the phone keyboard up).
+                    onMouseDown: (e: React.MouseEvent) => e.preventDefault(),
+                  })}
+                  {...(fact && {
+                    onClick: () => toggleFact(a.rank),
+                    // Keep focus where it is (the guess box during play), so opening a fact never costs a keystroke.
+                    onMouseDown: (e: React.MouseEvent) => e.preventDefault(),
+                    // Hover is pure CSS; this only arms it once the mouse actually moves here (see index.css), and
+                    // touches the DOM directly so hovering never re-renders the board.
+                    onPointerMove: (e: React.PointerEvent<HTMLLIElement>) => {
+                      const el = e.currentTarget;
+                      if (e.pointerType === "mouse" && !("hover" in el.dataset)) el.dataset.hover = "";
+                    },
+                  })}
+                >
+                  <span className="rank">{ordinal(a.rank)}</span>
+                  <span className="slot-body">
+                    <span className="name">
+                      {revealed ? (
+                        fact ? (
+                          // The name itself is the keyboard toggle; the row draws its focus ring.
+                          <button type="button" className="name-toggle" aria-expanded={open} aria-controls={`fact-${a.rank}`}>
+                            <TypeIn text={a.name} animate={typing} delay={revealDelay} />
+                          </button>
+                        ) : (
+                          <TypeIn text={a.name} animate={typing} delay={revealDelay} />
+                        )
+                      ) : hinted ? (
+                        <span className="blank" aria-label={`not found yet, starts with ${hintLetter(a.name)}`}>
+                          <b className="hint-letter" data-testid="hint-letter">{hintLetter(a.name)}</b> . . . . . . .
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className="blank-toggle"
+                          data-testid="hint-open"
+                          aria-label={`Not found yet. Hint for #${a.rank}`}
+                          aria-expanded={asking}
+                        >
+                          <span className="blank" aria-hidden="true">
+                            . . . . . . . .
+                          </span>
+                        </button>
+                      )}
+                    </span>
+                    {revealed && a.value && <span className="value">{a.value}</span>}
+                  </span>
+                  {asking && (
+                    <div className="hint-ask">
+                      {canHint(game, a.rank) ? (
+                        <>
+                          <span>hint: first letter? costs 1 life</span>
+                          <button
+                            ref={yesRef}
+                            data-testid="hint-yes"
+                            type="button"
+                            className="key key-xs key-gold"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              takeHint(a.rank);
+                            }}
+                          >
+                            Yes
+                          </button>
+                        </>
+                      ) : (
+                        <span role="status" data-testid="hint-refused">no hints on your last life</span>
+                      )}
+                    </div>
+                  )}
+                  {/* Always in the DOM once revealed, so desktop hover is pure CSS (no re-render); hidden until opened or hovered. */}
+                  {fact && (
+                    <p className="fact" id={`fact-${a.rank}`}>
+                      {fact.text}
+                    </p>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+          {/* Board actions sit under the board: GIVE UP while playing, the facts toggle once it's over. */}
+          {!over ? (
+            <div className="board-foot">
+              <button
+                type="button"
+                className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
+                onClick={quit}
+                data-testid="give-up"
+                onBlur={() => setConfirmQuit(false)}
+              >
+                {confirmQuit ? "Sure?" : "Give up"}
+              </button>
+            </div>
+          ) : (
+            factRanks.length > 0 && (
+              <div className="board-foot">
+                <button
+                  type="button"
+                  className="fact-all"
+                  aria-pressed={allFactsOpen}
+                  onClick={() => setOpenFacts(allFactsOpen ? new Set() : new Set(factRanks))}
+                >
+                  {allFactsOpen ? "hide facts" : "show all facts"}
+                </button>
+              </div>
+            )
+          )}
+        </section>
+      </div>
+
+      <div className="water">
+        {!over ? (
+          <div className="dock-wrap">
+            {missChips}
+            <form className="guess" onSubmit={submit} data-guess-dock data-glass>
+              <div className="feedback-line">
+                {feedback ? (
+                  <div key={feedback.key} className={`feedback ${feedback.tone}`} role="status" data-testid="feedback" data-tone={feedback.tone}>
+                    <span>{feedback.text}</span>
+                    {feedback.suggestions?.map((s) => (
+                      <button key={s} type="button" className="suggestion" data-testid="suggestion" onClick={() => fill(s)}>
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="feedback hint">type a name, press enter. typos are free.</p>
+                )}
+              </div>
+              <div key={shake.n} className={`guess-row ${shake.n ? "shake" : ""} ${shake.hit ? "hit" : ""}`}>
+                <input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="type a guess..."
+                  autoFocus
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  enterKeyHint="send"
+                  aria-label="Your guess"
+                />
+                <button className="key key-pink" type="submit" data-testid="guess-submit" disabled={!input.trim()}>
+                  Guess
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <>
+            {missChips}
+            <section
+              ref={resultsRef}
+              data-testid="results"
+              className={`panel results ${endedHere ? "enter" : ""}`}
+              style={{ "--d": `${resultsDelay}ms` } as CSSProperties}
+              aria-live="polite"
+              data-glass
+            >
+              <ResultsSquid found={game.found} status={game.status} cheerAt={endedHere ? resultsDelay + 550 : undefined} />
+              <p className={`label ${game.status === "won" ? "gold" : "pink"}`} data-motion={game.status === "gave-up" ? undefined : "banner"}>
+                {game.status === "won" ? "Perfect 10" : game.status === "gave-up" ? "Gave up" : "Game over"}
+              </p>
+              <p className="score" data-testid="score" data-found={game.found.length} aria-label={`${game.found.length} out of 10`}>
+                <span className={`score-n ${game.status === "won" ? "gold" : ""}`}><CountUp value={game.found.length} /></span>
+                <span className="score-of">/10</span>
+              </p>
+              <p className="caption">
+                {game.status === "won"
+                  ? `with ${game.lives} ${game.lives === 1 ? "life" : "lives"} to spare.`
+                  : game.status === "gave-up"
+                    ? "you gave up. the full list is above."
+                    : "out of lives. the full list is above."}
+              </p>
+              {(dailyStreak || hints.length > 0) && (
+                <div className="results-meta">
+                  {hints.length > 0 && <p>hints used: {hints.length}</p>}
+                  {dailyStreak && (
+                    <p>
+                      streak <b className="pink">{dailyStreak.current}</b> · best <b>{dailyStreak.best}</b>
+                    </p>
+                  )}
+                  {daily && <Countdown />}
+                </div>
+              )}
+              <div className="results-actions">
+                <button ref={shareRef} className="key key-pink" onClick={share}>
+                  {copied ? "Copied" : "Share"}
+                </button>
+                {blitzOpen && (
+                  <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`}>
+                    Blitz
+                  </a>
+                )}
+                <button className="key" data-testid="play-again" onClick={playAgain}>
+                  Play again
+                </button>
+                <button className="key" onClick={onRoll}>
+                  Roll another
+                </button>
+              </div>
+              <p className="source">
+                {puzzle.metric && <>ranked by {puzzle.metric.toLowerCase()}. </>}
+                source:{" "}
+                <a href={puzzle.source.url} target="_blank" rel="noreferrer">
+                  {puzzle.source.name}
+                </a>
+                , {asOf}.
+              </p>
+            </section>
+          </>
+        )}
+      </div>
       <SquidFx />
       <ClassicSquid found={game.found} status={game.status} />
     </main>

@@ -125,7 +125,7 @@ function HitRow({ points, name, value }: { points: string; name: string; value?:
 function RoundLists({ puzzle, hits, byName }: { puzzle: Puzzle; hits: BlitzHit[]; byName: Map<string, Entry> }) {
   return (
     <>
-      <section className="panel blitz-list" aria-labelledby="blitz-got">
+      <section className="panel blitz-list" aria-labelledby="blitz-got" data-glass>
         <h2 id="blitz-got" className="label cyan">
           Your answers
         </h2>
@@ -141,7 +141,7 @@ function RoundLists({ puzzle, hits, byName }: { puzzle: Puzzle; hits: BlitzHit[]
           <p className="caption">none this time.</p>
         )}
       </section>
-      <section className="panel blitz-list missed" aria-labelledby="blitz-missed">
+      <section className="panel blitz-list missed" aria-labelledby="blitz-missed" data-glass>
         <h2 id="blitz-missed" className="label">
           Biggest you missed
         </h2>
@@ -172,7 +172,7 @@ function PastRuns({
   if (!runs.length) return null;
   const bestAt = runs.find((r) => r.score === best)?.startedAt;
   return (
-    <details className="panel blitz-runs" data-testid="past-runs" open={open} onToggle={(e) => onToggle(e.currentTarget.open)}>
+    <details className="panel blitz-runs" data-testid="past-runs" data-glass open={open} onToggle={(e) => onToggle(e.currentTarget.open)}>
       <summary data-testid="past-runs-toggle">
         <span className="label">Past runs</span>
         <span className="caption">
@@ -290,7 +290,7 @@ export function Blitz({
   if (error) {
     return (
       <main className="screen game">
-        <section className="panel error">
+        <section data-glass className="panel error">
           <p className="label pink">Error</p>
           <p>{error}</p>
           <button className="key" onClick={onHome}>
@@ -307,7 +307,7 @@ export function Blitz({
     const why = refusal(puzzle, schedule, today);
     return (
       <main className="screen game">
-        <section className="panel error blitz-closed" data-testid="blitz-closed">
+        <section data-glass className="panel error blitz-closed" data-testid="blitz-closed">
           <p className="label gold">Blitz closed</p>
           <h1 className="blitz-closed-title">{puzzle.title}</h1>
           <p>{why.text}</p>
@@ -398,37 +398,38 @@ export function Blitz({
   const pastRuns = <PastRuns runs={runs} best={best} open={runsOpen} onToggle={setRunsOpen} onOpen={openRun} />;
   const viewRun = openAt ? runs.find((r) => r.startedAt === openAt) : undefined;
 
-  let body: React.ReactNode;
+  // The stage (see Game): the board side holds the lists, the water side the clock, score and guess box while
+  // playing, and the result card after. Narrower, it all stacks; "lead" items come up right after the title there.
+  let board: React.ReactNode;
+  let water: React.ReactNode;
   if (viewRun) {
     const isBest = viewRun.score === best;
     const k = viewRun.hits.length;
-    body = (
-      <>
-        <section className="panel results" data-testid="run-view" aria-live="polite">
-          <p className="label gold">Past run · {runTime(viewRun.startedAt)}</p>
-          <p className="score" aria-label={`${viewRun.score} points`}>
-            <span className={`score-n ${isBest ? "gold" : ""}`}>{viewRun.score}</span>
-            <span className="score-of">pts</span>
+    water = (
+      <section className="panel results lead" data-testid="run-view" aria-live="polite" data-glass>
+        <p className="label gold">Past run · {runTime(viewRun.startedAt)}</p>
+        <p className="score" aria-label={`${viewRun.score} points`}>
+          <span className={`score-n ${isBest ? "gold" : ""}`}>{viewRun.score}</span>
+          <span className="score-of">pts</span>
+        </p>
+        <div className="results-meta">
+          <p>
+            <b>{k}</b> answer{k === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
           </p>
-          <div className="results-meta">
-            <p>
-              <b>{k}</b> answer{k === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
-            </p>
-            {isBest && <p className="gold">best on this list</p>}
-          </div>
-          <div className="results-actions">
-            <button className="key" onClick={onBack} autoFocus>
-              Back
-            </button>
-          </div>
-        </section>
-        <RoundLists puzzle={puzzle} hits={viewRun.hits} byName={byName} />
-      </>
+          {isBest && <p className="gold">best on this list</p>}
+        </div>
+        <div className="results-actions">
+          <button className="key" onClick={onBack} autoFocus>
+            Back
+          </button>
+        </div>
+      </section>
     );
+    board = <RoundLists puzzle={puzzle} hits={viewRun.hits} byName={byName} />;
   } else if (!over) {
-    body = (
-      <>
-        <section className="panel blitz-meter" aria-label="Clock and score">
+    water = (
+      <div className="dock-wrap">
+        <section className="panel blitz-meter lead" aria-label="Clock and score" data-glass>
           <div className="blitz-meter-cell">
             <span className="label">Time</span>
             <Clock state={state} onExpire={expire} />
@@ -446,19 +447,13 @@ export function Blitz({
           </div>
         </section>
 
-        {note === "resumed" && <p className="blitz-note caption" data-testid="blitz-note">resumed. the clock kept running while you were away.</p>}
-
-        {hits.length > 0 && (
-          <ol className="panel blitz-hits" aria-label="Your answers, newest first">
-            {hits.map((h) => (
-              <HitRow key={h.name} points={`+${h.points}`} name={h.name} value={byName.get(h.name)?.value} />
-            ))}
-          </ol>
+        {note === "resumed" && (
+          <p className="blitz-note caption lead" data-testid="blitz-note" data-glass>
+            resumed. the clock kept running while you were away.
+          </p>
         )}
 
-        {!state.startedAt && pastRuns}
-
-        <form className="guess" onSubmit={submit}>
+        <form className="guess" onSubmit={submit} data-guess-dock data-glass>
           <div className="feedback-line">
             {feedback ? (
               <div key={feedback.key} className={`feedback ${feedback.tone}`} role="status">
@@ -492,58 +487,72 @@ export function Blitz({
             </button>
           </div>
         </form>
+      </div>
+    );
+    board = (
+      <>
+        {hits.length > 0 && (
+          <ol className="panel blitz-hits" aria-label="Your answers, newest first" data-glass>
+            {hits.map((h) => (
+              <HitRow key={h.name} points={`+${h.points}`} name={h.name} value={byName.get(h.name)?.value} />
+            ))}
+          </ol>
+        )}
+        {!state.startedAt && pastRuns}
       </>
     );
   } else {
-    body = (
-      <>
-        <section className="panel results enter" data-testid="blitz-results" aria-live="polite">
-          <BlitzResultsSquid hits={state.hits} best={!!record?.best && score > 0 && record.previous !== undefined} />
-          <p className="label gold" data-motion="banner">Time's up</p>
-          {note === "away" && <p className="caption">time ran out while you were away.</p>}
-          <p className="score" aria-label={`${score} points`}>
-            <span className={`score-n ${record?.best && score > 0 ? "gold" : ""}`} data-testid="blitz-final">
-              <CountUp value={score} />
-            </span>
-            <span className="score-of">pts</span>
+    water = (
+      <section className="panel results enter lead" data-testid="blitz-results" aria-live="polite" data-glass>
+        <BlitzResultsSquid hits={state.hits} best={!!record?.best && score > 0 && record.previous !== undefined} />
+        <p className="label gold" data-motion="banner">Time's up</p>
+        {note === "away" && <p className="caption">time ran out while you were away.</p>}
+        <p className="score" aria-label={`${score} points`}>
+          <span className={`score-n ${record?.best && score > 0 ? "gold" : ""}`} data-testid="blitz-final">
+            <CountUp value={score} />
+          </span>
+          <span className="score-of">pts</span>
+        </p>
+        <div className="results-meta">
+          <p>
+            <b>{n}</b> answer{n === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
           </p>
-          <div className="results-meta">
-            <p>
-              <b>{n}</b> answer{n === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
-            </p>
-            {record?.daily &&
-              (record.daily.counted ? (
-                <p className="gold" data-testid="daily-blitz-line" data-counted="true">
-                  today's blitz: <b>{record.daily.score}</b>
-                </p>
-              ) : (
-                <p data-testid="daily-blitz-line" data-counted="false">
-                  replay: today's score stays <b>{record.daily.score}</b>
-                </p>
-              ))}
-            {record &&
-              (record.best && score > 0 ? (
-                <p className="gold" data-motion="banner">
-                  new best on this list{record.previous !== undefined ? ` (was ${record.previous})` : ""}
-                </p>
-              ) : (
-                <p>
-                  best on this list: <b>{record.previous ?? score}</b>
-                </p>
-              ))}
-          </div>
-          <div className="results-actions">
-            <button className="key key-gold" onClick={share}>
-              {copied ? "Copied" : "Share"}
-            </button>
-            <button className="key" data-testid="blitz-again" onClick={again} autoFocus>
-              Play again
-            </button>
-            <a className="key" href={`#p-${puzzle.id}`}>
-              The list
-            </a>
-          </div>
-        </section>
+          {record?.daily &&
+            (record.daily.counted ? (
+              <p className="gold" data-testid="daily-blitz-line" data-counted="true">
+                today's blitz: <b>{record.daily.score}</b>
+              </p>
+            ) : (
+              <p data-testid="daily-blitz-line" data-counted="false">
+                replay: today's score stays <b>{record.daily.score}</b>
+              </p>
+            ))}
+          {record &&
+            (record.best && score > 0 ? (
+              <p className="gold" data-motion="banner">
+                new best on this list{record.previous !== undefined ? ` (was ${record.previous})` : ""}
+              </p>
+            ) : (
+              <p>
+                best on this list: <b>{record.previous ?? score}</b>
+              </p>
+            ))}
+        </div>
+        <div className="results-actions">
+          <button className="key key-gold" onClick={share}>
+            {copied ? "Copied" : "Share"}
+          </button>
+          <button className="key" data-testid="blitz-again" onClick={again} autoFocus>
+            Play again
+          </button>
+          <a className="key" href={`#p-${puzzle.id}`}>
+            The list
+          </a>
+        </div>
+      </section>
+    );
+    board = (
+      <>
         <RoundLists puzzle={puzzle} hits={state.hits} byName={byName} />
         {pastRuns}
       </>
@@ -551,25 +560,28 @@ export function Blitz({
   }
 
   return (
-    <main className={`screen game blitz ${over ? "blitz-over" : ""}`} data-testid="blitz-screen" data-list={puzzle.id}>
-      <ScreenHead onBack={onBack} onHome={onHome}>
-        <span className="label mode gold">
-          {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
-        </span>
-      </ScreenHead>
+    <main className={`screen game blitz stage ${over ? "blitz-over" : ""}`} data-testid="blitz-screen" data-list={puzzle.id}>
+      <div className="board-col">
+        <ScreenHead onBack={onBack} onHome={onHome}>
+          <span className="label mode gold">
+            {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
+          </span>
+        </ScreenHead>
 
-      <section className="panel prompt">
-        <div className="prompt-top">
-          <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-          <ModeTag mode="blitz" />
-        </div>
-        <h1>{puzzle.title}</h1>
-        <p className="caption">
-          name as many as you can. scored by {(puzzle.metric ?? "the number").toLowerCase()}: bigger is better.
-        </p>
-      </section>
+        <section className="panel prompt" data-glass>
+          <div className="prompt-top">
+            <span className="label cyan">{meta?.category ?? "Top 10"}</span>
+            <ModeTag mode="blitz" />
+          </div>
+          <h1>{puzzle.title}</h1>
+          <p className="caption">
+            name as many as you can. scored by {(puzzle.metric ?? "the number").toLowerCase()}: bigger is better.
+          </p>
+        </section>
 
-      {body}
+        {board}
+      </div>
+      <div className="water">{water}</div>
       <BlitzSquid hits={viewRun ? viewRun.hits : state.hits} />
     </main>
   );
