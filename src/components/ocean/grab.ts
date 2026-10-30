@@ -268,14 +268,14 @@ export class Grabs {
       const nl = Math.hypot(nx, ny) || 1;
       const f = Math.min(3, dt * 30);
       for (let i = 1; i < N - 1; i++) {
-        const vx = (g.x[i] - g.ox[i]) * 0.8;
-        const vy = (g.y[i] - g.oy[i]) * 0.8;
+        const vx = (g.x[i] - g.ox[i]) * 0.55;
+        const vy = (g.y[i] - g.oy[i]) * 0.55;
         g.ox[i] = g.x[i];
         g.oy[i] = g.y[i];
         const ripple = Math.sin(now * 0.016 - i * 0.7) * 0.25 * f * Math.sin((Math.PI * i) / (N - 1));
         // A gentle pull toward its share of the line from the squid to the club, so it unfurls without kinks.
         const u = i / (N - 1);
-        const pull = Math.min(0.6, (g.t < g.reach ? 0.45 : 0.22) * f);
+        const pull = Math.min(0.6, (g.t < g.reach ? 0.45 : 0.3) * f);
         g.x[i] += vx + (nx / nl) * ripple + (bx + (tx - bx) * u - g.x[i]) * pull;
         g.y[i] += vy + (ny / nl) * ripple + (by + (ty - by) * u - g.y[i]) * pull;
       }
