@@ -43,13 +43,13 @@ export function History({ index, schedule, entry, onBack, onHome }: Props) {
         <span className="label mode">Past runs</span>
       </ScreenHead>
 
-      <section className="panel prompt">
+      <section data-glass className="panel prompt">
         <h1>Past runs</h1>
         <p className="caption">everything you've finished, newest first.</p>
       </section>
 
       {plays.length ? (
-        <ol className="panel arch-list">
+        <ol data-glass className="panel arch-list">
           {plays.map((p) => {
             const r = result(p);
             const [date, time] = runTime(p.at).split(", ");
@@ -73,7 +73,7 @@ export function History({ index, schedule, entry, onBack, onHome }: Props) {
           })}
         </ol>
       ) : (
-        <section className="panel error">
+        <section data-glass className="panel error">
           <p>nothing played yet.</p>
           {entry && (
             <a className="key key-pink" href={`#daily-${entry.date}`}>

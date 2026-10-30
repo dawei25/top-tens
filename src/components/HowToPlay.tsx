@@ -18,7 +18,7 @@ export function HowToPlay({ onClose, scroll }: { onClose: () => void; scroll?: b
     onClose();
   };
   return (
-    <section ref={ref} className="panel howto" aria-labelledby="howto-title">
+    <section ref={ref} data-glass className="panel howto" aria-labelledby="howto-title">
       <div className="panel-head">
         <h2 id="howto-title" className="label">
           How to play

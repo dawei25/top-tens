@@ -552,6 +552,28 @@ a {
   flex-wrap: wrap;
   gap: 12px;
 }
+/* Free play and Your games: stacked on phones; from 700px side by side (about 65/35), tops and heights aligned,
+   Your games' two keys stacked in its column. */
+.home-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+@media (min-width: 700px) {
+  .home-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 65fr) minmax(0, 35fr);
+    /* The cards reach 10px into the gap on each side (see .home-group): 16px of ocean shows between them. */
+    column-gap: 36px;
+  }
+  .games-group .games-row {
+    flex-direction: column;
+  }
+  .games-group .games-key {
+    justify-content: space-between;
+    min-height: 52px;
+  }
+}
 .games-key {
   gap: 10px;
 }
@@ -658,8 +680,103 @@ a {
 
 /* ---------- Game ---------- */
 .game {
+  /* How far the floating guess box stays off the bottom edge; the screen ends with the same room, so the box
+     settles in place at the end of the scroll and never covers the board. */
+  --dock-gap: max(10px, env(safe-area-inset-bottom));
   gap: 14px;
-  padding-bottom: 0;
+  padding-bottom: var(--dock-gap);
+  /* A short screen (a Blitz round just begun) still puts the box at the bottom edge, in thumb reach. */
+  min-height: 100dvh;
+}
+@media (min-width: 700px) {
+  .game {
+    --dock-gap: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+/*
+ * The stage (classic and Blitz). Wide screens (1100px and up): the header, the title card and the board in a column
+ * on the left, 45% of the width (460 to 680px); the rest is open water for the ocean. The guess box floats in it,
+ * centred a third of the way in, its top at about 54% of the viewport height (level with the lower half of the
+ * board), and stays put while the page scrolls. Blitz floats its clock and score with the box. Narrower, the two
+ * wrappers dissolve into the one centred column; "lead" items (Blitz's clock, its result card) come right after the
+ * title card there.
+ */
+@media (min-width: 1100px) {
+  .stage {
+    --board-w: clamp(460px, 45%, 680px);
+    --dock-w: 420px;
+    --dock-top: clamp(120px, 54vh, 100vh - 300px);
+    max-width: 1600px;
+    display: grid;
+    grid-template-columns: var(--board-w) minmax(0, 1fr);
+    gap: 0;
+    padding-top: 24px;
+    padding-bottom: 32px;
+    padding-left: max(32px, env(safe-area-inset-left));
+    padding-right: max(32px, env(safe-area-inset-right));
+  }
+  .blitz.stage {
+    /* The clock and score sit above the box: lift the group so the box lands where it does in classic. */
+    --dock-top: clamp(100px, 54vh - 150px, 100vh - 440px);
+  }
+  .board-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+  }
+  .water {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    min-width: 0;
+    /* A percentage here is of the open water's width: the box's centre a third of the way in, never nearer the
+       board than 32px. */
+    padding-left: max(32px, calc(100% / 3 - var(--dock-w) / 2));
+  }
+  .dock-wrap {
+    position: sticky;
+    top: var(--dock-top);
+    margin-top: calc(var(--dock-top) - 24px);
+    width: min(var(--dock-w), 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .dock-wrap .guess {
+    position: static;
+    max-width: none;
+  }
+  /* Misses hang under the box while playing (above it on narrower screens). */
+  .water .misses {
+    margin-inline: 0;
+  }
+  .dock-wrap .misses {
+    order: 1;
+  }
+  .water > .misses,
+  .water > .results {
+    width: min(480px, 100%);
+  }
+  .dock-wrap .blitz-note {
+    margin: 0;
+  }
+}
+@media (max-width: 1099px) {
+  .stage .board-col,
+  .stage .water,
+  .stage .dock-wrap {
+    display: contents;
+  }
+  .stage .game-head,
+  .stage .prompt {
+    order: -2;
+  }
+  .stage .lead {
+    order: -1;
+  }
 }
 
 /* The header is a glass card, like the panels: BACK, the screen's label (and the ink-sac lives), sound and HOME. */
@@ -1168,32 +1285,71 @@ a {
   font-weight: 400;
 }
 
-/* Input bar, pinned to the bottom of the viewport. */
+/*
+ * The guess box (data-guess-dock), floating over the ocean. Sticky to the bottom of the viewport, so it rides above
+ * the on-screen keyboard as the viewport shrinks (index.html asks for interactive-widget=resizes-content).
+ * - Phones: a pill a little above the bottom edge, the feedback line on its own small glass plate just above it.
+ * - From 700px: one floating glass box under the board, the feedback line on top.
+ * - From 1100px: the same box out in the open water beside the board (see the stage, below).
+ */
 .guess {
   position: sticky;
-  bottom: 0;
+  bottom: var(--dock-gap);
   z-index: 5;
-  margin-top: 2px;
-  --pad-bottom: max(14px, env(safe-area-inset-bottom));
-  padding: 10px 0 var(--pad-bottom);
+  margin-top: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  /* Its glass, full-bleed without widening the layout (a border image's outset paints past the box but never
-     scrolls): a hairline on top, tinted behind the feedback line, clearer around the guess box (no text of its own
-     there; the box is its own glass). The change sits in the gap between them. */
-  border-image: linear-gradient(
-      to bottom,
-      rgba(125, 147, 184, 0.3) 0 1px,
-      var(--glass-bar) 1px calc(100% - var(--pad-bottom) - 60px),
-      var(--glass-bar-clear) calc(100% - var(--pad-bottom) - 54px)
-    )
-    fill 0 / 0 / 0 100vmax;
+  align-items: flex-start;
+  gap: 8px;
 }
 .feedback-line {
   min-height: 28px;
   display: flex;
   align-items: flex-end;
+}
+@media (max-width: 699px) {
+  .guess .feedback-line {
+    min-height: 0;
+    max-width: 100%;
+    padding: 3px 10px 4px;
+    border-radius: var(--radius);
+    background: var(--glass-bar);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+  }
+  /* The pill: the input and GUESS in one rounded glass capsule. */
+  .guess .guess-row {
+    align-self: stretch;
+    padding: 6px;
+    border-radius: 999px;
+    background: var(--glass-bar);
+    box-shadow:
+      inset 0 0 0 1px var(--hairline),
+      0 6px 0 rgba(0, 0, 0, 0.35);
+  }
+  .guess .guess-row input {
+    height: 50px;
+    padding: 0 18px;
+    border-radius: 999px;
+  }
+  .guess .guess-row .key {
+    min-height: 50px;
+    border-radius: 999px;
+  }
+}
+@media (min-width: 700px) {
+  .guess {
+    align-self: center;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    max-width: 600px;
+    padding: 10px 12px 12px;
+    border-radius: 8px;
+    background: var(--glass-bar) var(--scan);
+    box-shadow:
+      inset 0 0 0 1px var(--hairline),
+      0 6px 0 rgba(0, 0, 0, 0.35);
+  }
 }
 .feedback {
   display: flex;
@@ -1490,9 +1646,6 @@ a {
   }
   .value {
     font-size: 22px;
-  }
-  .guess {
-    --pad-bottom: 24px;
   }
   .key-big {
     min-height: 80px;
