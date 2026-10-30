@@ -33,12 +33,12 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
         <span className="label mode">Archive</span>
       </ScreenHead>
 
-      <section className="panel prompt">
+      <section data-glass className="panel prompt">
         <h1>Past dailies</h1>
         <p className="caption">every daily so far. replays don't count toward your streak.</p>
       </section>
 
-      <ol className="panel arch-list">
+      <ol data-glass className="panel arch-list">
         {list.map((e, i) => {
           const r = result(saved.games[e.id]);
           const isToday = e.date === today;

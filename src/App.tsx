@@ -68,7 +68,7 @@ function parentOf(hash: string, today: string): string {
 function NoList({ text, onHome }: { text: string; onHome: () => void }) {
   return (
     <main className="screen game">
-      <section className="panel error">
+      <section data-glass className="panel error">
         <p className="label pink">No list</p>
         <p>{text}</p>
         <button className="key" onClick={onHome}>

@@ -128,7 +128,7 @@ export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; o
     return () => document.removeEventListener("keydown", onKey);
   }, []);
   return (
-    <header className="game-head">
+    <header className="game-head" data-glass>
       <button className="key key-icon" onClick={onBack} aria-label="Back" title="Back (Esc)" data-testid="nav-back">
         <BackArrow />
       </button>
