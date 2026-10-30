@@ -15,10 +15,11 @@
   /*
    * Glass: panels are tinted glass over the ocean (components/ocean), so the squid shows faintly through them. Each
    * alpha is the lowest that keeps the dimmest body text on that surface at 4.5:1 with pure white right behind the
-   * glass (the brightest the ocean can draw). Panels carry muted captions; the input bar's feedback line too; the
-   * input row of the bar carries no text of its own, so it is clearer, and the guess box is its own glass.
+   * glass (the brightest the ocean can draw), scan lines included. Panels carry muted captions (a shade darker than
+   * the old opaque panel, for the room); the input bar's feedback line too; the input row of the bar carries no
+   * text of its own, so it is clearer, and the guess box is its own glass.
    */
-  --glass-panel: rgba(13, 24, 48, 0.93);
+  --glass-panel: rgba(10, 20, 42, 0.94);
   --glass-bar: rgba(4, 9, 18, 0.9);
   --glass-bar-clear: rgba(4, 9, 18, 0.35);
   --glass-well: rgba(8, 22, 43, 0.8);
@@ -1142,6 +1143,11 @@ a {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  /* On glass, reaching into the gutter so the chips stay where they were. */
+  margin-inline: -10px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  background: var(--glass-panel);
 }
 .misses .label {
   color: var(--pink);
@@ -1160,7 +1166,6 @@ a {
 }
 .miss-chip b {
   font-weight: 400;
-  opacity: 0.75;
 }
 
 /* Input bar, pinned to the bottom of the viewport. */
@@ -1771,6 +1776,11 @@ a {
   margin: -4px 2px 0;
   font-size: 17px;
   color: var(--gold);
+  /* On a glass plate: it sits between panels, over the ocean. */
+  margin-inline: -8px;
+  padding: 2px 10px;
+  border-radius: var(--radius);
+  background: var(--glass-panel);
 }
 a.text-btn {
   display: inline-flex;
