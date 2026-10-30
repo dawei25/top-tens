@@ -232,16 +232,16 @@ export class SquidBody {
     this.limbs = LIMB_ROOTS.map((r) => {
       const tentacle = r.id <= 2;
       // Tentacles longest; then the middle arms, the outer ones a little shorter.
-      const n = tentacle ? 15 : r.id === 3 || r.id === 10 ? 9 : r.id === 4 || r.id === 9 ? 10 : 11;
-      const seg = tentacle ? 2.05 : 1.75;
-      const rest = tentacle ? (r.id === 1 ? -0.07 : 0.07) : r.angle * 1.9;
+      const n = tentacle ? 16 : r.id === 3 || r.id === 10 ? 11 : r.id === 4 || r.id === 9 ? 12 : 13;
+      const seg = tentacle ? 2.05 : 1.8;
+      const rest = tentacle ? (r.id === 1 ? -0.08 : 0.08) : r.angle * 1.6;
       return {
         id: r.id,
         tentacle,
         u: r.x - PIVOT_X,
         v: r.y - PIVOT_Y,
         rest,
-        curl: tentacle ? 0.15 : 0.55,
+        curl: tentacle ? 0.12 : 0.35,
         n,
         seg,
         phase: r.id * 1.9,
@@ -279,7 +279,7 @@ export class SquidBody {
     spread *= 1 + 0.4 * m.inflating;
     if (m.asleep) spread = 1.5;
     const swimming = m.jetAge < 1.2;
-    const amp = (m.asleep ? 0.12 : swimming ? 0.28 : 0.38) * (l.tentacle ? 0.8 : 1);
+    const amp = (m.asleep ? 0.1 : swimming ? 0.22 : 0.3) * (l.tentacle ? 0.8 : 1);
     const wave = amp * s * Math.sin(t * (m.hovering ? 1.6 : 2.6) - j * 0.55 + l.phase);
     const curl = l.curl * s * s * Math.sign(l.rest || 1) * (0.6 + 0.4 * Math.sin(t * 0.6 + l.phase));
     return l.rest * spread + curl + wave;
@@ -313,7 +313,7 @@ export class SquidBody {
     if (!this.placed) return this.settle(t, m);
     this.fin = this.finFrame(t, m);
     const f = Math.min(3, dt * 30);
-    const damp = Math.pow(0.88, f);
+    const damp = Math.pow(0.86, f);
     for (const l of this.limbs) {
       const r = this.toWorld(l.u, l.v);
       l.x[0] = l.ox[0] = r.x;
@@ -326,7 +326,7 @@ export class SquidBody {
         ry += Math.cos(h) * l.seg;
         const s = j / (l.n - 1);
         // Stiffer near the root, loose at the tip: the tips lag, swing and settle last.
-        const k = Math.min(0.6, (0.13 * (1 - s) ** 1.4 + 0.02) * f);
+        const k = Math.min(0.6, (0.2 * (1 - s) ** 1.2 + 0.045) * f);
         const vx = (l.x[j] - l.ox[j]) * damp;
         const vy = (l.y[j] - l.oy[j]) * damp;
         l.ox[j] = l.x[j];
