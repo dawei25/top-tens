@@ -129,9 +129,13 @@ export class Grabs {
     const ir = input.getBoundingClientRect();
     const rr = row.getBoundingClientRect();
     const nr = name.getBoundingClientRect();
-    // A row scrolled out of view (or under a guess bar across the bottom) has nothing to set the word into.
-    const under = rr.left < ir.right && rr.right > ir.left && rr.bottom > ir.top && rr.top < ir.bottom + 8;
-    if (rr.top < 0 || rr.bottom > innerHeight || under) return false;
+    // A row off screen, or covered by the guess dock, has nothing to set the word into. Rows beside or below a
+    // floating box are fine. (Without a dock, the old guess bar across the bottom: covered from the input's top.)
+    const dock = input.closest("[data-guess-dock]")?.getBoundingClientRect();
+    const covered = dock
+      ? rr.left < dock.right && rr.right > dock.left && rr.bottom > dock.top && rr.top < dock.bottom
+      : rr.left < ir.right && rr.right > ir.left && rr.bottom > ir.top;
+    if (rr.top < 0 || rr.bottom > innerHeight || covered) return false;
 
     const cs = getComputedStyle(input);
     const fromSize = parseFloat(cs.fontSize) || 28;
@@ -159,11 +163,11 @@ export class Grabs {
       t: 0,
       waiting: wait > 0,
       wait,
-      // Struck from close by after a dart: a shorter reach.
-      reach: wait > 0 ? 0.14 : tentacle ? 0.16 : 0.24,
-      grip: tentacle ? 0.1 : 0.07,
-      carry: 0.28,
-      set: 0.07,
+      // Struck from close by after a dart: quicker all through, so the word still lands within about 1.1 s.
+      reach: wait > 0 ? 0.12 : tentacle ? 0.16 : 0.24,
+      grip: wait > 0 ? 0.07 : tentacle ? 0.1 : 0.07,
+      carry: wait > 0 ? 0.25 : 0.28,
+      set: wait > 0 ? 0.06 : 0.07,
       back: 0.22,
       from,
       to,

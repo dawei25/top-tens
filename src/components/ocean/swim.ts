@@ -46,7 +46,7 @@ const KEEL = 18;
 const THRUST = 0.14;
 /** Turn rates, degrees a second: on the fins at rest, and on a dart or a flee. */
 const TURN = 230;
-const TURN_URGENT = 620;
+const TURN_URGENT = 900;
 /** Above this speed (px/s) the turn rate is capped, so the keel keeps the travel within a few degrees of the heading. */
 const MOVING = 12;
 const TURN_MOVING = 190;
@@ -60,7 +60,7 @@ const SMALL_TURN = 35;
 /** On the fins while turning: a tight arc, never more than this px/s. */
 const FIN_SPEED = 8;
 /** A dart brakes into its point: its speed is held to this many times the distance left (per second). */
-const ARRIVE = 5.5;
+const ARRIVE = 8;
 /** Settling onto the seabed, px/s (slower than any swimming). */
 const SINK = 9;
 
@@ -214,7 +214,7 @@ export class Swimmer {
     const dy = this.target.y - this.y;
     const d = Math.hypot(dx, dy);
     if (d < 12) return;
-    this.go(headingOf(dx, dy), clamp(d * 4, 260, 2300) * Math.max(1, this.speed * 0.9), 0.06, true, this.target);
+    this.go(headingOf(dx, dy), clamp(d * 5, 300, 3200) * Math.max(1, this.speed * 0.9), 0.05, true, this.target);
   }
 
   /** Jet hard away from where it is (it just inked): the direction with the most room, nearest the way it faces. */
@@ -364,7 +364,7 @@ export class Swimmer {
 
     if (this.phase === "turn") {
       // Turn first: brake, and rotate on the fins (a tight arc) until it nearly faces the way it will go.
-      brake = this.urgent ? 9 : 3;
+      brake = this.urgent ? 14 : 3;
       finTo = FIN_SPEED;
       const off = this.turnTo(this.aim, this.turnRate(), dt);
       this.sx += (1 - this.sx) * refill;

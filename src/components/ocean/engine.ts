@@ -61,7 +61,7 @@ const DOCK_FALLBACK = ".guess-row";
 const CHECK_SPEED = 15;
 const OFF_DEG = 30;
 /** A find: the squid darts over first, unless it is near the box already; it strikes after at most WAIT_S. */
-const WAIT_S = 0.42;
+const WAIT_S = 0.5;
 
 /** Debug numbers for frame-time and motion checks, exposed as window.__ocean in dev when the URL has ?oceanstats. */
 interface Stats {
@@ -364,7 +364,7 @@ export function startOcean(els: OceanEls): Ocean {
    * (and never older than a few seconds when asked for), never per frame. Without [data-glass] marks, the app's
    * column (main) stands in for the glass; without [data-guess-dock], the guess row.
    */
-  const layout = { dirty: true, at: 0, glass: [] as DOMRect[], dock: null as DOMRect | null };
+  const layout = { dirty: true, at: 0, glass: [] as DOMRect[], dock: null as DOMRect | null, board: null as DOMRect | null };
   function readLayout() {
     const now = performance.now();
     if (!layout.dirty && now - layout.at < 3000) return layout;
@@ -376,6 +376,9 @@ export function startOcean(els: OceanEls): Ocean {
     const dock = document.querySelector(DOCK) ?? document.querySelector(DOCK_FALLBACK);
     const dr = dock?.getBoundingClientRect();
     layout.dock = dr && dr.width > 0 && dr.bottom > 0 && dr.top < vh ? dr : null;
+    // The board's column (wide screens put it on the left, with open water to its right).
+    const col = document.querySelector(".board-col")?.getBoundingClientRect();
+    layout.board = col && col.width > 0 ? col : null;
     return layout;
   }
 
@@ -392,7 +395,8 @@ export function startOcean(els: OceanEls): Ocean {
 
   /**
    * A spot in open water (the viewport minus the glass), where the squid shows: sampled, scored by how clear of the
-   * glass it is, and on wide screens favouring the water right of the board (the tallest panel, when it sits left).
+   * glass it is, and on wide screens favouring the water right of the board (.board-col, or the tallest panel, when
+   * it sits left).
    * `near` favours spots close to the squid (dozing, the loops); `room` is the clearance it needs. Null when the
    * glass covers everything (phones).
    */
@@ -401,8 +405,8 @@ export function startOcean(els: OceanEls): Ocean {
     const sw = SQUID_W * px;
     const sh = SQUID_H * px;
     const need = Math.max(sw * 0.9, room);
-    const tall = glass.reduce<DOMRect | null>((a, r) => (!a || r.height > a.height ? r : a), null);
-    const boardRight = vw >= 900 && tall && tall.left + tall.width / 2 < vw / 2 ? tall.right : null;
+    const board = layout.board ?? glass.reduce<DOMRect | null>((a, r) => (!a || r.height > a.height ? r : a), null);
+    const boardRight = vw >= 900 && board && board.left + board.width / 2 < vw / 2 ? board.right : null;
     let best: Pt | null = null;
     let score = -Infinity;
     for (let i = 0; i < 18; i++) {
@@ -445,11 +449,30 @@ export function startOcean(els: OceanEls): Ocean {
 
   /** Where the squid strikes from at the guess dock: beside it in open water, or just above it behind the glass. */
   function dockPoint(): Pt | null {
-    const r = readLayout().dock;
+    const { dock: r, glass } = readLayout();
     if (!r) return null;
+    const sw = SQUID_W * px;
     const sh = SQUID_H * px;
+    // In open water by the box, if there is some: above it first (its limbs hang down to the box), then either
+    // side; the clearest spot wins (the box itself doesn't count as cover).
+    const others = glass.filter((g) => !(g.left === r.left && g.top === r.top && g.width === r.width));
+    const spots = [
+      { x: r.left + Math.min(r.width * 0.3, 120), y: r.top - sh * 0.55, bias: 30 },
+      { x: r.left - sw * 1.15, y: r.top + r.height / 2 - sh * 0.3, bias: 0 },
+      { x: r.right + sw * 1.15, y: r.top + r.height / 2 - sh * 0.3, bias: 0 },
+    ].filter((p) => p.x > sw && p.x < vw - sw && p.y > sh * 0.5);
+    let best: Pt | null = null;
+    let score = sw * 0.6;
+    for (const p of spots) {
+      const k = Math.min(clearance(p.x, p.y, others), sw * 2) + p.bias;
+      if (k > score) {
+        score = k;
+        best = { x: p.x, y: p.y };
+      }
+    }
+    if (best) return best;
+    // No open water (a phone): just above the box, behind the glass, its limbs hanging toward it.
     const p = besideRect(r);
-    // Its limbs hang below it: hold the mantle above the box, so they hang beside it, not off the screen.
     return { x: p.x, y: Math.min(p.y - sh * 0.3, vh - sh * 1.25) };
   }
 
