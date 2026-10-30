@@ -1,0 +1,24 @@
+{
+  "id": "city-visitors",
+  "judgedAt": "2026-10-30",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 2,
+  "scores": { "recognizability": 4, "curve": 2, "fairness": 1, "data": 3, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 4, "livesLost": 5, "guesses": 9 },
+  "fan": null,
+  "blitzCasual": null,
+  "summary": "The source table stops at 10, so every famous city a player tries (New York, Tokyo, Rome, Singapore, Barcelona) costs a life with no rank to explain it. Correct, but punishing and not much fun.",
+  "reasons": [
+    "Casual found 4 (Paris, London, Dubai, Bangkok) and was out of lives after 9 guesses: New York, Tokyo, Rome, Barcelona and Singapore all cost a life as unranked answers.",
+    "Wikipedia's 2025 table only lists the top 10, so there are no ranks 11+: no near-miss feedback in classic and nothing to score in Blitz.",
+    "The surprises (Macau, Mecca, Antalya) are interesting on reveal, and the matcher handles hk, kl, macao, makkah and constantinople well."
+  ],
+  "fixes": [
+    "Drop non-name aliases: SJK Lai Meng and K.L.C.C. (Kuala Lumpur), Al memzar (Dubai), Guzelbag Mahallesi and Kaleici (Antalya), and the truncated 'Krungthepmahanakornamornratanakosinmahintarayutth...' (Bangkok).",
+    "If a deeper ranking becomes available (for example a fuller Euromonitor top 100 table), rebuild from it so misses get a rank and the list becomes Blitz-ready; until then keep it out of the dailies."
+  ],
+  "difficulty": 4,
+  "tags": ["geography", "cities", "travel"],
+  "audience": "travel buffs"
+}

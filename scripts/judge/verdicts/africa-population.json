@@ -19,6 +19,6 @@
   ],
   "fixes": [
     "Rename #36 'Congo' to 'Republic of the Congo' and make bare 'Congo' (and 'the Congo') a shared alias of #4 DR Congo and #36, so the game offers the choice.",
-    "Drop junk aliases: 'Ugandan nationalism', 'Ker Alur' (Uganda), 'Official language of Southern Sudan' (Sudan), 'North Kenya', 'Kenya-Africa' (Kenya), 'Belgian Ubanghi', 'CKN' (DR Congo)."
+    "Drop junk aliases: 'Ugandan nationalism', 'Ker Alur' (Uganda), 'Official language of Southern Sudan' (Sudan), 'North Kenya', 'Kenya-Africa' (Kenya), 'Belgian Ubanghi' (DR Congo)."
   ]
 }

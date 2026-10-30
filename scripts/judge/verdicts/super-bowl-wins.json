@@ -1,0 +1,24 @@
+{
+  "id": "super-bowl-wins",
+  "judgedAt": "2026-10-30",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 3 },
+  "casual": { "found": 9, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 17, "named": 18 },
+  "difficulty": 2,
+  "tags": ["sports", "football", "nfl"],
+  "audience": "football fans",
+  "summary": "Good classic: the dynasties come fast, then the real puzzle is which teams have 3 wins versus 2. US-centric, so it fits best around Super Bowl time.",
+  "reasons": [
+    "Casual found 9 and lost 4 on Eagles #11, Seahawks #14, Rams #12 and Ravens #17: recent champions with 2 wins, fair near misses. Washington is the stretch.",
+    "Data is current (Seahawks 2 after Super Bowl LX). Nicknames work well (pats, niners, redskins, chiefs), but 'bucs' is not recognized.",
+    "Blitz qualifies on paper but is just reciting the 32 teams, every one worth at least 10, so the classic suits it better. Hard for players outside the US."
+  ],
+  "fixes": [
+    "Add alias 'Bucs' to Tampa Bay Buccaneers.",
+    "Drop junk redirect aliases: 'Pittsburgh Steelers stadiums', 'Pittsburgh Pirates' (an MLB team), 'Dallascowboys.com', 'Dallas cowboy players', 'Dallas Cowboys retired numbers', 'Dallas Cowboys Super Bowls', 'Kansas City Chiefs Cheerleaders', 'Kansas City Chiefs Hall of Fame', 'Packers Pro Shop', 'Packers fan', 'New York Giants Depth Chart', 'Redskinettes', '70 Greatest Redskins', 'Command Force', 'New England Patriots strategy', 'Denver Broncos Ring of Fame', 'Broncos Ring of Fame', 'Denver Broncos retired numbers', 'San Francisco 49ers Hall of Fame', '49ers Hall of Fame', 'Let's Ride', 'Just win, baby'."
+  ]
+}
