@@ -13,7 +13,15 @@ after(() => browser.close());
 
 const litOf = (loc) =>
   loc.locator('[data-limb][data-on="true"]').evaluateAll((els) => els.map((e) => Number(e.dataset.limb)).sort((a, b) => a - b));
-const transformOf = (page) => page.getByTestId("ocean").locator(".ocean-squid").evaluate((el) => el.style.transform);
+/** A fingerprint of the squid canvas (the squid and the effects in front of it): changes as it swims. */
+const squidFrame = (page) =>
+  page.evaluate(() => {
+    const c = document.querySelector('[data-testid="ocean"] .ocean-front');
+    const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+    let h = 0;
+    for (let i = 0; i < d.length; i += 4) h = (Math.imul(h, 31) + d[i] + d[i + 1] * 3 + d[i + 3] * 7) | 0;
+    return h;
+  });
 
 /** The ocean is behind everything, out of the way: hidden from readers, nothing focusable, never takes a pointer. */
 async function assertOcean(page) {
@@ -100,27 +108,48 @@ for (const vp of VIEWPORTS) {
   });
 }
 
-test("the squid roams, and parks with reduced motion (lit limbs stay)", async () => {
+
+test("the squid roams, grabs words without leaving anything behind, and parks with reduced motion", async () => {
   const { ctx, page } = await open(browser, VIEWPORTS[0], `#p-${LIST}`);
   const squid = page.getByTestId("ocean").getByTestId("squid");
   await squid.waitFor();
   const p = await puzzle(page, LIST);
+  // Count the word tiles the squid carries (however fast they come and go on a slow machine).
+  await page.evaluate(() => {
+    window.__tiles = 0;
+    new MutationObserver((list) => {
+      for (const m of list) for (const n of m.addedNodes) if (n.classList?.contains("grab-word")) window.__tiles++;
+    }).observe(document.querySelector(".ocean-tiles"), { childList: true });
+  });
+  // Two quick finds: two grabs at once. Each word is in its row at once; the box is cleared.
   for (const r of [2, 5]) await guess(page, p.answers.find((a) => a.rank === r).name);
+  assert.equal(await page.getByLabel("Your guess").inputValue(), "");
+  assert.equal(await page.locator('[data-testid="slot"][data-rank="5"]').getAttribute("class").then((c) => c.includes("found")), true);
+  // The grabbed word tiles ride above the UI, then are gone once set (about 0.8 s), the rows unmarked.
+  assert.ok((await page.evaluate(() => window.__tiles)) >= 1);
+  await page.waitForFunction(() => !document.querySelector(".ocean-tiles .grab-word, [data-grabbing]"), null, { timeout: 4000 });
+  assert.ok(await page.evaluate(() => getComputedStyle(document.querySelector(".ocean-over")).pointerEvents === "none"));
 
-  // Moving: its transform changes from frame to frame.
-  const first = await transformOf(page);
+  // Moving: the squid canvas changes from frame to frame.
+  const first = await squidFrame(page);
   await page.waitForFunction(
-    (t) => document.querySelector('[data-testid="ocean"] .ocean-squid').style.transform !== t,
+    (h) => {
+      const c = document.querySelector('[data-testid="ocean"] .ocean-front');
+      const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+      let x = 0;
+      for (let i = 0; i < d.length; i += 4) x = (Math.imul(x, 31) + d[i] + d[i + 1] * 3 + d[i + 3] * 7) | 0;
+      return x !== h;
+    },
     first,
     { timeout: 3000 },
   );
 
-  // Reduced motion: parked, and still.
+  // Reduced motion: parked, and still, the lit limbs still lit.
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.waitForTimeout(150);
-  const parked = await transformOf(page);
+  const parked = await squidFrame(page);
   await page.waitForTimeout(800);
-  assert.equal(await transformOf(page), parked);
+  assert.equal(await squidFrame(page), parked);
   assert.deepEqual(await litOf(squid), [2, 5]);
   await ctx.close();
 });
