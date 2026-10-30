@@ -1,7 +1,7 @@
 {
   "Matterhorn": {"article":"Matterhorn","why":"vital+likely","value":"4,478 m","n":4478,"raw":"4,478 m (14,692 ft)"},
   "Mont Blanc": {"article":"Mont Blanc","why":"vital+likely","value":"4,806 m","n":4806,"raw":"4,805.59 m (15,766.4 ft)"},
-  "Mount Fuji": {"article":"Mount Fuji","why":"vital+likely","skip":"no Elevation row"},
+  "Mount Fuji": {"article":"Mount Fuji","why":"vital+likely","value":"3,776 m","n":3776,"raw":"fixed: article lead, summit elevation of 3,776.24 m"},
   "Mount Kilimanjaro": {"article":"Mount Kilimanjaro","why":"vital+likely","value":"5,895 m","n":5895,"raw":"5,895 m (19,341 ft)"},
   "Denali": {"article":"Denali","why":"vital+likely","value":"6,190 m","n":6190,"raw":"20,310 ft (6,190 m)NAVD88"},
   "Mount Elbrus": {"article":"Mount Elbrus","why":"vital+likely","value":"5,642 m","n":5642,"raw":"5,642 m (18,510 ft)"},
