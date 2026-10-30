@@ -3,6 +3,7 @@ import { Home } from "./components/Home";
 import { Archive } from "./components/Archive";
 import { Blitz } from "./components/Blitz";
 import { History } from "./components/History";
+import { Ocean } from "./components/ocean";
 import { Game, Loading } from "./components/Game";
 import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
@@ -78,7 +79,17 @@ function NoList({ text, onHome }: { text: string; onHome: () => void }) {
   );
 }
 
+/** The deep-sea backdrop and its roaming squid stay put behind every screen (decorative, aria-hidden). */
 export default function App() {
+  return (
+    <>
+      <Ocean />
+      <Screens />
+    </>
+  );
+}
+
+function Screens() {
   const [index, setIndex] = useState<PuzzleMeta[] | null>(null);
   const [schedule, setSchedule] = useState<DailyEntry[] | null>(null);
   const [route, setRoute] = useState<Route>(readHash);

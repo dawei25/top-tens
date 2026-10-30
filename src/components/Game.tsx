@@ -318,7 +318,6 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   return (
     <main className={`screen game status-${game.status}`}>
       <ScreenHead onBack={onBack} onHome={onHome}>
-        <ClassicSquid found={game.found} status={game.status} />
         <span className="label mode">{mode}</span>
           <div
             key={lostLife?.key}
@@ -615,6 +614,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         </section>
       )}
       <SquidFx />
+      <ClassicSquid found={game.found} status={game.status} />
     </main>
   );
 }

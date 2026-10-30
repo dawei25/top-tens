@@ -31,6 +31,8 @@ interface Props {
   hero?: boolean;
   /** Celebrate once, this many ms after mounting: the perfect-10 hop, or the new-best spin. */
   cheer?: { kind: "win" | "best"; delay: number } | null;
+  /** The squid roaming the ocean: its swimming (and so its win loops and ink jet) is the ocean's, not its own. */
+  roam?: boolean;
   testId?: string;
 }
 
@@ -71,7 +73,7 @@ const spin = (el: Element | null) =>
     easing: "steps(8, end)",
   });
 
-export function Squid({ mode, lit, mood = "play", heat = 0, flinch = 0, flare = 0, hero = false, cheer = null, testId = "squid" }: Props) {
+export function Squid({ mode, lit, mood = "play", heat = 0, flinch = 0, flare = 0, hero = false, cheer = null, roam = false, testId = "squid" }: Props) {
   const move = useRef<HTMLSpanElement>(null);
   const on = new Set(lit.filter((r) => r >= 1 && r <= 10));
   const key = [...on].sort((a, b) => a - b).join(",");
@@ -92,7 +94,7 @@ export function Squid({ mode, lit, mood = "play", heat = 0, flinch = 0, flare = 
   const [seenFlare, setSeenFlare] = useState(flare);
   if (mood !== seenMood) {
     setSeenMood(mood);
-    if (seenMood === "play" && mood === "won") setBurst({ kind: "win", n: (burst?.n ?? 0) + 1 });
+    if (seenMood === "play" && mood === "won" && !roam) setBurst({ kind: "win", n: (burst?.n ?? 0) + 1 });
   }
   if (flare !== seenFlare) {
     setSeenFlare(flare);
@@ -122,7 +124,7 @@ export function Squid({ mode, lit, mood = "play", heat = 0, flinch = 0, flare = 
   useLayoutEffect(() => {
     const from = prevMood.current;
     prevMood.current = mood;
-    if (from !== "play" || mood === "play") return;
+    if (from !== "play" || mood === "play" || roam) return;
     if (mood === "won") hop(move.current, unit);
     else if (mood === "lost") {
       // Squeeze, jet off the top of the screen, then drift back in, dim.
@@ -139,7 +141,7 @@ export function Squid({ mode, lit, mood = "play", heat = 0, flinch = 0, flare = 
         { duration: 1600, easing: "steps(16, end)" },
       );
     }
-  }, [mood, unit]);
+  }, [mood, unit, roam]);
 
   useEffect(() => {
     if (flare) spin(move.current);
@@ -165,7 +167,6 @@ export function Squid({ mode, lit, mood = "play", heat = 0, flinch = 0, flare = 
   }, [cheerKind, cheerDelay, unit]);
 
   const style = { "--charge": on.size / 10 } as CSSProperties;
-  const lids = mood === "lost" || mood === "gave-up";
 
   return (
     <span
@@ -193,7 +194,8 @@ export function Squid({ mode, lit, mood = "play", heat = 0, flinch = 0, flare = 
           <path className="s-spot" d={SQUID.spots} />
           <path className="s-eye" d={SQUID.eyes} />
           <path className="s-pupil" d={SQUID.pupils} />
-          {lids && <path className="s-lid" d={SQUID.lids} />}
+          {/* Half-shut eyes: shown by CSS when it is down or dozing. */}
+          <path className="s-lid" d={SQUID.lids} />
           {SQUID.limbs.map((l) => (
             <g key={l.id} className={`limb${limbClass(l.id, fresh)}`} data-limb={l.id} data-on={on.has(l.id)}>
               <path className="l-a" d={l.a} />

@@ -12,6 +12,17 @@
   --key-hi: #11264a;
   --key-shadow: #02060f;
   --hairline: rgba(125, 147, 184, 0.22);
+  /*
+   * Glass: panels are tinted glass over the ocean (components/ocean), so the squid shows faintly through them. Each
+   * alpha is the lowest that keeps the dimmest body text on that surface at 4.5:1 with pure white right behind the
+   * glass (the brightest the ocean can draw), scan lines included. Panels carry muted captions (a shade darker than
+   * the old opaque panel, for the room); the input bar's feedback line too; the input row of the bar carries no
+   * text of its own, so it is clearer, and the guess box is its own glass.
+   */
+  --glass-panel: rgba(10, 20, 42, 0.94);
+  --glass-bar: rgba(4, 9, 18, 0.9);
+  --glass-bar-clear: rgba(4, 9, 18, 0.35);
+  --glass-well: rgba(8, 22, 43, 0.8);
 
   --text: #e8f1ff;
   --muted: #7d93b8;
@@ -154,7 +165,7 @@ a {
 }
 
 .panel {
-  background: var(--panel) var(--scan);
+  background: var(--glass-panel) var(--scan);
   border: 1px solid var(--hairline);
   border-radius: var(--radius);
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
@@ -286,6 +297,23 @@ a {
   gap: 28px;
   padding-top: max(32px, 6vh);
   max-width: calc(var(--col) + 2 * var(--gutter));
+}
+/* Home's groups sit on glass cards (reaching a little into the gutters, so nothing inside moves), with the ocean
+   open between them and around the title. The tagline gets a small glass plate of its own. */
+.home-group,
+.home-foot {
+  margin-inline: -10px;
+  padding: 10px;
+  background: var(--glass-panel) var(--scan);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 1px var(--hairline),
+    0 6px 0 rgba(0, 0, 0, 0.35);
+}
+.title .caption {
+  padding: 2px 12px;
+  border-radius: 6px;
+  background: var(--glass-panel);
 }
 
 .title {
@@ -573,8 +601,6 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-top: 8px;
-  border-top: 1px solid var(--hairline);
 }
 .home-foot-end {
   display: flex;
@@ -636,12 +662,18 @@ a {
   padding-bottom: 0;
 }
 
+/* The header is a glass card, like the panels: BACK, the screen's label (and the ink-sac lives), sound and HOME. */
 .game-head {
   display: grid;
   /* Equal side columns keep the middle centered although the right side holds two keys. */
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 12px;
+  padding: 8px;
+  background: var(--glass-panel) var(--scan);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
 }
 .game-head > :first-child {
   justify-self: start;
@@ -656,8 +688,29 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
+}
+/* A label on its own (Blitz, Archive, Past runs) reads a size up, so the card isn't empty in the middle. */
+.game-head-mid > .mode:only-child {
+  font-size: 18px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.15;
+}
+/* Phones: the middle takes all the room between BACK and the sound key (equal side columns would squeeze the
+   lives), and a long label wraps. */
+@media (max-width: 480px) {
+  .game-head {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 6px;
+  }
+  .game-head-mid > .mode {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.15;
+  }
 }
 .mode {
   font-size: 14px;
@@ -1090,6 +1143,11 @@ a {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  /* On glass, reaching into the gutter so the chips stay where they were. */
+  margin-inline: -10px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  background: var(--glass-panel);
 }
 .misses .label {
   color: var(--pink);
@@ -1108,7 +1166,6 @@ a {
 }
 .miss-chip b {
   font-weight: 400;
-  opacity: 0.75;
 }
 
 /* Input bar, pinned to the bottom of the viewport. */
@@ -1117,15 +1174,21 @@ a {
   bottom: 0;
   z-index: 5;
   margin-top: 2px;
-  padding: 10px 0 max(14px, env(safe-area-inset-bottom));
-  background: var(--bar);
-  /* Full-bleed background without widening the layout. */
-  box-shadow: 0 0 0 100vmax var(--bar);
-  clip-path: inset(0 -100vmax);
-  border-top: 1px solid var(--hairline);
+  --pad-bottom: max(14px, env(safe-area-inset-bottom));
+  padding: 10px 0 var(--pad-bottom);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* Its glass, full-bleed without widening the layout (a border image's outset paints past the box but never
+     scrolls): a hairline on top, tinted behind the feedback line, clearer around the guess box (no text of its own
+     there; the box is its own glass). The change sits in the gap between them. */
+  border-image: linear-gradient(
+      to bottom,
+      rgba(125, 147, 184, 0.3) 0 1px,
+      var(--glass-bar) 1px calc(100% - var(--pad-bottom) - 60px),
+      var(--glass-bar-clear) calc(100% - var(--pad-bottom) - 54px)
+    )
+    fill 0 / 0 / 0 100vmax;
 }
 .feedback-line {
   min-height: 28px;
@@ -1183,14 +1246,15 @@ a {
   padding: 0 14px;
   border: 3px solid var(--cyan-edge);
   border-radius: var(--radius);
-  background: var(--well);
+  background: var(--glass-well);
   color: var(--text);
   font-size: 28px;
   box-shadow: 0 0 0 3px var(--cyan-glow);
   caret-color: var(--cyan);
 }
+/* As bright as a label, so it stays readable with the squid right behind the box. */
 .guess-row input::placeholder {
-  color: #5d739c;
+  color: var(--label);
 }
 .guess-row input:focus-visible {
   outline: none;
@@ -1428,7 +1492,7 @@ a {
     font-size: 22px;
   }
   .guess {
-    padding-bottom: 24px;
+    --pad-bottom: 24px;
   }
   .key-big {
     min-height: 80px;
@@ -1712,6 +1776,11 @@ a {
   margin: -4px 2px 0;
   font-size: 17px;
   color: var(--gold);
+  /* On a glass plate: it sits between panels, over the ocean. */
+  margin-inline: -8px;
+  padding: 2px 10px;
+  border-radius: var(--radius);
+  background: var(--glass-panel);
 }
 a.text-btn {
   display: inline-flex;

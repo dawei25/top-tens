@@ -1,0 +1,52 @@
+/*
+ * The ocean layer (animations agent): fixed under the whole app, decorative only. Two low-res canvases scaled up
+ * with crisp pixels (the scene behind, the effects in front), and the roaming squid between them. The engine sets
+ * --ocean-px (3 px on phones, 4 px on wider screens), which is also the squid's pixel size, so they match.
+ */
+.ocean {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  contain: strict;
+  background: var(--page-bottom);
+}
+.ocean canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.ocean-squid {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(20 * var(--ocean-px, 3px));
+  height: calc(24 * var(--ocean-px, 3px));
+  transform-origin: 50% 42%;
+  will-change: transform;
+}
+.ocean-squid .squid {
+  --px: var(--ocean-px, 3px);
+}
+/* It swims (the engine moves it), so the treading-water bob and tip sway of a squid standing still are off: they
+   would only cost style work on every frame. The lit limbs' shimmer stays. */
+.ocean-squid .squid-move,
+.ocean-squid .tip {
+  animation: none !important;
+}
+
+/* Dozing: eyes half shut, the glow turned down. */
+.ocean-squid[data-doze] .s-lid {
+  visibility: visible;
+}
+.ocean-squid[data-doze] .squid-glow {
+  opacity: 0.55;
+}
+.ocean-squid[data-doze] .squid-px {
+  filter: brightness(0.8);
+}
