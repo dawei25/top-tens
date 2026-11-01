@@ -549,14 +549,7 @@ export function Blitz({
         data-glass
       >
         <BlitzResultsSquid hits={state.hits} best={!!record?.best && score > 0 && record.previous !== undefined} />
-        {locked ? (
-          <>
-            <p className="label gold">Played</p>
-            <p className="caption">one round only. this was yours.</p>
-          </>
-        ) : (
-          <p className="label gold" data-motion="banner">Time's up</p>
-        )}
+        {locked ? <p className="label gold">Played</p> : <p className="label gold" data-motion="banner">Time's up</p>}
         {note === "away" && <p className="caption">time ran out while you were away.</p>}
         <p className="score" aria-label={`${score} points`}>
           <span className={`score-n ${record?.best && score > 0 ? "gold" : ""}`} data-testid="blitz-final">
@@ -565,6 +558,7 @@ export function Blitz({
           <span className="score-of">pts</span>
         </p>
         <div className="results-meta">
+          {locked && <p>one round only. this was yours.</p>}
           <p>
             <b>{n}</b> answer{n === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
           </p>
