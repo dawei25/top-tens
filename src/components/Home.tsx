@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { PuzzleMeta } from "../game/puzzles";
-import { streak, type DailyEntry } from "../game/daily";
+import { dailyGame as dailyGameOf, streak, type DailyEntry } from "../game/daily";
 import { load, save, stats } from "../game/storage";
 import { recentPlays } from "../game/history";
 import { Countdown } from "./Countdown";
@@ -113,7 +113,7 @@ export function Home({
   const [helpAsked, setHelpAsked] = useState(false);
   const dailyRef = useRef<HTMLButtonElement>(null);
   const blitzRef = useRef<HTMLButtonElement>(null);
-  const dailyGame = entry && saved.games[entry.id];
+  const dailyGame = entry && dailyGameOf(saved, entry);
   const dailyDone = !!dailyGame && dailyGame.status !== "playing";
   const dailyBlitzDone = saved.blitzDaily?.[today];
   // Keyboard-first: Enter starts today's list, or today's Blitz once the list is done. Focus without scrolling so

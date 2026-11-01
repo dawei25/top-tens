@@ -55,9 +55,33 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("score").getAttribute("data-found"), "2");
     assert.ok(await noHScroll(page));
 
-    await page.getByTestId("nav-back").click();
+    // One try: no Play again; Today's Blitz (unplayed) and a random list instead.
+    assert.equal(await page.getByTestId("play-again").count(), 0);
+    assert.equal(await page.getByTestId("results-daily-blitz").count(), 1);
+    assert.equal(await page.getByTestId("results-roll").count(), 1);
+
+    // Reopening it (reload) shows the finished board and results, never a fresh game.
+    await page.reload();
+    await page.getByTestId("results").waitFor();
+    assert.equal(await page.getByTestId("score").getAttribute("data-found"), "2");
+    assert.equal(await page.getByLabel("Your guess").count(), 0);
+    assert.equal(await page.locator('[data-testid="slot"][data-state="hidden"]').count(), 0);
+
+    await page.getByTestId("nav-home").click();
     await page.getByTestId("today-list").waitFor();
     assert.equal(await page.getByTestId("today-list").getAttribute("data-done"), "true");
+    // From Home too.
+    await page.getByTestId("today-list").click();
+    await page.getByTestId("results").waitFor();
+    assert.equal(await page.getByTestId("give-up").count(), 0);
+
+    // Random list rolls a different list, a fresh game.
+    await page.getByTestId("results-roll").click();
+    await page.getByTestId("give-up").waitFor();
+    const rolled = await hash(page);
+    assert.match(rolled, /^#p-/);
+    assert.notEqual(rolled, `#p-${entry.id}`);
+    assert.equal(await lives(), "5");
     await ctx.close();
   });
 }
