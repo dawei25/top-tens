@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SoundToggle } from "./sound/SoundToggle";
+import type { Puzzle } from "../game/types";
 
 export function reducedMotion(): boolean {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -22,6 +23,21 @@ export function formatAsOf(asOf: string): string {
 /** "Wikipedia: List of ..." -> "Wikipedia". */
 export function sourceSite(name: string): string {
   return name.split(":")[0].trim() || name;
+}
+
+/**
+ * A guess that isn't an accepted answer at all: "Not one of the 237 films on this list." when the puzzle names its
+ * noun, otherwise "Not on this list."
+ */
+export function notOnList(puzzle: Pick<Puzzle, "noun" | "answers" | "extras">): string {
+  if (!puzzle.noun) return "Not on this list.";
+  const count = puzzle.answers.length + puzzle.extras.length;
+  return `Not one of the ${count.toLocaleString("en-US")} ${puzzle.noun} on this list.`;
+}
+
+/** The list's prompt for a Blitz, where the goal is as many as you can: "Name the 10 tallest ..." -> "Name the tallest ...". */
+export function blitzPrompt(prompt: string): string {
+  return prompt.replace(/^Name the 10 /, "Name the ");
 }
 
 /**

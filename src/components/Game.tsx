@@ -21,7 +21,7 @@ import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
+import { formatAsOf, InkSac, notOnList, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
 import { ParBlock, usePar } from "./par";
@@ -41,6 +41,11 @@ interface Props {
   onRoll: () => void;
   /** Today's Blitz, while it's unplayed (a finished daily offers it). */
   onDailyBlitz?: () => void;
+  /**
+   * Today's Blitz list while it's unplayed. A free Blitz of it would be a practice run at a one-try round, so this
+   * list offers Today's Blitz instead of its own Blitz key.
+   */
+  todaysBlitz?: string;
 }
 
 interface Feedback {
@@ -54,7 +59,7 @@ interface Feedback {
 /** Milliseconds between missed rows typing in at the end of a game. */
 const REVEAL_STEP = 90;
 
-function describe(r: GuessResult): Omit<Feedback, "key"> | null {
+function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null {
   switch (r.kind) {
     case "correct":
       return { tone: "good", text: `${r.entry.name}. #${r.entry.rank} on the board.` };
@@ -75,14 +80,14 @@ function describe(r: GuessResult): Omit<Feedback, "key"> | null {
     case "unknown":
       return {
         tone: "warn",
-        text: r.junk ? "That doesn't look like an answer. No life lost." : "Not a recognized answer for this list. No life lost.",
+        text: r.junk ? "That doesn't look like an answer. No life lost." : `${notOnList(puzzle)} No life lost.`,
       };
     default:
       return null;
   }
 }
 
-export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, onDailyBlitz }: Props) {
+export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, onDailyBlitz, todaysBlitz }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -217,7 +222,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
       return;
     }
     const { state, result } = applyGuess(game, puzzle, text, lexicon, offered);
-    const fb = describe(result);
+    const fb = describe(result, puzzle);
     if (!fb) return;
     setHintAsk(null);
     if (result.kind === "correct") emitPlay({ kind: "found", rank: result.entry.rank, found: state.found.length });
@@ -298,12 +303,18 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     dailyStreak = streak(sv);
   }
   const mode = !daily ? "Random list" : daily.date === today ? `Daily #${daily.n}` : `Archive #${daily.n}`;
-  // Count this game in before the save effect runs, so finishing today's daily opens Blitz on the results at once.
-  const blitzOpen = (() => {
-    const sv = load();
-    sv.games[id] = game;
-    return blitzAvailable(puzzle, schedule, today, sv);
-  })();
+  // The list's own Blitz key. Never on a daily: Blitz shows every answer, and a round there would be a practice run
+  // at the day's one-try Blitz (a finished daily offers Today's Blitz instead). Nor on Today's Blitz list until that
+  // round is played. Count this game in before the save effect runs, so finishing a list opens its Blitz at once.
+  const heldBlitz = todaysBlitz === puzzle.id;
+  const blitzOpen =
+    !daily &&
+    !heldBlitz &&
+    (() => {
+      const sv = load();
+      sv.games[id] = game;
+      return blitzAvailable(puzzle, schedule, today, sv);
+    })();
 
   const missChips = misses.length > 0 && (
     <section className="misses" aria-label="Wrong guesses" data-glass>
@@ -342,7 +353,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
             {blitzOpen && !over && (
-              <a className="key key-xs key-blitz-sm" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
+              <a className="key key-xs key-blitz-sm" data-testid="title-blitz" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
                 Blitz
               </a>
             )}
@@ -601,14 +612,14 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button ref={shareRef} className="key key-pink" onClick={share}>
                   {copied ? "Copied" : "Share"}
                 </button>
-                {/* A daily is one try: no Play again, just somewhere else to go. */}
-                {daily && onDailyBlitz && (
+                {/* A daily is one try: no Play again, just somewhere else to go. Today's Blitz list offers that round. */}
+                {(daily || heldBlitz) && onDailyBlitz && (
                   <button className="key key-blitz" data-testid="results-daily-blitz" onClick={onDailyBlitz}>
                     Today's Blitz
                   </button>
                 )}
                 {/* A daily already offers Today's Blitz; a second gold Blitz key there reads like the same thing. */}
-                {blitzOpen && !daily && (
+                {blitzOpen && (
                   <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`}>
                     Blitz
                   </a>

@@ -1048,6 +1048,10 @@ a {
   margin-top: 6px;
   font-size: 18px;
 }
+/* Blitz's title card: the list's prompt, then the round's rule right under it. */
+.prompt .caption.blitz-rule {
+  margin-top: 2px;
+}
 .asof {
   margin-top: 4px;
   font-size: 16px;
@@ -2189,12 +2193,20 @@ a.text-btn {
   }
 }
 
-/* Archive: that day's Blitz score under the daily result */
-.arch-result .arch-blitz {
+/* Archive: that day's Blitz score under the daily result. A Blitz on another list (older dates) names that list, on
+   its own line under the title, where there is room for it. */
+.arch-result .arch-blitz,
+.arch-title .arch-blitz {
   display: block;
   font-size: 15px;
   letter-spacing: 0.08em;
   color: var(--gold);
+}
+.arch-title .arch-blitz {
+  margin-top: 2px;
+}
+.arch-blitz b {
+  font-weight: 400;
 }
 .results-meta p.gold b {
   color: var(--gold);
