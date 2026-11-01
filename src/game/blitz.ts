@@ -82,8 +82,11 @@ export type BlitzResult =
   | { kind: "scored"; hit: BlitzHit; corrected: boolean }
   | { kind: "duplicate"; name: string }
   | { kind: "choices"; suggestions: string[] }
-  /** Not on this list, or on it without a stat: scores nothing, costs nothing. */
-  | { kind: "none"; junk: boolean }
+  /**
+   * Scores nothing, costs nothing: not on this list (`junk` if it doesn't look like an answer at all), part of
+   * several names (`vague`: how many fit, see GuessResult), or on the list without a stat to score (`unscored`).
+   */
+  | { kind: "none"; junk: boolean; vague?: number; unscored?: string }
   | { kind: "over" };
 
 export function newBlitz(puzzle: Puzzle): BlitzState {
@@ -133,11 +136,11 @@ export function blitzGuess(
   const r = judgeGuess(text, puzzle, new Set(), lex, offered);
   if (r.kind === "empty") return { state, result: r };
   if (r.kind === "typo") return { state, result: { kind: "choices", suggestions: r.suggestions } };
-  if (r.kind === "unknown") return { state, result: { kind: "none", junk: r.junk } };
+  if (r.kind === "unknown") return { state, result: { kind: "none", junk: r.junk, vague: r.vague } };
   if (r.kind === "duplicate" || r.kind === "correct" || r.kind === "near") {
     const entry: Entry = r.entry;
     if (state.hits.some((h) => h.name === entry.name)) return { state, result: { kind: "duplicate", name: entry.name } };
-    if (entry.n === undefined) return { state, result: { kind: "none", junk: false } };
+    if (entry.n === undefined) return { state, result: { kind: "none", junk: false, unscored: entry.name } };
     const hit: BlitzHit = { name: entry.name, rank: entry.rank, n: entry.n, points: entryPoints(puzzle, entry) };
     const corrected = r.kind === "duplicate" ? false : r.corrected;
     return { state: { ...startBlitz(state, now), hits: [...state.hits, hit] }, result: { kind: "scored", hit, corrected } };

@@ -66,9 +66,10 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("lives").getAttribute("data-lives"), "4");
     assert.equal(await squid.getAttribute("data-lit"), "3");
 
-    // Loading the game in progress shows the same limbs lit.
+    // Loading the game in progress shows the same limbs lit. The ocean is there at once, before the saved game has
+    // loaded: wait for its limbs, not just for the squid.
     await page.reload();
-    await squid.waitFor();
+    await squid.locator('[data-limb][data-on="true"]').nth(2).waitFor({ state: "attached" });
     assert.deepEqual(await litOf(squid), [1, 4, 7]);
     assert.equal(await squid.getAttribute("data-mood"), "play");
     assert.ok(await noHScroll(page));

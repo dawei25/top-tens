@@ -184,3 +184,45 @@ describe("autocorrect doesn't hand out answers nobody typed", () => {
     expect(j("bangledesh")).toMatchObject({ kind: "correct", entry: { rank: 8 } });
   });
 });
+
+describe("a whole name beats a word of a longer name at the same distance", () => {
+  const peaks: Puzzle = {
+    ...puzzle,
+    id: "peaks",
+    answers: [e(1, "Mount Everest", ["Everest"]), e(2, "K2"), e(3, "Kangchenjunga"), e(4, "Lhotse"), ...puzzle.answers.slice(4)],
+    extras: [e(0, "Lhotse Middle"), e(0, "Lhotse Shar")],
+  };
+  it("corrects a misspelling to the peak itself, not a choice of its side summits", () => {
+    expect(judgeGuess("lotse", peaks, new Set())).toMatchObject({ kind: "correct", entry: { rank: 4 }, corrected: true });
+  });
+});
+
+describe("several names containing the guess", () => {
+  const states: Puzzle = {
+    ...puzzle,
+    id: "states",
+    answers: [
+      e(1, "California"), e(2, "Texas"), e(3, "Florida"), e(4, "New York"), e(5, "Pennsylvania"),
+      e(6, "Illinois"), e(7, "Ohio"), e(8, "Georgia"), e(9, "North Carolina"), e(10, "Michigan"),
+    ],
+    extras: [e(28, "South Carolina"), e(47, "North Dakota"), e(46, "South Dakota")],
+  };
+  const games: Puzzle = {
+    ...puzzle,
+    id: "games",
+    answers: [e(1, "Minecraft"), e(2, "Mario Kart 8"), ...puzzle.answers.slice(2)],
+    extras: [e(0, "Mario Kart Wii"), e(0, "Mario Kart World"), e(0, "Mario Kart Arcade GP"), e(0, "Destroy All Humans!"), e(0, "Destroy All Humans! 2")],
+  };
+  it("offers them when the guess is what each is called (North and South Carolina)", () => {
+    expect(judgeGuess("carolina", states, new Set())).toMatchObject({ kind: "typo", suggestions: ["North Carolina", "South Carolina"] });
+    expect(judgeGuess("dakota", states, new Set())).toMatchObject({ kind: "typo", suggestions: ["North Dakota", "South Dakota"] });
+  });
+  it("asks for more, without names, when three or more only contain the guess; two are a fair choice", () => {
+    expect(judgeGuess("mario kart", games, new Set())).toMatchObject({ kind: "unknown", vague: 4 });
+    expect(judgeGuess("humans", games, new Set())).toMatchObject({ kind: "typo", suggestions: ["Destroy All Humans!", "Destroy All Humans! 2"] });
+  });
+  it("still takes one name's distinctive word as that entry", () => {
+    expect(judgeGuess("minecraft", games, new Set())).toMatchObject({ kind: "correct", entry: { rank: 1 } });
+    expect(judgeGuess("york", states, new Set())).toMatchObject({ kind: "correct", entry: { rank: 4 } });
+  });
+});
