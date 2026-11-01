@@ -2244,3 +2244,332 @@ a.text-btn {
   top: 16px;
   right: max(var(--gutter), env(safe-area-inset-right));
 }
+
+/* ---------- Par ---------- */
+/* The title card's par: quiet, next to the found counter. */
+.count-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-left: auto;
+}
+.key-blitz-sm + .count-wrap {
+  margin-left: 0;
+}
+.count-par {
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* The results panel: par and a pixel histogram of how players score, then where this score stands. */
+.par-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 0 2px;
+  border-top: 1px dashed var(--hairline);
+}
+.par-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.par-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.par-stat b {
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 0.9;
+  color: var(--gold);
+}
+.histogram {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.histo-bars {
+  display: grid;
+  grid-template-columns: repeat(11, 12px);
+  column-gap: 2px;
+  align-items: end;
+  height: 42px;
+  border-bottom: 2px solid var(--hairline);
+}
+.histo-col {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+}
+.histo-bar {
+  width: 100%;
+  background: var(--faint);
+}
+.histo-col[data-you] .histo-bar {
+  background: var(--pink);
+  box-shadow: 0 0 8px var(--pink-glow);
+}
+/* Par: a gold pixel caret under its bar. */
+.histo-col[data-par]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  translate: -50% 0;
+  border-inline: 4px solid transparent;
+  border-bottom: 5px solid var(--gold);
+}
+.histo-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--muted);
+}
+.par-line {
+  font-size: 19px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+.est {
+  min-height: 0;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+.est:hover {
+  color: var(--text);
+}
+.est-note {
+  display: block;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* Past runs: the classic result's distance from par, under it. */
+.vs-par {
+  display: block;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* Home's record panel: the knowledge key on the right of its head. */
+.home-stats .group-head {
+  align-items: center;
+}
+.knowledge-key {
+  color: var(--cyan);
+}
+
+/* ---------- Your knowledge ---------- */
+.know-overall {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 28px;
+  margin-top: 12px;
+}
+.know-headline {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.know-big {
+  font-size: 72px;
+  line-height: 0.85;
+  color: var(--text);
+  text-shadow:
+    -2px 0 var(--pink),
+    2px 0 var(--cyan);
+}
+.know-big.over {
+  color: var(--cyan);
+}
+.know-big.under {
+  color: var(--pink);
+}
+.know-big-of {
+  font-size: 22px;
+  color: var(--label);
+  letter-spacing: 0.1em;
+}
+.know-stats {
+  display: flex;
+  gap: 24px;
+}
+.know-stats div {
+  display: flex;
+  flex-direction: column-reverse;
+}
+.know-stats dt {
+  font-size: 16px;
+  color: var(--muted);
+}
+.know-stats dd {
+  font-size: 36px;
+  line-height: 1;
+  color: var(--cyan);
+}
+.know-est {
+  font-size: 16px;
+  color: var(--muted);
+}
+.know-list {
+  padding: 12px 0 8px;
+}
+.know-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--know-bar) 4.2em;
+  column-gap: 14px;
+  align-items: baseline;
+  padding: 0 18px 8px;
+  --know-bar: 216px;
+}
+.know-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.know-list ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.know-row {
+  --know-bar: 216px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--know-bar) 4.2em;
+  column-gap: 14px;
+  align-items: center;
+  padding: 6px 18px;
+}
+.know-row + .know-row {
+  border-top: 1px solid rgba(125, 147, 184, 0.08);
+}
+.know-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 22px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+}
+.know-sub {
+  font-size: 16px;
+  text-transform: none;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+/* The bar grows out from the par line in the middle: right for over par, left for under. */
+.know-bar {
+  position: relative;
+  height: 16px;
+  background: repeating-linear-gradient(90deg, rgba(125, 147, 184, 0.1) 0 2px, transparent 2px 8px);
+}
+.know-bar::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--gold);
+}
+.know-fill {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+}
+.know-fill.over {
+  left: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+.know-fill.under {
+  right: 50%;
+  background: var(--pink);
+  box-shadow: 0 0 8px var(--pink-glow);
+}
+.know-vs {
+  font-size: 24px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+}
+.know-vs.over {
+  color: var(--cyan);
+}
+.know-vs.under {
+  color: var(--pink);
+}
+.know-head h2 {
+  grid-area: title;
+}
+.know-axis {
+  grid-area: axis;
+}
+.know-name {
+  grid-area: name;
+}
+.know-bar {
+  grid-area: bar;
+}
+.know-vs {
+  grid-area: vs;
+}
+.know-head {
+  grid-template-areas: "title axis .";
+}
+.know-row {
+  grid-template-areas: "name bar vs";
+}
+/* Phones: name and number on one line, the bar full width under them. */
+@media (max-width: 520px) {
+  .know-row,
+  .know-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-inline: 12px;
+    column-gap: 10px;
+    row-gap: 6px;
+  }
+  .know-head {
+    grid-template-areas: "title" "axis";
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .know-row {
+    grid-template-areas: "name vs" "bar bar";
+    padding-block: 8px;
+  }
+  .know-name {
+    font-size: 19px;
+  }
+  .know-vs {
+    font-size: 20px;
+  }
+  .know-big {
+    font-size: 60px;
+  }
+}

@@ -4,6 +4,7 @@ import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
 import { runTime } from "./Blitz";
 import { ScreenHead, ModeTag } from "./pixel";
+import { usePar, vsParText } from "./par";
 
 interface Props {
   index: PuzzleMeta[];
@@ -36,6 +37,7 @@ function href(p: Play, schedule: DailyEntry[]): string {
 /** Everything played, list games and Blitz rounds alike, newest first. */
 export function History({ index, schedule, entry, onBack, onHome }: Props) {
   const plays = recentPlays(load(), 100);
+  const par = usePar();
 
   return (
     <main className="screen archive">
@@ -66,7 +68,14 @@ export function History({ index, schedule, entry, onBack, onHome }: Props) {
                       {p.kind === "blitz" && p.today && <span className="play-tag blitz">today's blitz</span>}
                     </span>
                   </span>
-                  <span className={`arch-result ${r.tone}`}>{r.text}</span>
+                  <span className={`arch-result ${r.tone}`}>
+                    {r.text}
+                    {p.kind === "list" && par?.[p.id] && (
+                      <span className="vs-par" data-testid="history-vs-par">
+                        {vsParText(p.run.found.length - par[p.id].par)}
+                      </span>
+                    )}
+                  </span>
                 </a>
               </li>
             );

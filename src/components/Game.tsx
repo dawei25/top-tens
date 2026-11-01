@@ -24,6 +24,7 @@ import { Countdown } from "./Countdown";
 import { formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
+import { ParBlock, usePar } from "./par";
 
 interface Props {
   id: string;
@@ -99,6 +100,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   /** The hidden row showing the "first letter?" confirm. */
   const [hintAsk, setHintAsk] = useState<number | null>(null);
   const yesRef = useRef<HTMLButtonElement>(null);
+  const parFile = usePar();
 
   useEffect(() => {
     loadPuzzle(id)
@@ -301,6 +303,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const allFactsOpen = factRanks.length > 0 && factRanks.every((r) => openFacts.has(r));
 
   const hints = game.hints ?? [];
+  const par = parFile?.[puzzle.id];
   // Count this game in before the save effect has run, so the results show the streak it just made.
   let dailyStreak: ReturnType<typeof streak> | null = null;
   if (daily && over) {
@@ -357,8 +360,15 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 Blitz
               </a>
             )}
-            <span className="count" aria-label={`${game.found.length} of 10 found`}>
-              <b>{game.found.length}</b>/10
+            <span className="count-wrap">
+              <span className="count" aria-label={`${game.found.length} of 10 found`}>
+                <b>{game.found.length}</b>/10
+              </span>
+              {par && (
+                <span className="count-par" data-testid="title-par" title={par.estimated ? "par: what a typical player gets (estimated)" : "par: what a typical player gets"}>
+                  par {par.par}
+                </span>
+              )}
             </span>
           </div>
           <h1>{puzzle.title}</h1>
@@ -582,6 +592,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <span className={`score-n ${game.status === "won" ? "gold" : ""}`}><CountUp value={game.found.length} /></span>
                 <span className="score-of">/10</span>
               </p>
+              {par && <ParBlock list={par} score={game.found.length} />}
               <p className="caption">
                 {game.status === "won"
                   ? `with ${game.lives} ${game.lives === 1 ? "life" : "lives"} to spare.`
