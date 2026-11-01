@@ -122,6 +122,20 @@ describe("with a backend", () => {
     await vi.waitFor(() => expect(svc.start).toHaveBeenCalled());
   });
 
+  it("shows a stored session's player at once, before the backend code arrives", async () => {
+    configure();
+    vi.doMock("./service", () => ({ start: vi.fn() }));
+    const { store } = fakeBrowser();
+    store.set(
+      "top-tens:auth",
+      JSON.stringify({ access_token: "t", user: { id: "u-1", email: "dana@example.com", user_metadata: { full_name: "Dana Scully" }, app_metadata: { provider: "google" } } }),
+    );
+    const net = await import("./index");
+    net.startNet();
+    const { getAccount } = await import("./store");
+    expect(getAccount()).toMatchObject({ status: "in", user: { id: "u-1", name: "Dana Scully", email: "dana@example.com", google: true } });
+  });
+
   it("is signed out (not loading) at startup when there's no session, and off when accounts are switched off", async () => {
     configure();
     fakeBrowser();

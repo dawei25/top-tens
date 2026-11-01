@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { loadPar, percentile, percentileLabel, type ListPar, type ParFile } from "../game/par";
+import { useListStats } from "../net";
+import { formatCount, pickCounts } from "../net/crowd";
 
 /** par.json, once loaded (null until then; an empty map if it's missing). */
 export function usePar(): ParFile | null {
@@ -86,21 +88,27 @@ export function ParHistogram({ counts, par, score }: { counts: number[]; par: nu
   );
 }
 
-/** The results panel's par block: par, the histogram, and where the score stands (marked as an estimate). */
-export function ParBlock({ list, score }: { list: ListPar; score: number }) {
-  const p = percentile(list.counts, score);
+/**
+ * The results panel's par block: par, the histogram, and where the score stands. With a backend (and the list's id),
+ * real players' scores replace the estimate once enough of them have finished the list ("of 1,203 players").
+ */
+export function ParBlock({ list, score, id }: { list: ListPar; score: number; id?: string }) {
+  const { counts, real } = pickCounts(list.counts, useListStats(id, "list"));
+  const p = percentile(counts, score);
   return (
-    <div className="par-block" data-testid="par" data-par={list.par}>
+    <div className="par-block" data-testid="par" data-par={list.par} data-source={real ? "players" : "estimate"} data-n={real?.n}>
       <div className="par-row">
         <p className="par-stat">
           <span className="label">Par</span>
           <b>{list.par}</b>
         </p>
-        <ParHistogram counts={list.counts} par={list.par} score={score} />
+        <ParHistogram counts={counts} par={list.par} score={score} />
       </div>
       <p className="par-line">
-        <span>{percentileLabel(p)} of players</span>{" "}
-        {list.estimated && <Est />}
+        <span>
+          {percentileLabel(p)} of {real ? `${formatCount(real.n)} players` : "players"}
+        </span>{" "}
+        {!real && list.estimated && <Est />}
       </p>
     </div>
   );

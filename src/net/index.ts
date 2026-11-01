@@ -6,6 +6,7 @@ import { accountsOn, backendOn } from "./config";
 import type { CrowdStats, ListAverages } from "./crowd";
 import type { SyncSave } from "./sync/merge";
 import {
+  accountUser,
   getAccount,
   getSaveVersion,
   KEYS,
@@ -14,6 +15,7 @@ import {
   subscribeAccount,
   subscribeSaves,
   type AccountState,
+  type AccountUser,
 } from "./store";
 
 /**
@@ -65,12 +67,23 @@ export function startNet(): void {
   if (!backendOn) return;
   const pending = /"pending":\[\{/.test(stored(KEYS.outbox) ?? "");
   const session = accountsOn && (!!stored(KEYS.auth) || authCallback());
-  setAccount({ status: !accountsOn ? "off" : session ? "loading" : "out" });
+  // A stored session names its player, so Home can show them at once; the backend code confirms it a moment later.
+  let user: AccountUser | undefined;
+  try {
+    const u = accountsOn ? JSON.parse(stored(KEYS.auth) ?? "null")?.user : null;
+    if (typeof u?.id === "string") user = accountUser(u);
+  } catch {
+    // Not a session we can read: wait for the backend code.
+  }
+  setAccount({ status: !accountsOn ? "off" : user ? "in" : session ? "loading" : "out", user });
   if (pending || session) {
     loadService()
       ?.then((s) => s.start())
-      // The backend code didn't download (offline): play on signed out; the next try comes with the next game.
-      .catch(() => getAccount().status === "loading" && setAccount({ status: "out" }));
+      // The backend code didn't download (offline): play on; the next try comes with the next game.
+      .catch(() => {
+        if (getAccount().status === "loading") setAccount({ status: "out" });
+        else if (getAccount().status === "in") setAccount({ sync: "offline" });
+      });
   }
   addEventListener("online", () => withService((s) => s.flushPlays()));
   // Coming back to the tab: catch up with other devices (at most every 30 s).

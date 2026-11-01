@@ -8,6 +8,9 @@ import { build, preview } from "vite";
 const PORT = Number(process.env.E2E_PORT) || 5101;
 const dir = fileURLToPath(new URL(".", import.meta.url));
 const started = Date.now();
+// The suite runs without a backend, whatever a local .env.local says (it would send test games to a real project).
+// Set env wins over .env files. backend.e2e.cjs builds its own copy with fake keys and a mocked Supabase.
+for (const key of ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY"]) process.env[key] = "";
 
 await build({ logLevel: "warn" });
 const server = await preview({ preview: { port: PORT, strictPort: true }, logLevel: "warn" });

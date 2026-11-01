@@ -35,6 +35,8 @@ import { ModeTag, ScreenHead } from "./pixel";
 import { blitzPrompt, notOnList } from "./copy";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
+import { BlitzCrowdLine } from "./account";
+import { reportBlitz } from "../net";
 
 interface Props {
   id: string;
@@ -340,6 +342,8 @@ export function Blitz({
     }
     save(next);
     emitPlay({ kind: "blitz-end", score: blitzScore(state), best: r.best && r.previous !== undefined });
+    // Score stats (and sync): a no-op without a backend. A date's Blitz counts as a daily only on its own date.
+    reportBlitz(state, dailyBlitz && daily?.counted && dailyBlitz.date === localDate() ? dailyBlitz.date : undefined);
     setRecord({ best: r.best, previous: r.previous, daily });
   }, [state, record, id, dailyBlitz]);
 
@@ -601,6 +605,7 @@ export function Blitz({
           <p>
             <b>{n}</b> answer{n === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
           </p>
+          <BlitzCrowdLine id={id} score={score} />
           {record?.daily?.counted && dailyBlitz && (
             <p className="gold" data-testid="daily-blitz-line">
               {dailyBlitz.date === today ? "today's blitz" : `blitz #${dailyBlitz.n}`}: <b>{record.daily.score}</b>

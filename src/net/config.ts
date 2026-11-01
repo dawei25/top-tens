@@ -20,17 +20,21 @@ export function readBackend(url?: string, anonKey?: string, signIn?: string): Ba
   return { url: u.replace(/\/+$/, ""), anonKey: k, signIn: methods };
 }
 
-export const BACKEND: Backend | null = readBackend(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-  import.meta.env.VITE_SIGN_IN,
-);
+/**
+ * Both checks start with the raw env, which the build replaces with literals: in a build without a backend they fold
+ * to `false`, and the bundler and minifier drop the code behind them.
+ */
+const configured = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+export const BACKEND: Backend | null = configured
+  ? readBackend(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, import.meta.env.VITE_SIGN_IN)
+  : null;
 
 /** Whether this build talks to a backend at all (anonymous score stats). */
-export const backendOn = BACKEND !== null;
+export const backendOn: boolean = configured && BACKEND !== null;
 
 /** Whether players can sign in (accounts and sync). */
-export const accountsOn = !!BACKEND && BACKEND.signIn.length > 0;
+export const accountsOn: boolean = configured && !!BACKEND && BACKEND.signIn.length > 0;
 
 /** Where privacy questions go, if the owner set one. */
 export const PRIVACY_CONTACT = import.meta.env.VITE_PRIVACY_CONTACT?.trim() ?? "";

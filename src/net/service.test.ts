@@ -63,6 +63,7 @@ function fakeSupabase() {
     auth: {
       onAuthStateChange: vi.fn(),
       getSession: vi.fn(async () => ({ data: { session: null } })),
+      signOut: vi.fn(async () => ({ error: null })),
     },
   };
   return { client, calls, answers };
@@ -209,5 +210,54 @@ describe("sync through the service", () => {
     const svc = await import("./service");
     await svc.syncNow();
     expect(fake.calls.saves).toEqual([]);
+  });
+
+  it("never merges one account's games into another's on a shared device", async () => {
+    const svc = await import("./service");
+    const { setAccount } = await import("./store");
+    const run = (id: string) => ({ id, startedAt: 1, finishedAt: 2, status: "lost", found: [], lives: 0, hints: 0 });
+    // Ann synced here, then signed out offline, so her latest game stayed on the device.
+    store.set("top-tens:sync-owner", "ann");
+    store.set("top-tens:v1", JSON.stringify({ games: {}, daily: {}, seenHelp: true, listRuns: [run("ann-game")] }));
+
+    setAccount({ status: "in", user: { id: "bob", name: "Bob" } });
+    await svc.syncNow();
+    expect(JSON.parse(store.get("top-tens:v1")!).listRuns ?? []).toEqual([]);
+    // Bob's account never saw Ann's game.
+    expect((fake.answers.row!.data as { listRuns?: unknown[] }).listRuns ?? []).toEqual([]);
+    expect(JSON.parse(store.get("top-tens:v1:ann")!).listRuns[0].id).toBe("ann-game");
+    expect(store.get("top-tens:sync-owner")).toBe("bob");
+
+    // Ann signs in again: her game comes back (and goes to her account).
+    fake.answers.row = null;
+    setAccount({ status: "in", user: { id: "ann", name: "Ann" } });
+    await svc.syncNow();
+    expect(JSON.parse(store.get("top-tens:v1")!).listRuns.map((r: { id: string }) => r.id)).toEqual(["ann-game"]);
+    expect(store.has("top-tens:v1:ann")).toBe(false);
+  });
+
+  it("signs out to a fresh device once the account has the save, and keeps it when it couldn't sync", async () => {
+    const svc = await import("./service");
+    const { setAccount, getAccount } = await import("./store");
+    const saved = { games: {}, daily: { "2026-11-01": "mountains" }, seenHelp: true };
+    store.set("top-tens:v1", JSON.stringify(saved));
+    setAccount({ status: "in", user: { id: "u", name: "Dana" } });
+    await svc.signOut();
+    expect(getAccount().status).toBe("out");
+    expect(JSON.parse(store.get("top-tens:v1")!)).toEqual({ games: {}, daily: {}, seenHelp: true });
+    expect(store.has("top-tens:sync-owner")).toBe(false);
+
+    // Offline: the save can't reach the account, so it stays here.
+    vi.resetModules();
+    const offline = await import("./service");
+    const s2 = await import("./store");
+    fake.client.from = () => {
+      throw new TypeError("Failed to fetch");
+    };
+    store.set("top-tens:v1", JSON.stringify(saved));
+    s2.setAccount({ status: "in", user: { id: "u", name: "Dana" } });
+    await offline.signOut();
+    expect(s2.getAccount().status).toBe("out");
+    expect(JSON.parse(store.get("top-tens:v1")!)).toEqual(saved);
   });
 });

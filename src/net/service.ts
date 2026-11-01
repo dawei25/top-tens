@@ -1,4 +1,4 @@
-import { createClient, type Session, type SupabaseClient, type User } from "@supabase/supabase-js";
+import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import type { BlitzState } from "../game/blitz";
 import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
@@ -6,9 +6,9 @@ import { accountsOn, BACKEND } from "./config";
 import { parseAverages, parseStats, type CrowdStats, type ListAverages } from "./crowd";
 import { localOutboxStore, Outbox, retryDelay, type SendResult } from "./outbox";
 import { blitzPlay, clientId, listPlay, rpcArgs, type Play } from "./plays";
-import { bumpSaves, getAccount, KEYS, remember, setAccount, type AccountUser } from "./store";
+import { accountUser, bumpSaves, getAccount, KEYS, remember, setAccount, type AccountUser } from "./store";
 import { syncSave, type SaveRemote } from "./sync/engine";
-import type { SyncSave } from "./sync/merge";
+import { mergeSaves, type SyncSave } from "./sync/merge";
 
 /**
  * Everything that talks to the backend: score stats, sign-in and save sync. Loaded with a dynamic import, and only in
@@ -117,19 +117,7 @@ export function listAverages(): Promise<ListAverages | null> {
 
 // ---------- Account ----------
 
-function displayName(user: User): string {
-  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
-  for (const k of ["display_name", "full_name", "name"]) {
-    const v = meta[k];
-    if (typeof v === "string" && v.trim()) return v.trim().slice(0, 40);
-  }
-  return user.email?.split("@")[0] || "player";
-}
-
-function userOf(session: Session): AccountUser {
-  const u = session.user;
-  return { id: u.id, name: displayName(u), email: u.email, google: u.app_metadata?.provider === "google" };
-}
+const userOf = (session: Session): AccountUser => accountUser(session.user);
 
 /** Where a sign-in comes back to: this page, without its screen (the session lands on Home). */
 function returnTo(): string {
@@ -230,8 +218,7 @@ export async function rename(name: string): Promise<string | null> {
   try {
     const { data, error } = await sb().auth.updateUser({ data: { display_name: name } });
     if (error || !data.user) return "couldn't save the name.";
-    const current = getAccount().user;
-    if (current) setAccount({ user: { ...current, name: displayName(data.user) } });
+    setAccount({ user: accountUser(data.user) });
     return null;
   } catch {
     return "couldn't reach the server. check your connection.";
@@ -257,6 +244,7 @@ export async function signOut(): Promise<void> {
   setAccount({ status: "out", user: undefined, sync: "idle", syncedAt: undefined });
   if (synced) {
     save({ games: {}, daily: {}, seenHelp: load().seenHelp });
+    storage.remove(KEYS.owner);
     bumpSaves();
   }
 }
@@ -325,6 +313,59 @@ const local = {
   write: (s: SyncSave) => save(s),
 };
 
+/** localStorage that never throws (private mode, storage blocked). */
+const storage = {
+  get(k: string): string | null {
+    try {
+      return localStorage.getItem(k);
+    } catch {
+      return null;
+    }
+  },
+  set(k: string, v: string): void {
+    try {
+      localStorage.setItem(k, v);
+    } catch {
+      // Not kept.
+    }
+  },
+  remove(k: string): void {
+    try {
+      localStorage.removeItem(k);
+    } catch {
+      // Already gone, or never there.
+    }
+  },
+};
+
+/**
+ * Before syncing this device with `userId`'s account. If the save here last synced with another account (someone
+ * signed out while offline, so their latest games never reached it), set it aside for that account and start this one
+ * from its own save: one person's games never end up in another's account. Anything set aside earlier for this
+ * account comes back. True if this device's save changed.
+ */
+export function claimDevice(userId: string, now = Date.now()): boolean {
+  let changed = false;
+  const owner = storage.get(KEYS.owner);
+  if (owner && owner !== userId) {
+    storage.set(KEYS.stash + owner, JSON.stringify(load()));
+    save({ games: {}, daily: {}, seenHelp: load().seenHelp });
+    changed = true;
+  }
+  const stashed = storage.get(KEYS.stash + userId);
+  if (stashed) {
+    try {
+      save(mergeSaves(load(), JSON.parse(stashed), now));
+      changed = true;
+    } catch {
+      // A broken stash is dropped.
+    }
+    storage.remove(KEYS.stash + userId);
+  }
+  storage.set(KEYS.owner, userId);
+  return changed;
+}
+
 let running: Promise<void> | null = null;
 let again = false;
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -343,11 +384,13 @@ export function syncNow(): Promise<void> {
         const user = getAccount().user;
         if (getAccount().status !== "in" || !user) return;
         setAccount({ sync: "syncing" });
+        const claimed = claimDevice(user.id);
         try {
           const out = await syncSave(remoteFor(user.id), local);
           setAccount({ sync: "synced", syncedAt: Date.now() });
-          if (out.changedLocal) bumpSaves();
+          if (out.changedLocal || claimed) bumpSaves();
         } catch (e) {
+          if (claimed) bumpSaves();
           setAccount({ sync: e instanceof Offline || !navigator.onLine ? "offline" : "error" });
         }
       } while (again);

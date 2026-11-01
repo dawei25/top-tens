@@ -75,4 +75,27 @@ export const KEYS = {
   auth: "top-tens:auth",
   /** Finished games waiting to be sent. */
   outbox: "top-tens:outbox",
+  /** The account this device's save was last synced with. */
+  owner: "top-tens:sync-owner",
+  /** A save set aside for its account (`${stash}${user id}`) when someone else signed in on this device. */
+  stash: "top-tens:v1:",
 } as const;
+
+/** What the screens show of a Supabase user: a display name (set by the player, else from Google, else the email). */
+export function accountUser(u: {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+  app_metadata?: Record<string, unknown>;
+}): AccountUser {
+  const meta = u.user_metadata ?? {};
+  let name = "";
+  for (const k of ["display_name", "full_name", "name"]) {
+    const v = meta[k];
+    if (typeof v === "string" && v.trim()) {
+      name = v.trim().slice(0, 40);
+      break;
+    }
+  }
+  return { id: u.id, name: name || u.email?.split("@")[0] || "player", email: u.email, google: u.app_metadata?.provider === "google" };
+}
