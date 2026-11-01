@@ -21,13 +21,18 @@ let base;
 let outDir;
 
 before(async () => {
-  process.env.VITE_SUPABASE_URL = SUPA;
-  process.env.VITE_SUPABASE_ANON_KEY = "e2e-anon-key";
   const { build, preview } = await import("vite");
   const root = path.resolve(__dirname, "..");
-  outDir = mkdtempSync(path.join(tmpdir(), "tentacle-backend-e2e-"));
-  await build({ root, logLevel: "warn", build: { outDir, emptyOutDir: true } });
-  server = await preview({ root, logLevel: "warn", build: { outDir }, preview: { port: 0, strictPort: false } });
+  // npm run e2e builds this copy up front (E2E_BACKEND_DIST, with the same fake keys); run alone, the spec builds it.
+  let dist = process.env.E2E_BACKEND_DIST;
+  if (!dist) {
+    process.env.VITE_SUPABASE_URL = SUPA;
+    process.env.VITE_SUPABASE_ANON_KEY = "e2e-anon-key";
+    dist = outDir = mkdtempSync(path.join(tmpdir(), "tentacle-backend-e2e-"));
+    await build({ root, logLevel: "warn", build: { outDir, emptyOutDir: true } });
+  }
+  // Port 0: whatever port is free, so it never collides with another agent's server.
+  server = await preview({ root, logLevel: "warn", build: { outDir: dist }, preview: { port: 0, strictPort: false } });
   base = `http://localhost:${server.httpServer.address().port}/`;
   browser = await chromium.launch();
 });

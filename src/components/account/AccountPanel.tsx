@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { loadService, useAccount } from "../../net";
-import { syncLabel } from "./labels";
+import { cleanName, syncLabel } from "./labels";
 import "./account.css";
 
 const SignInSheet = lazy(() => import("./SignInSheet"));
@@ -12,13 +12,6 @@ function ago(t: number, now = Date.now()): string {
   if (s < 3600) return `${Math.floor(s / 60)} min ago`;
   if (s < 86_400) return `${Math.floor(s / 3600)} h ago`;
   return new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-/** Display names: what's left after trimming, 1 to 24 characters, no control characters. */
-export function cleanName(raw: string): string | null {
-  const name = raw.replace(/\s+/g, " ").trim();
-  if (!name || name.length > 24 || /\p{Cc}/u.test(name)) return null;
-  return name;
 }
 
 /**

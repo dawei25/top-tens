@@ -158,7 +158,7 @@ describe("list_stats and list_averages", () => {
     expect(counts.reduce((a, b) => a + b, 0)).toBe(61);
     // 60 players at i % 11 (6 each at 0-4, 5 each at 5-10), plus B's first game, a 3.
     expect(counts).toEqual([6, 6, 6, 7, 6, 5, 5, 5, 5, 5, 5]);
-    expect(avg).toBeCloseTo((60 * 0 + [...Array(60).keys()].reduce((a, i) => a + (i % 11), 0) + 3) / 61, 2);
+    expect(avg).toBeCloseTo(([...Array(60).keys()].reduce((a, i) => a + (i % 11), 0) + 3) / 61, 2);
   });
 
   it("buckets Blitz scores by 50 points, up to the top one reached", async () => {
