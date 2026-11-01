@@ -14,9 +14,16 @@
  * the way it already faces), loops (a circle that starts along its heading), dozing (it swims down head-first, rights
  * itself above the seabed and settles slowly) and hovering near something the player points at.
  *
+ * Confined (wide screens, with a Room): the whole squid, limbs included, stays in open water. Every turn is checked
+ * against the glass before it starts (the way round that fits), every glide against the room ahead of it (a heading
+ * near the one it wants, as far as fits), a glide that would run out of room brakes in time, and as a last resort a
+ * step that would touch the glass is not taken (it stops dead, never slides). Dozing, it rights itself where it has
+ * room to turn and sinks straight down to the seabed.
+ *
  * Pure motion in CSS px and seconds, no DOM: each frame the engine reads x, y, tilt, sx, sy, and the jet state that
  * drives the limbs and fins (jetAge, inflating, hovering).
  */
+import type { Room } from "./room";
 
 export interface Pt {
   x: number;
@@ -32,10 +39,10 @@ export interface World {
   /** The seabed's top edge (CSS px) under a column. */
   floor: (x: number) => number;
   /** Asked for each new waypoint: a point where the squid will show (open water), or null for anywhere. */
-  prefer?: () => Pt | null;
+  prefer?: (low: boolean) => Pt | null;
 }
 
-type Phase = "turn" | "inflate" | "glide" | "hover" | "settle";
+type Phase = "turn" | "inflate" | "glide" | "hover" | "settle" | "sink" | "pivot";
 export type Behaviour = "roam" | "perk" | "doze" | "loop";
 
 /** Glide drag, per second: a pulse's speed falls off as exp(-DRAG t). */
@@ -61,8 +68,21 @@ const SMALL_TURN = 35;
 const FIN_SPEED = 8;
 /** A dart brakes into its point: its speed is held to this many times the distance left (per second). */
 const ARRIVE = 8;
-/** Settling onto the seabed, px/s (slower than any swimming). */
+/** Settling onto the seabed, px/s (slower than any swimming); confined, it sinks further, a little faster. */
 const SINK = 9;
+const SINK_ROOM = 13;
+/** Confined, in a strip too thin to turn round in: it goes down by drifting, upright-ish, this many px/s. */
+const DRIFT = 12;
+/** Confined, hemmed in: a slow turn about the middle of its silhouette (which stays put, so it always fits), its
+ *  head never moving faster than this (px/s), below what the heading check looks at. */
+const PIVOT_SPEED = 12;
+/** Confined: headings tried for that slow turn. */
+const PIVOT_HEADINGS = [30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180];
+/** Confined: a glide stops this far short of the room it has ahead (CSS px). */
+const SHORT = 24;
+/** Confined: headings tried around the one it wants, nearest first; for a hop, only near its own. */
+const OFFSETS = [0, 12, -12, 25, -25, 40, -40, 60, -60, 90, -90, 120, -120, 150, -150, 180];
+const HOP_OFFSETS = [0, 15, -15, 30, -30, 50, -50];
 
 const RAD = Math.PI / 180;
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
@@ -105,8 +125,31 @@ export class Swimmer {
   private target: Pt;
   private perkAt: Pt | null = null;
   private dozeX: number | null = null;
-  private loop: { c: Pt; r: number; a0: number; dir: number; turns: number; t: number; dur: number } | null = null;
+  private loop: {
+    c: Pt;
+    r: number;
+    a0: number;
+    dir: number;
+    turns: number;
+    t: number;
+    dur: number;
+  } | null = null;
   private onLoopDone: (() => void) | null = null;
+  /** Confined: open water, and the way round the current turn goes (1 clockwise, -1, 0 the short way). */
+  private room: Room | null = null;
+  private spin: 1 | -1 | 0 = 0;
+  /** Confined: seconds a turn or a glide has been held up at the glass (then it plans again). */
+  private stuck = 0;
+  /** Confined: on its way out of glass that came over it (a panel appeared, the page scrolled). */
+  escaping = false;
+  /** Confined dozing: the height where it rights itself before sinking. */
+  private dozeTurnY: number | null = null;
+  /** Confined, escaping: the heading that fits where it is going, to turn to once there. */
+  private after: number | null = null;
+  /** Confined, pivoting: the heading it turns to, slowly, about the middle of its silhouette; and whether it then
+   *  settles (dozing, righting itself where there is no room to turn the usual way). */
+  private pivotTo = 0;
+  private settleAfter = false;
 
   private world: World;
   private rand: () => number;
@@ -126,6 +169,48 @@ export class Swimmer {
     this.y = clamp(this.y, b.y0, this.maxY());
     this.target = this.waypoint();
     this.arrive = null;
+  }
+
+  /** Open water to stay in (wide screens), or null: anywhere, behind the glass. */
+  setRoom(room: Room | null) {
+    const was = this.room;
+    this.room = room;
+    if (!room) this.escaping = false;
+    if (!!was !== !!room) {
+      this.spin = 0;
+      if (this.behaviour === "doze" && !this.asleep) this.dozeTurnY = null;
+    }
+  }
+
+  get confined() {
+    return this.room !== null;
+  }
+
+  /** The envelope's slack where it is now (confined), for the engine's checks. */
+  fit() {
+    return this.room ? this.room.fit(this.x, this.y, this.tilt, this.onSeabed) : Infinity;
+  }
+
+  /** Settling or asleep: its limbs may rest on the seabed, at the bottom edge. */
+  private get onSeabed() {
+    return this.asleep || this.phase === "settle";
+  }
+
+  /** Put it somewhere at once (a resize, the first frame), at rest. */
+  place(p: Pt, tilt = this.tilt) {
+    this.x = p.x;
+    this.y = p.y;
+    this.tilt = tilt;
+    this.vx = this.vy = 0;
+    this.thrust = 0;
+    this.arrive = null;
+    this.escaping = false;
+    this.spin = 0;
+    if (this.behaviour !== "doze") {
+      this.phase = "glide";
+      this.left = 0.4;
+    }
+    this.target = this.waypoint();
   }
 
   /** Inflating for a jet, 0-1: the arms open as the mantle fills. */
@@ -170,7 +255,8 @@ export class Swimmer {
   }
 
   private waypoint(): Pt {
-    const pref = this.low ? null : this.world.prefer?.();
+    if (this.room) return this.world.prefer?.(this.low) ?? { x: this.x, y: this.y };
+    const pref = this.low ? null : this.world.prefer?.(false);
     if (pref) return this.clampPt(pref);
     const b = this.bounds();
     const x = b.x0 + this.rand() * (b.x1 - b.x0);
@@ -183,7 +269,7 @@ export class Swimmer {
    * Set up a jet along heading `aim` (degrees), enough to glide about `v / DRAG` px: turn first if it faces well
    * away, then inflate (finishing the turn), then jet.
    */
-  private go(aim: number, v: number, inflate = 0.22, urgent = false, arrive: Pt | null = null) {
+  private go(aim: number, v: number, inflate = 0.22, urgent = false, arrive: Pt | null = null, spin: 1 | -1 | 0 = 0) {
     this.aim = aim;
     this.jet = v;
     this.urgent = urgent;
@@ -191,7 +277,54 @@ export class Swimmer {
     this.thrust = 0;
     this.inflateFor = inflate;
     this.left = inflate;
+    this.spin = spin;
+    this.stuck = 0;
     this.phase = Math.abs(wrapDeg(aim - this.tilt)) > SMALL_TURN ? "turn" : "inflate";
+  }
+
+  /**
+   * Confined: the heading nearest `want` (degrees) that it can turn to here and glide along, and how far (at most
+   * `travel`, at least `min`), scored by how far it gets against how far it turns away (`turnCost` per degree).
+   * Null when nothing fits.
+   */
+  private plan(want: number, travel: number, min = 20, turnCost = 1 / 90, offs = OFFSETS): { aim: number; travel: number; spin: 1 | -1 | 0 } | null {
+    const room = this.room!;
+    let best: { aim: number; travel: number; spin: 1 | -1 | 0 } | null = null;
+    let score = -Infinity;
+    for (const off of offs) {
+      const aim = wrapDeg(want + off);
+      const spin = room.sweep(this.x, this.y, this.tilt, aim);
+      if (spin === null) continue;
+      let t = Math.min(travel, room.reach(this.x, this.y, aim, travel + SHORT) - SHORT);
+      if (t < min) continue;
+      // Better to end where it can turn round (or, upright, drift down): never boxed in, facing the glass.
+      const ux = Math.sin(aim * RAD);
+      const uy = -Math.cos(aim * RAD);
+      const free = (d: number) => Math.abs(aim) <= 50 || room.free(this.x + ux * d, this.y + uy * d) >= 0;
+      let boxed = 0;
+      if (!free(t)) {
+        let d = t - 10;
+        while (d >= min && !free(d)) d -= 10;
+        if (d >= min) t = d;
+        else boxed = 0.6;
+      }
+      const k = t / travel - Math.abs(off) * turnCost - boxed;
+      if (k > score) {
+        score = k;
+        best = { aim, travel: t, spin };
+      }
+    }
+    return best;
+  }
+
+  /** Confined, with nowhere to go from here: hang a moment, then look again. */
+  private hold(s = 0.6) {
+    this.phase = "hover";
+    this.left = s + this.rand() * 0.4;
+    this.thrust = 0;
+    this.arrive = null;
+    this.urgent = false;
+    this.spin = 0;
   }
 
   /** Pulse toward a point, far enough to get about `share` of the way there. */
@@ -201,7 +334,17 @@ export class Swimmer {
     const d = Math.hypot(dx, dy);
     const travel = clamp(d * share, 24, this.unit * max * this.speed);
     // A slight wobble in the aim, so it never swims dead straight.
-    this.go(headingOf(dx, dy) + (this.rand() - 0.5) * 20, travel * DRAG, inflate);
+    const aim = headingOf(dx, dy) + (this.rand() - 0.5) * 20;
+    if (this.room) {
+      const q = this.plan(aim, travel, Math.min(24, travel));
+      if (q && Math.abs(wrapDeg(q.aim - aim)) <= 60) return this.go(q.aim, q.travel * DRAG, inflate, false, null, q.spin);
+      // Below it, in a strip too thin to turn round in: it drifts down to it, upright.
+      if (dy > 30 && this.drift(dy)) return;
+      if (q) return this.go(q.aim, q.travel * DRAG, inflate, false, null, q.spin);
+      if (this.pivot()) return;
+      return this.hold();
+    }
+    this.go(aim, travel * DRAG, inflate);
   }
 
   /** A quick dart to a point (a find): turn fast, jet hard, brake into it. */
@@ -214,7 +357,132 @@ export class Swimmer {
     const dy = this.target.y - this.y;
     const d = Math.hypot(dx, dy);
     if (d < 12) return;
-    this.go(headingOf(dx, dy), clamp(d * 5, 300, 3200) * Math.max(1, this.speed * 0.9), 0.05, true, this.target);
+    const boost = Math.max(1, this.speed * 0.9);
+    if (this.room && !this.escaping) {
+      // As straight there as the open water allows, braking where the glide must end.
+      const q = this.plan(headingOf(dx, dy), d, Math.min(30, d), 1 / 60);
+      if (!q) return this.hold(0.3);
+      const end = {
+        x: this.x + Math.sin(q.aim * RAD) * q.travel,
+        y: this.y - Math.cos(q.aim * RAD) * q.travel,
+      };
+      return this.go(q.aim, clamp(q.travel * 5, 300, 3200) * boost, 0.05, true, end, q.spin);
+    }
+    this.go(headingOf(dx, dy), clamp(d * 5, 300, 3200) * boost, 0.05, true, this.target);
+  }
+
+  /**
+   * Out of glass that came over it, to a spot in open water (confined): a dart that ignores the glass until it is
+   * clear, then a turn to heading `h`, which fits there.
+   */
+  escape(p: Pt, h: number | null = null) {
+    if (this.behaviour === "loop") return;
+    this.escaping = true;
+    this.after = h;
+    this.dart(p);
+  }
+
+  /**
+   * Confined and hemmed in (no turn here fits, nothing ahead): turn slowly about the middle of the silhouette, which
+   * stays where it is, to the heading nearest its own with the most open water ahead. False if none has any.
+   */
+  private pivot() {
+    const room = this.room;
+    if (!room) return false;
+    const b = room.back;
+    const cx = this.x - Math.sin(this.tilt * RAD) * b;
+    const cy = this.y + Math.cos(this.tilt * RAD) * b;
+    let best: number | null = null;
+    let score = -Infinity;
+    for (const off of PIVOT_HEADINGS) {
+      const h = wrapDeg(this.tilt + off);
+      const x = cx + Math.sin(h * RAD) * b;
+      const y = cy - Math.cos(h * RAD) * b;
+      const ahead = room.reach(x, y, h, this.unit);
+      const k = (Math.abs(h) <= 50 ? 60 : 0) + ahead - Math.abs(off) * 0.5;
+      if ((ahead >= 40 || Math.abs(h) <= 50) && k > score) {
+        score = k;
+        best = h;
+      }
+    }
+    if (best === null) return false;
+    this.pivotTo = best;
+    this.phase = "pivot";
+    this.left = 0.2;
+    this.thrust = 0;
+    this.arrive = null;
+    this.urgent = false;
+    this.spin = 0;
+    this.vx = this.vy = 0;
+    return true;
+  }
+
+  /** The slow turn: the silhouette's middle stays put; the head swings round it, slower than the heading check. */
+  private stepPivot(dt: number, refill: number) {
+    const room = this.room;
+    this.sx += (1 - this.sx) * refill;
+    this.sy += (1 - this.sy) * refill;
+    if (!room) {
+      this.phase = "glide";
+      this.left = 0;
+      return;
+    }
+    const b = room.back;
+    const rate = ((PIVOT_SPEED / b) * 180) / Math.PI;
+    const diff = wrapDeg(this.pivotTo - this.tilt);
+    const step = clamp(diff, -rate * dt, rate * dt);
+    const cx = this.x - Math.sin(this.tilt * RAD) * b;
+    const cy = this.y + Math.cos(this.tilt * RAD) * b;
+    this.tilt += step;
+    this.x = cx + Math.sin(this.tilt * RAD) * b;
+    this.y = cy - Math.cos(this.tilt * RAD) * b;
+    this.vx = this.vy = 0;
+    // Clear enough to turn the usual way now: on with it.
+    this.left -= dt;
+    if (this.left <= 0 && !this.settleAfter) {
+      this.left = 0.2;
+      const q = this.plan(this.pivotTo, this.unit * 0.6, 30, 1 / 90, [0]);
+      if (q) return this.go(q.aim, q.travel * DRAG, 0.18, false, null, q.spin);
+    }
+    if (Math.abs(diff - step) < 0.5) {
+      if (this.settleAfter) {
+        this.settleAfter = false;
+        this.phase = "settle";
+        return;
+      }
+      this.phase = "glide";
+      this.left = 0;
+      this.next();
+    }
+  }
+
+  /** Confined, roughly upright: drift down (slowly, fins out) up to `max` px, as far as fits. False if it can't. */
+  private drift(max: number) {
+    if (!this.room || Math.abs(wrapDeg(this.tilt)) > 50) return false;
+    const d = Math.min(this.room.drop(this.x, this.y, this.tilt, Math.min(max, 220)), max) - 8;
+    if (d < 24) return false;
+    this.phase = "sink";
+    this.left = d / DRIFT;
+    this.thrust = 0;
+    this.arrive = null;
+    this.urgent = false;
+    this.spin = 0;
+    return true;
+  }
+
+  /**
+   * A find: a quick happy hop, head-first, a short way along (or near) its heading; bigger for the feeding
+   * tentacles. With no room for one, a flourish in place: the mantle fills and snaps, the arms flare and close.
+   */
+  hop(big: boolean) {
+    if (this.behaviour === "loop" || this.escaping) return;
+    this.wakeUp();
+    this.behaviour = "roam";
+    const want = big ? 90 : 55;
+    const q = this.room ? this.plan(this.tilt, want, 18, 1 / 45, HOP_OFFSETS) : { aim: this.tilt, travel: want, spin: 0 as const };
+    if (q) this.go(q.aim, q.travel * DRAG, big ? 0.1 : 0.07, true, null, q.spin);
+    else this.go(this.tilt, 0, big ? 0.12 : 0.09, true);
+    this.target = this.waypoint();
   }
 
   /** Jet hard away from where it is (it just inked): the direction with the most room, nearest the way it faces. */
@@ -224,6 +492,16 @@ export class Swimmer {
     this.behaviour = "roam";
     const b = this.bounds();
     const L = this.unit * 1.1 * Math.max(1, this.speed);
+    if (this.room && !this.escaping) {
+      // The heading with the most room, nearest the way it faces.
+      const q = this.plan(this.tilt, L, 30, 1 / 400);
+      if (!q) return this.go(this.tilt, 0, 0.07, true);
+      this.target = {
+        x: this.x + Math.sin(q.aim * RAD) * q.travel,
+        y: this.y - Math.cos(q.aim * RAD) * q.travel,
+      };
+      return this.go(q.aim, q.travel * DRAG, 0.07, true, null, q.spin);
+    }
     let best = this.tilt;
     let score = -Infinity;
     for (let i = 0; i < 12; i++) {
@@ -238,12 +516,26 @@ export class Swimmer {
         best = h;
       }
     }
-    this.target = this.clampPt({ x: this.x + Math.sin(best * RAD) * L, y: this.y - Math.cos(best * RAD) * L });
+    this.target = this.clampPt({
+      x: this.x + Math.sin(best * RAD) * L,
+      y: this.y - Math.cos(best * RAD) * L,
+    });
     this.go(best, L * DRAG, 0.07, true);
   }
 
-  /** Swim `turns` loops, then call `done`. The circle starts along its heading, on the side with more room. */
-  loops(turns: number, done?: () => void) {
+  /**
+   * Swim `turns` loops, then call `done`. The circle starts along its heading, on the side with more room. Confined,
+   * only a circle that fits all the way round; false (and no loops) when none does.
+   */
+  loops(turns: number, done?: () => void): boolean {
+    if (this.behaviour === "loop") return false;
+    if (this.room) {
+      const pick = this.loopFit();
+      if (!pick) return false;
+      this.wakeUp();
+      this.startLoop(pick, turns, done);
+      return true;
+    }
     this.wakeUp();
     const b = this.bounds();
     const hx = Math.sin(this.tilt * RAD);
@@ -264,23 +556,52 @@ export class Swimmer {
       }
       if (roomBest >= 0) break;
     }
-    const { c, r, dir } = pick!;
+    this.startLoop(pick!, turns, done);
+    return true;
+  }
+
+  private startLoop({ c, r, dir }: { c: Pt; r: number; dir: number }, turns: number, done?: () => void) {
     const a0 = Math.atan2(this.y - c.y, this.x - c.x);
     this.loop = { c, r, a0, dir, turns, t: 0, dur: 0.5 + turns * 0.95 };
     this.behaviour = "loop";
     this.onLoopDone = done ?? null;
     this.arrive = null;
     this.thrust = 0;
+    this.spin = 0;
   }
 
-  /** Sink to the seabed and sleep; over toward column `x` on the way down, if given. */
-  doze(x?: number) {
+  /** Confined: the biggest loop from here (either way round) whose every pose on the circle fits. */
+  private loopFit(): { c: Pt; r: number; dir: number } | null {
+    const room = this.room!;
+    const hx = Math.sin(this.tilt * RAD);
+    const hy = -Math.cos(this.tilt * RAD);
+    const r0 = clamp(Math.min(this.world.w, this.world.h) * 0.11, 36, 110);
+    for (const r of [r0, r0 * 0.75, r0 * 0.55, 30]) {
+      for (const dir of [1, -1]) {
+        const c = { x: this.x - dir * hy * r, y: this.y + dir * hx * r };
+        let ok = true;
+        for (let k = 0; ok && k < 36; k++) {
+          const a = (k / 36) * Math.PI * 2;
+          ok = room.fit(c.x + Math.cos(a) * r, c.y + Math.sin(a) * r, headingOf(-Math.sin(a) * dir, Math.cos(a) * dir)) >= 0;
+        }
+        if (ok) return { c, r, dir };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Sink to the seabed and sleep; over toward column `x` on the way down, if given. Confined, `turnY` is where it
+   * rights itself (room to turn round) before sinking straight down the column.
+   */
+  doze(x?: number, turnY?: number) {
     if (this.behaviour === "loop" || this.behaviour === "doze") return;
     this.behaviour = "doze";
     this.arrive = null;
     this.urgent = false;
     const b = this.bounds();
     this.dozeX = clamp(x ?? this.x, b.x0, b.x1);
+    this.dozeTurnY = this.room && turnY !== undefined ? turnY : null;
     // Finish the glide it is in, then head down.
     if (this.phase !== "glide") {
       this.phase = "glide";
@@ -295,11 +616,18 @@ export class Swimmer {
     this.wakeUp();
     this.behaviour = "roam";
     this.target = this.waypoint();
-    this.go((this.rand() - 0.5) * 30, this.unit * 0.5 * DRAG, 0.16);
+    const aim = (this.rand() - 0.5) * 30;
+    if (this.room) {
+      const q = this.plan(aim, this.unit * 0.5, 16, 1 / 45, HOP_OFFSETS);
+      if (!q) return this.hold(0.4);
+      return this.go(q.aim, q.travel * DRAG, 0.16, false, null, q.spin);
+    }
+    this.go(aim, this.unit * 0.5 * DRAG, 0.16);
   }
 
   private wakeUp() {
     this.asleep = false;
+    this.settleAfter = false;
     if (this.behaviour === "doze") this.behaviour = "roam";
     if (this.phase === "settle") {
       this.phase = "glide";
@@ -310,6 +638,7 @@ export class Swimmer {
   /** Where a doze heads: just above its resting spot. */
   private dozeSpot(): Pt {
     const x = this.dozeX ?? this.x;
+    if (this.dozeTurnY !== null) return { x, y: this.dozeTurnY };
     return { x, y: this.floorY(x) - this.world.sh * 0.35 };
   }
 
@@ -331,7 +660,10 @@ export class Swimmer {
 
   /** Turn toward heading `to`, no faster than `rate` degrees a second; returns how far off it still is. */
   private turnTo(to: number, rate: number, dt: number) {
-    const diff = wrapDeg(to - this.tilt);
+    let diff = wrapDeg(to - this.tilt);
+    // The way round that fits (confined), until nearly there.
+    if (this.spin && Math.abs(diff) > 3 && Math.sign(diff) !== this.spin) diff += 360 * this.spin;
+    if (Math.abs(diff) <= 3) this.spin = 0;
     const step = clamp(diff, -rate * dt, rate * dt);
     this.tilt += step;
     return Math.abs(diff - step);
@@ -357,6 +689,13 @@ export class Swimmer {
     if (this.behaviour === "loop" && this.loop) return this.stepLoop(dt);
     this.jetAge += dt;
     this.tilt = wrapDeg(this.tilt);
+    // Confined: where it was, to undo a step that would touch the glass.
+    const room = this.room && !this.escaping && this.phase !== "settle" ? this.room : null;
+    const x0 = this.x;
+    const y0 = this.y;
+    const tilt0 = this.tilt;
+    const phase0 = this.phase;
+    const slack0 = room ? room.fit(x0, y0, tilt0) : 0;
     /** Extra braking on the forward speed this frame (per second). */
     let brake = 0;
     let finTo = -1;
@@ -395,14 +734,17 @@ export class Swimmer {
       }
     } else if (this.phase === "settle") {
       return this.stepSettle(dt, t, refill);
+    } else if (this.phase === "sink") {
+      return this.stepDrift(dt, refill);
+    } else if (this.phase === "pivot") {
+      return this.stepPivot(dt, refill);
     } else {
       // Glide (or hover): the mantle refills more slowly than it contracted, and it steers a little.
       this.left -= dt;
       this.sx += (1 - this.sx) * refill;
       this.sy += (1 - this.sy) * refill;
       const goal =
-        this.arrive ??
-        (this.phase !== "glide" ? null : this.behaviour === "doze" ? this.dozeSpot() : this.behaviour === "perk" ? this.perkAt : this.target);
+        this.arrive ?? (this.phase !== "glide" ? null : this.behaviour === "doze" ? this.dozeSpot() : this.behaviour === "perk" ? this.perkAt : this.target);
       if (goal) {
         const want = headingOf(goal.x - this.x, goal.y - this.y);
         if (Math.abs(wrapDeg(want - this.tilt)) < 50) this.turnTo(want, Math.min(this.turnRate(), this.arrive ? 120 : STEER), dt);
@@ -437,6 +779,12 @@ export class Swimmer {
     let s = -this.vx * hy + this.vy * hx;
     // Heading for a wall: brake so the glide ends inside.
     if (u > MOVING && !this.inBounds(this.x + (hx * u) / DRAG, this.y + (hy * u) / DRAG)) brake += 4;
+    if (room && u > MOVING) {
+      // Confined: brake so the glide (and what is left of the jet) ends short of the glass, never in it.
+      const go = u + this.jet * (this.thrust / THRUST) ** 2;
+      const free = room.reach(this.x, this.y, this.tilt, go / DRAG + 12) - 6;
+      if (go / (DRAG + brake) > free) brake = Math.max(brake, Math.min(40, go / Math.max(free, 1) - DRAG));
+    }
     // Braking (fins spread) slows it every way at once; the keel always kills the sideways part faster.
     u *= Math.exp(-(DRAG + brake) * dt);
     if (u < 0) u *= Math.exp(-KEEL * dt);
@@ -461,6 +809,49 @@ export class Swimmer {
       this.thrust = 0;
       this.arrive = null;
     }
+
+    if (this.escaping && this.room && this.room.fit(this.x, this.y, this.tilt) >= 0) this.escaping = false;
+    if (room) this.guard(room, x0, y0, tilt0, phase0, slack0, dt);
+  }
+
+  /**
+   * Confined, the last resort (turns and glides are planned to fit): a step that would bring the silhouette closer
+   * to the glass than the margin is not taken. A turn that would is held; a glide stops dead. Held up for a moment,
+   * it plans again from where it is.
+   */
+  private guard(room: Room, x0: number, y0: number, tilt0: number, phase0: Phase, slack0: number, dt: number) {
+    const slack = room.fit(this.x, this.y, this.tilt);
+    if (slack >= 0 || slack >= slack0 - 0.01) {
+      this.stuck = Math.max(0, this.stuck - dt);
+      return;
+    }
+    const floor = Math.min(0, slack0) - 0.01;
+    let moved = true;
+    if (room.fit(x0, y0, this.tilt) >= floor) {
+      // The turn is fine; the step forward is not.
+      this.x = x0;
+      this.y = y0;
+    } else if (room.fit(this.x, this.y, tilt0) >= floor) {
+      // The step is fine; the turn is not.
+      this.tilt = tilt0;
+      moved = phase0 === "turn" || phase0 === "inflate";
+    } else {
+      this.x = x0;
+      this.y = y0;
+      this.tilt = tilt0;
+    }
+    if (moved) {
+      this.vx = this.vy = 0;
+      this.thrust = 0;
+      this.arrive = null;
+      this.stuck += dt;
+    }
+    if (this.stuck > 0.25 && this.phase !== "settle") {
+      this.stuck = 0;
+      this.phase = "glide";
+      this.left = 0;
+      this.next();
+    }
   }
 
   /** Dozing, over its resting spot: right itself on the fins, then settle slowly onto the seabed and sleep. */
@@ -474,33 +865,80 @@ export class Swimmer {
     this.y += this.vy * dt;
     if (!this.asleep) {
       const off = Math.hypot(this.vx, this.vy) <= MOVING / 2 ? this.turnTo(0, TURN * 0.6, dt) : 180;
-      // Upright, it eases onto its spot: down, or up a touch if it came in low (never a jump).
+      // Upright, it eases onto its spot: down, or up a touch if it came in low (never a jump). Confined, it sinks
+      // from higher up, a little faster (still far below the speed it swims at).
       const gap = rest - this.y;
-      if (off < 6) this.y += clamp(gap * 1.5 + Math.sign(gap) * 2, -SINK, SINK) * dt;
-      if (Math.abs(rest - this.y) < 0.25) {
-        this.asleep = true;
-        this.vx = this.vy = 0;
+      const sink = this.dozeTurnY !== null ? SINK_ROOM : SINK;
+      if (off < 6) {
+        const y = this.y + clamp(gap * 1.5 + Math.sign(gap) * 2, -sink, sink) * dt;
+        // Confined: glass below (it came over it), it dozes off where it is.
+        if (this.room && this.room.fit(this.x, y, this.tilt, true) < 0) this.asleep = true;
+        else this.y = y;
       }
+      if (Math.abs(rest - this.y) < 0.25) this.asleep = true;
+      if (this.asleep) this.vx = this.vy = 0;
     } else {
       // On the seabed as it drifts (in whole pixels): followed smoothly, never a hop.
-      this.y += clamp(rest - this.y, -SINK * dt, SINK * dt);
-      // Asleep: it lolls a little to one side.
-      this.turnTo(14, 6, dt);
+      const y = this.y + clamp(rest - this.y, -SINK * dt, SINK * dt);
+      if (!this.room || this.room.fit(this.x, y, this.tilt, true) >= 0) this.y = y;
+      // Asleep: it lolls a little to one side (where that fits).
+      if (!this.room || this.room.fit(this.x, this.y, 14, true) >= 0) this.turnTo(14, 6, dt);
     }
     // Breathing: the mantle swells and eases, slowly.
     this.sx += (1 + (this.asleep ? 0.035 * Math.sin(t * 1.4) : 0) - this.sx) * refill;
     this.sy += (1 - this.sy) * refill;
   }
 
+  /**
+   * Drifting down a strip (confined): straight down, slower than the heading check looks at, easing upright where
+   * that fits; it stops short of anything below.
+   */
+  private stepDrift(dt: number, refill: number) {
+    const room = this.room;
+    this.left -= dt;
+    this.sx += (1 - this.sx) * refill;
+    this.sy += (1 - this.sy) * refill;
+    const y = this.y + DRIFT * dt;
+    const tilt = this.tilt + clamp(-wrapDeg(this.tilt), -20 * dt, 20 * dt);
+    if (!room || room.fit(this.x, y, tilt) >= 0) {
+      this.y = y;
+      this.tilt = tilt;
+    } else if (room.fit(this.x, y, this.tilt) >= 0) this.y = y;
+    else this.left = 0;
+    this.vx = 0;
+    this.vy = DRIFT;
+    if (this.left <= 0 || !room) {
+      this.vy = 0;
+      this.phase = "glide";
+      this.left = 0;
+      this.next();
+    }
+  }
+
   /** The glide has run out: pulse on toward the waypoint, pick a new one, or hover a moment. */
   private next() {
     this.urgent = false;
     this.arrive = null;
+    if (this.after !== null) {
+      // Out from under the glass: turn to a heading that fits here.
+      const a = this.after;
+      this.after = null;
+      if (this.escaping) return this.go(a, 0, 0.08, true);
+    }
     if (this.behaviour === "doze") {
       // Down head-first to just above the resting spot, then settle.
       const spot = this.dozeSpot();
       if (Math.hypot(spot.x - this.x, spot.y - this.y) < 40) {
         this.phase = "settle";
+        // Confined: right itself the way round that fits; with no room for that, slowly about its middle.
+        const spin = this.room ? this.room.sweep(this.x, this.y, this.tilt, 0) : 0;
+        this.spin = spin ?? 0;
+        if (spin === null) {
+          this.pivotTo = 0;
+          this.phase = "pivot";
+          this.settleAfter = true;
+          this.vx = this.vy = 0;
+        }
         return;
       }
       this.pulseTo(spot, 0.95, 0.22, 1.2);

@@ -1,6 +1,6 @@
 // The ocean and its squid: a decorative layer behind every screen, with the one roaming squid in it. It lights one
-// limb per answer found (classic) and per top-10 hit (Blitz), the same after a reload; it roams, and with reduced
-// motion it is parked and still.
+// limb per answer found (classic) and per top-10 hit (Blitz), the same after a reload; a find shows at once (no
+// word carried over the glass); it roams, and with reduced motion it is parked and still.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, puzzle, noHScroll, guess } = require("./helpers.cjs");
@@ -109,26 +109,17 @@ for (const vp of VIEWPORTS) {
 }
 
 
-test("the squid roams, grabs words without leaving anything behind, and parks with reduced motion", async () => {
+test("the squid roams, finds show at once, and it parks with reduced motion", async () => {
   const { ctx, page } = await open(browser, VIEWPORTS[0], `#p-${LIST}`);
   const squid = page.getByTestId("ocean").getByTestId("squid");
   await squid.waitFor();
   const p = await puzzle(page, LIST);
-  // Count the word tiles the squid carries (however fast they come and go on a slow machine).
-  await page.evaluate(() => {
-    window.__tiles = 0;
-    new MutationObserver((list) => {
-      for (const m of list) for (const n of m.addedNodes) if (n.classList?.contains("grab-word")) window.__tiles++;
-    }).observe(document.querySelector(".ocean-tiles"), { childList: true });
-  });
-  // Two quick finds: two grabs at once. Each word is in its row at once; the box is cleared.
+  // Two quick finds: each word is in its row at once; the box is cleared; both limbs lit.
   for (const r of [2, 5]) await guess(page, p.answers.find((a) => a.rank === r).name);
   assert.equal(await page.getByLabel("Your guess").inputValue(), "");
-  assert.equal(await page.locator('[data-testid="slot"][data-rank="5"]').getAttribute("class").then((c) => c.includes("found")), true);
-  // The grabbed word tiles ride above the UI, then are gone once set (about 0.8 s), the rows unmarked.
-  assert.ok((await page.evaluate(() => window.__tiles)) >= 1);
-  await page.waitForFunction(() => !document.querySelector(".ocean-tiles .grab-word, [data-grabbing]"), null, { timeout: 4000 });
-  assert.ok(await page.evaluate(() => getComputedStyle(document.querySelector(".ocean-over")).pointerEvents === "none"));
+  const row = page.locator('[data-testid="slot"][data-rank="5"]');
+  assert.ok((await row.getAttribute("class")).includes("found"));
+  assert.deepEqual(await litOf(squid), [2, 5]);
 
   // Moving: the squid canvas changes from frame to frame.
   const first = await squidFrame(page);

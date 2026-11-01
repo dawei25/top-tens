@@ -2,7 +2,7 @@
  * One-off squid effects over the classic game screen, in a fixed, aria-hidden, pointer-transparent layer:
  * - Ink: a life lost (a costly miss or a hint) inks in the ocean, behind the glass; in front, the screen dims around
  *   the squid for a beat and the emptied sac drips. The last life dims it nearly to black.
- * (The grab, the squid reaching through the glass for a found word, is the ocean's: components/ocean/grab.ts.)
+ * (A find is the ocean squid's: its limb flashes and it hops, in components/ocean.)
  * Everything is built on the spot, animated with the Web Animations API and removed when done. Nothing runs with
  * reduced motion, and nothing here touches game state or focus.
  */

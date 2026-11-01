@@ -17,7 +17,7 @@ import "./squid.css";
 export type SquidMood = "play" | "won" | "lost" | "gave-up";
 
 interface Props {
-  /** Classic lights a new limb as the grabbed word lands; Blitz lights it at once. */
+  /** Which screen it is on (for the CSS); a new limb lights at once in both. */
   mode: "classic" | "blitz";
   /** Lit limbs, by rank (1-10). */
   lit: readonly number[];
@@ -42,7 +42,7 @@ const MOTES = 8;
 /** Each limb's own colour, by rank (colors.ts): the CSS lights it with var(--limb). */
 const tint = (id: number) => ({ "--limb": limbColor(id) }) as CSSProperties;
 
-/** #1 is gold; #1 and #2 are the long tentacles (their grab strains, so they light a beat later); fresh ones flash. */
+/** #1 is gold; #1 and #2 are the long tentacles; fresh ones flash. */
 const limbClass = (id: number, fresh: ReadonlySet<number>) =>
   `${id === 1 ? " first" : ""}${id <= 2 ? " tentacle" : ""}${fresh.has(id) ? " fresh" : ""}`;
 
