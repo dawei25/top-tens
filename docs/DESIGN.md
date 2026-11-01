@@ -30,13 +30,17 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
 
 Puzzles are prebuilt from Wikipedia tables (`scripts/topics.ts`, `scripts/build.ts`) into `public/puzzles/*.json`,
 with every table row as an accepted answer, aliases from redirects, and a source link with an "as of" date.
-Modes: daily (date-seeded pick) and roll (random unplayed, optional category filter).
+Modes: daily (Today's list and Today's Blitz, from `public/puzzles/daily.json`) and free play (a random list or Blitz,
+optionally by category). **Dailies are one try each**, archive dailies included: a finished daily always reopens on
+its result. Free play is endless: Play again rolls a new random game, keeping the category if one was picked.
 
 ## 4. Screens
 
-1. **Home:** Today's list, Roll a random list, category chips, stats.
+1. **Home:** Today's list and Blitz; Free play (Random list, Random Blitz, each with a floating by-category picker);
+   Your games (Archive, Past runs); stats. Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
 2. **Game:** prompt, lives, 10 rank slots, input pinned at the bottom, feedback line, chips for life-costing misses.
-3. **Results:** score, full list with values, source link, share, roll another.
+3. **Results:** score, par and histogram, full list with values, source link, share, Play again (rolls a new game).
+   A finished daily offers Today's Blitz and Random list instead.
 4. **How to play** on first visit.
 
 ## 5. Visual direction: Krillion's language, arcade high-score table

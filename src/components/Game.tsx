@@ -607,7 +607,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     Today's Blitz
                   </button>
                 )}
-                {blitzOpen && (
+                {/* A daily already offers Today's Blitz; a second gold Blitz key there reads like the same thing. */}
+                {blitzOpen && !daily && (
                   <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`}>
                     Blitz
                   </a>
