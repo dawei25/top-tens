@@ -74,6 +74,9 @@ function describe(r: BlitzResult): Omit<Feedback, "key"> | null {
   }
 }
 
+/** Rows on the answer board before the first answer (wide screens). */
+const BOARD_ROWS = 6;
+
 /** "Oct 29, 21:40" in the player's time. */
 export function runTime(ms: number): string {
   const d = new Date(ms);
@@ -399,14 +402,14 @@ export function Blitz({
   const pastRuns = <PastRuns runs={runs} best={best} open={runsOpen} onToggle={setRunsOpen} onOpen={openRun} />;
   const viewRun = openAt ? runs.find((r) => r.startedAt === openAt) : undefined;
 
-  // The stage (see Game): the board side holds the lists, the water side the clock, score and guess box while
+  // The stage (see Game): the board column holds the lists, the control column the clock, score and guess box while
   // playing, and the result card after. Narrower, it all stacks; "lead" items come up right after the title there.
   let board: React.ReactNode;
-  let water: React.ReactNode;
+  let control: React.ReactNode;
   if (viewRun) {
     const isBest = viewRun.score === best;
     const k = viewRun.hits.length;
-    water = (
+    control = (
       <section className="panel results lead" data-testid="run-view" aria-live="polite" data-glass>
         <p className="label gold">Past run · {runTime(viewRun.startedAt)}</p>
         <p className="score" aria-label={`${viewRun.score} points`}>
@@ -428,8 +431,8 @@ export function Blitz({
     );
     board = <RoundLists puzzle={puzzle} hits={viewRun.hits} byName={byName} />;
   } else if (!over) {
-    water = (
-      <div className="dock-wrap">
+    control = (
+      <div className="control-card" data-glass>
         <section className="panel blitz-meter lead" aria-label="Clock and score" data-glass>
           <div className="blitz-meter-cell">
             <span className="label">Time</span>
@@ -490,20 +493,27 @@ export function Blitz({
         </form>
       </div>
     );
+    // Wide screens show the answer board from the start: faint empty rows that fill in as you score (narrower, the
+    // board only appears with the first answer).
+    const empty = Math.max(0, BOARD_ROWS - hits.length);
     board = (
       <>
-        {hits.length > 0 && (
-          <ol className="panel blitz-hits" aria-label="Your answers, newest first" data-glass>
-            {hits.map((h) => (
-              <HitRow key={h.name} points={`+${h.points}`} name={h.name} value={byName.get(h.name)?.value} />
-            ))}
-          </ol>
-        )}
+        <ol className={`panel blitz-hits ${hits.length ? "" : "is-empty"}`} aria-label="Your answers, newest first" data-glass>
+          {hits.map((h) => (
+            <HitRow key={h.name} points={`+${h.points}`} name={h.name} value={byName.get(h.name)?.value} />
+          ))}
+          {Array.from({ length: empty }, (_, i) => (
+            <li key={`empty-${i}`} className="blitz-hit empty" aria-hidden="true">
+              <span className="blitz-pts">+</span>
+              <span className="blitz-name">. . . . . . . .</span>
+            </li>
+          ))}
+        </ol>
         {!state.startedAt && pastRuns}
       </>
     );
   } else {
-    water = (
+    control = (
       <section className="panel results enter lead" data-testid="blitz-results" aria-live="polite" data-glass>
         <BlitzResultsSquid hits={state.hits} best={!!record?.best && score > 0 && record.previous !== undefined} />
         <p className="label gold" data-motion="banner">Time's up</p>
@@ -562,14 +572,14 @@ export function Blitz({
 
   return (
     <main className={`screen game blitz stage ${over ? "blitz-over" : ""}`} data-testid="blitz-screen" data-list={puzzle.id}>
-      <div className="board-col">
-        <ScreenHead onBack={onBack} onHome={onHome}>
-          <span className="label mode gold">
-            {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
-          </span>
-        </ScreenHead>
+      <ScreenHead onBack={onBack} onHome={onHome}>
+        <span className="label mode gold">
+          {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
+        </span>
+      </ScreenHead>
 
-        <section className="panel prompt" data-glass>
+      <div className="board-col">
+        <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
             <ModeTag mode="blitz" />
@@ -582,7 +592,7 @@ export function Blitz({
 
         {board}
       </div>
-      <div className="water">{water}</div>
+      <div className="control-col" data-testid="control-col">{control}</div>
       <BlitzSquid hits={viewRun ? viewRun.hits : state.hits} />
     </main>
   );

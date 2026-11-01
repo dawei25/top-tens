@@ -3,6 +3,7 @@ import { Home } from "./components/Home";
 import { Archive } from "./components/Archive";
 import { Blitz } from "./components/Blitz";
 import { History } from "./components/History";
+import { Knowledge } from "./components/Knowledge";
 import { Ocean } from "./components/ocean";
 import { Game, Loading } from "./components/Game";
 import type { Lexicon } from "./game/junk";
@@ -28,11 +29,13 @@ type Route =
   | { screen: "game"; id: string }
   | { screen: "blitz"; id: string; runs: boolean; run?: number }
   | { screen: "history" }
+  | { screen: "stats" }
   | { screen: "dailyblitz"; date: string; runs: boolean; run?: number };
 
 function readHash(): Route {
   const h = location.hash;
   if (h === "#archive") return { screen: "archive" };
+  if (h === "#stats") return { screen: "stats" };
   // The Blitz-only runs screen became Past runs, which lists list games and Blitz rounds together.
   if (h === "#blitz-history") history.replaceState(null, "", "#history");
   if (h === "#history" || h === "#blitz-history") return { screen: "history" };
@@ -153,13 +156,17 @@ function Screens() {
     replacing.current = true;
     location.replace(`${location.pathname}${location.search}${parentOf(location.hash, today) || "#"}`);
   };
-  // Blitz a random list: a uniformly random open Blitz list, never one of the last few rolled, always a fresh round.
-  const blitzRoll = async (): Promise<boolean> => {
+  // The lists open for Blitz right now (Home's counts and the Blitz roll use the same filter).
+  const openBlitz = (saved = load()) =>
+    index.filter((m) => m.blitz && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
+  // Blitz a random list (optionally in a category): a uniformly random open Blitz list, never one of the last few
+  // rolled (per category, like the classic roll), always a fresh round.
+  const blitzRoll = async (category?: string): Promise<boolean> => {
     const saved = load();
-    const open = index.filter((m) => m.blitz && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
+    const open = openBlitz(saved).filter((m) => !category || m.category === category);
     const id = pickRandom(
       open.map((m) => m.id),
-      "blitz",
+      category ? `blitz:${category}` : "blitz",
     );
     if (!id) return false;
     save(freshBlitz(saved, id));
@@ -188,6 +195,10 @@ function Screens() {
 
   if (route.screen === "history") {
     return <History index={index} schedule={schedule} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;
+  }
+
+  if (route.screen === "stats") {
+    return <Knowledge index={index} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;
   }
 
   if (route.screen === "dailyblitz") {
@@ -251,6 +262,7 @@ function Screens() {
       onDailyBlitz={() => (location.hash = `#dailyblitz-${today}`)}
       onRoll={roll}
       onBlitz={blitzRoll}
+      blitzLists={openBlitz()}
       onArchive={() => (location.hash = "#archive")}
     />
   );

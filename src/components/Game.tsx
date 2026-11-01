@@ -24,6 +24,7 @@ import { Countdown } from "./Countdown";
 import { formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
+import { ParBlock, usePar } from "./par";
 
 interface Props {
   id: string;
@@ -99,6 +100,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   /** The hidden row showing the "first letter?" confirm. */
   const [hintAsk, setHintAsk] = useState<number | null>(null);
   const yesRef = useRef<HTMLButtonElement>(null);
+  const parFile = usePar();
 
   useEffect(() => {
     loadPuzzle(id)
@@ -301,6 +303,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const allFactsOpen = factRanks.length > 0 && factRanks.every((r) => openFacts.has(r));
 
   const hints = game.hints ?? [];
+  const par = parFile?.[puzzle.id];
   // Count this game in before the save effect has run, so the results show the streak it just made.
   let dailyStreak: ReturnType<typeof streak> | null = null;
   if (daily && over) {
@@ -329,26 +332,27 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
 
   return (
     <main className={`screen game stage status-${game.status}`}>
-      {/* The stage: the board in a column on the left on wide screens, the guess box floating in the open water
-          beside it. Narrower, both wrappers dissolve (display: contents) into one centered column. */}
-      <div className="board-col">
-        <ScreenHead onBack={onBack} onHome={onHome}>
-          <span className="label mode">{mode}</span>
-          <div
-            key={lostLife?.key}
-            className={`lives ${lostLife ? "lives-hit" : ""}`}
-            data-testid="lives"
-            data-lives={game.lives}
-            role="img"
-            aria-label={`${game.lives} ${game.lives === 1 ? "life" : "lives"} left`}
-          >
-            {Array.from({ length: MAX_LIVES }, (_, i) => (
-              <InkSac key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
-            ))}
-          </div>
-        </ScreenHead>
+      {/* The stage. Wide screens: the header across the frame, then two aligned columns: the title card and the board
+          on the left, the control card (guess box, feedback, misses; the result card at the end) on the right.
+          Narrower, both column wrappers dissolve (display: contents) into one centered column. */}
+      <ScreenHead onBack={onBack} onHome={onHome}>
+        <span className="label mode">{mode}</span>
+        <div
+          key={lostLife?.key}
+          className={`lives ${lostLife ? "lives-hit" : ""}`}
+          data-testid="lives"
+          data-lives={game.lives}
+          role="img"
+          aria-label={`${game.lives} ${game.lives === 1 ? "life" : "lives"} left`}
+        >
+          {Array.from({ length: MAX_LIVES }, (_, i) => (
+            <InkSac key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
+          ))}
+        </div>
+      </ScreenHead>
 
-        <section className="panel prompt" data-glass>
+      <div className="board-col">
+        <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
             {blitzOpen && !over && (
@@ -356,8 +360,15 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 Blitz
               </a>
             )}
-            <span className="count" aria-label={`${game.found.length} of 10 found`}>
-              <b>{game.found.length}</b>/10
+            <span className="count-wrap">
+              <span className="count" aria-label={`${game.found.length} of 10 found`}>
+                <b>{game.found.length}</b>/10
+              </span>
+              {par && (
+                <span className="count-par" data-testid="title-par" title={par.estimated ? "par: what a typical player gets (estimated)" : "par: what a typical player gets"}>
+                  par {par.par}
+                </span>
+              )}
             </span>
           </div>
           <h1>{puzzle.title}</h1>
@@ -523,9 +534,9 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         </section>
       </div>
 
-      <div className="water">
+      <div className="control-col" data-testid="control-col">
         {!over ? (
-          <div className="dock-wrap">
+          <div className="control-card" data-glass>
             {missChips}
             <form className="guess" onSubmit={submit} data-guess-dock data-glass>
               <div className="feedback-line">
@@ -581,12 +592,13 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <span className={`score-n ${game.status === "won" ? "gold" : ""}`}><CountUp value={game.found.length} /></span>
                 <span className="score-of">/10</span>
               </p>
+              {par && <ParBlock list={par} score={game.found.length} />}
               <p className="caption">
                 {game.status === "won"
                   ? `with ${game.lives} ${game.lives === 1 ? "life" : "lives"} to spare.`
                   : game.status === "gave-up"
-                    ? "you gave up. the full list is above."
-                    : "out of lives. the full list is above."}
+                    ? "you gave up. the full list is on the board."
+                    : "out of lives. the full list is on the board."}
               </p>
               {(dailyStreak || hints.length > 0) && (
                 <div className="results-meta">

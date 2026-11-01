@@ -58,15 +58,26 @@ function ModeKey({
   );
 }
 
+type Pick = "list" | "blitz";
+
+/** Categories in index order, with how many lists each has. */
+function countByCategory(lists: PuzzleMeta[]): [string, number][] {
+  const counts = new Map<string, number>();
+  for (const m of lists) counts.set(m.category, (counts.get(m.category) ?? 0) + 1);
+  return [...counts];
+}
+
 interface Props {
   index: PuzzleMeta[];
+  /** The lists open for Blitz right now (the same filter as the Blitz roll). */
+  blitzLists: PuzzleMeta[];
   /** Today's daily; missing only if the schedule failed to load. */
   entry?: DailyEntry;
   archiveCount: number;
   onDaily: () => void;
   onRoll: (category?: string) => void;
-  /** Goes to a random Blitz-ready list; false when there is none. */
-  onBlitz: () => Promise<boolean>;
+  /** Goes to a random Blitz-ready list (in the category, if given); false when there is none. */
+  onBlitz: (category?: string) => Promise<boolean>;
   onArchive: () => void;
   /** The player's local date. */
   today: string;
@@ -77,6 +88,7 @@ interface Props {
 
 export function Home({
   index,
+  blitzLists,
   entry,
   archiveCount,
   onDaily,
@@ -88,6 +100,11 @@ export function Home({
   onDailyBlitz,
 }: Props) {
   const [noBlitz, setNoBlitz] = useState(false);
+  /** The open "by category" picker, if any (one at a time). */
+  const [picker, setPicker] = useState<Pick | null>(null);
+  const listStrip = useRef<HTMLButtonElement>(null);
+  const blitzStrip = useRef<HTMLButtonElement>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const saved = load();
   const s = stats(saved);
   const st = streak(saved);
@@ -127,6 +144,33 @@ export function Home({
       delete root.dataset.modality;
     };
   }, []);
+  // The category picker: focus goes to its first chip on open, back to its strip on close (Escape, a press outside
+  // the free-play keys, or a pick).
+  useEffect(() => {
+    if (!picker) return;
+    const strip = picker === "list" ? listStrip : blitzStrip;
+    pickerRef.current?.querySelector("button")?.focus();
+    const close = () => {
+      setPicker(null);
+      strip.current?.focus({ preventScroll: true });
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      close();
+    };
+    // A press on either free-play key or strip is left to its own click: closing first would shift the layout
+    // under the pointer on phones, where the pickers stack.
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target as Element).closest?.("[data-picker]")) close();
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [picker]);
   // Inline confirm, like GIVE UP: the first click arms it for 3 s, the second clears everything but seenHelp.
   const [confirmReset, setConfirmReset] = useState(false);
   const [, setVersion] = useState(0);
@@ -151,13 +195,65 @@ export function Home({
     setVersion((v) => v + 1);
     focusDaily();
   };
-  const categories = [...new Set(index.map((p) => p.category))];
-  const blitzCount = index.filter((p) => p.blitz).length;
+  const listCats = countByCategory(index);
+  const blitzCats = countByCategory(blitzLists);
 
   // Starting a game with the rules on screen counts as having seen them.
   const start = (fn: () => void) => () => {
     if (help) markHelpSeen();
     fn();
+  };
+  const blitzRoll = (category?: string) => {
+    setNoBlitz(false);
+    onBlitz(category).then((ok) => setNoBlitz(!ok));
+  };
+
+  /** A free-play key with its "by category" strip under it, and that mode's category chips when open. */
+  const freeKey = (kind: Pick, key: React.ReactNode, cats: [string, number][], strip: React.RefObject<HTMLButtonElement | null>) => {
+    const open = picker === kind;
+    const name = kind === "list" ? "Random list" : "Random Blitz";
+    const id = `${kind}-categories`;
+    return (
+      <div className={`free-key ${kind === "list" ? "classic" : "blitz"}`} data-picker={kind}>
+        {key}
+        {cats.length > 0 && (
+          <button
+            ref={strip}
+            type="button"
+            className="cat-strip"
+            data-testid={`random-${kind}-categories`}
+            aria-expanded={open}
+            aria-controls={id}
+            aria-label={`${name} by category`}
+            onClick={() => setPicker((p) => (p === kind ? null : kind))}
+          >
+            by category
+          </button>
+        )}
+        {open && (
+          <div ref={pickerRef} id={id} className="chips cat-picker" role="group" aria-label={`${name} categories`}>
+            {cats.map(([c, n]) => (
+              <button
+                key={c}
+                type="button"
+                className="chip cat-chip"
+                data-testid="category"
+                data-mode={kind}
+                data-category={c}
+                onClick={start(() => {
+                  setPicker(null);
+                  strip.current?.focus({ preventScroll: true });
+                  if (kind === "list") onRoll(c);
+                  else blitzRoll(c);
+                })}
+              >
+                {c} <span className="cat-n">{n}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -222,37 +318,34 @@ export function Home({
               Free play
             </h2>
           </div>
+          {/* Each key rolls at once; the strip under it opens that mode's categories (a chip rolls in that one). */}
           <div className="mode-pair">
-            <ModeKey
-              mode="classic"
-              testId="random-list"
-              title="Random list"
-              status={`${index.length} lists`}
-              onClick={start(() => onRoll())}
-            />
-            <ModeKey
-              mode="blitz"
-              testId="random-blitz"
-              title="Random Blitz"
-              status={`${blitzCount} lists`}
-              onClick={start(() => {
-                setNoBlitz(false);
-                onBlitz().then((ok) => setNoBlitz(!ok));
-              })}
-            />
+            {freeKey(
+              "list",
+              <ModeKey
+                mode="classic"
+                testId="random-list"
+                title="Random list"
+                status={`${index.length} lists`}
+                onClick={start(() => onRoll())}
+              />,
+              listCats,
+              listStrip,
+            )}
+            {freeKey(
+              "blitz",
+              <ModeKey
+                mode="blitz"
+                testId="random-blitz"
+                title="Random Blitz"
+                status={`${blitzLists.length} lists`}
+                onClick={start(() => blitzRoll())}
+              />,
+              blitzCats,
+              blitzStrip,
+            )}
           </div>
           {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
-          {/* A chip rolls a random classic list in that category, straight away. */}
-          <div className="cat-row">
-            <span className="caption">or by category</span>
-            <div className="chips">
-              {categories.map((c) => (
-                <button key={c} className="chip" data-testid="category" onClick={start(() => onRoll(c))}>
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
         </section>
 
         <section className="home-group games-group" data-glass aria-labelledby="games-title">
@@ -274,11 +367,17 @@ export function Home({
         </section>
       </div>
 
-      {(s.played > 0 || st.best > 0) && (
+      {/* Also with only past runs (a list rolled again starts fresh), so the knowledge page stays reachable. */}
+      {(s.played > 0 || st.best > 0 || !!saved.listRuns?.length) && (
         <section data-glass className="panel home-stats" aria-labelledby="stats-title">
-          <h2 id="stats-title" className="label">
-            Your record
-          </h2>
+          <div className="group-head">
+            <h2 id="stats-title" className="label">
+              Your record
+            </h2>
+            <a className="key key-xs knowledge-key" href="#stats" data-testid="knowledge-link">
+              Your knowledge
+            </a>
+          </div>
           <dl className="stat-row">
             <div>
               <dt>played</dt>
