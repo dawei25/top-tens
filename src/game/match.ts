@@ -214,7 +214,11 @@ export function judgeGuess(
   const close = candidates.filter((c) => c.dist <= typoBudget(len));
   if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
     const tied = close.filter((c) => c.dist === close[0].dist);
-    if (tied.length <= MAX_TYPO_CHOICES) return choose(tied, true);
+    // As with exact matches, a whole name or alias beats one word of another entry's name: "lotse" is Lhotse, not a
+    // choice with Lhotse Middle and Lhotse Shar.
+    const named = tied.filter((c) => !c.viaWord);
+    const readings = named.length ? named : tied;
+    if (readings.length <= MAX_TYPO_CHOICES) return choose(readings, true);
   }
 
   return { kind: "unknown", junk: isJunk(raw, lex) };
