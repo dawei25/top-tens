@@ -26,6 +26,7 @@ import { localDate, type DailyEntry } from "../game/daily";
 import type { Lexicon } from "../game/junk";
 import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { load, save } from "../game/storage";
+import { shownValue } from "../game/state";
 import { emitPlay } from "../game/events";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
@@ -147,7 +148,7 @@ function RoundLists({ puzzle, hits, byName }: { puzzle: Puzzle; hits: BlitzHit[]
         </h2>
         <ol>
           {missedTop(puzzle, { puzzleId: puzzle.id, hits }, 10).map((e) => (
-            <HitRow key={e.name} points={e.rank ? `#${e.rank}` : ""} name={e.name} value={e.value} />
+            <HitRow key={e.name} points={e.rank ? `#${e.rank}` : ""} name={e.name} value={shownValue(e)} />
           ))}
         </ol>
       </section>

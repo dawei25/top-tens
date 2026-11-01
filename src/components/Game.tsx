@@ -10,6 +10,7 @@ import {
   MAX_LIVES,
   newGame,
   shareText,
+  shownValue,
   type GameState,
 } from "../game/state";
 import { load, save } from "../game/storage";
@@ -60,10 +61,10 @@ function describe(r: GuessResult): Omit<Feedback, "key"> | null {
         tone: "bad",
         // Show the entry's own number when the data has it: "Gasherbrum IV is #17, 7,932 m."
         text: !r.entry.rank
-          ? r.entry.value
-            ? `${r.entry.name}: ${r.entry.value}. Not in the top 10.`
+          ? shownValue(r.entry)
+            ? `${r.entry.name}: ${shownValue(r.entry)}. Not in the top 10.`
             : `${r.entry.name} isn't in the top 10`
-          : `${r.entry.name} is #${r.entry.rank}${r.entry.value ? `, ${r.entry.value}` : ""}.${r.entry.rank <= 15 ? " So close." : ""}`,
+          : `${r.entry.name} is #${r.entry.rank}${shownValue(r.entry) ? `, ${shownValue(r.entry)}` : ""}.${r.entry.rank <= 15 ? " So close." : ""}`,
       };
     case "typo":
       return { tone: "warn", text: "Did you mean", suggestions: r.suggestions };
@@ -444,7 +445,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                       </button>
                     )}
                   </span>
-                  {revealed && a.value && <span className="value">{a.value}</span>}
+                  {revealed && shownValue(a) && <span className="value">{shownValue(a)}</span>}
                 </span>
                 {asking && (
                   <div className="hint-ask">
