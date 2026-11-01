@@ -111,6 +111,11 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
       const dist = spacing ? 0 : editDistance(g, rest);
       // Codes (ATL, EDDF, PRC) match exactly or not at all; fuzzy they catch keyboard mash like "asdf".
       if (dist > 0 && CODE.test(form)) continue;
+      // A misspelling keeps its first letter: "factories" is not a typo of Castries. One slip anywhere is still fine.
+      if (dist > 1 && g[0] !== rest[0]) continue;
+      // One word of a longer name only catches a near-exact misspelling of a real word ("kareen" for Kareem), never a
+      // different short word: "pope" is not "Don't Bother Me, I Can't Cope".
+      if (dist > 0 && i >= forms.length && (dist > 1 || g.length < 5 || g[0] !== rest[0])) continue;
       if (dist < best || (dist === 0 && form === entry.name)) {
         best = dist;
         len = rest.length;

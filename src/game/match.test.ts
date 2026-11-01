@@ -163,3 +163,24 @@ describe("shared words are not typo evidence", () => {
     expect(j("mount everst")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Mount Everest" } });
   });
 });
+
+describe("autocorrect doesn't hand out answers nobody typed", () => {
+  const songs: Puzzle = {
+    ...puzzle,
+    id: "songs",
+    answers: [e(1, "Blinding Lights"), e(2, "Shape of You"), ...puzzle.answers.slice(2)],
+    extras: [e(11, "Don't Bother Me, I Can't Cope"), e(12, "Castries"), e(13, "Kareem Abdul-Jabbar")],
+  };
+  const j = (g: string) => judgeGuess(g, songs, new Set());
+  it("a different short word is not a typo of one word in a long name", () => {
+    expect(j("pope")).toMatchObject({ kind: "unknown" });
+  });
+  it("a misspelling past one slip keeps its first letter", () => {
+    expect(j("factories")).toMatchObject({ kind: "unknown" });
+  });
+  it("near-exact misspellings still land, on whole names and on words of names", () => {
+    expect(j("kareen")).toMatchObject({ kind: "near", entry: { name: "Kareem Abdul-Jabbar" }, corrected: true });
+    expect(j("blindng lihgts")).toMatchObject({ kind: "correct", entry: { rank: 1 }, corrected: true });
+    expect(j("bangledesh")).toMatchObject({ kind: "correct", entry: { rank: 8 } });
+  });
+});
