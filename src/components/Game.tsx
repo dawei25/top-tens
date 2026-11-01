@@ -71,7 +71,11 @@ function describe(r: GuessResult): Omit<Feedback, "key"> | null {
     case "unknown":
       return {
         tone: "warn",
-        text: r.junk ? "That doesn't look like an answer. No life lost." : "Not a recognized answer for this list. No life lost.",
+        text: r.vague
+          ? "More than one answer fits. Be more specific. No life lost."
+          : r.junk
+            ? "That doesn't look like an answer. No life lost."
+            : "Not a recognized answer for this list. No life lost.",
       };
     default:
       return null;
