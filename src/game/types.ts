@@ -33,6 +33,11 @@ export interface Puzzle {
   metric?: string;
   /** Home category, e.g. "Geography" (also in index.json). */
   category?: string;
+  /**
+   * What the player names, plural and lower case: "countries", "films", "NBA players". The UI says it wherever a
+   * guess could be the wrong kind of thing ("name as many countries as you can", "Not one of the 237 films here").
+   */
+  noun?: string;
   /** The ranking's #1 has the smallest number (a Similarweb rank); such lists never play in Blitz. */
   lowerIsBetter?: boolean;
   /**
