@@ -6,7 +6,16 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { normalize } from "../src/game/match";
 import type { Entry, Puzzle } from "../src/game/types";
-import { INTENT } from "./intent";
+import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./intent";
+
+/** Curated forms shared by many lists (countries, cities, states, athletes' nicknames). */
+const SHARED_FORMS = [
+  ...COUNTRY_FORMS.flat(),
+  ...CITY_FORMS.flat(),
+  ...Object.values(NICKNAMES).flat(),
+  ...Object.values(STATE_FORMS).flat(),
+  "Congo",
+];
 import { bareWord, blockedAlias, gluedAlias, junkRedirect } from "./aliases";
 import { UNIVERSES } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
@@ -123,7 +132,11 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
 
   // Alias hygiene (scripts/aliases.ts): glued names are broken data; the rest are likely redirects that aren't names.
   const curated = new Set(
-    [...Object.values(INTENT[p.id]?.same ?? {}).flat(), ...Object.keys(INTENT[p.id]?.groups ?? {})].map(normalize),
+    [
+      ...Object.values(INTENT[p.id]?.same ?? {}).flat(),
+      ...Object.keys(INTENT[p.id]?.groups ?? {}),
+      ...SHARED_FORMS,
+    ].map(normalize),
   );
   const junk: string[] = [];
   for (const e of all) {

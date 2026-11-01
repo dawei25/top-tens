@@ -10,7 +10,7 @@ import { fetchCategory, fetchPage, fetchRedirects, pageUrl, requestCount } from 
 import { addValues } from "./values";
 import { writeLexicon } from "./lexicon";
 import { tableDataDate } from "./dates";
-import { CITY_FORMS, COUNTRY_FORMS, INTENT, STATE_FORMS } from "./intent";
+import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./intent";
 
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
@@ -98,7 +98,8 @@ export function parseValue(text: string): { value: number; display: string } | n
 function usableAlias(alias: string, name: string): boolean {
   const n = normalize(alias);
   if (n.replace(/ /g, "").length < 2) return false;
-  return !/^\d+$/.test(n) || /^\d+$/.test(normalize(name));
+  // "329,715.1" from a number column, "4,256" (Pete Rose's hits): numbers, not names.
+  return !/^[\d ]+$/.test(n) || /^[\d ]+$/.test(normalize(name));
 }
 
 /** Country, state and capital names: a short form that is one of these names a place, not the entry. */
@@ -145,6 +146,9 @@ function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink"
   if (topic.nameFromLink && cell.link) return cleanName(cell.link);
   let name = cleanName(topic.nameFromText || !cell.linkText ? cell.text : cell.linkText);
   if (topic.nameStrip) name = name.replace(topic.nameStrip, "").trim();
+  // "Shape Of You" in the table is "Shape of You" in its article: the article's casing.
+  const linked = cell.link ? cleanName(cell.link) : "";
+  if (linked !== name && linked.toLowerCase() === name.toLowerCase()) return linked;
   // Untypeable names ("Маша и Медведь") fall back to the linked article's title, if that is typeable.
   if (!normalize(name) && cell.link && normalize(cleanName(cell.link))) return cleanName(cell.link);
   return name;
@@ -152,7 +156,7 @@ function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink"
 
 /** Total rows, notes and tier headings ("$50 billion+") that tables mix in with real rows. */
 const SKIP_NAME =
-  /^(totals?|grand total|subtotal|as of\b|world( total)?$|others?$|various$|unknown$|[$€£]\d|(player|name|rank|country|team|title)$)/i;
+  /^(totals?|grand total|subtotal|as of\b|last updated\b|world( total)?$|others?$|various$|unknown$|[$€£]\d|(player|name|rank|country|team|title)$)/i;
 
 /**
  * Use the linked article for redirects only if it is about the thing itself ("Avatar (2009 film)", not
@@ -219,6 +223,10 @@ function universeName(text: string, members: Place[]): string | undefined {
   return (members.find((m) => hit(m.name)) ?? members.find((m) => m.aliases.some(hit)))?.name;
 }
 
+/** Names of the rows a topic's tables leave unranked, where `unrankedRowsFree` makes them free. */
+const UNRANKED_ROWS = new Map<string, Set<string>>();
+const unrankedRows = (topic: Topic) => UNRANKED_ROWS.get(topic.id) ?? UNRANKED_ROWS.set(topic.id, new Set()).get(topic.id)!;
+
 async function readRows(topic: Topic): Promise<Row[]> {
   const $ = await fetchPage(topic.page);
   const tables = wikitables($);
@@ -235,9 +243,16 @@ async function readRows(topic: Topic): Promise<Row[]> {
       const nameCell = r[nc];
       const valueCell = r[vc];
       if (!nameCell || !valueCell || nameCell.isHeader && !nameCell.text) continue;
-      if (topic.rankedOnly && !/^\d/.test(r[0]?.text ?? "")) continue;
       const cellText = (members.length && universeName(nameCell.text, members)) || cellName(nameCell, topic);
       if (!cellText || !normalize(cellText) || topic.skip?.includes(cellText) || SKIP_NAME.test(cellText)) continue;
+      // A row the ranking leaves out (no rank, no figure) is free where the topic says so: Monaco has no IMF figure.
+      const unranked = () => {
+        if (topic.unrankedRowsFree) unrankedRows(topic).add(normalize(cellText));
+      };
+      if (topic.rankedOnly && !/^\d/.test(r[0]?.text ?? "")) {
+        unranked();
+        continue;
+      }
       const name = topic.rename?.[cellText] ?? cellText;
       if (topic.where && !topic.where.match.test(r[column(header, topic.where.col)]?.text ?? "")) continue;
       if (/\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
@@ -250,11 +265,17 @@ async function readRows(topic: Topic): Promise<Row[]> {
           v = alt;
         }
       }
-      if (!v) continue;
+      // A count of nothing (a team with no titles) ranks nothing; the universe still accepts the name.
+      if (!v || (v.value === 0 && !topic.lowerIsBetter)) {
+        if (!v) unranked();
+        continue;
+      }
       // One name per line of the cell: "Mount Everest / Sagarmatha / Chomolungma" are three aliases, not one glued string.
       // A river system's cell ("Saint Lawrence–Niagara–Detroit–...") names other rivers after the first.
       const lines = (nameCell.lines.length > 1 ? nameCell.lines : [nameCell.text]).filter((l) => !topic.noParts || !/[–-]/.test(l));
-      const seeds = [...lines, nameCell.linkText ?? "", ...shortForms(name, topic.stripWords)];
+      const seeds = [...lines, nameCell.linkText ?? "", ...shortForms(name, topic.stripWords)].map((s) =>
+        topic.nameStrip ? s.replace(topic.nameStrip, "").trim() : s,
+      );
       if (name !== cellText) seeds.push(cellText);
       // The cell can say more than the name: "Mississippi–Missouri–Jefferson" names the Mississippi row.
       for (const line of lines) if (cleanName(line) !== name) seeds.push(...shortForms(cleanName(line)));
@@ -264,7 +285,9 @@ async function readRows(topic: Topic): Promise<Row[]> {
         if (cell) seeds.push(cell.linkText ?? "", ...cell.lines.flatMap((l) => l.split("/")).map((part) => part.split(",")[0]));
       }
       // The article's own title is never among its redirects ("Acadia National Park" for "Acadia").
-      const target = topic.articles?.[name] ?? redirectTarget(name, nameCell, hasCountries(topic));
+      // A renamed row ("Disneyland Park" shown as "Disneyland Paris") keeps the article its table name links.
+      const viaCell = redirectTarget(cellText, nameCell, hasCountries(topic));
+      const target = topic.articles?.[name] ?? (viaCell !== cellText ? viaCell : redirectTarget(name, nameCell, hasCountries(topic)));
       if (target !== name) seeds.push(target);
       rows.push({
         name,
@@ -277,6 +300,11 @@ async function readRows(topic: Topic): Promise<Row[]> {
     }
   }
   if (!topic.keepOrder) rows.sort((a, b) => b.value - a.value);
+  // "3.2 million" among "6,301,972"s reads as another unit: write it out like the rest.
+  const worded = rows.filter((r) => /\b(million|billion|trillion)$/.test(r.valueText));
+  if (worded.length && worded.length < rows.length / 2) {
+    for (const r of worded) r.valueText = Math.round(r.value).toLocaleString("en-US");
+  }
   const seen = new Set<string>();
   return rows.filter((r) => !seen.has(normalize(r.name)) && seen.add(normalize(r.name)));
 }
@@ -321,7 +349,7 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
     const titles = await fetchCategory(cat, topic.categoryDepth ?? 0, CATEGORY_CAP);
     if (!titles.length) console.log(`warn ${topic.id}: category "${cat}" is empty or missing`);
     for (const title of titles) {
-      if (CATEGORY_SKIP.test(title) || topic.categorySkip?.test(title)) continue;
+      if (CATEGORY_SKIP.test(title) || topic.categorySkip?.test(title) || topic.skip?.includes(title)) continue;
       if (topic.categoryNames && !looksLikeName(baseTitle(title))) continue;
       const name = cleanName(title);
       if (!normalize(name) || SKIP_NAME.test(name)) continue;
@@ -411,6 +439,13 @@ function curated(topic: Topic, entries: Entry[], final: boolean): Curated[] {
       if (hits.length !== 1) continue;
       for (const alias of forms) out.push({ alias, targets: hits, strict: false });
     }
+    // "Congo" is two countries: the game asks which one.
+    const congo = (first: string) => {
+      const forms = new Set(COUNTRY_FORMS.find((f) => f[0] === first)!.map(normalize));
+      return entries.find((e) => forms.has(normalize(e.name)));
+    };
+    const [drc, roc] = [congo("DR Congo"), congo("Republic of the Congo")];
+    if (drc && roc) out.push({ alias: "Congo", targets: [drc, roc], strict: false });
   }
   if (/\bcities\b/.test(topic.noun)) {
     for (const forms of CITY_FORMS) {
@@ -420,6 +455,12 @@ function curated(topic: Topic, entries: Entry[], final: boolean): Curated[] {
       if (!hits.length) hits = entries.filter((e) => set.has(normalize(e.name)));
       if (hits.length !== 1) continue;
       for (const alias of forms) out.push({ alias, targets: hits, strict: false });
+    }
+  }
+  if (topic.people) {
+    for (const [name, aliases] of Object.entries(NICKNAMES)) {
+      const hits = entries.filter((e) => e.name === name);
+      if (hits.length === 1) for (const alias of aliases) out.push({ alias, targets: hits, strict: false });
     }
   }
   if ([topic.universe ?? []].flat().includes("us-states")) {
@@ -549,8 +590,9 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     }
     for (const a of topic.aliases?.[row.name] ?? []) aliases.add(a);
     if (topic.people) {
+      // "Bryant", not "Park" (Linkin Park) or "Brown": a surname that is a plain word means other things.
       const last = row.name.split(" ").at(-1)!;
-      if (last.length >= 4) aliases.add(last);
+      if (last.length >= 4 && !isEnglishWord(normalize(last))) aliases.add(last);
     }
     const fact = i < 10 ? facts[row.name] : undefined;
     entries.push({
@@ -569,7 +611,11 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   seedIntent(topic, entries);
   const extra = await readAlso(topic, rows.at(-1)!.value);
   for (const u of [topic.universe ?? []].flat()) {
-    extra.push(...UNIVERSES[u]().filter((p) => !topic.skip?.includes(p.name)).map((p) => ({ rank: 0, ...p })));
+    // A free row's other names count too: the table's "Macau" is the universe's "Macao".
+    const free = new Set(unrankedRows(topic));
+    for (const forms of COUNTRY_FORMS) if (forms.some((f) => free.has(normalize(f)))) for (const f of forms) free.add(normalize(f));
+    const members = UNIVERSES[u]().filter((p) => !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
+    extra.push(...members.map((p) => ({ rank: 0, ...p })));
   }
   const taken = new Set(entries.flatMap((e) => [e.name, ...e.aliases].map(normalize)));
   // The same thing written another way ("St. Lawrence River" for the ranked Saint Lawrence, the table's link

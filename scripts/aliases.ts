@@ -230,6 +230,24 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
  */
 export const COUNTRY_JUNK = [
   "Snow Mexico", "Finnishness", "The Land of Chocolate", "Day of the Capital", "Abdullah al-Saleh", "Al Rawda Palace",
+  "Ugandan nationalism", "Ker Alur", "Official language of Southern Sudan", "North Kenya", "Kenya-Africa",
+  "Belgian Ubanghi", "Độc lập, tự do, hạnh phúc", "Doc lap, tu do, hanh phuc", "Swedish sin", "Folkland",
+  "Federal state", "German infrastructure", "Law and criminal justice of Italy", "Administrative units of Italy",
+  "Mountains of Spain", "Bibliography of Finland", "Irish politics", "Ireland politics", "Politic in eire",
+  "Politic of eire", "Science and technology in Malta", "Maltese art", "Swedish origin", "Law of Greece",
+  "Languages of Saudi Arabia", "Argentina Information", "National symbols of Chile", "Cultural heritage of Chile",
+  "Third Republic", "Languages of Vietnam", "Social problems in Saudi Arabia", "Child abuse in Saudi Arabia",
+  "National parks in Kuwait", "Water supply and sanitation in Kuwait", "Water resources of Kuwait",
+  "Languages of Kuwait", "Law of Iran", "Science and technology in Bahrain",
+  "Description of Democratic Republic of Congo", "Project Meridian", "United States military ranks",
+  "US military branches", "Customs and etiquette in the services", "Prince Pickles", "Russian Foreign Legion",
+  "Muscovian army", "Britain's languages", "Great Britain's languages", "Council Union", "Soviet order",
+  "People's republic of russia", "United states of soviet russia", "European USSR", "De", "Modern day China",
+  "France–Monaco border", "Monaco–France border", "Fort-Hercule", "Monegasque culture", "Monegasque geography",
+  "HUB in a Singapore context", "Gibraltar Health Authority", "Gibraltar Group Practice Medical Scheme",
+  "Vatican City culture", "Vatican City cuisine", "Vatican citizenship", "Roman Catholicism in Rome",
+  "St. Joseph's Fountain", "Fushifarurah", "Iru fushi", "Irufushi", "See United Kingdom.", "See China.",
+  "Topography of the UK", "Topography of the United Kingdom", "Abegistan", "Yananistan",
 ];
 
 let english: Set<string> | undefined;
