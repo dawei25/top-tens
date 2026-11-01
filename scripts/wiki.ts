@@ -51,8 +51,9 @@ export function pageUrl(title: string): string {
   return `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
 }
 
-export async function fetchPage(title: string): Promise<cheerio.CheerioAPI> {
-  return cheerio.load(await fetchCached(pageUrl(title)));
+/** A page's HTML; with cacheOnly, only what an earlier build fetched (NotFound otherwise). */
+export async function fetchPage(title: string, cacheOnly = false): Promise<cheerio.CheerioAPI> {
+  return cheerio.load(await fetchCached(pageUrl(title), cacheOnly));
 }
 
 /**

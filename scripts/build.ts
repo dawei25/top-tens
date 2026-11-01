@@ -527,6 +527,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     id: topic.id,
     title: topic.title,
     prompt: topic.prompt,
+    noun: topic.noun,
     category: topic.category,
     metric: topic.metric,
     ...(topic.lowerIsBetter ? { lowerIsBetter: true as const } : {}),

@@ -25,6 +25,7 @@ const isPlaceList = (p: Puzzle) => {
   const t = TOPICS.find((x) => x.id === p.id);
   return !!t?.universe || /cities|capitals|countries|population|states|metros|islands/.test(p.id);
 };
+const topicNoun = (id: string) => TOPICS.find((t) => t.id === id)?.noun;
 /** Below this many accepted answers, wrong-but-real guesses are likely to be free. */
 const MIN_ACCEPTED = 30;
 
@@ -56,7 +57,14 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
   const warn = (msg: string) => issues.push({ level: "warn", msg });
 
   if (p.id + ".json" !== file) err(`id "${p.id}" doesn't match file name`);
-  for (const k of ["title", "prompt"] as const) if (!p[k]?.trim()) err(`missing ${k}`);
+  for (const k of ["title", "prompt", "noun"] as const) if (!p[k]?.trim()) err(`missing ${k}`);
+  for (const k of ["title", "prompt", "noun"] as const) if (p[k]?.includes("—")) err(`${k} has an em dash`);
+  if (p.prompt && !p.prompt.startsWith("Name the 10 ")) warn(`prompt doesn't start "Name the 10": ${p.prompt}`);
+  // Plural and lower case except proper nouns: "countries", "NBA players", "YouTube channels".
+  const first = p.noun?.split(" ")[0] ?? "";
+  if (/^[A-Z][a-z]+$/.test(first) && !/^(Broadway|Instagram|Facebook)$/.test(first)) warn(`noun "${p.noun}" starts with a capital`);
+  if (p.noun && !/(s|people)$/.test(p.noun)) warn(`noun "${p.noun}" doesn't look plural`);
+  if (topicNoun(p.id) && p.noun !== topicNoun(p.id)) err(`noun "${p.noun}" differs from topics.ts`);
   if (!p.source?.url || !p.source?.asOf) err("missing source url or asOf");
   if (p.answers.length !== 10) err(`${p.answers.length} answers, expected 10`);
 
