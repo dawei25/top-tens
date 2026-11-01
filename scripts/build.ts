@@ -479,7 +479,14 @@ function curated(topic: Topic, entries: Entry[], final: boolean): Curated[] {
   if (topic.people) {
     for (const [name, aliases] of Object.entries(NICKNAMES)) {
       const hits = entries.filter((e) => e.name === name);
-      if (hits.length === 1) for (const alias of aliases) out.push({ alias, targets: hits, strict: false });
+      if (hits.length !== 1) continue;
+      // "The Answer", "The Glove": a nickname that is one plain word catches that word typed for anything else.
+      const own = normalize(name).split(" ");
+      for (const alias of aliases) {
+        const n = normalize(alias);
+        if (!n.includes(" ") && isEnglishWord(n) && !own.includes(n) && !/^[A-Z0-9]{2,4}$/.test(alias)) continue;
+        out.push({ alias, targets: hits, strict: false });
+      }
     }
   }
   if ([topic.universe ?? []].flat().includes("us-states")) {

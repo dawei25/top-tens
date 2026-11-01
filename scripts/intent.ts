@@ -96,7 +96,7 @@ export const CITY_FORMS: string[][] = [
   ["Ho Chi Minh City", "HCMC", "Saigon"],
   ["Hong Kong", "HK"],
   ["Saint Petersburg", "St Petersburg", "St. Petersburg", "Leningrad"],
-  ["Toronto", "The 6ix", "The Six"],
+  ["Toronto", "The 6ix"],
   ["Montreal", "Montréal", "MTL"],
   ["Calgary", "YYC"],
   ["Delhi", "New Delhi", "Dilli"],
@@ -121,14 +121,15 @@ export const CITY_FORMS: string[][] = [
 
 /**
  * Famous nicknames of athletes, applied on every list of people where the athlete is an entry (ranked or not).
- * Only names fans really use (most are Wikipedia redirects); a nickname two players share is left out.
+ * Only names fans really use (most are Wikipedia redirects); a nickname two players share is left out. The build
+ * also leaves out one that is a single plain word ("The Glove" is "glove"): it would catch that word typed for anything
+ * else.
  */
 export const NICKNAMES: Record<string, string[]> = {
   // Basketball
   "LeBron James": ["King James", "LBJ", "Bron"],
   "Kareem Abdul-Jabbar": ["Lew Alcindor"],
-  "Karl Malone": ["The Mailman"],
-  "Kobe Bryant": ["Black Mamba", "Mamba"],
+  "Kobe Bryant": ["Black Mamba"],
   "Michael Jordan": ["MJ", "Air Jordan", "His Airness"],
   "Kevin Durant": ["KD", "Slim Reaper"],
   "Wilt Chamberlain": ["Wilt the Stilt", "The Big Dipper"],
@@ -152,7 +153,6 @@ export const NICKNAMES: Record<string, string[]> = {
   "Isiah Thomas": ["Zeke"],
   "Chris Paul": ["CP3", "Point God"],
   "Russell Westbrook": ["Russ"],
-  "James Harden": ["The Beard"],
   "Paul Pierce": ["The Truth"],
   "Damian Lillard": ["Dame", "Dame Time"],
   "Kyrie Irving": ["Uncle Drew"],
@@ -160,7 +160,6 @@ export const NICKNAMES: Record<string, string[]> = {
   "Larry Bird": ["Larry Legend"],
   "Dennis Rodman": ["The Worm"],
   "Elvin Hayes": ["The Big E"],
-  "Robert Parish": ["The Chief"],
   "Dwight Howard": ["Superman", "D12"],
   "Vince Carter": ["Vinsanity", "Air Canada", "Half Man Half Amazing"],
   "Tracy McGrady": ["T-Mac"],
@@ -177,10 +176,8 @@ export const NICKNAMES: Record<string, string[]> = {
   "Matt Ryan": ["Matty Ice"],
   "Joe Montana": ["Joe Cool"],
   "Brett Favre": ["The Gunslinger"],
-  "Walter Payton": ["Sweetness"],
   "Adrian Peterson": ["All Day"],
   "LaDainian Tomlinson": ["LT"],
-  "Jerome Bettis": ["The Bus"],
   "Derrick Henry": ["King Henry"],
   "Marshawn Lynch": ["Beast Mode"],
   "O. J. Simpson": ["The Juice", "OJ", "OJ Simpson"],
@@ -220,7 +217,6 @@ export const NICKNAMES: Record<string, string[]> = {
   "Mario Lemieux": ["Super Mario", "Le Magnifique"],
   "Sidney Crosby": ["Sid the Kid", "Sid"],
   "Alexander Ovechkin": ["Ovi", "Alex Ovechkin", "The Great Eight"],
-  "Mark Messier": ["The Moose"],
   "Steve Yzerman": ["Stevie Y"],
   "Brett Hull": ["The Golden Brett"],
   "Bobby Hull": ["The Golden Jet"],
@@ -250,7 +246,6 @@ export const NICKNAMES: Record<string, string[]> = {
 export const STATE_FORMS: Record<string, string[]> = {
   Massachusetts: ["Mass"],
   California: ["Cali"],
-  "New Jersey": ["Jersey"],
   Washington: ["Washington State"],
   "New York": ["New York State", "NY State"],
   Virginia: ["Virgina"],
@@ -447,7 +442,7 @@ export const INTENT: Record<string, Intent> = {
   },
   buildings: {
     same: {
-      "Willis Tower": ["Sears Tower", "Sears"],
+      "Willis Tower": ["Sears Tower"],
       "Merdeka Maybank Tower": ["Merdeka 118", "PNB 118", "Merdeka PNB118"],
       "Mecca Royal Clock Tower": ["Abraj Al Bait", "Makkah Royal Clock Tower", "Mecca Clock Tower"],
       "Ping An Finance Centre": ["Ping An Finance Center", "Ping An"],
@@ -466,13 +461,11 @@ export const INTENT: Record<string, Intent> = {
       "Magic Johnson": ["Magic", "Earvin Johnson"],
       "LeBron James": ["LeBron", "King James", "LBJ"],
       "Kareem Abdul-Jabbar": ["Kareem", "Lew Alcindor"],
-      "Karl Malone": ["The Mailman"],
       "Kobe Bryant": ["Kobe", "Black Mamba"],
       "Kevin Durant": ["KD", "Durant"],
       "Michael Jordan": ["MJ", "Air Jordan"],
       "Dirk Nowitzki": ["Dirk"],
       "Wilt Chamberlain": ["Wilt", "Wilt the Stilt"],
-      "James Harden": ["The Beard"],
       "Shaquille O'Neal": ["Shaq", "Shaquille"],
     },
   },
@@ -560,10 +553,10 @@ export const INTENT: Record<string, Intent> = {
   "nfl-rushing-yards": {
     same: {
       "Emmitt Smith": ["Emmitt"],
-      "Walter Payton": ["Sweetness", "Payton"],
+      "Walter Payton": ["Payton"],
       "Adrian Peterson": ["AP", "All Day"],
       "LaDainian Tomlinson": ["LT", "LaDainian"],
-      "Jerome Bettis": ["The Bus", "Bettis"],
+      "Jerome Bettis": ["Bettis"],
       "Derrick Henry": ["King Henry"],
       "Barry Sanders": ["Barry"],
     },
@@ -575,7 +568,7 @@ export const INTENT: Record<string, Intent> = {
       "Gordie Howe": ["Mr. Hockey", "Howe"],
       "Jaromir Jagr": ["Jaromír Jágr", "Jagr"],
       "Phil Esposito": ["Espo"],
-      "Mark Messier": ["Messier", "The Moose"],
+      "Mark Messier": ["Messier"],
       "Steve Yzerman": ["Stevie Y", "Yzerman"],
     },
   },
@@ -593,8 +586,6 @@ export const INTENT: Record<string, Intent> = {
   },
   "tiktok-accounts": {
     same: {
-      "Dwayne Johnson": ["The Rock"],
-      IShowSpeed: ["Speed"],
       "Charli D'Amelio": ["Charli", "Charli DAmelio"],
       "Khaby Lame": ["Khaby", "Khabane Lame"],
       MrBeast: ["Mr Beast", "Jimmy Donaldson"],
@@ -839,8 +830,6 @@ export const INTENT: Record<string, Intent> = {
       "Kareem Abdul-Jabbar": ["Kareem", "Lew Alcindor"],
       "Elvin Hayes": ["The Big E"],
       "Tim Duncan": ["The Big Fundamental", "Duncan"],
-      "Karl Malone": ["The Mailman"],
-      "Robert Parish": ["The Chief"],
       "Kevin Garnett": ["KG", "Garnett"],
       "Bill Russell": ["Russell"],
     },
@@ -853,7 +842,7 @@ export const INTENT: Record<string, Intent> = {
       "Sidney Crosby": ["Sid the Kid", "Sid", "Crosby"],
       "Mario Lemieux": ["Super Mario", "Lemieux"],
       "Alexander Ovechkin": ["Ovi", "Alex Ovechkin", "Ovechkin"],
-      "Mark Messier": ["Messier", "The Moose"],
+      "Mark Messier": ["Messier"],
       "Steve Yzerman": ["Stevie Y", "Yzerman"],
     },
   },
@@ -906,7 +895,6 @@ export const INTENT: Record<string, Intent> = {
   },
   "facebook-pages": {
     same: {
-      "Dwayne Johnson": ["The Rock"],
       "Real Madrid C.F.": ["Real Madrid"],
       "FC Barcelona": ["Barcelona", "Barca", "Barça"],
       "5-Minute Crafts": ["5 Minute Crafts", "Five Minute Crafts"],

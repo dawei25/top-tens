@@ -250,7 +250,7 @@ export const COUNTRY_JUNK = [
   "St. Joseph's Fountain", "Fushifarurah", "Iru fushi", "Irufushi", "See United Kingdom.", "See China.",
   "Topography of the UK", "Topography of the United Kingdom", "Abegistan", "Yananistan", "Land of the Swiss",
   // Rare names that only catch typos of other words ("airplanes" became Ireland, "nunavut" Greenland).
-  "Airlann", "Airlan", "Nunaat", "Antarctica of The North", "S'pore", "Pinas", "Sovjet",
+  "Airlann", "Airlan", "Nunaat", "Antarctica of The North", "S'pore", "Pinas", "Sovjet", "Grease", "Island", "Port",
 ];
 
 let english: Set<string> | undefined;

@@ -363,6 +363,7 @@ export const TOPICS: Topic[] = [
       "Fuxingmen Inner Street", "Fuxingmen Outer Street", "Fuxing Road", "St. Xavier's High School Loyola Hall",
       "Prakash Higher Secondary School", "Prakash school", "Phss", "SJK Lai Meng", "Sichuanese teahouse",
       "Mexican Federal District Transit System", "Sister Cities Chicago", "Shouer", "Singy", "Singan",
+      "S'pore",
     ],
   },
   {
@@ -454,7 +455,7 @@ export const TOPICS: Topic[] = [
     skip: ["Australia", "Antarctica", "Japan", "Indonesia", "Philippines"],
     junkAliases: [
       "Borneo flags", "New Guinea Man", "Sumatera Celebes", "ID-SM", "Eastern Sumatra", "Kangat Bay", "Lupanglunti",
-      "Lupanlunti", "Nunavut",
+      "Lupanlunti", "Nunavut", "China",
     ],
   },
   {
@@ -558,7 +559,7 @@ export const TOPICS: Topic[] = [
     also: [{ tables: [1, 2], name: 0 }],
     universeCategories: ["YouTube channels", "YouTubers"],
     categoryDepth: 2,
-    junkAliases: ["Hindi", "Nursery Rhymes"],
+    junkAliases: ["Hindi", "Nursery Rhymes", "Track 5"],
     // A table footnote ("As of October 2026 UTC").
     skip: ["UTC"],
   },
@@ -685,6 +686,7 @@ export const TOPICS: Topic[] = [
     // Overview articles and peoples in the categories, and pool entries that hijack a ranked language's name.
     categorySkip: /^(languages|classical languages|multilingualism|indian states)\b|\b(people|peoples|dialects|macaronic language)$/i,
     skip: ["Hijra Farsi", "Punjabi dialects", "German-Russian macaronic language"],
+    junkAliases: ["Frenches"],
   },
   {
     id: "buildings",
@@ -800,7 +802,7 @@ export const TOPICS: Topic[] = [
       "Always Low Prices, Always", "Carbon emissions by Saudi Aramco", "Tim Noel", "Controversies surrounding UnitedHealth Group",
       "Woodstock for Capitalists", "Berkshire Hathaway Annual Shareholders Meeting", "Xinjiang Oilfield Company",
       "Xinjiang Oil Company", "Great Wall Drilling", "Great Wall Drilling Company", "Logistics Health Incorporated",
-      "ICBC.com.cn", "ICBC Leasing", "AStore",
+      "ICBC.com.cn", "ICBC Leasing", "AStore", "Erica",
     ],
   },
   {
@@ -875,6 +877,8 @@ export const TOPICS: Topic[] = [
       "Yankees Suck", "New York Yankees Roster", "Yankees Roster", "Dodgers Roster", "Reds Roster",
       "St. Louis Cardinals roster", "Detroit Tigers roster", "Pittsburgh Pirates roster", "Kruk and Kuip", "Talksox",
       "Piratefest", "Atlanta Braves 1990s pitching rotation", "Philadelphia / Kansas City / Oakland / Athletics",
+      // Cities with another team too: "new york" was the Giants, "philadelphia" the Athletics.
+      "Philadelphia", "Kansas City", "New York", "Milwaukee",
     ],
   },
   {
@@ -1031,7 +1035,7 @@ export const TOPICS: Topic[] = [
       "Chandler Hallow", "Ava Kris Tyson", "Chris Tyson", "Nolan Hansen", "Zaira Nucci", "Heidi D'Amelio", "Marc D'Amelio",
       "MrBeast allegations", "T-Series vs MrBeast", "Would You Risk Dying for $500,000?", "Legal issues with TikTok",
       "Project Texas", "TikTok Star", "TikToker", "Tiktokers", "TikTok dance", "TikTok trend", "Dolls", "Dolls EP",
-      "FIFA World Cup tiebreakers", "Sports", "League",
+      "FIFA World Cup tiebreakers", "Sports", "League", "The Parades",
     ],
   },
   {
@@ -1105,7 +1109,7 @@ export const TOPICS: Topic[] = [
       "Joe Merrick", "Serebii", "Fubata town", "Foento City", "Japan Pokemon", "Pokemon Fans", "Pokémon Fans", "Winnie- -Pooh",
       "Winnie Sanders", "Nova 6", "Urzikstan", "Russell Adler", "Captain Marvel", "Gamora", "A Mini Marvel",
       "Summer of Heroes", "MPower", "The Women of Black Panther", "Christie Brezault", "Princess Annika", "Mermaidia",
-      "Mariposa and the Butterfly Fairy Friends", "Lance Vance", "San Andreas",
+      "Mariposa and the Butterfly Fairy Friends", "Lance Vance", "San Andreas", "Pokey", "Boo",
     ],
   },
   {
@@ -1129,7 +1133,7 @@ export const TOPICS: Topic[] = [
       "Mario Calculator", "POW Block", "Pokemon types", "Pokémon types", "Poke Ball", "Poké Ball", "Pokedex", "Pokédex",
       "Gym Badge", "Elite Four", "Giovanni", "Steven Stone", "Noland", "Sakaki", "Arklay forest", "Raccoon Dam",
       "Caliban Cove", "Nova 6", "Urzikstan", "Russell Adler", "Lance Vance", "Wanted level", "Alex Hunter", "Piemonte Calcio",
-      "L-Block", "Tetris music", "Tetrimino", "Tetromino", "Abstergo", "Precursor Genome",
+      "L-Block", "Tetris music", "Tetrimino", "Tetromino", "Abstergo", "Precursor Genome", "Pokey",
     ],
   },
   {
@@ -1153,6 +1157,7 @@ export const TOPICS: Topic[] = [
     categorySkip: /^(comparison|issues|privacy|criticism|evaluation|clearinghouse)\b|\b(protocol|search engine|engine|software|framework|project|technologies|corporation|inc\.?|library|index|service|communities)$/i,
     webNames: true,
     junkAliases: [
+      "The Parades", "Facebooking", "Binges", "Sonic",
       "Giigke,cin", "Ghits", "Google videos", "GoogleYouTube", "Youtubing", "Facephiliac", "Mini-feed",
       "Instagram trends", "Layout from Instagram", "Do Anything Now", "Fail Whale", "Twitpocalypse",
       "Twittered revolution", "AMA", "Subreddit", "Reddit gold", "Infogami", "TikTok Review", "Timeline of WhatsApp",
@@ -1284,7 +1289,7 @@ export const TOPICS: Topic[] = [
       "Great Victoria Desert", "Great Sandy Desert", "Tanami Desert", "Simpson Desert", "Gibson Desert",
       "Little Sandy Desert", "Strzelecki Desert",
     ],
-    junkAliases: ["Ecoregion PA1314", "Desert of the Gobi"],
+    junkAliases: ["Ecoregion PA1314", "Desert of the Gobi", "Arctics"],
   },
   {
     id: "city-visitors",
@@ -1301,7 +1306,7 @@ export const TOPICS: Topic[] = [
     universe: "capitals",
     junkAliases: [
       "SJK Lai Meng", "K.L.C.C.", "Al memzar", "Guzelbag Mahallesi", "Kaleici",
-      "Krungthepmahanakornamornratanakosinmahintarayutth",
+      "Krungthepmahanakornamornratanakosinmahintarayutth", "Noble",
     ],
   },
   {
@@ -1405,7 +1410,7 @@ export const TOPICS: Topic[] = [
       "WebsiteSpark", "Forceware", "IReady", "Controversies surrounding Nvidia", "Project GROOT", "Project Groot",
       "Nvidia Grace", "Move fast and break things", "Hacker Way", "1 Hacker Way", "One Hacker Way", "Mars Oasis",
       "SpaceX Hawthorne facility", "SpaceX headquarters", "SpaceX Hawthorne", "WaferTech", "TSMC Washington", "Spacex.com",
-      "AStore",
+      "AStore", "Supercenter", "GamePlay",
     ],
   },
   {
@@ -1750,7 +1755,7 @@ export const TOPICS: Topic[] = [
       "Tokyo in pop culture", "Kotly, Moscow", "Kotly, Moscow Oblast", "Western Moscow", "Abdeen", "Cairo in the middle ages",
       "Sangwon Middle School", "Five Grand Palaces of Joseon-Dynasty Seoul", "Five Grand Palaces", "Seoul castle",
       "South Seoul", "North Seoul", "Mexican Federal District Transit System", "Londonise", "Londonize", "Baku Oilfields",
-      "Shouer", "Singy", "Singan",
+      "Shouer", "Singy", "Singan", "S'pore",
     ],
   },
   {
@@ -1820,6 +1825,7 @@ export const TOPICS: Topic[] = [
       "Starboy", "King Of The Fall", "We're Alone Together", "Monologue Song", "Lady Gaga as a gay icon",
       "Lady Gaga as gay icon", "Coldplay.com", "Pectoralz", "Los Unidades", "Big Fat Noises", "Shakira Bio",
       "Shakira ft. Wyclef Jean", "Shakira & Alejandro Sanz", "Gypsy Love", "Killa on the Run", "The Hooligans", "Hottest Heart",
+      "Insane", "Dolly", "Meow", "Purr", "The Embassy",
     ],
   },
   {
@@ -1845,6 +1851,7 @@ export const TOPICS: Topic[] = [
       "Democratic People's Republic of Samsung", "Republic of Samsung", "Samsung Wave M", "SAMSUNG WB750", "ES70",
       "Move fast and break things", "Narendra Modi's Google+ Hangout", "Use of Technology by Narenda Modi", "Cinematch",
       "Qwikster", "Fast.com", "Magic Quill Productions", "The Parades", "Ecce homo qui est faba", "Killer Queen by Katy Perry",
+      "Track 5", "Insane", "Dolly", "Meow", "Purr", "Facebooking",
     ],
   },
   {
