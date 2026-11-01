@@ -12,6 +12,9 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
   - **Ambiguous typos** ("Irak"): tappable buttons fill the input with each option.
   - **Duplicates.**
   - **Anything that isn't an accepted answer** for the list: keyboard mash, or a real thing the source doesn't cover.
+    A plain miss says how many of what the list holds ("Not one of the 258 countries here."), from the puzzle's
+    `noun`, so a wrong kind of guess (cars on a list of countries) is obvious.
+  - **A guess that fits several answers without naming one** ("star wars", "mario kart"): "be more specific".
 - The game ends at 10/10 or 0 lives; missed slots are then revealed. A give up button reveals everything.
 
 ## 2. Answer matching (`src/game/match.ts`)
@@ -19,11 +22,16 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
 1. Normalize: lowercase, strip accents and punctuation, `&` → `and`, drop a leading article, Roman numerals → digits.
 2. Exact match on name or alias submits immediately.
 3. Otherwise fuzzy match (edit distance with transpositions, budget scaled by length). A unique match fills the input.
-   Ties offer choices.
-4. Numbers must agree: GTA 6 never matches GTA V.
-5. A guess that is itself a known real name (any name in the bank, any country or capital) is never corrected into a
+   Two equally close readings offer choices; more is noise. Past one slip, a misspelling keeps its first letter
+   ("factories" is not Castries), and one word of a longer name only catches a near-exact typo ("pope" is not
+   "Don't Bother Me, I Can't Cope").
+4. **Never list answers the player didn't type.** A guess that is part of several names (a shared franchise alias,
+   a common word) lists them only when two fit or when it's what each is called ("carolina": North and South
+   Carolina); otherwise it asks the player to be more specific, free.
+5. Numbers must agree: GTA 6 never matches GTA V.
+6. A guess that is itself a known real name (any name in the bank, any country or capital) is never corrected into a
    different one: "Austria" is not Australia.
-6. Unmatched input is free; `junk.ts` only picks the message ("doesn't look like an answer" vs "not a recognized
+7. Unmatched input is free; `junk.ts` only picks the message ("doesn't look like an answer" vs "not a recognized
    answer").
 
 ## 3. Content
@@ -32,15 +40,24 @@ Puzzles are prebuilt from Wikipedia tables (`scripts/topics.ts`, `scripts/build.
 with every table row as an accepted answer, aliases from redirects, and a source link with an "as of" date.
 Modes: daily (Today's list and Today's Blitz, from `public/puzzles/daily.json`) and free play (a random list or Blitz,
 optionally by category). **Dailies are one try each**, archive dailies included: a finished daily always reopens on
-its result. Free play is endless: Play again rolls a new random game, keeping the category if one was picked.
+its result. Free play is endless: Play again rolls a new random game, keeping the category if one was picked, and
+prefers lists the player hasn't played in that mode.
+
+**One topic a day (from 2026-11-05).** Today's list and Today's Blitz are the same list; a list that can't be a
+Blitz has no Today's Blitz. Until that day's list is finished, its Blitz shows only the player's hits ("the rest
+shows once you finish today's list"). Free Blitz never lands on today's daily, a future one, or Today's Blitz before
+it's played. Older dates keep the separate Blitz list they ran with (an explicit `blitz` in daily.json). The judge's
+bar for a daily (docs/JUDGE.md): a typical player averages 5 to 6 out of 10.
 
 ## 4. Screens
 
 1. **Home:** Today's list and Blitz; Free play (Random list, Random Blitz, each with a floating by-category picker);
    Your games (Archive, Past runs); stats. Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
 2. **Game:** prompt, lives, 10 rank slots, input pinned at the bottom, feedback line, chips for life-costing misses.
+   Blitz's title card shows the prompt and "name as many <noun> as you can".
 3. **Results:** score, par and histogram, full list with values, source link, share, Play again (rolls a new game).
-   A finished daily offers Today's Blitz and Random list instead.
+   A finished daily offers Today's Blitz and Random list instead. Archive rows show the date's Blitz score, naming
+   the other list on older dates whose Blitz ran on a different one.
 4. **How to play** on first visit.
 
 ## 5. Visual direction: Krillion's language, arcade high-score table
