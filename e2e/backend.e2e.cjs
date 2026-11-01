@@ -248,8 +248,10 @@ test("sign-in key, sheet and privacy page (desktop)", async () => {
   await ctx.close();
 });
 
-test("the sign-in sheet fits a phone", async () => {
+test("the account pieces fit a phone: Home's key, the sheet, the account panel", async () => {
   const { ctx, page } = await open(phone, "", FRESH);
+  await page.getByTestId("account-key").waitFor();
+  assert.ok(await noHScroll(page));
   await page.getByTestId("account-key").click();
   const sheet = page.getByTestId("sign-in-sheet");
   await sheet.waitFor();
@@ -258,6 +260,10 @@ test("the sign-in sheet fits a phone", async () => {
   assert.ok(await noHScroll(page));
   await page.getByTestId("sign-in-close").click();
   await sheet.waitFor({ state: "detached" });
+
+  await page.goto(base + "#stats");
+  await page.locator('[data-testid="account-panel"][data-signed-in="false"]').waitFor();
+  assert.ok(await noHScroll(page));
   await ctx.close();
 });
 

@@ -51,6 +51,8 @@ export async function flushPlays(): Promise<void> {
   try {
     if ((await outbox.flush()) === "retry") {
       retries++;
+      // Overlapping calls share one flush; only one retry may stay scheduled.
+      clearTimeout(retryTimer);
       retryTimer = setTimeout(() => void flushPlays(), retryDelay(retries));
     } else retries = 0;
   } catch {
@@ -124,7 +126,7 @@ function returnTo(): string {
   return `${location.origin}${location.pathname}`;
 }
 
-const AUTH_PARAMS = ["code", "error", "error_code", "error_description", "sb"];
+const AUTH_PARAMS = ["code", "error", "error_code", "error_description", "sb_flow_id"];
 
 /** Take the sign-in leftovers (a code, an error) out of the address bar, keeping the screen. */
 function cleanUrl(): void {
@@ -144,13 +146,28 @@ function cleanUrl(): void {
   if (changed) history.replaceState(history.state, "", url.toString());
 }
 
-function urlNotice(): string | undefined {
+/** Whether this browser started a sign-in that's waiting for its code (Supabase keeps a PKCE verifier for it). */
+function verifierWaiting(): boolean {
+  try {
+    return Object.keys(localStorage).some((k) => k.startsWith(`${KEYS.auth}-`) && k.endsWith("code-verifier"));
+  } catch {
+    return false;
+  }
+}
+
+/** What to tell the player about a sign-in that came back to the page and didn't work. */
+function urlNotice(hadVerifier: boolean): string | undefined {
   const url = new URL(location.href);
   const hash = new URLSearchParams(url.hash.slice(1));
   const err = url.searchParams.get("error_description") ?? hash.get("error_description");
   if (err) return `sign-in failed: ${err.replace(/\+/g, " ").toLowerCase()}.`;
-  // A link from an email opened in a different browser than the one that asked for it: its code can't be used here.
-  if (url.searchParams.has("code")) return "that link belongs to the browser you asked for it in. open it there, or use the code from the email.";
+  // Still a code in the address: Supabase couldn't use it. Without a verifier, the link was opened in a different
+  // browser from the one that asked for it.
+  if (url.searchParams.has("code")) {
+    return hadVerifier
+      ? "sign-in didn't finish. try again."
+      : "that link belongs to the browser you asked for it in. open it there, or use the code from the email.";
+  }
   return undefined;
 }
 
@@ -163,6 +180,7 @@ export async function start(): Promise<void> {
   void flushPlays();
   if (!accountsOn) return;
   try {
+    const hadVerifier = verifierWaiting();
     const auth = sb().auth;
     auth.onAuthStateChange((event, session) => {
       // Supabase asks for no awaited calls inside this callback, so react on the next tick.
@@ -177,11 +195,12 @@ export async function start(): Promise<void> {
     });
     // Waits for Supabase to finish starting up, which includes trading a sign-in code in the URL for a session.
     const { data } = await auth.getSession();
-    const notice = urlNotice();
+    const notice = urlNotice(hadVerifier);
     cleanUrl();
-    setAccount({ status: data.session ? "in" : "out", ...(data.session ? { user: userOf(data.session) } : {}), notice });
+    // A stored session that no longer works (its refresh was refused) ends up signed out here.
+    setAccount({ status: data.session ? "in" : "out", user: data.session ? userOf(data.session) : undefined, notice });
   } catch {
-    setAccount({ status: "out" });
+    setAccount({ status: "out", user: undefined });
   }
 }
 
@@ -268,6 +287,10 @@ export async function deleteAccount(): Promise<string | null> {
   } catch {
     // Already gone on the server.
   }
+  // The games here are this device's again: the next sign-in, whoever's, may take them along.
+  const gone = getAccount().user?.id;
+  if (gone) storage.remove(KEYS.stash + gone);
+  storage.remove(KEYS.owner);
   setAccount({ status: "out", user: undefined, sync: "idle", syncedAt: undefined });
   return null;
 }
@@ -348,7 +371,15 @@ export function claimDevice(userId: string, now = Date.now()): boolean {
   let changed = false;
   const owner = storage.get(KEYS.owner);
   if (owner && owner !== userId) {
-    storage.set(KEYS.stash + owner, JSON.stringify(load()));
+    let aside: SyncSave = load();
+    try {
+      // Something already set aside for that account: keep both.
+      const earlier = storage.get(KEYS.stash + owner);
+      if (earlier) aside = mergeSaves(aside, JSON.parse(earlier), now);
+    } catch {
+      // A broken stash: keep the newer save alone.
+    }
+    storage.set(KEYS.stash + owner, JSON.stringify(aside));
     save({ games: {}, daily: {}, seenHelp: load().seenHelp });
     changed = true;
   }
