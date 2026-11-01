@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { freshList, recentPlays, recordListRun, MAX_LIST_RUNS } from "./history";
+import { freshList, lastPlayed, recentPlays, recordListRun, MAX_LIST_RUNS } from "./history";
+import { pickRandom } from "./puzzles";
 import type { GameState } from "./state";
 import type { Saved } from "./storage";
 
@@ -40,5 +41,30 @@ describe("fresh start", () => {
     expect(fresh.games).toEqual({ b: game("b", 3) });
     expect(fresh.listRuns?.map((r) => r.id)).toEqual(["a"]);
     expect(freshList(fresh, "a")).toBe(fresh);
+  });
+});
+
+describe("random rolls prefer unplayed lists", () => {
+  const ids = Array.from({ length: 70 }, (_, i) => `l${i}`);
+  it("never repeats a played list while unplayed ones remain", () => {
+    const played = new Map<string, number>();
+    for (let i = 0; i < 70; i++) {
+      const id = pickRandom(ids, `test-${i % 3}`, Math.random, played)!;
+      expect(played.has(id)).toBe(false);
+      played.set(id, i);
+    }
+    // Everything played: the pick comes from the least recently played half.
+    for (let i = 0; i < 20; i++) expect(played.get(pickRandom(ids, "test-all", Math.random, played)!)!).toBeLessThan(35);
+  });
+  it("reads last plays per mode from the save", () => {
+    const saved: Saved = {
+      games: {},
+      daily: {},
+      seenHelp: true,
+      listRuns: [{ id: "a", startedAt: 1, finishedAt: 5, status: "lost", found: [], lives: 0, hints: 0 }],
+      blitzRuns: { b: [{ startedAt: 1, endedAt: 9, score: 3, hits: [] }] },
+    };
+    expect([...lastPlayed(saved, "list")]).toEqual([["a", 5]]);
+    expect([...lastPlayed(saved, "blitz")]).toEqual([["b", 9]]);
   });
 });

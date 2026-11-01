@@ -48,27 +48,46 @@ export function dailyPuzzleId(index: PuzzleMeta[], day = dayNumber()): string {
 const recentRolls: Record<string, string[]> = {};
 
 /**
- * A uniformly random pick from `ids` that avoids the most recent picks of the same `kind` (up to half the pool, so
- * small pools still rotate). Remembered for the page's lifetime.
+ * A random pick from `ids` that the player hasn't played yet when there is one (`lastPlayed`: list id -> when it was
+ * last played in this mode), else one of the least recently played half. Within that, it avoids the most recent picks
+ * of the same `kind` (up to half the pool, so small pools still rotate), remembered for the page's lifetime.
  */
-export function pickRandom(ids: string[], kind: string, rand = Math.random): string | undefined {
+export function pickRandom(
+  ids: string[],
+  kind: string,
+  rand = Math.random,
+  lastPlayed?: ReadonlyMap<string, number>,
+): string | undefined {
   if (!ids.length) return undefined;
+  let base = ids;
+  if (lastPlayed) {
+    const fresh = ids.filter((id) => !lastPlayed.has(id));
+    base = fresh.length
+      ? fresh
+      : [...ids].sort((a, b) => lastPlayed.get(a)! - lastPlayed.get(b)!).slice(0, Math.ceil(ids.length / 2));
+  }
   const recent = recentRolls[kind] ?? [];
-  const avoid = new Set(recent.slice(0, Math.floor(ids.length / 2)));
-  const pool = ids.filter((id) => !avoid.has(id));
-  const pick = (pool.length ? pool : ids)[Math.floor(rand() * (pool.length || ids.length))];
+  const avoid = new Set(recent.slice(0, Math.floor(base.length / 2)));
+  const pool = base.filter((id) => !avoid.has(id));
+  const from = pool.length ? pool : base;
+  const pick = from[Math.floor(rand() * from.length)];
   recentRolls[kind] = [pick, ...recent.filter((id) => id !== pick)].slice(0, 20);
   return pick;
 }
 
 /**
- * A random list to play, optionally within a category, never one of the last few rolled. `exclude` (today's and
+ * A random list to play, optionally within a category, one not played yet when there is one (see pickRandom). `exclude` (today's and
  * future dailies, the list on screen) is skipped unless nothing else is left.
  */
-export function randomPuzzleId(index: PuzzleMeta[], category?: string, exclude: ReadonlySet<string> = new Set()): string {
+export function randomPuzzleId(
+  index: PuzzleMeta[],
+  category?: string,
+  exclude: ReadonlySet<string> = new Set(),
+  lastPlayed?: ReadonlyMap<string, number>,
+): string {
   const ids = index.filter((p) => !category || p.category === category).map((p) => p.id);
   const open = ids.filter((id) => !exclude.has(id));
-  return pickRandom(open.length ? open : ids, `roll:${category ?? ""}`) ?? index[0].id;
+  return pickRandom(open.length ? open : ids, `roll:${category ?? ""}`, Math.random, lastPlayed) ?? index[0].id;
 }
 
 function hash(s: string): number {

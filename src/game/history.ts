@@ -70,3 +70,19 @@ export function recentPlays(saved: Saved, limit = 50): Play[] {
   }
   return plays.sort((a, b) => b.at - a.at).slice(0, limit);
 }
+
+/**
+ * When each list was last played in a mode (list id -> epoch ms), so random rolls can prefer lists the player hasn't
+ * seen. A list game saved without a run (older saves) counts as played long ago.
+ */
+export function lastPlayed(saved: Saved, mode: "list" | "blitz"): Map<string, number> {
+  const out = new Map<string, number>();
+  const note = (id: string, t: number) => out.set(id, Math.max(out.get(id) ?? 0, t));
+  if (mode === "blitz") {
+    for (const [id, runs] of Object.entries(saved.blitzRuns ?? {})) for (const r of runs) note(id, r.endedAt);
+    return out;
+  }
+  for (const r of saved.listRuns ?? []) note(r.id, r.finishedAt);
+  for (const [id, g] of Object.entries(saved.games)) if (g.status !== "playing") note(id, 0);
+  return out;
+}

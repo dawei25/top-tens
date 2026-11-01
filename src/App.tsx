@@ -9,7 +9,7 @@ import { Game, Loading } from "./components/Game";
 import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
 import { blitzAvailable, freshBlitz } from "./game/blitz";
-import { freshList } from "./game/history";
+import { freshList, lastPlayed } from "./game/history";
 import {
   blitzOfTheDay,
   dailyHoldouts,
@@ -147,7 +147,7 @@ function Screens() {
     const exclude = dailyHoldouts(schedule, today);
     if (leave) exclude.add(leave);
     if (category && !index.some((m) => m.category === category && !exclude.has(m.id))) category = undefined;
-    const id = randomPuzzleId(index, category, exclude);
+    const id = randomPuzzleId(index, category, exclude, lastPlayed(load(), "list"));
     save(freshList(load(), id));
     rolledIn.current.set(`#p-${id}`, category);
     location.hash = `#p-${id}`;
@@ -177,6 +177,8 @@ function Screens() {
     const id = pickRandom(
       open.map((m) => m.id),
       category ? `blitz:${category}` : "blitz",
+      Math.random,
+      lastPlayed(saved, "blitz"),
     );
     if (!id) return false;
     save(freshBlitz(saved, id));

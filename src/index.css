@@ -484,8 +484,8 @@ a {
 /* Played: still filled, dimmed a step; the result takes the status slot. */
 .mode-key.today.done,
 .mode-key.today.done:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 72%, var(--key));
-  box-shadow: 0 5px 0 var(--key-shadow);
+  background: var(--accent);
+  box-shadow: 0 5px 0 var(--accent-shadow);
 }
 .mode-key.today.done .key-sub {
   font-size: 22px;
@@ -529,7 +529,7 @@ a {
       0 0 22px color-mix(in srgb, var(--accent) 35%, transparent);
   }
   .mode-key.today.done:hover:not(:disabled) {
-    box-shadow: 0 8px 0 var(--key-shadow);
+    box-shadow: 0 8px 0 var(--accent-shadow);
   }
   /* Pressed: the usual keycap sink wins over the hover lift. */
   .mode-key.today:active:not(:disabled) {
