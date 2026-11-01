@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   archive,
+  blitzHold,
+  blitzHoldouts,
+  blitzOfTheDay,
   dailyGame,
   dailyHoldouts,
   formatCountdown,
@@ -109,5 +112,61 @@ describe("random roll holdouts", () => {
   it("holds back today's daily and future ones, and the stand-in once the schedule runs out", () => {
     expect([...dailyHoldouts(schedule, "2026-10-21")].sort()).toEqual(["b", "c"]);
     expect([...dailyHoldouts(schedule, "2026-11-05")]).toEqual(["c"]);
+  });
+});
+
+describe("Today's Blitz", () => {
+  const lists = ["a", "b", "c", "d", "e", "g", "h", "i", "j", "k"].map((id) => ({ id, blitz: true })).concat([{ id: "f" }]);
+  const days: DailyEntry[] = [
+    { n: 1, date: "2026-11-02", id: "h" },
+    { n: 2, date: "2026-11-03", id: "a" },
+    { n: 3, date: "2026-11-04", id: "b", blitz: "c" },
+    { n: 4, date: "2026-11-05", id: "d" },
+    { n: 5, date: "2026-11-06", id: "e", blitz: "g" },
+    { n: 6, date: "2026-11-07", id: "f" },
+  ];
+  it("keeps a day's explicit pick, before and after the switch", () => {
+    expect(blitzOfTheDay(days, lists, "2026-11-04")).toBe("c");
+    expect(blitzOfTheDay(days, lists, "2026-11-06")).toBe("g");
+  });
+  it("from 2026-11-05, a day without one plays its own list", () => {
+    expect(blitzOfTheDay(days, lists, "2026-11-05")).toBe("d");
+  });
+  it("has no Blitz on a day whose list can't be a Blitz, rather than another topic", () => {
+    expect(blitzOfTheDay(days, lists, "2026-11-07")).toBeUndefined();
+    // Past the end of the schedule, the stand-in's Blitz carries on.
+    expect(blitzOfTheDay(days, lists, "2026-11-09")).toBeUndefined();
+    expect(blitzOfTheDay(days.slice(0, 4), lists, "2026-11-09")).toBe("d");
+  });
+  it("older days keep the date-seeded pick, never that day's daily or a later one", () => {
+    // What the pick gave for these dates before the switch existed.
+    expect(blitzOfTheDay(days, lists, "2026-11-02")).toBe("g");
+    expect(blitzOfTheDay(days, lists, "2026-11-03")).toBe("i");
+  });
+});
+
+describe("Blitz spoiler holds", () => {
+  const lists = [{ id: "a", blitz: true }, { id: "b", blitz: true }, { id: "c", blitz: true }];
+  const days: DailyEntry[] = [
+    { n: 1, date: "2026-11-04", id: "a" },
+    { n: 2, date: "2026-11-05", id: "b" },
+  ];
+  const done = (id: string) => ({ puzzleId: id, found: [1], lives: 0, log: [], status: "lost" as const });
+  it("a date's Blitz on its own unfinished list holds back the rest until that list is done", () => {
+    const fresh = saved([]);
+    expect(blitzHold(days, "2026-11-05", "b", fresh)?.n).toBe(2);
+    expect(blitzHold(days, "2026-11-05", "b", { ...fresh, dailyGames: { "2026-11-05": done("b") } })).toBeUndefined();
+    // A Blitz on another list spoils nothing of that date's.
+    expect(blitzHold(days, "2026-11-04", "c", fresh)).toBeUndefined();
+    // A day past the end of the schedule follows its stand-in.
+    expect(blitzHold(days, "2026-11-07", "b", fresh)?.n).toBe(2);
+  });
+  it("free Blitz never offers today's daily, a future one, or Today's Blitz before it's played", () => {
+    const fresh = saved([]);
+    // 2026-11-04 is before the switch: its Blitz is another list (c, the only one left).
+    expect([...blitzHoldouts(days, lists, fresh, "2026-11-04")].sort()).toEqual(["a", "b", "c"]);
+    const played: Saved = { ...fresh, blitzDaily: { "2026-11-04": { id: "c", score: 10, answers: 1 } } };
+    expect([...blitzHoldouts(days, lists, played, "2026-11-04")].sort()).toEqual(["a", "b"]);
+    expect([...blitzHoldouts(days, lists, fresh, "2026-11-05")]).toEqual(["b"]);
   });
 });

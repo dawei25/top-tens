@@ -42,6 +42,10 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
         {list.map((e, i) => {
           const r = result(dailyGame(saved, e));
           const isToday = e.date === today;
+          // That date's Blitz score. Older dates ran their Blitz on another list: that one is named, so the score never
+          // reads as a Blitz of this row's list.
+          const blitz = saved.blitzDaily?.[e.date];
+          const blitzTitle = blitz && blitz.id !== e.id ? (index.find((p) => p.id === blitz.id)?.title ?? blitz.id) : undefined;
           return (
             <li key={e.date}>
               <a ref={i === 0 ? firstRef : undefined} className={`arch-row ${isToday ? "today" : ""}`} data-testid="archive-row" data-date={e.date} href={`#daily-${e.date}`}>
@@ -50,10 +54,19 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
                 <span className="arch-title">
                   {index.find((p) => p.id === e.id)?.title ?? e.id}
                   {isToday && <span className="arch-tag">today</span>}
+                  {blitz && blitzTitle && (
+                    <small className="arch-blitz other" data-testid="archive-blitz" data-list={blitz.id} data-score={blitz.score}>
+                      blitz: {blitzTitle} <b>{blitz.score}</b>
+                    </small>
+                  )}
                 </span>
                 <span className={`arch-result ${r.tone}`}>
                   {r.text}
-                  {saved.blitzDaily?.[e.date] && <small className="arch-blitz">blitz {saved.blitzDaily[e.date].score}</small>}
+                  {blitz && !blitzTitle && (
+                    <small className="arch-blitz" data-testid="archive-blitz" data-list={blitz.id} data-score={blitz.score}>
+                      blitz {blitz.score}
+                    </small>
+                  )}
                 </span>
               </a>
             </li>

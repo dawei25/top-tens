@@ -8,7 +8,10 @@ export interface DailyEntry {
   /** Local calendar date, YYYY-MM-DD. Everyone gets the same list on the same date, at their own midnight. */
   date: string;
   id: string;
-  /** Today's Blitz list, when chosen by hand in the schedule. Otherwise picked by `blitzOfTheDay`. */
+  /**
+   * Today's Blitz list, when chosen by hand in the schedule. Otherwise `blitzOfTheDay` decides: the day's own list
+   * from 2026-11-05, a date-seeded pick before that.
+   */
   blitz?: string;
 }
 
@@ -126,10 +129,18 @@ function hash(s: string): number {
   return h >>> 0;
 }
 
+/** From this date on, a day's Blitz is that day's own list: one topic per day for both dailies. */
+export const SAME_TOPIC_FROM = "2026-11-05";
+
 /**
- * Today's Blitz list, the same for everyone on a date: the schedule's own pick if it names one, otherwise a
- * date-seeded pick among Blitz lists that isn't that date's daily (Blitz shows every answer, so it would spoil it)
- * and isn't scheduled as a later daily. It may be a list from an earlier daily.
+ * Today's Blitz list, the same for everyone on a date:
+ * - the schedule's own pick, if the entry names one (past dailies stay as they ran);
+ * - from SAME_TOPIC_FROM, the day's own list if it plays as a Blitz, and otherwise no Blitz that day (never a
+ *   different topic). While the day's list is unfinished, its Blitz shows only what the player hit (`blitzHold`);
+ * - before that, a date-seeded pick among Blitz lists that isn't that date's daily (Blitz shows every answer, so it
+ *   would spoil it) and isn't scheduled as a later daily. It may be a list from an earlier daily.
+ * A day the schedule hasn't reached yet follows the entry standing in for it (see `todayEntry`): from
+ * SAME_TOPIC_FROM that is the stand-in's own Blitz, so the two Today keys still share a topic.
  */
 export function blitzOfTheDay(
   schedule: DailyEntry[],
@@ -138,9 +149,41 @@ export function blitzOfTheDay(
 ): string | undefined {
   const entry = todayEntry(schedule, date);
   if (entry?.blitz && entry.date === date) return entry.blitz;
+  if (entry && entry.date >= SAME_TOPIC_FROM) {
+    const id = entry.blitz ?? entry.id;
+    return lists.some((l) => l.id === id && l.blitz) ? id : undefined;
+  }
   const blocked = new Set(schedule.filter((e) => e.date >= date).map((e) => e.id));
   if (entry) blocked.add(entry.id);
   const pool = lists.filter((l) => l.blitz && !blocked.has(l.id)).sort((a, b) => a.id.localeCompare(b.id));
   if (!pool.length) return undefined;
   return pool[hash(`blitz:${date}`) % pool.length].id;
+}
+
+/**
+ * The daily that a date's Blitz on list `id` would spoil: that date's daily (or the entry standing in for it) when
+ * it is the same list and the player hasn't finished it. While it holds, that Blitz shows only what the player hit;
+ * the rest shows once the daily is finished.
+ */
+export function blitzHold(schedule: DailyEntry[], date: string, id: string, saved: Saved): DailyEntry | undefined {
+  const entry = entryForDate(schedule, date) ?? todayEntry(schedule, date);
+  if (!entry || entry.id !== id) return undefined;
+  const g = dailyGame(saved, entry);
+  return !g || g.status === "playing" ? entry : undefined;
+}
+
+/**
+ * Lists a free Blitz never offers: today's daily and every future one (as for list rolls), and Today's Blitz until
+ * it's played (a free round on it first would be a practice run at a one-try round).
+ */
+export function blitzHoldouts(
+  schedule: DailyEntry[],
+  lists: { id: string; blitz?: boolean }[],
+  saved: Saved,
+  today = localDate(),
+): Set<string> {
+  const ids = dailyHoldouts(schedule, today);
+  const todays = blitzOfTheDay(schedule, lists, today);
+  if (todays && !saved.blitzDaily?.[today]) ids.add(todays);
+  return ids;
 }

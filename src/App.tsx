@@ -11,6 +11,8 @@ import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } f
 import { blitzAvailable, freshBlitz } from "./game/blitz";
 import { freshList, lastPlayed } from "./game/history";
 import {
+  blitzHold,
+  blitzHoldouts,
   blitzOfTheDay,
   dailyHoldouts,
   entryForDate,
@@ -160,9 +162,12 @@ function Screens() {
     replacing.current = true;
     location.replace(`${location.pathname}${location.search}${parentOf(location.hash, today) || "#"}`);
   };
-  // The lists open for Blitz right now (Home's counts and the Blitz roll use the same filter).
-  const openBlitz = (saved = load()) =>
-    index.filter((m) => m.blitz && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
+  // The lists open for a free Blitz right now (Home's counts and the Blitz roll use the same filter): never today's
+  // daily, a future one, or Today's Blitz before it's played.
+  const openBlitz = (saved = load()) => {
+    const held = blitzHoldouts(schedule, index, saved, today);
+    return index.filter((m) => m.blitz && !held.has(m.id) && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
+  };
   // Blitz a random list (optionally in a category): a uniformly random open Blitz list, never one of the last few
   // rolled (per category, like the classic roll), never `leave` (the list on screen), always a fresh round. A
   // category with nothing else open widens to all; false when no list is open at all.
@@ -189,8 +194,10 @@ function Screens() {
   /** Play again on a Blitz: another random open list (in the round's category, if it was rolled in one). */
   const blitzAgain = (id: string, category?: string) =>
     blitzChoices(category, id).open.length > 0 ? () => void blitzRoll(category, id) : undefined;
-  // Today's Blitz, while it's still there to play (a list's results offer it).
-  const dailyBlitzOpen = !!blitzOfTheDay(schedule, index, today) && !load().blitzDaily?.[today];
+  // Today's Blitz, while it's still there to play (a list's results offer it). Until then its list has no free Blitz.
+  const todaysBlitz = blitzOfTheDay(schedule, index, today);
+  const dailyBlitzOpen = !!todaysBlitz && !load().blitzDaily?.[today];
+  const heldBlitz = dailyBlitzOpen ? todaysBlitz : undefined;
   const current = todayEntry(schedule, today);
 
   if (route.screen === "blitz") {
@@ -205,6 +212,7 @@ function Screens() {
         showRuns={route.runs}
         openRun={route.run}
         base={`#blitz-${route.id}`}
+        todaysBlitz={heldBlitz}
         onBack={back}
         onHome={home}
         onRoll={blitzAgain(route.id, rolledIn.current.get(`#blitz-${route.id}`))}
@@ -221,8 +229,10 @@ function Screens() {
   }
 
   if (route.screen === "dailyblitz") {
-    // Today's Blitz: one list per date, the same for everyone; never a future one.
-    const id = route.date <= today ? blitzOfTheDay(schedule, index, route.date) : undefined;
+    // Today's Blitz: one list per date, the same for everyone; never a future one. Once played, it's the list that
+    // was played (the pick for an old date can move as the schedule and the lists grow).
+    const saved = load();
+    const id = route.date > today ? undefined : (saved.blitzDaily?.[route.date]?.id ?? blitzOfTheDay(schedule, index, route.date));
     if (!id) return <NoList text={`There's no Blitz for ${route.date} yet.`} onHome={home} />;
     const n = (entryForDate(schedule, route.date) ?? todayEntry(schedule, route.date))?.n ?? 0;
     return (
@@ -234,6 +244,7 @@ function Screens() {
         today={today}
         lexicon={lexicon}
         dailyBlitz={{ date: route.date, n }}
+        hold={blitzHold(schedule, route.date, id, saved)}
         base={`#dailyblitz-${route.date}`}
         showRuns={route.runs}
         openRun={route.run}
@@ -270,6 +281,7 @@ function Screens() {
         // offers a plain random list instead.
         onRoll={() => roll(entry ? undefined : rolledIn.current.get(`#p-${id}`), id)}
         onDailyBlitz={dailyBlitzOpen ? () => (location.hash = `#dailyblitz-${today}`) : undefined}
+        todaysBlitz={heldBlitz}
       />
     );
   }
