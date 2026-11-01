@@ -367,11 +367,17 @@ export function Home({
         </section>
       </div>
 
-      {(s.played > 0 || st.best > 0) && (
+      {/* Also with only past runs (a list rolled again starts fresh), so the knowledge page stays reachable. */}
+      {(s.played > 0 || st.best > 0 || !!saved.listRuns?.length) && (
         <section data-glass className="panel home-stats" aria-labelledby="stats-title">
-          <h2 id="stats-title" className="label">
-            Your record
-          </h2>
+          <div className="group-head">
+            <h2 id="stats-title" className="label">
+              Your record
+            </h2>
+            <a className="key key-xs knowledge-key" href="#stats" data-testid="knowledge-link">
+              Your knowledge
+            </a>
+          </div>
           <dl className="stat-row">
             <div>
               <dt>played</dt>
