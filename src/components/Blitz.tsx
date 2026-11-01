@@ -579,7 +579,7 @@ export function Blitz({
       </ScreenHead>
 
       <div className="board-col">
-        <section className="panel prompt" data-glass>
+        <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
             <ModeTag mode="blitz" />
@@ -592,7 +592,7 @@ export function Blitz({
 
         {board}
       </div>
-      <div className="control-col">{control}</div>
+      <div className="control-col" data-testid="control-col">{control}</div>
       <BlitzSquid hits={viewRun ? viewRun.hits : state.hits} />
     </main>
   );

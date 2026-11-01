@@ -349,7 +349,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
       </ScreenHead>
 
       <div className="board-col">
-        <section className="panel prompt" data-glass>
+        <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
             {blitzOpen && !over && (
@@ -524,7 +524,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         </section>
       </div>
 
-      <div className="control-col">
+      <div className="control-col" data-testid="control-col">
         {!over ? (
           <div className="control-card" data-glass>
             {missChips}
