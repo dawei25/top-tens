@@ -76,7 +76,8 @@ describe("blitz round", () => {
     expect(play("Madagascr")).toMatchObject({ kind: "scored", hit: { name: "Madagascar" }, corrected: true });
     expect(play("Faroe Islands")).toMatchObject({ kind: "scored", hit: { name: "Faroe Islands" } });
     expect(play("greenland")).toMatchObject({ kind: "duplicate" });
-    expect(play("France")).toMatchObject({ kind: "none", junk: false });
+    // France is in the pool without a stat: on the list, but nothing to score.
+    expect(play("France")).toMatchObject({ kind: "none", junk: false, unscored: "France" });
     expect(play("asdf")).toMatchObject({ kind: "none" });
     expect(s.hits.map((h) => h.name)).toEqual(["Greenland", "Madagascar", "Faroe Islands"]);
     expect(blitzScore(s)).toBe(s.hits.reduce((t, h) => t + h.points, 0));

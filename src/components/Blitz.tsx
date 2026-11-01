@@ -74,6 +74,8 @@ function describe(r: BlitzResult): Omit<Feedback, "key"> | null {
     case "choices":
       return { tone: "warn", text: "Did you mean", suggestions: r.suggestions };
     case "none":
+      if (r.vague) return { tone: "warn", text: "More than one fits. Be more specific." };
+      if (r.unscored) return { tone: "warn", text: `${r.unscored} is on the list, but without a figure. No points.` };
       return { tone: "bad", text: r.junk ? "Doesn't look like an answer." : "Not on this list." };
     default:
       return null;

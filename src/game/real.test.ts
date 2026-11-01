@@ -47,13 +47,10 @@ describe("first names and partial names", () => {
     expect(judge("nba-points", guess)).toMatchObject({ kind: "correct", entry: { name } });
   });
 
-  it("a shared first name offers the choices", () => {
+  it("a shared first name never lists more than two players the guess didn't name", () => {
     const r = judge("nba-points", "kevin");
-    expect(r.kind).toBe("typo");
-    if (r.kind === "typo") {
-      expect(r.suggestions).toEqual(expect.arrayContaining(["Kevin Durant", "Kevin Garnett"]));
-      expect(r.suggestions.length).toBeLessThanOrEqual(4);
-    }
+    if (r.kind === "typo") expect(r.suggestions.length).toBeLessThanOrEqual(2);
+    else expect(r).toMatchObject({ kind: "unknown", junk: false, vague: expect.any(Number) });
   });
 });
 
@@ -69,9 +66,10 @@ describe("intent edge cases", () => {
     if (w.kind === "typo") expect(w.suggestions).toContain("The Witcher 3: Wild Hunt");
   });
   it("spacing never matters", () => {
+    // "spiderman" is the shared Spider-Man alias: three films, so it asks for more rather than listing them.
     const r = judge("films-gross", "spiderman");
-    expect(r.kind).toBe("typo");
     if (r.kind === "typo") expect(r.suggestions.every((s) => s.startsWith("Spider-Man"))).toBe(true);
+    else expect(r).toMatchObject({ kind: "unknown", junk: false, vague: expect.any(Number) });
   });
   it("never lists more than two choices for a misspelling", () => {
     for (const g of ["kareem", "jams", "harde", "malon"]) {

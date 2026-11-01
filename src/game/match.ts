@@ -180,9 +180,8 @@ export function judgeGuess(
   };
 
   // An entry's full name beats other entries' aliases: "Avatar" is the 2009 film, not a choice of three.
-  // Otherwise a name several entries share ("New Zealand" for North and South Island) offers each of them.
   // A real name or alias beats a single word of another entry's name: "Britain" is Great Britain (alias),
-  // not a choice with New Britain.
+  // not a choice with New Britain. A name several entries share goes through `fits` below.
   const allExact = candidates.filter((c) => c.dist === 0);
   const strong = allExact.filter((c) => !c.viaWord);
   const exact = strong.length ? strong : allExact;
@@ -199,14 +198,31 @@ export function judgeGuess(
     }
     return resolve(named[0], false);
   }
-  if (exact.length > 0) return choose(exact, false);
+  /**
+   * Entries that what was typed fits exactly without being any one's full name: a shared alias, or whole words of
+   * longer names. One is that entry ("Kareem" for Kareem Abdul-Jabbar, "Haneda" for Tokyo Haneda Airport). Several
+   * are offered where the guess is what each is called once qualifiers are dropped ("carolina": North and South
+   * Carolina; "congo"), or when only two fit. Beyond that, listing them would hand the player answers they never
+   * named ("mario kart": four games, "water": four water parks), so the guess is free and the player is asked to be
+   * more specific.
+   */
+  const fits = (cs: Candidate[]): GuessResult => {
+    if (cs.length === 1) return resolve(cs[0], false);
+    const core = cs.filter((c) => coreName(c.entry.name) === guess);
+    if (core.length > 0 && core.length <= MAX_CHOICES) return choose(core, false);
+    const open = cs.filter((c) => !(c.inTop10 && found.has(c.entry.rank)));
+    if (open.length === 0) return resolve(cs[0], false);
+    // Two readings are a fair question, like a misspelling between two names ("New Zealand": North or South Island).
+    if (open.length <= MAX_TYPO_CHOICES) return choose(open, false);
+    return { kind: "unknown", junk: false, vague: open.length };
+  };
 
-  // A whole word from a longer name ("Kareem" for Kareem Abdul-Jabbar, "Haneda" for Tokyo Haneda Airport) is a
-  // correct short form, not a misspelling: if it names one entry it counts like an alias. It is checked before
+  if (exact.length > 0) return fits(exact);
+
+  // A whole word (or run of words) from a longer name is a short form, not a misspelling. It is checked before
   // near-spellings, which are weaker evidence ("wilt" is two letters from "West").
   const partial = wordMatches(guess, candidates);
-  if (partial.length === 1) return resolve(partial[0], false);
-  if (partial.length > 1 && partial.length <= MAX_CHOICES) return choose(partial, true);
+  if (partial.length > 0) return fits(partial);
 
   // Near-spellings are corrected in the input for the player to confirm. Two equally close readings
   // ("Irak": Iran or Iraq) become a choice; more than that is noise, and listing them would leak answers.
@@ -239,6 +255,22 @@ const GENERIC = new Set(
     "world cup league club team fc"
   ).split(" "),
 );
+
+/** Words that qualify a place's name without being the name: North Carolina, New Jersey, Republic of the Congo. */
+const QUALIFIERS = new Set(
+  (
+    "the of and north south east west northern southern eastern western central new upper lower great democratic " +
+    "republic people peoples federal united islamic federation commonwealth state city"
+  ).split(" "),
+);
+
+/** A name without its qualifiers: "Democratic Republic of the Congo" → congo, "North Carolina" → carolina. */
+function coreName(name: string): string {
+  return normalize(name)
+    .split(" ")
+    .filter((w) => !QUALIFIERS.has(w))
+    .join(" ");
+}
 
 /** Distinctive single words of a multi-word name: "Kareem Abdul-Jabbar" → kareem, abdul, jabbar. */
 function nameWords(name: string): string[] {
