@@ -1,6 +1,6 @@
 import type { Lexicon } from "./junk";
 import { judgeGuess } from "./match";
-import type { GuessResult, Puzzle } from "./types";
+import type { Entry, GuessResult, Puzzle } from "./types";
 
 export const MAX_LIVES = 5;
 
@@ -24,6 +24,15 @@ export interface GameState {
 
 export function newGame(puzzle: Puzzle): GameState {
   return { puzzleId: puzzle.id, found: [], lives: MAX_LIVES, log: [], status: "playing", startedAt: Date.now() };
+}
+
+/**
+ * An entry's number as shown to the player, or nothing when it only repeats the rank: lists ranked by a rank
+ * (Similarweb) store "#19" as the value of #19.
+ */
+export function shownValue(e: Pick<Entry, "rank" | "value">): string | undefined {
+  if (!e.value) return undefined;
+  return e.rank > 0 && e.value.replace(/[#\s]/g, "") === String(e.rank) ? undefined : e.value;
 }
 
 /** Only an accepted answer that isn't in the top 10 costs a life. */

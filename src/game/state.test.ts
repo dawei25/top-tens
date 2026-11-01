@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyGuess, newGame } from "./state";
+import { applyGuess, newGame, shownValue } from "./state";
 import type { Puzzle } from "./types";
 
 const puzzle: Puzzle = {
@@ -39,5 +39,14 @@ describe("game state", () => {
 
   it("wins at 10/10", () => {
     expect(play(...puzzle.answers.map((a) => a.name)).status).toBe("won");
+  });
+});
+
+describe("shown values", () => {
+  it("hides a value that only repeats the rank", () => {
+    expect(shownValue({ rank: 19, value: "#19" })).toBeUndefined();
+    expect(shownValue({ rank: 19, value: "8,849 m" })).toBe("8,849 m");
+    expect(shownValue({ rank: 0, value: "12" })).toBe("12");
+    expect(shownValue({ rank: 3 })).toBeUndefined();
   });
 });
