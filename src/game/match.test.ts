@@ -184,3 +184,15 @@ describe("autocorrect doesn't hand out answers nobody typed", () => {
     expect(j("bangledesh")).toMatchObject({ kind: "correct", entry: { rank: 8 } });
   });
 });
+
+describe("a whole name beats a word of a longer name at the same distance", () => {
+  const peaks: Puzzle = {
+    ...puzzle,
+    id: "peaks",
+    answers: [e(1, "Mount Everest", ["Everest"]), e(2, "K2"), e(3, "Kangchenjunga"), e(4, "Lhotse"), ...puzzle.answers.slice(4)],
+    extras: [e(0, "Lhotse Middle"), e(0, "Lhotse Shar")],
+  };
+  it("corrects a misspelling to the peak itself, not a choice of its side summits", () => {
+    expect(judgeGuess("lotse", peaks, new Set())).toMatchObject({ kind: "correct", entry: { rank: 4 }, corrected: true });
+  });
+});
