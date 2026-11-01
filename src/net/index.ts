@@ -1,0 +1,155 @@
+import { useEffect, useState, useSyncExternalStore } from "react";
+import type { BlitzState } from "../game/blitz";
+import type { GameState } from "../game/state";
+import { load, save } from "../game/storage";
+import { accountsOn, backendOn } from "./config";
+import type { CrowdStats, ListAverages } from "./crowd";
+import type { SyncSave } from "./sync/merge";
+import {
+  getAccount,
+  getSaveVersion,
+  KEYS,
+  recall,
+  setAccount,
+  subscribeAccount,
+  subscribeSaves,
+  type AccountState,
+} from "./store";
+
+/**
+ * The backend as the screens use it: always loaded, and a no-op in a build without a backend (no env), where nothing
+ * is sent, stored or downloaded. The real work is in ./service, imported on demand.
+ */
+
+export { accountsOn, backendOn } from "./config";
+export type { AccountState } from "./store";
+
+type Service = typeof import("./service");
+let service: Promise<Service> | null = null;
+
+/** The backend code, loaded on first use; null in a build without a backend. */
+export function loadService(): Promise<Service> | null {
+  if (!backendOn) return null;
+  service ??= import("./service").catch((e) => {
+    // A failed download (offline on first use) can be tried again later.
+    service = null;
+    throw e;
+  });
+  return service;
+}
+
+function withService(fn: (s: Service) => unknown): void {
+  loadService()?.then(fn).catch(() => {});
+}
+
+const stored = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+/** A sign-in coming back to the page: a code to trade for a session, or an error. */
+function authCallback(): boolean {
+  return /[?&](code|error_description)=/.test(location.search) || /(^#|&)(error_description|access_token)=/.test(location.hash);
+}
+
+let throttleUntil = 0;
+
+/**
+ * Called once at startup. Loads the backend code only when there's work for it: plays waiting to be sent, a session
+ * to restore, or a sign-in to finish. Otherwise it waits for the first finished game, stats view or sign-in.
+ */
+export function startNet(): void {
+  if (!backendOn) return;
+  const pending = /"pending":\[\{/.test(stored(KEYS.outbox) ?? "");
+  const session = accountsOn && (!!stored(KEYS.auth) || authCallback());
+  setAccount({ status: !accountsOn ? "off" : session ? "loading" : "out" });
+  if (pending || session) {
+    loadService()
+      ?.then((s) => s.start())
+      // The backend code didn't download (offline): play on signed out; the next try comes with the next game.
+      .catch(() => getAccount().status === "loading" && setAccount({ status: "out" }));
+  }
+  addEventListener("online", () => withService((s) => s.flushPlays()));
+  // Coming back to the tab: catch up with other devices (at most every 30 s).
+  const back = () => {
+    if (document.visibilityState === "hidden" || getAccount().status !== "in" || Date.now() < throttleUntil) return;
+    throttleUntil = Date.now() + 30_000;
+    withService((s) => s.syncSoon(0));
+  };
+  addEventListener("focus", back);
+  document.addEventListener("visibilitychange", back);
+}
+
+/** A list game just finished on this device (today's daily: pass its date). Sends its score; syncs if signed in. */
+export function reportList(game: GameState, daily?: string): void {
+  if (!backendOn) return;
+  withService((s) => {
+    s.start();
+    s.reportList(game, daily);
+  });
+}
+
+/** A Blitz round just finished on this device (a date's Blitz played on its date: pass the date). */
+export function reportBlitz(state: BlitzState, daily?: string): void {
+  if (!backendOn) return;
+  withService((s) => {
+    s.start();
+    s.reportBlitz(state, daily);
+  });
+}
+
+/**
+ * Home's "reset all progress" just ran. Signed in, the reset is stamped on the save so it reaches the account and
+ * every other device (instead of being merged back on the next sync). Signed out, it stays on this device.
+ */
+export function noteReset(): void {
+  if (getAccount().status !== "in") return;
+  const stamped: SyncSave = { ...load(), resetAt: Date.now() };
+  save(stamped);
+  withService((s) => s.syncSoon(0));
+}
+
+export function useAccount(): AccountState {
+  return useSyncExternalStore(subscribeAccount, getAccount, getAccount);
+}
+
+/** Ticks when a sync changed this device's save, so a screen that reads the save on render draws again. */
+export function useSaveVersion(): number {
+  return useSyncExternalStore(subscribeSaves, getSaveVersion, getSaveVersion);
+}
+
+/** A value the service fetches (and caches), by key; null until it arrives, or without a backend. */
+function useLoaded<T>(key: string | null, get: (s: Service) => Promise<T | null>): T | null {
+  const [value, setValue] = useState<{ key: string; value: T | null } | null>(null);
+  useEffect(() => {
+    if (!key || !backendOn) return;
+    let live = true;
+    loadService()
+      ?.then(get)
+      .then(
+        (v) => live && setValue({ key, value: v }),
+        () => {},
+      );
+    return () => {
+      live = false;
+    };
+    // `get` is rebuilt every render; the key says what it fetches.
+  }, [key]);
+  if (!key) return null;
+  if (value?.key === key) return value.value;
+  // Numbers fetched earlier (as the game ended) show from the first frame.
+  return recall<T>(key)?.value ?? null;
+}
+
+/** Real players' scores on a list in a mode; null without a backend, while loading, or if the server can't say. */
+export function useListStats(id: string | undefined, mode: "list" | "blitz"): CrowdStats | null {
+  return useLoaded(id ? `stats:${mode}:${id}` : null, (s) => s.listStats(id!, mode));
+}
+
+/** Every list's real average; null without a backend or until loaded. */
+export function useListAverages(): ListAverages | null {
+  return useLoaded("averages:list", (s) => s.listAverages());
+}
