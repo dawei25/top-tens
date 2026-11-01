@@ -233,7 +233,7 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
  * Rare spellings among city redirects that only catch typos of ordinary words ("singer" became Xi'an through
  * "Singan", "market" Mecca through "Makkeh"). Dropped on every city list.
  */
-export const CITY_JUNK = ["Singan", "Makkeh", "Shouer", "Singy", "S'pore", "Dtown"];
+export const CITY_JUNK = ["Singan", "Siking", "Signan", "Makkeh", "Shouer", "Singy", "S'pore", "Dtown"];
 
 export const COUNTRY_JUNK = [
   "Snow Mexico", "Finnishness", "The Land of Chocolate", "Day of the Capital", "Abdullah al-Saleh", "Al Rawda Palace",
