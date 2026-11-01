@@ -153,13 +153,17 @@ function Screens() {
     replacing.current = true;
     location.replace(`${location.pathname}${location.search}${parentOf(location.hash, today) || "#"}`);
   };
-  // Blitz a random list: a uniformly random open Blitz list, never one of the last few rolled, always a fresh round.
-  const blitzRoll = async (): Promise<boolean> => {
+  // The lists open for Blitz right now (Home's counts and the Blitz roll use the same filter).
+  const openBlitz = (saved = load()) =>
+    index.filter((m) => m.blitz && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
+  // Blitz a random list (optionally in a category): a uniformly random open Blitz list, never one of the last few
+  // rolled (per category, like the classic roll), always a fresh round.
+  const blitzRoll = async (category?: string): Promise<boolean> => {
     const saved = load();
-    const open = index.filter((m) => m.blitz && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
+    const open = openBlitz(saved).filter((m) => !category || m.category === category);
     const id = pickRandom(
       open.map((m) => m.id),
-      "blitz",
+      category ? `blitz:${category}` : "blitz",
     );
     if (!id) return false;
     save(freshBlitz(saved, id));
@@ -251,6 +255,7 @@ function Screens() {
       onDailyBlitz={() => (location.hash = `#dailyblitz-${today}`)}
       onRoll={roll}
       onBlitz={blitzRoll}
+      blitzLists={openBlitz()}
       onArchive={() => (location.hash = "#archive")}
     />
   );
