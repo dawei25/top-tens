@@ -695,79 +695,128 @@ a {
 }
 
 /*
- * The stage (classic and Blitz). Wide screens (1100px and up): the header, the title card and the board in a column
- * on the left, 45% of the width (460 to 680px); the rest is open water for the ocean. The guess box floats in it,
- * centred a third of the way in, its top at about 54% of the viewport height (level with the lower half of the
- * board), and stays put while the page scrolls. Blitz floats its clock and score with the box. Narrower, the two
- * wrappers dissolve into the one centred column; "lead" items (Blitz's clock, its result card) come right after the
- * title card there.
+ * The stage (classic and Blitz). Wide screens (1100px and up): everything sits in one centred frame, at most
+ * --frame wide, on a three-track grid:
+ *
+ *   | header, across the whole frame                                    |
+ *   | board column (.board-col)       | control column  | open water     |
+ *   |   title card, board / answers   |   control card  |                |
+ *
+ * - The board column takes the room left over (about 59% of a full frame); the control column is a fixed
+ *   --ctl-w; a narrow strip of open water stays inside the frame on the right, and the frame's sides are ocean.
+ * - One gap everywhere: --gap between the columns and between cards, the same as the screen gutter.
+ * - The control card's top lines up with the title card's; it is sticky, so it stays in view while the board
+ *   scrolls. It holds Blitz's clock and score, the guess box, then the feedback line and the misses; at the end the
+ *   result card (and the misses under it) take its place, at the same width.
+ * Narrower, the two column wrappers (and the control card) dissolve into the one centred column; "lead" items
+ * (Blitz's clock, its result card) come right after the title card there.
  */
 @media (min-width: 1100px) {
   .stage {
-    --board-w: clamp(460px, 45%, 680px);
-    --dock-w: 420px;
-    --dock-top: clamp(120px, 54vh, 100vh - 300px);
-    max-width: 1600px;
+    --frame: 1280px;
+    --ctl-w: 380px;
+    --gap: var(--gutter);
+    --frame-pad: 32px;
+    --frame-top: 24px;
+    max-width: calc(var(--frame) + 2 * var(--frame-pad));
     display: grid;
-    grid-template-columns: var(--board-w) minmax(0, 1fr);
-    gap: 0;
-    padding-top: 24px;
+    grid-template-columns: minmax(0, 1fr) var(--ctl-w) minmax(0, 0.15fr);
+    grid-template-rows: auto 1fr;
+    align-items: start;
+    gap: var(--gap);
+    padding-top: var(--frame-top);
     padding-bottom: 32px;
-    padding-left: max(32px, env(safe-area-inset-left));
-    padding-right: max(32px, env(safe-area-inset-right));
+    padding-left: max(var(--frame-pad), env(safe-area-inset-left));
+    padding-right: max(var(--frame-pad), env(safe-area-inset-right));
   }
-  .blitz.stage {
-    /* The clock and score sit above the box: lift the group so the box lands where it does in classic. */
-    --dock-top: clamp(100px, 54vh - 150px, 100vh - 440px);
+  .stage > .game-head {
+    grid-column: 1 / -1;
   }
   .board-col {
+    grid-column: 1;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: var(--gap);
     min-width: 0;
   }
-  .water {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-    min-width: 0;
-    /* A percentage here is of the open water's width: the box's centre a third of the way in, never nearer the
-       board than 32px. */
-    padding-left: max(32px, calc(100% / 3 - var(--dock-w) / 2));
-  }
-  .dock-wrap {
+  .control-col {
+    grid-column: 2;
     position: sticky;
-    top: var(--dock-top);
-    margin-top: calc(var(--dock-top) - 24px);
-    width: min(var(--dock-w), 100%);
+    top: var(--frame-top);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--gap);
+    min-width: 0;
   }
-  .dock-wrap .guess {
+
+  /* The control card: one glass card, its parts divided by hairlines. Its parts drop their own glass. */
+  .control-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-panel) var(--scan);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+  }
+  .stage .control-card > * {
+    margin: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  /* A hairline above each part but the first one shown (the order below isn't the markup's order). */
+  .stage .control-card > * {
+    border-top: 1px dashed var(--hairline);
+  }
+  .stage .control-card > .blitz-meter,
+  .stage:not(.blitz) .control-card > .guess {
+    border-top: 0;
+  }
+  .stage .control-card .blitz-meter {
+    padding: 12px 16px 14px;
+  }
+  .stage .control-card .blitz-note {
+    order: 1;
+    padding: 6px 16px;
+  }
+  .stage .control-card .guess {
+    order: 2;
     position: static;
     max-width: none;
+    padding: 16px;
+    gap: 10px;
   }
-  /* Misses hang under the box while playing (above it on narrower screens). */
-  .water .misses {
-    margin-inline: 0;
-  }
-  .dock-wrap .misses {
+  /* The feedback line reads under the box here (above it on narrower screens, where the box sits low). */
+  .stage .control-card .feedback-line {
     order: 1;
+    align-items: flex-start;
   }
-  .water > .misses,
-  .water > .results {
-    width: min(480px, 100%);
+  .stage .control-card .misses {
+    order: 3;
+    padding: 10px 16px 12px;
   }
-  .dock-wrap .blitz-note {
+
+  /* The end: the result card in the control column, the misses under it, both the column's width. */
+  .control-col > .results {
+    margin-bottom: 0;
+  }
+  /* A step smaller than on phones, so a four-digit Blitz score clears the results squid in the narrow column. */
+  .stage .control-col .score-n {
+    font-size: 120px;
+  }
+  .stage .control-col > .misses {
+    order: 1;
     margin: 0;
+    padding: 10px 16px 12px;
+    border: 1px solid var(--hairline);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
   }
 }
 @media (max-width: 1099px) {
   .stage .board-col,
-  .stage .water,
-  .stage .dock-wrap {
+  .stage .control-col,
+  .stage .control-card {
     display: contents;
   }
   .stage .game-head,
@@ -776,6 +825,13 @@ a {
   }
   .stage .lead {
     order: -1;
+  }
+  /* Blitz's answer board appears with the first answer here. */
+  .blitz-hits.is-empty {
+    display: none;
+  }
+  .blitz-hit.empty {
+    display: none;
   }
 }
 
@@ -1290,7 +1346,7 @@ a {
  * the on-screen keyboard as the viewport shrinks (index.html asks for interactive-widget=resizes-content).
  * - Phones: a pill a little above the bottom edge, the feedback line on its own small glass plate just above it.
  * - From 700px: one floating glass box under the board, the feedback line on top.
- * - From 1100px: the same box out in the open water beside the board (see the stage, below).
+ * - From 1100px: part of the control card, in the column right of the board (see the stage, above).
  */
 .guess {
   position: sticky;
@@ -1885,6 +1941,14 @@ a {
 }
 .blitz-hit .value {
   font-size: 18px;
+}
+/* The empty rows waiting for answers, like the classic board's empty slots. */
+.blitz-hit.empty .blitz-pts,
+.blitz-hit.empty .blitz-name {
+  color: var(--faint);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .blitz-list {
   padding: 12px 0 8px;

@@ -329,25 +329,26 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
 
   return (
     <main className={`screen game stage status-${game.status}`}>
-      {/* The stage: the board in a column on the left on wide screens, the guess box floating in the open water
-          beside it. Narrower, both wrappers dissolve (display: contents) into one centered column. */}
-      <div className="board-col">
-        <ScreenHead onBack={onBack} onHome={onHome}>
-          <span className="label mode">{mode}</span>
-          <div
-            key={lostLife?.key}
-            className={`lives ${lostLife ? "lives-hit" : ""}`}
-            data-testid="lives"
-            data-lives={game.lives}
-            role="img"
-            aria-label={`${game.lives} ${game.lives === 1 ? "life" : "lives"} left`}
-          >
-            {Array.from({ length: MAX_LIVES }, (_, i) => (
-              <InkSac key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
-            ))}
-          </div>
-        </ScreenHead>
+      {/* The stage. Wide screens: the header across the frame, then two aligned columns: the title card and the board
+          on the left, the control card (guess box, feedback, misses; the result card at the end) on the right.
+          Narrower, both column wrappers dissolve (display: contents) into one centered column. */}
+      <ScreenHead onBack={onBack} onHome={onHome}>
+        <span className="label mode">{mode}</span>
+        <div
+          key={lostLife?.key}
+          className={`lives ${lostLife ? "lives-hit" : ""}`}
+          data-testid="lives"
+          data-lives={game.lives}
+          role="img"
+          aria-label={`${game.lives} ${game.lives === 1 ? "life" : "lives"} left`}
+        >
+          {Array.from({ length: MAX_LIVES }, (_, i) => (
+            <InkSac key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
+          ))}
+        </div>
+      </ScreenHead>
 
+      <div className="board-col">
         <section className="panel prompt" data-glass>
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
@@ -523,9 +524,9 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         </section>
       </div>
 
-      <div className="water">
+      <div className="control-col">
         {!over ? (
-          <div className="dock-wrap">
+          <div className="control-card" data-glass>
             {missChips}
             <form className="guess" onSubmit={submit} data-guess-dock data-glass>
               <div className="feedback-line">
@@ -585,8 +586,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 {game.status === "won"
                   ? `with ${game.lives} ${game.lives === 1 ? "life" : "lives"} to spare.`
                   : game.status === "gave-up"
-                    ? "you gave up. the full list is above."
-                    : "out of lives. the full list is above."}
+                    ? "you gave up. the full list is on the board."
+                    : "out of lives. the full list is on the board."}
               </p>
               {(dailyStreak || hints.length > 0) && (
                 <div className="results-meta">
