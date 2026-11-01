@@ -15,6 +15,8 @@
  * on when it stops, and rest on the seabed when it dozes. The two feeding tentacles (#1 and #2) are the longest,
  * with clubs.
  *
+ * A limb coming on (a find) flashes white-hot into its colour, and a bright shimmer runs down it from root to tip.
+ *
  * Everything is drawn as whole pixels: tapered strokes stamped along each segment, batched into one path per colour.
  */
 import { BODY, LIMB_ROOTS } from "../squid/sprite";
@@ -79,8 +81,24 @@ interface Limb {
 
 type Tone = "rim" | "left" | "right" | "spot" | "eye" | "pupil" | "lid";
 type Palette = Record<Tone, string>;
-const NORMAL: Palette = { rim: "#2a8aa2", left: "#15465a", right: "#0f3445", spot: "#2d93ad", eye: "#a6f1ff", pupil: "#06101e", lid: "#2a8aa2" };
-const WON: Palette = { rim: "#d4faff", left: "#5fe6ff", right: "#29b7df", spot: "#ffffff", eye: "#c8f8ff", pupil: "#0b2a4a", lid: "#d4faff" };
+const NORMAL: Palette = {
+  rim: "#2a8aa2",
+  left: "#15465a",
+  right: "#0f3445",
+  spot: "#2d93ad",
+  eye: "#a6f1ff",
+  pupil: "#06101e",
+  lid: "#2a8aa2",
+};
+const WON: Palette = {
+  rim: "#d4faff",
+  left: "#5fe6ff",
+  right: "#29b7df",
+  spot: "#ffffff",
+  eye: "#c8f8ff",
+  pupil: "#0b2a4a",
+  lid: "#d4faff",
+};
 const NIGHT = "#050a14";
 const mapPal = (p: Palette, f: (c: string, k: Tone) => string): Palette =>
   Object.fromEntries(Object.entries(p).map(([k, c]) => [k, f(c, k as Tone)])) as Palette;
@@ -89,6 +107,9 @@ const mapPal = (p: Palette, f: (c: string, k: Tone) => string): Palette =>
 const UNLIT = ["#1d6f86", "#14536a"];
 const UNLIT_CORE = ["#2a8aa2", "#1f6f86"];
 const SUCKER = "#ff5d8f";
+/** A limb coming on: white-hot fading into its colour over FLASH s; the shimmer runs root to tip over SHIMMER s. */
+const FLASH = 0.45;
+const SHIMMER = 0.5;
 
 /* ---------------------------------------------------------------- the mantle grid */
 
@@ -117,6 +138,9 @@ function toneGrid(reach: number): (Tone | null)[] {
   return out;
 }
 const FIN_FRAMES = [toneGrid(99), toneGrid(2), toneGrid(1)];
+/** The mantle's pixel centres (fins spread), relative to the pivot: for the dev overlap check. */
+const MANTLE_PTS: number[] = [];
+FIN_FRAMES[0].forEach((tone, i) => tone && MANTLE_PTS.push((i % W) + 0.5 - PIVOT_X, Math.floor(i / W) + 0.5 - PIVOT_Y));
 /** The top row of each eye, closed over when the lids are down. */
 const LID = new Set<number>();
 for (let y = 1; y < H; y++) for (let x = 0; x < W; x++) if ("ep".includes(BODY[y][x]) && BODY[y - 1][x] === "#") LID.add(y * W + x);
@@ -215,8 +239,6 @@ export function strokeChain(
 
 export class SquidBody {
   pose: Pose = { x: 0, y: 0, angle: 0, sx: 1, sy: 1 };
-  /** Limbs out of the ocean (reaching through the glass for a word): not drawn here meanwhile. */
-  readonly away = new Set<number>();
   private limbs: Limb[];
   private cache = new Map<string, Uint32Array>();
   private scratch: HTMLCanvasElement;
@@ -261,10 +283,27 @@ export class SquidBody {
     for (const c of LIMB_COLORS) this.glow.set(`${c}8`, glowSprite(c, 4));
   }
 
-  /** Where limb `id` leaves the head, in canvas px. */
-  rootOf(id: number) {
+  /** A point `s` of the way along limb `id` (0 its root, 1 its tip), in canvas px. */
+  limbAt(id: number, s: number) {
     const l = this.limbs.find((m) => m.id === id)!;
-    return this.toWorld(l.u, l.v);
+    const j = Math.round(s * (l.n - 1));
+    return { x: l.x[j], y: l.y[j] };
+  }
+
+  /**
+   * Every drawn point of the squid (canvas px): the limbs' nodes and the mantle's pixels, with how far each one's
+   * pixels reach around it. For the dev overlap check, not drawing.
+   */
+  eachPoint(fn: (x: number, y: number, r: number) => void) {
+    for (const l of this.limbs) for (let j = 0; j < l.n; j++) fn(l.x[j], l.y[j], 1.5);
+    const { x, y, angle, sx, sy } = this.pose;
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    for (let i = 0; i < MANTLE_PTS.length; i += 2) {
+      const u = MANTLE_PTS[i] * sx;
+      const v = MANTLE_PTS[i + 1] * sy;
+      fn(x + u * c - v * s, y + u * s + v * c, 0.9);
+    }
   }
 
   private toWorld(u: number, v: number) {
@@ -352,13 +391,13 @@ export class SquidBody {
     }
   }
 
-  /** Note limbs newly lit (outside a grab), so they flash white-hot as they come on. */
+  /** Note limbs newly lit, so they flash white-hot as they come on. */
   noteLit(lit: ReadonlySet<number>, t: number, flash: boolean) {
     for (const id of lit) if (!this.known.has(id) && flash) this.litAt.set(id, t);
     this.known = new Set(lit);
   }
 
-  /** A limb comes on now (the grab set its word): it flashes into its colour. */
+  /** A limb comes on now (a find): it flashes into its colour, and the shimmer runs down it. */
   flash(id: number, t: number) {
     this.litAt.set(id, t);
   }
@@ -376,12 +415,12 @@ export class SquidBody {
       if (!look.lit.has(id)) return null;
       let c: string = limbColor(id);
       const since = this.litAt.get(id);
-      if (since !== undefined && t - since < 0.45) c = mix("#ffffff", c, (t - since) / 0.45);
+      if (since !== undefined && t - since < FLASH) c = mix("#ffffff", c, (t - since) / FLASH);
       return dim ? mix(c, NIGHT, dim) : c;
     };
 
     for (const l of this.limbs) {
-      if (!look.lit.has(l.id) || this.away.has(l.id)) continue;
+      if (!look.lit.has(l.id)) continue;
       // Glow in the limb's own colour (never the passing flash tint: the sprites are cached by colour).
       const c = limbColor(l.id);
       const mid = l.n >> 1;
@@ -391,20 +430,24 @@ export class SquidBody {
 
     const out = this.rects;
     for (const l of this.limbs) {
-      if (this.away.has(l.id)) continue;
       const c = colorOf(l.id);
       const shade = l.id % 2;
       const face = c ?? (dim ? mix(UNLIT[shade], NIGHT, dim) : UNLIT[shade]);
       const core = c ? mix(c, "#ffffff", 0.55) : dim ? mix(UNLIT_CORE[shade], NIGHT, dim) : UNLIT_CORE[shade];
       const clubFrom = l.tentacle ? 1 - 3 / (l.n - 1) : 2;
+      // Just lit: a bright band runs from root to tip (behind the flash), a touch wider on the feeding tentacles.
+      const since = c ? t - (this.litAt.get(l.id) ?? -9) : 9;
+      const band = since < SHIMMER + 0.1 ? since / SHIMMER : -1;
+      const half = l.tentacle ? 0.2 : 0.16;
+      const hot = band >= 0 ? mix(face, "#ffffff", 0.75) : face;
       strokeChain(
         out,
         l.x,
         l.y,
         l.n,
         l.tentacle ? (s) => (s >= clubFrom ? 2 : 1) : (s) => (s < 0.55 ? 2 : 1),
-        () => face,
-        () => core,
+        band >= 0 ? (s) => (Math.abs(s - band) < half ? hot : face) : () => face,
+        band >= 0 ? (s) => (Math.abs(s - band) < half ? "#ffffff" : core) : () => core,
       );
       if (l.tentacle) {
         // The club's suckers, on its inner side.
@@ -444,10 +487,17 @@ export class SquidBody {
 
   private palette(look: Look, dim: number): { key: string; pal: Palette } {
     if (look.mood === "won") return { key: "won", pal: WON };
-    if (dim) return { key: `dim${dim}`, pal: mapPal(NORMAL, (c) => mix(c, NIGHT, dim)) };
+    if (dim)
+      return {
+        key: `dim${dim}`,
+        pal: mapPal(NORMAL, (c) => mix(c, NIGHT, dim)),
+      };
     const h = look.heat;
     if (!h) return { key: "n", pal: NORMAL };
-    return { key: `h${h}`, pal: mapPal(NORMAL, (c, k) => (k === "pupil" ? c : mix(c, WON[k], h * 0.16))) };
+    return {
+      key: `h${h}`,
+      pal: mapPal(NORMAL, (c, k) => (k === "pupil" ? c : mix(c, WON[k], h * 0.16))),
+    };
   }
 
   private sprite(look: Look, dim: number): Uint32Array {

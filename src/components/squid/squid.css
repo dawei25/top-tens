@@ -37,14 +37,6 @@
 .slot.found.just[data-rank]::before {
   background: linear-gradient(90deg, color-mix(in srgb, var(--limb) 30%, transparent), transparent 85%);
 }
-/* While the squid carries the word up (components/ocean/grab.ts), the row waits: its numeral and its arrival flash
-   come on as the word lands, with the limb. */
-.slot.found[data-grabbing] .rank {
-  color: var(--faint);
-}
-.slot.found[data-grabbing]::before {
-  visibility: hidden;
-}
 
 /* On a results panel: the hero squid, top right, beside the banner and the big score. */
 .results:has(> .squid.hero) {
@@ -243,10 +235,6 @@
 .squid-sparks {
   display: none;
 }
-/* While a word is pulled out of the guess box, its placeholder stays out of the way. */
-.guess-row input[data-grabbing]::placeholder {
-  color: transparent;
-}
 
 @media (prefers-reduced-motion: no-preference) {
   /* Idle: a two-frame bob, and the limb tips sway on the off-beat, like an arcade sprite treading water. */
@@ -280,7 +268,7 @@
     animation-duration: 1s;
   }
 
-  /* A limb lighting up: white-hot, then its colour. In classic it waits for the grabbed word to land. */
+  /* A limb lighting up: white-hot, then its colour. */
   .limb.fresh path {
     animation: squid-limb-in 0.6s steps(6, end) var(--light-delay, 0ms) both;
   }
@@ -309,14 +297,6 @@
   .squid[data-mood="gave-up"] .g-limb {
     animation: none;
   }
-  /* Classic lights the limb as the grabbed word lands (see SquidFx: about 0.41 s, 0.52 s for a straining #1/#2). */
-  .squid[data-mode="classic"] {
-    --light-delay: 0.4s;
-  }
-  .squid[data-mode="classic"] .tentacle {
-    --light-delay: 0.52s;
-  }
-
   .squid-sparks {
     display: block;
     position: absolute;
@@ -362,43 +342,6 @@
   .squid-fx {
     display: none;
   }
-}
-
-/* The grab (components/ocean/grab.ts): the word, cut out of the guess box as a tile, edged in the grabbing limb's
-   colour (--limb), carried up to its row; and a splash of that colour across the row as it lands. */
-.grab-word {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform-origin: 0 0;
-}
-.grab-text {
-  position: absolute;
-  left: -6px;
-  top: 0;
-  padding: 3px 6px 2px;
-  transform: translateY(-50%);
-  line-height: 1;
-  white-space: nowrap;
-  color: #fff;
-  background: var(--well);
-  box-shadow: 0 0 0 2px var(--limb, var(--cyan-edge));
-  border-radius: 3px;
-  text-shadow:
-    0 0 6px var(--limb, var(--cyan)),
-    0 0 14px color-mix(in srgb, var(--limb, var(--cyan)) 40%, transparent);
-}
-/* Set: the tile melts into the row's own text. */
-.grab-word.landed .grab-text {
-  background: transparent;
-  box-shadow: 0 0 0 2px transparent;
-  opacity: 0;
-  transition: opacity 0.18s steps(3, end), background-color 0.06s linear;
-}
-.grab-splash {
-  position: absolute;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--limb, var(--cyan)) 40%, transparent), color-mix(in srgb, var(--limb, var(--cyan)) 8%, transparent) 70%, transparent);
-  box-shadow: inset 4px 0 0 var(--limb, var(--cyan));
 }
 
 /* 10/10 fireworks */

@@ -1,8 +1,7 @@
 /*
  * The ocean layer (animations agent): fixed under the whole app, decorative only. Two low-res canvases scaled up
  * with crisp pixels: the scene, and the squid with the effects in front of it. The engine sets --ocean-px (3 px on
- * phones, 4 px on wider screens). Above the UI, the grab overlay: the limb reaching through the glass, and the word
- * tiles it carries.
+ * phones, 4 px on wider screens).
  */
 .ocean {
   position: fixed;
@@ -14,8 +13,7 @@
   contain: strict;
   background: var(--page-bottom);
 }
-.ocean canvas,
-.ocean-over canvas {
+.ocean canvas {
   position: absolute;
   left: 0;
   top: 0;
@@ -32,23 +30,4 @@
   height: 1px;
   overflow: hidden;
   opacity: 0;
-}
-
-.ocean-over {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  overflow: hidden;
-  pointer-events: none;
-  user-select: none;
-}
-.ocean-tiles {
-  position: absolute;
-  inset: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ocean-over {
-    display: none;
-  }
 }

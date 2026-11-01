@@ -1,24 +1,27 @@
 /**
  * The ocean's engine: one requestAnimationFrame loop for the whole layer, at about 30 fps (a timer sleeps between
  * frames, so the page isn't woken on every vsync), paused while the tab is hidden. Each frame it steps the scene, the
- * swim, the squid's limbs and the effects, and draws the low-res canvases: the backdrop (at 15 fps), the squid with
- * the effects in front of it, and, while a word is being grabbed, the overlay above the UI. No layout reads per
- * frame: sizes are read on resize; the glass panels ([data-glass]) and the guess dock ([data-guess-dock]) are read
- * lazily after a resize, a scroll or an event, when the squid next needs them (a new waypoint, a find); a found
- * row or a hovered key once, when its event happens.
+ * swim, the squid's limbs and the effects, and draws the two low-res canvases: the backdrop (at 15 fps), and the
+ * squid with the effects in front of it. No layout reads per frame: sizes are read on resize; the glass panels
+ * ([data-glass]) are read after a resize, a scroll or an event, and at most twice a second otherwise.
  *
- * It listens to play events for the reactions (a find: the squid darts head-first to the guess box, then strikes
- * and grabs the word, at once if it is already near; a lost
- * life inks and flees; a perfect 10 loops and bursts; Blitz hits) and to input for idling: after IDLE_MS without a
- * key or a tap, the squid sinks to the seabed and dozes until the next one. With reduced motion it draws one still
- * frame: the squid parked, its limbs at rest, lit.
+ * Open water (room.ts): on screens 700px and wider, wherever the glass leaves room for it, the squid lives entirely
+ * in open water, limbs included, and never goes behind a panel: its waypoints, its dozing spot on the seabed, its
+ * flight from ink and its loops are all picked in open water, and the swim plans every move to stay there. When a
+ * panel comes over it (a result card, a new screen, a scroll), it swims out to the nearest free water. Where there is
+ * no such room (phones, narrow strips), it roams behind the glass as before.
+ *
+ * It listens to play events for the reactions (a find: the limb flashes and shimmers, a glow pulse, a quick hop; a
+ * lost life inks and flees; a perfect 10 loops and bursts; Blitz hits) and to input for idling: after IDLE_MS
+ * without a key or a tap, the squid sinks to the seabed and dozes until the next one. With reduced motion it draws
+ * one still frame: the squid parked in open water, its limbs at rest, lit.
  */
 import { onPlay, type PlayEvent } from "../../game/events";
 import { reducedMotion } from "../pixel";
 import { limbColor } from "../squid/colors";
 import { SquidBody, type Motion } from "./body";
 import { Fx } from "./fx";
-import { GUESS_INPUT, Grabs } from "./grab";
+import { ENV_BACK, ENV_R, Room, type Box } from "./room";
 import { Scene } from "./scene";
 import { squidAt, type OceanSquidState } from "./store";
 import { Swimmer, type Pt } from "./swim";
@@ -27,9 +30,6 @@ export interface OceanEls {
   root: HTMLElement;
   back: HTMLCanvasElement;
   front: HTMLCanvasElement;
-  /** Above the UI: the grabbing limb, and a layer for the word tiles. */
-  overlay: HTMLCanvasElement;
-  tiles: HTMLElement;
   /** The squid's aria-hidden stand-in in the DOM (its state as data attributes). */
   squid: HTMLElement;
 }
@@ -47,6 +47,8 @@ const IDLE_MS = 20000;
 /** The squid in sprite px: mantle width, and the height it keeps clear (mantle and the arms' reach). */
 const SQUID_W = 20;
 const SQUID_H = 30;
+/** Glass is re-read at least this often (ms) while the squid keeps to open water. */
+const ROOM_MS = 500;
 
 const CYAN = "#4de3ff";
 const GOLD = "#ffd166";
@@ -55,18 +57,18 @@ const WHITE = "#e8fbff";
 
 /** Panels the ocean shows through: marked [data-glass], or (a layout without the marks) the app's column. */
 const GLASS = "[data-glass]";
+/** Bare UI the squid keeps out from behind too (not glass, but it would hide there): Home's logo and sound key. */
+const SOLID = ".home .logo, .home-sound";
 const DOCK = "[data-guess-dock]";
 const DOCK_FALLBACK = ".guess-row";
 /** The heading check (dev stats): travel faster than this (CSS px/s) must be within OFF_DEG of the heading. */
 const CHECK_SPEED = 15;
 const OFF_DEG = 30;
-/** A find: the squid darts over first, unless it is near the box already; it strikes after at most WAIT_S. */
-const WAIT_S = 0.5;
 
 /** Debug numbers for frame-time and motion checks, exposed as window.__ocean in dev when the URL has ?oceanstats. */
 interface Stats {
   frames: number;
-  /** Time spent in the frame callback, total and worst. */
+  /** Time spent in the frame callback, total and worst (the dev checks below are not counted). */
   drawMs: number;
   maxMs: number;
   /** Gaps between frames: the worst, and how many ran over 50 ms (a dropped beat at 30 fps). */
@@ -83,15 +85,39 @@ interface Stats {
   worstDeg: number;
   /** The last few off-heading frames: what the squid was doing. */
   offLog: string[];
+  /**
+   * The glass check, on wide screens (1100px and up): frames checked, and frames where any pixel of the squid (body
+   * or limbs) was over a glass rect, read fresh that frame. `overlap` counts the squid's own doing; `relocating`
+   * frames where it was still swimming out from under glass that came over it (a panel appeared, a new screen, a
+   * scroll). `behind`: wide frames with no room at all (it roams behind the glass). `closest`: the nearest any pixel
+   * came to the glass (CSS px). `envOut`: frames where a pixel lay outside the planning envelope (turning, the limbs
+   * lag outside it for a moment: turns keep extra room for that).
+   */
+  wide: number;
+  overlap: number;
+  relocating: number;
+  behind: number;
+  closest: number;
+  /** What it was doing at its closest. */
+  closestAt: string;
+  /** The worst time (ms) spent reading the glass in one frame (forced layout after a screen change included). */
+  readMs: number;
+  envOut: number;
+  envMax: number;
+  overlapLog: string[];
+  /** Wide frames with no room, by screen (location.hash); frames outside the envelope, by what it was doing. */
+  behindBy: Record<string, number>;
+  envBy: Record<string, number>;
   /** Reactions seen: finds, inks, wins, Blitz hits, dozes. */
   seen: Record<string, number>;
-  /** What the squid is doing, and its heading (degrees, 0 is up). */
+  /** What the squid is doing, and its heading (degrees, 0 is up); whether it keeps to open water. */
   state: string;
   tilt: number;
+  room: boolean;
 }
 
 export function startOcean(els: OceanEls): Ocean {
-  const { root, back, front, overlay, tiles, squid } = els;
+  const { root, back, front, squid } = els;
   const bctx = back.getContext("2d")!;
   const fctx = front.getContext("2d")!;
   const scene = new Scene();
@@ -115,6 +141,9 @@ export function startOcean(els: OceanEls): Ocean {
   let heat = 0;
   let bubbleIn = 0;
   let trailIn = 0;
+  let room: Room | null = null;
+  let escapedAt = 0;
+  const bornAt = performance.now();
   const timers: { at: number; fn: () => void }[] = [];
   const later = (s: number, fn: () => void) => timers.push({ at: t + s, fn });
 
@@ -122,12 +151,46 @@ export function startOcean(els: OceanEls): Ocean {
   // frame-time checks of a production build).
   const stats: Stats | null =
     (import.meta.env.DEV || import.meta.env.VITE_OCEANSTATS === "1") && typeof location !== "undefined" && location.search.includes("oceanstats")
-      ? { frames: 0, drawMs: 0, maxMs: 0, maxGap: 0, slow: 0, at: 0, x: 0, y: 0, jet: 0, checked: 0, offHeading: 0, worstDeg: 0, offLog: [], seen: {}, state: "", tilt: 0 }
+      ? {
+          frames: 0,
+          drawMs: 0,
+          maxMs: 0,
+          maxGap: 0,
+          slow: 0,
+          at: 0,
+          x: 0,
+          y: 0,
+          jet: 0,
+          checked: 0,
+          offHeading: 0,
+          worstDeg: 0,
+          offLog: [],
+          wide: 0,
+          overlap: 0,
+          relocating: 0,
+          behind: 0,
+          closest: Infinity,
+          closestAt: "",
+          readMs: 0,
+          envOut: 0,
+          envMax: 0,
+          overlapLog: [],
+          behindBy: {},
+          envBy: {},
+          seen: {},
+          state: "",
+          tilt: 0,
+          room: false,
+        }
       : null;
   /** The squid as drawn last frame (CSS px, heading), for the heading check; null after a jump (a resize). */
   let drawn: { x: number; y: number; a: number } | null = null;
   if (stats) {
-    const g = globalThis as unknown as { __ocean: Stats; __oceanGo: (x: number, y: number) => void; __oceanSwim: (x: number, y: number) => void };
+    const g = globalThis as unknown as {
+      __ocean: Stats;
+      __oceanGo: (x: number, y: number) => void;
+      __oceanSwim: (x: number, y: number) => void;
+    };
     g.__ocean = stats;
     // Debug: send the squid somewhere (for screenshots of it in open water).
     g.__oceanGo = (x, y) => swimmer.dart({ x, y });
@@ -143,17 +206,12 @@ export function startOcean(els: OceanEls): Ocean {
     floor: (x: number) => scene.floorAt(x / px, t) * px,
     prefer,
   });
-  const swimmer = new Swimmer({ w: 400, h: 800, sw: 60, sh: 90, floor: () => 800 });
-
-  const grabs = new Grabs(overlay, tiles, {
-    px: () => px,
-    rootOf: (rank) => body.rootOf(rank),
-    away: (rank, out) => (out ? body.away.add(rank) : body.away.delete(rank)),
-    lit: (rank) => {
-      body.flash(rank, t);
-      glow(limbColor(rank), 1, 0);
-    },
-    ready: () => nearStrike(),
+  const swimmer = new Swimmer({
+    w: 400,
+    h: 800,
+    sw: 60,
+    sh: 90,
+    floor: () => 800,
   });
 
   /** Canvas px of a viewport point. */
@@ -168,7 +226,13 @@ export function startOcean(els: OceanEls): Ocean {
 
   /** The squid's pose on the canvas: the swim's (its idle surge is part of the swim, along its heading). */
   function pose() {
-    body.pose = { x: swimmer.x / px, y: swimmer.y / px, angle: (swimmer.tilt * Math.PI) / 180, sx: swimmer.sx, sy: swimmer.sy };
+    body.pose = {
+      x: swimmer.x / px,
+      y: swimmer.y / px,
+      angle: (swimmer.tilt * Math.PI) / 180,
+      sx: swimmer.sx,
+      sy: swimmer.sy,
+    };
     squidAt.x = swimmer.x;
     squidAt.y = swimmer.y;
     squidAt.live = true;
@@ -190,28 +254,38 @@ export function startOcean(els: OceanEls): Ocean {
       c.style.width = `${cw * px}px`;
       c.style.height = `${ch * px}px`;
     }
-    grabs.resize(cw, ch, px);
     bctx.imageSmoothingEnabled = false;
     fctx.imageSmoothingEnabled = false;
     root.style.setProperty("--ocean-px", `${px}px`);
     scene.resize(cw, ch);
     swimmer.setWorld(world());
+    // A jump anyway: if the glass now covers it, it starts out in open water instead of swimming out.
+    refreshRoom(true);
+    if (room && swimmer.fit() < 0) {
+      const p = nearestFit(swimmer);
+      if (p) swimmer.place(p, p.h);
+    }
     pose();
     body.settle(t, motion());
     if (still) park();
     draw(true);
   }
 
-  /** Reduced motion: the squid rests in the lower right, upright, limbs at rest, over a still scene. */
+  /** Reduced motion: the squid rests upright, limbs at rest, in the clearest open water (or the lower right). */
   function park() {
-    swimmer.x = vw * (vw >= 700 ? 0.8 : 0.5);
-    // Wide screens: in the open water beside the column. Phones: low, behind the clearer glass round the guess box.
-    swimmer.y = vw >= 700 ? Math.min(vh * 0.55, world().floor(vw * 0.8) - SQUID_H * px) : vh - SQUID_H * px * 1.15;
+    const spot = room ? clearestSpot(false, false) : null;
+    if (spot) {
+      swimmer.x = spot.x;
+      swimmer.y = spot.y;
+    } else {
+      swimmer.x = vw * (vw >= 700 ? 0.8 : 0.5);
+      // Wide screens: in the open water beside the column. Phones: low, behind the clearer glass round the guess box.
+      swimmer.y = vw >= 700 ? Math.min(vh * 0.55, world().floor(vw * 0.8) - SQUID_H * px) : vh - SQUID_H * px * 1.15;
+    }
     swimmer.tilt = 0;
     swimmer.sx = swimmer.sy = 1;
     swimmer.jetAge = 9;
     fx.clear();
-    grabs.clear();
     pose();
     body.settle(t, { jetAge: 9, inflating: 0, hovering: false, asleep: false });
   }
@@ -227,13 +301,17 @@ export function startOcean(els: OceanEls): Ocean {
       backDirty = fx.back;
     }
     fctx.clearRect(0, 0, front.width, front.height);
-    body.draw(fctx, t, { lit, mood: state?.mood ?? "play", heat, doze: swimmer.behaviour === "doze" });
+    body.draw(fctx, t, {
+      lit,
+      mood: state?.mood ?? "play",
+      heat,
+      doze: swimmer.behaviour === "doze",
+    });
     fx.drawFront(fctx);
-    grabs.draw();
   }
 
   /** 30 fps; asleep on the seabed nothing hurries, so the whole ocean idles at the backdrop's rate. */
-  const frameMs = () => (swimmer.asleep && !grabs.active ? 1000 / BG_FPS : FRAME_MS);
+  const frameMs = () => (swimmer.asleep ? 1000 / BG_FPS : FRAME_MS);
 
   function frame(now: number) {
     raf = 0;
@@ -252,10 +330,13 @@ export function startOcean(els: OceanEls): Ocean {
       return;
     }
     // Sleep until just before the next frame is due, so the page is only woken ~30 times a second.
-    wait = setTimeout(() => {
-      wait = 0;
-      if (running) raf = requestAnimationFrame(frame);
-    }, Math.max(0, frameMs() - (performance.now() - now) - 10));
+    wait = setTimeout(
+      () => {
+        wait = 0;
+        if (running) raf = requestAnimationFrame(frame);
+      },
+      Math.max(0, frameMs() - (performance.now() - now) - 10),
+    );
   }
 
   function tick(now: number) {
@@ -266,16 +347,37 @@ export function startOcean(els: OceanEls): Ocean {
     for (let i = timers.length - 1; i >= 0; i--) {
       if (timers[i].at <= t) timers.splice(i, 1)[0].fn();
     }
+    const r0 = stats ? performance.now() : 0;
+    refreshRoom(false);
+    if (stats) stats.readMs = Math.max(stats.readMs, performance.now() - r0);
+    // Glass came over it (a panel appeared, a new screen, a scroll): out to the nearest open water (and again, if a
+    // second later it is still under glass).
+    if (room && swimmer.behaviour !== "loop" && (!swimmer.escaping || t - escapedAt > 3) && swimmer.fit() < 0) {
+      const p = nearestFit(swimmer);
+      if (p && performance.now() - bornAt < 1500) {
+        // Still loading (the screen drew after the ocean started): it starts out there.
+        swimmer.place(p, p.h);
+        pose();
+        body.settle(t, motion());
+        drawn = null;
+      } else if (p) {
+        if (swimmer.behaviour === "doze") delete squid.dataset.doze;
+        swimmer.escape(p, p.h);
+        escapedAt = t;
+      }
+    }
     if (swimmer.behaviour !== "doze" && now - lastInput > IDLE_MS) doze();
     scene.step(dt, t);
     swimmer.step(dt, t);
     pose();
     const m = motion();
     body.step(dt, t, m, swimmer.behaviour === "doze" ? (x) => scene.floorAt(x, t) : null);
-    grabs.step(dt, now);
     if (swimmer.asleep && (bubbleIn -= dt) <= 0) {
       bubbleIn = 1.6 + Math.random();
-      const p = cv({ x: swimmer.x + SQUID_W * px * 0.15, y: swimmer.y - 7 * px });
+      const p = cv({
+        x: swimmer.x + SQUID_W * px * 0.15,
+        y: swimmer.y - 7 * px,
+      });
       fx.bubble(p.x, p.y);
     }
     // Momentum: a trail of light bits behind a hot squid.
@@ -288,44 +390,105 @@ export function startOcean(els: OceanEls): Ocean {
     const backToo = bgIn <= 0;
     if (backToo) bgIn += 1 / BG_FPS;
     draw(backToo);
-    if (stats) {
-      const ms = performance.now() - t0;
-      // Head-first: the drawn squid's travel this frame against its heading (halfway through the frame's turn).
-      const cx = body.pose.x * px;
-      const cy = body.pose.y * px;
-      const a = swimmer.tilt;
-      if (drawn && dt > 0) {
-        const vx = (cx - drawn.x) / dt;
-        const vy = (cy - drawn.y) / dt;
-        const v = Math.hypot(vx, vy);
-        if (v > CHECK_SPEED) {
-          const d = a - drawn.a;
-          const mid = ((drawn.a + (d - 360 * Math.round(d / 360)) / 2) * Math.PI) / 180;
-          const cos = (vx * Math.sin(mid) - vy * Math.cos(mid)) / v;
-          const off = (Math.acos(Math.max(-1, Math.min(1, cos))) * 180) / Math.PI;
-          stats.checked++;
-          stats.worstDeg = Math.max(stats.worstDeg, off);
-          if (off > OFF_DEG) {
-            stats.offHeading++;
-            stats.offLog.push(`${swimmer.state} v=${v.toFixed(0)} off=${off.toFixed(0)}`);
-            if (stats.offLog.length > 20) stats.offLog.shift();
-          }
+    if (stats) check(now, dt, performance.now() - t0);
+  }
+
+  /** Dev: the frame time, the heading check and the glass check (see Stats). */
+  function check(now: number, dt: number, ms: number) {
+    const s = stats!;
+    // Head-first: the drawn squid's travel this frame against its heading (halfway through the frame's turn).
+    const cx = body.pose.x * px;
+    const cy = body.pose.y * px;
+    const a = swimmer.tilt;
+    if (drawn && dt > 0) {
+      const vx = (cx - drawn.x) / dt;
+      const vy = (cy - drawn.y) / dt;
+      const v = Math.hypot(vx, vy);
+      if (v > CHECK_SPEED) {
+        const d = a - drawn.a;
+        const mid = ((drawn.a + (d - 360 * Math.round(d / 360)) / 2) * Math.PI) / 180;
+        const cos = (vx * Math.sin(mid) - vy * Math.cos(mid)) / v;
+        const off = (Math.acos(Math.max(-1, Math.min(1, cos))) * 180) / Math.PI;
+        s.checked++;
+        s.worstDeg = Math.max(s.worstDeg, off);
+        if (off > OFF_DEG) {
+          s.offHeading++;
+          s.offLog.push(
+            `${swimmer.state} v=${v.toFixed(0)} off=${off.toFixed(0)} dt=${(dt * 1000).toFixed(0)}ms${swimmer.escaping ? " escaping" : ""}; at ${swimmer.clock.toFixed(2)}; ${swimmer.note}`,
+          );
+          if (s.offLog.length > 20) s.offLog.shift();
         }
       }
-      drawn = { x: cx, y: cy, a };
-      stats.state = swimmer.state;
-      stats.tilt = swimmer.tilt;
-      stats.frames++;
-      stats.drawMs += ms;
-      stats.maxMs = Math.max(stats.maxMs, ms);
-      const gap = stats.at ? now - stats.at : 0;
-      stats.at = now;
-      stats.maxGap = Math.max(stats.maxGap, gap);
-      if (gap > 50) stats.slow++;
-      stats.x = swimmer.x;
-      stats.y = swimmer.y;
-      stats.jet = swimmer.jetAge;
     }
+    drawn = { x: cx, y: cy, a };
+
+    // The glass, read fresh: is any pixel of the squid over it? And is every pixel inside the planning envelope?
+    if (vw >= 1100) {
+      s.wide++;
+      const boxes = [...document.querySelectorAll(`${GLASS}, ${SOLID}`)]
+        .map((e) => e.getBoundingClientRect())
+        .filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < vh);
+      // The squid's plans use the glass as last read: if it has moved since, it came over the squid.
+      const stale = !room || !room.same(boxes, vw, vh);
+      const ang = body.pose.angle;
+      const ex = body.pose.x - Math.sin(ang) * ENV_BACK;
+      const ey = body.pose.y + Math.cos(ang) * ENV_BACK;
+      let over = false;
+      let near = Infinity;
+      let env = 0;
+      body.eachPoint((x, y, r) => {
+        env = Math.max(env, Math.hypot(x - ex, y - ey) + r);
+        const l = (x - r) * px;
+        const rt = (x + r) * px;
+        const tp = (y - r) * px;
+        const bt = (y + r) * px;
+        for (const b of boxes) {
+          const gx = Math.max(b.left - rt, l - b.right, 0);
+          const gy = Math.max(b.top - bt, tp - b.bottom, 0);
+          const gap = Math.hypot(gx, gy);
+          if (gap < near) near = gap;
+          if (rt > b.left && l < b.right && bt > b.top && tp < b.bottom) over = true;
+        }
+      });
+      s.envMax = Math.max(s.envMax, env);
+      if (env > ENV_R) {
+        s.envOut++;
+        const k = `${swimmer.state}${swimmer.asleep ? " asleep" : ""}`;
+        s.envBy[k] = (s.envBy[k] ?? 0) + 1;
+      }
+      if (performance.now() - bornAt < 1500) {
+        // Loading: the screen draws after the ocean starts; the squid is placed in open water once it has.
+      } else if (!room) {
+        s.behind++;
+        s.behindBy[location.hash] = (s.behindBy[location.hash] ?? 0) + 1;
+      } else if (swimmer.escaping || (over && stale)) {
+        if (over) s.relocating++;
+      } else {
+        if (near < s.closest) s.closestAt = `${swimmer.state}${swimmer.asleep ? " asleep" : ""} tilt ${swimmer.tilt.toFixed(0)}`;
+        s.closest = Math.min(s.closest, near);
+        if (over) {
+          s.overlap++;
+          s.overlapLog.push(
+            `${swimmer.state} at ${swimmer.x.toFixed(0)},${swimmer.y.toFixed(0)} tilt ${swimmer.tilt.toFixed(0)} fit ${swimmer.fit().toFixed(0)}`,
+          );
+          if (s.overlapLog.length > 20) s.overlapLog.shift();
+        }
+      }
+    }
+
+    s.state = swimmer.state;
+    s.tilt = swimmer.tilt;
+    s.room = !!room;
+    s.frames++;
+    s.drawMs += ms;
+    s.maxMs = Math.max(s.maxMs, ms);
+    const gap = s.at ? now - s.at : 0;
+    s.at = now;
+    s.maxGap = Math.max(s.maxGap, gap);
+    if (gap > 50) s.slow++;
+    s.x = swimmer.x;
+    s.y = swimmer.y;
+    s.jet = swimmer.jetAge;
   }
 
   function start() {
@@ -340,16 +503,25 @@ export function startOcean(els: OceanEls): Ocean {
     cancelAnimationFrame(raf);
     clearTimeout(wait);
     raf = wait = 0;
-    // A grab cut short leaves nothing behind (its word's row is already filled in).
-    if (grabs.active) grabs.clear();
   }
 
   /* ---------------- idle ---------------- */
 
   function doze() {
-    // Read once, as it nods off: settle in open water if there is any.
     if (stats) stats.seen.doze = (stats.seen.doze ?? 0) + 1;
-    swimmer.doze(openSpot(true)?.x);
+    if (room) {
+      // A column of open water down to the seabed, and the height where it can right itself above it.
+      const site = dozeSite();
+      if (!site) {
+        // Nowhere to settle: it keeps roaming, slowly, and tries again later.
+        lastInput = performance.now();
+        return;
+      }
+      swimmer.doze(site.x, site.y);
+    } else {
+      // Read once, as it nods off: settle in open water if there is any.
+      swimmer.doze(openSpot(true)?.x);
+    }
     squid.dataset.doze = "";
     bubbleIn = 2;
   }
@@ -365,26 +537,206 @@ export function startOcean(els: OceanEls): Ocean {
   /* ---------------- where to be seen ---------------- */
 
   /**
-   * The glass panels and the guess dock, in viewport CSS px. Read lazily, at most once per resize, scroll or event
-   * (and never older than a few seconds when asked for), never per frame. Without [data-glass] marks, the app's
-   * column (main) stands in for the glass; without [data-guess-dock], the guess row.
+   * The glass panels, in viewport CSS px. Read lazily, at most once per resize, scroll or event (and every ROOM_MS
+   * while the squid keeps to open water), never per frame. Without [data-glass] marks, the app's column (main) stands
+   * in for the glass; without [data-guess-dock], the guess row.
    */
-  const layout = { dirty: true, at: 0, glass: [] as DOMRect[], dock: null as DOMRect | null, board: null as DOMRect | null };
-  function readLayout() {
+  const layout = {
+    dirty: true,
+    at: 0,
+    burst: 0,
+    glass: [] as DOMRect[],
+    solid: [] as DOMRect[],
+    dock: null as DOMRect | null,
+  };
+  function readLayout(maxAge = 3000) {
     const now = performance.now();
-    if (!layout.dirty && now - layout.at < 3000) return layout;
+    if (!layout.dirty && now - layout.at < maxAge) return layout;
     layout.dirty = false;
     layout.at = now;
     const marked = document.querySelectorAll(GLASS);
     const els = marked.length ? [...marked] : [document.querySelector("main")].filter((e) => e !== null);
-    layout.glass = els.map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < vh);
+    const shown = (r: DOMRect) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < vh;
+    layout.glass = els.map((e) => e.getBoundingClientRect()).filter(shown);
+    layout.solid = [...document.querySelectorAll(SOLID)].map((e) => e.getBoundingClientRect()).filter(shown);
     const dock = document.querySelector(DOCK) ?? document.querySelector(DOCK_FALLBACK);
     const dr = dock?.getBoundingClientRect();
     layout.dock = dr && dr.width > 0 && dr.bottom > 0 && dr.top < vh ? dr : null;
-    // The board's column (wide screens put it on the left, with open water to its right).
-    const col = document.querySelector(".board-col")?.getBoundingClientRect();
-    layout.board = col && col.width > 0 ? col : null;
     return layout;
+  }
+
+  /** Open water for this layout (700px and wider), or null; rebuilt only when the glass has moved. */
+  function refreshRoom(force: boolean) {
+    if (vw < 700) {
+      if (room) swimmer.setRoom((room = null));
+      return;
+    }
+    // After a resize, a scroll, an event or a new screen, read every frame for a few frames (the screen may render
+    // a frame or two later); otherwise every ROOM_MS.
+    const burst = layout.burst > 0;
+    if (burst) layout.burst--;
+    if (!force && !burst && !layout.dirty && performance.now() - layout.at < ROOM_MS) return;
+    if (layout.dirty) layout.burst = 8;
+    const { glass, solid } = readLayout(force || burst ? 0 : ROOM_MS);
+    const boxes: Box[] = [...glass, ...solid].map((r) => ({
+      left: r.left,
+      top: r.top,
+      right: r.right,
+      bottom: r.bottom,
+    }));
+    if (room && room.same(boxes, vw, vh)) return;
+    room = Room.build(boxes, vw, vh, px);
+    swimmer.setRoom(room);
+  }
+
+  /**
+   * Can it get from where it is to p in open water: a turn here that fits, then a straight glide; or, roughly
+   * upright, a drift straight down to it (a strip too thin to turn round in)?
+   */
+  function reachable(r: Room, p: Pt) {
+    const dx = p.x - swimmer.x;
+    const dy = p.y - swimmer.y;
+    if (dy > 30 && Math.abs(dx) < 4 && Math.abs(swimmer.tilt - 360 * Math.round(swimmer.tilt / 360)) <= 50)
+      return r.drop(swimmer.x, swimmer.y, swimmer.tilt, dy) >= dy - 8;
+    const h = (Math.atan2(dx, -dy) * 180) / Math.PI;
+    return r.sweep(swimmer.x, swimmer.y, swimmer.tilt, h) !== null && r.line(swimmer.x, swimmer.y, p.x, p.y);
+  }
+
+  /**
+   * A spot in open water the squid can get to from where it is, sampled across the viewport (so the biggest stretches
+   * of open water get the most visits), plus a few straight ahead and straight below. Prefers spots clear of the
+   * glass and not right where it is already; `low` (out of lives) keeps low; `near` favours spots close by.
+   */
+  function freeSpot(opt: { low?: boolean; near?: boolean } = {}): Pt | null {
+    const r = room;
+    if (!r) return null;
+    const cands: Pt[] = [];
+    for (let i = 0; i < 36; i++) cands.push({ x: Math.random() * vw, y: Math.random() * vh });
+    const hx = Math.sin((swimmer.tilt * Math.PI) / 180);
+    const hy = -Math.cos((swimmer.tilt * Math.PI) / 180);
+    for (const d of [120, 200, 300]) {
+      cands.push({ x: swimmer.x + hx * d, y: swimmer.y + hy * d });
+      cands.push({ x: swimmer.x, y: swimmer.y + d * 0.8 });
+    }
+    let best: Pt | null = null;
+    let score = -Infinity;
+    for (const p of cands) {
+      const f = r.best(p.x, p.y).slack;
+      if (f < 0 || !reachable(r, p)) continue;
+      const d = Math.hypot(p.x - swimmer.x, p.y - swimmer.y);
+      let k = Math.min(f, 80) + Math.random() * 60;
+      // Somewhere it can turn round, or upright (it can drift down): never boxed in, facing the glass.
+      const h = (Math.atan2(p.x - swimmer.x, -(p.y - swimmer.y)) * 180) / Math.PI;
+      if (r.free(p.x, p.y) < 0 && Math.abs(h) > 50 && d > 4) k -= 150;
+      if (d < 120) k -= 90;
+      if (opt.near) k -= d * 0.3;
+      if (opt.low) k += (p.y / vh) * 160;
+      if (k > score) {
+        score = k;
+        best = p;
+      }
+    }
+    return best;
+  }
+
+  /**
+   * The spot in open water nearest a point (searched in rings around it), and the heading that fits there. A spot
+   * with room to turn round wins if there is one not much further off; else one it fits upright (it can drift down
+   * from there); else any.
+   */
+  function nearestFit(p: Pt): (Pt & { h: number }) | null {
+    const r = room;
+    if (!r) return null;
+    const reach = Math.hypot(vw, vh);
+    let first: (Pt & { h: number }) | null = null;
+    let firstK = -Infinity;
+    let until = reach;
+    for (let d = 0; d < Math.min(reach, until); d += 16) {
+      const n = d ? Math.max(12, Math.round(d / 10)) : 1;
+      for (let k = 0; k < n; k++) {
+        const a = (k / n) * Math.PI * 2;
+        const x = p.x + Math.cos(a) * d;
+        const y = p.y + Math.sin(a) * d;
+        const c = r.clear(x, y);
+        if (c - r.back - r.r >= 0) return { x, y, h: r.best(x, y).h };
+        // No heading can fit nearer the glass than this (the envelope's middle is r.back away).
+        if (c < r.r - r.back || (first && d > until - 16)) continue;
+        const f = r.best(x, y);
+        if (f.slack < 0) continue;
+        const kk = (Math.abs(f.h) <= 50 ? 100 : 0) + f.slack;
+        if (!first || (d <= until - 250 && kk > firstK)) {
+          firstK = kk;
+          first = { x, y, h: f.h };
+          until = d + 250;
+        }
+      }
+    }
+    return first;
+  }
+
+  /**
+   * The clearest spot on a grid, nearer is better: for the perfect-10 loops, room to turn round (`free`); for reduced
+   * motion's parking place, room upright.
+   */
+  function clearestSpot(near: boolean, free: boolean): Pt | null {
+    const r = room;
+    if (!r) return null;
+    let best: Pt | null = null;
+    let score = -Infinity;
+    for (let y = 24; y < vh; y += 24) {
+      for (let x = 24; x < vw; x += 24) {
+        const f = free ? r.free(x, y) : r.fit(x, y, 0);
+        if (f < 0) continue;
+        const k = Math.min(f, 140) - (near ? Math.hypot(x - swimmer.x, y - swimmer.y) * 0.15 : 0) + (x / vw) * 10;
+        if (k > score) {
+          score = k;
+          best = { x, y };
+        }
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Where to doze (in open water): a column whose water is clear all the way down to the seabed for the squid
+   * upright, and where it rights itself above it: right where it is, if it is nearly upright already; else in a
+   * column like that, at a height with room to turn round (best), or at the height nearest its own (it rights itself
+   * slowly, about its middle). Nearer columns, and shorter sinks, win.
+   */
+  function dozeSite(): Pt | null {
+    const r = room;
+    if (!r) return null;
+    const sh = SQUID_H * px;
+    const restAt = (x: number) => scene.floorAt(x / px, t) * px - sh * 0.5;
+    const tilt = swimmer.tilt - 360 * Math.round(swimmer.tilt / 360);
+    if (Math.abs(tilt) <= 30 && r.sweep(swimmer.x, swimmer.y, tilt, 0) !== null) {
+      const rest = restAt(swimmer.x);
+      if (rest > swimmer.y && r.drop(swimmer.x, swimmer.y, 0, rest - swimmer.y, true) >= rest - swimmer.y) return { x: swimmer.x, y: swimmer.y };
+    }
+    let best: Pt | null = null;
+    let score = -Infinity;
+    for (let x = 16; x < vw; x += 16) {
+      const rest = restAt(x);
+      if (r.fit(x, rest, 0, true) < 0) continue;
+      let turnY: number | null = null;
+      let top = rest;
+      for (let y = rest; y > 0 && r.fit(x, y, 0, true) >= 0; y -= 10) {
+        top = y;
+        if (r.free(x, y) >= 8) {
+          turnY = y;
+          break;
+        }
+      }
+      // With no room to turn round in the column: at the height nearest its own, at least a body above the seabed.
+      const y = turnY ?? Math.min(Math.max(swimmer.y, top), rest - SQUID_H * px * 0.5);
+      if (y < top) continue;
+      const k = (turnY !== null ? 200 : 0) - Math.abs(x - swimmer.x) * 0.5 - Math.abs(y - swimmer.y) * 0.3 - (rest - y) * 0.3 + Math.random() * 40;
+      if (k > score) {
+        score = k;
+        best = { x, y };
+      }
+    }
+    return best;
   }
 
   /** How far a point is from the nearest glass panel (0 inside one). */
@@ -399,19 +751,15 @@ export function startOcean(els: OceanEls): Ocean {
   }
 
   /**
-   * A spot in open water (the viewport minus the glass), where the squid shows: sampled, scored by how clear of the
-   * glass it is, and on wide screens favouring the water right of the board (.board-col, or the tallest panel, when
-   * it sits left).
-   * `near` favours spots close to the squid (dozing, the loops); `room` is the clearance it needs. Null when the
+   * Behind the glass (no room): a spot in what open water there is, sampled, scored by how clear of the glass it
+   * is. `near` favours spots close to the squid (dozing, the loops); `room` is the clearance it needs. Null when the
    * glass covers everything (phones).
    */
-  function openSpot(near = false, room = 0): Pt | null {
+  function openSpot(near = false, need0 = 0): Pt | null {
     const { glass } = readLayout();
     const sw = SQUID_W * px;
     const sh = SQUID_H * px;
-    const need = Math.max(sw * 0.9, room);
-    const board = layout.board ?? glass.reduce<DOMRect | null>((a, r) => (!a || r.height > a.height ? r : a), null);
-    const boardRight = vw >= 900 && board && board.left + board.width / 2 < vw / 2 ? board.right : null;
+    const need = Math.max(sw * 0.9, need0);
     let best: Pt | null = null;
     let score = -Infinity;
     for (let i = 0; i < 18; i++) {
@@ -420,7 +768,6 @@ export function startOcean(els: OceanEls): Ocean {
       const c = clearance(x, y, glass);
       if (c < need) continue;
       let k = Math.min(c, 160) + Math.random() * 50;
-      if (boardRight !== null && x > boardRight + sw) k += 140;
       if (near) k -= Math.hypot(x - swimmer.x, y - swimmer.y) * 0.4;
       if (k > score) {
         score = k;
@@ -431,11 +778,12 @@ export function startOcean(els: OceanEls): Ocean {
   }
 
   /**
-   * Each new waypoint: mostly in open water. With none (a phone, where the glass covers most of the ocean), most go
-   * to the strips where the squid shows: around the guess dock (clear glass, close to the next grab), or the open
-   * water around Home's title.
+   * Each new waypoint. In open water (room): a free spot there. Behind the glass: mostly in what open water there
+   * is; with none (a phone, where the glass covers most of the ocean), most go to the strips where the squid shows:
+   * around the guess dock (clear glass), or the open water around Home's title.
    */
-  function prefer(): Pt | null {
+  function prefer(low: boolean): Pt | null {
+    if (room) return freeSpot({ low });
     const open = openSpot();
     if (open) return Math.random() < 0.85 ? open : null;
     if (Math.random() > 0.7) return null;
@@ -448,37 +796,12 @@ export function startOcean(els: OceanEls): Ocean {
       return { x, y: top + Math.random() * Math.max(1, bottom - top) };
     }
     const title = document.querySelector(".home .title")?.getBoundingClientRect();
-    if (title && title.bottom > 0) return { x, y: Math.max(SQUID_H * px * 0.5, title.top + Math.random() * title.height) };
+    if (title && title.bottom > 0)
+      return {
+        x,
+        y: Math.max(SQUID_H * px * 0.5, title.top + Math.random() * title.height),
+      };
     return null;
-  }
-
-  /** Where the squid strikes from at the guess dock: beside it in open water, or just above it behind the glass. */
-  function dockPoint(): Pt | null {
-    const { dock: r, glass } = readLayout();
-    if (!r) return null;
-    const sw = SQUID_W * px;
-    const sh = SQUID_H * px;
-    // In open water by the box, if there is some: above it first (its limbs hang down to the box), then either
-    // side; the clearest spot wins (the box itself doesn't count as cover).
-    const others = glass.filter((g) => !(g.left === r.left && g.top === r.top && g.width === r.width));
-    const spots = [
-      { x: r.left + Math.min(r.width * 0.3, 120), y: r.top - sh * 0.55, bias: 30 },
-      { x: r.left - sw * 1.15, y: r.top + r.height / 2 - sh * 0.3, bias: 0 },
-      { x: r.right + sw * 1.15, y: r.top + r.height / 2 - sh * 0.3, bias: 0 },
-    ].filter((p) => p.x > sw && p.x < vw - sw && p.y > sh * 0.5);
-    let best: Pt | null = null;
-    let score = sw * 0.6;
-    for (const p of spots) {
-      const k = Math.min(clearance(p.x, p.y, others), sw * 2) + p.bias;
-      if (k > score) {
-        score = k;
-        best = { x: p.x, y: p.y };
-      }
-    }
-    if (best) return best;
-    // No open water (a phone): just above the box, behind the glass, its limbs hanging toward it.
-    const p = besideRect(r);
-    return { x: p.x, y: Math.min(p.y - sh * 0.3, vh - sh * 1.25) };
   }
 
   /* ---------------- reactions ---------------- */
@@ -510,6 +833,23 @@ export function startOcean(els: OceanEls): Ocean {
   }
 
   /**
+   * A limb comes on (a find, a Blitz top-10 hit): it flashes white-hot and a shimmer runs down it, its tip throws a
+   * few sparks, the squid glows; in open water it gives a quick hop (bigger for the feeding tentacles, #1 and #2).
+   * About half a second, all of it in the ocean.
+   */
+  function lightUp(rank: number, hop: boolean) {
+    const big = rank <= 2;
+    const color = rank === 1 ? GOLD : limbColor(rank);
+    body.flash(rank, t);
+    glow(color, big ? 1.5 : 1.15);
+    later(0.18, () => {
+      const p = body.limbAt(rank, 1);
+      fx.sparksAt(p.x, p.y, big ? 12 : 7, big ? 9 : 6, [color, WHITE]);
+    });
+    if (hop && room) swimmer.hop(big);
+  }
+
+  /**
    * Beside an element, read once now: just outside its nearer side when there is open water there (wide screens),
    * so the reaction shows; otherwise a third of the way across it, behind the glass.
    */
@@ -517,42 +857,26 @@ export function startOcean(els: OceanEls): Ocean {
     if (!el) return null;
     const r = el.getBoundingClientRect();
     if (r.bottom < 0 || r.top > vh) return null;
-    return besideRect(r);
-  }
-  function besideRect(r: DOMRect): Pt {
     const y = r.top + r.height / 2;
     const off = SQUID_W * px * 1.15;
     const sides = [r.left - off, r.right + off].filter((x) => x > off && x < vw - off);
     if (!sides.length) return { x: r.left + r.width * 0.35, y };
-    return { x: sides.reduce((a, b) => (Math.abs(a - swimmer.x) <= Math.abs(b - swimmer.x) ? a : b)), y };
+    return {
+      x: sides.reduce((a, b) => (Math.abs(a - swimmer.x) <= Math.abs(b - swimmer.x) ? a : b)),
+      y,
+    };
   }
 
   let pendingInk: "small" | "big" | null = null;
-  /** Where the squid is headed to strike from (a find), or null: grabs strike once it is within strikeR() of it. */
-  let strikeAt: Pt | null = null;
-  const strikeR = () => Math.max(110, Math.min(vw, vh) * 0.2);
-  const nearStrike = () => !strikeAt || Math.hypot(strikeAt.x - swimmer.x, strikeAt.y - swimmer.y) < strikeR();
 
   function onEvent(e: PlayEvent) {
     onInput();
     if (still) return;
     if (stats) stats.seen[e.kind] = (stats.seen[e.kind] ?? 0) + 1;
     switch (e.kind) {
-      case "found": {
-        // It goes for the word: darts head-first to the guess box (beside it, in open water, on wide screens), then
-        // strikes; already near, it strikes at once. The box is cleared and the row filled in meanwhile.
-        const p = document.querySelector(GUESS_INPUT) ? dockPoint() : null;
-        strikeAt = p;
-        const near = nearStrike();
-        if (grabs.start(e.rank, document, near ? 0 : WAIT_S)) {
-          if (p && !near) swimmer.dart(p);
-        } else {
-          const p = besidePoint(document.querySelector(`[data-testid="slot"][data-rank="${e.rank}"]`));
-          swimmer.dart(p ?? { x: Math.random() * vw, y: vh * (0.2 + Math.random() * 0.5) });
-          glow(e.rank === 1 ? GOLD : CYAN, e.rank <= 2 ? 1.6 : 1.2, 0.1);
-        }
+      case "found":
+        lightUp(e.rank, true);
         break;
-      }
       case "miss":
       case "hint":
         if (e.kind === "hint" || e.lifeLost) {
@@ -566,21 +890,30 @@ export function startOcean(els: OceanEls): Ocean {
           pendingInk = "big";
           queueMicrotask(flushInk);
         } else if (e.status === "won") {
-          // Out into open water first if there is any beside the column, so the loops show (after the last grab).
-          later(1.1, () => {
-            const open = openSpot(true, Math.min(Math.max(Math.min(vw, vh) * 0.11, 36), 110) * 2);
+          // Out into the clearest open water first, so the loops show (after the last find's hop).
+          later(0.7, () => {
+            const open = room ? clearestSpot(true, true) : openSpot(true, Math.min(Math.max(Math.min(vw, vh) * 0.11, 36), 110) * 2);
             if (open) swimmer.dart(open);
-            later(open ? 1.1 : 0.35, () => swimmer.loops(2, () => burst([CYAN, GOLD, PINK], true)));
+            later(open ? 1.1 : 0.35, () => {
+              const fx2 = () => burst([CYAN, GOLD, PINK], true);
+              if (!swimmer.loops(2, fx2)) fx2();
+            });
           });
         }
         break;
       case "blitz-hit": {
         const top = e.rank >= 1 && e.rank <= 10;
-        // The newest hit row is drawn after this event: read it on the next frame.
+        if (room) {
+          if (top) lightUp(e.rank, true);
+          else glow(CYAN, 0.8, 0.05);
+          break;
+        }
+        // Behind the glass: over to the newest hit row (drawn after this event: read it on the next frame).
         later(0.04, () => {
           const p = besidePoint(document.querySelector(".blitz-hits .blitz-hit:first-child"));
           if (p) swimmer.dart(p);
         });
+        if (top) body.flash(e.rank, t);
         glow(e.rank === 1 ? GOLD : CYAN, top ? 1.2 + heat * 0.15 : 0.8, 0.1);
         break;
       }
@@ -611,7 +944,12 @@ export function startOcean(els: OceanEls): Ocean {
     swimmer.low = s.mood === "lost";
     // Passing your best (Blitz): a gold flare, once per round.
     if (!still && prev && prev.session === s.session && s.flare > prev.flare) burst([GOLD, WHITE, CYAN], false);
-    if (still) draw(false);
+    if (still) {
+      // The screen changed under a parked squid: park it again, in this screen's open water.
+      refreshRoom(true);
+      park();
+      draw(false);
+    }
   }
 
   /* ---------------- hover perk (Home) ---------------- */
@@ -622,7 +960,8 @@ export function startOcean(els: OceanEls): Ocean {
     const key = todayKey(e);
     if (!key) return;
     const p = besidePoint(key);
-    if (p) swimmer.perk(p);
+    const q = p && room ? nearestFit(p) : p;
+    if (q) swimmer.perk(q);
   }
   function onOut(e: PointerEvent) {
     const key = todayKey(e);
@@ -638,6 +977,7 @@ export function startOcean(els: OceanEls): Ocean {
     if (still) {
       pause();
       delete squid.dataset.doze;
+      refreshRoom(true);
       park();
       draw(true);
     } else start();
@@ -656,9 +996,9 @@ export function startOcean(els: OceanEls): Ocean {
   document.addEventListener("pointerout", onOut);
   const offPlay = onPlay(onEvent);
 
+  swimmer.x = innerWidth * 0.7;
+  swimmer.y = innerHeight * 0.55;
   resize();
-  swimmer.x = vw * 0.7;
-  swimmer.y = vh * 0.55;
   pose();
   body.settle(t, motion());
   if (still) park();
