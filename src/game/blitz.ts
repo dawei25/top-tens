@@ -1,7 +1,7 @@
 import type { DailyEntry } from "./daily";
 import type { Lexicon } from "./junk";
 import { judgeGuess } from "./match";
-import type { Saved } from "./storage";
+import type { DailyBlitzResult, Saved } from "./storage";
 import type { Entry, Puzzle } from "./types";
 
 /**
@@ -254,13 +254,38 @@ export function blitzShareText(state: BlitzState, puzzle: Puzzle, url: string): 
 }
 
 /**
- * Record a finished round of Today's Blitz for its date. Only the first round finished on that date counts;
- * later rounds are ordinary replays (still in the list's history and best).
+ * Record a finished round of a date's Today's Blitz. One round per date: the first one finished locks it. `late`
+ * marks a round played after its date (it locks the same way, but wasn't that day's Today's Blitz).
  */
-export function recordDailyBlitz(saved: Saved, date: string, state: BlitzState): { saved: Saved; counted: boolean } {
+export function recordDailyBlitz(
+  saved: Saved,
+  date: string,
+  state: BlitzState,
+  late = false,
+): { saved: Saved; counted: boolean } {
   if (saved.blitzDaily?.[date]) return { saved, counted: false };
-  const entry = { id: state.puzzleId, score: blitzScore(state), answers: state.hits.length };
+  const entry: DailyBlitzResult = {
+    id: state.puzzleId,
+    score: blitzScore(state),
+    answers: state.hits.length,
+    ...(state.startedAt ? { startedAt: state.startedAt } : {}),
+    ...(late ? { late: true } : {}),
+  };
   return { saved: { ...saved, blitzDaily: { ...saved.blitzDaily, [date]: entry } }, counted: true };
+}
+
+/** Whether a stored round is the one a date's Blitz result came from (older results match by score). */
+export function isDailyBlitzRun(result: DailyBlitzResult, id: string, run: BlitzRun): boolean {
+  if (result.id !== id) return false;
+  if (result.startedAt) return result.startedAt === run.startedAt;
+  return result.score === run.score && result.answers === run.hits.length;
+}
+
+/** A date's Blitz once played (it's then locked): its result, and its round if the list's history still has it. */
+export function dailyBlitzPlayed(saved: Saved, date: string): { result: DailyBlitzResult; run?: BlitzRun } | undefined {
+  const result = saved.blitzDaily?.[date];
+  if (!result) return undefined;
+  return { result, run: blitzHistory(saved, result.id).find((r) => isDailyBlitzRun(result, result.id, r)) };
 }
 
 /** "TENtacle Blitz #12: Busiest airports" share text for Today's Blitz. */

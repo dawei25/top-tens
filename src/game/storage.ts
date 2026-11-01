@@ -2,7 +2,16 @@ import type { BlitzRun, BlitzState } from "./blitz";
 import type { ListRun } from "./history";
 import type { GameState } from "./state";
 
-const KEY = "top-tens:v1";
+export interface DailyBlitzResult {
+  id: string;
+  score: number;
+  answers: number;
+  /** The round's startedAt, to find it in blitzRuns. */
+  startedAt?: number;
+  late?: boolean;
+}
+
+const KEY ="top-tens:v1";
 
 export interface Saved {
   games: Record<string, GameState>;
@@ -14,9 +23,15 @@ export interface Saved {
   /** Finished Blitz rounds per list id, newest first, capped (see MAX_BLITZ_RUNS in blitz.ts). */
   blitzRuns?: Record<string, BlitzRun[]>;
   /**
-   * Today's Blitz results by local date: the first round finished on that date counts; replays don't change it.
+   * Today's Blitz results by date: one round each, the first one finished. `late` marks a round played after its
+   * date (from a link), which locks it the same way but isn't a Today's Blitz. Older entries lack startedAt.
    */
-  blitzDaily?: Record<string, { id: string; score: number; answers: number }>;
+  blitzDaily?: Record<string, DailyBlitzResult>;
+  /**
+   * Finished dailies by date (on the day or later, from the archive): one try each, so a date in here stays locked
+   * even after a roll replays the same list. Older saves only have the list's game in `games`.
+   */
+  dailyGames?: Record<string, GameState>;
   /** Finished list games, newest first, capped (see MAX_LIST_RUNS in history.ts). Survives Play again. */
   listRuns?: ListRun[];
   /** A Blitz round in progress per list id, saved after every hit so leaving the page doesn't lose it. */

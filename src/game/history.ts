@@ -1,4 +1,4 @@
-import type { BlitzRun } from "./blitz";
+import { isDailyBlitzRun, type BlitzRun } from "./blitz";
 import type { GameState } from "./state";
 import type { Saved } from "./storage";
 
@@ -64,7 +64,7 @@ export function recentPlays(saved: Saved, limit = 50): Play[] {
   const daily = Object.values(saved.blitzDaily ?? {});
   for (const [id, runs] of Object.entries(saved.blitzRuns ?? {})) {
     for (const run of runs) {
-      const today = daily.some((d) => d.id === id && d.score === run.score && d.answers === run.hits.length);
+      const today = daily.some((d) => !d.late && isDailyBlitzRun(d, id, run));
       plays.push({ kind: "blitz", id, at: run.endedAt, run, ...(today ? { today } : {}) });
     }
   }

@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { archive, dailyHoldouts, formatCountdown, msUntilNextDaily, streak, todayEntry, type DailyEntry } from "./daily";
+import {
+  archive,
+  dailyGame,
+  dailyHoldouts,
+  formatCountdown,
+  lockDaily,
+  msUntilNextDaily,
+  streak,
+  todayEntry,
+  type DailyEntry,
+} from "./daily";
 import { applyHint, canHint, hintLetter, newGame, shareText } from "./state";
 import type { Saved } from "./storage";
 import type { Puzzle } from "./types";
@@ -23,6 +33,26 @@ describe("daily schedule", () => {
   it("countdown to local midnight", () => {
     expect(msUntilNextDaily(new Date(2026, 9, 29, 23, 0, 0))).toBe(3_600_000);
     expect(formatCountdown(3_723_000)).toBe("01:02:03");
+  });
+});
+
+describe("one try per daily", () => {
+  const played = (id: string, found: number[], status: "playing" | "lost" = "lost") => ({
+    puzzleId: id, found, lives: 0, log: [], status,
+  });
+  it("the first finished game locks the date, even after a roll replays the list", () => {
+    const empty = saved([]);
+    const entry = schedule[0];
+    expect(lockDaily(empty, entry.date, played("a", [1], "playing"))).toBe(empty);
+    const locked = lockDaily(empty, entry.date, played("a", [1, 2]));
+    expect(lockDaily(locked, entry.date, played("a", [1, 2, 3])).dailyGames?.[entry.date].found).toEqual([1, 2]);
+    // A roll of the same list replaces the list's own save, not the daily's.
+    const rolled: Saved = { ...locked, games: { a: played("a", [], "playing") } };
+    expect(dailyGame(rolled, entry)?.found).toEqual([1, 2]);
+  });
+  it("older saves fall back to the list's game", () => {
+    expect(dailyGame({ ...saved([]), games: { b: played("b", [4]) } }, schedule[1])?.found).toEqual([4]);
+    expect(dailyGame(saved([]), schedule[1])).toBeUndefined();
   });
 });
 
