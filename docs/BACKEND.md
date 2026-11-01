@@ -21,7 +21,11 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   on another device). The save syncs on sign-in, after every finished game and when the tab comes back (at most every
   30 s): read the account's copy, merge it with this device's (`src/net/sync/merge.ts`: nothing is lost, see its
   header), write the merge back only if the copy is still the version that was read, else merge again. Never
-  overwrite. Plays sent while signed in are linked to the account.
+  overwrite. Plays sent while signed in are linked to the account. The first sign-in on a device takes that device's
+  games along. Signing out syncs once more, then clears the device (the games are in the account), so the next person
+  to sign in there doesn't inherit them; if that last sync can't happen (offline), the games stay and are set aside for
+  their account if someone else signs in. "Reset all progress" while signed in resets the account too (`resetAt` in
+  the save), instead of being merged back from other devices.
 - **Account deletion** is `api/delete-account.ts`, a Vercel function: deleting a sign-in needs Supabase's service
   role key, which must stay on a server. The function asks Supabase Auth whether the caller's access token is valid,
   then deletes that user's plays, save and sign-in. Why not a Postgres function: `delete from auth.users` in a
