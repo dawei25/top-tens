@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { normalize } from "../src/game/match";
 import type { Entry, Puzzle } from "../src/game/types";
 import { INTENT } from "./intent";
-import { bareWord, gluedAlias, junkRedirect } from "./aliases";
+import { bareWord, blockedAlias, gluedAlias, junkRedirect } from "./aliases";
 import { UNIVERSES } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
 import { TOPICS } from "./topics";
@@ -131,7 +131,8 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
     for (const a of e.aliases) {
       if (gluedAlias(a, forms)) warn(`"${e.name}": alias "${a}" looks like several names glued together`);
       if (curated.has(normalize(a))) continue;
-      const why = junkRedirect(a, { names: [e.name], forms, works: topic?.works });
+      if (blockedAlias(a, [e.name])) err(`"${e.name}": alias "${a}" is a slur or an insult`);
+      const why = junkRedirect(a, { names: [e.name], forms, works: topic?.works, webNames: topic?.webNames });
       if (why) junk.push(`${e.name}: "${a}" (${why})`);
       // A one-word alias that is a plain word or a place, and no word of the name: "City" for Alaska.
       else if (!normalize(e.name).split(" ").includes(normalize(a)) && !isPlaceList(p) && bareWord(a, PLACES)) {

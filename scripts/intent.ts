@@ -18,8 +18,13 @@ export interface Intent {
  */
 export const COUNTRY_FORMS: string[][] = [
   ["United States", "USA", "US", "U.S.", "U.S.A.", "America", "United States of America", "the States"],
-  ["United Kingdom", "UK", "U.K.", "Britain", "Great Britain", "GB", "England", "Scotland", "Wales"],
-  ["China", "PRC", "People's Republic of China", "Mainland China"],
+  ["United Kingdom", "UK", "U.K.", "Britain", "Great Britain", "GB", "England", "Scotland", "Wales", "Team GB", "British"],
+  ["China", "PRC", "People's Republic of China", "Mainland China", "Zhongguo"],
+  ["Australia", "Aussie", "Aussies"],
+  ["Switzerland", "Swiss", "Swiss Confederation"],
+  ["India", "Bharat"],
+  ["Japan", "Nippon", "Nihon"],
+  ["South Africa", "RSA"],
   ["Taiwan", "Republic of China", "ROC", "Chinese Taipei", "Formosa"],
   ["Russia", "Russian Federation"],
   ["Soviet Union", "USSR", "U.S.S.R.", "Soviet", "CCCP"],
@@ -28,7 +33,7 @@ export const COUNTRY_FORMS: string[][] = [
   ["DR Congo", "Democratic Republic of the Congo", "DRC", "Congo-Kinshasa", "Zaire", "Congo DR", "DR of Congo"],
   ["Republic of the Congo", "Congo-Brazzaville", "Congo Republic"],
   ["Ivory Coast", "Côte d'Ivoire", "Cote d'Ivoire"],
-  ["Czech Republic", "Czechia"],
+  ["Czech Republic", "Czechia", "Czech"],
   ["Turkey", "Türkiye", "Turkiye"],
   ["Netherlands", "Holland", "The Netherlands"],
   ["United Arab Emirates", "UAE", "Emirates"],
@@ -62,6 +67,70 @@ export const COUNTRY_FORMS: string[][] = [
   ["Kyrgyzstan", "Kyrgyz Republic"],
   ["Ireland", "Republic of Ireland", "Eire"],
 ];
+
+/**
+ * Everyday names for cities, applied to every city list. Each line is one city, its usual English name first; the
+ * build gives the others to the entry with that name (or, failing that, the one entry with another of the names).
+ * A form that is another entry's name stays that entry's ("Frisco", Texas).
+ */
+export const CITY_FORMS: string[][] = [
+  ["New York City", "New York", "NYC", "NY", "Big Apple", "The Big Apple"],
+  ["Los Angeles", "LA", "L.A."],
+  ["San Francisco", "SF", "San Fran", "Frisco"],
+  ["Washington, D.C.", "Washington", "Washington DC", "DC", "D.C."],
+  ["Philadelphia", "Philly"],
+  ["Las Vegas", "Vegas"],
+  ["New Orleans", "NOLA", "Big Easy", "The Big Easy"],
+  ["Indianapolis", "Indy"],
+  ["St. Louis", "Saint Louis", "St Louis", "STL"],
+  ["Chicago", "Chi-Town", "Chitown"],
+  ["Atlanta", "ATL"],
+  ["Oklahoma City", "OKC"],
+  ["Salt Lake City", "SLC"],
+  ["Jacksonville", "Jax"],
+  ["Rio de Janeiro", "Rio"],
+  ["São Paulo", "SP", "Sampa"],
+  ["Belo Horizonte", "BH"],
+  ["Mexico City", "CDMX", "Ciudad de México"],
+  ["Kuala Lumpur", "KL"],
+  ["Ho Chi Minh City", "HCMC", "Saigon"],
+  ["Hong Kong", "HK"],
+  ["Saint Petersburg", "St Petersburg", "St. Petersburg", "Leningrad"],
+  ["Toronto", "The 6ix", "The Six"],
+  ["Montreal", "Montréal", "MTL"],
+  ["Calgary", "YYC"],
+  ["Delhi", "New Delhi", "Dilli"],
+  ["Mumbai", "Bombay"],
+  ["Chennai", "Madras"],
+  ["Kolkata", "Calcutta"],
+  ["Bengaluru", "Bangalore"],
+  ["Pune", "Poona"],
+  ["Beijing", "Peking"],
+  ["Guangzhou", "Canton"],
+  ["Xi'an", "Xian"],
+  ["Chongqing", "Chungking"],
+  ["Tianjin", "Tientsin"],
+  ["Qingdao", "Tsingtao"],
+  ["Kyiv", "Kiev"],
+  ["Istanbul", "Constantinople"],
+  ["Dhaka", "Dacca"],
+  ["Yangon", "Rangoon"],
+  ["Mecca", "Makkah"],
+  ["Macau", "Macao"],
+];
+
+/**
+ * Short names for US states beyond their postal codes (which build.ts adds from gazetteer.ts, except the ones that
+ * are everyday words: IN, OR, ME, HI, OK, OH).
+ */
+export const STATE_FORMS: Record<string, string[]> = {
+  Massachusetts: ["Mass"],
+  California: ["Cali"],
+  "New Jersey": ["Jersey"],
+  Washington: ["Washington State"],
+  "New York": ["New York State", "NY State"],
+  Virginia: ["Virgina"],
+};
 
 export const INTENT: Record<string, Intent> = {
   islands: {
@@ -104,7 +173,8 @@ export const INTENT: Record<string, Intent> = {
       "Río de la Plata": ["Parana", "Paraná", "River Plate", "Parana River"],
       Congo: ["Congo River", "Zaire River"],
       Mississippi: ["Mississippi River", "Mississippi-Missouri", "Missouri", "Missouri River"],
-      Padma: ["Ganges", "Ganga", "Ganges River"],
+      Ganges: ["Padma", "Ganga", "Ganges River", "River Ganges"],
+      "Saint Lawrence": ["St. Lawrence", "St Lawrence", "Saint Lawrence River", "St. Lawrence River"],
       "Shatt al-Arab": ["Euphrates"],
       Murray: ["Murray-Darling", "Darling"],
       Amur: ["Amur River", "Heilong Jiang"],
@@ -115,18 +185,20 @@ export const INTENT: Record<string, Intent> = {
   lakes: {
     same: {
       "Caspian Sea": ["Caspian", "Caspian Lake"],
-      Superior: ["Lake Superior"],
-      Victoria: ["Lake Victoria"],
-      Huron: ["Lake Huron"],
-      Michigan: ["Lake Michigan"],
-      Tanganyika: ["Lake Tanganyika"],
-      Baikal: ["Lake Baikal", "Baykal"],
+      "Lake Superior": ["Superior"],
+      "Lake Victoria": ["Victoria"],
+      "Lake Huron": ["Huron"],
+      "Lake Michigan": ["Michigan"],
+      "Lake Tanganyika": ["Tanganyika"],
+      "Lake Baikal": ["Baikal", "Baykal"],
       "Great Bear Lake": ["Great Bear"],
-      Malawi: ["Lake Malawi", "Lake Nyasa", "Nyasa"],
+      "Lake Malawi": ["Malawi", "Lake Nyasa", "Nyasa"],
       "Great Slave Lake": ["Great Slave"],
     },
     groups: {
-      "Michigan-Huron": ["Michigan", "Huron"],
+      // One lake hydrologically: the game asks which of the two the player means.
+      "Michigan-Huron": ["Lake Michigan", "Lake Huron"],
+      "Lake Michigan-Huron": ["Lake Michigan", "Lake Huron"],
     },
   },
   "world-cities": {

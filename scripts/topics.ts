@@ -39,6 +39,10 @@ export interface Topic {
   keepOrder?: boolean;
   /** Skip rows whose first column is not a number (unranked rows like "World"). */
   rankedOnly?: boolean;
+  /**
+   * Not answers at all, so guessing one is free: table rows, rows of `also` tables and universe members with these
+   * names ("World"; DC and the territories on the state lists).
+   */
   skip?: string[];
   /** Extra alias sources: other columns whose text/link text also names the row. */
   aliasCols?: (string | number)[];
@@ -78,6 +82,15 @@ export interface Topic {
   fallback?: { from: string | number; factor: number };
   /** Creative works (books, shows, films, albums, games): redirects sharing no word with the title are songs or characters. */
   works?: boolean;
+  /** Web addresses are names here ("x.com", "Amazon.com"); elsewhere a redirect like "Dallascowboys.com" is dropped. */
+  webNames?: boolean;
+  /**
+   * The name cell joins several things with dashes, and only the first is the answer: a river system
+   * ("Saint Lawrence–Niagara–Detroit–...") is not also Detroit. No aliases from the other parts.
+   */
+  noParts?: boolean;
+  /** Display names for rows, by the name the table gives ("Padma" is shown as "Ganges"). */
+  rename?: Record<string, string>;
   /** Aliases to drop by exact text (after normalize): junk the rules in scripts/aliases.ts can't tell from a name. */
   junkAliases?: string[];
   /** The Wikipedia article for an entry, by name, when the table links the wrong one (or none). */
@@ -101,7 +114,16 @@ export interface Also {
   nameFromText?: boolean;
   nameFromLink?: boolean;
   skip?: string[];
+  /**
+   * A column with the list's own stat, in the ranked rows' unit: each answer from these tables shows it and scores
+   * it in Blitz, unranked. Titanic is in the inflation table's nominal column ($200 million) but not in the ranking,
+   * which stops above $200 million. A number at or above the last ranked row's means something else and is dropped.
+   */
+  value?: string | number;
 }
+
+/** DC and the territories: not states, so naming one on a state list is free (and they take no rank). */
+const NOT_STATES = ["District of Columbia", "Puerto Rico", "Guam", "U.S. Virgin Islands", "American Samoa", "Northern Mariana Islands"];
 
 /** Big city tables, so any sincere city guess on a city list is an accepted answer. */
 const CITIES: Also[] = [
@@ -241,6 +263,7 @@ export const TOPICS: Topic[] = [
     value: "2025",
     metric: "Population (2025 est.)",
     rankedOnly: true,
+    skip: NOT_STATES,
     universe: "us-states",
   },
   {
@@ -257,7 +280,7 @@ export const TOPICS: Topic[] = [
     fallback: { from: "Total area / mi", factor: 2.589988 },
     metric: "Total area",
     unit: " km²",
-    skip: ["United States", "50 States and DC", "50 States", "Contiguous US"],
+    skip: ["United States", "50 States and DC", "50 States", "Contiguous US", "Minor Outlying Islands", ...NOT_STATES],
     universe: "us-states",
   },
   {
@@ -319,7 +342,31 @@ export const TOPICS: Topic[] = [
     metric: "Length",
     unit: " km",
     keepOrder: true,
+    // Cells name whole systems ("Saint Lawrence–Niagara–Detroit–..."): the other rivers are not this one.
+    noParts: true,
+    // The table names the Ganges system by its lowest stretch; players know it as the Ganges.
+    rename: { Padma: "Ganges" },
+    values: { kind: "length" },
     universeCategories: ["International rivers of Asia", "International rivers of Europe", "International rivers of Africa", "International rivers of South America", "International rivers of North America", "Sacred rivers", "Rivers of London"],
+    // Famous rivers under 1,000 km that the table and the categories leave out; their length comes from the article.
+    more: {
+      Seine: ["River Seine"],
+      "Hudson River": ["Hudson"],
+      "Potomac River": ["Potomac"],
+      Tiber: ["River Tiber"],
+      "Po River": ["Po"],
+      "River Shannon": ["Shannon"],
+      "River Severn": ["Severn"],
+      Arno: ["River Arno"],
+      Ebro: ["Ebro River"],
+      "River Liffey": ["Liffey"],
+      "River Clyde": ["Clyde"],
+      "Charles River": [],
+      "Delaware River": [],
+      "Sacramento River": [],
+      "Chao Phraya River": ["Chao Phraya"],
+      "Snake River": [],
+    },
   },
   {
     id: "islands",
@@ -350,8 +397,20 @@ export const TOPICS: Topic[] = [
     value: "Area",
     metric: "Area",
     unit: " km²",
-    also: [{ tables: [3], name: "Name" }],
-    universeCategories: ["Great Lakes", "African Great Lakes", "Rift lakes", "Ancient lakes", "Lakes of Russia", "International lakes of Europe", "International lakes of Asia", "International lakes of Africa", "International lakes of North America", "International lakes of South America", "Saline lakes of Asia", "Endorheic lakes of Asia", "Freshwater lochs of Scotland", "Lakes of Switzerland", "Lakes of Italy", "Glacial lakes"],
+    // "Lake Superior", not "Superior" (a word, and Michigan is a state); the table's short names stay aliases.
+    nameFromLink: true,
+    also: [{ tables: [3], name: "Name", skip: ["Michigan–Huron", "Lake Michigan–Huron"] }],
+    more: { "Great Salt Lake": [] },
+    categoryNames: true,
+    // Bays, a wind, a river and an agency among the redirects to the top 10.
+    junkAliases: [
+      "Misery Bay", "Lakehead Region Conservation Authority", "Hammond Bay", "Lake Huron, Ontario", "Lake Illinois",
+      "Good Harbor Bay", "Sleeping Bear Bay", "Platte Bay", "Caspian Sea bordering countries", "Sarma", "Sarma wind",
+      "The Galapagos of Russia", "Dease River", "Lake Niassa and its Coastal Zone", "Boadzulu island",
+    ],
+    // The Great Lakes categories hold the region's history, ships and festivals rather than lakes.
+    categorySkip: /\b(dispute|crisis|festival|storm|commission|company|lines|program|agreement|compact|charter|conference|clan|people|basin|region|states|surfing|tour|datum|patrol|group|suite|laboratory|alliance|refugee|carp|expedition|shipwrecks?|flood|monster|fishery)\b/i,
+    universeCategories: ["Rift lakes", "Ancient lakes", "Lakes of Russia", "International lakes of Europe", "International lakes of Asia", "International lakes of Africa", "International lakes of North America", "International lakes of South America", "Saline lakes of Asia", "Endorheic lakes of Asia", "Freshwater lochs of Scotland", "Lakes of Switzerland", "Lakes of Italy", "Glacial lakes"],
   },
   {
     id: "tourism",
@@ -364,6 +423,9 @@ export const TOPICS: Topic[] = [
     name: "Destination",
     value: "2024",
     metric: "Arrivals (millions, 2024)",
+    // Regional top 10s give near misses a 2024 figure (Thailand 35.5). They are no world ranking past #10, so no
+    // ranks; a figure above #10's (China 64.9, Hong Kong 45.0, missing from the world table) is left out.
+    also: [{ tables: [1, 2, 3, 4], name: "Destination", value: "2024" }],
     universe: "countries",
   },
   {
@@ -883,7 +945,7 @@ export const TOPICS: Topic[] = [
     value: "2025",
     metric: "GDP 2025 (US$ millions)",
     universe: "us-states",
-    skip: ["United States"],
+    skip: ["United States", ...NOT_STATES],
   },
   {
     id: "europe-cities",
@@ -1124,6 +1186,8 @@ export const TOPICS: Topic[] = [
     name: "Country",
     value: "Spending",
     metric: "Spending (US$ billions)",
+    // The share-of-GDP table gives spending for countries the top 40 leaves out (Oman, Azerbaijan).
+    also: [{ tables: [2], name: "Country", value: "Military spending" }],
     universe: "countries",
   },
   {
@@ -1242,7 +1306,7 @@ export const TOPICS: Topic[] = [
     value: "Pts",
     metric: "Points",
     people: true,
-    also: [{ page: "List of NHL players with 500 goals", tables: [0], name: 2 }, { tables: [1, 2], name: "Player" }],
+    also: [{ tables: [1, 2], name: "Player", value: "Pts" }, { page: "List of NHL players with 500 goals", tables: [0], name: 2 }],
     universeCategories: ["Hockey Hall of Fame inductees"],
   },
   {
@@ -1403,8 +1467,9 @@ export const TOPICS: Topic[] = [
     metric: "Estimated budget (US$)",
     works: true,
     unit: " million",
+    // The ranking lists budgets over $200 million; the inflation table's nominal column has the rest (Titanic).
     also: [
-      { tables: [2], name: "Title" },
+      { tables: [2], name: "Title", value: "Nominal" },
       { page: "List of highest-grossing films", tables: [0, 2], name: "Title" },
     ],
   },
