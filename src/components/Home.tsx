@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PuzzleMeta } from "../game/puzzles";
 import { dailyGame as dailyGameOf, streak, type DailyEntry } from "../game/daily";
 import { load, save, stats } from "../game/storage";
 import { recentPlays } from "../game/history";
 import { Countdown } from "./Countdown";
 import { HowToPlay, markHelpSeen } from "./HowToPlay";
-import { EnterHint, ModeTag, type Mode } from "./pixel";
+import { EnterHint, type Mode } from "./pixel";
 import { SoundToggle } from "./sound/SoundToggle";
 
 /**
- * A home key: mode tag and status on top, the action below. Today's keys carry their mode's accent while unplayed
- * (filled when focused) and settle once played; free-play keys stay quiet.
+ * A home key: its status on top (right), the action below. Today's keys carry their mode's accent while unplayed
+ * and settle once played; free-play keys stay quiet. The mode shows in the color, not in a tag.
  */
 function ModeKey({
   mode,
@@ -45,7 +45,6 @@ function ModeKey({
       onPointerEnter={today ? (e) => e.pointerType === "mouse" && e.currentTarget.focus({ preventScroll: true }) : undefined}
     >
       <span className="mode-key-top">
-        <ModeTag mode={mode} />
         <span className="key-sub" data-testid={`${testId}-status`}>
           {status}
         </span>
@@ -144,12 +143,24 @@ export function Home({
       delete root.dataset.modality;
     };
   }, []);
+  // The dropdown opens upward when it would run off the bottom of the screen and there's more room above; either way
+  // it scrolls inside itself rather than past the screen's edge.
+  useLayoutEffect(() => {
+    const el = pickerRef.current;
+    const anchor = el?.parentElement?.getBoundingClientRect();
+    if (!picker || !el || !anchor) return;
+    const below = innerHeight - anchor.bottom - 12;
+    const above = anchor.top - 12;
+    const up = el.scrollHeight > below && above > below;
+    el.dataset.up = String(up);
+    el.style.maxHeight = `${Math.max(160, Math.floor(up ? above : below))}px`;
+  }, [picker]);
   // The category picker: focus goes to its first chip on open, back to its strip on close (Escape, a press outside
   // the free-play keys, or a pick).
   useEffect(() => {
     if (!picker) return;
     const strip = picker === "list" ? listStrip : blitzStrip;
-    pickerRef.current?.querySelector("button")?.focus();
+    pickerRef.current?.querySelector("button")?.focus({ preventScroll: true });
     const close = () => {
       setPicker(null);
       strip.current?.focus({ preventScroll: true });
@@ -214,47 +225,94 @@ export function Home({
     const name = kind === "list" ? "Random list" : "Random Blitz";
     const id = `${kind}-categories`;
     return (
-      <div className={`free-key ${kind === "list" ? "classic" : "blitz"}`} data-picker={kind}>
+      <div
+        className={`free-key ${kind === "list" ? "classic" : "blitz"}`}
+        data-picker={kind}
+        // Tabbing out of the open picker closes it (focus goes where Tab took it).
+        onBlur={(e) => {
+          if (open && !e.currentTarget.contains(e.relatedTarget as Node | null)) setPicker(null);
+        }}
+      >
         {key}
         {cats.length > 0 && (
-          <button
-            ref={strip}
-            type="button"
-            className="cat-strip"
-            data-testid={`random-${kind}-categories`}
-            aria-expanded={open}
-            aria-controls={id}
-            aria-label={`${name} by category`}
-            onClick={() => setPicker((p) => (p === kind ? null : kind))}
-          >
-            by category
-          </button>
-        )}
-        {open && (
-          <div ref={pickerRef} id={id} className="chips cat-picker" role="group" aria-label={`${name} categories`}>
-            {cats.map(([c, n]) => (
-              <button
-                key={c}
-                type="button"
-                className="chip cat-chip"
-                data-testid="category"
-                data-mode={kind}
-                data-category={c}
-                onClick={start(() => {
-                  setPicker(null);
-                  strip.current?.focus({ preventScroll: true });
-                  if (kind === "list") onRoll(c);
-                  else blitzRoll(c);
-                })}
-              >
-                {c} <span className="cat-n">{n}</span>
-              </button>
-            ))}
+          <div className="cat-anchor">
+            <button
+              ref={strip}
+              type="button"
+              className="cat-strip"
+              data-testid={`random-${kind}-categories`}
+              aria-expanded={open}
+              aria-controls={id}
+              aria-label={`${name} by category`}
+              onClick={() => setPicker((p) => (p === kind ? null : kind))}
+              onKeyDown={(e) => {
+                if (open && e.key === "ArrowDown") {
+                  e.preventDefault();
+                  pickerRef.current?.querySelector("button")?.focus();
+                }
+              }}
+            >
+              by category
+            </button>
+            {open && categoryMenu(kind, cats, strip, id, name)}
           </div>
         )}
       </div>
     );
   };
+
+  /**
+   * The open picker: a dropdown floating under its strip, over the page, so nothing moves (above the strip near the
+   * bottom of the screen). Arrow keys move through it.
+   */
+  const categoryMenu = (
+    kind: Pick,
+    cats: [string, number][],
+    strip: React.RefObject<HTMLButtonElement | null>,
+    id: string,
+    name: string,
+  ) => (
+    <div
+      ref={pickerRef}
+      id={id}
+      className="chips cat-picker"
+      role="group"
+      aria-label={`${name} categories`}
+      data-glass
+      onKeyDown={(e) => {
+        const items = [...e.currentTarget.querySelectorAll<HTMLButtonElement>("button")];
+        const i = items.indexOf(document.activeElement as HTMLButtonElement);
+        const keys: Record<string, number> = {
+          ArrowDown: (i + 1) % items.length,
+          ArrowUp: (i - 1 + items.length) % items.length,
+          Home: 0,
+          End: items.length - 1,
+        };
+        if (!(e.key in keys)) return;
+        e.preventDefault();
+        items[keys[e.key]].focus();
+      }}
+    >
+      {cats.map(([c, n]) => (
+        <button
+          key={c}
+          type="button"
+          className="chip cat-chip"
+          data-testid="category"
+          data-mode={kind}
+          data-category={c}
+          onClick={start(() => {
+            setPicker(null);
+            strip.current?.focus({ preventScroll: true });
+            if (kind === "list") onRoll(c);
+            else blitzRoll(c);
+          })}
+        >
+          {c} <span className="cat-n">{n}</span>
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <main className="screen home">
@@ -312,7 +370,7 @@ export function Home({
 
       {/* Side by side on wide screens: free play takes most of the row, your games the rest. */}
       <div className="home-pair">
-        <section className="home-group" data-glass aria-labelledby="free-title">
+        <section className="home-group" data-glass data-testid="free-play" aria-labelledby="free-title">
           <div className="group-head">
             <h2 id="free-title" className="label">
               Free play
