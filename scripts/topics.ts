@@ -158,7 +158,8 @@ const NOT_STATES = ["District of Columbia", "Puerto Rico", "Guam", "U.S. Virgin 
  */
 const MARKET_CAP_SKIP = [
   ...UNIVERSES.countries().map((c) => c.name),
-  "United States", "United Kingdom", "South Korea", "Petro China", "Royal Dutch Shell", "Samsung",
+  "United States", "United Kingdom", "South Korea", "Netherlands United Kingdom", "Petro China", "Royal Dutch Shell",
+  "Samsung",
 ];
 
 /** Big city tables, so any sincere city guess on a city list is an accepted answer. */
@@ -339,7 +340,7 @@ export const TOPICS: Topic[] = [
     metric: "Population (2025 est.)",
     junkAliases: [
       "Monroe May Elementary", "Monroe may", "San diego beaches", "Fort Worth United Soccer Club", "Sister Cities Chicago",
-      "Land of smelly onions", "Houstonians", "New York Shitty",
+      "Land of smelly onions", "Houstonians", "New York Shitty", "Dtown",
     ],
   },
   {
@@ -361,7 +362,7 @@ export const TOPICS: Topic[] = [
       "6-resurrection", "Tokyo in pop culture", "Jūjō, Tokyo", "Qinglong, Shanghai", "West Bund", "Abdeen", "Fatehpur beri",
       "Fuxingmen Inner Street", "Fuxingmen Outer Street", "Fuxing Road", "St. Xavier's High School Loyola Hall",
       "Prakash Higher Secondary School", "Prakash school", "Phss", "SJK Lai Meng", "Sichuanese teahouse",
-      "Mexican Federal District Transit System", "Sister Cities Chicago",
+      "Mexican Federal District Transit System", "Sister Cities Chicago", "Shouer", "Singy", "Singan",
     ],
   },
   {
@@ -430,6 +431,7 @@ export const TOPICS: Topic[] = [
       "Chao Phraya River": ["Chao Phraya"],
       "Snake River": [],
     },
+    junkAliases: ["Piaro"],
   },
   {
     id: "islands",
@@ -702,7 +704,7 @@ export const TOPICS: Topic[] = [
     // The table links CITIC Tower to its article, China Zun; the plain title is a 33-storey Hong Kong office block.
     articles: { "CITIC Tower": "China Zun" },
     // The plane that hit China Zun in 2026; the park; a name cut short.
-    junkAliases: ["B-12PP", "Central Park", "Trump International Hotel and"],
+    junkAliases: ["B-12PP", "Central Park", "Trump International Hotel and", "Signiel"],
     // Famous, completed, and missing from the tables (it would otherwise be corrected to Burj Almasa).
     more: { "Burj Al Arab": ["Burj al-Arab"] },
   },
@@ -764,7 +766,7 @@ export const TOPICS: Topic[] = [
     // Events, TV shows and scoreboards named after the stadiums.
     junkAliases: [
       "Buckeye Country Superfest", "12th Man TV", "Walk of Champions", "Godzillatron", "Adzillatron", "Salt", "Australia",
-      "Lincoln",
+      "Lincoln", "The Shoe",
     ],
   },
 
@@ -796,7 +798,7 @@ export const TOPICS: Topic[] = [
       "Always Low Prices, Always", "Carbon emissions by Saudi Aramco", "Tim Noel", "Controversies surrounding UnitedHealth Group",
       "Woodstock for Capitalists", "Berkshire Hathaway Annual Shareholders Meeting", "Xinjiang Oilfield Company",
       "Xinjiang Oil Company", "Great Wall Drilling", "Great Wall Drilling Company", "Logistics Health Incorporated",
-      "ICBC.com.cn", "ICBC Leasing",
+      "ICBC.com.cn", "ICBC Leasing", "AStore",
     ],
   },
   {
@@ -849,7 +851,7 @@ export const TOPICS: Topic[] = [
       "Kansas City Chiefs Hall of Fame", "Packers Pro Shop", "Packers fan", "New York Giants Depth Chart", "Redskinettes",
       "70 Greatest Redskins", "Command Force", "New England Patriots strategy", "Denver Broncos Ring of Fame",
       "Broncos Ring of Fame", "Denver Broncos retired numbers", "San Francisco 49ers Hall of Fame", "49ers Hall of Fame",
-      "Let's Ride", "Just win, baby",
+      "Let's Ride", "Just win, baby", "Stillers",
     ],
   },
   {
@@ -1246,11 +1248,12 @@ export const TOPICS: Topic[] = [
     noun: "cities",
     prompt: "Name the 10 most populous cities in mainland China (2020 census)",
     page: "List of cities in China by population",
-    tables: [2],
+    // Cities over a million, then the 100,000 to 1 million table: one ranking by the same 2020 census.
+    tables: [2, 3],
     name: "City",
     value: "2020",
     metric: "Population (2020 census)",
-    also: [{ tables: [3, 4], name: "City" }],
+    also: [{ tables: [4], name: "City" }],
     junkAliases: ["Fuxingmen Inner Street", "Fuxingmen Outer Street", "Fuxing Road", "Sichuanese teahouse", "Chien Mei village"],
   },
   {
@@ -1396,6 +1399,7 @@ export const TOPICS: Topic[] = [
       "WebsiteSpark", "Forceware", "IReady", "Controversies surrounding Nvidia", "Project GROOT", "Project Groot",
       "Nvidia Grace", "Move fast and break things", "Hacker Way", "1 Hacker Way", "One Hacker Way", "Mars Oasis",
       "SpaceX Hawthorne facility", "SpaceX headquarters", "SpaceX Hawthorne", "WaferTech", "TSMC Washington", "Spacex.com",
+      "AStore",
     ],
   },
   {
@@ -1740,6 +1744,7 @@ export const TOPICS: Topic[] = [
       "Tokyo in pop culture", "Kotly, Moscow", "Kotly, Moscow Oblast", "Western Moscow", "Abdeen", "Cairo in the middle ages",
       "Sangwon Middle School", "Five Grand Palaces of Joseon-Dynasty Seoul", "Five Grand Palaces", "Seoul castle",
       "South Seoul", "North Seoul", "Mexican Federal District Transit System", "Londonise", "Londonize", "Baku Oilfields",
+      "Shouer", "Singy", "Singan",
     ],
   },
   {
@@ -1882,6 +1887,8 @@ export const TOPICS: Topic[] = [
     // The ranking lists budgets over $200 million; the inflation table's nominal column has the rest (Titanic).
     also: [
       { tables: [2], name: "Title", value: "Nominal" },
+      // Each era's record holder with its nominal cost (Ben-Hur, Gone with the Wind, Terminator 2).
+      { tables: [3], name: "Production", value: "Cost" },
       { page: "List of highest-grossing films", tables: [0, 2], name: "Title" },
     ],
     junkAliases: [

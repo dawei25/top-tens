@@ -143,7 +143,7 @@ export const NICKNAMES: Record<string, string[]> = {
   "Hakeem Olajuwon": ["The Dream", "Hakeem the Dream", "Akeem Olajuwon"],
   "David Robinson": ["The Admiral"],
   "Charles Barkley": ["Sir Charles", "Chuck"],
-  "Julius Erving": ["Dr. J", "Doctor J"],
+  "Julius Erving": ["Dr. J"],
   "Jerry West": ["The Logo", "Mr. Clutch"],
   "George Gervin": ["The Iceman", "Iceman"],
   "Pete Maravich": ["Pistol Pete"],
@@ -480,7 +480,8 @@ export const INTENT: Record<string, Intent> = {
     same: {
       "Narendra Modi Stadium": ["Motera Stadium", "Motera"],
       "Michigan Stadium": ["The Big House", "Big House"],
-      "Ohio Stadium": ["The Horseshoe", "The Shoe", "Ohio State"],
+      // Not "The Shoe": it caught "shop".
+      "Ohio Stadium": ["The Horseshoe", "Ohio State"],
       "Tiger Stadium": ["Death Valley", "LSU Tiger Stadium", "LSU"],
       "Darrell K Royal–Texas Memorial Stadium": ["Texas Memorial Stadium", "DKR"],
       "Beaver Stadium": ["Penn State"],
@@ -889,6 +890,8 @@ export const INTENT: Record<string, Intent> = {
       "Disney's Hollywood Studios": ["Hollywood Studios"],
     },
     groups: {
+      "Universal Studios": ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
+      Universal: ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
       "Tokyo Disney": ["Tokyo Disneyland", "Tokyo DisneySea"],
     },
   },
