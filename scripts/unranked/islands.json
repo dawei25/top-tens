@@ -43,7 +43,6 @@
   "Norfolk Island": {"article":"Norfolk Island","why":"vital+likely","value":"34.6 km²","n":34.6,"raw":"34.6 km2 (13.4 sq mi)"},
   "Christmas Island": {"article":"Christmas Island","why":"vital+likely","value":"135 km²","n":135,"raw":"135 km2 (52 sq mi)"},
   "Cocos Islands": {"article":"Cocos (Keeling) Islands","why":"vital+likely","value":"14 km²","n":14,"raw":"14 km2 (5.4 sq mi)"},
-  "Cocos (Keeling) Islands": {"article":"Cocos (Keeling) Islands","why":"vital+likely","value":"14 km²","n":14,"raw":"14 km2 (5.4 sq mi)"},
   "Isle of Man": {"article":"Isle of Man","why":"vital+likely","value":"574 km²","n":574,"raw":"574 km2 (222 sq mi) (178)"},
   "Jersey": {"article":"Jersey","why":"vital+likely","value":"119.6 km²","n":119.6,"raw":"119.6 km2 (46.2 sq mi) (unranked)"},
   "Guernsey": {"article":"Guernsey","why":"vital+likely","value":"62 km²","n":62,"raw":"62 km2 (24 sq mi)"},
@@ -51,9 +50,6 @@
   "Seychelles": {"article":"Seychelles","why":"likely","value":"457 km²","n":457,"raw":"457 km2 (176 sq mi) (181st)"},
   "The Bahamas": {"article":"The Bahamas","why":"likely","skip":"total area includes 28% water","raw":"13,880 km2 (5,360 sq mi) (156th)"},
   "Fiji": {"article":"Fiji","why":"likely","value":"18,274 km²","n":18274,"raw":"18,274 km2 (7,056 sq mi) (151st)"},
-  "Philippines": {"article":"Philippines","why":"likely","skip":"300,000 is not below the #10 value","raw":"300,000 km2 (120,000 sq mi) (72nd)"},
-  "Japan": {"article":"Japan","why":"likely","skip":"377,975 is not below the #10 value","raw":"377,975 km2 (145,937 sq mi) (62nd)"},
-  "Indonesia": {"article":"Indonesia","why":"likely","skip":"1,904,569 is not below the #10 value","raw":"1,904,569 km2 (735,358 sq mi) (14th)"},
   "Marshall Islands": {"article":"Marshall Islands","why":"likely","value":"181.43 km²","n":181.43,"raw":"181.43 km2 (70.05 sq mi) (189th)"},
   "Cook Islands": {"article":"Cook Islands","why":"likely","value":"236.7 km²","n":236.7,"raw":"236.7 km2 (91.4 sq mi) (unranked)"},
   "Bahrain": {"article":"Bahrain","why":"likely","value":"786.8 km²","n":786.8,"raw":"786.8 km2 (303.8 sq mi) (173rd)"},
@@ -98,5 +94,9 @@
   "Paracel Islands": {"article":"Paracel Islands","why":"vital","value":"7.75 km²","n":7.75,"raw":"7.75 km2 (2.99 sq mi) (15,000 sq km ocean surface)"},
   "Samoan Islands": {"article":"Samoan Islands","why":"vital","value":"3,030 km²","n":3030,"raw":"3,030 km2 (1,170 sq mi)"},
   "Malay Archipelago": {"article":"Malay Archipelago","why":"vital","skip":"2,870,000 is not below the #10 value","raw":"2,870,000 km2 (1,110,000 sq mi)"},
-  "Visayas": {"article":"Visayas","why":"vital","value":"71,503 km²","n":71503,"raw":"71,503 km2 (27,607 sq mi)"}
+  "Visayas": {"article":"Visayas","why":"vital","value":"71,503 km²","n":71503,"raw":"71,503 km2 (27,607 sq mi)"},
+  "Prince Edward Islands": {"article":"Prince Edward Islands","why":"vital","value":"343 km²","n":343,"raw":"343 km2 (132 sq mi)"},
+  "Senkaku Islands": {"article":"Senkaku Islands","why":"vital","value":"7 km²","n":7,"raw":"7 km2 (2.7 sq mi)"},
+  "Line Islands": {"article":"Line Islands","why":"vital","value":"503.28 km²","n":503.28,"raw":"503.28 km2 (194.32 sq mi)"},
+  "Crozet Islands": {"article":"Crozet Islands","why":"vital","skip":"no Area row"}
 }

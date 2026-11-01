@@ -145,7 +145,9 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
       if (gluedAlias(a, forms)) warn(`"${e.name}": alias "${a}" looks like several names glued together`);
       if (curated.has(normalize(a))) continue;
       if (blockedAlias(a, [e.name])) err(`"${e.name}": alias "${a}" is a slur or an insult`);
-      const why = junkRedirect(a, { names: [e.name], forms, works: topic?.works, webNames: topic?.webNames });
+      let why = junkRedirect(a, { names: [e.name], forms, works: topic?.works, webNames: topic?.webNames });
+      // "New York City, NY" on New York: the build knew New York City as one of its names; here it is an alias.
+      if (why === "a place inside the thing" && forms.some((f) => normalize(f) === normalize(a.split(",")[0]))) why = null;
       if (why) junk.push(`${e.name}: "${a}" (${why})`);
       // A one-word alias that is a plain word or a place, and no word of the name: "City" for Alaska.
       else if (!normalize(e.name).split(" ").includes(normalize(a)) && !isPlaceList(p) && bareWord(a, PLACES)) {

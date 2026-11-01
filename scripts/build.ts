@@ -28,16 +28,20 @@ const LINK = new WeakMap<Entry, string | undefined>();
 
 const SPELLED_OUT: Record<string, string> = { st: "saint", ste: "sainte", mt: "mount", ft: "fort" };
 
+/** Words that can stand first or last in a name of the same thing: "River Paraguay" is "Paraguay River". */
+const MOVABLE = new Set(["river", "lake", "loch", "lough", "mount", "isle", "island", "islands", "cape"]);
+
 /**
  * A key under which two spellings of the same thing meet: "St. Lawrence River" and "Saint Lawrence River",
- * "River Paraguay" and "Paraguay River", "Gatwick Airport (London)". Qualifiers, case, accents and word order go.
+ * "River Paraguay" and "Paraguay River", "Gatwick Airport (London)". Qualifiers, case and accents go; word order
+ * stays ("John Collins" is not "Collins John").
  */
 export function sameKey(name: string): string {
-  return normalize(baseTitle(name))
+  const words = normalize(baseTitle(name))
     .split(" ")
-    .map((w) => SPELLED_OUT[w] ?? w)
-    .sort()
-    .join(" ");
+    .map((w) => SPELLED_OUT[w] ?? w);
+  if (words.length > 1 && MOVABLE.has(words[0])) words.push(words.shift()!);
+  return words.join(" ");
 }
 /** Every table row is an accepted answer; this only guards against runaway tables. */
 const MAX_ROWS = 1000;
@@ -64,6 +68,8 @@ function column(header: string[], spec: string | number): number {
 function cleanName(s: string): string {
   return cleanText(s)
     .replace(/\s*\(.*?\)\s*/g, " ")
+    // A parenthesis the table never closes: "IShowSpeed (Darren Watkins Jr.".
+    .replace(/\s*\([^)]*$/, "")
     .replace(/[†‡*^#⁂§¤]+/g, "")
     .replace(/^"|"$/g, "")
     .replace(/\s+(&|and) (family|brothers|sisters|sons)$/i, "")
@@ -118,7 +124,8 @@ const GENERIC_WORDS =
 function shortForms(name: string, strip?: RegExp): string[] {
   // "Family Computer/Nintendo Entertainment System", "Mississippi–Missouri", "PUBG: Battlegrounds".
   const out = name
-    .split(/\s*[:–/]\s*|\s+-\s+/)
+    // A slash between digits is part of the name: "National 9/11 Museum".
+    .split(/\s*[:–]\s*|(?<!\d)\s*\/\s*(?!\d)|\s+-\s+/)
     .filter((p) => p !== name && !(isWord(p) || PLACES.has(normalize(p))));
   // Hawaiʻi is typed "Hawaii": normalize() keeps the ʻokina as a word break.
   if (/[ʻʼ`]/.test(name)) out.push(name.replace(/[ʻʼ`]/g, ""));
@@ -142,10 +149,20 @@ const CONNECTOR_START = /^(of|and|the|in|on|at|de|du|des|la|le|del|y)\s/;
 /** "Part 2", "Vol. 1": which part, not which work. */
 const PART = /^(part|chapter|volume|vol\.?|episode|book|season)\s*\d+$/i;
 
-function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink" | "nameStrip">): string {
+/** Little words a title keeps in lower case inside it: "Shape of You", "Die with a Smile", "Take Me to Church". */
+const SMALL_WORDS = new Set("a an the and but or nor of in on at to for by with as".split(" "));
+
+/** "Locked Out Of Heaven" → "Locked Out of Heaven": the first and last words stay capitalized. */
+export function titleCase(name: string): string {
+  const words = name.split(" ");
+  return words.map((w, i) => (i > 0 && i < words.length - 1 && SMALL_WORDS.has(w.toLowerCase()) ? w.toLowerCase() : w)).join(" ");
+}
+
+function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink" | "nameStrip" | "titleCase">): string {
   if (topic.nameFromLink && cell.link) return cleanName(cell.link);
   let name = cleanName(topic.nameFromText || !cell.linkText ? cell.text : cell.linkText);
   if (topic.nameStrip) name = name.replace(topic.nameStrip, "").trim();
+  if (topic.titleCase) name = titleCase(name);
   // "Shape Of You" in the table is "Shape of You" in its article: the article's casing.
   const linked = cell.link ? cleanName(cell.link) : "";
   if (linked !== name && linked.toLowerCase() === name.toLowerCase()) return linked;
@@ -353,7 +370,8 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       if (topic.categoryNames && !looksLikeName(baseTitle(title))) continue;
       const name = cleanName(title);
       if (!normalize(name) || SKIP_NAME.test(name)) continue;
-      const entry: Entry = { rank: 0, name, aliases: name === title ? [] : [title] };
+      // The title's qualifier ("Ben Taylor (first baseman, born 1888)") is nothing a player types.
+      const entry: Entry = { rank: 0, name, aliases: name === baseTitle(title) ? [] : [baseTitle(title)] };
       ARTICLE.set(entry, title);
       out.push(entry);
     }

@@ -7,7 +7,7 @@
   "Po River": {"article":"Po River","why":"likely","value":"652 km","n":652,"raw":"652 km (405 mi)"},
   "Rhône": {"article":"Rhône","why":"likely","value":"814 km","n":814,"raw":"813.69 km (505.60 mi)"},
   "Jordan River": {"article":"Jordan River","why":"likely","value":"251 km","n":251,"raw":"251 km (156 mi)"},
-  "River Shannon": {"article":"River Shannon","why":"likely","skip":"Length has no km","raw":"360 kilometres (220 mi)"},
+  "River Shannon": {"article":"River Shannon","why":"likely","value":"360 km","n":360,"raw":"360 kilometres (220 mi)"},
   "River Severn": {"article":"River Severn","why":"likely","value":"354 km","n":354,"raw":"354 km (220 mi)"},
   "Arno": {"article":"Arno","why":"likely","value":"241 km","n":241,"raw":"241 km (150 mi)"},
   "Ebro": {"article":"Ebro","why":"likely","value":"930 km","n":930,"raw":"930 km (580 mi)"},

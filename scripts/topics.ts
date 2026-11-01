@@ -87,6 +87,8 @@ export interface Topic {
   fallback?: { from: string | number; factor: number };
   /** Creative works (books, shows, films, albums, games): redirects sharing no word with the title are songs or characters. */
   works?: boolean;
+  /** The table writes every word capitalized ("Shape Of You"): small words go lower case ("Shape of You"). */
+  titleCase?: boolean;
   /** Web addresses are names here ("x.com", "Amazon.com"); elsewhere a redirect like "Dallascowboys.com" is dropped. */
   webNames?: boolean;
   /**
@@ -135,6 +137,8 @@ const STATE_JUNK = [
   "Idaho State Tax Commission", "Idaho government", "Rockford Academy", "Illinois demographics",
   "Eastern vs Western North Carolina barbecue", "Michigan.org", "California–Guangdong relations", "Flowery Easter",
   "Texas-sized",
+  // Postal codes that are everyday words, among the redirects ("oh" was Ohio).
+  "IN", "OR", "ME", "HI", "OK", "OH",
 ];
 
 /** People among the earlier years' richest who have died: naming one is free. */
@@ -947,7 +951,7 @@ export const TOPICS: Topic[] = [
     value: 2,
     metric: "Home runs",
     people: true,
-    universeCategories: ["National Baseball Hall of Fame inductees"],
+    // Not the Hall of Fame: it adds managers, umpires and executives with no home runs, each a costly miss.
   },
   {
     id: "nhl-goals",
@@ -1017,7 +1021,6 @@ export const TOPICS: Topic[] = [
     aliasCols: ["Username"],
     people: true,
     also: [{ tables: [1], name: "Owner" }],
-    rename: { "IShowSpeed (Darren Watkins Jr.": "IShowSpeed" },
     junkAliases: [
       "Chandler Hallow", "Ava Kris Tyson", "Chris Tyson", "Nolan Hansen", "Zaira Nucci", "Heidi D'Amelio", "Marc D'Amelio",
       "MrBeast allegations", "T-Series vs MrBeast", "Would You Risk Dying for $500,000?", "Legal issues with TikTok",
@@ -1039,6 +1042,7 @@ export const TOPICS: Topic[] = [
     works: true,
     also: [{ tables: [4], name: "Song" }],
     universeCategories: ["Billboard Hot 100 number-one singles"],
+    titleCase: true,
   },
   {
     id: "albums",

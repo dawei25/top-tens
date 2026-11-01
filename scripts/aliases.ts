@@ -185,7 +185,8 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
   // "Kotly, Moscow", "Vista Alegre, Belo Horizonte": a place inside the thing, named before it. "Washington, D.C."
   // and "Atlanta, Georgia" start with the thing's own name and stay.
   const parts = base.split(/\s*,\s*/);
-  if (parts.length > 1 && !own.has(normalize(parts[0])) && parts.slice(1).some((p) => forms.has(normalize(p)))) {
+  const head = normalize(parts[0]);
+  if (parts.length > 1 && !own.has(head) && parts.slice(1).some((p) => forms.has(normalize(p)))) {
     return "a place inside the thing";
   }
 
@@ -247,7 +248,9 @@ export const COUNTRY_JUNK = [
   "HUB in a Singapore context", "Gibraltar Health Authority", "Gibraltar Group Practice Medical Scheme",
   "Vatican City culture", "Vatican City cuisine", "Vatican citizenship", "Roman Catholicism in Rome",
   "St. Joseph's Fountain", "Fushifarurah", "Iru fushi", "Irufushi", "See United Kingdom.", "See China.",
-  "Topography of the UK", "Topography of the United Kingdom", "Abegistan", "Yananistan",
+  "Topography of the UK", "Topography of the United Kingdom", "Abegistan", "Yananistan", "Land of the Swiss",
+  // Rare names that only catch typos of other words ("airplanes" became Ireland, "nunavut" Greenland).
+  "Airlann", "Airlan", "Nunaat", "Antarctica of The North",
 ];
 
 let english: Set<string> | undefined;
