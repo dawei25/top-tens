@@ -167,7 +167,7 @@ export function Home({
         <h1 className="logo" aria-label="TENtacle">
           <span>TEN</span><span>tacle</span>
         </h1>
-        <p className="caption" data-glass>name the top 10. five lives. typos are free.</p>
+        <p className="caption" data-glass>name the top 10. five lives.</p>
       </header>
 
       {help && (
