@@ -10,8 +10,8 @@ import type { Puzzle } from "../src/game/types";
 
 const require = createRequire(import.meta.url);
 
-/** JSON files in public/puzzles that are not puzzles: the index, this lexicon, the daily schedule. */
-export const NOT_PUZZLES = new Set(["index.json", "lexicon.json", "daily.json"]);
+/** JSON files in public/puzzles that are not puzzles: the index, this lexicon, the daily schedule, par scores. */
+export const NOT_PUZZLES = new Set(["index.json", "lexicon.json", "daily.json", "par.json"]);
 
 /**
  * Every name and alias in the bank. `ranked` is the part from the source tables (ranked entries); the rest are
