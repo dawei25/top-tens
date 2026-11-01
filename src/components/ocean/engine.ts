@@ -98,6 +98,10 @@ interface Stats {
   relocating: number;
   behind: number;
   closest: number;
+  /** What it was doing at its closest. */
+  closestAt: string;
+  /** The worst time (ms) spent reading the glass in one frame (forced layout after a screen change included). */
+  readMs: number;
   envOut: number;
   envMax: number;
   overlapLog: string[];
@@ -166,6 +170,8 @@ export function startOcean(els: OceanEls): Ocean {
           relocating: 0,
           behind: 0,
           closest: Infinity,
+          closestAt: "",
+          readMs: 0,
           envOut: 0,
           envMax: 0,
           overlapLog: [],
@@ -341,7 +347,9 @@ export function startOcean(els: OceanEls): Ocean {
     for (let i = timers.length - 1; i >= 0; i--) {
       if (timers[i].at <= t) timers.splice(i, 1)[0].fn();
     }
+    const r0 = stats ? performance.now() : 0;
     refreshRoom(false);
+    if (stats) stats.readMs = Math.max(stats.readMs, performance.now() - r0);
     // Glass came over it (a panel appeared, a new screen, a scroll): out to the nearest open water (and again, if a
     // second later it is still under glass).
     if (room && swimmer.behaviour !== "loop" && (!swimmer.escaping || t - escapedAt > 3) && swimmer.fit() < 0) {
@@ -405,7 +413,9 @@ export function startOcean(els: OceanEls): Ocean {
         s.worstDeg = Math.max(s.worstDeg, off);
         if (off > OFF_DEG) {
           s.offHeading++;
-          s.offLog.push(`${swimmer.state} v=${v.toFixed(0)} off=${off.toFixed(0)}`);
+          s.offLog.push(
+            `${swimmer.state} v=${v.toFixed(0)} off=${off.toFixed(0)} dt=${(dt * 1000).toFixed(0)}ms${swimmer.escaping ? " escaping" : ""}; at ${swimmer.clock.toFixed(2)}; ${swimmer.note}`,
+          );
           if (s.offLog.length > 20) s.offLog.shift();
         }
       }
@@ -454,6 +464,7 @@ export function startOcean(els: OceanEls): Ocean {
       } else if (swimmer.escaping || (over && stale)) {
         if (over) s.relocating++;
       } else {
+        if (near < s.closest) s.closestAt = `${swimmer.state}${swimmer.asleep ? " asleep" : ""} tilt ${swimmer.tilt.toFixed(0)}`;
         s.closest = Math.min(s.closest, near);
         if (over) {
           s.overlap++;

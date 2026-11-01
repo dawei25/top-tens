@@ -142,6 +142,9 @@ export class Swimmer {
   private stuck = 0;
   /** Confined: on its way out of glass that came over it (a panel appeared, the page scrolled). */
   escaping = false;
+  /** The last thing the confinement did, and when (seconds of swim time): for the dev stats' off-heading log. */
+  note = "";
+  clock = 0;
   /** Confined dozing: the height where it rights itself before sinking. */
   private dozeTurnY: number | null = null;
   /** Confined, escaping: the heading that fits where it is going, to turn to once there. */
@@ -379,6 +382,10 @@ export class Swimmer {
     if (this.behaviour === "loop") return;
     this.escaping = true;
     this.after = h;
+    // It stops dead as the glass lands on it (behind the glass, where it hardly shows), so it turns in place, never
+    // swinging round mid-glide (a screen being drawn can make that frame long).
+    this.vx = this.vy = 0;
+    this.thrust = 0;
     this.dart(p);
   }
 
@@ -686,6 +693,7 @@ export class Swimmer {
   }
 
   private tick(dt: number, t: number) {
+    this.clock += dt;
     if (this.behaviour === "loop" && this.loop) return this.stepLoop(dt);
     this.jetAge += dt;
     this.tilt = wrapDeg(this.tilt);
@@ -782,7 +790,9 @@ export class Swimmer {
     if (room && u > MOVING) {
       // Confined: brake so the glide (and what is left of the jet) ends short of the glass, never in it.
       const go = u + this.jet * (this.thrust / THRUST) ** 2;
-      const free = room.reach(this.x, this.y, this.tilt, go / DRAG + 12) - 6;
+      // A hard stop (a dart, a flee) further short: its limbs swing on past it.
+      const stop = this.urgent ? 32 : 14;
+      const free = room.reach(this.x, this.y, this.tilt, go / DRAG + stop + 8) - stop;
       if (go / (DRAG + brake) > free) brake = Math.max(brake, Math.min(40, go / Math.max(free, 1) - DRAG));
     }
     // Braking (fins spread) slows it every way at once; the keel always kills the sideways part faster.
@@ -831,14 +841,17 @@ export class Swimmer {
       // The turn is fine; the step forward is not.
       this.x = x0;
       this.y = y0;
+      this.note = `guard: step held at ${this.clock.toFixed(2)}`;
     } else if (room.fit(this.x, this.y, tilt0) >= floor) {
       // The step is fine; the turn is not.
       this.tilt = tilt0;
       moved = phase0 === "turn" || phase0 === "inflate";
+      this.note = `guard: turn held at ${this.clock.toFixed(2)}`;
     } else {
       this.x = x0;
       this.y = y0;
       this.tilt = tilt0;
+      this.note = `guard: both held at ${this.clock.toFixed(2)}`;
     }
     if (moved) {
       this.vx = this.vy = 0;
