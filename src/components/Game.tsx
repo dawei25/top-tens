@@ -21,7 +21,7 @@ import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { formatAsOf, InkSac, notOnList, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
+import { formatAsOf, InkSac, NO_LIFE_LOST, notOnList, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
 import { ParBlock, usePar } from "./par";
@@ -80,7 +80,7 @@ function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
     case "unknown":
       return {
         tone: "warn",
-        text: r.junk ? "That doesn't look like an answer. No life lost." : `${notOnList(puzzle)} No life lost.`,
+        text: `${r.junk ? "That doesn't look like an answer." : notOnList(puzzle)} ${NO_LIFE_LOST}`,
       };
     default:
       return null;

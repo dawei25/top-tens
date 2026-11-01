@@ -26,14 +26,18 @@ export function sourceSite(name: string): string {
 }
 
 /**
- * A guess that isn't an accepted answer at all: "Not one of the 237 films on this list." when the puzzle names its
- * noun, otherwise "Not on this list."
+ * A guess that isn't an accepted answer at all: "Not one of the 237 films here." when the puzzle names its noun,
+ * otherwise "Not on this list." Short enough for one line of the control card in most lists.
  */
 export function notOnList(puzzle: Pick<Puzzle, "noun" | "answers" | "extras">): string {
   if (!puzzle.noun) return "Not on this list.";
   const count = puzzle.answers.length + puzzle.extras.length;
-  return `Not one of the ${count.toLocaleString("en-US")} ${puzzle.noun} on this list.`;
+  // A long noun wraps with its "here." rather than leaving it alone on the second line.
+  return `Not one of the ${count.toLocaleString("en-US")} ${puzzle.noun} here.`;
 }
+
+/** "No life lost." that wraps as one piece, onto its own line when the sentence before it fills the first. */
+export const NO_LIFE_LOST = "No life lost.";
 
 /** The list's prompt for a Blitz, where the goal is as many as you can: "Name the 10 tallest ..." -> "Name the tallest ...". */
 export function blitzPrompt(prompt: string): string {

@@ -16,14 +16,18 @@ const NOW = new Date("2026-10-29T12:00:00-04:00");
 const TODAY = "2026-10-29";
 const FRESH = { games: {}, daily: {}, seenHelp: true };
 
-/** A new tab at `hash` with the fake clock installed and storage seeded once (reloads keep their progress). */
-async function open(browser, vp, hash = "", seed = FRESH) {
+/**
+ * A new tab at `hash` with the fake clock installed and storage seeded once (reloads keep their progress).
+ * `opts.now` sets another date than NOW; `opts.setup(ctx)` runs before the page opens (to route files, say).
+ */
+async function open(browser, vp, hash = "", seed = FRESH, opts = {}) {
   const ctx = await browser.newContext({
     viewport: vp.viewport,
     isMobile: !!vp.isMobile,
     hasTouch: !!vp.hasTouch,
     timezoneId: "America/New_York",
   });
+  if (opts.setup) await opts.setup(ctx);
   // Seed once per context (a flag in localStorage, so reloads and second tabs keep the progress).
   await ctx.addInitScript((s) => {
     if (localStorage.getItem("e2e-seeded")) return;
@@ -31,10 +35,13 @@ async function open(browser, vp, hash = "", seed = FRESH) {
     localStorage.setItem("e2e-seeded", "1");
   }, seed);
   const page = await ctx.newPage();
-  await page.clock.install({ time: NOW });
+  await page.clock.install({ time: opts.now ?? NOW });
   await page.goto(URL + hash);
   return { ctx, page };
 }
+
+/** Go to `hash` in the app (an in-app navigation, like following a link). */
+const go = (page, h) => page.evaluate((x) => (location.hash = x), h);
 
 /** A second tab in the same context (shares storage), for deep links with no in-app history. */
 async function openTab(ctx, hash) {
@@ -57,4 +64,4 @@ async function guess(page, text) {
   await box.press("Enter");
 }
 
-module.exports = { chromium, VIEWPORTS, NOW, TODAY, open, openTab, hash, puzzle, todaysDaily, store, noHScroll, guess };
+module.exports = { chromium, VIEWPORTS, NOW, TODAY, open, openTab, go, hash, puzzle, todaysDaily, store, noHScroll, guess };
