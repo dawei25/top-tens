@@ -162,10 +162,11 @@ function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink"
   if (topic.nameFromLink && cell.link) return cleanName(cell.link);
   let name = cleanName(topic.nameFromText || !cell.linkText ? cell.text : cell.linkText);
   if (topic.nameStrip) name = name.replace(topic.nameStrip, "").trim();
-  if (topic.titleCase) name = titleCase(name);
-  // "Shape Of You" in the table is "Shape of You" in its article: the article's casing.
+  // "ROSÉ" in the table is "Rosé" in her article: the article's casing. A table that writes every word capitalized
+  // links redirects with that casing too ("Shape Of You"), so `titleCase` comes after.
   const linked = cell.link ? cleanName(cell.link) : "";
-  if (linked !== name && linked.toLowerCase() === name.toLowerCase()) return linked;
+  if (linked !== name && linked.toLowerCase() === name.toLowerCase()) name = linked;
+  if (topic.titleCase) name = titleCase(name);
   // Untypeable names ("Маша и Медведь") fall back to the linked article's title, if that is typeable.
   if (!normalize(name) && cell.link && normalize(cleanName(cell.link))) return cleanName(cell.link);
   return name;

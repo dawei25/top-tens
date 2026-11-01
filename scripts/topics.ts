@@ -559,6 +559,8 @@ export const TOPICS: Topic[] = [
     universeCategories: ["YouTube channels", "YouTubers"],
     categoryDepth: 2,
     junkAliases: ["Hindi", "Nursery Rhymes"],
+    // A table footnote ("As of October 2026 UTC").
+    skip: ["UTC"],
   },
   {
     id: "youtube-videos",
@@ -829,6 +831,8 @@ export const TOPICS: Topic[] = [
       "Bovingdon stack", "Heathrow.com", "Dubai Air wing Hangar", "Dubai Royal Airwing Hangar", "Dubai International Terminal 1",
       "O'Hare Modernization Program", "Dfwairport.com", "Garhoud",
     ],
+    // Earlier years' names of ranked or listed airports (intent.ts gives them to the airport).
+    skip: ["London Gatwick Airport", 'Rome–Fiumicino International Airport "Leonardo da Vinci'],
   },
 
   // Batch 2: sports
@@ -1045,6 +1049,8 @@ export const TOPICS: Topic[] = [
     also: [{ tables: [4], name: "Song" }],
     universeCategories: ["Billboard Hot 100 number-one singles"],
     titleCase: true,
+    // A phrasal verb keeps its capital (the article is "Take On Me").
+    rename: { "Take on Me": "Take On Me" },
   },
   {
     id: "albums",

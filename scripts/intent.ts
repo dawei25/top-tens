@@ -995,6 +995,8 @@ export const INTENT: Record<string, Intent> = {
   },
   airports: {
     same: {
+      "Gatwick Airport": ["London Gatwick", "London Gatwick Airport", "Gatwick"],
+      "Leonardo da Vinci Rome Fiumicino Airport": ["Fiumicino", "Rome–Fiumicino International Airport", "Leonardo da Vinci–Fiumicino Airport"],
       "Hartsfield–Jackson Atlanta International Airport": ["Atlanta", "Atlanta Airport"],
       "Dubai International Airport": ["Dubai"],
       "Tokyo Haneda Airport": ["Haneda"],
