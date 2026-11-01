@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { archive, type DailyEntry } from "../game/daily";
+import { archive, dailyGame, type DailyEntry } from "../game/daily";
 import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
 import type { GameState } from "../game/state";
@@ -20,7 +20,7 @@ function result(g?: GameState): { text: string; tone: string } {
   return { text: `${g.found.length}/10`, tone: g.status === "won" ? "gold" : "text" };
 }
 
-/** Every daily so far, newest first. Old ones play like any list but don't count toward streaks. */
+/** Every daily so far, newest first. Each is one try; old ones played late don't count toward streaks. */
 export function Archive({ index, schedule, today, onBack, onHome }: Props) {
   const saved = load();
   const list = archive(schedule, today);
@@ -35,12 +35,12 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
 
       <section data-glass className="panel prompt">
         <h1>Past dailies</h1>
-        <p className="caption">every daily so far. replays don't count toward your streak.</p>
+        <p className="caption">every daily so far. one try each. late plays don't count toward your streak.</p>
       </section>
 
       <ol data-glass className="panel arch-list">
         {list.map((e, i) => {
-          const r = result(saved.games[e.id]);
+          const r = result(dailyGame(saved, e));
           const isToday = e.date === today;
           return (
             <li key={e.date}>

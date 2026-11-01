@@ -1,3 +1,4 @@
+import type { GameState } from "./state";
 import type { Saved } from "./storage";
 
 /** One day of the daily schedule (public/puzzles/daily.json). The file is the record of what ran when. */
@@ -55,6 +56,20 @@ export function dailyHoldouts(schedule: DailyEntry[], today = localDate()): Set<
   const current = todayEntry(schedule, today);
   if (current) ids.add(current.id);
   return ids;
+}
+
+/**
+ * A daily's saved game: its locked result if it was finished, otherwise the list's own save (a game in progress, or
+ * a result from before dailies were locked).
+ */
+export function dailyGame(saved: Saved, entry: Pick<DailyEntry, "date" | "id">): GameState | undefined {
+  return saved.dailyGames?.[entry.date] ?? saved.games[entry.id];
+}
+
+/** Dailies are one try each: the first finished game for a date stays its result. */
+export function lockDaily(saved: Saved, date: string, game: GameState): Saved {
+  if (game.status === "playing" || saved.dailyGames?.[date]) return saved;
+  return { ...saved, dailyGames: { ...saved.dailyGames, [date]: game } };
 }
 
 /** Past and present dailies, newest first: the archive. Future entries are never listed. */

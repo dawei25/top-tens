@@ -106,6 +106,8 @@ function Screens() {
    */
   const trail = useRef<string[]>([location.hash]);
   const replacing = useRef(false);
+  /** The category each random game in this tab was rolled in (by its hash), so Play again rolls in it too. */
+  const rolledIn = useRef(new Map<string, string | undefined>());
 
   useEffect(() => {
     loadIndex().then(setIndex);
@@ -140,12 +142,14 @@ function Screens() {
   if (!index || !schedule) return <Loading />;
 
   // A roll is always a fresh game, even on a list played before (its result stays in Past runs). It never lands on
-  // today's or a future daily, or on the list already on screen.
-  const roll = (category?: string) => {
+  // today's or a future daily, or on `leave` (the list on screen). A category with nothing else left widens to all.
+  const roll = (category?: string, leave?: string) => {
     const exclude = dailyHoldouts(schedule, today);
-    if (route.screen === "game") exclude.add(route.id);
+    if (leave) exclude.add(leave);
+    if (category && !index.some((m) => m.category === category && !exclude.has(m.id))) category = undefined;
     const id = randomPuzzleId(index, category, exclude);
     save(freshList(load(), id));
+    rolledIn.current.set(`#p-${id}`, category);
     location.hash = `#p-${id}`;
   };
   const home = () => (location.hash = "");
@@ -160,19 +164,31 @@ function Screens() {
   const openBlitz = (saved = load()) =>
     index.filter((m) => m.blitz && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
   // Blitz a random list (optionally in a category): a uniformly random open Blitz list, never one of the last few
-  // rolled (per category, like the classic roll), always a fresh round.
-  const blitzRoll = async (category?: string): Promise<boolean> => {
+  // rolled (per category, like the classic roll), never `leave` (the list on screen), always a fresh round. A
+  // category with nothing else open widens to all; false when no list is open at all.
+  const blitzChoices = (category?: string, leave?: string, saved = load()) => {
+    const open = openBlitz(saved).filter((m) => m.id !== leave);
+    const inCategory = open.filter((m) => m.category === category);
+    return category && inCategory.length ? { open: inCategory, category } : { open, category: undefined };
+  };
+  const blitzRoll = async (wanted?: string, leave?: string): Promise<boolean> => {
     const saved = load();
-    const open = openBlitz(saved).filter((m) => !category || m.category === category);
+    const { open, category } = blitzChoices(wanted, leave, saved);
     const id = pickRandom(
       open.map((m) => m.id),
       category ? `blitz:${category}` : "blitz",
     );
     if (!id) return false;
     save(freshBlitz(saved, id));
+    rolledIn.current.set(`#blitz-${id}`, category);
     location.hash = `#blitz-${id}`;
     return true;
   };
+  /** Play again on a Blitz: another random open list (in the round's category, if it was rolled in one). */
+  const blitzAgain = (id: string, category?: string) =>
+    blitzChoices(category, id).open.length > 0 ? () => void blitzRoll(category, id) : undefined;
+  // Today's Blitz, while it's still there to play (a list's results offer it).
+  const dailyBlitzOpen = !!blitzOfTheDay(schedule, index, today) && !load().blitzDaily?.[today];
   const current = todayEntry(schedule, today);
 
   if (route.screen === "blitz") {
@@ -189,6 +205,7 @@ function Screens() {
         base={`#blitz-${route.id}`}
         onBack={back}
         onHome={home}
+        onRoll={blitzAgain(route.id, rolledIn.current.get(`#blitz-${route.id}`))}
       />
     );
   }
@@ -220,6 +237,7 @@ function Screens() {
         openRun={route.run}
         onBack={back}
         onHome={home}
+        onRoll={blitzAgain(id)}
       />
     );
   }
@@ -246,7 +264,10 @@ function Screens() {
         lexicon={lexicon}
         onBack={back}
         onHome={home}
-        onRoll={() => roll()}
+        // Play again on a random list rolls another in the same category (if it was rolled in one); a finished daily
+        // offers a plain random list instead.
+        onRoll={() => roll(entry ? undefined : rolledIn.current.get(`#p-${id}`), id)}
+        onDailyBlitz={dailyBlitzOpen ? () => (location.hash = `#dailyblitz-${today}`) : undefined}
       />
     );
   }

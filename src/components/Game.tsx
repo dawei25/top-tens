@@ -14,7 +14,7 @@ import {
   type GameState,
 } from "../game/state";
 import { load, save } from "../game/storage";
-import { localDate, streak, type DailyEntry } from "../game/daily";
+import { dailyGame, localDate, lockDaily, streak, type DailyEntry } from "../game/daily";
 import { blitzAvailable } from "../game/blitz";
 import { recordListRun } from "../game/history";
 import { emitPlay } from "../game/events";
@@ -37,7 +37,10 @@ interface Props {
   lexicon?: Lexicon;
   onBack: () => void;
   onHome: () => void;
+  /** A fresh random list: Play again on a random list, Random list on a finished daily. */
   onRoll: () => void;
+  /** Today's Blitz, while it's unplayed (a finished daily offers it). */
+  onDailyBlitz?: () => void;
 }
 
 interface Feedback {
@@ -79,7 +82,7 @@ function describe(r: GuessResult): Omit<Feedback, "key"> | null {
   }
 }
 
-export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll }: Props) {
+export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, onDailyBlitz }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -106,18 +109,23 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     loadPuzzle(id)
       .then((p) => {
         setPuzzle(p);
-        setGame(load().games[id] ?? newGame(p));
+        // A daily is one try: once finished, it always opens on its result.
+        const s = load();
+        setGame((daily ? dailyGame(s, daily) : s.games[id]) ?? newGame(p));
       })
       .catch((e) => setError(String(e.message ?? e)));
+    // The daily is fixed for this screen (App keys it by date).
   }, [id]);
 
   useEffect(() => {
     if (!game || !puzzle) return;
-    const s = load();
-    s.games[id] = game;
-    // Only a daily finished on its own date counts toward the streak; archive replays don't.
+    let s = load();
+    // A locked daily leaves the list's own save alone (a later roll of the same list may be using it).
+    if (!(daily && s.dailyGames?.[daily.date])) s.games[id] = game;
+    // Only a daily finished on its own date counts toward the streak; archive plays don't.
     if (daily && game.status !== "playing" && daily.date === localDate()) s.daily[daily.date] = daily.id;
-    // Past runs: a finished game goes into the history (a no-op if it's already there), so PLAY AGAIN can't lose it.
+    if (daily) s = lockDaily(s, daily.date, game);
+    // Past runs: a finished game goes into the history (a no-op if it's already there), so a roll can't lose it.
     save(recordListRun(s, game, daily?.n));
   }, [game, puzzle, id, daily]);
 
@@ -245,28 +253,6 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     const entry = puzzle.answers.find((a) => a.rank === rank);
     if (entry) setFeedback({ tone: "warn", text: `#${rank} starts with ${hintLetter(entry.name)}. One life spent.`, key: Date.now() });
   };
-  /** Forget this list's result (and its streak day) and start it over, fresh. */
-  const playAgain = () => {
-    const s = load();
-    delete s.games[id];
-    if (daily) delete s.daily[daily.date];
-    // A roll of today's daily list shares its saved game, so it takes today's streak day with it too.
-    if (s.daily[localDate()] === id) delete s.daily[localDate()];
-    save(s);
-    setHintAsk(null);
-    setGame(newGame(puzzle));
-    setInput("");
-    setFeedback(null);
-    setLastFound(null);
-    setShake({ n: 0, hit: false });
-    setLostLife(null);
-    setEndedHere(false);
-    setCopied(false);
-    setOpenFacts(new Set());
-    scrollTo({ top: 0, behavior: "auto" });
-    // The guess box mounts with autoFocus.
-  };
-
   const share = async () => {
     const url = `${location.origin}${location.pathname}${daily ? `#daily-${daily.date}` : `#p-${puzzle.id}`}`;
     const text = shareText(game, puzzle, url, daily?.n);
@@ -615,17 +601,26 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button ref={shareRef} className="key key-pink" onClick={share}>
                   {copied ? "Copied" : "Share"}
                 </button>
+                {/* A daily is one try: no Play again, just somewhere else to go. */}
+                {daily && onDailyBlitz && (
+                  <button className="key key-blitz" data-testid="results-daily-blitz" onClick={onDailyBlitz}>
+                    Today's Blitz
+                  </button>
+                )}
                 {blitzOpen && (
                   <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`}>
                     Blitz
                   </a>
                 )}
-                <button className="key" data-testid="play-again" onClick={playAgain}>
-                  Play again
-                </button>
-                <button className="key" onClick={onRoll}>
-                  Roll another
-                </button>
+                {daily ? (
+                  <button className="key" data-testid="results-roll" onClick={onRoll}>
+                    Random list
+                  </button>
+                ) : (
+                  <button className="key" data-testid="play-again" onClick={onRoll}>
+                    Play again
+                  </button>
+                )}
               </div>
               <p className="source">
                 {puzzle.metric && <>ranked by {puzzle.metric.toLowerCase()}. </>}

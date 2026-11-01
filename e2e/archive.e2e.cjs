@@ -1,7 +1,8 @@
 // Archive -> an old daily -> Back -> archive -> Back -> home; a deep link to an old daily goes Back to the archive.
+// An old daily is one try: once finished it stays on its result, even after a roll replays the same list.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, VIEWPORTS, open, openTab, hash, noHScroll } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, open, openTab, hash, store, noHScroll } = require("./helpers.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -37,6 +38,34 @@ for (const vp of VIEWPORTS) {
     assert.equal(await hash(deep), "#archive");
     await deep.getByTestId("nav-home").click();
     await deep.getByTestId("today-list").waitFor();
+    await ctx.close();
+  });
+
+  test(`an archived daily is one try (${vp.name})`, async () => {
+    const { ctx, page } = await open(browser, vp, "#archive");
+    const rows = page.getByTestId("archive-row");
+    await rows.first().waitFor();
+    const old = (await rows.evaluateAll((els) => els.map((e) => e.getAttribute("data-date")))).at(-1);
+    const row = page.locator(`[data-testid="archive-row"][data-date="${old}"]`);
+    await row.click();
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("results").waitFor();
+    assert.equal(await page.getByTestId("play-again").count(), 0);
+    const id = (await store(page)).dailyGames[old].puzzleId;
+
+    // A later roll of the same list replaces the list's own save; the daily stays locked on its result.
+    await page.evaluate((listId) => {
+      const s = JSON.parse(localStorage.getItem("top-tens:v1"));
+      delete s.games[listId];
+      localStorage.setItem("top-tens:v1", JSON.stringify(s));
+    }, id);
+    await page.getByTestId("nav-back").click();
+    await row.waitFor();
+    await row.click();
+    await page.getByTestId("results").waitFor();
+    assert.equal(await page.getByTestId("give-up").count(), 0);
+    assert.equal(await page.getByLabel("Your guess").count(), 0);
     await ctx.close();
   });
 }

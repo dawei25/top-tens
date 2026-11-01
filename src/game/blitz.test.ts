@@ -13,6 +13,7 @@ import {
   points,
   recordBlitz,
   recordDailyBlitz,
+  dailyBlitzPlayed,
   blitzHistory,
   MAX_BLITZ_RUNS,
   resumeBlitz,
@@ -147,7 +148,24 @@ describe("today's blitz", () => {
     expect(first.counted).toBe(true);
     const again = recordDailyBlitz(first.saved, "2026-10-29", st(900));
     expect(again.counted).toBe(false);
-    expect(again.saved.blitzDaily?.["2026-10-29"]).toMatchObject({ score: 300, answers: 1 });
+    expect(again.saved.blitzDaily?.["2026-10-29"]).toMatchObject({ score: 300, answers: 1, startedAt: 1 });
+  });
+  it("a played date is locked to its round, found by startedAt (or by score for older results)", () => {
+    const empty: Saved = { games: {}, daily: {}, seenHelp: true };
+    expect(dailyBlitzPlayed(empty, "2026-10-29")).toBeUndefined();
+    const round = { puzzleId: "a", startedAt: 5, endedAt: 9, hits: [{ name: "x", rank: 1, n: 1, points: 100 }] };
+    const other = { ...round, startedAt: 20, endedAt: 30 };
+    let s = recordBlitz(empty, "a", round).saved;
+    s = recordBlitz(s, "a", other).saved;
+    s = recordDailyBlitz(s, "2026-10-29", round).saved;
+    expect(dailyBlitzPlayed(s, "2026-10-29")?.run?.startedAt).toBe(5);
+    // An older result without startedAt matches by score and answers.
+    const legacy: Saved = { ...s, blitzDaily: { "2026-10-29": { id: "a", score: 100, answers: 1 } } };
+    expect(dailyBlitzPlayed(legacy, "2026-10-29")?.run).toBeDefined();
+    // A round played after its date locks it too, marked late.
+    const late = recordDailyBlitz(empty, "2026-10-01", round, true);
+    expect(late.counted).toBe(true);
+    expect(late.saved.blitzDaily?.["2026-10-01"]).toMatchObject({ late: true });
   });
 });
 

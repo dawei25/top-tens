@@ -347,8 +347,9 @@ a {
  * Home system.
  * - Groups (Today, Free play, Your games, Your record) share one label style and one spacing scale:
  *   28px between groups, 12px inside a group.
- * - Every play key is a mode key: a mode tag and a status on top (status right-aligned), the action below.
- * - Mode identity: classic is pink, Blitz is gold, on the tag, the accent and the fill.
+ * - Every play key is a mode key: its status on top (right-aligned), the action below. No rules tags: the title
+ *   names the mode and the color carries it.
+ * - Mode identity: classic is pink, Blitz is gold, on the accent and the fill.
  * - Today's two keys are always filled with their mode's color; played, they dim a step and show the result.
  *   Free-play keys are quiet; Your games (archive, past runs) are quieter still.
  * - The keyboard hint lives on the focused key, with a fine pointer only.
@@ -439,6 +440,9 @@ a {
   justify-content: space-between;
   gap: 12px;
 }
+.mode-key-top {
+  justify-content: flex-end;
+}
 .mode-key .key-label {
   font-size: 23px;
   letter-spacing: 0.2em;
@@ -465,7 +469,6 @@ a {
 }
 .mode-key.today .key-label,
 .mode-key.today .key-sub,
-.mode-key.today .mode-tag,
 .mode-key.today .enter-hint {
   color: var(--accent-ink);
 }
@@ -536,8 +539,9 @@ a {
 }
 
 /*
- * Free play: each key rolls at once. A slim "by category" strip under each one opens that mode's category chips
- * right under it (one picker at a time); a chip rolls in that category.
+ * Free play: each key rolls at once. A slim "by category" strip under each one opens that mode's categories as a
+ * dropdown floating over the page (one at a time), so the panel never grows; a chip rolls in that category.
+ * Side by side, both keys stretch to the taller one, so titles and strips line up.
  */
 .free-key {
   --accent: var(--pink);
@@ -545,6 +549,14 @@ a {
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+}
+.free-key > .mode-key {
+  flex: 1;
+}
+.cat-anchor {
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 .free-key.blitz {
   --accent: var(--gold);
@@ -583,12 +595,31 @@ a {
   color: var(--accent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
 }
-/* The chips: a tight menu of rows under the strip, the count on the right. */
+/* The chips: a tight menu of rows on its own glass, the count on the right; above the strip near the screen's
+   bottom (data-up, set when it opens). */
 .cat-picker {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
   flex-direction: column;
   flex-wrap: nowrap;
   gap: 6px;
+  padding: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 8px;
+  background: var(--glass-panel) var(--scan);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent),
+    0 8px 0 rgba(0, 0, 0, 0.45),
+    0 14px 30px rgba(0, 0, 0, 0.5);
   animation: rise 0.15s ease-out both;
+}
+.cat-picker[data-up="true"] {
+  top: auto;
+  bottom: calc(100% + 6px);
 }
 .cat-chip {
   display: flex;
@@ -641,16 +672,8 @@ a {
 .games-key {
   gap: 10px;
 }
-/* A narrow free-play key lets its status drop under the mode tag (still on the right) rather than overflow. */
-.mode-pair .mode-key-top {
-  flex-wrap: wrap;
-  row-gap: 4px;
-}
-.mode-pair .mode-key-top .key-sub {
-  margin-left: auto;
-}
-/* Wide screens: Home is one centred column inside the play screens' frame, wide enough for the free-play keys to
-   keep tag and status on one line; the same 16px of ocean between cards as between the play screens' columns. */
+/* Wide screens: Home is one centred column inside the play screens' frame; the same 16px of ocean between cards as
+   between the play screens' columns. */
 @media (min-width: 1100px) {
   .home {
     max-width: calc(880px + 2 * var(--gutter));

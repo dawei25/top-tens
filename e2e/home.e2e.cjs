@@ -21,16 +21,33 @@ for (const vp of VIEWPORTS) {
     assert.equal(await chips.count(), 0, "closed until asked");
     assert.equal(await listStrip.getAttribute("aria-expanded"), "false");
 
-    // The list picker: classic chips only, focus on the first one.
+    // Side by side (desktop), both free-play keys and both strips line up.
+    const box = async (id) => page.getByTestId(id).boundingBox();
+    if (vp.name === "desktop") {
+      const [l, b] = [await box("random-list"), await box("random-blitz")];
+      assert.equal(Math.round(l.y), Math.round(b.y));
+      assert.equal(Math.round(l.height), Math.round(b.height));
+      assert.equal(Math.round((await box("random-list-categories")).y), Math.round((await box("random-blitz-categories")).y));
+    }
+
+    // The list picker: classic chips only, focus on the first one. It floats: the Free play panel doesn't grow.
+    const panelHeight = async () => (await box("free-play")).height;
+    const closedHeight = await panelHeight();
     await listStrip.click();
+    assert.equal(await panelHeight(), closedHeight);
     assert.equal(await listStrip.getAttribute("aria-expanded"), "true");
     assert.ok((await chips.count()) > 1);
     assert.equal(await page.locator('[data-testid="category"][data-mode="blitz"]').count(), 0);
     assert.equal(await focusedTestId(page), "category");
     assert.equal(await focusedMode(page), "list");
+    // Arrow keys move through the chips.
+    await page.keyboard.press("ArrowDown");
+    const second = await page.locator('[data-testid="category"][data-mode="list"]').nth(1).getAttribute("data-category");
+    assert.equal(await page.evaluate(() => document.activeElement?.dataset.category), second);
 
     // Opening the Blitz picker closes the list one.
     await blitzStrip.click();
+    assert.equal(await panelHeight(), closedHeight);
     assert.equal(await listStrip.getAttribute("aria-expanded"), "false");
     assert.equal(await blitzStrip.getAttribute("aria-expanded"), "true");
     assert.equal(await page.locator('[data-testid="category"][data-mode="list"]').count(), 0);
