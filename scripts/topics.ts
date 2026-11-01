@@ -340,7 +340,7 @@ export const TOPICS: Topic[] = [
     metric: "Population (2025 est.)",
     junkAliases: [
       "Monroe May Elementary", "Monroe may", "San diego beaches", "Fort Worth United Soccer Club", "Sister Cities Chicago",
-      "Land of smelly onions", "Houstonians", "New York Shitty", "Dtown",
+      "Land of smelly onions", "Houstonians", "New York Shitty",
     ],
   },
   {
@@ -362,8 +362,7 @@ export const TOPICS: Topic[] = [
       "6-resurrection", "Tokyo in pop culture", "Jūjō, Tokyo", "Qinglong, Shanghai", "West Bund", "Abdeen", "Fatehpur beri",
       "Fuxingmen Inner Street", "Fuxingmen Outer Street", "Fuxing Road", "St. Xavier's High School Loyola Hall",
       "Prakash Higher Secondary School", "Prakash school", "Phss", "SJK Lai Meng", "Sichuanese teahouse",
-      "Mexican Federal District Transit System", "Sister Cities Chicago", "Shouer", "Singy", "Singan",
-      "S'pore",
+      "Mexican Federal District Transit System", "Sister Cities Chicago",
     ],
   },
   {
@@ -1014,7 +1013,7 @@ export const TOPICS: Topic[] = [
       "Space Systems Center", "Jeremy bieber", "Skylrk", "Justin Bieber's hair", "David Hudson", "David Daniel Hudson",
       "Daisy Dove Bloom", "Dolly", "Meow", "Purr", "Mad Potion", "Immortal Flame", "De Soi", "Andrea Swift",
       "Andrea Gardner Swift", "Andrea Finlay", "Scott Kingsley Swift", "Monologue Song", "Track 5", "Wonderstruck",
-      "Incredible Things", "India", "F.C.", "Times",
+      "Incredible Things", "India", "F.C.", "Times", "X Money", "XMoney",
     ],
   },
   {
@@ -1157,7 +1156,7 @@ export const TOPICS: Topic[] = [
     categorySkip: /^(comparison|issues|privacy|criticism|evaluation|clearinghouse)\b|\b(protocol|search engine|engine|software|framework|project|technologies|corporation|inc\.?|library|index|service|communities)$/i,
     webNames: true,
     junkAliases: [
-      "The Parades", "Facebooking", "Binges", "Sonic",
+      "The Parades", "Facebooking", "Binges", "Sonic", "X Money", "XMoney",
       "Giigke,cin", "Ghits", "Google videos", "GoogleYouTube", "Youtubing", "Facephiliac", "Mini-feed",
       "Instagram trends", "Layout from Instagram", "Do Anything Now", "Fail Whale", "Twitpocalypse",
       "Twittered revolution", "AMA", "Subreddit", "Reddit gold", "Infogami", "TikTok Review", "Timeline of WhatsApp",
@@ -1686,7 +1685,7 @@ export const TOPICS: Topic[] = [
     universeCategories: ["National Baseball Hall of Fame inductees"],
     junkAliases: [
       "Stan Musial Lifetime Achievement Award", "RE2PECT", "Isabella Pujols", "Cynthia Scurtis", "Boli",
-      "Barry Bonds 714th home run",
+      "Barry Bonds 714th home run", "D.Jeter",
     ],
   },
   {
@@ -1755,7 +1754,6 @@ export const TOPICS: Topic[] = [
       "Tokyo in pop culture", "Kotly, Moscow", "Kotly, Moscow Oblast", "Western Moscow", "Abdeen", "Cairo in the middle ages",
       "Sangwon Middle School", "Five Grand Palaces of Joseon-Dynasty Seoul", "Five Grand Palaces", "Seoul castle",
       "South Seoul", "North Seoul", "Mexican Federal District Transit System", "Londonise", "Londonize", "Baku Oilfields",
-      "Shouer", "Singy", "Singan", "S'pore",
     ],
   },
   {
@@ -1825,7 +1823,7 @@ export const TOPICS: Topic[] = [
       "Starboy", "King Of The Fall", "We're Alone Together", "Monologue Song", "Lady Gaga as a gay icon",
       "Lady Gaga as gay icon", "Coldplay.com", "Pectoralz", "Los Unidades", "Big Fat Noises", "Shakira Bio",
       "Shakira ft. Wyclef Jean", "Shakira & Alejandro Sanz", "Gypsy Love", "Killa on the Run", "The Hooligans", "Hottest Heart",
-      "Insane", "Dolly", "Meow", "Purr", "The Embassy",
+      "Insane", "Dolly", "Meow", "Purr", "The Embassy", "Track 5",
     ],
   },
   {

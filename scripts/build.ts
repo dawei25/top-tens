@@ -15,7 +15,7 @@ import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./int
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
 import { UNIVERSES, US_STATE_CODES, type Place } from "./gazetteer";
-import { bareWord, baseTitle, blockedAlias, COUNTRY_JUNK, isEnglishWord, junkRedirect } from "./aliases";
+import { bareWord, baseTitle, blockedAlias, CITY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
 /** Fewest entries with a stat (`n`) for a list to be playable in Blitz. */
@@ -670,7 +670,11 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     own(e, [e.name, ARTICLE.get(e), LINK.get(e)]);
   }
 
-  const junkList = [...(topic.junkAliases ?? []), ...(hasCountries(topic) ? COUNTRY_JUNK : [])];
+  const junkList = [
+    ...(topic.junkAliases ?? []),
+    ...(hasCountries(topic) ? COUNTRY_JUNK : []),
+    ...(/\bcities\b/.test(topic.noun) ? CITY_JUNK : []),
+  ];
   if (junkList.length) {
     const junk = new Set(junkList.map(normalize));
     for (const e of entries) {

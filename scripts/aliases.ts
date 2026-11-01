@@ -229,6 +229,12 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
  * Redirects to country articles that no rule can tell from a name (jokes, people, buildings, events), found by the
  * list judges. Dropped on every list with the countries universe.
  */
+/**
+ * Rare spellings among city redirects that only catch typos of ordinary words ("singer" became Xi'an through
+ * "Singan", "market" Mecca through "Makkeh"). Dropped on every city list.
+ */
+export const CITY_JUNK = ["Singan", "Makkeh", "Shouer", "Singy", "S'pore", "Dtown"];
+
 export const COUNTRY_JUNK = [
   "Snow Mexico", "Finnishness", "The Land of Chocolate", "Day of the Capital", "Abdullah al-Saleh", "Al Rawda Palace",
   "Ugandan nationalism", "Ker Alur", "Official language of Southern Sudan", "North Kenya", "Kenya-Africa",
@@ -251,6 +257,7 @@ export const COUNTRY_JUNK = [
   "Topography of the UK", "Topography of the United Kingdom", "Abegistan", "Yananistan", "Land of the Swiss",
   // Rare names that only catch typos of other words ("airplanes" became Ireland, "nunavut" Greenland).
   "Airlann", "Airlan", "Nunaat", "Antarctica of The North", "S'pore", "Pinas", "Sovjet", "Grease", "Island", "Port",
+  "Poccnr", "Poccия",
 ];
 
 let english: Set<string> | undefined;
