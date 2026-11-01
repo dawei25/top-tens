@@ -81,7 +81,8 @@ arms, two long tentacles), and a top 10 has ten slots.** Every answer found is o
   the existing palette (cyan glow, pink and gold accents on navy). Not a copy of any existing sprite.
 - Feedback loop (owner-approved ideas):
   1. The squid fills in: one limb lights per answer found; ten lit is a full glowing squid.
-  2. The tentacle grab: a correct answer is snatched from the input into its slot; bigger answers pull harder.
+  2. The find flash (replaced the tentacle grab in November 2026): the lit limb flashes white-hot, a shimmer runs
+     root to tip and the squid hops head-first; #1 and #2 hop and glow bigger. About half a second, no delay to state.
   3. Ink lives: five ink sacs; a life lost squirts ink that dims the screen for a beat; running out ends in a cloud.
   5. Sound (optional, off by default): each rank is a note (#1 highest); a perfect game ends on a chord.
   6. Blitz glow: fast hits make the squid glow brighter (momentum, no scoring change); the score bumps with each
@@ -100,10 +101,10 @@ The squid leaves the header and lives in a deep-ocean world behind the whole app
   kelp on the seabed, parallax layers for depth.
 - Panels become tinted glass: slightly see-through, so the ocean and the squid show faintly behind the board and the
   text box. Text contrast stays readable.
-- One squid, always **behind the UI**. It wanders with squid-like pulse-and-glide swimming. It never needs to dodge
-  typing, because it is behind the glass.
-- Reactions (behind the glass): its limbs light for answers found; a find makes it dart and glow; a lost life inks
+- One squid. On wide screens it lives in **open water**: the viewport minus every glass panel (`[data-glass]`), so it
+  is always in view and never behind the board. On phones and narrow layouts, where no strip is wide enough, it
+  roams behind the glass instead. It swims head-first with pulse-and-glide strokes, never backwards.
+- Reactions: its limbs light for answers found; a find makes it dart and glow; a lost life inks
   where it is and darts away; a perfect 10 does loops; Blitz momentum makes it swim faster and glow brighter; idle,
   it sinks and dozes.
-- The tentacle grab (input to row) stays in front: it is the one moment that crosses the glass.
 - Later (not in the MVP): a seafloor that grows from your history, a lanternfish school for the streak, tap tricks.
