@@ -65,5 +65,9 @@ export type GuessResult =
   | { kind: "duplicate"; entry: Entry }
   | { kind: "near"; entry: Entry; corrected: boolean }
   | { kind: "typo"; suggestions: string[] }
-  /** Not an accepted answer for this list. Free; `junk` picks the message. */
-  | { kind: "unknown"; junk: boolean };
+  /**
+   * Not an accepted answer for this list. Free; `junk` picks the message. `vague`: what was typed is part of several
+   * names ("mario kart", "star wars") without being what any of them is called, so the player is asked to be more
+   * specific instead of being shown names they never typed. It holds how many fit.
+   */
+  | { kind: "unknown"; junk: boolean; vague?: number };

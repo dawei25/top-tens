@@ -25,14 +25,14 @@ import {
 } from "../game/blitz";
 import { dailyGame, entryForDate, localDate, todayEntry, type DailyEntry } from "../game/daily";
 import type { Lexicon } from "../game/junk";
-import { judgeGuess } from "../game/match";
 import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { load, save } from "../game/storage";
 import { shownValue } from "../game/state";
 import { emitPlay } from "../game/events";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
-import { blitzPrompt, ModeTag, notOnList, ScreenHead } from "./pixel";
+import { ModeTag, ScreenHead } from "./pixel";
+import { blitzPrompt, notOnList } from "./copy";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
 
@@ -73,8 +73,7 @@ interface Feedback {
   key: number;
 }
 
-/** `unscored`: the answer a "none" result matched, when it is on the list but has no number to score. */
-function describe(r: BlitzResult, puzzle: Puzzle, unscored?: string): Omit<Feedback, "key"> | null {
+function describe(r: BlitzResult, puzzle: Puzzle): Omit<Feedback, "key"> | null {
   switch (r.kind) {
     case "scored":
       return { tone: "good", text: r.corrected ? `Counted as ${r.hit.name}. +${r.hit.points}` : `${r.hit.name}. +${r.hit.points}` };
@@ -83,20 +82,13 @@ function describe(r: BlitzResult, puzzle: Puzzle, unscored?: string): Omit<Feedb
     case "choices":
       return { tone: "warn", text: "Did you mean", suggestions: r.suggestions };
     case "none":
-      if (r.junk) return { tone: "bad", text: "Doesn't look like an answer." };
-      return { tone: "bad", text: unscored ? `${unscored} has no number here. No points.` : notOnList(puzzle) };
+      if (r.vague) return { tone: "warn", text: "More than one fits. Be more specific." };
+      if (r.unscored) return { tone: "warn", text: `${r.unscored} is on the list, but without a figure. No points.` };
+      // Plain misses only: "Not one of the 258 countries here." (or "Not on this list." without a noun).
+      return { tone: "bad", text: r.junk ? "Doesn't look like an answer." : notOnList(puzzle) };
     default:
       return null;
   }
-}
-
-/**
- * Blitz scores only answers with a number, and says "none" for the rest of the list too. Which answer a "none"
- * matched, if any, so the feedback doesn't call a real answer "not on this list".
- */
-function unscoredAnswer(text: string, puzzle: Puzzle, lexicon?: Lexicon, offered?: string[]): string | undefined {
-  const r = judgeGuess(text, puzzle, new Set(), lexicon, offered);
-  return r.kind === "correct" || r.kind === "near" || r.kind === "duplicate" ? r.entry.name : undefined;
 }
 
 /** Rows on the answer board before the first answer (wide screens). */
@@ -429,8 +421,7 @@ export function Blitz({
       keepLive(next);
       emitPlay({ kind: "blitz-hit", rank: result.hit.rank, points: result.hit.points, score: blitzScore(next), best: load().blitzBest?.[id] });
     } else if (result.kind === "none" || result.kind === "duplicate") emitPlay({ kind: "blitz-miss" });
-    const unscored = result.kind === "none" && !result.junk ? unscoredAnswer(input, puzzle, lexicon, feedback?.suggestions) : undefined;
-    const fb = describe(result, puzzle, unscored);
+    const fb = describe(result, puzzle);
     if (fb) setFeedback({ ...fb, key: Date.now() });
     if (result.kind !== "choices" && result.kind !== "empty") setInput("");
     inputRef.current?.focus();

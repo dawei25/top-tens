@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SoundToggle } from "./sound/SoundToggle";
-import type { Puzzle } from "../game/types";
 
 export function reducedMotion(): boolean {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -23,25 +22,6 @@ export function formatAsOf(asOf: string): string {
 /** "Wikipedia: List of ..." -> "Wikipedia". */
 export function sourceSite(name: string): string {
   return name.split(":")[0].trim() || name;
-}
-
-/**
- * A guess that isn't an accepted answer at all: "Not one of the 237 films here." when the puzzle names its noun,
- * otherwise "Not on this list." Short enough for one line of the control card in most lists.
- */
-export function notOnList(puzzle: Pick<Puzzle, "noun" | "answers" | "extras">): string {
-  if (!puzzle.noun) return "Not on this list.";
-  const count = puzzle.answers.length + puzzle.extras.length;
-  // A long noun wraps with its "here." rather than leaving it alone on the second line.
-  return `Not one of the ${count.toLocaleString("en-US")} ${puzzle.noun} here.`;
-}
-
-/** "No life lost." that wraps as one piece, onto its own line when the sentence before it fills the first. */
-export const NO_LIFE_LOST = "No life lost.";
-
-/** The list's prompt for a Blitz, where the goal is as many as you can: "Name the 10 tallest ..." -> "Name the tallest ...". */
-export function blitzPrompt(prompt: string): string {
-  return prompt.replace(/^Name the 10 /, "Name the ");
 }
 
 /**
