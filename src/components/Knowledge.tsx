@@ -1,4 +1,4 @@
-import type { DailyEntry } from "../game/daily";
+import { dailyGame, type DailyEntry } from "../game/daily";
 import type { ParFile } from "../game/par";
 import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
@@ -21,7 +21,7 @@ interface Group {
   vsPar: number;
 }
 
-/** Tags shown: those with at least this many games. */
+/** Tags shown: those with at least this many games (the By topic placeholder says "two"). */
 const MIN_TAG_GAMES = 2;
 const MAX_TAGS = 8;
 
@@ -67,8 +67,11 @@ function knowledge(index: PuzzleMeta[], par: ParFile) {
   };
 }
 
-/** One row: name and games, a bar out from the par line (right: over par, left: under), the number. */
-function Bars({ title, rows, kind, scale }: { title: string; rows: Group[]; kind: string; scale: number }) {
+/**
+ * One row: name and games, a bar out from the par line (right: over par, left: under), the number. With no rows yet,
+ * one placeholder row says what will show there.
+ */
+function Bars({ title, rows, kind, scale, empty }: { title: string; rows: Group[]; kind: string; scale: number; empty: string }) {
   return (
     <section data-glass className="panel know-list" aria-labelledby={`know-${kind}`}>
       <div className="know-head">
@@ -101,26 +104,68 @@ function Bars({ title, rows, kind, scale }: { title: string; rows: Group[]; kind
             </li>
           );
         })}
+        {rows.length === 0 && (
+          <li className="know-row know-placeholder" data-testid={`know-${kind}-empty`}>
+            <span className="know-name">{empty}</span>
+            <span className="know-bar" aria-hidden="true" />
+            <span className="know-vs" aria-hidden="true">
+              --
+            </span>
+          </li>
+        )}
       </ol>
     </section>
   );
 }
 
-/** "Your knowledge": how your finished list games compare with par, overall, by category and by topic. */
+/**
+ * "Your knowledge" (Home's Stats key): how your finished list games compare with par, overall, by category and by
+ * topic. Before the first game the same sections show, with placeholders.
+ */
 export function Knowledge({ index, entry, onBack, onHome }: Props) {
   const par = usePar();
   const k = par ? knowledge(index, par) : null;
   const scale = k ? Math.max(3, ...[...k.categories, ...k.tags].map((g) => Math.abs(g.vsPar))) : 3;
+  const daily = entry && dailyGame(load(), entry);
+  const dailyOpen = !!entry && (!daily || daily.status === "playing");
 
   return (
     <main className="screen archive knowledge" data-testid="knowledge">
       <ScreenHead onBack={onBack} onHome={onHome}>
-        <span className="label mode">Your knowledge</span>
+        <span className="label mode">Stats</span>
       </ScreenHead>
 
       <section data-glass className="panel prompt know-top">
         <h1>Your knowledge</h1>
         <p className="caption">your list games against par: what a typical player gets on each list.</p>
+        {k && !k.overall && (
+          <div className="know-overall know-none" data-testid="knowledge-empty">
+            <p className="know-headline" aria-label="no games against par yet">
+              <span className="know-big none" aria-hidden="true">
+                --
+              </span>
+              <span className="know-big-of" aria-hidden="true">
+                vs par
+              </span>
+            </p>
+            <dl className="know-stats">
+              <div>
+                <dt>games</dt>
+                <dd>0</dd>
+              </div>
+              <div>
+                <dt>avg / 10</dt>
+                <dd>--</dd>
+              </div>
+            </dl>
+            <p className="know-empty-line">play a list to see how you do against par.</p>
+            {dailyOpen && (
+              <a className="key key-pink key-sm" href={`#daily-${entry.date}`}>
+                Today's list
+              </a>
+            )}
+          </div>
+        )}
         {k?.overall && (
           <div className="know-overall">
             <p className="know-headline" data-testid="vs-par" aria-label={`${signed(k.overall.vsPar, 1)} vs par on average`}>
@@ -150,19 +195,10 @@ export function Knowledge({ index, entry, onBack, onHome }: Props) {
         )}
       </section>
 
-      {!k ? null : !k.overall ? (
-        <section data-glass className="panel error" data-testid="knowledge-empty">
-          <p>no list games yet. finish one and see how you do against par.</p>
-          {entry && (
-            <a className="key key-pink" href={`#daily-${entry.date}`}>
-              Today's list
-            </a>
-          )}
-        </section>
-      ) : (
+      {k && (
         <>
-          <Bars title="By category" rows={k.categories} kind="category" scale={scale} />
-          {k.tags.length > 0 && <Bars title="By topic" rows={k.tags} kind="tag" scale={scale} />}
+          <Bars title="By category" rows={k.categories} kind="category" scale={scale} empty="none yet. finish a list." />
+          <Bars title="By topic" rows={k.tags} kind="tag" scale={scale} empty="none yet. a topic needs two games." />
         </>
       )}
     </main>

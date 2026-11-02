@@ -2525,6 +2525,28 @@ a.text-btn {
   font-size: 16px;
   color: var(--muted);
 }
+/* Before the first game: the same sections, their numbers blank and faint, and a line saying what will show. */
+.know-big.none {
+  color: var(--muted);
+  text-shadow: none;
+}
+.know-none .know-stats dd {
+  color: var(--muted);
+}
+.know-empty-line {
+  flex-basis: 100%;
+  margin-top: 4px;
+  color: var(--label);
+}
+.know-placeholder .know-name {
+  font-size: 18px;
+  text-transform: none;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.know-placeholder .know-vs {
+  color: var(--faint);
+}
 .know-list {
   padding: 12px 0 8px;
 }
