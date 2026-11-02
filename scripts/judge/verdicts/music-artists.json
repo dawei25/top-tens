@@ -3,24 +3,22 @@
   "judgedAt": "2026-11-02",
   "decision": "fix-first",
   "alsoBlitz": true,
-  "priority": 6,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 2, "data": 3, "fun": 3, "blitzDepth": 5 },
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 2, "data": 4, "fun": 4, "blitzDepth": 5 },
   "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
   "fan": { "found": 8, "livesLost": 5, "guesses": 13 },
-  "blitzCasual": { "scored": 25, "named": 25 },
+  "blitzCasual": { "scored": 28, "named": 30 },
   "difficulty": 3,
   "tags": ["music", "pop", "hip-hop"],
   "audience": "pop and rap fans",
-  "summary": "Everyone knows all ten names, but the title says best-selling while the ranking is certified units, so the Beatles, Elvis, Madonna, Elton John and Queen all cost lives. Put the measure in the title and it is a good daily and a deep Blitz.",
+  "summary": "All ten are household names and a casual player finds 8, but the headline still says 'sales', so players who start with the Beatles, Elvis and Madonna burn lives on legends. Put streams in the title and it is a good daily and a deep Blitz.",
   "reasons": [
-    "Casual found 8 (Drake, Rihanna, Taylor Swift, Eminem, Beyonce, Bieber, Michael Jackson, Ariana Grande) but lost all 5 lives on the Beatles (#11), Elvis (#18), Madonna (#22), Ed Sheeran (#13) and Elton John (#19). A player who reads the title the usual way and starts with the legends finds 2.",
-    "The page ranks by claimed sales (Beatles first) and uses certified units only to break ties. This list ranks by that column, which counts streams and gives featured artists full credit, so Drake's 556.8 million is over three times his 170 million claimed sales. The prompt mentions streams, but the title promises the classic list.",
-    "As a Blitz it is excellent: 25 of 25 casual names scored, every miss shows a figure, and all 10 answers have good sourced facts."
+    "The casual player read the caption and opened with Taylor Swift and Drake, but still lost 3 of 5 lives on the Beatles (#11), Elvis (#18) and Madonna (#22), then Ed Sheeran (#13) and Kanye (#12): 8 found. A player who takes the headline at its word (Beatles, Michael Jackson, Elvis, Madonna, Taylor Swift, Elton John, Drake, Rihanna, Queen) finds 4.",
+    "'Most certified sales' is better than 'best-selling' but still says sales, and the headline disagrees with the caption ('certified units, sales and streams'). The fan, who knew streams rule, also found 8 and ran out on Sheeran, Bruno Mars, Post Malone, Kanye and the Beatles. Those are fair near misses, each with a figure (the Beatles are 1.5 million behind Ariana Grande).",
+    "Data is now clean: values match the page, the glued Eminem alias is gone, 'elvis' and 'kanye' match directly, all 10 answers have sourced facts and every miss shows a figure. Blitz: 28 of 30 casual names scored (Bad Bunny and BTS are not on the page)."
   ],
   "fixes": [
-    "Retitle so the title names the measure, for example 'Music artists with the most certified units (streams count)', and make the prompt say it plainly: 'Name the 10 music artists with the most certified units: albums, singles and streams, featured credits included'. 'Best-selling' reads as the claimed-sales list led by the Beatles, Elvis and Michael Jackson.",
-    "The prompt says 'all markets' but the page's column is 'from available markets': drop 'all markets' or say 'available markets'.",
-    "Drop the glued alias 'Eminem, Marshall Bruce Mathers III' on Eminem.",
-    "Add 'Elvis' (Elvis Presley) and 'Kanye' (Kanye West) as aliases: both now go through a did-you-mean step, which slows Blitz."
+    "Retitle so the headline says streams count and matches the caption, for example 'Music artists with the most certified sales and streams' (or 'Music artists with the most certified units'). Keep the current prompt. 'Certified sales' still reads as the best-selling list led by the Beatles, Elvis and Madonna.",
+    "Add '2Pac' as an alias of Tupac Shakur (#74): '2pac' is currently judged junk, so his stage name scores nothing in Blitz. Add 'RiRi' to Rihanna, which currently isn't recognized."
   ]
 }
