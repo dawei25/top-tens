@@ -114,6 +114,12 @@
   "blitz": false
  },
  {
+  "id": "instagram",
+  "title": "Most-followed Instagram accounts",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
   "id": "video-games",
   "title": "Best-selling video games",
   "category": "Entertainment",
@@ -128,6 +134,12 @@
  {
   "id": "books",
   "title": "Best-selling books",
+  "category": "Culture",
+  "blitz": true
+ },
+ {
+  "id": "fiction-authors",
+  "title": "Best-selling fiction authors",
   "category": "Culture",
   "blitz": true
  },
@@ -247,7 +259,7 @@
  },
  {
   "id": "music-artists",
-  "title": "Best-selling music artists",
+  "title": "Music artists with the most certified sales",
   "category": "Entertainment",
   "blitz": true
  },
