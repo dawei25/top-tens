@@ -10,7 +10,7 @@ import { FIXED_VALUE, NO_VALUE, pickLikely } from "./likely";
 import type { Topic } from "./topics";
 import { fetchPage, NotFound } from "./wiki";
 
-export type ValueKind = "elevation" | "area" | "nba-points" | "subscribers" | "passengers";
+export type ValueKind = "elevation" | "area" | "nba-points" | "subscribers" | "passengers" | "length";
 
 export interface Reading {
   /** The number as shown, without the topic's unit: "4,478", "27.5 million". */
@@ -106,6 +106,17 @@ function area(rows: Row[]): Reading {
   return { display: km[0].text, number: km[0].value, raw: row.data };
 }
 
+/** A river's length in km: the infobox "Length" row ("346 km (215 mi)"). */
+function length(rows: Row[]): Reading {
+  const row = rows.find((r) => /^length$/i.test(r.label));
+  if (!row) return { skip: "no Length row" };
+  const km = numbersWith(row.data, String.raw`km\b|kilomet(?:re|er)s?\b`);
+  if (!km.length) return { skip: "Length has no km", raw: row.data };
+  if (new Set(km.map((k) => Math.round(k.value))).size > 1) return { skip: "several lengths", raw: row.data };
+  const n = Math.round(km[0].value);
+  return { display: withCommas(n), number: n, raw: row.data };
+}
+
 function nbaPoints(rows: Row[]): Reading {
   const stats = rows.filter((r) => /^career\b.*\bstatistics$/i.test(r.header));
   if (!stats.length) return { skip: "no career statistics" };
@@ -194,7 +205,7 @@ export function readValue($: CheerioAPI, kind: ValueKind, scale = 1, names: stri
   if ($("#disambigbox, .dmbox-disambig").length) return { skip: "disambiguation page" };
   const rows = infoboxRows($);
   if (!rows) return { skip: "no infobox" };
-  const read = { elevation, area, "nba-points": nbaPoints, subscribers, passengers }[kind];
+  const read = { elevation, area, "nba-points": nbaPoints, subscribers, passengers, length }[kind];
   const r = read(rows, names);
   if (r.number !== undefined) r.number /= scale;
   return r;

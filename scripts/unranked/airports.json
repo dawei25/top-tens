@@ -5,7 +5,6 @@
   "Gatwick Airport": {"article":"Gatwick Airport","why":"whole pool","value":"43,242,000 (2024)","n":43242000,"raw":"Statistics (2024) | Total passengers | 43,242,000"},
   "Logan International Airport": {"article":"Logan International Airport","why":"whole pool","value":"43,236,013 (2025)","n":43236013,"raw":"Statistics (2025) | Passengers | 43,236,013"},
   "Tan Son Nhat International Airport": {"article":"Tan Son Nhat International Airport","why":"whole pool","value":"39,859,384 (2024)","n":39859384,"raw":"Statistics (2024) | Passengers | 39,859,384 ( 1.9%)"},
-  "London Gatwick Airport": {"article":"London Gatwick Airport","why":"whole pool","value":"43,242,000 (2024)","n":43242000,"raw":"Statistics (2024) | Total passengers | 43,242,000"},
   "Fort Lauderdale–Hollywood International Airport": {"article":"Fort Lauderdale–Hollywood International Airport","why":"whole pool","value":"32,208,419 (2025)","n":32208419,"raw":"Statistics (2025) | Total passengers | 32,208,419 8.5%"},
   "Munich Airport": {"article":"Munich Airport","why":"whole pool","value":"43,394,442 (2025)","n":43394442,"raw":"Statistics (2025) | Passengers | 43,394,442 4.4%"},
   "Antalya Airport": {"article":"Antalya Airport","why":"whole pool","value":"39,000,177 (2025)","n":39000177,"raw":"Statistics (2025) | Passengers | 39,000,177"},
@@ -27,5 +26,6 @@
   "Xiamen Gaoqi International Airport": {"article":"Xiamen Gaoqi International Airport","why":"whole pool","value":"29,193,712 (2025)","n":29193712,"raw":"Statistics (2025) | Passengers | 29,193,712"},
   "Guiyang Longdongbao International Airport": {"article":"Guiyang Longdongbao International Airport","why":"whole pool","value":"22,731,681 (2025)","n":22731681,"raw":"Statistics (2025) | Passengers | 22,731,681 1.9%"},
   "Haikou Meilan International Airport": {"article":"Haikou Meilan International Airport","why":"whole pool","value":"26,851,102 (2025)","n":26851102,"raw":"Statistics (2025) | Passengers | 26,851,102"},
-  "Noi Bai International Airport": {"article":"Noi Bai International Airport","why":"whole pool","value":"29,304,631 (2019)","n":29304631,"raw":"Statistics (2019) | Total passengers | 29,304,631 13.1%"}
+  "Noi Bai International Airport": {"article":"Noi Bai International Airport","why":"whole pool","value":"29,304,631 (2019)","n":29304631,"raw":"Statistics (2019) | Total passengers | 29,304,631 13.1%"},
+  "Narita International Airport": {"article":"Narita International Airport","why":"whole pool","value":"42,255,291 (2025)","n":42255291,"raw":"Statistics (2025) | Passengers | 42,255,291"}
 }

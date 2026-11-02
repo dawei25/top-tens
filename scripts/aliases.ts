@@ -18,6 +18,8 @@ export interface AliasContext {
   forms?: string[];
   /** A creative work (book, show, film, album, game): redirects that share no word with its names are songs or characters. */
   works?: boolean;
+  /** Web addresses are names here (websites, companies): "x.com", "Amazon.com". */
+  webNames?: boolean;
 }
 
 /** Text without a trailing "(qualifier)": "City (Alaska)" → "City". */
@@ -86,7 +88,7 @@ const CLASS_NOUN = new Set(
 );
 
 /** "<aspect> of/in <the thing>": the connecting words. */
-const CONNECTOR = /\s(of|in|involving|during|under|for|on|at|against|from|about)\s(the\s)?/gi;
+const CONNECTOR = /\s(of|in|involving|during|under|for|on|at|against|from|about|by|within|surrounding)\s(the\s)?/gi;
 
 /**
  * Words naming an event, a part, a document or a topic rather than the thing itself: "1937 Nanga Parbat tragedy",
@@ -100,11 +102,47 @@ const TOPIC_WORDS = new Set(
     "bombing crash avalanche riot riots protest protests scandal lawsuit lawsuits trial battle campaign election " +
     "referendum economy factsheet slogan mansion department ministry politics origin information symbols heritage " +
     "bibliography infrastructure topography wildfire wildfires establishment foundation fund advisors review " +
-    "trends revolution census statistics art band wildlife animals fauna flora"
+    "trends revolution census statistics art band wildlife animals fauna flora " +
+    // Places inside a city or a country, and institutions there: "Vancouver Christian School", "Rua das Flores".
+    "school schools academy elementary montessori church hotel street road avenue boulevard lane highway highways " +
+    "neighbourhood neighbourhoods neighborhood neighborhoods suburb oblast county league association " +
+    "terminal hangar murals flight crashes program programme commission board constitution government facilities " +
+    // Subtopics and spin-offs: "Pune weather", "Recife cuisine", "Frozen fandom", "Kansas City Chiefs Cheerleaders".
+    "weather cuisine food skyline culture nightlife fandom fan fans roster rosters cheerleaders players retired fame " +
+    "depth trophies shop podcast festival investigation investigations approval polling policy policies " +
+    "administration tax relations demographics map maps strategy mascot anthem motto ranks branches etiquette " +
+    "customs geography literature exploration magnetosphere radius mass distance orbit system allegations " +
+    "philanthropy collectibles pension lobbying controversy controversies valley basin watershed region"
   ).split(" "),
 );
 /** Multi-word topic phrases. */
-const TOPIC_PHRASES = /\b(metropolitan areas?|base camp|fact sheet|cultural influence|science and technology)\b/i;
+const TOPIC_PHRASES =
+  /\b(metropolitan areas?|base camp|fact sheet|cultural influence|science and technology|protected areas?|ring of honou?r|in pop culture)\b/i;
+
+/**
+ * Slurs, insults and vandalism among Wikipedia's redirects ("T-gay" to T-Series, "Bramladesh" to Brampton). A
+ * rebuild must never bring them back, on any list.
+ */
+export const BLOCKED_ALIASES = [
+  "T-gay", "Bramladesh", "Hong couver", "Hong kouver", "Hongcouver", "New York Shitty", "Sidney Cry baby",
+  "Sidney Crybaby", "A-fraud", "America's Wang", "Ayatollah dictatorship", "Microsoft.sucks", "Snovechkin",
+  "Barroid", "Elonia Musk", "First Lady Elonia", "First Lady Elonia Musk", "Toddler ceo", "Yankees Suck",
+  "Shaqtoberfest", "Triple-double cocaine bear", "Throw Rogan", "RIP Harambe",
+];
+/** Words that make a redirect an insult, unless the entry's own name has the word (Rudy Gay). */
+const INSULT = /\b(gay|fags?|faggots?|retard(ed|s)?|shitty|shit|sucks?|crybaby|cry baby|dumb|idiot|moron|loser|fraud)\b/i;
+
+/** A redirect that is an insult or a slur: never an alias. */
+export function blockedAlias(alias: string, names: string[]): boolean {
+  const n = normalize(alias);
+  if (BLOCKED.has(n)) return true;
+  const word = alias.match(INSULT)?.[0];
+  return !!word && !names.some((name) => new RegExp(`\\b${word}\\b`, "i").test(name));
+}
+const BLOCKED = new Set(BLOCKED_ALIASES.map(normalize));
+
+/** A web address: "Dallascowboys.com", "Www.britishmuseum.org", ".bnpparibas". Names on most lists, not on websites. */
+export const WEB_ADDRESS = /^(www\.|\.)|\.(com|org|net|gov|edu|co\.uk|io|tv|sucks|info)$/i;
 
 /** A description, not a name: "Highest mountain in Asia", "Largest US state", "First trillionaire". */
 const DESCRIPTION = /^(the )?(highest|tallest|largest|biggest|longest|richest|deepest|busiest|oldest|most|first|world's|worlds)\b/i;
@@ -142,6 +180,25 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
 
   if (YEAR.test(base) && !names.some((n) => /\d{4}/.test(n))) return "names an event or edition (a year)";
 
+  if (WEB_ADDRESS.test(base) && (!ctx.webNames || /^(www\.|\.)|\.sucks$/i.test(base))) return "a web address";
+
+  // "Kotly, Moscow", "Vista Alegre, Belo Horizonte": a place inside the thing, named before it. "Washington, D.C."
+  // and "Atlanta, Georgia" start with the thing's own name and stay.
+  const parts = base.split(/\s*,\s*/);
+  const head = normalize(parts[0]);
+  if (parts.length > 1 && !own.has(head) && parts.slice(1).some((p) => forms.has(normalize(p)))) {
+    return "a place inside the thing";
+  }
+
+  // "Gretzky's Office", "LeBron's son", "Minecraft's cultural impact": something of the thing's, not its name.
+  const possessive = base.match(/^(.+?)['’]s\s+(.+)$/);
+  if (possessive) {
+    const [, whose, what] = possessive;
+    const ownWords = names.flatMap((n) => normalize(n).split(" ")).filter((w) => w.length >= 4);
+    const isOwn = own.has(normalize(whose)) || ownWords.includes(normalize(whose));
+    if (isOwn && !sharesWord(what, names)) return "something of the thing's, not a name for it";
+  }
+
   const first = base.match(DESCRIPTION)?.[2];
   if (first && !usesOwnWord(normalize(first))) return "a description, not a name";
 
@@ -172,8 +229,35 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
  * Redirects to country articles that no rule can tell from a name (jokes, people, buildings, events), found by the
  * list judges. Dropped on every list with the countries universe.
  */
+/**
+ * Rare spellings among city redirects that only catch typos of ordinary words ("singer" became Xi'an through
+ * "Singan", "market" Mecca through "Makkeh"). Dropped on every city list.
+ */
+export const CITY_JUNK = ["Singan", "Siking", "Signan", "Makkeh", "Shouer", "Singy", "S'pore", "Dtown"];
+
 export const COUNTRY_JUNK = [
   "Snow Mexico", "Finnishness", "The Land of Chocolate", "Day of the Capital", "Abdullah al-Saleh", "Al Rawda Palace",
+  "Ugandan nationalism", "Ker Alur", "Official language of Southern Sudan", "North Kenya", "Kenya-Africa",
+  "Belgian Ubanghi", "Độc lập, tự do, hạnh phúc", "Doc lap, tu do, hanh phuc", "Swedish sin", "Folkland",
+  "Federal state", "German infrastructure", "Law and criminal justice of Italy", "Administrative units of Italy",
+  "Mountains of Spain", "Bibliography of Finland", "Irish politics", "Ireland politics", "Politic in eire",
+  "Politic of eire", "Science and technology in Malta", "Maltese art", "Swedish origin", "Law of Greece",
+  "Languages of Saudi Arabia", "Argentina Information", "National symbols of Chile", "Cultural heritage of Chile",
+  "Third Republic", "Languages of Vietnam", "Social problems in Saudi Arabia", "Child abuse in Saudi Arabia",
+  "National parks in Kuwait", "Water supply and sanitation in Kuwait", "Water resources of Kuwait",
+  "Languages of Kuwait", "Law of Iran", "Science and technology in Bahrain",
+  "Description of Democratic Republic of Congo", "Project Meridian", "United States military ranks",
+  "US military branches", "Customs and etiquette in the services", "Prince Pickles", "Russian Foreign Legion",
+  "Muscovian army", "Britain's languages", "Great Britain's languages", "Council Union", "Soviet order",
+  "People's republic of russia", "United states of soviet russia", "European USSR", "De", "Modern day China",
+  "France–Monaco border", "Monaco–France border", "Fort-Hercule", "Monegasque culture", "Monegasque geography",
+  "HUB in a Singapore context", "Gibraltar Health Authority", "Gibraltar Group Practice Medical Scheme",
+  "Vatican City culture", "Vatican City cuisine", "Vatican citizenship", "Roman Catholicism in Rome",
+  "St. Joseph's Fountain", "Fushifarurah", "Iru fushi", "Irufushi", "See United Kingdom.", "See China.",
+  "Topography of the UK", "Topography of the United Kingdom", "Abegistan", "Yananistan", "Land of the Swiss",
+  // Rare names that only catch typos of other words ("airplanes" became Ireland, "nunavut" Greenland).
+  "Airlann", "Airlan", "Nunaat", "Antarctica of The North", "S'pore", "Pinas", "Sovjet", "Grease", "Island", "Port",
+  "Poccnr", "Poccия",
 ];
 
 let english: Set<string> | undefined;

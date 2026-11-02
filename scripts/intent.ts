@@ -18,8 +18,13 @@ export interface Intent {
  */
 export const COUNTRY_FORMS: string[][] = [
   ["United States", "USA", "US", "U.S.", "U.S.A.", "America", "United States of America", "the States"],
-  ["United Kingdom", "UK", "U.K.", "Britain", "Great Britain", "GB", "England", "Scotland", "Wales"],
-  ["China", "PRC", "People's Republic of China", "Mainland China"],
+  ["United Kingdom", "UK", "U.K.", "Britain", "Great Britain", "GB", "England", "Scotland", "Wales", "Team GB", "British"],
+  ["China", "PRC", "People's Republic of China", "Mainland China", "Zhongguo"],
+  ["Australia", "Aussie", "Aussies"],
+  ["Switzerland", "Swiss", "Swiss Confederation"],
+  ["India", "Bharat"],
+  ["Japan", "Nippon", "Nihon"],
+  ["South Africa", "RSA"],
   ["Taiwan", "Republic of China", "ROC", "Chinese Taipei", "Formosa"],
   ["Russia", "Russian Federation"],
   ["Soviet Union", "USSR", "U.S.S.R.", "Soviet", "CCCP"],
@@ -28,7 +33,7 @@ export const COUNTRY_FORMS: string[][] = [
   ["DR Congo", "Democratic Republic of the Congo", "DRC", "Congo-Kinshasa", "Zaire", "Congo DR", "DR of Congo"],
   ["Republic of the Congo", "Congo-Brazzaville", "Congo Republic"],
   ["Ivory Coast", "Côte d'Ivoire", "Cote d'Ivoire"],
-  ["Czech Republic", "Czechia"],
+  ["Czech Republic", "Czechia", "Czech"],
   ["Turkey", "Türkiye", "Turkiye"],
   ["Netherlands", "Holland", "The Netherlands"],
   ["United Arab Emirates", "UAE", "Emirates"],
@@ -62,6 +67,189 @@ export const COUNTRY_FORMS: string[][] = [
   ["Kyrgyzstan", "Kyrgyz Republic"],
   ["Ireland", "Republic of Ireland", "Eire"],
 ];
+
+/**
+ * Everyday names for cities, applied to every city list. Each line is one city, its usual English name first; the
+ * build gives the others to the entry with that name (or, failing that, the one entry with another of the names).
+ * A form that is another entry's name stays that entry's ("Frisco", Texas).
+ */
+export const CITY_FORMS: string[][] = [
+  ["New York City", "New York", "NYC", "NY", "Big Apple", "The Big Apple"],
+  ["Los Angeles", "LA", "L.A."],
+  ["San Francisco", "SF", "San Fran", "Frisco"],
+  ["Washington, D.C.", "Washington", "Washington DC", "DC", "D.C."],
+  ["Philadelphia", "Philly"],
+  ["Las Vegas", "Vegas"],
+  ["New Orleans", "NOLA", "Big Easy", "The Big Easy"],
+  ["Indianapolis", "Indy"],
+  ["St. Louis", "Saint Louis", "St Louis", "STL"],
+  ["Chicago", "Chi-Town", "Chitown"],
+  ["Atlanta", "ATL"],
+  ["Oklahoma City", "OKC"],
+  ["Salt Lake City", "SLC"],
+  ["Jacksonville", "Jax"],
+  ["Rio de Janeiro", "Rio"],
+  ["São Paulo", "SP", "Sampa"],
+  ["Belo Horizonte", "BH"],
+  ["Mexico City", "CDMX", "Ciudad de México"],
+  ["Kuala Lumpur", "KL"],
+  ["Ho Chi Minh City", "HCMC", "Saigon"],
+  ["Hong Kong", "HK"],
+  ["Saint Petersburg", "St Petersburg", "St. Petersburg", "Leningrad"],
+  ["Toronto", "The 6ix"],
+  ["Montreal", "Montréal", "MTL"],
+  ["Calgary", "YYC"],
+  ["Delhi", "New Delhi", "Dilli"],
+  ["Mumbai", "Bombay"],
+  ["Chennai", "Madras"],
+  ["Kolkata", "Calcutta"],
+  ["Bengaluru", "Bangalore"],
+  ["Pune", "Poona"],
+  ["Beijing", "Peking"],
+  ["Guangzhou", "Canton"],
+  ["Xi'an", "Xian"],
+  ["Chongqing", "Chungking"],
+  ["Tianjin", "Tientsin"],
+  ["Qingdao", "Tsingtao"],
+  ["Kyiv", "Kiev"],
+  ["Istanbul", "Constantinople"],
+  ["Dhaka", "Dacca"],
+  ["Yangon", "Rangoon"],
+  ["Mecca", "Makkah"],
+  ["Macau", "Macao"],
+];
+
+/**
+ * Famous nicknames of athletes, applied on every list of people where the athlete is an entry (ranked or not).
+ * Only names fans really use (most are Wikipedia redirects); a nickname two players share is left out. The build
+ * also leaves out one that is a single plain word ("The Glove" is "glove"): it would catch that word typed for anything
+ * else.
+ */
+export const NICKNAMES: Record<string, string[]> = {
+  // Basketball
+  "LeBron James": ["King James", "LBJ", "Bron"],
+  "Kareem Abdul-Jabbar": ["Lew Alcindor"],
+  "Kobe Bryant": ["Black Mamba"],
+  "Michael Jordan": ["MJ", "Air Jordan", "His Airness"],
+  "Kevin Durant": ["KD", "Slim Reaper"],
+  "Wilt Chamberlain": ["Wilt the Stilt", "The Big Dipper"],
+  "Shaquille O'Neal": ["Shaq", "The Diesel", "The Big Aristotle"],
+  "Stephen Curry": ["Steph", "Steph Curry", "Chef Curry"],
+  "Allen Iverson": ["AI", "The Answer"],
+  "Giannis Antetokounmpo": ["Giannis", "Greek Freak", "The Greek Freak"],
+  "Carmelo Anthony": ["Melo"],
+  "Dwyane Wade": ["D-Wade", "Flash"],
+  "Kevin Garnett": ["KG", "The Big Ticket"],
+  "Tim Duncan": ["The Big Fundamental"],
+  "Hakeem Olajuwon": ["The Dream", "Hakeem the Dream", "Akeem Olajuwon"],
+  "David Robinson": ["The Admiral"],
+  "Charles Barkley": ["Sir Charles", "Chuck"],
+  "Julius Erving": ["Dr. J"],
+  "Jerry West": ["The Logo", "Mr. Clutch"],
+  "George Gervin": ["The Iceman", "Iceman"],
+  "Pete Maravich": ["Pistol Pete"],
+  "Magic Johnson": ["Magic", "Earvin Johnson"],
+  "Oscar Robertson": ["The Big O", "Big O"],
+  "Isiah Thomas": ["Zeke"],
+  "Chris Paul": ["CP3", "Point God"],
+  "Russell Westbrook": ["Russ"],
+  "Paul Pierce": ["The Truth"],
+  "Damian Lillard": ["Dame", "Dame Time"],
+  "Kyrie Irving": ["Uncle Drew"],
+  "Nikola Jokić": ["Joker", "The Joker"],
+  "Larry Bird": ["Larry Legend"],
+  "Dennis Rodman": ["The Worm"],
+  "Elvin Hayes": ["The Big E"],
+  "Dwight Howard": ["Superman", "D12"],
+  "Vince Carter": ["Vinsanity", "Air Canada", "Half Man Half Amazing"],
+  "Tracy McGrady": ["T-Mac"],
+  "Gary Payton": ["The Glove"],
+  "Anthony Davis": ["The Brow"],
+  "Kawhi Leonard": ["The Claw"],
+  "Dominique Wilkins": ["The Human Highlight Film", "Nique"],
+  "Paul George": ["PG13"],
+  "Shai Gilgeous-Alexander": ["SGA", "Shai"],
+  // American football
+  "Tom Brady": ["TB12", "Tom Terrific"],
+  "Peyton Manning": ["The Sheriff"],
+  "Ben Roethlisberger": ["Big Ben"],
+  "Matt Ryan": ["Matty Ice"],
+  "Joe Montana": ["Joe Cool"],
+  "Brett Favre": ["The Gunslinger"],
+  "Adrian Peterson": ["All Day"],
+  "LaDainian Tomlinson": ["LT"],
+  "Derrick Henry": ["King Henry"],
+  "Marshawn Lynch": ["Beast Mode"],
+  "O. J. Simpson": ["The Juice", "OJ", "OJ Simpson"],
+  "Calvin Johnson": ["Megatron"],
+  "Deion Sanders": ["Prime Time", "Neon Deion"],
+  // Baseball
+  "Babe Ruth": ["The Babe", "The Bambino", "Sultan of Swat"],
+  "Hank Aaron": ["Hammerin' Hank"],
+  "Willie Mays": ["Say Hey Kid", "The Say Hey Kid"],
+  "Alex Rodriguez": ["A-Rod", "ARod"],
+  "Albert Pujols": ["The Machine", "Prince Albert"],
+  "Ken Griffey Jr.": ["Junior Griffey", "The Kid"],
+  "Sammy Sosa": ["Slammin' Sammy"],
+  "Mark McGwire": ["Big Mac"],
+  "David Ortiz": ["Big Papi"],
+  "Mickey Mantle": ["The Mick"],
+  "Reggie Jackson": ["Mr. October"],
+  "Pete Rose": ["Charlie Hustle"],
+  "Ty Cobb": ["The Georgia Peach"],
+  "Stan Musial": ["Stan the Man"],
+  "Derek Jeter": ["The Captain", "Mr. November"],
+  "Carl Yastrzemski": ["Yaz"],
+  "Tony Gwynn": ["Mr. Padre"],
+  "Ichiro Suzuki": ["Ichiro"],
+  "Rickey Henderson": ["Man of Steal"],
+  "Cal Ripken Jr.": ["Iron Man", "Cal Ripken"],
+  "Lou Gehrig": ["The Iron Horse"],
+  "Joe DiMaggio": ["Joltin' Joe", "The Yankee Clipper"],
+  "Ted Williams": ["The Splendid Splinter", "Teddy Ballgame"],
+  "Frank Thomas": ["The Big Hurt"],
+  "Miguel Cabrera": ["Miggy"],
+  "Honus Wagner": ["The Flying Dutchman"],
+  "Shohei Ohtani": ["Shotime"],
+  // Hockey
+  "Wayne Gretzky": ["The Great One"],
+  "Gordie Howe": ["Mr. Hockey"],
+  "Mario Lemieux": ["Super Mario", "Le Magnifique"],
+  "Sidney Crosby": ["Sid the Kid", "Sid"],
+  "Alexander Ovechkin": ["Ovi", "Alex Ovechkin", "The Great Eight"],
+  "Steve Yzerman": ["Stevie Y"],
+  "Brett Hull": ["The Golden Brett"],
+  "Bobby Hull": ["The Golden Jet"],
+  "Maurice Richard": ["The Rocket", "Rocket Richard"],
+  "Phil Esposito": ["Espo"],
+  "Teemu Selänne": ["The Finnish Flash"],
+  "Joe Sakic": ["Burnaby Joe"],
+  "Jarome Iginla": ["Iggy"],
+  "Joe Thornton": ["Jumbo Joe"],
+  // Football (soccer)
+  "Wayne Rooney": ["Wazza", "Roo"],
+  "Sergio Agüero": ["Kun Agüero", "Kun"],
+  "Frank Lampard": ["Lamps", "Super Frank"],
+  "Thierry Henry": ["Titi"],
+  "Mohamed Salah": ["Mo Salah", "Egyptian King"],
+  "Robin van Persie": ["RVP"],
+  "Les Ferdinand": ["Sir Les"],
+  "Steven Gerrard": ["Stevie G"],
+  "Ian Wright": ["Wrighty"],
+  "Cristiano Ronaldo": ["CR7"],
+};
+
+/**
+ * Short names for US states beyond their postal codes (which build.ts adds from gazetteer.ts, except the ones that
+ * are everyday words: IN, OR, ME, HI, OK, OH).
+ */
+export const STATE_FORMS: Record<string, string[]> = {
+  Massachusetts: ["Mass"],
+  California: ["Cali"],
+  Washington: ["Washington State"],
+  "New York": ["New York State", "NY State"],
+  Virginia: ["Virgina"],
+};
 
 export const INTENT: Record<string, Intent> = {
   islands: {
@@ -104,7 +292,8 @@ export const INTENT: Record<string, Intent> = {
       "Río de la Plata": ["Parana", "Paraná", "River Plate", "Parana River"],
       Congo: ["Congo River", "Zaire River"],
       Mississippi: ["Mississippi River", "Mississippi-Missouri", "Missouri", "Missouri River"],
-      Padma: ["Ganges", "Ganga", "Ganges River"],
+      Ganges: ["Padma", "Ganga", "Ganges River", "River Ganges"],
+      "Saint Lawrence": ["St. Lawrence", "St Lawrence", "Saint Lawrence River", "St. Lawrence River"],
       "Shatt al-Arab": ["Euphrates"],
       Murray: ["Murray-Darling", "Darling"],
       Amur: ["Amur River", "Heilong Jiang"],
@@ -115,18 +304,20 @@ export const INTENT: Record<string, Intent> = {
   lakes: {
     same: {
       "Caspian Sea": ["Caspian", "Caspian Lake"],
-      Superior: ["Lake Superior"],
-      Victoria: ["Lake Victoria"],
-      Huron: ["Lake Huron"],
-      Michigan: ["Lake Michigan"],
-      Tanganyika: ["Lake Tanganyika"],
-      Baikal: ["Lake Baikal", "Baykal"],
+      "Lake Superior": ["Superior"],
+      "Lake Victoria": ["Victoria"],
+      "Lake Huron": ["Huron"],
+      "Lake Michigan": ["Michigan"],
+      "Lake Tanganyika": ["Tanganyika"],
+      "Lake Baikal": ["Baikal", "Baykal"],
       "Great Bear Lake": ["Great Bear"],
-      Malawi: ["Lake Malawi", "Lake Nyasa", "Nyasa"],
+      "Lake Malawi": ["Malawi", "Lake Nyasa", "Nyasa"],
       "Great Slave Lake": ["Great Slave"],
     },
     groups: {
-      "Michigan-Huron": ["Michigan", "Huron"],
+      // One lake hydrologically: the game asks which of the two the player means.
+      "Michigan-Huron": ["Lake Michigan", "Lake Huron"],
+      "Lake Michigan-Huron": ["Lake Michigan", "Lake Huron"],
     },
   },
   "world-cities": {
@@ -144,6 +335,9 @@ export const INTENT: Record<string, Intent> = {
   },
   "youtube-channels": {
     same: {
+      BANGTANTV: ["BTS", "Bangtan Boys", "Bangtan"],
+      "UR · Cristiano": ["Cristiano Ronaldo", "Cristiano", "Ronaldo", "CR7", "UR Cristiano"],
+      "Eminem Music": ["Eminem"],
       "SET India": ["Sony Entertainment Television", "Sony TV", "SET"],
       "김프로KIMPRO": ["Kimpro", "Kim Pro"],
       "Kids Diana Show": ["Diana and Roma", "Kids Diana"],
@@ -154,6 +348,7 @@ export const INTENT: Record<string, Intent> = {
   },
   "youtube-videos": {
     same: {
+      "Baby Shark Dance": ["Baby Shark", "Baby Shark Pinkfong"],
       "Johny Johny Yes Papa": ["Johnny Johnny Yes Papa", "Johnny Johnny"],
       "Axel F": ["Crazy Frog", "Crazy Frog Axel F"],
       "Phonics Song with Two Words": ["Phonics Song", "ChuChu TV Phonics Song"],
@@ -161,11 +356,17 @@ export const INTENT: Record<string, Intent> = {
       "Wheels on the Bus": ["The Wheels on the Bus"],
     },
     groups: {
-      "Baby Shark": ["Baby Shark Dance", "Baby Shark"],
     },
   },
   "video-games": {
     same: {
+      "Sonic the Hedgehog": ["Sonic", "Sonic 1"],
+      "Call of Duty: Black Ops III": ["Black Ops 3", "BO3", "CoD Black Ops 3"],
+      "Call of Duty: Modern Warfare": ["CoD Modern Warfare", "Modern Warfare 2019"],
+      "Call of Duty: Black Ops Cold War": ["Cold War", "Black Ops Cold War", "BOCW"],
+      "Call of Duty: Modern Warfare 3": ["MW3", "CoD MW3"],
+      "Call of Duty: Black Ops": ["Black Ops 1", "BO1"],
+      "Call of Duty 4: Modern Warfare": ["CoD 4", "CoD4"],
       "Mario Kart 8": ["Mario Kart 8 Deluxe", "MK8", "MK8D"],
       "Grand Theft Auto V": ["GTA 5", "GTA V"],
       "Grand Theft Auto Online": ["GTA Online"],
@@ -175,6 +376,8 @@ export const INTENT: Record<string, Intent> = {
       "The Witcher 3: Wild Hunt": ["Witcher 3", "The Witcher 3"],
     },
     groups: {
+      CoD: ["Call of Duty: Black Ops III", "Call of Duty: Modern Warfare", "Call of Duty: Black Ops Cold War", "Call of Duty: Modern Warfare 3"],
+      "Call of Duty": ["Call of Duty: Black Ops III", "Call of Duty: Modern Warfare", "Call of Duty: Black Ops Cold War", "Call of Duty: Modern Warfare 3"],
       GTA: ["Grand Theft Auto V", "Grand Theft Auto: San Andreas", "Grand Theft Auto IV", "Grand Theft Auto VI"],
       "Grand Theft Auto": ["Grand Theft Auto V", "Grand Theft Auto: San Andreas", "Grand Theft Auto IV", "Grand Theft Auto VI"],
       Zelda: [
@@ -186,22 +389,27 @@ export const INTENT: Record<string, Intent> = {
   },
   consoles: {
     same: {
+      "Nintendo 3DS": ["3DS", "New Nintendo 3DS", "New 3DS"],
+      "Xbox Series X/S": ["Xbox Series X", "Xbox Series S", "Xbox Series X and Series S", "Series X"],
+      "Sega Mark III/Master System": ["Master System", "Sega Master System"],
       PlayStation: ["PS1", "PSX", "PS One", "PlayStation 1"],
       "PlayStation 2": ["PS2"],
       "PlayStation 3": ["PS3"],
       "PlayStation 4": ["PS4"],
       "PlayStation 5": ["PS5"],
-      "Nintendo DS": ["DS"],
+      // Models of a console are that console.
+      "Nintendo DS": ["DS", "DSi", "Nintendo DSi", "DS Lite"],
       "Nintendo Switch": ["Switch"],
-      "Game Boy": ["Gameboy"],
+      "Game Boy": ["Gameboy", "Game Boy Color", "GBC", "Gameboy Color"],
       Wii: ["Nintendo Wii"],
       "Xbox 360": ["X360"],
       "Family Computer/Nintendo Entertainment System": ["NES", "Famicom", "Nintendo Entertainment System"],
       "Super Famicom/Super Nintendo Entertainment System": ["SNES", "Super Nintendo", "Super Famicom"],
       "Nintendo 64": ["N64"],
-      "Game Boy Advance": ["GBA"],
+      "Game Boy Advance": ["GBA", "Game Boy Advance SP", "GBA SP"],
       "PlayStation Portable": ["PSP"],
-      "Mega Drive/Genesis": ["Sega Genesis", "Genesis", "Sega Mega Drive"],
+      // "Mega Drive" alone is Sega's console, not the Brazil-only Tectoy row.
+      "Mega Drive/Genesis": ["Sega Genesis", "Genesis", "Sega Mega Drive", "Mega Drive"],
       "Nintendo GameCube": ["GameCube"],
     },
   },
@@ -214,9 +422,17 @@ export const INTENT: Record<string, Intent> = {
       "Alice's Adventures in Wonderland": ["Alice in Wonderland"],
       "The Little Prince": ["Le Petit Prince"],
     },
+    groups: {
+      HP: ["Harry Potter and the Philosopher's Stone", "Harry Potter and the Chamber of Secrets"],
+    },
   },
   languages: {
     same: {
+      "Iranian Persian": ["Farsi", "Persian"],
+      "Yue Chinese": ["Cantonese"],
+      Tagalog: ["Filipino"],
+      "Wu Chinese": ["Shanghainese"],
+      "Standard German": ["German"],
       "Mandarin Chinese": ["Mandarin", "Chinese", "Putonghua"],
       "Modern Standard Arabic": ["Arabic"],
       Bengali: ["Bangla"],
@@ -226,6 +442,7 @@ export const INTENT: Record<string, Intent> = {
   },
   buildings: {
     same: {
+      "Willis Tower": ["Sears Tower"],
       "Merdeka Maybank Tower": ["Merdeka 118", "PNB 118", "Merdeka PNB118"],
       "Mecca Royal Clock Tower": ["Abraj Al Bait", "Makkah Royal Clock Tower", "Mecca Clock Tower"],
       "Ping An Finance Centre": ["Ping An Finance Center", "Ping An"],
@@ -234,19 +451,21 @@ export const INTENT: Record<string, Intent> = {
       "CITIC Tower": ["China Zun"],
       "Lotte World Tower": ["Lotte Tower"],
     },
+    groups: {
+      "Petronas Towers": ["Petronas Tower 1", "Petronas Tower 2"],
+      "Petronas Twin Towers": ["Petronas Tower 1", "Petronas Tower 2"],
+    },
   },
   "nba-points": {
     same: {
       "Magic Johnson": ["Magic", "Earvin Johnson"],
       "LeBron James": ["LeBron", "King James", "LBJ"],
       "Kareem Abdul-Jabbar": ["Kareem", "Lew Alcindor"],
-      "Karl Malone": ["The Mailman"],
       "Kobe Bryant": ["Kobe", "Black Mamba"],
       "Kevin Durant": ["KD", "Durant"],
       "Michael Jordan": ["MJ", "Air Jordan"],
       "Dirk Nowitzki": ["Dirk"],
       "Wilt Chamberlain": ["Wilt", "Wilt the Stilt"],
-      "James Harden": ["The Beard"],
       "Shaquille O'Neal": ["Shaq", "Shaquille"],
     },
   },
@@ -254,7 +473,8 @@ export const INTENT: Record<string, Intent> = {
     same: {
       "Narendra Modi Stadium": ["Motera Stadium", "Motera"],
       "Michigan Stadium": ["The Big House", "Big House"],
-      "Ohio Stadium": ["The Horseshoe", "The Shoe", "Ohio State"],
+      // Not "The Shoe": it caught "shop".
+      "Ohio Stadium": ["The Horseshoe", "Ohio State"],
       "Tiger Stadium": ["Death Valley", "LSU Tiger Stadium", "LSU"],
       "Darrell K Royal–Texas Memorial Stadium": ["Texas Memorial Stadium", "DKR"],
       "Beaver Stadium": ["Penn State"],
@@ -269,9 +489,12 @@ export const INTENT: Record<string, Intent> = {
   },
   "companies-revenue": {
     same: {
+      "CVS Health": ["CVS"],
+      Shell: ["Royal Dutch Shell"],
+      "Samsung Electronics": ["Samsung"],
+      "China National Petroleum Corporation": ["Petro China", "PetroChina", "CNPC"],
       Alphabet: ["Google"],
       "China Petrochemical Corporation": ["Sinopec"],
-      "China National Petroleum Corporation": ["PetroChina", "CNPC"],
       "Berkshire Hathaway": ["Berkshire"],
       "State Grid Corporation of China": ["State Grid"],
       "Saudi Aramco": ["Aramco"],
@@ -280,6 +503,7 @@ export const INTENT: Record<string, Intent> = {
   },
   "super-bowl-wins": {
     same: {
+      "Tampa Bay Buccaneers": ["Bucs", "Tampa Bay"],
       "New England Patriots": ["Pats", "Boston Patriots", "New England"],
       "Washington Commanders": ["Washington Redskins", "Redskins", "Washington Football Team", "Washington"],
       "Las Vegas Raiders": ["Oakland Raiders", "Los Angeles Raiders", "LA Raiders"],
@@ -305,6 +529,7 @@ export const INTENT: Record<string, Intent> = {
   },
   "premier-league-goals": {
     same: {
+      "Son Heung-min": ["Son", "Sonny", "Heung-min Son", "Son Heung Min"],
       "Mohamed Salah": ["Mo Salah", "Salah"],
       "Sergio Agüero": ["Aguero", "Kun Agüero"],
       "Andy Cole": ["Andrew Cole"],
@@ -328,10 +553,10 @@ export const INTENT: Record<string, Intent> = {
   "nfl-rushing-yards": {
     same: {
       "Emmitt Smith": ["Emmitt"],
-      "Walter Payton": ["Sweetness", "Payton"],
+      "Walter Payton": ["Payton"],
       "Adrian Peterson": ["AP", "All Day"],
       "LaDainian Tomlinson": ["LT", "LaDainian"],
-      "Jerome Bettis": ["The Bus", "Bettis"],
+      "Jerome Bettis": ["Bettis"],
       "Derrick Henry": ["King Henry"],
       "Barry Sanders": ["Barry"],
     },
@@ -343,12 +568,13 @@ export const INTENT: Record<string, Intent> = {
       "Gordie Howe": ["Mr. Hockey", "Howe"],
       "Jaromir Jagr": ["Jaromír Jágr", "Jagr"],
       "Phil Esposito": ["Espo"],
-      "Mark Messier": ["Messier", "The Moose"],
+      "Mark Messier": ["Messier"],
       "Steve Yzerman": ["Stevie Y", "Yzerman"],
     },
   },
   "x-accounts": {
     same: {
+      X: ["Twitter", "@Twitter"],
       "Elon Musk": ["Elon", "Musk"],
       "Barack Obama": ["Obama", "Barack"],
       "Cristiano Ronaldo": ["CR7", "Cristiano", "Ronaldo"],
@@ -370,6 +596,8 @@ export const INTENT: Record<string, Intent> = {
   },
   albums: {
     same: {
+      "Sgt. Pepper's Lonely Hearts Club Band": ["Sgt Pepper", "Sergeant Pepper", "Sgt. Pepper's", "Sergeant Pepper's"],
+      "1": ["Beatles 1", "The Beatles 1"],
       "Their Greatest Hits": ["Eagles Greatest Hits", "Their Greatest Hits 1971-1975"],
       "The Bodyguard": ["Bodyguard soundtrack", "The Bodyguard soundtrack"],
       Rumours: ["Rumors"],
@@ -386,19 +614,32 @@ export const INTENT: Record<string, Intent> = {
   },
   "media-franchises": {
     same: {
+      "Middle-earth": ["The Lord of the Rings", "Lord of the Rings", "LOTR", "The Hobbit"],
+      "Despicable Me": ["Minions"],
+      "The Railway Series": ["Thomas the Tank Engine", "Thomas & Friends", "Thomas"],
+      "Ultra Series": ["Ultraman"],
+      "Star Wars": ["SW"],
+      "Wizarding World": ["HP", "Harry Potter"],
+      "Grand Theft Auto": ["GTA"],
       "Mickey Mouse & Friends": ["Mickey Mouse", "Mickey"],
       "Winnie-the-Pooh": ["Winnie the Pooh", "Pooh"],
       "Disney Princess": ["Disney Princesses"],
       "Call of Duty": ["COD"],
       "Marvel Cinematic Universe": ["MCU", "Marvel"],
-      "Wizarding World": ["Harry Potter"],
+    },
+    groups: {
+      Disney: ["Mickey Mouse & Friends", "Disney Princess"],
     },
   },
   "game-franchises": {
     same: {
-      Mario: ["Super Mario"],
+      Mario: ["Mario Kart", "Mario Party", "Luigi", "Super Mario"],
+      Wii: ["Wii Sports", "Wii Fit"],
+      "Red Dead": ["Red Dead Redemption"],
+      "The Elder Scrolls": ["Skyrim", "Elder Scrolls"],
+      "Grand Theft Auto": ["GTA V", "GTA 5", "GTA"],
+      "Star Wars": ["SW"],
       "Call of Duty": ["COD"],
-      "Grand Theft Auto": ["GTA"],
       FIFA: ["EA Sports FC", "EA FC"],
       "Resident Evil": ["Biohazard"],
       "Final Fantasy": ["FF"],
@@ -448,10 +689,10 @@ export const INTENT: Record<string, Intent> = {
   },
   deserts: {
     same: {
+      "Great Australian Desert": ["Outback", "Australian Outback", "Australian deserts", "The Outback", "Australian Desert", "Australian Outback deserts"],
+      "Arabian Desert": ["Rub' al Khali", "Rub al Khali", "Empty Quarter", "The Empty Quarter", "Arabia"],
       "Sahara Desert": ["Sahara"],
-      "Great Australian Desert": ["Australian Desert", "Australian Outback deserts"],
       "Patagonian Desert": ["Patagonia"],
-      "Arabian Desert": ["Arabia"],
     },
   },
   "city-visitors": {
@@ -471,6 +712,9 @@ export const INTENT: Record<string, Intent> = {
   },
   empires: {
     same: {
+      "Xiongnu Empire": ["Xiongnu"],
+      "Achaemenid Empire": ["Persian Empire", "Persia", "Persian", "First Persian Empire"],
+      "Empire of Japan": ["Japanese Empire", "Imperial Japan"],
       "British Empire": ["British", "Britain"],
       "Mongol Empire": ["Mongols", "Mongolian Empire"],
       "Russian Empire": ["Russia", "Tsarist Russia", "Imperial Russia"],
@@ -490,13 +734,20 @@ export const INTENT: Record<string, Intent> = {
   },
   museums: {
     same: {
+      "Museum of Modern Art": ["MoMA"],
+      "National Museum of Natural History": ["Smithsonian Natural History", "Smithsonian Museum of Natural History"],
+      "National Air and Space Museum": ["Smithsonian Air and Space", "Air and Space Museum"],
       Louvre: ["The Louvre", "Louvre Museum", "Musée du Louvre"],
       "Vatican Museums": ["Vatican Museum", "Musei Vaticani"],
       "Metropolitan Museum of Art": ["The Met", "Met Museum", "The Metropolitan Museum"],
     },
+    groups: {
+      Smithsonian: ["National Museum of Natural History", "National Air and Space Museum", "Smithsonian Museum of American History", "Smithsonian American Art Museum"],
+    },
   },
   "market-cap-peak": {
     same: {
+      PetroChina: ["Petro China"],
       Meta: ["Facebook", "Meta Platforms"],
       Alphabet: ["Google"],
       TSMC: ["Taiwan Semiconductor"],
@@ -506,6 +757,17 @@ export const INTENT: Record<string, Intent> = {
   },
   banks: {
     same: {
+      Citigroup: ["Citi", "Citibank", "Citicorp"],
+      "SMBC Group": ["Sumitomo Mitsui", "Sumitomo Mitsui Banking Corporation", "SMFG", "Sumitomo Mitsui Financial Group"],
+      "Mitsubishi UFJ Financial Group": ["MUFG"],
+      "Toronto-Dominion Bank": ["TD", "TD Bank"],
+      "Royal Bank of Canada": ["RBC"],
+      "Banco Bilbao Vizcaya Argentaria": ["BBVA"],
+      "U.S. Bancorp": ["US Bank", "U.S. Bank"],
+      "PNC Financial Services": ["PNC"],
+      "Truist Financial Corp": ["Truist"],
+      "Charles Schwab Corporation": ["Schwab"],
+      BNY: ["BNY Mellon", "Bank of New York Mellon", "Bank of New York"],
       "Industrial and Commercial Bank of China": ["ICBC"],
       "Agricultural Bank of China": ["ABC", "Agricultural Bank"],
       "China Construction Bank": ["CCB"],
@@ -514,17 +776,19 @@ export const INTENT: Record<string, Intent> = {
       "BNP Paribas": ["BNP"],
       "Postal Savings Bank of China": ["Postal Savings Bank", "PSBC"],
     },
+    groups: {
+      Sumitomo: ["SMBC Group", "Sumitomo Mitsui Trust Holdings"],
+    },
   },
   "richest-people": {
     same: {
+      "S. Robson Walton": ["Rob Walton", "Robson Walton"],
       "Elon Musk": ["Elon"],
       "Mark Zuckerberg": ["Zuck"],
       "Jensen Huang": ["Jensen"],
       "Warren Buffett": ["Buffet"],
     },
     groups: {
-      // Today's richest Bettencourt, or her late mother: ask.
-      Bettencourt: ["Françoise Bettencourt Meyers", "Liliane Bettencourt"],
     },
   },
   broadway: {
@@ -538,6 +802,8 @@ export const INTENT: Record<string, Intent> = {
   },
   manga: {
     same: {
+      "Hunter × Hunter": ["Hunter x Hunter", "HxH"],
+      "Spy × Family": ["Spy x Family", "Spy Family"],
       "Case Closed / Detective Conan": ["Detective Conan", "Case Closed", "Conan"],
       "Demon Slayer: Kimetsu no Yaiba": ["Demon Slayer", "Kimetsu no Yaiba"],
       "Jujutsu Kaisen": ["JJK"],
@@ -547,6 +813,7 @@ export const INTENT: Record<string, Intent> = {
   },
   "nba-assists": {
     same: {
+      "Nick Van Exel": ["Van Exel"],
       "Chris Paul": ["CP3"],
       "Magic Johnson": ["Magic", "Earvin Johnson"],
       "Oscar Robertson": ["The Big O", "Big O"],
@@ -563,8 +830,6 @@ export const INTENT: Record<string, Intent> = {
       "Kareem Abdul-Jabbar": ["Kareem", "Lew Alcindor"],
       "Elvin Hayes": ["The Big E"],
       "Tim Duncan": ["The Big Fundamental", "Duncan"],
-      "Karl Malone": ["The Mailman"],
-      "Robert Parish": ["The Chief"],
       "Kevin Garnett": ["KG", "Garnett"],
       "Bill Russell": ["Russell"],
     },
@@ -577,12 +842,13 @@ export const INTENT: Record<string, Intent> = {
       "Sidney Crosby": ["Sid the Kid", "Sid", "Crosby"],
       "Mario Lemieux": ["Super Mario", "Lemieux"],
       "Alexander Ovechkin": ["Ovi", "Alex Ovechkin", "Ovechkin"],
-      "Mark Messier": ["Messier", "The Moose"],
+      "Mark Messier": ["Messier"],
       "Steve Yzerman": ["Stevie Y", "Yzerman"],
     },
   },
   "mlb-hits": {
     same: {
+      "Alex Rodriguez": ["A-Rod", "ARod", "A Rod"],
       "Pete Rose": ["Charlie Hustle"],
       "Hank Aaron": ["Hammerin' Hank"],
       "Stan Musial": ["Stan the Man"],
@@ -602,11 +868,20 @@ export const INTENT: Record<string, Intent> = {
   },
   "theme-parks": {
     same: {
+      "Disneyland Paris": ["Disneyland Park Paris", "Euro Disney", "Euro Disneyland", "Disney Paris", "Paris Disneyland"],
+      "Disney Adventure World": ["Walt Disney Studios", "Walt Disney Studios Park"],
+      "Shanghai Disneyland": ["Shanghai Disney"],
+      "Hong Kong Disneyland": ["Hong Kong Disney", "HK Disneyland"],
+      "Universal Studios Beijing": ["Universal Beijing"],
       "Magic Kingdom": ["Walt Disney World", "Disney World"],
       Disneyland: ["Disneyland California", "Disneyland Anaheim"],
       "Universal Studios Japan": ["USJ", "Universal Japan"],
       "Disney's Hollywood Studios": ["Hollywood Studios"],
-      "Disneyland Park": ["Disneyland Paris", "Euro Disney"],
+    },
+    groups: {
+      "Universal Studios": ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
+      Universal: ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
+      "Tokyo Disney": ["Tokyo Disneyland", "Tokyo DisneySea"],
     },
   },
   "spotify-artists": {
@@ -629,15 +904,24 @@ export const INTENT: Record<string, Intent> = {
   },
   "car-makers": {
     same: {
-      "Volkswagen Group": ["VW", "Volkswagen"],
-      "Hyundai Motor Group": ["Hyundai", "Hyundai-Kia"],
-      "General Motors": ["GM"],
+      "Hyundai Motor Group": ["Kia", "Genesis", "Genesis Motor", "Hyundai Motor Company", "Hyundai", "Hyundai-Kia"],
+      "General Motors": ["Chevrolet", "Chevy", "Cadillac", "Buick", "GMC", "GM"],
+      Stellantis: ["Jeep", "Dodge", "Ram", "Ram Trucks", "Chrysler", "Fiat", "Peugeot", "Citroën", "Citroen", "Opel", "Vauxhall", "Alfa Romeo", "Maserati", "Lancia", "Fiat Chrysler", "Fiat-Chrysler", "FCA", "PSA", "PSA Group", "Groupe PSA"],
+      "Volkswagen Group": ["Audi", "Porsche", "Skoda", "Škoda", "SEAT", "Cupra", "Bentley", "Lamborghini", "VW", "Volkswagen"],
+      Toyota: ["Lexus", "Daihatsu"],
+      Honda: ["Acura"],
+      Geely: ["Volvo", "Volvo Cars", "Polestar", "Lotus", "Zeekr"],
+      "SAIC Motor": ["MG", "SAIC"],
+      Ford: ["Lincoln"],
+      Nissan: ["Infiniti", "Datsun"],
+      Suzuki: ["Maruti Suzuki", "Maruti"],
       "BYD Auto": ["BYD"],
-      "SAIC Motor": ["SAIC"],
     },
   },
   "us-metros": {
     same: {
+      "San Francisco–Oakland–Fremont": ["Bay Area", "San Francisco Bay Area", "SF Bay Area", "SF"],
+      "Minneapolis–St. Paul–Bloomington": ["Twin Cities"],
       "New York–Newark–Jersey City": ["NYC", "New York City", "New York metro", "Tri-State Area"],
       "Los Angeles–Long Beach–Anaheim": ["LA", "Greater Los Angeles"],
       "Dallas–Fort Worth–Arlington": ["DFW", "Dallas-Fort Worth", "Metroplex"],
@@ -647,6 +931,135 @@ export const INTENT: Record<string, Intent> = {
       "Houston–Pasadena–The Woodlands": ["Greater Houston"],
       "Atlanta–Sandy Springs–Roswell": ["Metro Atlanta"],
       "Chicago–Naperville–Elgin": ["Chicagoland"],
+    },
+  },
+  "us-box-office": {
+    same: {
+      "E.T. the Extra-Terrestrial": ["ET", "E.T."],
+      "Harry Potter and the Sorcerer's Stone": ["Harry Potter and the Philosopher's Stone", "Philosopher's Stone", "Sorcerer's Stone"],
+    },
+    groups: {
+      LOTR: ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers"],
+      "Lord of the Rings": ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers"],
+      HP: ["Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Sorcerer's Stone", "Harry Potter and the Goblet of Fire"],
+      "Harry Potter": ["Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Sorcerer's Stone", "Harry Potter and the Goblet of Fire"],
+    },
+  },
+  "films-gross": {
+    same: {
+      "Avatar: Fire and Ash": ["Avatar 3"],
+      "The Lord of the Rings: The Return of the King": ["LOTR", "Lord of the Rings", "Return of the King", "ROTK"],
+      "Harry Potter and the Philosopher's Stone": ["Harry Potter and the Sorcerer's Stone", "Sorcerer's Stone", "Philosopher's Stone"],
+    },
+    groups: {
+      HP: ["Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Philosopher's Stone", "Harry Potter and the Goblet of Fire", "Harry Potter and the Half-Blood Prince"],
+      "Harry Potter": ["Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Philosopher's Stone", "Harry Potter and the Goblet of Fire", "Harry Potter and the Half-Blood Prince"],
+      SW: ["Star Wars: The Force Awakens", "Star Wars: The Last Jedi", "Star Wars: The Rise of Skywalker", "Rogue One: A Star Wars Story"],
+    },
+  },
+  "expensive-films": {
+    same: {
+      "Harry Potter and the Philosopher's Stone": ["Harry Potter and the Sorcerer's Stone", "Sorcerer's Stone", "Philosopher's Stone"],
+    },
+    groups: {
+      "Fast and Furious": ["Fast X", "Furious 7", "The Fate of the Furious"],
+      "Fast & Furious": ["Fast X", "Furious 7", "The Fate of the Furious"],
+      HP: ["Harry Potter and the Half-Blood Prince", "Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Philosopher's Stone", "Harry Potter and the Goblet of Fire"],
+      "Harry Potter": ["Harry Potter and the Half-Blood Prince", "Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Philosopher's Stone", "Harry Potter and the Goblet of Fire"],
+      LOTR: ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers"],
+      "Lord of the Rings": ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers"],
+      SW: ["Star Wars: The Force Awakens", "Star Wars: The Rise of Skywalker", "Star Wars: The Last Jedi", "Solo: A Star Wars Story"],
+    },
+  },
+  "ballon-dor-countries": {
+    same: {
+      Germany: ["West Germany"],
+    },
+  },
+  "nobel-countries": {
+    same: {
+      Germany: ["West Germany"],
+    },
+  },
+  airports: {
+    same: {
+      "Gatwick Airport": ["London Gatwick", "London Gatwick Airport", "Gatwick"],
+      "Leonardo da Vinci Rome Fiumicino Airport": ["Fiumicino", "Rome–Fiumicino International Airport", "Leonardo da Vinci–Fiumicino Airport"],
+      "Hartsfield–Jackson Atlanta International Airport": ["Atlanta", "Atlanta Airport"],
+      "Dubai International Airport": ["Dubai"],
+      "Tokyo Haneda Airport": ["Haneda"],
+      "Dallas Fort Worth International Airport": ["Dallas", "Fort Worth", "Dallas Fort Worth"],
+      "Shanghai Pudong International Airport": ["Pudong"],
+      "O'Hare International Airport": ["Chicago", "Chicago O'Hare"],
+      "Heathrow Airport": ["London Heathrow"],
+      "Guangzhou Baiyun International Airport": ["Guangzhou", "Baiyun"],
+      "Denver International Airport": ["Denver"],
+      "Indira Gandhi International Airport": ["Delhi", "New Delhi", "Delhi Airport", "IGI"],
+      "Seoul Incheon International Airport": ["Incheon"],
+      "Los Angeles International Airport": ["Los Angeles", "LA"],
+      "Charles de Gaulle Airport": ["Paris CDG", "Roissy", "Paris Charles de Gaulle"],
+      "Beijing Capital International Airport": ["Beijing Capital"],
+      "Singapore Changi Airport": ["Singapore", "Changi"],
+      "Amsterdam Airport Schiphol": ["Amsterdam", "Schiphol"],
+      "Shenzhen Bao'an International Airport": ["Shenzhen"],
+      "Kuala Lumpur International Airport": ["Kuala Lumpur", "KL", "KLIA"],
+      "Frankfurt Airport": ["Frankfurt"],
+      "Suvarnabhumi Airport": ["Bangkok"],
+      "John F. Kennedy International Airport": ["Kennedy", "JFK Airport"],
+      "Hong Kong International Airport": ["Hong Kong", "Chek Lap Kok"],
+      "Orlando International Airport": ["Orlando"],
+      "Josep Tarradellas Barcelona–El Prat Airport": ["Barcelona", "El Prat"],
+      "Chhatrapati Shivaji Maharaj International Airport": ["Mumbai", "Mumbai Airport", "Bombay"],
+      "Miami International Airport": ["Miami"],
+      "Harry Reid International Airport": ["Las Vegas", "Vegas"],
+      "Soekarno–Hatta International Airport": ["Jakarta"],
+      "San Francisco International Airport": ["San Francisco", "SF"],
+      "Hamad International Airport": ["Doha"],
+      "Charlotte Douglas International Airport": ["Charlotte"],
+      "King Abdulaziz International Airport": ["Jeddah"],
+      "Seattle–Tacoma International Airport": ["Seattle", "Sea-Tac", "SeaTac"],
+      "Ninoy Aquino International Airport": ["Manila"],
+      "Phoenix Sky Harbor International Airport": ["Phoenix"],
+      "Hangzhou Xiaoshan International Airport": ["Hangzhou"],
+      "Chongqing Jiangbei International Airport": ["Chongqing"],
+      "Kunming Changshui International Airport": ["Kunming"],
+      "Xi'an Xianyang International Airport": ["Xi'an", "Xian"],
+      "George Bush Intercontinental Airport": ["Houston"],
+      "Taoyuan International Airport": ["Taipei", "Taoyuan"],
+      "Toronto Pearson International Airport": ["Toronto", "Pearson"],
+      "São Paulo/Guarulhos International Airport": ["São Paulo", "Guarulhos"],
+      "Logan International Airport": ["Boston"],
+      "Munich Airport": ["Munich"],
+      "Sydney Kingsford Smith Airport": ["Sydney"],
+      "Detroit Metropolitan Airport": ["Detroit"],
+      "Mexico City International Airport": ["Mexico City"],
+      "El Dorado International Airport": ["Bogotá"],
+      "Tan Son Nhat International Airport": ["Ho Chi Minh City", "Saigon"],
+      "Noi Bai International Airport": ["Hanoi"],
+      "Cancún International Airport": ["Cancún"],
+      "Salt Lake City International Airport": ["Salt Lake City"],
+      "Minneapolis/St Paul International Airport": ["Minneapolis"],
+      "Fort Lauderdale–Hollywood International Airport": ["Fort Lauderdale"],
+      "Changsha Huanghua International Airport": ["Changsha"],
+      "Zhengzhou Xinzheng International Airport": ["Zhengzhou"],
+      "Nanjing Lukou International Airport": ["Nanjing"],
+      "Xiamen Gaoqi International Airport": ["Xiamen"],
+      "Guiyang Longdongbao International Airport": ["Guiyang"],
+      "Haikou Meilan International Airport": ["Haikou"],
+    },
+    groups: {
+      London: ["Heathrow Airport", "Gatwick Airport"],
+      Paris: ["Charles de Gaulle Airport", "Orly Airport"],
+      "New York": ["John F. Kennedy International Airport", "Newark Liberty International Airport", "LaGuardia Airport"],
+      "New York City": ["John F. Kennedy International Airport", "Newark Liberty International Airport", "LaGuardia Airport"],
+      NYC: ["John F. Kennedy International Airport", "Newark Liberty International Airport", "LaGuardia Airport"],
+      Tokyo: ["Tokyo Haneda Airport", "Narita International Airport"],
+      Shanghai: ["Shanghai Pudong International Airport", "Shanghai Hongqiao International Airport"],
+      Beijing: ["Beijing Capital International Airport", "Beijing Daxing International Airport"],
+      Seoul: ["Seoul Incheon International Airport", "Gimpo International Airport"],
+      Istanbul: ["Istanbul Airport", "Istanbul Sabiha Gökçen International Airport"],
+      Chengdu: ["Chengdu Tianfu International Airport", "Chengdu Shuangliu International Airport"],
+      Moscow: ["Sheremetyevo International Airport", "Moscow Domodedovo Airport"],
     },
   },
 };

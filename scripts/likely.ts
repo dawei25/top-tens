@@ -150,6 +150,12 @@ export const LIKELY: Record<string, string[]> = {
     "Moist Critikal", "Penguinz0", "Kwebbelkop",
   ],
   // airports: no list; its unranked pool is under LIKELY_CAP, so all of it is taken.
+  // Rivers under 1,000 km that people name (the table ranks every river system over 1,000 km).
+  rivers: [
+    "River Thames", "Seine", "Hudson River", "Potomac River", "Tiber", "Po River", "Rhône", "Jordan River",
+    "River Shannon", "River Severn", "Arno", "Ebro", "Douro", "Garonne", "River Liffey", "River Clyde",
+    "Charles River", "Delaware River", "Sacramento River", "Chao Phraya River", "Snake River", "Yalu River",
+  ],
 };
 
 export interface Pick {
