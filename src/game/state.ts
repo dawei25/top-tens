@@ -27,6 +27,14 @@ export function newGame(puzzle: Puzzle): GameState {
 }
 
 /**
+ * How deep the list's own ranking goes: the highest rank any answer carries. An answer outside it (rank 0, from the
+ * wider pool) is "outside the top N".
+ */
+export function rankedDepth(puzzle: Pick<Puzzle, "answers" | "extras">): number {
+  return Math.max(10, ...puzzle.answers.map((e) => e.rank), ...puzzle.extras.map((e) => e.rank));
+}
+
+/**
  * An entry's number as shown to the player, or nothing when it only repeats the rank: lists ranked by a rank
  * (Similarweb) store "#19" as the value of #19.
  */

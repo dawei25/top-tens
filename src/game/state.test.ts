@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyGuess, newGame, shownValue } from "./state";
+import { applyGuess, newGame, rankedDepth, shownValue } from "./state";
 import type { Puzzle } from "./types";
 
 const puzzle: Puzzle = {
@@ -48,5 +48,13 @@ describe("shown values", () => {
     expect(shownValue({ rank: 19, value: "8,849 m" })).toBe("8,849 m");
     expect(shownValue({ rank: 0, value: "12" })).toBe("12");
     expect(shownValue({ rank: 3 })).toBeUndefined();
+  });
+});
+
+describe("rankedDepth", () => {
+  const e = (rank: number) => ({ rank, name: `n${rank}`, aliases: [] });
+  it("is the deepest rank the list carries, never under 10", () => {
+    expect(rankedDepth({ answers: [e(1), e(10)], extras: [e(11), e(117), e(0)] })).toBe(117);
+    expect(rankedDepth({ answers: [e(1), e(10)], extras: [e(0)] })).toBe(10);
   });
 });

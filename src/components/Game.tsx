@@ -10,6 +10,7 @@ import {
   MAX_LIVES,
   newGame,
   shareText,
+  rankedDepth,
   shownValue,
   type GameState,
 } from "../game/state";
@@ -73,7 +74,9 @@ function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
         text: !r.entry.rank
           ? shownValue(r.entry)
             ? `${r.entry.name}: ${shownValue(r.entry)}. Not in the top 10.`
-            : `${r.entry.name} isn't in the top 10`
+            : rankedDepth(puzzle) > 10
+              ? `${r.entry.name} is outside the top ${rankedDepth(puzzle)}.`
+              : `${r.entry.name} isn't in the top 10.`
           : `${r.entry.name} is #${r.entry.rank}${shownValue(r.entry) ? `, ${shownValue(r.entry)}` : ""}.${r.entry.rank <= 15 ? " So close." : ""}`,
       };
     case "typo":
