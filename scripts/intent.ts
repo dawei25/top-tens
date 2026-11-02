@@ -1091,8 +1091,13 @@ export const INTENT: Record<string, Intent> = {
       Disneyland: ["Disneyland California", "Disneyland Anaheim"],
       "Universal Studios Japan": ["USJ", "Universal Japan"],
       "Disney's Hollywood Studios": ["Hollywood Studios", "MGM Studios", "Disney-MGM Studios"],
+      // Without these, "universal hollywood" read as the "Universal" alias plus words: Universal Studios Japan.
+      "Universal Studios Hollywood": ["Universal Hollywood"],
+      "Ocean Park Hong Kong": ["Ocean Park"],
     },
     groups: {
+      // Universal Orlando Resort's two parks.
+      "Universal Orlando": ["Universal Studios Florida", "Universal Islands of Adventure"],
       // No top-10 park has "Disney" in its name: the guess offers the four Disney parks of the top 10.
       Disney: ["Magic Kingdom", "Disneyland", "Tokyo Disneyland", "Shanghai Disneyland"],
       "Universal Studios": ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],

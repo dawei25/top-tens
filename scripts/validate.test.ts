@@ -102,3 +102,22 @@ describe("validate: figures for misses", () => {
     expect(errors(puzzle({ ranked: 10, unranked: 20, values: 0 }), topic)).toEqual([]);
   });
 });
+
+describe("validate: ranks past the top 10", () => {
+  it("lets a tie share its rank, and nothing else", () => {
+    const p = puzzle({ ranked: 14 });
+    // #12 and #13 tie: both #12, then #14.
+    Object.assign(p.extras[2], { rank: 12, n: p.extras[1].n });
+    expect(errors(p)).toEqual([]);
+    p.extras[2].n = 1;
+    expect(errors(p)).toEqual([expect.stringContaining("extras rank jumps from 12 to 12")]);
+  });
+
+  it("flags a universe member that is a ranked answer under another name", () => {
+    const p = puzzle();
+    p.extras.push({ rank: 11, name: "Djibouti City", aliases: [] }, { rank: 0, name: "Djibouti", aliases: [] });
+    expect(warnings(p, { id: "test-list", universe: "capitals" })).toContainEqual(
+      expect.stringContaining('"Djibouti City" and unranked "Djibouti" may be the same answer'),
+    );
+  });
+});

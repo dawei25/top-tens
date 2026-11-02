@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { datedLabel, datedValue, labelYear, matchFacts, mergeIndex, rankOf, sameKey, scaledFigure, skipName } from "./build";
+import { datedLabel, datedValue, labelYear, matchFacts, mergeIndex, rangeText, rankOf, sameKey, scaledFigure, skipName } from "./build";
 import { COUNTRY_FORMS } from "./intent";
 
 describe("matchFacts", () => {
@@ -73,6 +73,12 @@ describe("dated values", () => {
     expect(rankOf("-")).toBeUndefined();
     expect(rankOf("")).toBeUndefined();
     expect(rankOf(undefined)).toBeUndefined();
+  });
+
+  it("show a low and a high estimate as one range", () => {
+    expect(rangeText("400 million", "600 million")).toBe("400–600 million");
+    expect(rangeText("500 million", "1 billion")).toBe("500 million–1 billion");
+    expect(rangeText("600 million", "600 million")).toBe("600 million");
   });
 });
 
