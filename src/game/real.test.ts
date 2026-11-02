@@ -47,10 +47,17 @@ describe("first names and partial names", () => {
     expect(judge("nba-points", guess)).toMatchObject({ kind: "correct", entry: { name } });
   });
 
-  it("a shared first name never lists more than two players the guess didn't name", () => {
-    const r = judge("nba-points", "kevin");
-    if (r.kind === "typo") expect(r.suggestions.length).toBeLessThanOrEqual(2);
-    else expect(r).toMatchObject({ kind: "unknown", junk: false, vague: expect.any(Number) });
+  it("a shared name takes the natural reading: the famous one first, the other once he's found", () => {
+    expect(judge("nba-points", "jordan")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Michael Jordan" } });
+    const mj = read<Puzzle>("nba-points.json").answers.find((e) => e.name === "Michael Jordan")!.rank;
+    expect(judgeGuess("jordan", read<Puzzle>("nba-points.json"), new Set([mj]))).toMatchObject({
+      kind: "near",
+      corrected: true,
+      entry: { name: "DeAndre Jordan" },
+    });
+    const kevin = judge("nba-points", "kevin");
+    if (kevin.kind === "typo") expect(kevin.suggestions.length).toBeLessThanOrEqual(4);
+    else expect(kevin).toMatchObject({ corrected: true });
   });
 });
 

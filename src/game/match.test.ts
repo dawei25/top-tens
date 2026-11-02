@@ -141,9 +141,9 @@ describe("intent", () => {
     expect(j("Faroe Islands")).toMatchObject({ kind: "near", entry: { rank: 0 } });
   });
 
-  it("matches a distinctive word from a longer name", () => {
-    expect(j("Haneda")).toMatchObject({ kind: "near", corrected: false, entry: { name: "Tokyo Haneda Airport" } });
-    expect(j("Ellesmere")).toMatchObject({ kind: "correct", corrected: false, entry: { rank: 10 } });
+  it("puts a distinctive word from a longer name in the box to confirm", () => {
+    expect(j("Haneda")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Tokyo Haneda Airport" } });
+    expect(j("Ellesmere")).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 10 } });
     expect(j("island").kind).toBe("unknown");
   });
 });
@@ -217,8 +217,10 @@ describe("several names containing the guess", () => {
     expect(judgeGuess("carolina", states, new Set())).toMatchObject({ kind: "typo", suggestions: ["North Carolina", "South Carolina"] });
     expect(judgeGuess("dakota", states, new Set())).toMatchObject({ kind: "typo", suggestions: ["North Dakota", "South Dakota"] });
   });
-  it("asks for more, without names, when three or more only contain the guess; two are a fair choice", () => {
-    expect(judgeGuess("mario kart", games, new Set())).toMatchObject({ kind: "unknown", vague: 4 });
+  it("takes the natural reading: the most prominent name, then the next once that one is found", () => {
+    expect(judgeGuess("mario kart", games, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Mario Kart 8" } });
+    // Mario Kart 8 found: the rest are unranked equals, so they're offered.
+    expect(judgeGuess("mario kart", games, new Set([2]))).toMatchObject({ kind: "typo" });
     expect(judgeGuess("humans", games, new Set())).toMatchObject({ kind: "typo", suggestions: ["Destroy All Humans!", "Destroy All Humans! 2"] });
   });
   it("still takes one name's distinctive word as that entry", () => {
@@ -245,5 +247,52 @@ describe("six or seven letters get two edits", () => {
     expect(j("marocco")).toMatchObject({ kind: "correct", entry: { rank: 4 }, corrected: true });
     expect(j("pheonix")).toMatchObject({ kind: "correct", entry: { rank: 5 }, corrected: true });
     expect(j("polnad")).toMatchObject({ kind: "correct", entry: { rank: 1 }, corrected: true });
+  });
+});
+
+describe("leaks the list judges found", () => {
+  const moons: Puzzle = {
+    ...puzzle,
+    id: "moons",
+    answers: [
+      e(1, "Ganymede"), e(2, "Titan", ["Saturn VI"]), e(3, "Callisto"), e(4, "Io", ["Satellite Io", "Jupiter I"]),
+      e(5, "Moon"), e(6, "Europa"), e(7, "Triton", ["Neptune I"]), e(8, "Titania", ["Uranus III"]), e(9, "Rhea", ["Saturn V"]),
+      e(10, "Oberon", ["Uranus IV"]),
+    ],
+    extras: [],
+  };
+  const world: Puzzle = {
+    ...puzzle,
+    id: "world",
+    extras: [...puzzle.extras, e(0, "American Samoa"), e(0, "South Africa"), e(0, "Ireland", ["Irlanda", "Irland"]), e(0, "Cars 2")],
+  };
+  it("a name with whole words added or dropped is not a misspelling (Neptune I, Uranus III, Satellite Io)", () => {
+    for (const g of ["neptune", "uranus", "saturn", "satellite"]) expect(judgeGuess(g, moons, new Set())).toMatchObject({ kind: "unknown" });
+    expect(judgeGuess("cars", world, new Set())).toMatchObject({ kind: "near", corrected: true, entry: { name: "Cars 2" } });
+  });
+  it("a word that is only part of a name asks before it costs a life", () => {
+    expect(judgeGuess("american", world, new Set())).toMatchObject({ kind: "near", corrected: true, entry: { name: "American Samoa" } });
+    expect(judgeGuess("africa", world, new Set())).toMatchObject({ kind: "near", corrected: true, entry: { name: "South Africa" } });
+  });
+  it("a plain category word is never corrected into an answer", () => {
+    expect(judgeGuess("islands", world, new Set())).toMatchObject({ kind: "unknown" });
+  });
+});
+
+describe("an exact title that is the less likely reading", () => {
+  const films: Puzzle = {
+    ...puzzle,
+    id: "films",
+    answers: [e(1, "Avengers: Endgame"), e(2, "Avatar"), e(3, "Avatar: The Way of Water"), ...puzzle.answers.slice(3)],
+    extras: [e(15, "The Avengers"), e(0, "Frozen")],
+  };
+  it("offers the likelier answer that carries the same name, free", () => {
+    expect(judgeGuess("avengers", films, new Set())).toMatchObject({ kind: "typo", suggestions: ["Avengers: Endgame", "The Avengers"] });
+  });
+  it("still counts an exact title that is itself the likely reading", () => {
+    expect(judgeGuess("avatar", films, new Set())).toMatchObject({ kind: "correct", corrected: false, entry: { rank: 2 } });
+  });
+  it("once the likelier one is found, the exact title is the reading", () => {
+    expect(judgeGuess("avengers", films, new Set([1]))).toMatchObject({ kind: "near", entry: { name: "The Avengers" } });
   });
 });

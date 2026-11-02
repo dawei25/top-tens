@@ -26,7 +26,7 @@ export function play(id: string, guesses: string[]): string[] {
     switch (r.kind) {
       case "correct":
         found.add(r.entry.rank);
-        text = `TOP 10 #${r.entry.rank} ${r.entry.name}${r.corrected ? " (after the game corrected the spelling)" : ""}`;
+        text = `TOP 10 #${r.entry.rank} ${r.entry.name}${r.corrected ? " (the game asks \"did you mean\" first; counted as confirmed)" : ""}`;
         break;
       case "duplicate":
         text = `already found (#${r.entry.rank} ${r.entry.name}), free`;
@@ -41,7 +41,11 @@ export function play(id: string, guesses: string[]): string[] {
         text = `ambiguous, the game offers: ${r.suggestions.join(" / ")} (free)`;
         break;
       case "unknown":
-        text = r.junk ? "junk, free" : "NOT RECOGNIZED, free (the game says it isn't an answer for this list)";
+        text = r.vague
+          ? `fits ${r.vague} answers without naming one: the game says "be more specific", free`
+          : r.junk
+            ? "junk, free"
+            : "NOT RECOGNIZED, free (the game says it isn't an answer for this list)";
         break;
       default:
         text = r.kind;

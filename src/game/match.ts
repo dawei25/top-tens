@@ -29,6 +29,11 @@ function digitsOf(s: string): string {
   return (s.match(/\d+/g) ?? []).join(" ");
 }
 
+/** Whether `part`'s words appear, in order and whole, inside `whole` ("neptune" in "neptune 1"). */
+function wordsWithin(part: string, whole: string): boolean {
+  return part.length > 0 && ` ${whole} `.includes(` ${part} `);
+}
+
 /** Optimal string alignment distance (Levenshtein plus adjacent transpositions). */
 export function editDistance(a: string, b: string): number {
   const m = a.length;
@@ -91,6 +96,8 @@ interface Candidate {
   fullName: boolean;
   /** The best match was only one word of the name ("Britain" in "New Britain"), not a name or alias. */
   viaWord: boolean;
+  /** The best form starts and ends with the same letters as the guess: a slip in the middle ("Hungray"). */
+  ends: boolean;
 }
 
 function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Candidate[] {
@@ -101,6 +108,7 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
     let len = 0;
     let fullName = false;
     let viaWord = false;
+    let ends = false;
     const forms = [entry.name, ...entry.aliases];
     const words = nameWords(entry.name);
     // Words of the name count as forms too, so a misspelled first name ("kareen") lands on its own entry.
@@ -115,6 +123,9 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
       const dist = spacing ? 0 : editDistance(g, rest);
       // Codes (ATL, EDDF, PRC) match exactly or not at all; fuzzy they catch keyboard mash like "asdf".
       if (dist > 0 && CODE.test(form)) continue;
+      // A name with whole words added or dropped isn't a misspelling of it: "neptune" is not "Neptune I", "cars" is not
+      // "Cars 2", "satellite" is not "Satellite Io". Those are parts of names, judged as such in judgeGuess.
+      if (dist > 0 && (wordsWithin(g, rest) || wordsWithin(rest, g))) continue;
       // A misspelling keeps its first letter: "factories" is not a typo of Castries. One slip anywhere is still fine.
       if (dist > 1 && g[0] !== rest[0]) continue;
       // One word of a longer name only catches a near-exact misspelling of a real word ("kareen" for Kareem), never a
@@ -125,9 +136,10 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
         len = rest.length;
         fullName = dist === 0 && form === entry.name;
         viaWord = i >= forms.length;
+        ends = g[0] === rest[0] && g[g.length - 1] === rest[rest.length - 1];
       }
     }
-    return { entry, inTop10, dist: best, len, fullName, viaWord };
+    return { entry, inTop10, dist: best, len, fullName, viaWord, ends };
   });
 }
 
@@ -191,54 +203,79 @@ export function judgeGuess(
   const exact = strong.length ? strong : allExact;
   const named = exact.filter((c) => c.fullName);
   if (named.length === 1) {
-    // The exact name of a ranked entry counts ("MrBeast", "Avatar"). The exact name of an unranked pool entry that a
-    // ranked entry's name contains ("The Witcher", the 2007 game, vs The Witcher 3: Wild Hunt) is ambiguous: offer
-    // them rather than charge a life for the less likely reading. When every longer name is unranked too
+    // An exact name counts ("MrBeast", "Avatar"), unless a more prominent answer also carries it and the exact one is
+    // the less likely reading: "avengers" is more likely Endgame (#1) than The Avengers (#15), "pokemon" a Pokémon
+    // game than the unranked franchise entry, "the witcher" The Witcher 3 than the 2007 game. Then both are offered,
+    // free, rather than a life charged for the less likely reading. When the longer names are no more prominent
     // ("Matterhorn" vs Klein Matterhorn), the exact name is the obvious reading and counts.
-    const containing = wordMatches(guess, candidates).filter((c) => c !== named[0]);
-    const ambiguous = containing.some((c) => c.entry.rank > 0);
-    if (named[0].entry.rank === 0 && ambiguous && containing.length < MAX_CHOICES) {
-      return choose([named[0], ...containing], false);
-    }
-    return resolve(named[0], false);
+    const n = named[0];
+    const better = wordMatches(guess, candidates)
+      .filter((c) => c !== n && prominence(c) < prominence(n) && !(c.inTop10 && found.has(c.entry.rank)))
+      .sort((a, b) => prominence(a) - prominence(b));
+    const likelier = better.some((c) => c.inTop10 || (n.entry.rank === 0 && c.entry.rank > 0));
+    if (!n.inTop10 && likelier) return choose([n, ...better.slice(0, MAX_CHOICES - 1)], false);
+    return resolve(n, false);
   }
   /**
-   * Entries that what was typed fits exactly without being any one's full name: a shared alias, or whole words of
-   * longer names. One is that entry ("Kareem" for Kareem Abdul-Jabbar, "Haneda" for Tokyo Haneda Airport). Several
-   * are offered where the guess is what each is called once qualifiers are dropped ("carolina": North and South
-   * Carolina; "congo"), or when only two fit. Beyond that, listing them would hand the player answers they never
-   * named ("mario kart": four games, "water": four water parks), so the guess is free and the player is asked to be
-   * more specific.
+   * Several entries fit what was typed. Read it the way a person means it: the most prominent one first ("jordan" is
+   * Michael Jordan, #6, not DeAndre Jordan). When one clearly stands out (in the top 10 when the next isn't, or ranked
+   * when the next is only in the wider pool), it goes in the box to confirm; once it's found, the next one does.
+   * Otherwise the most prominent few are offered. Only a huge spread of unranked names (a common word) asks the
+   * player to be more specific.
    */
-  const fits = (cs: Candidate[]): GuessResult => {
-    if (cs.length === 1) return resolve(cs[0], false);
-    const core = cs.filter((c) => coreName(c.entry.name) === guess);
-    if (core.length > 0 && core.length <= MAX_CHOICES) return choose(core, false);
-    const open = cs.filter((c) => !(c.inTop10 && found.has(c.entry.rank)));
-    if (open.length === 0) return resolve(cs[0], false);
-    // Two readings are a fair question, like a misspelling between two names ("New Zealand": North or South Island).
-    if (open.length <= MAX_TYPO_CHOICES) return choose(open, false);
-    return { kind: "unknown", junk: false, vague: open.length };
+  const natural = (cs: Candidate[], max: number): GuessResult => {
+    const byProminence = (a: Candidate, b: Candidate) =>
+      prominence(a) - prominence(b) || nameWordCount(a) - nameWordCount(b) || a.entry.name.localeCompare(b.entry.name);
+    const open = cs.filter((c) => !(c.inTop10 && found.has(c.entry.rank))).sort(byProminence);
+    if (open.length === 0) return resolve([...cs].sort(byProminence)[0], false);
+    const [top, next] = open;
+    if (!next) return resolve(top, true);
+    const standsOut = (top.inTop10 && !next.inTop10) || (top.entry.rank > 0 && next.entry.rank === 0);
+    if (standsOut) return resolve(top, true);
+    if (top.entry.rank === 0 && open.length > VAGUE_ABOVE) return { kind: "unknown", junk: false, vague: open.length };
+    // Alphabetical, so the order never hints at which choice is in the top 10.
+    const names = open.slice(0, max).map((c) => c.entry.name).sort((a, b) => a.localeCompare(b));
+    return { kind: "typo", suggestions: names };
   };
 
-  if (exact.length > 0) return fits(exact);
+  /**
+   * Entries that what was typed fits exactly without being any one's full name: a shared alias, or (`part`) whole
+   * words of longer names. One entry is that entry: an alias counts at once, part of a name ("Kareem", "american")
+   * goes in the box to confirm, so a word that only happens to be in a name never costs a life by itself. Names that
+   * are all called that once qualifiers are dropped ("carolina": North and South Carolina; "congo") are offered as
+   * equals; anything else takes the natural reading.
+   */
+  const fits = (cs: Candidate[], part: boolean): GuessResult => {
+    if (cs.length === 1) return resolve(cs[0], part);
+    const core = cs.filter((c) => coreName(c.entry.name) === guess);
+    if (core.length === 1) return resolve(core[0], part);
+    if (core.length > 1 && core.length <= MAX_CHOICES) return choose(core, false);
+    return natural(cs, MAX_CHOICES);
+  };
+
+  if (exact.length > 0) return fits(exact, !strong.length);
 
   // A whole word (or run of words) from a longer name is a short form, not a misspelling. It is checked before
   // near-spellings, which are weaker evidence ("wilt" is two letters from "West").
   const partial = wordMatches(guess, candidates);
-  if (partial.length > 0) return fits(partial);
+  if (partial.length > 0) return fits(partial, true);
+
+  // A plain category word ("islands", "lake", "city") is never a misspelling of an answer.
+  if (guess.split(" ").every((w) => GENERIC.has(w))) return { kind: "unknown", junk: false };
 
   // Near-spellings are corrected in the input for the player to confirm. Two equally close readings
   // ("Irak": Iran or Iraq) become a choice; more than that is noise, and listing them would leak answers.
   const len = Math.min(guess.length, best?.len ?? guess.length);
-  const close = candidates.filter((c) => c.dist <= typoBudget(len));
+  // Six or seven letters get a third edit when the first and last letters agree: a slip in the middle ("hungray").
+  const close = candidates.filter((c) => c.dist <= typoBudget(len) + (c.ends && len >= 6 && len <= 7 ? 1 : 0));
   if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
     const tied = close.filter((c) => c.dist === close[0].dist);
     // As with exact matches, a whole name or alias beats one word of another entry's name: "lotse" is Lhotse, not a
     // choice with Lhotse Middle and Lhotse Shar.
     const named = tied.filter((c) => !c.viaWord);
     const readings = named.length ? named : tied;
-    if (readings.length <= MAX_TYPO_CHOICES) return choose(readings, true);
+    if (readings.length === 1) return resolve(readings[0], true);
+    if (readings.length <= MAX_CHOICES) return natural(readings, MAX_TYPO_CHOICES);
   }
 
   return { kind: "unknown", junk: isJunk(raw, lex) };
@@ -248,6 +285,17 @@ export function judgeGuess(
 const MAX_CHOICES = 4;
 /** Most choices offered for a misspelling. */
 const MAX_TYPO_CHOICES = 2;
+/** Past this many unranked names sharing a word, the word is too common to guess from: ask for more. */
+const VAGUE_ABOVE = 8;
+
+/** Lower is more prominent: the list's own ranking first, the wider pool after. */
+function prominence(c: Candidate): number {
+  return c.entry.rank > 0 ? c.entry.rank : Number.MAX_SAFE_INTEGER;
+}
+
+function nameWordCount(c: Candidate): number {
+  return normalize(c.entry.name).split(" ").length;
+}
 
 /** Words too generic to identify an entry on their own. */
 const GENERIC = new Set(
