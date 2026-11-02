@@ -14,6 +14,9 @@ export function notOnList(puzzle: Pick<Puzzle, "noun" | "answers" | "extras">): 
   return `Not one of the ${count.toLocaleString("en-US")} ${puzzle.noun}${NBSP}here.`;
 }
 
+/** The clue key on an empty row: its tooltip and accessible label. */
+export const CLUE_LABEL = "Clue: first letter, costs a life";
+
 /** "No life lost.", wrapping as one piece: onto its own line when the sentence before it fills the first. */
 export const NO_LIFE_LOST = ["No", "life", "lost."].join(NBSP);
 

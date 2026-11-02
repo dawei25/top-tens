@@ -1,5 +1,5 @@
 // Blitz: the clock waits for the first keystroke, a hit scores, a guess after 0 doesn't count, the round is
-// recorded, and its past run opens and closes with Back.
+// recorded, and its past run opens and closes with Back. A list's Play Blitz keys (title card, results) open it.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, hash, puzzle, noHScroll, guess } = require("./helpers.cjs");
@@ -56,6 +56,32 @@ for (const vp of VIEWPORTS) {
     assert.equal(await hash(page), `#blitz-${LIST}`);
     assert.equal(await page.getByTestId("run-view").count(), 0);
     assert.equal(await page.getByTestId("past-runs").getAttribute("open"), "");
+    await ctx.close();
+  });
+
+  test(`a list's Play Blitz keys open a round on that list (${vp.name})`, async () => {
+    const { ctx, page } = await open(browser, vp, `#p-${LIST}`);
+    // On the title card, next to the score, inside the card even on a phone.
+    const key = page.getByTestId("title-blitz");
+    await key.waitFor();
+    const card = await page.getByTestId("title-card").boundingBox();
+    const box = await key.boundingBox();
+    assert.ok(box.x >= card.x && box.x + box.width <= card.x + card.width, "the key stays inside the title card");
+    assert.ok(await noHScroll(page));
+    await key.click();
+    await page.getByTestId("blitz-clock").waitFor();
+    assert.equal(await hash(page), `#blitz-${LIST}`);
+    assert.equal(await page.getByTestId("blitz-screen").getAttribute("data-list"), LIST);
+
+    // Back on the list, the results offer the same round once the game is over (the title card's key is gone then).
+    await page.getByTestId("nav-back").click();
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("results").waitFor();
+    assert.equal(await page.getByTestId("title-blitz").count(), 0);
+    await page.getByTestId("blitz-key").click();
+    await page.getByTestId("blitz-clock").waitFor();
+    assert.equal(await hash(page), `#blitz-${LIST}`);
     await ctx.close();
   });
 }

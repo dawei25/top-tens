@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { load, save } from "../game/storage";
-import { reducedMotion } from "./pixel";
+import { ClueIcon, reducedMotion } from "./pixel";
 
 export function markHelpSeen() {
   const s = load();
@@ -55,7 +55,11 @@ export function HowToPlay({ onClose, scroll }: { onClose: () => void; scroll?: b
         <li>
           <span className="rule-n">5</span>
           <span>
-            Stuck? Tap an empty row to see its <b className="gold">first letter</b> for a life. Not on your last one.
+            Stuck? Tap the{" "}
+            <span className="clue clue-inline" role="img" aria-label="magnifying glass">
+              <ClueIcon />
+            </span>{" "}
+            on an empty row to see its <b className="gold">first letter</b> for a life. Not on your last one.
           </span>
         </li>
       </ol>

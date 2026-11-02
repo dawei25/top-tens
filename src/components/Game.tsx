@@ -22,8 +22,8 @@ import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
-import { NO_LIFE_LOST, notOnList } from "./copy";
+import { ClueIcon, formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
+import { CLUE_LABEL, NO_LIFE_LOST, notOnList } from "./copy";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
 import { ParBlock, usePar } from "./par";
@@ -357,19 +357,22 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-            {blitzOpen && !over && (
-              <a className="key key-xs key-blitz-sm" data-testid="title-blitz" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
-                Blitz
-              </a>
-            )}
-            <span className="count-wrap">
-              <span className="count" aria-label={`${game.found.length} of 10 found`}>
-                <b>{game.found.length}</b>/10
-              </span>
-              {par && (
-                <span className="count-par" data-testid="title-par" title={par.estimated ? "par: what a typical player gets (estimated)" : "par: what a typical player gets"}>
-                  par {par.par}
+            {/* The score, then the list's Blitz key; on a narrow card the key drops under the score. */}
+            <span className="prompt-end">
+              <span className="count-wrap">
+                <span className="count" aria-label={`${game.found.length} of 10 found`}>
+                  <b>{game.found.length}</b>/10
                 </span>
+                {par && (
+                  <span className="count-par" data-testid="title-par" title={par.estimated ? "par: what a typical player gets (estimated)" : "par: what a typical player gets"}>
+                    par {par.par}
+                  </span>
+                )}
+              </span>
+              {blitzOpen && !over && (
+                <a className="key key-xs key-blitz-sm" data-testid="title-blitz" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
+                  Play Blitz
+                </a>
               )}
             </span>
           </div>
@@ -419,6 +422,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     fact ? "has-fact" : "",
                     open ? "fact-open" : "",
                     hintable ? "hintable" : "",
+                    // On the last life the magnifiers dim; a press still says why.
+                    hintable && !canHint(game, a.rank) ? "clue-off" : "",
                     hinted ? "hinted" : "",
                     asking ? "asking" : "",
                   ].join(" ")}
@@ -458,15 +463,20 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                           <b className="hint-letter" data-testid="hint-letter">{hintLetter(a.name)}</b> . . . . . . .
                         </span>
                       ) : (
+                        // The whole row is the clue key; the magnifier at its end says so without a hover.
                         <button
                           type="button"
                           className="blank-toggle"
                           data-testid="hint-open"
-                          aria-label={`Not found yet. Hint for #${a.rank}`}
+                          aria-label={`#${a.rank} not found yet. ${CLUE_LABEL}`}
+                          title={CLUE_LABEL}
                           aria-expanded={asking}
                         >
                           <span className="blank" aria-hidden="true">
                             . . . . . . . .
+                          </span>
+                          <span className="clue" data-testid="clue" aria-hidden="true">
+                            <ClueIcon />
                           </span>
                         </button>
                       )}
@@ -477,7 +487,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     <div className="hint-ask">
                       {canHint(game, a.rank) ? (
                         <>
-                          <span>hint: first letter? costs 1 life</span>
+                          <span>clue: first letter? costs 1 life</span>
                           <button
                             ref={yesRef}
                             data-testid="hint-yes"
@@ -492,7 +502,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                           </button>
                         </>
                       ) : (
-                        <span role="status" data-testid="hint-refused">no hints on your last life</span>
+                        <span role="status" data-testid="hint-refused">no clues on your last life</span>
                       )}
                     </div>
                   )}
@@ -604,7 +614,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               </p>
               {(dailyStreak || hints.length > 0) && (
                 <div className="results-meta">
-                  {hints.length > 0 && <p>hints used: {hints.length}</p>}
+                  {hints.length > 0 && <p>clues used: {hints.length}</p>}
                   {dailyStreak && (
                     <p>
                       streak <b className="pink">{dailyStreak.current}</b> · best <b>{dailyStreak.best}</b>
@@ -625,8 +635,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 )}
                 {/* A daily already offers Today's Blitz; a second gold Blitz key there reads like the same thing. */}
                 {blitzOpen && (
-                  <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`}>
-                    Blitz
+                  <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
+                    Play Blitz
                   </a>
                 )}
                 {daily ? (

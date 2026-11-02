@@ -1,4 +1,4 @@
-// Today's daily: exact guess, typo fixed in the box, a real wrong answer costs a life, junk is free, a hint,
+// Today's daily: exact guess, typo fixed in the box, a real wrong answer costs a life, junk is free, a clue,
 // give up -> results, Back -> home.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
