@@ -1,0 +1,40 @@
+{
+  "id": "boys-names",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 3,
+  "scores": {
+    "recognizability": 5,
+    "curve": 3,
+    "fairness": 4,
+    "data": 4,
+    "fun": 3,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 12
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 0,
+    "guesses": 10
+  },
+  "blitzCasual": null,
+  "summary": "An easy, friendly Oddball: James, Michael and John come fast, and Richard at #7 is the one people forget.",
+  "reasons": [
+    "Casual player found 10 with 2 lives lost (Daniel, Matthew).",
+    "Ranks only (Social Security records, 1926 to 2025): not Blitz-ready.",
+    "Written by the coordinator, not an independent judge."
+  ],
+  "fixes": [],
+  "difficulty": 1,
+  "tags": [
+    "names",
+    "first names",
+    "usa"
+  ],
+  "audience": "anyone"
+}

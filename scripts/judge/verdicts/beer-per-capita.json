@@ -1,0 +1,36 @@
+{
+  "id": "beer-per-capita",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 3,
+  "scores": {
+    "recognizability": 5,
+    "curve": 3,
+    "fairness": 3,
+    "data": 4,
+    "fun": 5,
+    "blitzDepth": 4
+  },
+  "casual": {
+    "found": 5,
+    "livesLost": 5,
+    "guesses": 12
+  },
+  "fan": null,
+  "blitzCasual": null,
+  "summary": "The Czech Republic tops it at 126 litres a head, Namibia sneaks in at #6, and Belgium, the UK and the Netherlands all miss the top 10.",
+  "reasons": [
+    "Casual player found 5 (Germany, Czech Republic, Ireland, Poland, Austria) and ran out of lives on Belgium, the UK, the US, Australia and the Netherlands.",
+    "Hard, but every miss is a country everyone knows and the reveal is the fun part.",
+    "Written by the coordinator, not an independent judge."
+  ],
+  "fixes": [],
+  "difficulty": 3,
+  "tags": [
+    "food and drink",
+    "beer",
+    "geography"
+  ],
+  "audience": "anyone"
+}

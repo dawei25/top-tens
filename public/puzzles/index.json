@@ -516,6 +516,18 @@
   "blitz": false
  },
  {
+  "id": "boys-names",
+  "title": "Most common boys' names in the US",
+  "category": "Oddball",
+  "blitz": false
+ },
+ {
+  "id": "beer-per-capita",
+  "title": "Countries that drink the most beer per person",
+  "category": "Oddball",
+  "blitz": true
+ },
+ {
   "id": "passwords",
   "title": "Most common passwords",
   "category": "Oddball",
