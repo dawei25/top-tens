@@ -16,7 +16,9 @@ Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 - Data: car models named "Toyota Corolla" style; athletes' past stars free, Burrow and Usyk with figures, a Forbes
   2026 title; tour facts name the artist, tour grosses from infoboxes so 54 of 57 unranked tours score in Blitz;
   MJ, RHCP, Led Zep. Camp Nou keeps 99,354 (no current figure to override with).
-- Leak rate: 1.5% before this cycle; re-measure on the merged main pending.
+- Leak rate: 1.6% overall (1476 of 94,041, 97 lists), but on the same 95 lists 1.53% -> 1.44%. The new
+  netflix-seasons list is the worst at 14.3%: its pool is every Netflix original, so "cars", "planes" and "water"
+  find obscure shows. Next: plain words or a narrower pool there.
 - New topics: netflix-seasons ("Netflix seasons with the most views in their first 91 days"; casual 7, a possible
   daily; "squid game" is Season 1, later seasons by number) and mcdonalds-countries (casual 9, too easy for a list;
   Blitz 31/34). Both need a judge.
