@@ -77,6 +77,12 @@ export interface Topic {
    * isn't measures something else and is dropped.
    */
   values?: { kind: ValueKind; scale?: number; below?: "tenth" | "last" };
+  /**
+   * Why a miss outside a short ranking (25 rows or fewer) shows no figure: no other table or infobox has one
+   * ("every other country has none"). Without it, scripts/validate.ts fails such a list when none of its unranked
+   * answers has a value (give them one with `also` and `dated`, or `values`).
+   */
+  noFigures?: string;
   /** #1 has the smallest number (a rank such as Similarweb's). Such a list is never Blitz: a bigger n isn't better. */
   lowerIsBetter?: boolean;
   /**
@@ -142,12 +148,42 @@ export interface Also {
   aliasCols?: (string | number)[];
   /** Only keep rows whose `col` cell matches, as on a topic. */
   where?: { col: string | number; match: RegExp };
+  /** Names for these tables' rows, by the name the table gives: "Mercedes" is the pool's "Mercedes-Benz". */
+  rename?: Record<string, string>;
   /**
    * A column with the list's own stat, in the ranked rows' unit: each answer from these tables shows it and scores
    * it in Blitz, unranked. Titanic is in the inflation table's nominal column ($200 million) but not in the ranking,
    * which stops above $200 million. A number at or above the last ranked row's means something else and is dropped.
    */
   value?: string | number;
+  /**
+   * These tables rank the same thing for another year or by another source (the 2024 top 10 on a 2025 list, a 2016
+   * survey): an unranked answer shows its latest rank and figure from them, labelled so it can't pass for the
+   * list's own: "#6 in 2024 (16.5 million)", a rank alone "#3 in 2019", a figure alone "2.98 million (2016)". It
+   * stays unranked and never scores in Blitz (no `n`); the figure isn't capped at #10's, since another year's can
+   * be higher. An answer with the list's own stat (a `value` source without `dated`) keeps that instead.
+   */
+  dated?: Dated;
+}
+
+export interface Dated {
+  /** Column with the row's rank in that table. */
+  rank?: string | number;
+  /**
+   * When the ranking is from. Default: the year in the value, rank or name column's header ("Arrivals 2024"), else
+   * in the table's caption or heading ("1987–1989"). "{year}" in it stands for that year ("Q4 {year}").
+   */
+  label?: string;
+  /** Who ranked it, when that isn't the list's own source: "#43 in 2016 (Mastercard, 2.98 million)". */
+  source?: string;
+  /** Divides the cell's number into the shown unit: 1e6 with `unit` " million" shows 16,500,000 as "16.5 million". */
+  scale?: number;
+  /** Shown before the figure ("$"); default: the cell's own currency sign. */
+  prefix?: string;
+  /** Shown after the figure (default: the topic's unit). */
+  unit?: string;
+  /** The name cell ends with the figure ("Tencent 688,000"): the number is the figure, the rest the name. */
+  figureInName?: boolean;
 }
 
 /** Redirects to US states that are jokes, documents, agencies or teams, found by the list judges. */
@@ -894,6 +930,7 @@ export const TOPICS: Topic[] = [
     name: "Franchise",
     value: "Wins",
     metric: "Super Bowl wins",
+    noFigures: "every other team has no Super Bowl win",
     universe: "nfl-teams",
     canonical: true,
     junkAliases: [
@@ -937,6 +974,7 @@ export const TOPICS: Topic[] = [
     name: "Country",
     value: "Wins",
     metric: "Grand Prix wins",
+    noFigures: "every other country has no Grand Prix win",
     universe: "countries",
     junkAliases: ["Swedish sin"],
   },
@@ -1477,7 +1515,19 @@ export const TOPICS: Topic[] = [
     name: "City",
     value: "Arrivals",
     metric: "Arrivals (millions, 2025)",
-    also: [{ tables: [1, 2, 3], name: "City" }, ...CITIES],
+    // The page's earlier rankings give a city outside the 2025 top 10 its latest rank and figure: New York City
+    // "#8 in 2023 (11.7 million)", Singapore "#5 in 2018 (18.6 million)", Mexico City from Mastercard's 2016 list.
+    also: [
+      { tables: [1, 2], name: "City", value: "Arrivals", dated: { rank: "Rank", scale: 1e6, unit: " million" } },
+      { tables: [3], name: "City", value: "Arrivals 2018", dated: { rank: "Rank (Euromonitor)", scale: 1e6, unit: " million" } },
+      {
+        tables: [3],
+        name: "City",
+        value: "Arrivals 2016",
+        dated: { rank: "Rank (Mastercard)", source: "Mastercard", scale: 1e6, unit: " million" },
+      },
+      ...CITIES,
+    ],
     universe: "capitals",
     junkAliases: [
       "SJK Lai Meng", "K.L.C.C.", "Al memzar", "Guzelbag Mahallesi", "Kaleici",
@@ -1571,9 +1621,24 @@ export const TOPICS: Topic[] = [
     name: "Company",
     value: "Nominal",
     metric: "Peak market cap (US$ billions)",
+    // The page's quarterly top 10s (2006-2026, US$ millions, the figure in the name cell) and yearly ones
+    // (2000-2005) give a company outside the peak ranking its latest place: "ExxonMobil: #8 in Q4 2022 ($454
+    // billion)". That is the market value then, labelled with when, not a peak.
     also: [
-      { tables: range(1, 27), name: 2, skip: MARKET_CAP_SKIP },
-      { tables: range(1, 27), name: 4, skip: MARKET_CAP_SKIP },
+      ...[8, 6, 4, 2].map((c, i) => ({
+        tables: range(1, 21),
+        name: c,
+        dated: { rank: "Rank", label: `Q${4 - i} {year}`, figureInName: true, scale: 1e3, prefix: "$", unit: " billion" },
+        skip: MARKET_CAP_SKIP,
+      })),
+      {
+        tables: range(22, 27),
+        name: "Name",
+        value: "Market value",
+        dated: { rank: "Rank", scale: 1e3, prefix: "$", unit: " billion" },
+        skip: MARKET_CAP_SKIP,
+        rename: { "Intel Corporation": "Intel" },
+      },
       { page: "List of largest companies by revenue", tables: [0], name: "Name" },
     ],
     webNames: true,
@@ -1623,8 +1688,18 @@ export const TOPICS: Topic[] = [
     value: "Net worth",
     metric: "Net worth (US$)",
     people: true,
-    // Earlier years' top 10s; people who have died are free, not a costly miss ("karl" was Karl Albrecht).
-    also: [{ tables: range(1, 37), name: "Name", skip: [...DECEASED_BILLIONAIRES, "Steven Ballmer"] }],
+    // Earlier years' top 10s, latest first (a name is spelled as its latest table spells it); each person shows
+    // their last appearance ("Bill Gates: #7 in 2024 ($128 billion)"). People who have died are free, not a costly
+    // miss ("karl" was Karl Albrecht).
+    also: [
+      {
+        tables: range(1, 37).reverse(),
+        name: "Name",
+        value: "Net worth",
+        dated: { rank: "No." },
+        skip: [...DECEASED_BILLIONAIRES, "Steven Ballmer"],
+      },
+    ],
     dataAsOf: "2026",
     // Bettencourt Meyers ranks below the top 10 the page tables, so nothing lists her; "bettencourt" alone
     // otherwise finds only her late mother.
@@ -1880,7 +1955,9 @@ export const TOPICS: Topic[] = [
     name: "Amusement park",
     value: "2024",
     metric: "Visitors (2024)",
-    also: [{ tables: [2, 3, 4, 5], name: "Amusement park" }],
+    // The regional tables have the same 2024 figures for parks outside the world top 25 (Knott's Berry Farm, Cedar
+    // Point), so those show and score theirs (all 46 have one).
+    also: [{ tables: [2, 3, 4, 5], name: "Amusement park", value: "2024" }],
     universeCategories: ["Walt Disney Parks and Resorts", "Operating amusement parks", "Amusement parks in the United States"],
     // Resorts (a guess at "Tokyo Disney" means its parks: intent.ts), companies, services and events are no parks.
     skip: [
@@ -2058,6 +2135,7 @@ export const TOPICS: Topic[] = [
     name: "Country",
     value: "Wins",
     metric: "Ballon d'Or wins",
+    noFigures: "every other country has no Ballon d'Or",
     universe: "countries",
     // Yashin's win counts for the Soviet Union; "Russia" is half right, so it is free rather than a costly miss.
     skip: ["Russia"],
@@ -2114,7 +2192,17 @@ export const TOPICS: Topic[] = [
     value: "Sold vehicles(2025)",
     metric: "Vehicles sold (2025)",
     stripWords: /\b(group|motor|motors|auto|company|corporation)\b/gi,
-    also: [{ tables: range(1, 12), name: 1 }],
+    // The page's earlier years give a group outside the 2025 table its latest rank and figure ("BMW: #12 in 2020
+    // (2,324,778)"); a rank column belongs to its table's latest year, so earlier years' columns show a figure only.
+    also: [
+      { tables: [1], name: 1, value: "Sold vehicles (2020)", dated: { rank: 0 }, rename: { Mercedes: "Mercedes-Benz" } },
+      { tables: [2], name: 1, value: "Vehicles (2017)", dated: { rank: 0 } },
+      { tables: [2], name: 1, value: "Vehicles (2016)", dated: {} },
+      { tables: [2], name: 1, value: "Vehicles (2015)", dated: {} },
+      { tables: [3, 4, 5, 9], name: 1, value: "Total", dated: { rank: 0 } },
+      { tables: [6, 7, 8, 11, 12], name: 1, value: "Vehicles", dated: { rank: 0 } },
+      { tables: [10], name: 1, value: "Vehicles (2004)", dated: {} },
+    ],
     universeCategories: ["Car brands"],
     // Brands are their group's answer (intent.ts gives the group their names), not answers of their own.
     skip: [
@@ -2277,8 +2365,16 @@ export const TOPICS: Topic[] = [
     noRedirects: true,
     // "!@$%&" normalizes to "and".
     skip: ["!@$%&"],
-    // The other surveys' lists (SplashData by year, Keeper, NCSC, Huntress): common passwords outside NordPass's top 10.
-    also: [...range(1, 9).map((c) => ({ tables: [1], name: c })), { tables: [2, 3, 4], name: 1 }],
+    // The other surveys' lists (Huntress 2026, SplashData by year, NCSC, Keeper): common passwords outside
+    // NordPass's top 20, each with its latest rank on one of them ("qwerty: #14 in 2026 (Huntress)").
+    also: [
+      { tables: [4], name: "Password", dated: { rank: "Rank", label: "2026", source: "Huntress" } },
+      ...range(1, 9)
+        .reverse()
+        .map((c) => ({ tables: [1], name: c, dated: { rank: "Rank", source: "SplashData" } })),
+      { tables: [3], name: 1, dated: { rank: "Rank", source: "NCSC" } },
+      { tables: [2], name: 1, dated: { rank: "Rank", source: "Keeper" } },
+    ],
   },
 ];
 

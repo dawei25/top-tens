@@ -20,9 +20,10 @@ const SHARED_FORMS = [
 import { bareWord, blockedAlias, gluedAlias, junkRedirect } from "./aliases";
 import { UNIVERSES } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
-import { TOPICS } from "./topics";
+import { TOPICS, type Topic } from "./topics";
 
 const DIR = join(import.meta.dirname, "..", "public", "puzzles");
+const FACTS_DIR = join(import.meta.dirname, "facts");
 /** Neighbours in a ranking more than this far apart (ratio of their numbers) get a second look. */
 const JUMP = 20;
 const COUNTRY_SET = new Set(UNIVERSES.countries().map((c) => normalize(c.name)));
@@ -38,11 +39,37 @@ const isPlaceList = (p: Puzzle) => {
 const topicNoun = (id: string) => TOPICS.find((t) => t.id === id)?.noun;
 /** Below this many accepted answers, wrong-but-real guesses are likely to be free. */
 const MIN_ACCEPTED = 30;
+/**
+ * Lists built (source.asOf) on or after this day must have a fact on every top-10 answer; older builds only warn.
+ * A rebuild brings a list under the rule.
+ */
+export const FACTS_REQUIRED_FROM = "2026-11-02";
+/** A ranking this short leaves most misses unranked: they need a figure from somewhere, or a reason (`noFigures`). */
+export const SHORT_RANKING = 25;
 
 type Level = "error" | "warn";
-interface Issue {
+export interface Issue {
   level: Level;
   msg: string;
+}
+
+/** How many answers the source ranks, and how many of the rest (rank 0) show a figure when missed. */
+export function figureShare(p: Pick<Puzzle, "answers" | "extras">): { ranked: number; unranked: number; withValue: number } {
+  const unranked = p.extras.filter((e) => e.rank === 0);
+  return {
+    ranked: p.answers.length + p.extras.length - unranked.length,
+    unranked: unranked.length,
+    withValue: unranked.filter((e) => e.value?.trim()).length,
+  };
+}
+
+/** Problems with one fact: an em dash, no text, no source URL. */
+export function factIssues(where: string, fact: { text?: string; source?: string }): string[] {
+  const out: string[] = [];
+  if (!fact.text?.trim()) out.push(`${where}: fact has no text`);
+  if (fact.text?.includes("—")) out.push(`${where}: fact has an em dash`);
+  if (!/^https?:\/\/\S+$/.test(fact.source ?? "")) out.push(`${where}: fact has no source URL`);
+  return out;
 }
 
 /**
@@ -64,7 +91,7 @@ export function junkReason(name: string, numbers = false): string | null {
   return null;
 }
 
-function checkPuzzle(p: Puzzle, file: string): Issue[] {
+export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = TOPICS.find((t) => t.id === p.id)): Issue[] {
   const issues: Issue[] = [];
   const err = (msg: string) => issues.push({ level: "error", msg });
   const warn = (msg: string) => issues.push({ level: "warn", msg });
@@ -87,6 +114,23 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
     if (!e.aliases.length) warn(`#${e.rank} ${e.name}: no aliases`);
   });
 
+  // Every top-10 answer has a fact (scripts/facts/<id>.json, matched by name, article or alias), sourced, plain.
+  const noFact = p.answers.filter((e) => !e.fact).map((e) => `#${e.rank} ${e.name}`);
+  if (noFact.length) {
+    const required = (p.source?.asOf ?? "") >= FACTS_REQUIRED_FROM;
+    (required ? err : warn)(`${noFact.length} top-10 answer(s) without a fact: ${noFact.join(", ")}`);
+  }
+  for (const e of [...p.answers, ...p.extras]) if (e.fact) for (const m of factIssues(`#${e.rank} ${e.name}`, e.fact)) err(m);
+
+  // A short ranking: most real guesses are unranked, and a miss with no figure tells the player nothing.
+  const share = figureShare(p);
+  if (share.ranked <= SHORT_RANKING && share.unranked && !share.withValue && !topic?.noFigures) {
+    err(
+      `the ranking stops at ${share.ranked} and none of its ${share.unranked} unranked answers has a figure, so misses ` +
+        "show none: fill them from the page's other tables (`also` with `dated`) or say why not (`noFigures`)",
+    );
+  }
+
   const all: Entry[] = [...p.answers, ...p.extras];
   if (all.length < MIN_ACCEPTED) warn(`only ${all.length} accepted answers (want ${MIN_ACCEPTED}+)`);
 
@@ -98,7 +142,7 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
   }
 
   const byName = new Map<string, Entry>();
-  const numbers = !!TOPICS.find((t) => t.id === p.id)?.numberNames;
+  const numbers = !!topic?.numberNames;
   for (const e of all) {
     const where = e.rank ? `#${e.rank}` : "unranked";
     const why = junkReason(e.name, numbers);
@@ -130,7 +174,6 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
     }
   }
 
-  const topic = TOPICS.find((t) => t.id === p.id);
   const built = p as Puzzle & { category?: string };
   if (!built.category) err("missing category");
   else if (topic && built.category !== topic.category) err(`category "${built.category}" differs from topics.ts ("${topic.category}")`);
@@ -262,7 +305,23 @@ function main(): number {
   };
 
   print("index", globalIssues);
+
+  // The facts as written, before a build ships them: an em dash or a missing source fails here first.
+  const factFiles: Issue[] = [];
+  for (const f of existsSync(FACTS_DIR) ? readdirSync(FACTS_DIR).filter((x) => x.endsWith(".json")).sort() : []) {
+    let facts: Record<string, { text?: string; source?: string }>;
+    try {
+      facts = JSON.parse(readFileSync(join(FACTS_DIR, f), "utf8"));
+    } catch (e) {
+      factFiles.push({ level: "error", msg: `${f}: unreadable: ${(e as Error).message}` });
+      continue;
+    }
+    for (const [name, fact] of Object.entries(facts)) for (const msg of factIssues(`${f} "${name}"`, fact)) factFiles.push({ level: "error", msg });
+  }
+  print("scripts/facts", factFiles);
+
   const sizes: [string, number][] = [];
+  const shares: [string, ReturnType<typeof figureShare>][] = [];
   for (const f of files.sort()) {
     let p: Puzzle;
     try {
@@ -272,7 +331,16 @@ function main(): number {
       continue;
     }
     sizes.push([p.id, p.answers.length + p.extras.length]);
+    shares.push([p.id, figureShare(p)]);
     print(`${p.id} (${p.answers.length + p.extras.length} accepted)`, checkPuzzle(p, f));
+  }
+
+  // Short rankings: how many misses outside the ranking can show a figure.
+  console.log(`\nRankings of ${SHORT_RANKING} or fewer: unranked answers with a figure`);
+  for (const [id, s] of shares.filter(([, s]) => s.ranked <= SHORT_RANKING && s.unranked)) {
+    const pct = Math.round((100 * s.withValue) / s.unranked);
+    const why = TOPICS.find((t) => t.id === id)?.noFigures;
+    console.log(`  ${id.padEnd(22)} ranked ${String(s.ranked).padStart(2)}, ${s.withValue}/${s.unranked} (${pct}%)${why ? `; none: ${why}` : ""}`);
   }
 
   sizes.sort((a, b) => a[1] - b[1]);
