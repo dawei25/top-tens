@@ -19,7 +19,9 @@ Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
   lost 139 readings with figures for 11 fewer leaks); x-accounts, facebook-pages and tiktok-accounts rebuilt with the
   shared junk list; concert-tours aliases ("the weekend", "m72", "farewell tour" to Elton) and dated figures from
   yearly tables; 2Pac and RiRi.
-- Leak rate: 1.6% before this cycle; re-measure on the merged main pending.
+- Leak rate: 1.6% -> 1.5% (1388 of 90,486, 95 lists; the new in-order word reading added none). Worst: theme-parks,
+  stadiums, youtube-channels, video-games. What is left is mostly words that name top-10 answers on other lists
+  ("water", "music", "china") and near-spellings of plain words ("planes" to Planet, "rice" to Nice).
 - New topics: athletes-earnings ("Highest-earning athletes of 2026", every Forbes top 10 since 2012 accepted with its
   year; casual 8, par 6) and car-models ("Best-selling car models of all time"; casual 7, Blitz 15/23). Both need a
   judge. Known cost on car-models: "gold" is corrected to Golf.
