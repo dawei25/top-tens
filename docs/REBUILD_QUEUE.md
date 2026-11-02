@@ -26,11 +26,18 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       because the leading article is dropped, so that alias also catches "rod". Only drop "a" when a word follows it
       with a space, or keep hyphenated forms whole.
 
-- [ ] **Matcher: "title artist" guesses** (code, no rebuild): "perfect ed sheeran" on spotify-songs should match
-      Perfect by stripping a trailing artist name the song's entry knows.
+- [ ] **Shared junk lists not yet applied** (cycle 2): x-accounts, facebook-pages and tiktok-accounts get
+      `CELEBRITY_JUNK` and shared ranks for ties below the top 10 at their next rebuild (cached, no fetches).
+
+- [ ] **Plain words, narrower "known name"** (lexicon + `isPlainWord`, cycle 3): `isPlainWord` vetoes any word that
+      is the exact name of an obscure pool entry ("humans", "music"), so those still leak. Let the lexicon decide
+      instead: count only ranked names and places as names when building `words` (about 670 more plain words), and
+      drop the known-name check in `isPlainWord`. Measure with the leak audit and the plain-word test.
 
 ## Done
 
+- **Matcher: "title artist" guesses** (2026-11-02): "perfect ed sheeran" puts Perfect in the box
+  (`leadingName`), but not when the whole guess is a name of its own ("saudi aramco").
 - **Quality pass and full rebuild** (2026-11-02): every title and prompt says what the player names, every puzzle
   has a `noun`; famous unranked answers get values from other tables on the page (Titanic $200 million, 43 more
   films; tourism, military spending, NHL points, Europe cities), China cities ranked to 452, 64 duplicates merged,

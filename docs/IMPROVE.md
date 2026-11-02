@@ -44,6 +44,11 @@ stronger.
 | Detective Conan had no fun fact | top-10 answers without a fact (new lists, renames) | facts looked up by normalized name, article and aliases; validate.ts errors on a top-10 answer without a fact |
 | Singapore, Tokyo, NYC "isn't in the top 10" with no figure | misses with no number when the source ranks only 10 | unranked answers take their rank and figure (with year) from the page's other tables ("#6 in 2024"); any other miss says "outside the top N"; validate.ts flags lists whose misses can't show a figure |
 | Par read too high, then city visitors at par 1 | a crude synthetic crowd | compressed crowd model in par.ts (pars 3-7); real stats (Phase 1) replace it at 50 players |
+| Music artists titled "best-selling" but ranked by certified units (Drake #1, the Beatles #11) | a title that hides an unexpected measure | judge brief: the title names the measure when it isn't the obvious one, else `fix-first` |
+| Capitals had Ulaanbaatar ranked and "Ulan Bator" unranked (two lives, one city) | one place under two names | validate.ts warns when an unranked universe member duplicates a ranked row; merge with `aliases` |
+| "bookworm" and "relentless" found Amazon | junk redirects on company and celebrity lists | shared `COMPANY_JUNK` and `CELEBRITY_JUNK` lists in scripts/aliases.ts, applied to every such list |
+| "humans" offered Destroy All Humans!, "water" Fritz-Walter-Stadion | an ordinary word read as part of a longer name | plain words in the lexicon (`isPlainWord`), never the words top-10 answers are known by; scripts/lexicon.test.ts |
+| "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
 
 ## What good looks like
 

@@ -59,7 +59,8 @@ fire off that all score). The owner's target for Today's list: a typical player 
   - recognizability >= 4: most adults could name 5 of these without being fans of the topic (Broadway shows, NHL
     scorers and national parks fail this; they are free play);
   - the title and prompt say what the player is naming ("Countries emitting the most CO2", not "Biggest CO2
-    emitters"); if not, it's `fix-first`;
+    emitters"), and by what measure when it isn't the one a player would assume ("most certified units", not
+    "best-selling", when streams count and Drake beats the Beatles); if not, it's `fix-first`;
   - curve >= 3, fairness >= 3, data >= 4;
   - the casual simulation finds **6 to 8** of the 10 before the game ends. (A game short of 10/10 always ends at
     zero lives, so count what was found by then; running out is normal, not a fail.) `scripts/judge/par.ts` turns

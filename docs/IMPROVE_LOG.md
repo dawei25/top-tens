@@ -2,6 +2,26 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-02, cycle 2
+
+- Judged: capitals (daily list, p8, also Blitz), animated-films (daily list, p8, also Blitz), theme-parks (daily
+  list, p7), music-artists (fix-first: "best-selling" title over a certified-units ranking, so the Beatles, Elvis
+  and Madonna cost lives; retitled and rebuilt, re-judge next). Daily bank: 6 approved lists not yet scheduled;
+  scheduled through Nov 12, so no top-up.
+- Data: all four lists' fixes (capitals merged with their other spellings, theme-park category pages skipped,
+  gross figures for every unranked animated film); ties below the top 10 share a rank (Everland #20).
+- Method fixes: plain words in the lexicon (5,408), never the words top-10 answers or ranked people are known by
+  (the spec as written lost 243 natural readings, "cowboys", "pizza", "swift"); shared junk lists for companies and
+  celebrities; an alias made of two names joined by a comma is dropped; validate.ts warns on one place under two
+  names; judge brief: the title names an unexpected measure.
+- Matcher: number words count as digits ("frozen two"); a guess that is a name of its own isn't read as an answer
+  plus who made it ("saudi aramco" is not Saudi Arabia).
+- Leak rate: 2.7% before this cycle; re-measure on the merged main pending.
+- New topics: instagram (most-followed accounts; casual 8, Blitz 26/29; could be a daily, needs a judge) and
+  fiction-authors (ranked by the low estimate, ties broken by the high; casual 4, free play).
+- Next: judge instagram, concert-tours and music-artists; the narrower known-name rule for plain words
+  (REBUILD_QUEUE); rebuild x-accounts, facebook-pages and tiktok-accounts for the shared junk list.
+
 ## 2026-11-02, par model fixed (player feedback, second round)
 
 - The uniform shift after "par too high" pushed hard lists to absurd pars (city visitors par 1; a player who got 5
