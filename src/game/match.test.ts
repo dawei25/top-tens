@@ -340,6 +340,10 @@ describe("an ordinary word typed alone", () => {
     expect(judgeGuess("kevin", games, new Set(), lex)).toMatchObject({ entry: { name: "Kevin Durant" }, corrected: true });
     expect(judgeGuess("minecraft", games, new Set(), lex)).toMatchObject({ kind: "correct", entry: { rank: 1 } });
   });
+  it("and an entry named exactly that word still matches", () => {
+    const withWater: Puzzle = { ...games, extras: [...games.extras, e(0, "Water")] };
+    expect(judgeGuess("water", withWater, new Set(), lex)).toMatchObject({ kind: "near", entry: { name: "Water" }, corrected: false });
+  });
 });
 
 describe("number words", () => {

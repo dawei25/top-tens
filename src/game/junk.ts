@@ -12,9 +12,10 @@ export interface Lexicon {
   /** FNV-1a hashes (base 36) of every normalized name in the bank, always treated as real. */
   names: string;
   /**
-   * FNV-1a hashes (base 36) of ordinary English words that appear as a word inside some answer's name but are not a
-   * name themselves ("humans", "water", "trees"). Typed alone they are a word, not part of a name: the matcher doesn't
-   * read them as one ("humans" is not Destroy All Humans!). Optional: older lexicons don't have it.
+   * FNV-1a hashes (base 36) of ordinary English words that appear as a word inside some answer's name but don't name
+   * an answer players mean by it ("humans", "water", "trees"; scripts/lexicon.ts decides). Typed alone they are a
+   * word, not part of a name: the matcher doesn't read them as one ("humans" is not Destroy All Humans!), though an
+   * entry named exactly that still matches. Optional: older lexicons don't have it.
    */
   words?: string;
 }
@@ -132,12 +133,16 @@ function knownNames(lex: Lexicon): Set<string> {
 
 let wordSetCache: { src: string; set: Set<string> } | null = null;
 
-/** Whether the text is an ordinary English word that is not itself a name in the bank (see `Lexicon.words`). */
+/**
+ * Whether the text is an ordinary English word that names no answer a player means by it (see `Lexicon.words`). The
+ * lexicon decides which names count: an obscure pool entry called "Humans" or "Music" doesn't stop the word being
+ * plain. Such an entry still matches when typed in full, since only readings of it as part of a longer name stop.
+ */
 export function isPlainWord(text: string, lex?: Lexicon): boolean {
   if (!lex?.words) return false;
   if (wordSetCache?.src !== lex.words) wordSetCache = { src: lex.words, set: new Set(lex.words.split(" ")) };
   const s = normalize(text);
-  return !s.includes(" ") && wordSetCache.set.has(fnv(s).toString(36)) && !isKnownName(text, lex);
+  return !s.includes(" ") && wordSetCache.set.has(fnv(s).toString(36));
 }
 
 /** Whether the text is exactly some answer or alias in the bank, or a country or capital. */
