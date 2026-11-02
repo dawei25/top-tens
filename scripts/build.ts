@@ -143,7 +143,7 @@ const GENERIC_WORDS =
  * mean nothing alone are left out: plain words ("Deluxe", "Impossible"; a word of the name is still matched as one),
  * places ("Missouri"), "Part 2", and fragments like "of Brazil" or "Salt City–Murray".
  */
-function shortForms(name: string, strip?: RegExp): string[] {
+function shortForms(name: string, strip?: RegExp | RegExp[]): string[] {
   // "Family Computer/Nintendo Entertainment System", "Mississippi–Missouri", "PUBG: Battlegrounds".
   const out = name
     // A slash between digits is part of the name: "National 9/11 Museum".
@@ -151,8 +151,7 @@ function shortForms(name: string, strip?: RegExp): string[] {
     .filter((p) => p !== name && !(isWord(p) || PLACES.has(normalize(p))));
   // Hawaiʻi is typed "Hawaii": normalize() keeps the ʻokina as a word break.
   if (/[ʻʼ`]/.test(name)) out.push(name.replace(/[ʻʼ`]/g, ""));
-  for (const words of [GENERIC_WORDS, strip]) {
-    if (!words) continue;
+  for (const words of [GENERIC_WORDS, ...[strip ?? []].flat()]) {
     // A word gone from the middle of a phrase garbles it: "Salt City–Murray", "Lake of Woods", "Leaning of Pisa".
     const marked = name.replace(words, GAP).replace(new RegExp(`${GAP}(\\s*${GAP})*`, "g"), GAP);
     if (new RegExp(`\\p{L}\\s+${GAP}\\s+\\p{L}`, "u").test(marked)) continue;
@@ -160,7 +159,9 @@ function shortForms(name: string, strip?: RegExp): string[] {
     // "Salt" (Salt Lake Stadium), "Australia" (Stadium Australia), "South" (South Island) mean something else alone.
     if (stripped !== name && !bareWord(stripped, PLACES)) out.push(stripped);
   }
-  return out.filter((s) => s.replace(/\W/g, "").length >= 3 && !CONNECTOR_START.test(s.trim()) && !PART.test(s.trim()));
+  return out.filter(
+    (s) => s.replace(/\W/g, "").length >= 3 && !CONNECTOR_START.test(s.trim()) && !CONNECTOR_END.test(s.trim()) && !PART.test(s.trim()),
+  );
 }
 
 const GAP = "\u0002";
@@ -168,6 +169,8 @@ const GAP = "\u0002";
 const isWord = (s: string) => !normalize(s).includes(" ") && isEnglishWord(normalize(s));
 /** Pieces that aren't names: "of Brazil", "and Futuna" (lower case: "The Two Towers" is a name). */
 const CONNECTOR_START = /^(of|and|the|in|on|at|de|du|des|la|le|del|y)\s/;
+/** Pieces cut off before their last word: "Love On" (Love On Tour), "Living Proof: The Farewell". */
+const CONNECTOR_END = /\s(of|and|the|in|on|at|to|for|with)$/i;
 /** "Part 2", "Vol. 1": which part, not which work. */
 const PART = /^(part|chapter|volume|vol\.?|episode|book|season)\s*\d+$/i;
 
@@ -495,8 +498,12 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       const nc = column(header, src.name);
       const vc = src.value === undefined ? -1 : column(header, src.value);
       const rc = src.dated?.rank === undefined ? -1 : column(header, src.dated.rank);
-      const label = src.dated && datedLabel(src.dated, [vc, rc, nc].filter((c) => c >= 0).map((c) => header[c]), tableTitle($, tables[t]));
-      if (src.dated && !label) throw new Error(`no year for dated table ${t} (give it a label)`);
+      // A table of one row per year labels each row with its own year.
+      const perYear = src.dated?.perYear;
+      const yc = perYear ? column(header, perYear.col) : -1;
+      const tableLabel =
+        src.dated && !perYear && datedLabel(src.dated, [vc, rc, nc].filter((c) => c >= 0).map((c) => header[c]), tableTitle($, tables[t]));
+      if (src.dated && !perYear && !tableLabel) throw new Error(`no year for dated table ${t} (give it a label)`);
       const aliasCs = (src.aliasCols ?? []).map((a) => column(header, a));
       for (const r of body) {
         const cell = r[nc];
@@ -518,17 +525,18 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords), ...others].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
         const v = topic.lowerIsBetter ? null : glued ? parseValue(glued[1]) : vc >= 0 ? parseValue(r[vc]?.text ?? "") : null;
+        const label = perYear ? datedLabel(src.dated!, [r[yc]?.text ?? ""], "") : tableLabel;
         if (src.dated && label) {
           const d = src.dated;
           const sign = d.prefix ?? v?.display.match(/^[$€£]/)?.[0] ?? "";
           const digits = v && (d.scale ? scaledFigure(v.value, d.scale) : v.display.replace(/^[$€£]/, ""));
           const figure = v && v.value > 0 ? sign + digits + (d.unit ?? topic.unit ?? "") : undefined;
-          const shown = datedValue(label, rc >= 0 ? rankOf(r[rc]?.text) : undefined, figure, d.source);
+          const shown = datedValue(label, rc >= 0 ? rankOf(r[rc]?.text) : perYear?.rank, figure, d.source);
           if (shown) {
             entry.value = shown;
             DATED.set(entry, labelYear(label));
           }
-        } else if (v && v.value > 0 && v.value < limit) {
+        } else if (!src.dated && v && v.value > 0 && v.value < limit) {
           entry.value = (topic.prefix ?? "") + v.display + (topic.unit ?? "");
           entry.n = statNumber(v.value);
         }
@@ -627,6 +635,8 @@ interface Curated {
   targets: Entry[];
   /** Topic-specific intent is checked strictly; shared country forms are skipped where they don't fit. */
   strict: boolean;
+  /** A group's size (intent.ts `groups`): how many entries it names. */
+  group?: number;
 }
 
 /** Curated aliases for a topic: shared country forms (for country lists), then the topic's own intent. */
@@ -692,7 +702,7 @@ function curated(topic: Topic, entries: Entry[], final: boolean): Curated[] {
     for (const alias of aliases) out.push({ alias, targets: find([name]), strict: true });
   }
   for (const [alias, members] of Object.entries(intent.groups ?? {})) {
-    out.push({ alias, targets: find(members), strict: true });
+    out.push({ alias, targets: find(members), strict: true, group: members.length });
   }
   return out;
 }
@@ -702,7 +712,12 @@ function curated(topic: Topic, entries: Entry[], final: boolean): Curated[] {
  * "United Kingdom" (meaning Great Britain on the islands list) does not come back as a separate country entry.
  */
 function seedIntent(topic: Topic, entries: Entry[]): void {
-  for (const { alias, targets } of curated(topic, entries, false)) for (const e of targets) e.aliases.push(alias);
+  // A group waits until all its entries exist: seeded on some, it would swallow the rest as the same answer (Cher's
+  // "The Farewell Tour" into Elton John's, which shares "Farewell Tour").
+  for (const { alias, targets, group } of curated(topic, entries, false)) {
+    if (group && targets.length < group) continue;
+    for (const e of targets) e.aliases.push(alias);
+  }
 }
 
 /** Curated aliases win over automatic ones with the same spelling: they move to exactly their targets. */

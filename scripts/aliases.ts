@@ -291,6 +291,9 @@ export const CELEBRITY_JUNK = [
   "Hiraben Modi", "Heeraben Modi", "HE Hiraben Modi", "Damodardas Mulchand Modi", "Damodardas Modi", "Mulchand Modi",
   "Narendra Modi's Google+ Hangout", "Use of Technology by Narenda Modi", "NaMo TV", "Founder of SpaceX",
   "Michelle Obama's husband",
+  // Instagram's own account: features, users and studies of the app (on the Instagram and Facebook lists).
+  "Instagram Stories", "Instagram story", "Instagram Direct", "Instagram Live", "Effects of Instagram on mental health",
+  "Instagram impact on people", "Instagrammer", "Instagram blogger", "Instagram Kids", "Instagram from Facebook", "Ig.me",
 ];
 
 /**
