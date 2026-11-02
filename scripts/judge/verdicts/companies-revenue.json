@@ -1,28 +1,27 @@
 {
   "id": "companies-revenue",
-  "judgedAt": "2026-10-30",
-  "decision": "fix-first",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
   "alsoBlitz": true,
-  "priority": 6,
-  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 3, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 5, "livesLost": 5, "guesses": 10 },
-  "fan": { "found": 10, "livesLost": 4, "guesses": 15 },
-  "blitzCasual": { "scored": 21, "named": 28 },
+  "priority": 3,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 21, "named": 24 },
   "difficulty": 3,
   "tags": ["business", "companies", "money"],
   "audience": "people who follow business news",
-  "summary": "Fun Blitz after a cleanup: casual players name 20+ scoring companies. Weak as a classic daily, because players think of market value and lose lives on Microsoft, Tesla and Meta.",
+  "summary": "Great Blitz, but too hard for a daily once the data is right. The casual player found 6, and one of them, Berkshire at #10, is only there because CVS still shows its 2023 revenue.",
   "reasons": [
-    "Casual run: Apple, Amazon, Walmart, Google and Aramco found, but Microsoft (#19), Exxon (#13), Toyota (#17), Tesla (unranked) and Meta (#46) used up all five lives by guess 10. Big tech by market value is the obvious wrong idea, and every one of those guesses costs a life.",
-    "Top 10 is right (Fortune Global 500 order). State Grid, CNPC and Sinopec are fair stretch answers for fans; a fan got 10/10 with 4 lives lost, one of them a PetroChina bug.",
-    "Blitz suits it well: 21 of 28 quick casual names scored (oil majors, carmakers, banks, Costco). Data issues below keep it at fix-first."
+    "Casual found 6 (Walmart, Amazon, Apple, Google, Aramco, Berkshire) before Microsoft #19, Exxon #13, Toyota #17, Nvidia #27 and Samsung #33 took all five lives by guess 11. Each miss teaches something, but nearly every famous company is in the pool, so lives go fast. State Grid, CNPC and Sinopec are out of reach for most players.",
+    "That 6 rests on mixed-year data: Alphabet is #8 on 2025 revenue while CVS sits #11 on its 2023 figure, though the 2024 and 2025 Fortune Global 500 both have CVS in the top 10. With CVS corrected, Berkshire drops to #11 and the casual finds 5 (crowd estimate about 4.6), so this is free play, not fix-first.",
+    "Blitz is excellent: 21 of 24 quick casual names scored, and natural spellings work (wal-mart, aramco, cnpc, petrochina, united health, berkshire). The fan got 10/10 with 2 lives lost, one of them on CVS."
   ],
   "fixes": [
-    "'PetroChina' is an alias of #5 China National Petroleum Corporation, but the unranked extra 'Petro China' catches the guess first and costs a life. Drop the unranked 'Petro China' entry so 'petrochina' finds #5.",
-    "Add 'CVS' as an alias of #11 CVS Health (currently not recognized).",
-    "Countries in the unranked pool: 'United States', 'United Kingdom', 'Japan', 'Germany'. They are not companies and cost a life. Remove them.",
-    "Duplicate entities in the unranked pool: merge 'Royal Dutch Shell' into #15 Shell, and 'Samsung' into #33 Samsung Electronics (today 'samsung' brings up a choice and the unranked one scores nothing).",
-    "ICBC (#24) alias 'The Bank of East Asia' is a different bank; drop it.",
-    "Junk redirect aliases on top-10 entries: Amazon 'Sonic', 'Just Do It Award', 'Indigo Starfish', 'Lobbying by Amazon', 'Lobbying by Amazon.com', 'Controversies surrounding Amazon, Inc.', 'Amazon leadership principles', 'Commingled inventory', 'Co-mingled inventory', 'Comingled inventory'; Apple ' Inc.' (leading-space fragment, so typing 'inc' finds Apple), 'Katherine L. Adams', 'Boycott Apple', 'Directly Responsible Individual', 'Apple tax', 'Apple tax practices', 'Tax avoidance by Apple Inc.'; Walmart 'GamePlay', 'Supercenter', 'Discount City', 'Save Money. Live Better.', 'Always Low Prices, Always'; Saudi Aramco 'Carbon emissions by Saudi Aramco'; UnitedHealth 'Tim Noel', 'Controversies surrounding UnitedHealth Group'; Berkshire Hathaway 'Woodstock for Capitalists', 'Berkshire Hathaway Annual Shareholders Meeting'."
+    "TotalEnergies is missing. SKIP_NAME in scripts/build.ts begins `^(totals?|` with no word boundary, so the source's #26 TotalEnergies ($218B) is dropped as a total row and every entry from Glencore down shows one rank too high (Nvidia #27, source #28). Make it `totals?\\b`; the same bug can drop any name starting with 'Total' on other lists.",
+    "Values mix years: Amazon, Walmart, Apple, Alphabet and Nvidia show 2025 revenue; Aramco, UnitedHealth and Berkshire 2024; CVS, Volkswagen, Exxon, Shell, State Grid, Sinopec and most of 11-50 still show 2023 figures (refs are Fortune pages retrieved in 2022). That decides the top-10 cut: CVS Health reported about $373B for 2024, above Berkshire's $371B. Refresh at least CVS Health, ideally every row from one year or source, then re-rank.",
+    "Amazon's old-domain aliases 'Bookworm.com' and 'Relentless.com' make the plain words 'bookworm' and 'relentless' autocorrect to #1 Amazon. Add them and the other Amazon domain redirects (Look.com, Casa.com, Wag.com, Yoyo.com, BeautyBar.com, AfterSchool.com, Myhabit.com, Unboxed.com) to junkAliases.",
+    "Alias gaps (free misses today): 'Sinopec Group' (Fortune's name for #6), 'VW' for Volkswagen, 'AmerisourceBergen' for Cencora (its name until 2023), 'Hon Hai' for Foxconn.",
+    "Junk redirects on ranks 11+: people (Shigeru Hayakawa on Toyota, Savita Subramanian on Bank of America, Shilpan Amin on General Motors), slogans and addresses (Move fast and break things, Hacker Way on Meta; Bank of opportunity, Blue chip investor on Bank of America; EVerybody in on General Motors), 'IReady' on Nvidia, 'Project Solidgold' on China Construction Bank, 'New Auto' on Volkswagen."
   ]
 }
