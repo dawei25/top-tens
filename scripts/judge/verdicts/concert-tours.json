@@ -3,25 +3,24 @@
   "judgedAt": "2026-11-02",
   "decision": "fix-first",
   "alsoBlitz": true,
-  "priority": 7,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 4 },
-  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
-  "fan": { "found": 8, "livesLost": 5, "guesses": 14 },
-  "blitzCasual": { "scored": 16, "named": 22 },
-  "difficulty": 3,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "blitzCasual": { "scored": 15, "named": 22 },
+  "difficulty": 2,
   "tags": ["music", "concerts", "pop"],
-  "audience": "pop fans",
-  "summary": "A good daily you can play by artist name, with a fair spread and a few surprises. Fix two alias traps first: \"the weekend\" says The Weeknd isn't on the list, and \"farewell tour\" costs a life as Cher's tour.",
+  "audience": "music fans",
+  "summary": "A strong daily you can play by artist name: casual 8, fan 9, and every miss shows a figure. Hold it for one matcher fix: typing just \"tour\" offers top-10 tours as free choices until the whole top 10 is found.",
   "reasons": [
-    "The title clearly asks for tours, and artist names work: each artist gives their biggest tour to confirm, and Ed Sheeran offers both of his top-10 tours. Casual found 6, fan 8.",
-    "Lives go fast. Beyonce (#13), Pink (#11), the Stones (#16), Madonna and Michael Jackson are natural guesses that each cost a life, but each one shows its rank or gross.",
-    "Swift, Coldplay, Sheeran and Styles are gimmes, Elton John, U2 and The Weeknd take some thought, and Metallica and Springsteen are fair stretches."
+    "Last cycle's traps are fixed (\"the weekend\", \"guns and roses\", \"m72\", \"renaissance tour\", \"farewell tour\", \"ed sheeran divide\"). Swift, Coldplay, Sheeran, Styles and Elton are gimmes, The Weeknd and U2 take thought, Metallica and Springsteen are fair stretches. Casual 8 (9 if they go back for Ed Sheeran's second offered tour), fan 9.",
+    "Lives go fast (both players ran out), but on near misses that teach: Pink #11, Guns N' Roses #12, Beyonce #13, the Stones #16, Madonna's Sticky & Sweet at $411M. Pink beating Beyonce and The Weeknd at #3 are good surprises.",
+    "\"tour\", the word in nearly every answer, offers four top-10 tours at a time as free choices and keeps doing it as they are found; \"world tour\" offers M72 and Music of the Spheres. The list's own noun hands out the key, in classic and in Blitz."
   ],
   "fixes": [
-    "\"the weekend\" (the usual misspelling of The Weeknd, #3) gets \"isn't an answer for this list\": \"weekend\" is a known name in the lexicon, so the one-letter correction is blocked. Add an intent alias for this topic, or let the correction run when the clashing name isn't on this list. \"guns and roses\" is also not recognized (#12).",
-    "\"farewell tour\" costs a life as Cher's Living Proof: The Farewell Tour through its alias \"The Farewell Tour\", but players mean Elton John's (#4). Drop that generic alias, and map \"farewell tour\" to Farewell Yellow Brick Road in intent.ts, since Cher's full name still contains the words.",
-    "Short forms not recognized: \"renaissance tour\", \"1989 tour\", \"m72\" and \"m72 tour\" (M72 is under the 4-letter word-match minimum). Add \"<X> Tour\" for \"<X> World Tour\" names, plus \"M72\".",
-    "Matcher (src/game/match.ts, coordinator): leadingName takes the first entry carrying a shared artist alias and ignores the rest of the guess. \"ed sheeran divide\" offers Mathematics Tour, and \"coldplay a head full of dreams\" offers Music of the Spheres (#2), a free top-10 hit for a #18 guess. When the leading alias has several owners, use the trailing words to choose. Guard with a test for both.",
-    "Cowboy Carter Tour (a likely Beyonce guess), The MDNA Tour, The 1989 World Tour and the other table 2 and 8 entries show no figure, but the page has one: table 8 (Highest-grossing tours annually) gives Cowboy Carter $407,600,113 in 2025, and table 2 gives Steel Wheels/Urban Jungle $175,000,000. Show them as dated figures. The topics.ts comment calling table 8 North American looks wrong (the 1989 World Tour's $250.7M there is its worldwide total)."
+    "Answer-key leak (src/game/match.ts, coordinator): \"tour\" and \"the tour\" are read as part of every name and offered as choices: After Hours til Dawn / Mathematics / Music of the Spheres / Eras, then Divide, 360°, M72, Springsteen and Love On Tour as earlier ones are found, all free. \"world tour\" offers Las Mujeres / M72 / Music of the Spheres / Renaissance. A guess made only of the list's noun words should get \"be more specific\": add \"tour\" and \"tours\" to GENERIC, or let natural() go vague when a word part fits more than VAGUE_ABOVE entries even if the top ones are ranked. Keep \"renaissance tour\", \"1989 tour\", \"m72 tour\" and \"harry styles tour\" working. Guard with a test on this list and a validate.ts check that no puzzle's noun word offers or accepts a top-10 answer.",
+    "The reveal never says whose tour 360° Tour (#7, U2) or M72 World Tour (#9, Metallica) is: the names don't, and neither do their facts (Divide Tour's fact doesn't name Ed Sheeran either). Players answer by artist, so a casual who missed U2 learns nothing from \"360° Tour\". Name the artist in those three facts in scripts/facts/concert-tours.json, or show the table's Artist column on the reveal (a types.ts change).",
+    "Artist + tour fails for short artist names: \"u2 vertigo\", \"u2 joshua tree\" and \"bts arirang\" get \"isn't an answer for this list\" although Vertigo Tour, The Joshua Tree Tours 2017 & 2019 and Arirang World Tour (#19) are on it (\"metallica worldwired\" and \"shakira las mujeres\" work). leadingName skips leading names under four letters; let an exact artist alias lead at any length. Free in classic, but the message is wrong and it loses Blitz points.",
+    "Not recognized: \"after hours till dawn\" (the usual \"till\" spelling of #3), \"mots\" (\"MOTS Tour\" is an alias) and \"sheeran\" alone (\"springsteen\" works). Add \"After Hours till Dawn\", \"MOTS\" and \"Sheeran\" (on both Ed Sheeran tours)."
   ]
 }
