@@ -1,24 +1,23 @@
 {
   "id": "music-artists",
   "judgedAt": "2026-11-02",
-  "decision": "fix-first",
+  "decision": "daily-blitz",
   "alsoBlitz": true,
-  "priority": 7,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 2, "data": 4, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
-  "fan": { "found": 8, "livesLost": 5, "guesses": 13 },
-  "blitzCasual": { "scored": 28, "named": 30 },
-  "difficulty": 3,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 6, "livesLost": 5, "guesses": 20 },
+  "blitzCasual": { "scored": 27, "named": 28 },
+  "difficulty": 2,
   "tags": ["music", "pop", "hip-hop"],
-  "audience": "pop and rap fans",
-  "summary": "All ten are household names and a casual player finds 8, but the headline still says 'sales', so players who start with the Beatles, Elvis and Madonna burn lives on legends. Put streams in the title and it is a good daily and a deep Blitz.",
+  "audience": "anyone",
+  "summary": "Every name is famous and the title now says streams count, but a casual player finds 9 of 10, too easy for Today's list. As a Blitz it is excellent.",
   "reasons": [
-    "The casual player read the caption and opened with Taylor Swift and Drake, but still lost 3 of 5 lives on the Beatles (#11), Elvis (#18) and Madonna (#22), then Ed Sheeran (#13) and Kanye (#12): 8 found. A player who takes the headline at its word (Beatles, Michael Jackson, Elvis, Madonna, Taylor Swift, Elton John, Drake, Rihanna, Queen) finds 4.",
-    "'Most certified sales' is better than 'best-selling' but still says sales, and the headline disagrees with the caption ('certified units, sales and streams'). The fan, who knew streams rule, also found 8 and ran out on Sheeran, Bruno Mars, Post Malone, Kanye and the Beatles. Those are fair near misses, each with a figure (the Beatles are 1.5 million behind Ariana Grande).",
-    "Data is now clean: values match the page, the glued Eminem alias is gone, 'elvis' and 'kanye' match directly, all 10 answers have sourced facts and every miss shows a figure. Blitz: 28 of 30 casual names scored (Bad Bunny and BTS are not on the page)."
+    "The title and prompt now name the measure (certified sales and streams), so Drake at #1 and the Beatles at #11 land as a fair surprise, and every miss shows its figure.",
+    "Classic is too easy and swingy: the casual found 9 of 10 (out of lives on guess 15), the fan only 6 (out after 11, on Beatles, Elvis, Kanye, Bruno Mars, Ed Sheeran). #7 to #13 sit within 7%, so guess order matters more than knowledge.",
+    "Deep Blitz: 129 well-known artists carry a figure, and 27 of the casual's 28 names scored (Bad Bunny isn't on the page)."
   ],
   "fixes": [
-    "Retitle so the headline says streams count and matches the caption, for example 'Music artists with the most certified sales and streams' (or 'Music artists with the most certified units'). Keep the current prompt. 'Certified sales' still reads as the best-selling list led by the Beatles, Elvis and Madonna.",
-    "Add '2Pac' as an alias of Tupac Shakur (#74): '2pac' is currently judged junk, so his stage name scores nothing in Blitz. Add 'RiRi' to Rihanna, which currently isn't recognized."
+    "Common shorthand gets no credit (free in classic, but scores nothing in Blitz): add \"MJ\" for Michael Jackson, \"RHCP\" for Red Hot Chili Peppers (now rejected as junk) and \"Led Zep\" for Led Zeppelin."
   ]
 }
