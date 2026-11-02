@@ -42,7 +42,7 @@ stronger.
 | "Biggest CO2 emitters" left players guessing cars | titles that don't say what you're naming | validate.ts: every puzzle has a `noun`; judge brief: title names the answer type |
 | "pope" became "Don't Bother Me, I Can't Cope" | unrelated words autocorrected into answers | match.ts rules + tests; leak audit each cycle |
 | Detective Conan had no fun fact | top-10 answers without a fact (new lists, renames) | facts looked up by normalized name, article and aliases; validate.ts errors on a top-10 answer without a fact |
-| Singapore, Tokyo, NYC "isn't in the top 10" with no figure | misses with no number when the source ranks only 10 | unranked answers take figures (with year) from the page's other tables; validate.ts flags lists whose misses can't show a figure |
+| Singapore, Tokyo, NYC "isn't in the top 10" with no figure | misses with no number when the source ranks only 10 | unranked answers take their rank and figure (with year) from the page's other tables ("#6 in 2024"); any other miss says "outside the top N"; validate.ts flags lists whose misses can't show a figure |
 | Par read too high | the synthetic crowd too strong | crowd recalibrated; real stats (Phase 1) replace it |
 
 ## What good looks like
