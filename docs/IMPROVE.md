@@ -19,7 +19,8 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
 3. **Data agent** (its own worktree from main): apply the cycle's verdict `fixes` (junk aliases, missing short forms,
    demonyms, parse bugs, stale figures), and build new topics that passed the topic gate (title names the answer
    type, broad answer set, a casual player finds 4+ before looking). Rebuild only the affected lists, then
-   `validate.ts` and `scripts/judge/par.ts`.
+   `validate.ts` and `scripts/judge/par.ts`. Its own verdict on a new list carries `"by": "builder"`: par uses it,
+   the scheduler doesn't, until a real judge has looked.
 4. **Coordinator:** matcher findings in `src/game/match.ts` with unit tests; the leak audit (wrong guesses that get
    an answer offered); review the data branch; merge; `npm test`, typecheck, build, e2e; push main (it deploys).
    Never rebuild today's or tomorrow's daily list.
@@ -48,6 +49,7 @@ stronger.
 | Capitals had Ulaanbaatar ranked and "Ulan Bator" unranked (two lives, one city) | one place under two names | validate.ts warns when an unranked universe member duplicates a ranked row; merge with `aliases` |
 | "bookworm" and "relentless" found Amazon | junk redirects on company and celebrity lists | shared `COMPANY_JUNK` and `CELEBRITY_JUNK` lists in scripts/aliases.ts, applied to every such list |
 | "humans" offered Destroy All Humans!, "water" Fritz-Walter-Stadion | an ordinary word read as part of a longer name | plain words in the lexicon (`isPlainWord`), never the words top-10 answers are known by; scripts/lexicon.test.ts |
+| Nov 4's Blitz was Broadway, Nov 2's list (picked before the no-repeat rule) | a topic running twice | real.test.ts: no list runs twice from Nov 2, every day has its own Blitz; builder verdicts never schedule |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
 
 ## What good looks like

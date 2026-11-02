@@ -1,8 +1,7 @@
-// Extends the daily schedule (public/puzzles/daily.json) with the next N days. Only lists the list judge approved
-// can run (docs/JUDGE.md, verdicts in scripts/judge/verdicts/): `daily-list` verdicts on Blitz-ready lists, highest
-// priority first, rotating categories. Each day is one topic, played as both Today's list and Today's Blitz (new
-// entries carry no `blitz` field; older entries with one keep their separate Blitz). The file is the record of what
-// ran when.
+// Extends the daily schedule (public/puzzles/daily.json) with the next N days. Only lists a list judge approved can
+// run (docs/JUDGE.md, verdicts in scripts/judge/verdicts/; a builder's provisional verdict doesn't count): Today's
+// list from `daily-list` verdicts, highest priority first, rotating categories, and a different topic as Today's
+// Blitz (`assignBlitz`). The file is the record of what ran when.
 // Usage: NODE_NO_WARNINGS=1 npx tsx scripts/schedule.ts <days> [--write]   (dry run without --write)
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -32,6 +31,8 @@ export interface Verdict {
   blitzCasual?: { scored?: number } | null;
   tags?: string[];
   judgedAt?: string;
+  /** "builder": written by the data agent that built the list, pending a real judge. Never scheduled. */
+  by?: "builder";
 }
 
 const VERDICTS = join(import.meta.dirname, "judge", "verdicts");
@@ -42,7 +43,8 @@ export function readVerdicts(): Map<string, Verdict> {
   for (const f of readdirSync(VERDICTS)) {
     if (!f.endsWith(".json")) continue;
     const v: Verdict = JSON.parse(readFileSync(join(VERDICTS, f), "utf8"));
-    out.set(v.id, v);
+    // A builder rates its own list: useful for par, not enough to run it as a daily.
+    if (v.by !== "builder") out.set(v.id, v);
   }
   return out;
 }

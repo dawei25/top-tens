@@ -125,3 +125,22 @@ describe("picking a choice", () => {
     expect(pick).toMatchObject({ kind: "near", entry: { name: "The Witcher" } });
   });
 });
+
+describe("the daily schedule", () => {
+  // Separate topics for Today's list and Today's Blitz started on Nov 2; earlier Blitz picks are frozen as they ran.
+  const SEPARATE = "2026-11-02";
+  const days = read<{ date: string; id: string; blitz?: string }[]>("daily.json");
+  it("never runs a list twice, either way, from the day lists and Blitzes split", () => {
+    const seen = new Map<string, string>();
+    for (const d of days) {
+      for (const id of [d.id, d.blitz]) {
+        if (!id) continue;
+        if (d.date >= SEPARATE) expect(seen.get(id), `${id} on ${d.date} already ran on ${seen.get(id)}`).toBeUndefined();
+        if (!seen.has(id)) seen.set(id, d.date);
+      }
+    }
+  });
+  it("gives every day its own Blitz", () => {
+    for (const d of days) expect(d.blitz, d.date).toBeTruthy();
+  });
+});
