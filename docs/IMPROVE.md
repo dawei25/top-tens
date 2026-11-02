@@ -31,10 +31,26 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
    costing a life, a table parse dropping rows, a misleading title), fix it in the pipeline, the matcher or the
    judge brief, and say so in the log.
 
+## Every reported bug leaves a guard
+
+When a player (or the owner) finds a bug, fix the instance and then add the guard that stops the whole class: a
+`validate.ts` check, a test, or a line in the judge brief. Record it in the table below, so the method only gets
+stronger.
+
+| Reported | Class | Guard |
+|---|---|---|
+| "Biggest CO2 emitters" left players guessing cars | titles that don't say what you're naming | validate.ts: every puzzle has a `noun`; judge brief: title names the answer type |
+| "pope" became "Don't Bother Me, I Can't Cope" | unrelated words autocorrected into answers | match.ts rules + tests; leak audit each cycle |
+| Detective Conan had no fun fact | top-10 answers without a fact (new lists, renames) | facts looked up by normalized name, article and aliases; validate.ts errors on a top-10 answer without a fact |
+| Singapore, Tokyo, NYC "isn't in the top 10" with no figure | misses with no number when the source ranks only 10 | unranked answers take figures (with year) from the page's other tables; validate.ts flags lists whose misses can't show a figure |
+| Par read too high | the synthetic crowd too strong | crowd recalibrated; real stats (Phase 1) replace it |
+
 ## What good looks like
 
 - Titles say what the player is naming; misses say how many of what the list holds.
-- Every obvious guess either scores with a rank and figure or is honestly outside the source.
+- Every obvious guess either scores with a rank and figure or is honestly outside the source, and an obvious miss
+  shows a number (a rank, or a dated figure from the page) wherever the source has one.
+- Every top-10 answer has a fun fact with a source.
 - Matching reads guesses the natural way (CLAUDE.md, docs/DESIGN.md §2): partial knowledge helps, unrelated words
   never become answers.
 - Dailies: a typical player averages 5 to 6. Free play: fair and fun. Oddball: anyone can throw guesses.

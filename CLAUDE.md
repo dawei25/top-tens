@@ -86,6 +86,10 @@ use redirects already in the cache.
   helps ("shenzhen", "avengers" offer options). But an unrelated word is never turned into an answer ("pope" is not
   "Don't Bother Me, I Can't Cope", "islands" is not Ireland). Aliases must not undo that: no generic English words
   as aliases.
+- Every top-10 answer needs a fun fact (`scripts/facts/<id>.json`, with a source), and misses should show a number:
+  when the ranked table stops early, unranked answers take dated figures from the page's other tables.
+- Every bug a player reports gets a guard (a validate.ts check, a test or a judge-brief line), recorded in
+  `docs/IMPROVE.md`, so the class can't come back.
 - `NODE_NO_WARNINGS=1 npx tsx scripts/validate.ts` checks every built puzzle; run it after a rebuild.
 
 ## Writing

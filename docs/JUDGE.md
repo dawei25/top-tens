@@ -32,7 +32,9 @@ sports statistician.
    duplicate or garbled names, junk aliases (alias text glued together, redirects that are not names of the thing,
    such as "1937 Nanga Parbat tragedy" for a mountain)? Were obvious ways of typing a top-10 answer *not*
    recognized in the replay?
-6. **Score and decide** (below), then write the verdict file.
+6. **Check the reveal.** Every top-10 answer should show a fun fact, and your casual player's misses should show a
+   rank or a figure. A miss that only says "isn't in the top 10" while the page has numbers for it is a `fixes` item.
+7. **Score and decide** (below), then write the verdict file.
 
 ## Scores (1 to 5)
 
