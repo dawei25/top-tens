@@ -94,5 +94,45 @@
   "date": "2026-11-04",
   "id": "national-parks",
   "blitz": "broadway"
+ },
+ {
+  "n": 17,
+  "date": "2026-11-05",
+  "id": "lakes"
+ },
+ {
+  "n": 18,
+  "date": "2026-11-06",
+  "id": "x-accounts"
+ },
+ {
+  "n": 19,
+  "date": "2026-11-07",
+  "id": "olympic-medals"
+ },
+ {
+  "n": 20,
+  "date": "2026-11-08",
+  "id": "canada-cities"
+ },
+ {
+  "n": 21,
+  "date": "2026-11-09",
+  "id": "game-franchises"
+ },
+ {
+  "n": 22,
+  "date": "2026-11-10",
+  "id": "europe-cities"
+ },
+ {
+  "n": 23,
+  "date": "2026-11-11",
+  "id": "us-box-office"
+ },
+ {
+  "n": 24,
+  "date": "2026-11-12",
+  "id": "island-countries"
  }
 ]

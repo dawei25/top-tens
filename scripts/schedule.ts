@@ -29,6 +29,7 @@ export interface Verdict {
   priority: number;
   summary: string;
   scores?: { blitzDepth?: number };
+  judgedAt?: string;
 }
 
 const VERDICTS = join(import.meta.dirname, "judge", "verdicts");
@@ -44,7 +45,10 @@ export function readVerdicts(): Map<string, Verdict> {
   return out;
 }
 
-const listOk = (v?: Verdict) => v?.decision === "daily-list" && (v.scores?.blitzDepth ?? 0) >= 3;
+/** When the one-topic, 5-to-6 average bar started (docs/JUDGE.md); older daily verdicts were judged against an easier one. */
+const DAILY_BAR = "2026-11-02";
+const listOk = (v?: Verdict) =>
+  v?.decision === "daily-list" && (v.judgedAt ?? "") >= DAILY_BAR && (v.scores?.blitzDepth ?? 0) >= 3;
 /** The day's list is also its Blitz, so it has to be Blitz-ready. */
 const blitzReady = (id: string) => JSON.parse(readFileSync(join(DIR, `${id}.json`), "utf8")).blitz === true;
 
