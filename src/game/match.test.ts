@@ -296,3 +296,20 @@ describe("an exact title that is the less likely reading", () => {
     expect(judgeGuess("avengers", films, new Set([1]))).toMatchObject({ kind: "near", entry: { name: "The Avengers" } });
   });
 });
+
+describe("an answer's name followed by who made it", () => {
+  const songs: Puzzle = {
+    ...puzzle,
+    id: "songs2",
+    answers: [e(1, "Blinding Lights"), e(2, "Shape of You"), e(3, "Stay"), e(4, "Perfect"), ...puzzle.answers.slice(4)],
+    extras: [],
+  };
+  it("puts that answer in the box to confirm", () => {
+    expect(judgeGuess("perfect ed sheeran", songs, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Perfect" } });
+    expect(judgeGuess("shape of you by ed sheeran", songs, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 2 } });
+    expect(judgeGuess("stay justin bieber", songs, new Set())).toMatchObject({ kind: "correct", entry: { name: "Stay" } });
+  });
+  it("needs a real name at the start, not a scrap of one", () => {
+    expect(judgeGuess("sta justin bieber", songs, new Set())).toMatchObject({ kind: "unknown" });
+  });
+});

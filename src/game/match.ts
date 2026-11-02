@@ -260,6 +260,14 @@ export function judgeGuess(
   const partial = wordMatches(guess, candidates);
   if (partial.length > 0) return fits(partial, true);
 
+  // An answer's full name with more words after it, usually who made it ("perfect ed sheeran", "stay justin bieber"):
+  // that answer, put in the box to confirm. The longest name that starts the guess wins.
+  const lead = leadingName(guess, [...puzzle.answers, ...puzzle.extras]);
+  if (lead) {
+    const c = candidates.find((x) => x.entry === lead);
+    if (c) return resolve(c, true);
+  }
+
   // A plain category word ("islands", "lake", "city") is never a misspelling of an answer.
   if (guess.split(" ").every((w) => GENERIC.has(w))) return { kind: "unknown", junk: false };
 
@@ -315,6 +323,21 @@ const QUALIFIERS = new Set(
     "republic people peoples federal united islamic federation commonwealth state city"
   ).split(" "),
 );
+
+/**
+ * The entry whose full name or alias makes up the first words of a longer guess ("perfect" in "perfect ed sheeran"),
+ * the longest such name first. Names under four letters or made only of generic words don't count.
+ */
+function leadingName(guess: string, entries: Entry[]): Entry | undefined {
+  const words = guess.split(" ");
+  for (let k = words.length - 1; k >= 1; k--) {
+    const head = words.slice(0, k).join(" ");
+    if (head.replace(/ /g, "").length < 4 || words.slice(0, k).every((w) => GENERIC.has(w))) continue;
+    const hit = entries.find((e) => [e.name, ...e.aliases].some((f) => normalize(f) === head));
+    if (hit) return hit;
+  }
+  return undefined;
+}
 
 /** A name without its qualifiers: "Democratic Republic of the Congo" → congo, "North Carolina" → carolina. */
 function coreName(name: string): string {
