@@ -2542,6 +2542,31 @@ a.text-btn {
   letter-spacing: 0.06em;
   color: var(--muted);
 }
+
+/* A label that explains itself (days in a row): dotted like "est.", hover for the note, tap to read it inline. */
+.tip {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+  touch-action: manipulation;
+}
+.tip:hover {
+  color: var(--text);
+}
+.tip-note {
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.home-stats .tip-note {
+  margin-top: 10px;
+}
+
 /* Past runs: the classic result's distance from par, under it. */
 .vs-par {
   display: block;

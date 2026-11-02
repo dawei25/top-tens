@@ -138,6 +138,41 @@ export function ClueIcon() {
 }
 
 /**
+ * A label that explains itself: hover shows the note (title), a tap, click or Enter toggles it inline. The caller
+ * renders the note where it fits (`open`), so it can sit under a whole row of stats.
+ */
+export function TipLabel({
+  label,
+  note,
+  open,
+  onToggle,
+  controls,
+  testId,
+}: {
+  label: string;
+  note: string;
+  open: boolean;
+  onToggle: () => void;
+  controls: string;
+  testId?: string;
+}) {
+  return (
+    <button
+      type="button"
+      className="tip"
+      title={note}
+      aria-label={note}
+      aria-expanded={open}
+      aria-controls={controls}
+      data-testid={testId}
+      onClick={onToggle}
+    >
+      {label}
+    </button>
+  );
+}
+
+/**
  * Every screen's header: BACK (one step up) on the left, the screen's own middle, the sound key and HOME on the
  * right. Escape is Back too, except while typing in a field or when something on the screen already used the
  * Escape (a hint confirm marks it with preventDefault).

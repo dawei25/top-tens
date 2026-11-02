@@ -22,8 +22,8 @@ import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { ClueIcon, formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TypeIn } from "./pixel";
-import { CLUE_LABEL, NO_LIFE_LOST, notOnList } from "./copy";
+import { ClueIcon, formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TipLabel, TypeIn } from "./pixel";
+import { CLUE_LABEL, NO_LIFE_LOST, notOnList, STREAK_NOTE } from "./copy";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
 import { ParBlock, usePar } from "./par";
@@ -113,6 +113,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   /** The hidden row showing the "first letter?" confirm. */
   const [hintAsk, setHintAsk] = useState<number | null>(null);
   const yesRef = useRef<HTMLButtonElement>(null);
+  /** The "days in a row" note on a daily's results, opened by tap, click or keyboard. */
+  const [streakNote, setStreakNote] = useState(false);
   const parFile = usePar();
 
   useEffect(() => {
@@ -617,7 +619,20 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                   {hints.length > 0 && <p>clues used: {hints.length}</p>}
                   {dailyStreak && (
                     <p>
-                      streak <b className="pink">{dailyStreak.current}</b> · best <b>{dailyStreak.best}</b>
+                      <TipLabel
+                        label="days in a row"
+                        note={STREAK_NOTE}
+                        open={streakNote}
+                        onToggle={() => setStreakNote((o) => !o)}
+                        controls="streak-note"
+                        testId="streak-tip"
+                      />{" "}
+                      <b className="pink">{dailyStreak.current}</b> · most <b>{dailyStreak.best}</b>
+                    </p>
+                  )}
+                  {dailyStreak && (
+                    <p id="streak-note" className="tip-note" hidden={!streakNote}>
+                      {STREAK_NOTE.toLowerCase()}
                     </p>
                   )}
                   {daily && <Countdown />}

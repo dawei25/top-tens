@@ -43,7 +43,7 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
 
       <section data-glass className="panel prompt">
         <h1>Past dailies</h1>
-        <p className="caption">every daily so far. one try each. late plays don't count toward your streak.</p>
+        <p className="caption">every daily so far. one try each. late plays don't add to your days in a row.</p>
       </section>
 
       <ol data-glass className="panel arch-list">
