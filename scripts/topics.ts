@@ -138,6 +138,10 @@ export interface Also {
   nameFromText?: boolean;
   nameFromLink?: boolean;
   skip?: string[];
+  /** Other columns that also name the row (the artist of a tour), as on a topic. */
+  aliasCols?: (string | number)[];
+  /** Only keep rows whose `col` cell matches, as on a topic. */
+  where?: { col: string | number; match: RegExp };
   /**
    * A column with the list's own stat, in the ranked rows' unit: each answer from these tables shows it and scores
    * it in Blitz, unranked. Titanic is in the inflation table's nominal column ($200 million) but not in the ranking,
@@ -1124,6 +1128,83 @@ export const TOPICS: Topic[] = [
       { page: "List of Spotify streaming records", tables: [21], name: "Album" },
     ],
     junkAliases: ["For Crying Out Loud"],
+  },
+  {
+    id: "music-artists",
+    category: "Entertainment",
+    title: "Best-selling music artists",
+    noun: "artists",
+    prompt: "Name the 10 music artists with the most certified sales (albums, singles and streams, all markets)",
+    page: "List of best-selling music artists",
+    // The claimed-sales tiers ("Over 250 million", ...). Claimed sales tie a lot; certified units rank cleanly.
+    tables: [0, 1, 2, 3, 4, 5],
+    name: "Artist",
+    value: "Total certified units",
+    metric: "Certified units",
+    people: true,
+    // Songs, albums, mixtapes, tours, labels, fans and relatives among the redirects.
+    junkAliases: [
+      "I Get paper", "Comeback Season II", "It's Never Enough", "Do Right and Kill Everything", "All Kinds", "Fantasy 416",
+      "Drake Griffin", "Jungle Tour", "Wanna Know", "Please Forgive Me", "Songs recorded by Drake Canada", "Ela É do Tipo",
+      "Frozen Moments", "Nocta", "Sophie Brussaux", "Titles Ruin Everything", "Drake vs. Everybody", "Housekeeping Knows",
+      "The Embassy", "OVOXO", "Lost Files", "Gettin' Paid", "Fr8me", "Coffret 4 CD", "3 CD Collector's Set", "Insane",
+      "Monologue Song", "Andrea Gardner Swift", "Andrea Swift", "Incredible Things", "Track 5", "Andrea Finlay",
+      "Scott Kingsley Swift", "Wonderstruck", "Hailie Jade", "Hailie Jade Mathers", "Kimberley Anne Scott Mathers",
+      "Hailey Jade", "Hailie Jade Scott", "John Guerrera", "Deborah Mathers", "Debbie mathers", "Deborah Mathers-Briggs",
+      "Ronnie Polkingharn", "The Slim Shady Show", "Kim Mathers", "Hailie Mathers", "Kimberley Ann Scott Mathers",
+      "Haile Jade Mathers", "Bassmint", "The Way I Am", "Kimberly Anne Scott", "Soul intent", "Diss Me, Diss You",
+      "Eight Mile Style", "8 Mile Style", "Kimberly Mathers", "Deborah Nelson Mathers-Briggs", "Live at Comerica Park",
+      "Straight from the Vault", "Straight From The Vault EP", "Ken Kaniff", "Hailie Jade Scott Mathers", "Lose Yourself Tour",
+      "Evil", "Kimberley Anne Scott", "Shady Ltd.", "Hailie Scott Mathers", "Hailie Scott", "New Jacks",
+      "Bassmint Productions", "Debbie Nelson", "Deborah Rae Nelson", "Deborah R. Nelson", "Debbie Rae Nelson",
+      "Debbie Mathers-Briggs", "Debbie Nelson-Mathers", "Debbie Rae Mathers", "Slim",
+      "Beyoncé Knowles Records and Achivements", "Beyoncé Knowles' music videos", "Beyoncé' music videos",
+      "Slow Love World Tour", "Beyoncé Pulse", "The Ultimate Collection", "Pulse", "Third Ward Trill",
+      "Rock It Till Water Falls", "Renaissance Trilogy", "Rumi Carter", "Justin Bieber on Twitter", "Skylrk",
+      "Jeremy bieber", "Belieber", "Beliebers", "Bieber Mania", "Bieber Fever", "Biebermania", "Michael Jackson finances",
+      "Prince Michael Jackson ll", "Grace Rwaramba", "Michael Jackson jr", "Prince Michael Jackson I",
+      "Prince Michael Jackson Jr.", "Blanket", "Agent MJ", "Michael Joseph Jackson Jr", "Prince blanket", "MJJ Music",
+      "The skinniest Jackson", "The Hee Hee Guy", "Rhinstone Glove", "John Jay Smith", "Johnny Jay Smith", "In the Zone",
+      "In My Zone", "Boy in Detention", "Put It Up", "Ghetto Tales", "CBE", "Chris Brown Entertainment",
+      "CBE Entertainment", "King Of The Fall", "We're Alone Together", "Starboy", "The Dawn Is Coming", "Kin Kane",
+      "Manic Phase", "Bulleez N Nerdz", "Bullies and Nerds", "Gene Hackerman", "Gene.hackerman", "Sober lite",
+      "Moonlightbae", "Donutgate", "Ariana Grande credits", "Zandhr", "Dalton Gomez", "Marjorie Grande",
+    ],
+  },
+  {
+    id: "concert-tours",
+    category: "Entertainment",
+    title: "Highest-grossing concert tours",
+    noun: "concert tours",
+    prompt: "Name the 10 highest-grossing concert tours of all time (not adjusted for inflation)",
+    page: "List of highest-grossing concert tours",
+    tables: [1],
+    name: "Tour title",
+    value: "Actual gross",
+    metric: "Gross (US$)",
+    // Players name the artist: "taylor swift" is The Eras Tour, "coldplay" offers both of theirs.
+    aliasCols: ["Artist"],
+    also: [
+      // Each decade's top 10, worldwide, with its gross; a tour split across two decades (marked *) has only part of
+      // its gross in each table, so it is left out.
+      { tables: [3, 4, 5, 6, 7], name: "Tour title", value: "Actual gross", aliasCols: ["Artist"], where: { col: "Year", match: /^[^*]*$/ } },
+      // Record holders and each year's top North American tour (no worldwide gross).
+      { tables: [2, 8], name: "Tour title", aliasCols: ["Artist"] },
+    ],
+    // Ed Sheeran's tours are written in maths symbols, which read as just "tour"; Springsteen's is named by its years.
+    rename: {
+      "+−=÷× Tour": "Mathematics Tour",
+      "÷ Tour": "Divide Tour",
+      "2023–2025 Tour": "Springsteen and E Street Band 2023–2025 Tour",
+    },
+    numberNames: true,
+    aliases: { "Mathematics Tour": ["The Mathematics Tour"], "Divide Tour": ["The Divide Tour"] },
+    junkAliases: [
+      "Tour", "Bruce Springsteen · E Street Band", "2025 Tour", "Springsteen and E Street Band 2023",
+      // Concert films, live albums and an attack plot among the redirects.
+      "Attempted Taylor Swift concert terrorist plot", "Live in Ahmedabad", "Coldplay - Live in Ahmedabad", "Tutto Passa",
+      "Coldplay – Live in Paris", "The Weeknd Live at SoFi Stadium", "Kiss the future tour",
+    ],
   },
   {
     id: "animated-films",

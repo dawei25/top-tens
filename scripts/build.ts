@@ -25,6 +25,10 @@ const ARTICLE = new WeakMap<Entry, string>();
 const articleOf = (e: Entry) => ARTICLE.get(e) ?? e.name;
 /** The article a table cell links for an unranked entry, whatever the cell says: another name for the same thing. */
 const LINK = new WeakMap<Entry, string | undefined>();
+/** Aliases an unranked entry takes from other columns (the artist of a tour): names of something else, so they never
+ * make it the same thing as another entry. */
+const COLUMN_ALIASES = new WeakMap<Entry, Set<string>>();
+const ownForms = (e: Entry) => [e.name, ...e.aliases.filter((a) => !COLUMN_ALIASES.get(e)?.has(a))];
 
 const SPELLED_OUT: Record<string, string> = { st: "saint", ste: "sainte", mt: "mount", ft: "fort" };
 
@@ -402,9 +406,11 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       const { header, body } = splitHeader(tableGrid($, tables[t]));
       const nc = column(header, src.name);
       const vc = src.value === undefined ? -1 : column(header, src.value);
+      const aliasCs = (src.aliasCols ?? []).map((a) => column(header, a));
       for (const r of body) {
         const cell = r[nc];
         if (!cell || (cell.isHeader && !cell.text)) continue;
+        if (src.where && !src.where.match.test(r[column(header, src.where.col)]?.text ?? "")) continue;
         const name = familyName(cellName(cell, src), cell.text);
         if (!name || !normalize(name) || skipName(name)) continue;
         if (topic.skip?.includes(name) || src.skip?.includes(name)) continue;
@@ -412,7 +418,8 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         // A family row's text ("Karl and Theo Albrecht") names several people: not an alias of one of them.
         const family = name !== cellName(cell, src);
         const lines = family ? [] : cell.lines.length > 1 ? cell.lines : [cell.text];
-        const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords)].map(cleanName);
+        const others = aliasCs.flatMap((c) => (r[c] ? [r[c].linkText ?? "", ...r[c].lines.flatMap((l) => l.split("/")).map((p) => p.split(",")[0])] : []));
+        const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords), ...others].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
         const v = vc >= 0 && !topic.lowerIsBetter ? parseValue(r[vc]?.text ?? "") : null;
         if (v && v.value > 0 && v.value < limit) {
@@ -421,6 +428,7 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         }
         ARTICLE.set(entry, family ? name : redirectTarget(name, cell, hasCountries(topic)));
         LINK.set(entry, cell.link);
+        COLUMN_ALIASES.set(entry, new Set(others.map(cleanName).filter((a) => a && !lines.map(cleanName).includes(a))));
         out.push(entry);
       }
     }
@@ -720,12 +728,12 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   };
   for (const [i, e] of entries.entries()) own(e, [e.name, ...e.aliases, rows[i].redirectTarget, rows[i].link]);
   for (const e of extra) {
-    const forms = [e.name, ...e.aliases].map(normalize).filter(Boolean);
+    const forms = ownForms(e).map(normalize).filter(Boolean);
     if (forms.some((f) => taken.has(f))) continue;
     // Add-ons of an entry already listed ("Skyrim – Dragonborn" next to Skyrim) only blur what its name means.
     const base = e.name.split(" – ")[0];
     if (base !== e.name && taken.has(normalize(base))) continue;
-    const same = [e.name, ...e.aliases, ARTICLE.get(e), LINK.get(e)].map((f) => f && owner.get(sameKey(f))).find(Boolean);
+    const same = [...ownForms(e), ARTICLE.get(e), LINK.get(e)].map((f) => f && owner.get(sameKey(f))).find(Boolean);
     if (same) {
       if (!same.aliases.includes(e.name)) same.aliases.push(e.name);
       if (same.n === undefined && e.n !== undefined) Object.assign(same, { value: e.value, n: e.n });

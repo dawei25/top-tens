@@ -1,0 +1,21 @@
+{
+  "id": "concert-tours",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 2 },
+  "casual": { "found": 7, "livesLost": 1, "guesses": 13 },
+  "fan": null,
+  "blitzCasual": { "scored": 14, "named": 26 },
+  "difficulty": 2,
+  "tags": ["music", "concerts", "tours"],
+  "audience": "pop fans",
+  "summary": "Written by the data agent at build time, pending a real judge. Players name artists and the game finds their tour: taylor swift is The Eras Tour, coldplay offers their two.",
+  "reasons": [
+    "Casual run by artist found The Eras Tour, Music of the Spheres, After Hours til Dawn, Farewell Yellow Brick Road, 360, M72 and Love On Tour; Bruno Mars cost a life.",
+    "Each tour has its artist as an alias, shared across that artist's tours (the Rolling Stones and U2 offer their four biggest).",
+    "Small pool (67 tours, 51 with a gross), so a thin Blitz: famous artists without a listed tour score nothing."
+  ],
+  "fixes": []
+}

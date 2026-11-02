@@ -246,6 +246,18 @@
   "blitz": true
  },
  {
+  "id": "music-artists",
+  "title": "Best-selling music artists",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
+  "id": "concert-tours",
+  "title": "Highest-grossing concert tours",
+  "category": "Entertainment",
+  "blitz": true
+ },
+ {
   "id": "animated-films",
   "title": "Highest-grossing animated films",
   "category": "Entertainment",

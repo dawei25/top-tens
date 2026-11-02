@@ -795,6 +795,15 @@ export const INTENT: Record<string, Intent> = {
       "Saturday Night Fever": ["Saturday Night Fever soundtrack"],
     },
   },
+  "concert-tours": {
+    groups: {
+      // More than four tours each: the artist offers their four biggest.
+      "The Rolling Stones": ["A Bigger Bang Tour", "No Filter Tour", "Voodoo Lounge Tour", "Licks Tour"],
+      Stones: ["A Bigger Bang Tour", "No Filter Tour", "Voodoo Lounge Tour", "Licks Tour"],
+      U2: ["360° Tour", "The Joshua Tree Tours 2017 & 2019", "Vertigo Tour", "PopMart Tour"],
+      Springsteen: ["Springsteen and E Street Band 2023–2025 Tour", "Magic Tour", "The River Tour 2016", "Born in the U.S.A. Tour"],
+    },
+  },
   "animated-films": {
     same: {
       "Frozen II": ["Frozen 2"],
