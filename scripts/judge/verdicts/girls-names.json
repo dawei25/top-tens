@@ -1,0 +1,40 @@
+{
+  "id": "girls-names",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 3,
+  "scores": {
+    "recognizability": 5,
+    "curve": 4,
+    "fairness": 3,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 7,
+    "livesLost": 5,
+    "guesses": 12
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 4,
+    "guesses": 15
+  },
+  "blitzCasual": null,
+  "summary": "Mary is #1, but Patricia at #2, Linda at #4 and Barbara at #6 surprise younger players, who reach for Emily, Ashley and Emma.",
+  "reasons": [
+    "Casual player finds 7 and loses lives on Emily #15, Ashley #14, Emma #33, Olivia #41 and Michelle #17.",
+    "Ranks only (Social Security records, 1926 to 2025) for 50 names: not Blitz-ready, so no daily under the one-topic rule.",
+    "Written by the builder (data agent), not an independent judge."
+  ],
+  "fixes": [],
+  "difficulty": 2,
+  "tags": [
+    "names",
+    "first names",
+    "usa"
+  ],
+  "audience": "anyone"
+}

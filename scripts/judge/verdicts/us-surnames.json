@@ -1,0 +1,43 @@
+{
+  "id": "us-surnames",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": {
+    "recognizability": 5,
+    "curve": 3,
+    "fairness": 4,
+    "data": 5,
+    "fun": 4,
+    "blitzDepth": 5
+  },
+  "casual": {
+    "found": 8,
+    "livesLost": 4,
+    "guesses": 12
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 0,
+    "guesses": 10
+  },
+  "blitzCasual": {
+    "scored": 30,
+    "named": 30
+  },
+  "summary": "Smith, Johnson and Williams come easily; the fun is Garcia at #6, Rodriguez at #8 and Martinez at #10, ahead of Wilson and Taylor.",
+  "reasons": [
+    "Casual player finds 8 and loses lives on Wilson #14, Anderson #15, Taylor #17 and Lee #19.",
+    "Clean 2020 census counts: 100 ranked surnames, plus Canada's, Mexico's and Central America's common ones as unranked answers.",
+    "Easy for a daily (8 of 10). Written by the builder (data agent), not an independent judge, so held at free-play."
+  ],
+  "fixes": [],
+  "difficulty": 1,
+  "tags": [
+    "names",
+    "surnames",
+    "usa"
+  ],
+  "audience": "anyone"
+}
