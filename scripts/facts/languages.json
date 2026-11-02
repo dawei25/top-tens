@@ -1,4 +1,9 @@
 {
+  "English": {
+    "text": "Everyday words such as sky, egg, cake, give and get were borrowed from Old Norse.",
+    "source": "https://en.wikipedia.org/wiki/English_language",
+    "evidence": "Late Old English borrowed some grammar and core vocabulary from Old Norse ... Other Norse loanwords include give, get, sky, skirt, egg, and cake, typically displacing a native Anglo‑Saxon equivalent."
+  },
   "Mandarin Chinese": {
     "text": "The English word \"mandarin\" originally meant an official of the Ming and Qing empires.",
     "source": "https://en.wikipedia.org/wiki/Mandarin_Chinese",
@@ -9,10 +14,35 @@
     "source": "https://en.wikipedia.org/wiki/Hindi",
     "evidence": "It was borrowed from Classical Persian هندی Hindī (Iranian Persian pronunciation: Hendi), meaning 'of or belonging to Hind (India)' (hence, 'Indian')."
   },
+  "Spanish": {
+    "text": "The first grammar written for any modern European language was Nebrija's grammar of Castilian, in 1492.",
+    "source": "https://en.wikipedia.org/wiki/Spanish_language",
+    "evidence": "The Gramática de la lengua castellana, written in Salamanca in 1492 by Elio Antonio de Nebrija, was the first grammar written for a modern European language."
+  },
   "Modern Standard Arabic": {
     "text": "Used in literature, media and law, but generally not spoken as a first language, much like Latin today.",
     "source": "https://en.wikipedia.org/wiki/Modern_Standard_Arabic",
     "evidence": "MSA is the language used in literature, academia, print, mass media, and law and legislation, though it is generally not spoken as a first language, similar to Contemporary Latin."
+  },
+  "French": {
+    "text": "The first government to make Modern French official was the Aosta Valley, in 1536, three years before France.",
+    "source": "https://en.wikipedia.org/wiki/French_language",
+    "evidence": "Politically, the first government authority to adopt Modern French as the official language was the Aosta Valley in 1536, three years before France itself."
+  },
+  "Bengali": {
+    "text": "The national anthems of both India and Bangladesh were written in Bengali, by Rabindranath Tagore.",
+    "source": "https://en.wikipedia.org/wiki/Bengali_language",
+    "evidence": "The national anthems of both Bangladesh (Amar Sonar Bangla) and India (Jana Gana Mana) were written in Bengali by the Bengali Nobel laureate Rabindranath Tagore."
+  },
+  "Portuguese": {
+    "text": "It is the most widely spoken language in the Southern Hemisphere.",
+    "source": "https://en.wikipedia.org/wiki/Portuguese_language",
+    "evidence": "With approximately 267 million native speakers, it is the fifth-most spoken native language in the world, and the most widely spoken language in the Southern Hemisphere."
+  },
+  "Indonesian": {
+    "text": "Made the national language in 1945, it was then the mother tongue of only about 5% of Indonesians.",
+    "source": "https://en.wikipedia.org/wiki/Indonesian_language",
+    "evidence": "In 1945, when Indonesia declared its independence, Indonesian was formally declared the national language, despite being the native language of only about 5% of the population. In contrast, Javanese and Sundanese were the mother tongues of 42–48% and 15% respectively."
   },
   "Urdu": {
     "text": "In the late 18th century it was known as Zaban-e-Urdu-e-Mualla, \"language of the exalted camp\".",
