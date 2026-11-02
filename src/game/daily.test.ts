@@ -89,10 +89,10 @@ describe("hints", () => {
     s = { ...s, lives: 1 };
     expect(canHint(s, 5)).toBe(false);
   });
-  it("share text names the daily and counts hints", () => {
+  it("share text names the daily and counts clues", () => {
     const s = applyHint(newGame(puzzle), 2);
     expect(shareText(s, puzzle, "u", 12)).toContain("TENtacle #12: T");
-    expect(shareText(s, puzzle, "u", 12)).toContain("1 hint");
+    expect(shareText(s, puzzle, "u", 12)).toContain("1 clue");
   });
 });
 

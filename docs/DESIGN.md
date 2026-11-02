@@ -16,6 +16,10 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
     `noun`, so a wrong kind of guess (cars on a list of countries) is obvious.
   - **A guess that fits several answers** ("jordan", "shenzhen", "avengers"): the natural reading goes in the box or
     the options are offered (see below); only a word shared by a crowd of minor names asks to be more specific.
+- **Clue:** the magnifier on an empty row shows that answer's first letter for a life, after a confirm; not on the
+  last life.
+- Misses always show a number where the data has one: the rank and figure, a dated rank or figure from another
+  table on the source page ("#5 in 2018 (18.6 million)"), or how deep the ranking goes ("outside the top 118").
 - The game ends at 10/10 or 0 lives; missed slots are then revealed. A give up button reveals everything.
 
 ## 2. Answer matching (`src/game/match.ts`)
@@ -58,8 +62,9 @@ Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
 ## 4. Screens
 
 1. **Home:** Today's list and Blitz; Free play (Random list, Random Blitz, each with a floating by-category picker);
-   Your games (Archive, Past runs, Stats); your record. Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
-2. **Game:** prompt, lives, 10 rank slots, input pinned at the bottom, feedback line, chips for life-costing misses.
+   Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
+2. **Game:** title card with the prompt, score, par and a Play Blitz key; lives; 10 rank slots, each empty one with a
+   clue magnifier; feedback line; chips for life-costing misses.
    Blitz's title card shows the prompt and "name as many <noun> as you can".
 3. **Results:** score, par and histogram, full list with values, source link, share, Play again (rolls a new game).
    A finished daily offers Today's Blitz and Random list instead. The archive lists each date as a pair: the list
