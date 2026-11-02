@@ -1,23 +1,24 @@
 {
   "id": "billionaire-countries",
-  "judgedAt": "2026-10-30",
-  "decision": "daily-list",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
   "alsoBlitz": true,
-  "priority": 6,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 5 },
+  "priority": 3,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 2, "data": 4, "fun": 3, "blitzDepth": 5 },
   "casual": { "found": 5, "livesLost": 5, "guesses": 10 },
-  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
-  "blitzCasual": { "scored": 31, "named": 31 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 21, "named": 22 },
   "difficulty": 3,
   "tags": ["business", "wealth", "geography"],
   "audience": "news followers",
-  "summary": "Easy top five, then surprises: Italy, Hong Kong and Taiwan are in, the UK, France and Japan are not. Plays even better as a Blitz, where every country scores.",
+  "summary": "Easy top five, then a wall: the UK, France, Japan and Saudi Arabia all sit outside the top 10 and cost lives. Too harsh for a daily, but a good Blitz.",
   "reasons": [
-    "Casual found 5 (US, China, Russia, India, Germany) and ran out of lives in 10 guesses on UK #11, Japan #19, Saudi Arabia #29, France #13 and Switzerland #17: fair near misses, but the classic is short and harsh.",
-    "Fan went 10/10 losing 2; Hong Kong and Taiwan counted as separate entries (Forbes convention) are the stretch answers.",
-    "Blitz: all 31 casual names scored and bigger answers pay more, so it suits Blitz better than the classic."
+    "Casual got the top five (US, China, India, Germany, Russia), then ran out of lives in 10 guesses on UK #11, Saudi Arabia #29, France #13, Japan #19 and UAE #45. Crowd estimate 4.5, under the 5 to 6 target.",
+    "Fan went 10/10 in 11 guesses, losing 1 on the UK. Italy, Canada, Brazil, Hong Kong and Taiwan are fair reveals, but a typical player reaches for rich-sounding countries first.",
+    "Blitz has no lives and 76 countries carry a count: 21 of 22 casual names scored."
   ],
   "fixes": [
-    "Drop alias 'Zhongguo' from Taiwan (it means China); typing it now offers China or Taiwan."
+    "Prompt says countries, but #8 Hong Kong is a territory (the source column is Country/Territory): say 'countries or territories' so it is fair game.",
+    "Drop India aliases that are not names of the country: 'Indian society', 'Indian social structure', 'Traditional Indian social structure', 'Indian traditional social structure', 'India etymology', 'Bharath Niwas'; and Italy's 'Roman New Republic'. Harmless in play, but junk."
   ]
 }

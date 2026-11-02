@@ -1,24 +1,26 @@
 {
   "id": "moons",
-  "judgedAt": "2026-10-30",
-  "decision": "daily-list",
-  "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 3 },
-  "casual": { "found": 7, "livesLost": 4, "guesses": 12 },
-  "fan": { "found": 10, "livesLost": 2, "guesses": 15 },
-  "blitzCasual": { "scored": 13, "named": 14 },
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 3,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 3, "data": 3, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 16, "named": 16 },
   "difficulty": 3,
   "tags": ["science", "space", "astronomy"],
-  "audience": "space nerds and the curious",
-  "summary": "A good change-of-pace daily: the Moon, Titan, Europa and Io are gettable, the Moon being only #5 is a nice surprise, and Titania, Rhea and Oberon are fair stretch answers. Too shallow for Blitz.",
+  "audience": "space fans",
+  "summary": "Correct radii and a clear prompt, but too narrow for a daily: past the Moon, Titan, Europa and Io, the moons most players know are small ones (Phobos, Enceladus, Charon) that cost a life each. Planet names also leak answers right now.",
   "reasons": [
-    "Casual run: Moon, Titan, Europa, Io, Ganymede, Callisto, Triton found; lives went on Phobos #84, Deimos #97, Charon #12, Enceladus #18. 7/10 with 1 life left.",
-    "Mars's moons are the natural trap and cost a life each, but the reveal (they are tiny) is the lesson. Fan got 10/10 with only Iapetus #11 and Charon #12 as misses.",
-    "Radii and order are correct, and Luna / Earth's Moon / misspellings are handled. Blitz runs dry after about a dozen names even with 441 scoring moons."
+    "Casual: 7/10 by guess 9 (Moon, Titan, Europa, Io, Ganymede, Callisto from 'calisto', Triton), then out of lives on Enceladus #18, Phobos #84, Charon #12, Deimos #97, Miranda #19. Fan: 10/10, one life lost (Charon #12).",
+    "Misses the daily bar on recognizability: most non-fans can't name 5 of these, Titania, Rhea and Oberon are unknown to nearly everyone, and a typical game ends at 0 lives. Fine for free play and Random Blitz (casual Blitz scored 16 of 16).",
+    "Radii match the source and spellings work (luna, earth's moon, ganymeade, 'tritan' offers Titan / Triton), but planet-number aliases hand out answers: 'uranus' offers Oberon / Titania, 'saturn' offers Rhea / Titan, 'neptune' becomes Triton."
   ],
   "fixes": [
-    "Category is 'Culture'; it should be 'Science' (or the pipeline's space/science category).",
-    "Junk redirect aliases on top-10 entries: Moon 'Selenology', 'Selenologist', 'Lunar Science', 'Lunar mass', 'Moon mass', 'Lunar radius', 'Moon radius', 'Moon distance from earth', 'Moon in literature', 'Moon in culture', 'Earth and moon', 'Earth-Moon system', 'Terran System', 'Lunar humanization'; Triton 'Andvari', 'Cantaloupe terrain'; Titania 'Calphurnia'; Oberon 'Lear'; Titan 'Titan exploration'; Ganymede magnetosphere/magnetic-field redirects."
+    "Drop the bare planet-number aliases from the top 10: 'Saturn V' (Rhea), 'Saturn VI' (Titan), 'Uranus III' (Titania), 'Uranus IV' (Oberon), 'Neptune I' (Triton), and for consistency 'Jupiter I' to 'Jupiter IV', 'Earth I', 'Terra I'. Today 'uranus' offers Oberon / Titania (and once one is found, autocorrects to the other), 'saturn' and 'saturnian' offer Rhea / Titan, 'neptune' and 'neptunian' are corrected to Triton. Coordinator option in src/game/match.ts: a guess with no digits should not fuzzy-match a form that differs from it only by a number.",
+    "Drop 'Satellite Io' (and the other 'Satellite <moon>' redirect aliases): 'satellite' alone is corrected to Io.",
+    "Remove redirect aliases that are not names of the moon: 'Ganymedean atmosphere', 'Magnetic field of Ganymede', 'Callistoan atmosphere', 'Ionian atmosphere', 'Europan atmosphere', 'Titanian atmosphere', 'Rhean atmosphere'.",
+    "Pool entry #31 'S/2015 1' lost its parenthesis: the source name is 'S/2015 (136472) 1' (Makemake's moon)."
   ]
 }

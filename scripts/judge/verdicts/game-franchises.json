@@ -1,27 +1,26 @@
 {
   "id": "game-franchises",
-  "judgedAt": "2026-10-30",
+  "judgedAt": "2026-11-02",
   "decision": "daily-list",
   "alsoBlitz": true,
-  "priority": 8,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 5, "blitzDepth": 4 },
-  "casual": { "found": 9, "livesLost": 4, "guesses": 15 },
-  "fan": { "found": 10, "livesLost": 2, "guesses": 16 },
-  "blitzCasual": { "scored": 22, "named": 30 },
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "blitzCasual": { "scored": 21, "named": 26 },
   "difficulty": 2,
-  "tags": ["gaming", "video games"],
+  "tags": ["gaming", "video games", "franchises"],
   "audience": "gamers and anyone under 40",
-  "summary": "A fun, debate-starting daily: Mario, Pokemon, Call of Duty, GTA and Minecraft are gimmes, Tetris at #2 surprises, and Zelda, Halo and The Sims missing the top 10 are great near misses. Suits the classic list better than Blitz.",
+  "summary": "Everyone knows Mario, Pokémon, Call of Duty, GTA and Minecraft; the last spots (Resident Evil, Final Fantasy) hide among famous near misses like The Sims, Zelda and Sonic that eat lives fast. Plays great as Blitz too.",
   "reasons": [
-    "Casual run: Mario, Pokemon, Call of Duty, GTA, Minecraft, FIFA, Tetris, Assassin's Creed, Final Fantasy found; lives went on Zelda #15, Halo #35, The Sims #13, Street Fighter #47. 9/10 with 1 life left, missing Resident Evil.",
-    "Fortnite (free-to-play) is not an answer and costs nothing, which is right. Top-10 values and order match the source.",
-    "Blitz 22 of 30: Pac-Man, Skyrim, Red Dead Redemption, Mario Kart-style sub-series names and free games (Candy Crush, Angry Birds) score nothing; 'uncharted' costs a life in classic by matching Koei's Uncharted Waters."
+    "Casual 8/10 (Mario, Tetris, Pokémon, Call of Duty, GTA, Minecraft, FIFA, Assassin's Creed); lives went on Zelda #15, Sonic #18, Halo #35, The Sims #13 and Wii Sports #11, the last on the final guess. The fan also stopped at 8, out of lives on The Sims, Sonic, Lego, Wii and Need for Speed: #9 to #18 span only 218 to 140 million, so the tail is partly a lottery. Estimated crowd average about 6.",
+    "Top 10 matches the source exactly and is current (Resident Evil 218 million as of October 2026); #10 and #11 don't tie (215 vs 204). Common forms work: cod, gta 5, ea fc, biohazard, ff, mario kart, luigi. Fortnite and other free-to-play games are free misses.",
+    "Blitz is deep: 21 of 26 names scored in 90 s (17 of the first 20). Pac-Man, Crash Bandicoot and Guitar Hero are accepted but score nothing, because the source table stops at 50 million."
   ],
   "fixes": [
-    "Drop 'Educational games in the Sonic the Hedgehog series' from the unranked pool: it makes 'sonic' ambiguous with Sonic the Hedgehog (#18).",
-    "'uncharted' resolves to Uncharted Waters (unranked, costs a life). Add Naughty Dog's Uncharted to the pool, or drop the bare 'Uncharted' short form from Uncharted Waters.",
-    "Pac-Man is not in the pool at all ('pacman' offers Batman: Arkham / Rayman). Add it as an accepted answer.",
-    "Missing aliases for sub-series and flagship games: 'Mario Kart', 'Mario Party', 'Luigi' -> Mario; 'Wii Sports', 'Wii Fit' -> Wii; 'Red Dead Redemption' -> Red Dead; 'Skyrim' -> The Elder Scrolls; 'GTA V' / 'GTA 5' -> Grand Theft Auto.",
-    "Junk redirect aliases on top-10 entries: Mario 'Kamek', 'King Boo', 'Boo', 'Boo Diddley', 'E. Gadd', 'I have fury!', 'Caety Sagoian', 'Catey Sagoian', 'Mario Clock', 'Mario Calculator', 'POW Block' and the other character/enemy names; Pokemon 'Pokemon types', 'Poke Ball', 'Pokedex', 'Gym Badge', 'Elite Four', 'Giovanni', 'Steven Stone', 'Noland', 'Sakaki'; Resident Evil soundtrack/orchestra redirects, 'Arklay forest', 'Raccoon Dam', 'Caliban Cove'; Call of Duty 'Nova 6', 'Urzikstan', 'Russell Adler'; GTA 'Lance Vance', 'Wanted level'; FIFA 'Alex Hunter', 'Piemonte Calcio'; Tetris 'L-Block', 'Tetris music', 'Tetrimino'; Assassin's Creed 'Abstergo', 'Precursor Genome'. Drop redirects naming characters, items, places, soundtracks and mechanics."
+    "Mario (#1): add 'Super Mario Bros', 'Super Mario Bros.', 'Mario Bros' and 'Mario Bros.' as aliases. 'super mario bros' and 'mario bros' are not recognized now ('super mario' and 'mario brothers' are).",
+    "Final Fantasy (#10): drop 'Compilation of Final Fantasy VII' from the unranked pool (it is part of the series) and add 'Final Fantasy VII' and 'FF7' as aliases; 'final fantasy 7' and 'final fantasy vii' currently cost a life. Drop the other sub-series entries too: 'Final Fantasy Crystal Chronicles', 'Fabula Nova Crystallis Final Fantasy'.",
+    "Junk redirect aliases on the top 10. Mario: characters, enemies, places and the film ('Kamek the Magikoopa', 'Toadsworth', 'Koopa kid', 'Fire Bro', 'Toad Town', 'Professor E. Gadd', 'Lord Fawful', 'FawfuI', 'Cheep-Cheep', 'Bob-Omb', 'Dry Bones', 'Buzzy Beetle', 'Snifit', 'Lumalee', 'Bloober', 'Ignatius Koopa', 'Petey Piranha', 'Peach's Castle', 'Mushroom Kingdom', 'Super Mario Bros film', 'SMB Film', 'Mario Takes America' and the like). Pokémon: mechanics and characters ('Pokémon moves', 'Pokémon natures', 'Pokémon breeding', 'Pokémon evolution', 'Gym Leader', 'Gym Badges', 'Pokéball', 'Giovani', 'Professor Odamaki', 'Yukinari Ôkido-Hakase', 'Pokémon crime syndicates'). Resident Evil: every 'Biohazard ... Soundtrack' and '... Orchestra' redirect, 'Resident Evil list of books', 'The Umbrella Conspiracy', 'Arklay Forrest', 'Arklay Mountains', 'Raccoon City Outbreak', 'Operation Bacillus Terminate', 'Bio-Organic Weapon', 'Drain Demios'. Assassin's Creed: 'Abstergo Industries', 'Creed's Assassin'. Tetris: 'L-BIock'. GTA: 'Lists of Grand Theft Auto characters'. FIFA: 'FIFA leagues'.",
+    "Minor, free misses on plain names of top-10 answers: 'grand theft auto v' (while 'gta v' works), 'gta 6' / 'gta vi', 'resident evil 4' / 're4', 'pokemon go'. Add as aliases where the numbered-title rule allows."
   ]
 }
