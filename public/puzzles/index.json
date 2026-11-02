@@ -490,5 +490,35 @@
   "title": "Biggest car makers",
   "category": "Business",
   "blitz": false
+ },
+ {
+  "id": "fast-food-chains",
+  "title": "Fast food chains with the most locations",
+  "category": "Oddball",
+  "blitz": true
+ },
+ {
+  "id": "us-surnames",
+  "title": "Most common surnames in the US",
+  "category": "Oddball",
+  "blitz": true
+ },
+ {
+  "id": "tea-per-capita",
+  "title": "Countries that drink the most tea per person",
+  "category": "Oddball",
+  "blitz": true
+ },
+ {
+  "id": "girls-names",
+  "title": "Most common girls' names in the US",
+  "category": "Oddball",
+  "blitz": false
+ },
+ {
+  "id": "passwords",
+  "title": "Most common passwords",
+  "category": "Oddball",
+  "blitz": false
  }
 ]
