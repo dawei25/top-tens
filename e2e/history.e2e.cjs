@@ -18,7 +18,7 @@ for (const vp of VIEWPORTS) {
     await page.getByTestId("give-up").click();
     await page.getByTestId("results").waitFor();
     await page.clock.runFor(60_000);
-    // Then a Blitz round on the same list, from the results' BLITZ key.
+    // Then a Blitz round on the same list, from the results' PLAY BLITZ key.
     await page.getByTestId("blitz-key").click();
     await page.getByTestId("blitz-clock").waitFor();
     await guess(page, "Dubai");

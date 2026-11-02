@@ -1,5 +1,5 @@
-// Today's daily: exact guess, typo fixed in the box, a real wrong answer costs a life, junk is free, a hint,
-// give up -> results, Back -> home.
+// Today's daily: exact guess, typo fixed in the box, a real wrong answer costs a life, junk is free, a clue,
+// give up -> results (days in a row explained), Back -> home.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, hash, puzzle, todaysDaily, noHScroll, guess } = require("./helpers.cjs");
@@ -60,6 +60,13 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("results-daily-blitz").count(), 1);
     assert.equal(await page.getByTestId("results-roll").count(), 1);
 
+    // The days-in-a-row count explains itself: a tap or click opens its note (Home's record has the same).
+    const tip = page.getByTestId("results").getByTestId("streak-tip");
+    assert.match(await tip.getAttribute("aria-label"), /in a row .*Today's list/);
+    await tip.click();
+    assert.equal(await tip.getAttribute("aria-expanded"), "true");
+    assert.ok(await page.locator(`#${await tip.getAttribute("aria-controls")}`).isVisible());
+
     // Reopening it (reload) shows the finished board and results, never a fresh game.
     await page.reload();
     await page.getByTestId("results").waitFor();
@@ -70,6 +77,7 @@ for (const vp of VIEWPORTS) {
     await page.getByTestId("nav-home").click();
     await page.getByTestId("today-list").waitFor();
     assert.equal(await page.getByTestId("today-list").getAttribute("data-done"), "true");
+    assert.equal(await page.getByTestId("streak-tip").count(), 1);
     // From Home too.
     await page.getByTestId("today-list").click();
     await page.getByTestId("results").waitFor();

@@ -111,6 +111,68 @@ export function HomeIcon() {
 }
 
 /**
+ * The clue's magnifying glass, 9 x 9: a round lens with a glint and a faint glass tint ("g"), a thick handle.
+ * Colour comes from CSS (currentColor), so the row can light it.
+ */
+const LENS = [
+  "..###....",
+  ".#ggg#...",
+  "#g#ggg#..",
+  "#ggggg#..",
+  ".#ggg#...",
+  "..###.#..",
+  "......##.",
+  ".......##",
+  "........#",
+];
+const LENS_RIM = pixels(LENS);
+const LENS_GLASS = pixels(LENS.map((row) => row.replace(/#/g, ".").replace(/g/g, "#")));
+
+export function ClueIcon() {
+  return (
+    <svg className="clue-icon" viewBox="0 0 9 9" shapeRendering="crispEdges" aria-hidden="true">
+      <path className="glass" d={LENS_GLASS} fill="currentColor" />
+      <path d={LENS_RIM} fill="currentColor" />
+    </svg>
+  );
+}
+
+/**
+ * A label that explains itself: hover shows the note (title), a tap, click or Enter toggles it inline. The caller
+ * renders the note where it fits (`open`), so it can sit under a whole row of stats.
+ */
+export function TipLabel({
+  label,
+  note,
+  open,
+  onToggle,
+  controls,
+  testId,
+}: {
+  label: string;
+  note: string;
+  open: boolean;
+  onToggle: () => void;
+  controls: string;
+  testId?: string;
+}) {
+  return (
+    <button
+      type="button"
+      className="tip"
+      title={note}
+      aria-label={note}
+      aria-expanded={open}
+      aria-controls={controls}
+      data-testid={testId}
+      onClick={onToggle}
+    >
+      {label}
+    </button>
+  );
+}
+
+/**
  * Every screen's header: BACK (one step up) on the left, the screen's own middle, the sound key and HOME on the
  * right. Escape is Back too, except while typing in a field or when something on the screen already used the
  * Escape (a hint confirm marks it with preventDefault).
