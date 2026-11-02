@@ -98,41 +98,49 @@
  {
   "n": 17,
   "date": "2026-11-05",
-  "id": "lakes"
+  "id": "lakes",
+  "blitz": "us-surnames"
  },
  {
   "n": 18,
   "date": "2026-11-06",
-  "id": "x-accounts"
+  "id": "x-accounts",
+  "blitz": "world-cities"
  },
  {
   "n": 19,
   "date": "2026-11-07",
-  "id": "olympic-medals"
+  "id": "olympic-medals",
+  "blitz": "fast-food-chains"
  },
  {
   "n": 20,
   "date": "2026-11-08",
-  "id": "canada-cities"
+  "id": "canada-cities",
+  "blitz": "languages"
  },
  {
   "n": 21,
   "date": "2026-11-09",
-  "id": "game-franchises"
+  "id": "game-franchises",
+  "blitz": "us-states-gdp"
  },
  {
   "n": 22,
   "date": "2026-11-10",
-  "id": "europe-cities"
+  "id": "europe-cities",
+  "blitz": "nobel-countries"
  },
  {
   "n": 23,
   "date": "2026-11-11",
-  "id": "us-box-office"
+  "id": "us-box-office",
+  "blitz": "billionaire-countries"
  },
  {
   "n": 24,
   "date": "2026-11-12",
-  "id": "island-countries"
+  "id": "island-countries",
+  "blitz": "spotify-songs"
  }
 ]

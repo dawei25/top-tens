@@ -49,10 +49,11 @@ sports statistician.
 
 Pick the best fit, in this order:
 
-**One topic a day (from November 2026).** Today's list and Today's Blitz are the same list, so a daily must work in
-both modes. The owner's target: a typical player averages **5 to 6 out of 10** on a daily.
+**Two topics a day.** Today's list and Today's Blitz are separate topics, because they reward different things: a
+good list is about knowing the top 10 and its order, a good Blitz about breadth (lots of names a casual player can
+fire off that all score). The owner's target for Today's list: a typical player averages **5 to 6 out of 10**.
 
-- **`daily-list`** (a daily topic, both modes): all of
+- **`daily-list`** (Today's list): all of
   - recognizability >= 4: most adults could name 5 of these without being fans of the topic (Broadway shows, NHL
     scorers and national parks fail this; they are free play);
   - the title and prompt say what the player is naming ("Countries emitting the most CO2", not "Biggest CO2
@@ -63,9 +64,10 @@ both modes. The owner's target: a typical player averages **5 to 6 out of 10** o
     more than a real one, and the synthetic crowd in `scripts/judge/par.ts` sits about 1.2 answers below it, so this
     lands the estimated average near 5 to 6. Fewer than 6 is too hard for a daily; 9-10 is too easy. How fast famous
     misses burn lives belongs in `fairness`, not here;
-  - Blitz-ready with blitzDepth >= 3 (it is also Today's Blitz).
-- **`daily-blitz`**: kept for older verdicts. A list that only works as a Blitz (expensive films: obvious guesses
-  sit outside the top 10) is `free-play` now; Random Blitz still uses it.
+- **Today's Blitz** is drawn by the scheduler from any Blitz-ready list whose verdict scores blitzDepth >= 4,
+  data >= 4 and recognizability >= 4 (and isn't `reject` or `fix-first`), whatever its list decision: a list too
+  easy or too punishing as a classic (US states by GDP, world cities) can be a great Blitz. Simulate the casual
+  Blitz honestly so blitzDepth means something. `daily-blitz` remains for a list that is only good as a Blitz.
 - **`free-play`**: correct and playable but too niche or too hard for a daily; fine for random rolls, Random Blitz
   and the archive.
 - **`fix-first`**: would qualify, but has data problems to fix in the next rebuild (list them precisely).
@@ -126,6 +128,8 @@ them to each other in a verdict.
 
 ## How the schedule uses verdicts
 
-`scripts/schedule.ts` only schedules **judged** lists. From 2026-11-05 a day is one `daily-list` verdict, played as
-both Today's list and Today's Blitz, highest priority first, rotating categories. Older days had a separate Blitz
-list (an explicit `blitz` field in daily.json), which stays as it was. Lists without a verdict, or judged `free-play`, stay in random play and the archive.
+`scripts/schedule.ts` only schedules **judged** lists. Each day gets a `daily-list` verdict for Today's list
+(highest priority first, rotating categories) and a different list for Today's Blitz (the Blitz bar above, deepest
+first, varied by category and topic tag, keeping lists that could be a daily list for that pool). A list never runs
+twice, either way: a Blitz shows every answer. Every day's Blitz is an explicit `blitz` field in daily.json, so
+adding days never changes a past one (`schedule.ts --blitz` fills any upcoming day missing one). Lists without a verdict, or judged `free-play`, stay in random play and the archive.
