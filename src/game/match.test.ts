@@ -226,3 +226,24 @@ describe("several names containing the guess", () => {
     expect(judgeGuess("york", states, new Set())).toMatchObject({ kind: "correct", entry: { rank: 4 } });
   });
 });
+
+describe("six or seven letters get two edits", () => {
+  const places: Puzzle = {
+    ...puzzle,
+    id: "places",
+    answers: [e(1, "Poland"), e(2, "Montana"), e(3, "Hungary"), e(4, "Morocco"), e(5, "Phoenix"), ...puzzle.answers.slice(5)],
+    extras: [e(11, "Charli D'Amelio", ["Charli"])],
+  };
+  const j = (g: string) => judgeGuess(g, places, new Set());
+  it("an ordinary word three changes away is not a misspelling", () => {
+    expect(j("planes")).toMatchObject({ kind: "unknown" });
+    expect(j("church")).toMatchObject({ kind: "unknown" });
+    expect(j("mountain")).toMatchObject({ kind: "unknown" });
+  });
+  it("real slips still land", () => {
+    expect(j("hungery")).toMatchObject({ kind: "correct", entry: { rank: 3 }, corrected: true });
+    expect(j("marocco")).toMatchObject({ kind: "correct", entry: { rank: 4 }, corrected: true });
+    expect(j("pheonix")).toMatchObject({ kind: "correct", entry: { rank: 5 }, corrected: true });
+    expect(j("polnad")).toMatchObject({ kind: "correct", entry: { rank: 1 }, corrected: true });
+  });
+});

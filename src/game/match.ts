@@ -72,10 +72,14 @@ export function autoCorrectBudget(len: number): number {
 
 /**
  * Edits within which a guess is treated as a misspelling and corrected in the input. Short words get no extra
- * slack: two changed letters out of four ("wilt" / "west") is a different word, not a typo.
+ * slack: two changed letters out of four ("wilt" / "west") is a different word, not a typo. Six or seven letters
+ * get two: three changes there turn one ordinary word into another ("planes" / "Poland", "church" / "Charli"),
+ * while real slips ("Hungery", "Marocco", "Phoneix") are one or two.
  */
 export function typoBudget(len: number): number {
-  return autoCorrectBudget(len) + (len <= 5 ? 0 : 1);
+  if (len <= 5) return autoCorrectBudget(len);
+  if (len <= 7) return 2;
+  return autoCorrectBudget(len) + 1;
 }
 
 interface Candidate {
