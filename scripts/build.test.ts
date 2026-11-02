@@ -59,6 +59,18 @@ describe("dated values", () => {
     expect(datedValue("2016", undefined, undefined)).toBeUndefined();
   });
 
+  it("label a row of a table with one row per year by that row's year", () => {
+    // `perYear`: each year's top tour, the record as it grew, and other countries' rankings with a place in the label.
+    expect(datedValue(datedLabel({}, ["2025"], "")!, 1, "$407,600,113")).toBe("#1 in 2025 ($407,600,113)");
+    expect(datedValue(datedLabel({ label: "the record in {year}" }, ["1990"], "")!, undefined, "$175,000,000")).toBe(
+      "$175,000,000 (the record in 1990)",
+    );
+    expect(datedValue(datedLabel({ label: "the US, 2025" }, ["Rank"], "")!, 10, "$129 billion")).toBe(
+      "#10 in the US, 2025 ($129 billion)",
+    );
+    expect(labelYear("the US, 2025")).toBe(2025);
+  });
+
   it("scale figures into the list's unit", () => {
     expect(scaledFigure(16_500_000, 1e6)).toBe("16.5");
     expect(scaledFigure(9_985_100, 1e6)).toBe("10.0");

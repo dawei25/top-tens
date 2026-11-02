@@ -1755,6 +1755,7 @@ export const TOPICS: Topic[] = [
         value: "Net worth",
         dated: { rank: "Ranking in France", label: "France, 2023", prefix: "$" },
         skip: DECEASED_BILLIONAIRES,
+        rename: { "Jacques Saadé, jr.": "Jacques Saadé Jr." },
       },
     ],
     dataAsOf: "2026",
@@ -2457,13 +2458,8 @@ export const TOPICS: Topic[] = [
       // Athletes who earned $100 million in some year without making that year's top 10 (Joe Burrow, Oleksandr Usyk).
       { tables: [18], name: "Name" },
     ],
-    // Fights, relatives, staff, companies, pets and jokes among the redirects.
-    junkAliases: [
-      "Canelo Álvarez vs Victor Ortiz", "Will Ireton", "Gloria James", "Bronny's dad", "Bronny James Sr.", "The Bronze Jade",
-      "LRMR", "Lebrick", "Lebrick James", "Unanimous Media", "Sentenced", "My Next Chapter", "You the real MVP", "XNDA",
-      "XDNA", "Dawn Apollo Films", "Dawn Apollo Studios", "Hamilton and Alonso", "Untitled Lewis Hamilton project",
-      "Roscoe Hamilton",
-    ],
+    // Fights, relatives, staff, companies, pets and jokes among the redirects: CELEBRITY_JUNK, shared with the
+    // career lists, where these stars rank too.
   },
   {
     id: "car-models",

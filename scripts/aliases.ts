@@ -291,6 +291,11 @@ export const CELEBRITY_JUNK = [
   "Hiraben Modi", "Heeraben Modi", "HE Hiraben Modi", "Damodardas Mulchand Modi", "Damodardas Modi", "Mulchand Modi",
   "Narendra Modi's Google+ Hangout", "Use of Technology by Narenda Modi", "NaMo TV", "Founder of SpaceX",
   "Michelle Obama's husband",
+  // Athletes (the earnings list and the career lists): fights, relatives, staff, companies, pets and jokes.
+  "Canelo Álvarez vs Victor Ortiz", "Will Ireton", "Gloria James", "Bronny's dad", "Bronny James Sr.", "The Bronze Jade",
+  "LRMR", "Lebrick", "Lebrick James", "Unanimous Media", "Sentenced", "My Next Chapter", "You the real MVP", "XNDA",
+  "XDNA", "Dawn Apollo Films", "Dawn Apollo Studios", "Hamilton and Alonso", "Untitled Lewis Hamilton project",
+  "Roscoe Hamilton",
   // Instagram's own account: features, users and studies of the app (on the Instagram and Facebook lists).
   "Instagram Stories", "Instagram story", "Instagram Direct", "Instagram Live", "Effects of Instagram on mental health",
   "Instagram impact on people", "Instagrammer", "Instagram blogger", "Instagram Kids", "Instagram from Facebook", "Ig.me",

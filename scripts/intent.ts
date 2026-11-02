@@ -325,7 +325,7 @@ export const NICKNAMES: Record<string, string[]> = {
   "Russell Westbrook": ["Russ"],
   "Paul Pierce": ["The Truth"],
   "Damian Lillard": ["Dame", "Dame Time"],
-  "Kyrie Irving": ["Uncle Drew"],
+  "Kyrie Irving": ["Kyrie", "Uncle Drew"],
   "Nikola Jokić": ["Joker", "The Joker"],
   "Larry Bird": ["Larry Legend"],
   "Dennis Rodman": ["The Worm"],
