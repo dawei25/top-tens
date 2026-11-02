@@ -393,11 +393,17 @@ a {
   flex-direction: column;
   gap: 14px;
 }
-/* Wide enough: Today's list and Today's Blitz side by side, half the height. */
+/* Wide enough: Today's list and Today's Blitz side by side. The list is the main event, so it gets two thirds. */
 @media (min-width: 640px) {
   .today-stack {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
+  }
+  /* The narrower Blitz key keeps its title on one line. */
+  .today-stack .mode-key.today.blitz .key-label {
+    font-size: clamp(20px, 2.1vw, 28px);
+    letter-spacing: 0.12em;
+    white-space: nowrap;
   }
 }
 .today-stack .key-sub {
