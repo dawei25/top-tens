@@ -520,14 +520,33 @@ export const INTENT: Record<string, Intent> = {
   },
   "youtube-videos": {
     same: {
-      "Baby Shark Dance": ["Baby Shark", "Baby Shark Pinkfong"],
-      "Johny Johny Yes Papa": ["Johnny Johnny Yes Papa", "Johnny Johnny"],
+      // Uploaders and artists who name the video: "psy" is Gangnam Style.
+      "Baby Shark Dance": ["Baby Shark", "Baby Shark Pinkfong", "Pinkfong"],
+      Despacito: ["Luis Fonsi", "Fonsi"],
+      "See You Again": ["Wiz Khalifa"],
+      "Uptown Funk": ["Mark Ronson", "Bruno Mars"],
+      "Dame Tu Cosita": ["El Chombo"],
+      "Waka Waka": ["Shakira"],
+      "Counting Stars": ["OneRepublic", "One Republic"],
+      "Learning Colors – Colorful Eggs on a Farm": ["Miroshka TV"],
+      Baby: ["Justin Bieber Baby"],
+      "Bad Romance": ["Lady Gaga"],
+      Dynamite: ["BTS"],
+      Friday: ["Rebecca Black"],
+      "Party Rock Anthem": ["LMFAO"],
+      Faded: ["Alan Walker"],
+      "Johny Johny Yes Papa": ["Johnny Johnny Yes Papa", "Johnny Johnny", "LooLoo Kids"],
       "Axel F": ["Crazy Frog", "Crazy Frog Axel F"],
       "Phonics Song with Two Words": ["Phonics Song", "ChuChu TV Phonics Song"],
-      "Gangnam Style": ["Gangnam", "Oppa Gangnam Style"],
+      "Gangnam Style": ["Gangnam", "Oppa Gangnam Style", "Psy"],
       "Wheels on the Bus": ["The Wheels on the Bus"],
     },
     groups: {
+      Cocomelon: ["Wheels on the Bus", "Bath Song", "Baa Baa Black Sheep", "Baby Shark (Cocomelon)"],
+      "Ed Sheeran": ["Shape of You", "Perfect"],
+      "Katy Perry": ["Roar", "Dark Horse"],
+      "Maroon 5": ["Sugar", "Girls Like You"],
+      "Justin Bieber": ["Sorry", "Baby"],
     },
   },
   "video-games": {
@@ -933,6 +952,7 @@ export const INTENT: Record<string, Intent> = {
       TSMC: ["Taiwan Semiconductor"],
       "Saudi Aramco": ["Aramco"],
       ExxonMobil: ["Exxon", "Exxon Mobil", "Mobil"],
+      Samsung: ["Samsung Electronics"],
     },
   },
   banks: {
@@ -1050,15 +1070,19 @@ export const INTENT: Record<string, Intent> = {
     same: {
       "Disneyland Paris": ["Disneyland Park Paris", "Euro Disney", "Euro Disneyland", "Disney Paris", "Paris Disneyland"],
       "Disney Adventure World": ["Walt Disney Studios", "Walt Disney Studios Park"],
-      "Shanghai Disneyland": ["Shanghai Disney"],
-      "Hong Kong Disneyland": ["Hong Kong Disney", "HK Disneyland"],
+      "Shanghai Disneyland": ["Shanghai Disney", "Disneyland Shanghai"],
+      "Hong Kong Disneyland": ["Hong Kong Disney", "HK Disneyland", "Disneyland Hong Kong"],
+      "Universal Studios Florida": ["Universal Studios Orlando"],
+      "Chimelong Ocean Kingdom": ["Ocean Kingdom"],
       "Universal Studios Beijing": ["Universal Beijing"],
       "Magic Kingdom": ["Walt Disney World", "Disney World"],
       Disneyland: ["Disneyland California", "Disneyland Anaheim"],
       "Universal Studios Japan": ["USJ", "Universal Japan"],
-      "Disney's Hollywood Studios": ["Hollywood Studios"],
+      "Disney's Hollywood Studios": ["Hollywood Studios", "MGM Studios", "Disney-MGM Studios"],
     },
     groups: {
+      // No top-10 park has "Disney" in its name: the guess offers the four Disney parks of the top 10.
+      Disney: ["Magic Kingdom", "Disneyland", "Tokyo Disneyland", "Shanghai Disneyland"],
       "Universal Studios": ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
       Universal: ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
       "Tokyo Disney": ["Tokyo Disneyland", "Tokyo DisneySea"],
@@ -1084,7 +1108,7 @@ export const INTENT: Record<string, Intent> = {
   },
   "car-makers": {
     same: {
-      "Hyundai Motor Group": ["Kia", "Genesis", "Genesis Motor", "Hyundai Motor Company", "Hyundai", "Hyundai-Kia"],
+      "Hyundai Motor Group": ["Kia", "Kia Motors", "Genesis", "Genesis Motor", "Hyundai Motor Company", "Hyundai", "Hyundai-Kia"],
       "General Motors": ["Chevrolet", "Chevy", "Cadillac", "Buick", "GMC", "GM"],
       Stellantis: ["Jeep", "Dodge", "Ram", "Ram Trucks", "Chrysler", "Fiat", "Peugeot", "Citroën", "Citroen", "Opel", "Vauxhall", "Alfa Romeo", "Maserati", "Lancia", "Fiat Chrysler", "Fiat-Chrysler", "FCA", "PSA", "PSA Group", "Groupe PSA"],
       "Volkswagen Group": ["Audi", "Porsche", "Skoda", "Škoda", "SEAT", "Cupra", "Bentley", "Lamborghini", "VW", "Volkswagen"],
@@ -1096,6 +1120,11 @@ export const INTENT: Record<string, Intent> = {
       Nissan: ["Infiniti", "Datsun"],
       Suzuki: ["Maruti Suzuki", "Maruti"],
       "BYD Auto": ["BYD"],
+      // Unranked groups, each one entry with its brands.
+      "Mercedes-Benz": ["Mercedes", "Benz", "Mercedes-Benz Group"],
+      Tata: ["Tata Motors", "Tata Motors Passenger Vehicles", "Jaguar", "Jaguar Cars", "Land Rover", "Jaguar Land Rover", "JLR"],
+      BMW: ["BMW Group", "Mini", "Rolls-Royce", "Rolls-Royce Motor Cars"],
+      "Tesla, Inc.": ["Tesla", "Tesla Motors"],
     },
   },
   "us-metros": {

@@ -602,8 +602,21 @@ export const TOPICS: Topic[] = [
       { page: "List of most-liked YouTube videos", tables: [0, 1], name: "Video name" },
     ],
     universeCategories: ["Viral videos", "YouTube videos"],
-    // Category members that are a person, a device or a film, not a video.
-    skip: ["Ronaldinho", "I/O Brush", "Myspace – The Movie"],
+    // Category members that are a person, a channel, a web series, a device, a film or a trend, not a video.
+    skip: [
+      "Ronaldinho", "I/O Brush", "Myspace – The Movie", "Viral video", "Donald Trump",
+      "Donald Trump (Last Week Tonight with John Oliver)", "Geoffrey Baron", "Tom Brier",
+      "Stuart Chaifetz", "Vic DiBitetto", "Irene Esser", "Robert Greenwald", "Connor Michalek", "Germano Mosconi",
+      "Hansell Riojas", "Janina San Miguel", "Israa Seblani", "Martin Ssempa", "Chuck Testa", "Pita Taufatofua",
+      "Piotr Szczerek", "Ricardo Milos", "Deltalina", "Grindmother", "Moymoy Palaboy", "Kratu", "Joueur du Grenier",
+      "Mrwhosetheboss", "Good Mythical Morning", "Nostalgia Critic", "Red Letter Media", "Red vs. Blue", "Annoying Orange",
+      "The Juice Media", "Primitive Technology", "Mo Mountain Mutts", "Skibidi Toilet", "The Show with No Name",
+      "Rickrolling", "Bottle flipping", "Mannequin Challenge", "Silhouette Challenge", "Golden retriever egg challenge",
+      "Soda geyser", "Battle of Buulo Mareer", "Norfolk Southern–Gregson Street Overpass", "St. Patrick's Day beating",
+      "Montgomery Riverfront brawl", "Mitt Romney's 47 percent comments",
+    ],
+    // Killings and other incidents filmed and shared: events, not videos a player names.
+    categorySkip: /^(killing|killing and dismemberment|murder|torture|firing) of\b|\bincident$/i,
     // Cocomelon's own upload of the song; "Baby Shark" means Pinkfong's #1 (intent.ts).
     rename: { "Baby Shark": "Baby Shark (Cocomelon)" },
   },
@@ -1481,6 +1494,9 @@ export const TOPICS: Topic[] = [
       "Nvidia Grace", "Move fast and break things", "Hacker Way", "1 Hacker Way", "One Hacker Way", "Mars Oasis",
       "SpaceX Hawthorne facility", "SpaceX headquarters", "SpaceX Hawthorne", "WaferTech", "TSMC Washington", "Spacex.com",
       "AStore", "Supercenter", "GamePlay",
+      // "\uf8ff Inc." (Apple's logo) reads as "inc"; Nvidia's robot project is spelled with zeros.
+      "Inc.", "Project GR00T", "NVIDIA Project GR00T", "NVIDIA GR00T", "Nvidia GROOT", "Co-mingled inventory",
+      "Comingled inventory", "Amazon leadership principles", "Generalist Robot 00 Technology",
     ],
   },
   {
@@ -1783,6 +1799,14 @@ export const TOPICS: Topic[] = [
       "Disney Regional Entertainment", "Disney Experiences", "Adventures by Disney", "Disney Magic Kingdoms", "Club Disney",
       "World of Disney", "Downtown Disney", "Walt Disney Attractions Japan", "Universal Kids Resort",
       "Hale's Tours of the World", "Port Disney", "Universal Beijing",
+      // Category members that are no park: a racist carnival game, rides, lands, services, events, never-opened parks.
+      "African dodger", "CircusTrix", "Great Old Amusement Parks", "Trolley park", "Behind the Attraction", "E ticket",
+      "Go Away Green", "Hidden Mickey", "MagicBand", "MyMagic+", "Omnimover", "Virtual Magic Kingdom",
+      "Vista-United Telecommunications", "Wild About Safety", "Mickey's Magical Party", "Mickey's Very Merry Christmas Party",
+      "Summer Nightastic!", "Celebration in the Air", "Golden Pass", "Ellen's Energy Adventure", "Pleasure Island",
+      "Adventureland", "Disney's America", "Walt Disney's Riverfront Square", "Disneyland in Australia", "WestCOT",
+      "Disneyland Abu Dhabi", "The Wizarding World of Harry Potter", "20th Century Fox World", "PlayPlace",
+      "Margaritaville Resort Orlando",
     ],
     // #10 is the Paris park; "Disneyland Park" reads like #2.
     rename: { "Disneyland Park": "Disneyland Paris" },
@@ -1791,7 +1815,9 @@ export const TOPICS: Topic[] = [
       "Magic Kingdom Parade", "Disney's Dreams Come True Parade", "Hard Rock Cafe Osaka",
       "Hard Rock Cafe Universal CityWalk Osaka", "Universal CityWalk Osaka", "Team Disney Anaheim",
       "DisneySea Transit Steamer Line", "Hollywood Hills Amphitheater", "Disney's Doug Live!", "Chante, C'est Noel",
-      "Epcot '94", "Epcot '95",
+      "Epcot '94", "Epcot '95", "America", "USA Pavilion", "Epcot Pavilion", "World Showcase pavilion",
+      "Superstar Television", "The Spirit of Pocahontas", "Streets of America", "Pixar Place", "Critter Country",
+      "Disneyland Heliport", "Walt disney project", "Mickey's Soundsational Parade",
     ],
   },
   {
@@ -2005,7 +2031,8 @@ export const TOPICS: Topic[] = [
       "Vauxhall Motors", "Alfa Romeo", "Alfa Romeo Quadrifoglio", "Maserati", "Lancia", "DS Automobiles", "Fiat-Chrysler",
       "FCA", "PSA Group", "Groupe PSA", "PSA Peugeot Citroën", "Audi", "Porsche", "Škoda Auto", "SEAT", "Cupra",
       "Cupra Racing", "Bentley", "Lamborghini", "Lexus", "Daihatsu", "Acura", "Volvo Cars", "Polestar", "Lotus Cars",
-      "MG Cars", "Lincoln Motor Company", "Infiniti", "Datsun", "Maruti Suzuki",
+      "MG Cars", "Lincoln Motor Company", "Infiniti", "Datsun", "Maruti Suzuki", "Mercedes", "Tata Motors Passenger Vehicles",
+      "Jaguar Cars", "Land Rover", "Mini", "Mini (marque)", "Rolls-Royce Motor Cars",
     ],
     junkAliases: [
       "Toyota sewing machine", "Shigeru Hayakawa", "Controversies surrounding Toyota", "Toyota automobile collectibles",
@@ -2015,6 +2042,11 @@ export const TOPICS: Topic[] = [
       "Honda Soltec", "Honda Werther", "INNOCEAN", "Hyundai Innocean Communications",
       "Yanfeng Global Automotive Interior Systems", "Yanfeng Automotive Interiors", "Songsan Dolphin", "BYD God's Eye",
       "DiLink", "DiPilot", "E-Platform 2.0", "BYD e-Platform", "DM-i", "BYD J6", "Moia", "CARIAD", "Volkswagen Marine",
+      "The Power of Dreams", "Honda Clio", "Honda Primo", "Honda Verno", "Honda Outboard", "Honda Marine Group",
+      "Built Ford Tough", "Ford Research and Innovation Center", "Ford Advanced Vehicles", "New Auto",
+      "Volkswagen Financial Services", "Volkswagen Financial Services AG", "Toyota Financial Services", "Toyota FTAC",
+      "Toyota Baltic", "BYD Toyota EV Technology", "GAC BYD", "BYD TianShen", "BYD Dual Mode", "Geely GC2",
+      "Geely-Kandi Panda", "General Motors in motorsport",
     ],
   },
   // Oddball: fun lists anyone can throw guesses at, with a surprise or two.

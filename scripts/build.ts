@@ -460,7 +460,7 @@ function looksLikeName(title: string): boolean {
 const CATEGORY_CAP = 3000;
 /** Category members that are not things a player would name: lists, overviews, years, other namespaces. */
 const CATEGORY_SKIP =
-  /^((lists?|index|outline|history|timeline|glossary|bibliography|discography|filmography) of\b|\d{3,4}\b|(category|template|wikipedia|portal|file|help|draft|module):)/i;
+  /^((lists?|index|outline|history|timeline|glossary|bibliography|discography|filmography) of\b|\d{3,4}\b|(category|template|wikipedia|portal|file|help|draft|module):)|\(disambiguation\)$/i;
 
 /** An alias shared by more entries than this is too generic to mean any of them ("Mount", "Lake"). */
 const MAX_GROUP = 4;
