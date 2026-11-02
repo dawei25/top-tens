@@ -1,21 +1,26 @@
 {
   "id": "music-artists",
   "judgedAt": "2026-11-02",
-  "decision": "free-play",
+  "decision": "fix-first",
   "alsoBlitz": true,
   "priority": 6,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 7, "livesLost": 4, "guesses": 12 },
-  "fan": null,
-  "blitzCasual": { "scored": 29, "named": 30 },
-  "difficulty": 2,
-  "tags": ["music", "pop", "artists"],
-  "audience": "anyone",
-  "summary": "Written by the data agent at build time, pending a real judge. Everyone knows these names, but certified units favour the streaming era: the Beatles are #11, Elvis #18, Madonna #22.",
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 2, "data": 3, "fun": 3, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "blitzCasual": { "scored": 25, "named": 25 },
+  "difficulty": 3,
+  "tags": ["music", "pop", "hip-hop"],
+  "audience": "pop and rap fans",
+  "summary": "Everyone knows all ten names, but the title says best-selling while the ranking is certified units, so the Beatles, Elvis, Madonna, Elton John and Queen all cost lives. Put the measure in the title and it is a good daily and a deep Blitz.",
   "reasons": [
-    "Casual run found Drake, Rihanna, Taylor Swift, Eminem, Beyonce, Justin Bieber and Michael Jackson; The Beatles, Madonna, Ed Sheeran and Elton John cost lives.",
-    "Ranked by total certified units (the claimed-sales tiers tie a lot); all 129 tier artists are answers with a figure, so it is a deep Blitz.",
-    "Chris Brown (#8) and the gap between claimed and certified sales may surprise players; the prompt says certified sales."
+    "Casual found 8 (Drake, Rihanna, Taylor Swift, Eminem, Beyonce, Bieber, Michael Jackson, Ariana Grande) but lost all 5 lives on the Beatles (#11), Elvis (#18), Madonna (#22), Ed Sheeran (#13) and Elton John (#19). A player who reads the title the usual way and starts with the legends finds 2.",
+    "The page ranks by claimed sales (Beatles first) and uses certified units only to break ties. This list ranks by that column, which counts streams and gives featured artists full credit, so Drake's 556.8 million is over three times his 170 million claimed sales. The prompt mentions streams, but the title promises the classic list.",
+    "As a Blitz it is excellent: 25 of 25 casual names scored, every miss shows a figure, and all 10 answers have good sourced facts."
   ],
-  "fixes": []
+  "fixes": [
+    "Retitle so the title names the measure, for example 'Music artists with the most certified units (streams count)', and make the prompt say it plainly: 'Name the 10 music artists with the most certified units: albums, singles and streams, featured credits included'. 'Best-selling' reads as the claimed-sales list led by the Beatles, Elvis and Michael Jackson.",
+    "The prompt says 'all markets' but the page's column is 'from available markets': drop 'all markets' or say 'available markets'.",
+    "Drop the glued alias 'Eminem, Marshall Bruce Mathers III' on Eminem.",
+    "Add 'Elvis' (Elvis Presley) and 'Kanye' (Kanye West) as aliases: both now go through a did-you-mean step, which slows Blitz."
+  ]
 }
