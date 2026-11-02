@@ -14,17 +14,30 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       Did-you-know hooks; the other 72 lists still have the first-pass facts and need the same rewrite (coordinator,
       only for lists judged daily-worthy). Antarctic Desert has no fact yet.
 
-- [ ] **List judge leftovers** (from `scripts/judge/verdicts/*.json`; re-judge each list after the rebuild):
-      - **richest-people:** add ranks 11-25 so famous near misses (Michael Dell, the Waltons, Bill Gates, Gautam
-        Adani) show a rank. Needs a new source: The World's Billionaires table 38 has only the top 10.
-      - **books:** say in the prompt that religious, political and multi-volume works are excluded.
-      - **stadiums:** check Camp Nou's post-renovation capacity (99,354 is the old figure; about 105,000 would make it
-        #3); as a daily it needs a reframed prompt.
-      - **mountains:** famous peaks casual players name (Rainier, Whitney, Kenya, Ben Nevis, Olympus, Aoraki, Shasta,
-        Hood) are not in the pool; needs a category of ultra-prominent peaks or national high points.
+- [ ] **List judge leftovers** (re-judge each list after the rebuild):
+      - **richest-people:** ranks 11-25 so famous near misses (Michael Dell, the Waltons, Bill Gates, Gautam Adani)
+        show a rank. Needs a new source: The World's Billionaires table has only the top 10.
+      - **stadiums:** Camp Nou's post-renovation capacity (the page still says 99,354; about 105,000 would make it
+        #3).
+      - Sources still missing: 2025 sales for BMW, Mercedes and Tesla; career points for active NBA stars; Facebook
+        follower counts; a deeper city-visitors ranking; 2025 theme-park figures.
+
+- [ ] **`normalize()` and leading "A"** (contract change, needs a full rebuild): "A-Rod" normalizes to "rod"
+      because the leading article is dropped, so that alias also catches "rod". Only drop "a" when a word follows it
+      with a space, or keep hyphenated forms whole.
+
+- [ ] **Matcher: "title artist" guesses** (code, no rebuild): "perfect ed sheeran" on spotify-songs should match
+      Perfect by stripping a trailing artist name the song's entry knows.
 
 ## Done
 
+- **Quality pass and full rebuild** (2026-11-02): every title and prompt says what the player names, every puzzle
+  has a `noun`; famous unranked answers get values from other tables on the page (Titanic $200 million, 43 more
+  films; tourism, military spending, NHL points, Europe cities), China cities ranked to 452, 64 duplicates merged,
+  23 famous peaks and infobox lengths for famous short rivers; abbreviations and short forms (SF, NYC, DRC, KSA,
+  postal codes, GTA, CoD, LOTR, car brands, banks, airports by city, about 110 athlete nicknames); all 23 fix-first
+  lists and the daily verdicts' fixes; a slur blocklist the validator enforces; moons in a new Science category;
+  books, buildings and stadiums prompts. World Series and Super Bowl fall under the 30-figure Blitz minimum.
 - **Full rebuild of all 82 lists** (2026-10-30), with everything below; `index.json` lists all 82, the daily
   schedule is unchanged. instagram still fails the #10/#11 tie rule and stays out.
 - **Junk aliases** (`scripts/aliases.ts`, checked in `validate.ts`): "X in/of <name>" redirects, event, part and
