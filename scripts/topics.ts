@@ -1622,7 +1622,7 @@ export const TOPICS: Topic[] = [
     value: "Nominal",
     metric: "Peak market cap (US$ billions)",
     // The page's quarterly top 10s (2006-2026, US$ millions, the figure in the name cell) and yearly ones
-    // (2000-2005) give a company outside the peak ranking its latest place: "ExxonMobil: #10 in Q2 2022 ($X
+    // (2000-2005) give a company outside the peak ranking its latest place: "ExxonMobil: #8 in Q4 2022 ($454
     // billion)". That is the market value then, labelled with when, not a peak.
     also: [
       ...[8, 6, 4, 2].map((c, i) => ({
@@ -1688,9 +1688,9 @@ export const TOPICS: Topic[] = [
     value: "Net worth",
     metric: "Net worth (US$)",
     people: true,
-    // Earlier years' top 10s, latest first so a tie goes to the later year; each shows its last appearance
-    // ("Bill Gates: #7 in 2024 ($128 billion)"). People who have died are free, not a costly miss ("karl" was
-    // Karl Albrecht).
+    // Earlier years' top 10s, latest first (a name is spelled as its latest table spells it); each person shows
+    // their last appearance ("Bill Gates: #7 in 2024 ($128 billion)"). People who have died are free, not a costly
+    // miss ("karl" was Karl Albrecht).
     also: [
       {
         tables: range(1, 37).reverse(),

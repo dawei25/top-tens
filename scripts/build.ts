@@ -869,7 +869,8 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     const forms = ownForms(e).map(normalize).filter(Boolean);
     const known = forms.find((f) => taken.has(f));
     if (known) {
-      // Singapore in the 2018 table after the 2016 one: its later figure is the one to show.
+      // The same answer in another dated table: the latest figure is the one to show (New York City keeps its
+      // 2023 rank, not 2018's).
       adoptDated(taken.get(known)!, e);
       continue;
     }
