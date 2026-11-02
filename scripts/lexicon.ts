@@ -49,11 +49,12 @@ export const NOT_PUZZLES = new Set(["index.json", "lexicon.json", "daily.json", 
  * Every name and alias in the bank. `ranked` is the part from the source tables (ranked entries); the rest are
  * unranked pool members (universes, other tables, category members), thousands of them in some puzzles.
  */
-export function bankNames(dir: string): { ranked: string[]; all: string[]; namesOfNote: string[] } {
+export function bankNames(dir: string): Bank {
   const ranked: string[] = [];
   const all: string[] = [];
   /** Names of top-10 answers, and of every ranked person (lists with `people`). */
   const namesOfNote: string[] = [];
+  const figured: string[] = [];
   // Passwords are keyboard mash on purpose: "qwerty" stays junk everywhere else.
   const notWords = new Set(TOPICS.filter((t) => t.notWords).map((t) => `${t.id}.json`));
   const peopleLists = new Set(TOPICS.filter((t) => t.people).map((t) => `${t.id}.json`));
@@ -65,9 +66,18 @@ export function bankNames(dir: string): { ranked: string[]; all: string[]; names
       all.push(...forms);
       if (e.rank > 0) ranked.push(...forms);
       if ((e.rank > 0 && e.rank <= 10) || (e.rank > 0 && peopleLists.has(f))) namesOfNote.push(e.name);
+      if (e.rank > 0 || e.value) figured.push(e.name);
     }
   }
-  return { ranked, all, namesOfNote };
+  return { ranked, all, namesOfNote, figured };
+}
+
+export interface Bank {
+  ranked: string[];
+  all: string[];
+  namesOfNote: string[];
+  /** Names of entries that show a figure when named: ranked ones, and unranked ones with a value. */
+  figured: string[];
 }
 
 /**
@@ -77,10 +87,13 @@ export function bankNames(dir: string): { ranked: string[]; all: string[]; names
  * aliases count too: the matcher reads only names' words, but a word typed alone also never becomes a typo of one
  * ("water" is not Walter Masterson).
  *
- * Names keep their readings: any full name or alias in the bank ("jordan", "china", "avengers"), and every word of
- * `namesOfNote`, the top-10 answers and ranked people. There a word alone is how players name the answer: "cowboys"
- * is the Dallas Cowboys, "pizza" Pizza Hut, "shark" Baby Shark, "swift" Taylor Swift, "rose" Pete Rose. Without that,
- * 240 such readings of top-10 answers were lost, and some became typos of something else ("dragon" Doraemon).
+ * Names keep their readings: `known`, the full names and aliases of ranked entries and places ("jordan", "china",
+ * "avengers"), and every word of `namesOfNote`, the top-10 answers and ranked people. There a word alone is how
+ * players name the answer: "cowboys" is the Dallas Cowboys, "pizza" Pizza Hut, "shark" Baby Shark, "swift" Taylor
+ * Swift, "rose" Pete Rose. Without that, 240 such readings of top-10 answers were lost, and some became typos of
+ * something else ("dragon" Doraemon).
+ *
+ * Unranked pool members are not in `known` (see `bankPlainWords`). Such an entry still matches when typed in full.
  */
 export function plainWords(names: string[], known: Set<string>, namesOfNote: string[], dictionary: string[]): string[] {
   const english = new Set(dictionary.map((w) => normalize(w)).filter((w) => w.length >= 3 && !w.includes(" ")));
@@ -94,29 +107,43 @@ export function plainWords(names: string[], known: Set<string>, namesOfNote: str
   return [...out].sort();
 }
 
+/**
+ * The bank's plain words. Ranked names and aliases and places (`regions`) are names; unranked pool members mostly
+ * aren't: thousands of them have articles, and an obscure one called "Humans" or "Music" is not what a player typing
+ * the word means ("humans" no longer offers Destroy All Humans!).
+ *
+ * One exception keeps readings players use: a word that is some entry's exact name stays readable where it is also a
+ * word of a name that shows a figure (ranked, or unranked with a value). "rainier" is Mount Rainier (#20 national
+ * park), "sapiens" the book (#66), "gladiator" Gladiator II (#64 expensive film), "geneva" Lake Geneva. Without it,
+ * 117 readings of ranks 11+ and 22 of unranked answers with a figure were lost (cycle 3), to stop 10 more leaks.
+ */
+export function bankPlainWords(bank: Bank, regions: string[], dictionary: string[]): string[] {
+  const names = new Set([...bank.ranked, ...regions].map(normalize).filter(Boolean));
+  const pool = new Set(bank.all.map(normalize));
+  const figured = new Set(bank.figured.flatMap((n) => normalize(n).split(" ")));
+  return plainWords(bank.all, names, bank.namesOfNote, dictionary).filter((w) => !(pool.has(w) && figured.has(w)));
+}
+
 /** Writes public/puzzles/lexicon.json; says what it was trained on. */
 export function writeLexicon(dir: string): string {
   const words: string[] = require("an-array-of-english-words");
   // Countries and capitals too, so "Fiji" or "Ljubljana" never reads as junk.
   const places = [...countries().flatMap((c) => [c.name, ...c.aliases]), ...capitals()];
-  const { ranked, all, namesOfNote } = bankNames(dir);
+  const bank = bankNames(dir);
+  const { ranked, all } = bank;
   // The letter model learns from the ranked names only, so huge unranked pools (every YouTuber with an article)
   // don't skew what a plausible word looks like. Every name still counts as known.
   // Weight 2, not the default 5: the ranked bank is several times bigger than when the threshold was tuned.
   const lex = trainLexicon(words, [...ranked, ...places], 2);
   const known = new Set(lex.names.split(" "));
   // States and provinces are real names too: "amazonas" must not be corrected into the city Arapongas.
-  const knownText = new Set<string>();
-  // Plain words (below) leave out every name, these included.
-  for (const n of [...all, ...places, ...SUBDIVISIONS, ...usStates().map((s) => s.name)]) {
+  const regions = [...places, ...SUBDIVISIONS, ...usStates().map((s) => s.name)];
+  for (const n of [...all, ...regions]) {
     const s = normalize(n);
-    if (s) {
-      known.add(fnv(s).toString(36));
-      knownText.add(s);
-    }
+    if (s) known.add(fnv(s).toString(36));
   }
   lex.names = [...known].join(" ");
-  const plain = plainWords(all, knownText, namesOfNote, words);
+  const plain = bankPlainWords(bank, regions, words);
   // `words` is optional in the Lexicon format: older lexicons don't have it.
   const out = { ...lex, words: plain.map((w) => fnv(w).toString(36)).join(" ") };
   writeFileSync(join(dir, "lexicon.json"), JSON.stringify(out));
