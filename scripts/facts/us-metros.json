@@ -1,8 +1,38 @@
 {
+  "New York–Newark–Jersey City": {
+    "text": "It's home to the largest Asian population outside Asia, about 2.6 million people.",
+    "source": "https://en.wikipedia.org/wiki/New_York_metropolitan_area",
+    "evidence": "The New York metropolitan area continues to be the premier gateway for legal immigration to the United States, having the largest foreign-born population of any metropolitan region in the world, and is home to the largest Asian population outside Asia, at 2.6 million."
+  },
+  "Los Angeles–Long Beach–Anaheim": {
+    "text": "It stops at Camp Pendleton, the gap that keeps it from merging with San Diego into one urban area.",
+    "source": "https://en.wikipedia.org/wiki/Greater_Los_Angeles",
+    "evidence": "Although San Diego–Tijuana borders the Greater Los Angeles area at San Clemente and Temecula, it is not part of it as the two urban areas are not geographically contiguous due to the presence of Camp Pendleton."
+  },
+  "Chicago–Naperville–Elgin": {
+    "text": "The Chicago Tribune popularized the name Chicagoland; its publisher's version reached into four other states.",
+    "source": "https://en.wikipedia.org/wiki/Chicago_metropolitan_area",
+    "evidence": "Colonel Robert R. McCormick, editor and publisher of the Chicago Tribune, usually gets credit for placing the term in common use. McCormick's conception of Chicagoland stretched all the way to nearby parts of four states (Indiana, Wisconsin, Michigan, and Iowa)."
+  },
   "Dallas–Fort Worth–Arlington": {
     "text": "Residents call it DFW, borrowing the code of Dallas Fort Worth International Airport, or simply the Metroplex.",
     "source": "https://en.wikipedia.org/wiki/Dallas%E2%80%93Fort_Worth%E2%80%93Arlington",
     "evidence": "Residents of the area also refer to it as DFW (the code for Dallas Fort Worth International Airport) or the Metroplex."
+  },
+  "Houston–Pasadena–The Woodlands": {
+    "text": "Unlike most places, it tends to see high fuel prices as good news, since so many people there work in energy.",
+    "source": "https://en.wikipedia.org/wiki/Greater_Houston",
+    "evidence": "Unlike most places, where high fuel prices are seen as harmful to the economy, they are generally seen as beneficial for Houston, as many are employed in the energy industry."
+  },
+  "Atlanta–Sandy Springs–Roswell": {
+    "text": "Over half its people live in unincorporated areas; East Cobb would be its second-biggest city if it incorporated.",
+    "source": "https://en.wikipedia.org/wiki/Metro_Atlanta",
+    "evidence": "More than one half of metro Atlanta's population is in unincorporated areas or areas considered a census-designated-place (CDP) by the census bureau. One notable example is East Cobb ... it would be the second largest city in the metro besides Atlanta if incorporated."
+  },
+  "Washington–Arlington–Alexandria": {
+    "text": "The two US counties with the top median household incomes, Loudoun and Fairfax in Virginia, are both in it.",
+    "source": "https://en.wikipedia.org/wiki/Washington_metropolitan_area",
+    "evidence": "The two highest median household income counties in the nation – Loudoun and Fairfax County, Virginia – are components of the MSA"
   },
   "Miami–Fort Lauderdale–West Palm Beach": {
     "text": "Squeezed between the Atlantic and the Everglades, its urban area is about 100 miles long but at most 20 miles wide.",
@@ -13,5 +43,10 @@
     "text": "The region spans parts of up to four states: Pennsylvania, New Jersey, Delaware and Maryland.",
     "source": "https://en.wikipedia.org/wiki/Philadelphia%E2%80%93Camden%E2%80%93Wilmington",
     "evidence": "The region spans up to four states: southeastern Pennsylvania, southern New Jersey, northern Delaware, and the northern Eastern Shore of Maryland, though it is sometimes considered a tri-state region if northeastern Maryland is excluded."
+  },
+  "Phoenix–Mesa–Chandler": {
+    "text": "Since Amtrak rerouted in 1996, Phoenix has been one of the largest US cities without direct passenger rail.",
+    "source": "https://en.wikipedia.org/wiki/Phoenix_metropolitan_area",
+    "evidence": "Amtrak's Los Angeles-New Orleans Sunset Limited served the city of Phoenix directly from 1971 until it was rerouted on June 2, 1996 ... This made Phoenix one of the largest cities in the nation without direct passenger service."
   }
 }

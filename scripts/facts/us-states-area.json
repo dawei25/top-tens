@@ -29,10 +29,10 @@
     "source": "https://en.wikipedia.org/wiki/Arizona",
     "evidence": "It is the 48th state and last of the contiguous states to be admitted to the Union, achieving statehood on February 14, 1912."
   },
-  "Idaho": {
-    "text": "The US Forest Service holds about 38% of its land, the highest proportion of any state.",
-    "source": "https://en.wikipedia.org/wiki/Idaho",
-    "evidence": "The United States Forest Service holds about 38% of Idaho's land, the highest proportion of any state."
+  "Nevada": {
+    "text": "Its tourism office once spelled it \"Nevăda\", the breve showing that locals say the a as in \"apple\".",
+    "source": "https://en.wikipedia.org/wiki/Nevada",
+    "evidence": "Nevadans typically pronounce the second syllable with the \"a\" of \"apple\" ... At one time, the state's official tourism organization, TravelNevada, stylized the name of the state as \"Nevăda\", with a breve over the a indicating the locally preferred pronunciation, which was also available as a license plate design until 2007."
   },
   "Colorado": {
     "text": "Artifacts at its Lindenmeier site date from approximately 8720 BCE.",
@@ -48,5 +48,10 @@
     "text": "It was the first state to let women vote and the first to elect a female governor, Nellie Tayloe Ross.",
     "source": "https://en.wikipedia.org/wiki/Wyoming",
     "evidence": "Women's suffrage in Wyoming dates to 1869 when it granted women the right to vote as a territory, and in 1890 it became the first state allowing its woman citizens to vote. It also became the first state to allow women to hold elected office and the first to elect a female governor, Nellie Tayloe Ross."
+  },
+  "Idaho": {
+    "text": "The US Forest Service holds about 38% of its land, the highest proportion of any state.",
+    "source": "https://en.wikipedia.org/wiki/Idaho",
+    "evidence": "The United States Forest Service holds about 38% of Idaho's land, the highest proportion of any state."
   }
 }
