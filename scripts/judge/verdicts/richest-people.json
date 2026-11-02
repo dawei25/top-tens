@@ -1,26 +1,26 @@
 {
   "id": "richest-people",
-  "judgedAt": "2026-10-30",
-  "decision": "daily-list",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
   "alsoBlitz": false,
-  "priority": 8,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 9, "livesLost": 3, "guesses": 14 },
-  "fan": { "found": 10, "livesLost": 2, "guesses": 13 },
+  "priority": 3,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 9, "livesLost": 4, "guesses": 15 },
+  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
   "blitzCasual": null,
   "difficulty": 2,
-  "tags": ["business", "money", "billionaires"],
+  "tags": ["business", "people", "billionaires"],
   "audience": "anyone",
-  "summary": "A great daily: everyone knows Musk, Bezos and Zuckerberg, Page and Brin are a fun 'oh right' pair, and Bill Gates missing out is a talking point. Its weak spot is that near misses like Gates and Ballmer show no rank.",
+  "summary": "A clean, current Forbes 2026 top 10 that a news-following player nearly clears (casual found 9), so it is too easy for today's daily bar. Famous near misses cost lives fast, and several show stale or no figures.",
   "reasons": [
-    "Casual player found 9/10 losing 3 lives (Bill Gates, Mukesh Ambani, Steve Ballmer); only Amancio Ortega stayed hidden, a fair stretch.",
-    "Celebrity billionaires (Taylor Swift) and non-listed names (Jack Ma) are now free, and the junk relative aliases are gone, so the old traps are fixed.",
-    "No ranks 11+: Gates, Ballmer, Dell and Ambani cost a life with only 'outside the ranking', the same as a 1987 Japanese tycoon."
+    "Casual found 9 of 10 in 15 guesses (lives lost on Gates, Ambani, Ballmer, Bloomberg); Page, Brin, Ellison and Arnault fall easily for anyone who follows the news, and only Ortega is a real stretch. Above the 6 to 8 bar.",
+    "Fan also found 9 but spent all 5 lives on real near misses (Ballmer, Gates, Dell, Jim and Rob Walton) before reaching Ortega.",
+    "Top 10, names and all 10 fun facts are clean; the reveal is the weak spot: Dell shows \"#9 in 2000 ($19.1 billion)\", Adani and Bettencourt Meyers show nothing."
   ],
   "fixes": [
-    "Add ranks 11+ of the Forbes 2026 list (at least to #20) from a source that has them, so misses like Michael Dell, Steve Ballmer, Bill Gates, the Waltons and Mukesh Ambani show their rank.",
-    "Source metadata says 'data as of 2025' while the prompt says 'Forbes 2026 list'; set dataAsOf to 2026.",
-    "Make deceased historical extras free rather than costly (Sam Walton, Paul Allen, Ingvar Kamprad, David Koch, Sheldon Adelson, Karl and Theo Albrecht), so that a bare first name such as 'karl' (which resolves to Karl Albrecht) no longer costs a life.",
-    "Add 'Rob Walton' as an alias of S. Robson Walton (not recognized now), and 'Gautam Adani' as an accepted answer."
+    "No figure on a miss for Gautam Adani and Françoise Bettencourt Meyers (both added via `more`). Dated figures exist: List of Indians by net worth, table 0 (Adani $84 billion, #2 in India; caption undated) and List of French billionaires by net worth, table 0, 2023 Forbes list (Bettencourt Meyers $80.5 billion, #2 in France).",
+    "Stale reveals mislead: Michael Dell \"#9 in 2000 ($19.1 billion)\", Jim/Alice/S. Robson Walton \"#8/#9/#10 in 2020 (about $54 billion)\", Charles Koch \"#8 in 2018 ($60 billion)\". List of Americans by net worth, table 0 (US top 25 as of December 2025) has newer figures: Ballmer $153B (#7 US), Dell $129B (#10), Rob Walton $118B (#11), Jim Walton $115B (#12), Bloomberg $109B (#13), Gates $107B (#14), Alice Walton $106B (#15), Charles Koch $73.8B (#17). Show the newest dated figure per person, labelled as a US rank, e.g. \"Michael Dell: $129 billion, #10 in the US (Dec 2025)\". (Bloomberg Billionaires Index, table 1, has Dell #6 at $223 billion as of July 13, 2026, but that is a different index from the prompt's Forbes list.)",
+    "World ranks 11+ cannot come from Wikipedia: The World's Billionaires has only top-10 tables per year (List of richest people in the world redirects to it) and the Bloomberg Billionaires Index page lists only a top 10. The REBUILD_QUEUE item asking for ranks 11-25 should become dated figures from the country tables above.",
+    "Walton family: \"the walton family\" costs a life and shows \"#2 in 1998 ($48.0 billion)\", while \"waltons\" is not recognized (free). Skip the family rows like the deceased (the prompt is about people; Jim, Alice and Rob stay as costly near misses with current figures), or alias \"Waltons\" and give the family a current figure."
   ]
 }
