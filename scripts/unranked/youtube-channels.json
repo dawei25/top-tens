@@ -50,7 +50,6 @@
   "Ali-A": {"article":"Ali-A","why":"likely","skip":"several numbers","raw":"19.7 million (main channel)20.3 million (MoreAliA)985 thousand (Clare & Ali)434 thousand (Ali-A Plays)336 thousand(Ali-A²)"},
   "Typical Gamer": {"article":"Typical Gamer","why":"likely","value":"16 million (2026)","n":16,"raw":"16 million (main channel)9 million (TG Plays)651 thousand (More Typical Gamer) [updated 2026] [channels: TypicalGamer]"},
   "SSSniperWolf": {"article":"SSSniperWolf","why":"likely","value":"35 million (2026)","n":35,"raw":"35 million [updated 2026] [channels: SSSniperWolf]"},
-  "Brent Rivera": {"article":"Brent Rivera","why":"likely","value":"42.3 million (2026)","n":42.3,"raw":"42.3 million [updated 2026] [channels: Brent Rivera]"},
   "Hasan Piker": {"article":"Hasan Piker","why":"likely","value":"2 million (2026)","n":2,"raw":"2 million [updated 2026] [channels: HasanAbi]"},
   "XQc": {"article":"XQc","why":"likely","value":"2.51 million (2026)","n":2.51,"raw":"2.51 million [updated 2026] [channels: xQc]"},
   "Pokimane": {"article":"Pokimane","why":"likely","value":"6.59 million (2026)","n":6.59,"raw":"6.59 million [updated 2026] [channels: pokimane]"},
@@ -80,8 +79,8 @@
   "Epic Rap Battles of History": {"article":"Epic Rap Battles of History","why":"likely","skip":"no Subscribers row"},
   "React": {"article":"React (media franchise)","why":"likely","skip":"no Subscribers row"},
   "Annoying Orange": {"article":"Annoying Orange","why":"likely","skip":"no Subscribers row"},
-  "Fred Figglehorn": {"article":"Fred Figglehorn","why":"likely","skip":"no Subscribers row"},
-  "lonelygirl15": {"article":"Lonelygirl15","why":"likely","skip":"no Subscribers row"},
+  "FЯED": {"article":"FЯED","why":"likely","skip":"no Subscribers row"},
+  "Lonelygirl15": {"article":"Lonelygirl15","why":"likely","skip":"no Subscribers row"},
   "Jawed Karim": {"article":"Jawed Karim","why":"likely","skip":"several numbers","raw":"6.72 million 124 thousand (jawedNOW)"},
   "Mrwhosetheboss": {"article":"Mrwhosetheboss","why":"likely","value":"22.8 million (2026)","n":22.8,"raw":"22.8 million [updated 2026] [channels: Mrwhosetheboss]"},
   "Tom Scott": {"article":"Tom Scott (presenter)","why":"likely","value":"6.74 million (2026)","n":6.74,"raw":"6.74 million [updated 2026] [channels: Tom Scott]"},
@@ -91,8 +90,6 @@
   "Jschlatt": {"article":"Jschlatt","why":"likely","skip":"several numbers","raw":"4.59 million (largest channel) 15.61 million (combined)"},
   "Penguinz0": {"article":"Penguinz0","why":"likely","value":"18.3 million (2026)","n":18.3,"raw":"18.3 million [updated 2026] [channels: moistcr1tikal]"},
   "Kwebbelkop": {"article":"Kwebbelkop","why":"likely","value":"14.9 million (2026)","n":14.9,"raw":"14.9 million [updated 2026] [channels: Kwebbelkop]"},
-  "Khaby Lame": {"article":"Khaby Lame","why":"vital","value":"12.6 million (2026)","n":12.6,"raw":"12.6 million [updated 2026] [channels: Khaby. Lame]"},
-  "Charli D'Amelio": {"article":"Charli D'Amelio","why":"vital","value":"8.94 million (2026)","n":8.94,"raw":"8.94 million [updated 2026] [channels: charli d'amelio]"},
-  "Ryan Higa": {"article":"Ryan Higa","why":"vital","skip":"several numbers","raw":"20.7 million (nigahiga)4.51 million (HigaTV)"},
-  "Germán Garmendia": {"article":"Germán Garmendia","why":"vital","skip":"several numbers","raw":"JuegaGerman 56.4 million HolaSoyGerman 44.6 million"}
+  "Germán Garmendia": {"article":"Germán Garmendia","why":"vital","skip":"several numbers","raw":"JuegaGerman 56.4 million HolaSoyGerman 44.6 million"},
+  "Khaby Lame": {"article":"Khaby Lame","why":"vital","value":"12.6 million (2026)","n":12.6,"raw":"12.6 million [updated 2026] [channels: Khaby. Lame]"}
 }

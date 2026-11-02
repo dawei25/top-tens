@@ -13,7 +13,7 @@
  },
  {
   "id": "countries-gdp",
-  "title": "Largest economies",
+  "title": "Countries with the largest economies",
   "category": "Geography",
   "blitz": true
  },
@@ -87,7 +87,7 @@
   "id": "tourism",
   "title": "Most visited countries",
   "category": "Geography",
-  "blitz": false
+  "blitz": true
  },
  {
   "id": "billionaire-countries",
@@ -145,7 +145,7 @@
  },
  {
   "id": "olympic-medals",
-  "title": "Most Olympic medals (all-time)",
+  "title": "Countries with the most Olympic medals",
   "category": "Sports",
   "blitz": true
  },
@@ -175,19 +175,19 @@
  },
  {
   "id": "super-bowl-wins",
-  "title": "Most Super Bowl wins",
+  "title": "NFL teams with the most Super Bowl wins",
   "category": "Sports",
-  "blitz": true
+  "blitz": false
  },
  {
   "id": "world-series-wins",
-  "title": "Most World Series titles",
+  "title": "MLB teams with the most World Series titles",
   "category": "Sports",
-  "blitz": true
+  "blitz": false
  },
  {
   "id": "f1-wins-by-country",
-  "title": "F1 race wins by country",
+  "title": "Countries with the most F1 race wins",
   "category": "Sports",
   "blitz": false
  },
@@ -271,7 +271,7 @@
  },
  {
   "id": "us-states-gdp",
-  "title": "Largest US state economies",
+  "title": "US states with the largest economies",
   "category": "Geography",
   "blitz": true
  },
@@ -295,7 +295,7 @@
  },
  {
   "id": "china-cities",
-  "title": "Largest cities in China",
+  "title": "Largest cities in mainland China",
   "category": "Geography",
   "blitz": true
  },
@@ -326,7 +326,7 @@
  {
   "id": "moons",
   "title": "Largest moons",
-  "category": "Culture",
+  "category": "Science",
   "blitz": true
  },
  {
@@ -355,25 +355,25 @@
  },
  {
   "id": "oil-production",
-  "title": "Biggest oil producers",
+  "title": "Countries producing the most oil",
   "category": "Business",
   "blitz": true
  },
  {
   "id": "nobel-countries",
-  "title": "Most Nobel laureates by country",
+  "title": "Countries with the most Nobel laureates",
   "category": "Culture",
   "blitz": true
  },
  {
   "id": "military-spending",
-  "title": "Biggest military budgets",
+  "title": "Countries with the biggest military budgets",
   "category": "Geography",
   "blitz": true
  },
  {
   "id": "co2-emissions",
-  "title": "Biggest CO2 emitters",
+  "title": "Countries emitting the most CO2",
   "category": "Geography",
   "blitz": true
  },
@@ -385,7 +385,7 @@
  },
  {
   "id": "population-density",
-  "title": "Most densely populated places",
+  "title": "Densest countries and territories",
   "category": "Geography",
   "blitz": true
  },
@@ -451,13 +451,13 @@
  },
  {
   "id": "us-box-office",
-  "title": "Biggest US box office hits",
+  "title": "Highest-grossing films in the US",
   "category": "Entertainment",
   "blitz": true
  },
  {
   "id": "spotify-artists",
-  "title": "Most monthly listeners on Spotify",
+  "title": "Artists with the most monthly Spotify listeners",
   "category": "Entertainment",
   "blitz": true
  },
@@ -469,7 +469,7 @@
  },
  {
   "id": "ballon-dor-countries",
-  "title": "Ballon d'Or wins by country",
+  "title": "Countries with the most Ballon d'Or wins",
   "category": "Sports",
   "blitz": false
  },

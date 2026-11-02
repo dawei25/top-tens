@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bareWord, gluedAlias, junkRedirect } from "./aliases";
+import { bareWord, blockedAlias, gluedAlias, junkRedirect } from "./aliases";
 
 const junk = (raw: string, names: string[], forms: string[] = [], works = false) => junkRedirect(raw, { names, forms, works });
 
@@ -56,6 +56,40 @@ describe("junkRedirect", () => {
     expect(junk("TESV", ["The Elder Scrolls V: Skyrim"], [], true)).toBeNull();
     // Not works: nicknames stay.
     expect(junk("Pocket Monsters", ["Pokémon"])).toBeNull();
+  });
+});
+
+describe("places inside, possessives, web addresses, insults", () => {
+  it("drops a place inside the thing, keeps the thing's own name first", () => {
+    expect(junk("Kotly, Moscow", ["Moscow"])).not.toBeNull();
+    expect(junk("Rio Grande, Rio de Janeiro", ["Rio de Janeiro"])).not.toBeNull();
+    expect(junk("Washington, D.C.", ["Washington"])).toBeNull();
+    expect(junk("Atlanta, Georgia", ["Atlanta"])).toBeNull();
+    expect(junk("Ken Griffey, Jr.", ["Ken Griffey Jr."])).toBeNull();
+  });
+  it("drops something of the thing's", () => {
+    expect(junk("Gretzky's Office", ["Wayne Gretzky"])).not.toBeNull();
+    expect(junk("Minecraft's cultural impact", ["Minecraft"])).not.toBeNull();
+    expect(junk("Disney's Animal Kingdom", ["Animal Kingdom"])).toBeNull();
+    expect(junk("McDonald's Corporation", ["McDonald's"])).toBeNull();
+  });
+  it("drops web addresses except where they are names", () => {
+    expect(junk("Dallascowboys.com", ["Dallas Cowboys"])).not.toBeNull();
+    expect(junkRedirect("Google.com", { names: ["Google Search"], webNames: true })).toBeNull();
+    expect(junkRedirect("Microsoft.sucks", { names: ["Microsoft"], webNames: true })).not.toBeNull();
+  });
+  it("drops topics: lobbying, schools, weather", () => {
+    expect(junk("Lobbying by Amazon", ["Amazon"])).not.toBeNull();
+    expect(junk("Vancouver Christian School", ["Vancouver"])).not.toBeNull();
+    expect(junk("Pune weather", ["Pune"])).not.toBeNull();
+    expect(junk("School of Rock the Musical", ["School of Rock"])).toBeNull();
+  });
+  it("blocks slurs and insults, not a name that has the word", () => {
+    expect(blockedAlias("T-gay", ["T-Series"])).toBe(true);
+    expect(blockedAlias("Sidney Crybaby", ["Sidney Crosby"])).toBe(true);
+    expect(blockedAlias("Microsoft.sucks", ["Microsoft"])).toBe(true);
+    expect(blockedAlias("Rudy Gay", ["Rudy Gay"])).toBe(false);
+    expect(blockedAlias("Gaye", ["Marvin Gaye"])).toBe(false);
   });
 });
 

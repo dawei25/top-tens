@@ -6,8 +6,17 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { normalize } from "../src/game/match";
 import type { Entry, Puzzle } from "../src/game/types";
-import { INTENT } from "./intent";
-import { bareWord, gluedAlias, junkRedirect } from "./aliases";
+import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./intent";
+
+/** Curated forms shared by many lists (countries, cities, states, athletes' nicknames). */
+const SHARED_FORMS = [
+  ...COUNTRY_FORMS.flat(),
+  ...CITY_FORMS.flat(),
+  ...Object.values(NICKNAMES).flat(),
+  ...Object.values(STATE_FORMS).flat(),
+  "Congo",
+];
+import { bareWord, blockedAlias, gluedAlias, junkRedirect } from "./aliases";
 import { UNIVERSES } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
 import { TOPICS } from "./topics";
@@ -25,6 +34,7 @@ const isPlaceList = (p: Puzzle) => {
   const t = TOPICS.find((x) => x.id === p.id);
   return !!t?.universe || /cities|capitals|countries|population|states|metros|islands/.test(p.id);
 };
+const topicNoun = (id: string) => TOPICS.find((t) => t.id === id)?.noun;
 /** Below this many accepted answers, wrong-but-real guesses are likely to be free. */
 const MIN_ACCEPTED = 30;
 
@@ -56,7 +66,14 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
   const warn = (msg: string) => issues.push({ level: "warn", msg });
 
   if (p.id + ".json" !== file) err(`id "${p.id}" doesn't match file name`);
-  for (const k of ["title", "prompt"] as const) if (!p[k]?.trim()) err(`missing ${k}`);
+  for (const k of ["title", "prompt", "noun"] as const) if (!p[k]?.trim()) err(`missing ${k}`);
+  for (const k of ["title", "prompt", "noun"] as const) if (p[k]?.includes("—")) err(`${k} has an em dash`);
+  if (p.prompt && !p.prompt.startsWith("Name the 10 ")) warn(`prompt doesn't start "Name the 10": ${p.prompt}`);
+  // Plural and lower case except proper nouns: "countries", "NBA players", "YouTube channels".
+  const first = p.noun?.split(" ")[0] ?? "";
+  if (/^[A-Z][a-z]+$/.test(first) && !/^(Broadway|Instagram|Facebook)$/.test(first)) warn(`noun "${p.noun}" starts with a capital`);
+  if (p.noun && !/(s|people)$/.test(p.noun)) warn(`noun "${p.noun}" doesn't look plural`);
+  if (topicNoun(p.id) && p.noun !== topicNoun(p.id)) err(`noun "${p.noun}" differs from topics.ts`);
   if (!p.source?.url || !p.source?.asOf) err("missing source url or asOf");
   if (p.answers.length !== 10) err(`${p.answers.length} answers, expected 10`);
 
@@ -115,7 +132,11 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
 
   // Alias hygiene (scripts/aliases.ts): glued names are broken data; the rest are likely redirects that aren't names.
   const curated = new Set(
-    [...Object.values(INTENT[p.id]?.same ?? {}).flat(), ...Object.keys(INTENT[p.id]?.groups ?? {})].map(normalize),
+    [
+      ...Object.values(INTENT[p.id]?.same ?? {}).flat(),
+      ...Object.keys(INTENT[p.id]?.groups ?? {}),
+      ...SHARED_FORMS,
+    ].map(normalize),
   );
   const junk: string[] = [];
   for (const e of all) {
@@ -123,7 +144,10 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
     for (const a of e.aliases) {
       if (gluedAlias(a, forms)) warn(`"${e.name}": alias "${a}" looks like several names glued together`);
       if (curated.has(normalize(a))) continue;
-      const why = junkRedirect(a, { names: [e.name], forms, works: topic?.works });
+      if (blockedAlias(a, [e.name])) err(`"${e.name}": alias "${a}" is a slur or an insult`);
+      let why = junkRedirect(a, { names: [e.name], forms, works: topic?.works, webNames: topic?.webNames });
+      // "New York City, NY" on New York: the build knew New York City as one of its names; here it is an alias.
+      if (why === "a place inside the thing" && forms.some((f) => normalize(f) === normalize(a.split(",")[0]))) why = null;
       if (why) junk.push(`${e.name}: "${a}" (${why})`);
       // A one-word alias that is a plain word or a place, and no word of the name: "City" for Alaska.
       else if (!normalize(e.name).split(" ").includes(normalize(a)) && !isPlaceList(p) && bareWord(a, PLACES)) {

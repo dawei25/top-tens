@@ -5,13 +5,41 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fnv, trainLexicon } from "../src/game/junk";
 import { normalize } from "../src/game/match";
-import { capitals, countries } from "./gazetteer";
+import { capitals, countries, usStates } from "./gazetteer";
 import type { Puzzle } from "../src/game/types";
+
+/**
+ * States and provinces of the countries whose cities have lists, and a few more a player may type: known names, so
+ * the game never corrects one into a different answer. Not answers anywhere.
+ */
+const SUBDIVISIONS = [
+  // Canada
+  "Ontario", "Quebec", "British Columbia", "Alberta", "Manitoba", "Saskatchewan", "Nova Scotia", "New Brunswick",
+  "Newfoundland and Labrador", "Prince Edward Island", "Yukon", "Northwest Territories", "Nunavut",
+  // Brazil
+  "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo", "Goiás",
+  "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba", "Paraná", "Pernambuco", "Piauí",
+  "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia", "Roraima", "Santa Catarina", "Sergipe", "Tocantins",
+  // India
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana",
+  "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya",
+  "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+  "Uttar Pradesh", "Uttarakhand", "West Bengal", "Jammu and Kashmir", "Ladakh",
+  // China
+  "Anhui", "Fujian", "Gansu", "Guangdong", "Guizhou", "Hainan", "Hebei", "Heilongjiang", "Henan", "Hubei", "Hunan",
+  "Jiangsu", "Jiangxi", "Jilin", "Liaoning", "Qinghai", "Shaanxi", "Shandong", "Shanxi", "Sichuan", "Yunnan",
+  "Zhejiang", "Guangxi", "Inner Mongolia", "Ningxia", "Xinjiang", "Tibet",
+  // Australia
+  "New South Wales", "Victoria", "Queensland", "Western Australia", "South Australia", "Tasmania",
+  "Northern Territory",
+  // United Kingdom
+  "England", "Scotland", "Wales", "Northern Ireland",
+];
 
 const require = createRequire(import.meta.url);
 
-/** JSON files in public/puzzles that are not puzzles: the index, this lexicon, the daily schedule. */
-export const NOT_PUZZLES = new Set(["index.json", "lexicon.json", "daily.json"]);
+/** JSON files in public/puzzles that are not puzzles: the index, this lexicon, the daily schedule, par scores. */
+export const NOT_PUZZLES = new Set(["index.json", "lexicon.json", "daily.json", "par.json"]);
 
 /**
  * Every name and alias in the bank. `ranked` is the part from the source tables (ranked entries); the rest are
@@ -42,7 +70,8 @@ export function writeLexicon(dir: string): number {
   // Weight 2, not the default 5: the ranked bank is several times bigger than when the threshold was tuned.
   const lex = trainLexicon(words, [...ranked, ...places], 2);
   const known = new Set(lex.names.split(" "));
-  for (const n of all) {
+  // States and provinces are real names too: "amazonas" must not be corrected into the city Arapongas.
+  for (const n of [...all, ...SUBDIVISIONS, ...usStates().map((s) => s.name)]) {
     const s = normalize(n);
     if (s) known.add(fnv(s).toString(36));
   }
