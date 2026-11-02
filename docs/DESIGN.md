@@ -48,22 +48,26 @@ optionally by category). **Dailies are one try each**, archive dailies included:
 its result. Free play is endless: Play again rolls a new random game, keeping the category if one was picked, and
 prefers lists the player hasn't played in that mode.
 
-**One topic a day (from 2026-11-05).** Today's list and Today's Blitz are the same list; a list that can't be a
-Blitz has no Today's Blitz. Until that day's list is finished, its Blitz shows only the player's hits ("the rest
-shows once you finish today's list"). Free Blitz never lands on today's daily, a future one, or Today's Blitz before
-it's played. Older dates keep the separate Blitz list they ran with (an explicit `blitz` in daily.json). The judge's
-bar for a daily (docs/JUDGE.md): a typical player averages 5 to 6 out of 10.
+**Separate topics.** Today's list and Today's Blitz are different lists, because a good list rewards knowing the
+top 10 and a good Blitz rewards breadth. `daily.json` gives every day a `blitz`; a day without one gets a
+date-seeded Blitz list that isn't that day's daily or a later one. Free Blitz never lands on today's daily, a future
+one, or Today's Blitz before it's played. If a Blitz ever runs on its day's own list, it shows only the player's hits
+until that list is finished (`blitzHold`). The judge's bars (docs/JUDGE.md): a typical player averages 5 to 6 on
+Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
 
 ## 4. Screens
 
 1. **Home:** Today's list and Blitz; Free play (Random list, Random Blitz, each with a floating by-category picker);
-   Your games (Archive, Past runs); stats. Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
+   Your games (Archive, Past runs, Stats); your record. Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
 2. **Game:** prompt, lives, 10 rank slots, input pinned at the bottom, feedback line, chips for life-costing misses.
    Blitz's title card shows the prompt and "name as many <noun> as you can".
 3. **Results:** score, par and histogram, full list with values, source link, share, Play again (rolls a new game).
-   A finished daily offers Today's Blitz and Random list instead. Archive rows show the date's Blitz score, naming
-   the other list on older dates whose Blitz ran on a different one.
+   A finished daily offers Today's Blitz and Random list instead. The archive lists each date as a pair: the list
+   row and directly under it the Blitz row (BLITZ tag, that list's title, score or not played), each opening its own
+   one-try game.
 4. **How to play** on first visit.
+5. **Stats** (`#stats`, Your knowledge): list games against par, overall, by category and by topic; placeholders
+   before the first game.
 
 ## 5. Visual direction: Krillion's language, arcade high-score table
 

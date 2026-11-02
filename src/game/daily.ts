@@ -9,8 +9,8 @@ export interface DailyEntry {
   date: string;
   id: string;
   /**
-   * Today's Blitz list, when chosen by hand in the schedule. Otherwise `blitzOfTheDay` decides: the day's own list
-   * from 2026-11-05, a date-seeded pick before that.
+   * Today's Blitz list. The schedule names one for every day, a different topic from the day's list; without one,
+   * `blitzOfTheDay` falls back to a date-seeded pick on another list.
    */
   blitz?: string;
 }
