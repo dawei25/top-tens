@@ -441,7 +441,7 @@
   "id": "theme-parks",
   "title": "Most visited theme parks",
   "category": "Entertainment",
-  "blitz": false
+  "blitz": true
  },
  {
   "id": "us-metros",

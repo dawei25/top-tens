@@ -406,7 +406,7 @@ const YEARS = /(?<!\d)((?:19|20)\d{2})(?:\s*[–-]\s*((?:19|20)\d{2}))?(?!\d)/;
  */
 export function datedLabel(d: Pick<Dated, "label">, headers: string[], title: string): string | undefined {
   const year = [...headers, title]
-    .map((t) => t.match(YEARS))
+    .map((t) => (t ?? "").match(YEARS))
     .find(Boolean)?.[0]
     .replace(/\s*[–-]\s*/, "–");
   if (!d.label) return year;
@@ -442,6 +442,9 @@ export function rankOf(text: string | undefined): number | undefined {
   const n = Number(text?.match(/^\s*[=T]?-?\s*(\d{1,4})\b/)?.[1]);
   return n > 0 ? n : undefined;
 }
+
+/** A figure at the end of a name cell: "Tencent 688,000", "ExxonMobil 356,548.7". */
+const FIGURE_END = /\s+(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+)\s*$/;
 
 /** A table's caption, else the heading above it. */
 function tableTitle($: Awaited<ReturnType<typeof fetchPage>>, table: Parameters<typeof tableDataDate>[1]): string {
@@ -483,21 +486,27 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const cell = r[nc];
         if (!cell || (cell.isHeader && !cell.text)) continue;
         if (src.where && !src.where.match.test(r[column(header, src.where.col)]?.text ?? "")) continue;
-        const name = familyName(cellName(cell, src), cell.text);
+        // "Tencent 688,000": the figure follows the name in the same cell.
+        const glued = src.dated?.figureInName ? cell.text.match(FIGURE_END) : null;
+        const unglue = (s: string) => (src.dated?.figureInName ? s.replace(FIGURE_END, "") : s);
+        const named = unglue(cellName(cell, src));
+        const raw = familyName(named, cell.text);
+        const name = src.rename?.[raw] ?? raw;
         if (!name || !normalize(name) || skipName(name)) continue;
         if (topic.skip?.includes(name) || src.skip?.includes(name)) continue;
         if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue;
         // A family row's text ("Karl and Theo Albrecht") names several people: not an alias of one of them.
-        const family = name !== cellName(cell, src);
-        const lines = family ? [] : cell.lines.length > 1 ? cell.lines : [cell.text];
+        const family = raw !== named;
+        const lines = family ? [] : (cell.lines.length > 1 ? cell.lines : [cell.text]).map(unglue);
         const others = aliasCs.flatMap((c) => (r[c] ? [r[c].linkText ?? "", ...r[c].lines.flatMap((l) => l.split("/")).map((p) => p.split(",")[0])] : []));
         const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords), ...others].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
-        const v = vc >= 0 && !topic.lowerIsBetter ? parseValue(r[vc]?.text ?? "") : null;
+        const v = topic.lowerIsBetter ? null : glued ? parseValue(glued[1]) : vc >= 0 ? parseValue(r[vc]?.text ?? "") : null;
         if (src.dated && label) {
           const d = src.dated;
-          const currency = v?.display.match(/^[$€£]/)?.[0] ?? "";
-          const figure = v && v.value > 0 ? (d.scale ? currency + scaledFigure(v.value, d.scale) : v.display) + (d.unit ?? topic.unit ?? "") : undefined;
+          const sign = d.prefix ?? v?.display.match(/^[$€£]/)?.[0] ?? "";
+          const digits = v && (d.scale ? scaledFigure(v.value, d.scale) : v.display.replace(/^[$€£]/, ""));
+          const figure = v && v.value > 0 ? sign + digits + (d.unit ?? topic.unit ?? "") : undefined;
           const shown = datedValue(label, rc >= 0 ? rankOf(r[rc]?.text) : undefined, figure, d.source);
           if (shown) {
             entry.value = shown;

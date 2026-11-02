@@ -148,6 +148,8 @@ export interface Also {
   aliasCols?: (string | number)[];
   /** Only keep rows whose `col` cell matches, as on a topic. */
   where?: { col: string | number; match: RegExp };
+  /** Names for these tables' rows, by the name the table gives: "Mercedes" is the pool's "Mercedes-Benz". */
+  rename?: Record<string, string>;
   /**
    * A column with the list's own stat, in the ranked rows' unit: each answer from these tables shows it and scores
    * it in Blitz, unranked. Titanic is in the inflation table's nominal column ($200 million) but not in the ranking,
@@ -176,8 +178,12 @@ export interface Dated {
   source?: string;
   /** Divides the cell's number into the shown unit: 1e6 with `unit` " million" shows 16,500,000 as "16.5 million". */
   scale?: number;
+  /** Shown before the figure ("$"); default: the cell's own currency sign. */
+  prefix?: string;
   /** Shown after the figure (default: the topic's unit). */
   unit?: string;
+  /** The name cell ends with the figure ("Tencent 688,000"): the number is the figure, the rest the name. */
+  figureInName?: boolean;
 }
 
 /** Redirects to US states that are jokes, documents, agencies or teams, found by the list judges. */
@@ -1613,9 +1619,24 @@ export const TOPICS: Topic[] = [
     name: "Company",
     value: "Nominal",
     metric: "Peak market cap (US$ billions)",
+    // The page's quarterly top 10s (2006-2026, US$ millions, the figure in the name cell) and yearly ones
+    // (2000-2005) give a company outside the peak ranking its latest place: "ExxonMobil: #10 in Q2 2022 ($X
+    // billion)". That is the market value then, labelled with when, not a peak.
     also: [
-      { tables: range(1, 27), name: 2, skip: MARKET_CAP_SKIP },
-      { tables: range(1, 27), name: 4, skip: MARKET_CAP_SKIP },
+      ...[8, 6, 4, 2].map((c, i) => ({
+        tables: range(1, 21),
+        name: c,
+        dated: { rank: "Rank", label: `Q${4 - i} {year}`, figureInName: true, scale: 1e3, prefix: "$", unit: " billion" },
+        skip: MARKET_CAP_SKIP,
+      })),
+      {
+        tables: range(22, 27),
+        name: "Name",
+        value: "Market value",
+        dated: { rank: "Rank", scale: 1e3, prefix: "$", unit: " billion" },
+        skip: MARKET_CAP_SKIP,
+        rename: { "Intel Corporation": "Intel" },
+      },
       { page: "List of largest companies by revenue", tables: [0], name: "Name" },
     ],
     webNames: true,
@@ -1665,8 +1686,18 @@ export const TOPICS: Topic[] = [
     value: "Net worth",
     metric: "Net worth (US$)",
     people: true,
-    // Earlier years' top 10s; people who have died are free, not a costly miss ("karl" was Karl Albrecht).
-    also: [{ tables: range(1, 37), name: "Name", skip: [...DECEASED_BILLIONAIRES, "Steven Ballmer"] }],
+    // Earlier years' top 10s, latest first so a tie goes to the later year; each shows its last appearance
+    // ("Bill Gates: #7 in 2024 ($128 billion)"). People who have died are free, not a costly miss ("karl" was
+    // Karl Albrecht).
+    also: [
+      {
+        tables: range(1, 37).reverse(),
+        name: "Name",
+        value: "Net worth",
+        dated: { rank: "No." },
+        skip: [...DECEASED_BILLIONAIRES, "Steven Ballmer"],
+      },
+    ],
     dataAsOf: "2026",
     // Bettencourt Meyers ranks below the top 10 the page tables, so nothing lists her; "bettencourt" alone
     // otherwise finds only her late mother.
@@ -1922,7 +1953,9 @@ export const TOPICS: Topic[] = [
     name: "Amusement park",
     value: "2024",
     metric: "Visitors (2024)",
-    also: [{ tables: [2, 3, 4, 5], name: "Amusement park" }],
+    // The regional tables have the same 2024 figures for parks outside the world top 25 (Knott's Berry Farm, Cedar
+    // Point), so those show and score theirs (all 46 have one).
+    also: [{ tables: [2, 3, 4, 5], name: "Amusement park", value: "2024" }],
     universeCategories: ["Walt Disney Parks and Resorts", "Operating amusement parks", "Amusement parks in the United States"],
     // Resorts (a guess at "Tokyo Disney" means its parks: intent.ts), companies, services and events are no parks.
     skip: [
@@ -2156,7 +2189,17 @@ export const TOPICS: Topic[] = [
     value: "Sold vehicles(2025)",
     metric: "Vehicles sold (2025)",
     stripWords: /\b(group|motor|motors|auto|company|corporation)\b/gi,
-    also: [{ tables: range(1, 12), name: 1 }],
+    // The page's earlier years give a group outside the 2025 table its latest rank and figure ("BMW: #12 in 2020
+    // (2,324,778)"); a rank column belongs to its table's latest year, so earlier years' columns show a figure only.
+    also: [
+      { tables: [1], name: 1, value: "Sold vehicles (2020)", dated: { rank: 0 }, rename: { Mercedes: "Mercedes-Benz" } },
+      { tables: [2], name: 1, value: "Vehicles (2017)", dated: { rank: 0 } },
+      { tables: [2], name: 1, value: "Vehicles (2016)", dated: {} },
+      { tables: [2], name: 1, value: "Vehicles (2015)", dated: {} },
+      { tables: [3, 4, 5, 9], name: 1, value: "Total", dated: { rank: 0 } },
+      { tables: [6, 7, 8, 11, 12], name: 1, value: "Vehicles", dated: { rank: 0 } },
+      { tables: [10], name: 1, value: "Vehicles (2004)", dated: {} },
+    ],
     universeCategories: ["Car brands"],
     // Brands are their group's answer (intent.ts gives the group their names), not answers of their own.
     skip: [
@@ -2319,8 +2362,16 @@ export const TOPICS: Topic[] = [
     noRedirects: true,
     // "!@$%&" normalizes to "and".
     skip: ["!@$%&"],
-    // The other surveys' lists (SplashData by year, Keeper, NCSC, Huntress): common passwords outside NordPass's top 10.
-    also: [...range(1, 9).map((c) => ({ tables: [1], name: c })), { tables: [2, 3, 4], name: 1 }],
+    // The other surveys' lists (Huntress 2026, SplashData by year, NCSC, Keeper): common passwords outside
+    // NordPass's top 20, each with its latest rank on one of them ("qwerty: #14 in 2026 (Huntress)").
+    also: [
+      { tables: [4], name: "Password", dated: { rank: "Rank", label: "2026", source: "Huntress" } },
+      ...range(1, 9)
+        .reverse()
+        .map((c) => ({ tables: [1], name: c, dated: { rank: "Rank", source: "SplashData" } })),
+      { tables: [3], name: 1, dated: { rank: "Rank", source: "NCSC" } },
+      { tables: [2], name: 1, dated: { rank: "Rank", source: "Keeper" } },
+    ],
   },
 ];
 
