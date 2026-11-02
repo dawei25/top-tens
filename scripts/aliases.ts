@@ -258,6 +258,14 @@ export const COUNTRY_JUNK = [
   // Rare names that only catch typos of other words ("airplanes" became Ireland, "nunavut" Greenland).
   "Airlann", "Airlan", "Nunaat", "Antarctica of The North", "S'pore", "Pinas", "Sovjet", "Grease", "Island", "Port",
   "Poccnr", "Poccия",
+  // Foreign names that "islands" was corrected to (Ireland), and political-topic redirects.
+  "Irland", "Irlanda", "Irlandia", "Irland politic", "Political irland", "Irland political",
+  // Found by the list judges in cycle 1: a company, a book catalogue, a prefix, regions, social topics, forces.
+  "Topstrasse Global", "Bókatíðindi", "Bokatidindi", "Fenno-", "Northern Finland", "Norwegian coastline",
+  "Iran consumption expenditure", "Nigerian sport", "Indian society", "Indian social structure",
+  "Traditional Indian social structure", "Indian traditional social structure", "India etymology", "Bharath Niwas",
+  "Alpine Deutschen", "Iraqi Security Forces", "Iraqi Security Force", "Confucian Southeast Asia", "Roman New Republic",
+  "Land of the Irish",
 ];
 
 let english: Set<string> | undefined;

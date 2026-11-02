@@ -15,6 +15,7 @@ const SHARED_FORMS = [
   ...Object.values(NICKNAMES).flat(),
   ...Object.values(STATE_FORMS).flat(),
   "Congo",
+  "Congolese",
 ];
 import { bareWord, blockedAlias, gluedAlias, junkRedirect } from "./aliases";
 import { UNIVERSES } from "./gazetteer";
@@ -139,6 +140,7 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
     [
       ...Object.values(INTENT[p.id]?.same ?? {}).flat(),
       ...Object.keys(INTENT[p.id]?.groups ?? {}),
+      ...Object.values(topic?.aliases ?? {}).flat(),
       ...SHARED_FORMS,
     ].map(normalize),
   );

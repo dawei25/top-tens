@@ -13,10 +13,171 @@ export interface Intent {
 }
 
 /**
- * Everyday names for countries, applied to every topic whose universe includes countries. Each line is one
- * country; the build finds the entry whose name is one of the forms and gives it all the others.
+ * What people call a country's people, typed on a country list to mean the country: "american" is the United
+ * States, not American Samoa; "chinese" is China, not Chinese Taipei; "indian" is India, not the British Indian
+ * Ocean Territory. Keyed by a name in COUNTRY_FORMS (or the country's usual name). A demonym two countries share is
+ * left out ("Dominican" is the Dominican Republic, the far likelier reading), except Congolese (both Congos, see
+ * build.ts).
  */
-export const COUNTRY_FORMS: string[][] = [
+const DEMONYMS: Record<string, string[]> = {
+  "United States": ["American", "Americans", "Team USA"],
+  "United Kingdom": ["English", "Scottish", "Welsh", "Brits"],
+  China: ["Chinese"],
+  Taiwan: ["Taiwanese"],
+  India: ["Indian"],
+  Japan: ["Japanese"],
+  Germany: ["German"],
+  France: ["French"],
+  Italy: ["Italian"],
+  Spain: ["Spanish", "Spaniard"],
+  Portugal: ["Portuguese"],
+  Russia: ["Russian"],
+  Canada: ["Canadian"],
+  Mexico: ["Mexican"],
+  Brazil: ["Brazilian"],
+  Australia: ["Australian"],
+  "South Korea": ["South Korean", "Korean"],
+  "North Korea": ["North Korean"],
+  Switzerland: ["Swiss"],
+  Netherlands: ["Dutch"],
+  Sweden: ["Swedish", "Swede"],
+  Norway: ["Norwegian"],
+  Denmark: ["Danish", "Dane"],
+  Finland: ["Finnish"],
+  Iceland: ["Icelandic"],
+  Ireland: ["Irish"],
+  Turkey: ["Turkish"],
+  Greece: ["Greek"],
+  Austria: ["Austrian"],
+  Belgium: ["Belgian"],
+  Poland: ["Polish"],
+  "Czech Republic": ["Czech"],
+  Slovakia: ["Slovak", "Slovakian"],
+  Hungary: ["Hungarian"],
+  Romania: ["Romanian"],
+  Bulgaria: ["Bulgarian"],
+  Serbia: ["Serbian"],
+  Croatia: ["Croatian"],
+  Slovenia: ["Slovenian", "Slovene"],
+  "Bosnia and Herzegovina": ["Bosnian"],
+  Albania: ["Albanian"],
+  "North Macedonia": ["Macedonian"],
+  Montenegro: ["Montenegrin"],
+  Ukraine: ["Ukrainian"],
+  Belarus: ["Belarusian"],
+  Lithuania: ["Lithuanian"],
+  Latvia: ["Latvian"],
+  Estonia: ["Estonian"],
+  Moldova: ["Moldovan"],
+  Luxembourg: ["Luxembourgish"],
+  Malta: ["Maltese"],
+  Cyprus: ["Cypriot"],
+  Georgia: ["Georgian"],
+  Armenia: ["Armenian"],
+  Azerbaijan: ["Azerbaijani", "Azeri"],
+  Kazakhstan: ["Kazakh", "Kazakhstani"],
+  Uzbekistan: ["Uzbek"],
+  Afghanistan: ["Afghan"],
+  Pakistan: ["Pakistani"],
+  Bangladesh: ["Bangladeshi"],
+  "Sri Lanka": ["Sri Lankan"],
+  Nepal: ["Nepali", "Nepalese"],
+  Mongolia: ["Mongolian"],
+  Vietnam: ["Vietnamese"],
+  Thailand: ["Thai"],
+  Cambodia: ["Cambodian"],
+  Laos: ["Laotian"],
+  Myanmar: ["Burmese"],
+  Malaysia: ["Malaysian"],
+  Singapore: ["Singaporean"],
+  Indonesia: ["Indonesian"],
+  Philippines: ["Filipino", "Philippine"],
+  "New Zealand": ["New Zealander"],
+  Fiji: ["Fijian"],
+  Samoa: ["Samoan"],
+  Tonga: ["Tongan"],
+  Iran: ["Iranian", "Persian"],
+  Iraq: ["Iraqi"],
+  Syria: ["Syrian"],
+  Lebanon: ["Lebanese"],
+  Israel: ["Israeli"],
+  Palestine: ["Palestinian"],
+  Jordan: ["Jordanian"],
+  "Saudi Arabia": ["Saudi Arabian"],
+  Yemen: ["Yemeni"],
+  Oman: ["Omani"],
+  "United Arab Emirates": ["Emirati"],
+  Qatar: ["Qatari"],
+  Bahrain: ["Bahraini"],
+  Kuwait: ["Kuwaiti"],
+  Egypt: ["Egyptian"],
+  Libya: ["Libyan"],
+  Tunisia: ["Tunisian"],
+  Algeria: ["Algerian"],
+  Morocco: ["Moroccan"],
+  Sudan: ["Sudanese"],
+  "South Sudan": ["South Sudanese"],
+  Ethiopia: ["Ethiopian"],
+  Eritrea: ["Eritrean"],
+  Somalia: ["Somali"],
+  Kenya: ["Kenyan"],
+  Uganda: ["Ugandan"],
+  Tanzania: ["Tanzanian"],
+  Rwanda: ["Rwandan"],
+  Angola: ["Angolan"],
+  Zambia: ["Zambian"],
+  Zimbabwe: ["Zimbabwean"],
+  Malawi: ["Malawian"],
+  Mozambique: ["Mozambican"],
+  Namibia: ["Namibian"],
+  "South Africa": ["South African"],
+  Madagascar: ["Malagasy"],
+  Nigeria: ["Nigerian"],
+  Niger: ["Nigerien"],
+  Ghana: ["Ghanaian"],
+  "Ivory Coast": ["Ivorian"],
+  Senegal: ["Senegalese"],
+  Mali: ["Malian"],
+  Cameroon: ["Cameroonian"],
+  Liberia: ["Liberian"],
+  "Sierra Leone": ["Sierra Leonean"],
+  Guinea: ["Guinean"],
+  Gambia: ["Gambian"],
+  Chad: ["Chadian"],
+  Guatemala: ["Guatemalan"],
+  Honduras: ["Honduran"],
+  "El Salvador": ["Salvadoran", "Salvadorean"],
+  Nicaragua: ["Nicaraguan"],
+  "Costa Rica": ["Costa Rican"],
+  Panama: ["Panamanian"],
+  Cuba: ["Cuban"],
+  Jamaica: ["Jamaican"],
+  Haiti: ["Haitian"],
+  "Dominican Republic": ["Dominican"],
+  "Puerto Rico": ["Puerto Rican"],
+  Bahamas: ["Bahamian"],
+  Barbados: ["Barbadian", "Bajan"],
+  "Trinidad and Tobago": ["Trinidadian"],
+  Colombia: ["Colombian"],
+  Venezuela: ["Venezuelan"],
+  Ecuador: ["Ecuadorian"],
+  Peru: ["Peruvian"],
+  Bolivia: ["Bolivian"],
+  Chile: ["Chilean"],
+  Argentina: ["Argentine", "Argentinian"],
+  Uruguay: ["Uruguayan"],
+  Paraguay: ["Paraguayan"],
+  Guyana: ["Guyanese"],
+  Suriname: ["Surinamese"],
+  Greenland: ["Greenlandic"],
+};
+
+/**
+ * Everyday names for countries, applied to every topic whose universe includes countries. Each line is one
+ * country; the build finds the entry whose name is one of the forms and gives it all the others. Demonyms
+ * (DEMONYMS) join their country's line.
+ */
+const BASE_COUNTRY_FORMS: string[][] = [
   ["United States", "USA", "US", "U.S.", "U.S.A.", "America", "United States of America", "the States"],
   ["United Kingdom", "UK", "U.K.", "Britain", "Great Britain", "GB", "England", "Scotland", "Wales", "Team GB", "British"],
   ["China", "PRC", "People's Republic of China", "Mainland China", "Zhongguo"],
@@ -68,6 +229,13 @@ export const COUNTRY_FORMS: string[][] = [
   ["Ireland", "Republic of Ireland", "Eire"],
 ];
 
+export const COUNTRY_FORMS: string[][] = [
+  ...BASE_COUNTRY_FORMS.map((line) => [...line, ...line.flatMap((form) => DEMONYMS[form] ?? [])]),
+  ...Object.entries(DEMONYMS)
+    .filter(([country]) => !BASE_COUNTRY_FORMS.some((line) => line.includes(country)))
+    .map(([country, demonyms]) => [country, ...demonyms]),
+];
+
 /**
  * Everyday names for cities, applied to every city list. Each line is one city, its usual English name first; the
  * build gives the others to the entry with that name (or, failing that, the one entry with another of the names).
@@ -96,9 +264,11 @@ export const CITY_FORMS: string[][] = [
   ["Ho Chi Minh City", "HCMC", "Saigon"],
   ["Hong Kong", "HK"],
   ["Saint Petersburg", "St Petersburg", "St. Petersburg", "Leningrad"],
-  ["Toronto", "The 6ix"],
+  ["Toronto", "The 6ix", "The Six"],
   ["Montreal", "Montréal", "MTL"],
   ["Calgary", "YYC"],
+  ["Edmonton", "YEG"],
+  ["Vancouver", "YVR"],
   ["Delhi", "New Delhi", "Dilli"],
   ["Mumbai", "Bombay"],
   ["Chennai", "Madras"],
@@ -303,7 +473,7 @@ export const INTENT: Record<string, Intent> = {
   },
   lakes: {
     same: {
-      "Caspian Sea": ["Caspian", "Caspian Lake"],
+      "Caspian Sea": ["Caspian", "Caspian Lake", "Lake Caspian"],
       "Lake Superior": ["Superior"],
       "Lake Victoria": ["Victoria"],
       "Lake Huron": ["Huron"],
@@ -322,7 +492,9 @@ export const INTENT: Record<string, Intent> = {
   },
   "world-cities": {
     same: {
-      Delhi: ["New Delhi", "Dilli"],
+      // The source counts Delhi's and Manila's metropolitan regions.
+      Delhi: ["New Delhi", "Dilli", "Delhi NCR"],
+      Manila: ["Metro Manila"],
       Kolkata: ["Calcutta"],
       Mumbai: ["Bombay"],
       Chennai: ["Madras"],
@@ -607,7 +779,10 @@ export const INTENT: Record<string, Intent> = {
   "animated-films": {
     same: {
       "Frozen II": ["Frozen 2"],
-      "The Super Mario Bros. Movie": ["Super Mario Bros Movie", "Mario Movie", "Super Mario Movie"],
+      "The Super Mario Bros. Movie": [
+        "Super Mario Bros Movie", "Mario Movie", "Super Mario Movie", "Super Mario Brothers", "Mario Brothers",
+        "Super Mario Bros", "Mario Bros",
+      ],
       "Zootopia 2": ["Zootropolis 2"],
       "Ne Zha 2": ["Nezha 2"],
     },
@@ -633,16 +808,20 @@ export const INTENT: Record<string, Intent> = {
   },
   "game-franchises": {
     same: {
-      Mario: ["Mario Kart", "Mario Party", "Luigi", "Super Mario"],
+      Mario: [
+        "Mario Kart", "Mario Party", "Luigi", "Super Mario", "Super Mario Bros", "Super Mario Bros.", "Mario Bros", "Mario Bros.",
+        "Super Mario Brothers", "Mario Brothers",
+      ],
       Wii: ["Wii Sports", "Wii Fit"],
       "Red Dead": ["Red Dead Redemption"],
       "The Elder Scrolls": ["Skyrim", "Elder Scrolls"],
-      "Grand Theft Auto": ["GTA V", "GTA 5", "GTA"],
+      "Grand Theft Auto": ["GTA V", "GTA 5", "GTA", "Grand Theft Auto V", "GTA 6", "GTA VI", "Grand Theft Auto VI"],
+      Pokémon: ["Pokémon Go", "Pokemon Go"],
       "Star Wars": ["SW"],
       "Call of Duty": ["COD"],
       FIFA: ["EA Sports FC", "EA FC"],
-      "Resident Evil": ["Biohazard"],
-      "Final Fantasy": ["FF"],
+      "Resident Evil": ["Biohazard", "Resident Evil 4", "RE4"],
+      "Final Fantasy": ["FF", "Final Fantasy VII", "FF7", "FFVII"],
       "Assassin's Creed": ["AC"],
     },
   },
@@ -685,6 +864,7 @@ export const INTENT: Record<string, Intent> = {
   "canada-cities": {
     same: {
       Montreal: ["Montréal"],
+      "St. John's": ["Saint Johns", "Saint John's"],
     },
   },
   deserts: {
@@ -936,6 +1116,8 @@ export const INTENT: Record<string, Intent> = {
   "us-box-office": {
     same: {
       "E.T. the Extra-Terrestrial": ["ET", "E.T."],
+      "Avatar: Fire and Ash": ["Avatar 3"],
+      "Avengers: Infinity War": ["Infinity Wars"],
       "Harry Potter and the Sorcerer's Stone": ["Harry Potter and the Philosopher's Stone", "Philosopher's Stone", "Sorcerer's Stone"],
     },
     groups: {
@@ -979,6 +1161,14 @@ export const INTENT: Record<string, Intent> = {
   "nobel-countries": {
     same: {
       Germany: ["West Germany"],
+    },
+  },
+  "olympic-medals": {
+    same: {
+      // The table's names for Taiwan and the US Virgin Islands; "ROC" there is the Russian Olympic Committee.
+      "Chinese Taipei": ["Taiwan", "Taiwanese", "Formosa", "Republic of China"],
+      "Virgin Islands": ["U.S. Virgin Islands", "US Virgin Islands", "United States Virgin Islands", "USVI"],
+      ROC: ["Russian Olympic Committee"],
     },
   },
   "fast-food-chains": {
