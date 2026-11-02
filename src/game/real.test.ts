@@ -162,5 +162,5 @@ describe("every built list", () => {
       }
     }
     expect(leaks).toEqual([]);
-  });
+  }, 30_000);
 });

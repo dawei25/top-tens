@@ -310,6 +310,13 @@ describe("an answer's name followed by who made it", () => {
     expect(judgeGuess("shape of you by ed sheeran", songs, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 2 } });
     expect(judgeGuess("stay justin bieber", songs, new Set())).toMatchObject({ kind: "correct", entry: { name: "Stay" } });
   });
+  it("not when a number after the name names a different one", () => {
+    const films: Puzzle = { ...puzzle, id: "films5", answers: [e(1, "Frozen"), e(2, "Bridgerton Season 1", ["Bridgerton"]), ...puzzle.answers.slice(2)], extras: [] };
+    expect(judgeGuess("frozen 3", films, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("frozen three", films, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("bridgerton 2", films, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("bridgerton season 1 netflix", films, new Set())).toMatchObject({ kind: "correct", entry: { rank: 2 } });
+  });
   it("needs a real name at the start, not a scrap of one", () => {
     expect(judgeGuess("sta justin bieber", songs, new Set())).toMatchObject({ kind: "unknown" });
   });
@@ -425,6 +432,17 @@ describe("a word that fits a crowd", () => {
     expect(judgeGuess("tour", tours, new Set())).toMatchObject({ kind: "unknown", vague: 12 });
     expect(judgeGuess("world tour", tours, new Set())).toMatchObject({ kind: "unknown" });
     expect(judgeGuess("tour", tours, new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]))).toMatchObject({ kind: "unknown" });
+  });
+  it("as does a word three top-10 answers share, while two are a choice", () => {
+    const cars: Puzzle = {
+      ...puzzle,
+      id: "cars5",
+      answers: [e(1, "Toyota Corolla"), e(2, "Ford F-Series"), e(3, "Volkswagen Golf"), e(4, "Toyota Camry"), e(5, "Ford Fiesta"), e(6, "Toyota Hilux"), ...puzzle.answers.slice(6)],
+      extras: [e(0, "Toyota Prius")],
+    };
+    expect(judgeGuess("toyota", cars, new Set())).toMatchObject({ kind: "unknown", vague: 4 });
+    expect(judgeGuess("ford", cars, new Set())).toMatchObject({ kind: "typo", suggestions: ["Ford F-Series", "Ford Fiesta"] });
+    expect(judgeGuess("toyota corolla", cars, new Set())).toMatchObject({ kind: "correct", entry: { rank: 1 } });
   });
   it("while a distinctive word still finds its entry", () => {
     expect(judgeGuess("renaissance tour", tours, new Set())).toMatchObject({ kind: "correct", entry: { rank: 6 } });

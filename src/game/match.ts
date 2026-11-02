@@ -247,10 +247,12 @@ export function judgeGuess(
       prominence(a) - prominence(b) || nameWordCount(a) - nameWordCount(b) || a.entry.name.localeCompare(b.entry.name);
     const open = cs.filter((c) => !(c.inTop10 && found.has(c.entry.rank))).sort(byProminence);
     if (open.length === 0) return resolve([...cs].sort(byProminence)[0], false);
-    // A word that fits a crowd including several top-10 answers ("tour" on concert tours, "toyota" on car models) is
-    // too common to read: offering a few, again and again, would hand over the top 10. One top-10 answer in a crowd
-    // ("star wars" on box office) is still the natural reading.
-    if (cs.length > VAGUE_ABOVE && cs.filter((c) => c.inTop10).length > 1) return { kind: "unknown", junk: false, vague: cs.length };
+    // A word shared by three top-10 answers ("toyota" on car models, "china" on banks), or by a crowd with two or more
+    // ("tour" on concert tours), is a category on this list, not a name: offering a few, again and again, would hand
+    // over the top 10. Two ("avengers", "ed sheeran") are a choice, and one top-10 answer in a crowd ("star wars" on box
+    // office) is the natural reading.
+    const top10Fits = cs.filter((c) => c.inTop10).length;
+    if (top10Fits >= 3 || (cs.length > VAGUE_ABOVE && top10Fits > 1)) return { kind: "unknown", junk: false, vague: cs.length };
     const [top, next] = open;
     if (!next) return resolve(top, true);
     const standsOut = (top.inTop10 && !next.inTop10) || (top.entry.rank > 0 && next.entry.rank === 0);
@@ -384,7 +386,11 @@ function leadingName(guess: string, entries: Entry[]): Entry | undefined {
     if (words.slice(0, k).every((w) => GENERIC.has(w))) continue;
     // A short name ("u2", "bts") counts only to pick among the entries it shares by the rest ("u2 vertigo").
     const short = head.replace(/ /g, "").length < 4;
-    const hits = entries.filter((e) => forms(e).includes(head));
+    // A number after the name names a different one: "frozen 3" is not Frozen, "bridgerton 2" not its first season.
+    const restDigits = digitsOf(numbersAsDigits(words.slice(k).join(" ")));
+    const hits = entries.filter(
+      (e) => forms(e).includes(head) && (!restDigits || forms(e).some((f) => digitsOf(numbersAsDigits(f)).includes(restDigits))),
+    );
     if (hits.length === 0 || (short && hits.length === 1)) continue;
     if (hits.length === 1) return hits[0];
     const rest = words.slice(k).filter((w) => w.length >= 2 && !GENERIC.has(w));
