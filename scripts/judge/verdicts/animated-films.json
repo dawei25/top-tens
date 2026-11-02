@@ -1,27 +1,25 @@
 {
   "id": "animated-films",
   "judgedAt": "2026-11-02",
-  "decision": "fix-first",
+  "decision": "daily-list",
   "alsoBlitz": true,
   "priority": 8,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 3, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 8, "livesLost": 5, "guesses": 15 },
-  "fan": { "found": 9, "livesLost": 5, "guesses": 15 },
-  "blitzCasual": { "scored": 21, "named": 22 },
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "blitzCasual": { "scored": 24, "named": 30 },
   "difficulty": 2,
   "tags": ["film", "animation", "box office"],
   "audience": "anyone",
-  "summary": "A crowd-pleaser that hits the daily target, but the build merged the 1994 and 2019 Lion King into one entry. Restore the original and add year aliases, then run it.",
+  "summary": "A crowd-pleaser on target: a casual player finds about 8 before famous sequels just outside the top 10 use up their lives. The old fixes hold; two small reveal and alias fixes can wait for the next rebuild.",
   "reasons": [
-    "Most players know 9 of the 10. The casual player found 7 in their first 8 guesses and Zootopia 2 later, then lost all five lives on famous near misses (Toy Story 4 #11, Toy Story 3 #12, Moana 2 #13, Finding Nemo, Shrek 2). Ne Zha 2 at #1 and Toy Story 5 at #10 are the reveals.",
-    "Data bug: rows that share a title are dropped, so the 1994 Lion King ($970.7M, source #20) is missing, everything from Finding Nemo down shows one rank too high, and #4 reads as plain 'The Lion King' with the remake's $1.66B.",
-    "Typing gaps: 'lion king 2019' and 'the lion king (2019)' are rejected as not on the list (that cost the fan #4), and so is 'super mario brothers'. Blitz is excellent: 21 of 22 names scored."
+    "Casual found 8 in 14 guesses, then lost every life on near misses that each show a gross: Toy Story 4 (#11), Moana 2 (#13), Shrek 2 (#23), Finding Nemo (#21), Toy Story 3 (#12). Ne Zha 2 at #1 and Toy Story 5 at #10 are the reveals. Fan found 9.",
+    "Old fixes hold: the two Lion Kings are separate ('lion king' offers the 2019 film to confirm, 'lion king 1994' is #20), 'super mario brothers' and 'mario brothers' count, and 'spiderman' and 'cars' now only offer Across the Spider-Verse and Cars 2 to confirm, free to decline.",
+    "Left for the rebuild: unranked misses (Aladdin, Beauty and the Beast, Lilo & Stitch, Cars 2) show no figure though the page has one, and 'frozen two' reads as Frozen. Blitz is deep: 24 of 30 scored."
   ],
   "fixes": [
-    "scripts/build.ts:327 dedups rows by normalized name, which drops The Lion King (1994, $970,707,763; #20 in table 0 and #1 in the traditional table) as a duplicate of the 2019 remake. Keep both, named 'The Lion King (2019)' (#4) and 'The Lion King (1994)' (#20); Finding Nemo becomes #21 and Monsters, Inc. #50.",
-    "Aliases: 'The Lion King 2019', 'Lion King 2019' and 'The Lion King remake' on the 2019 film; 'The Lion King 1994' and 'Lion King 1994' on the original. Decide where bare 'The Lion King' goes: kept on the 2019 film it stays a free #4 for casual players (as 'Avatar' is the 2009 film); shared, the game asks which one, and a player who picks the classic loses a life (casual drops to about 6-7).",
-    "Add 'Super Mario Brothers' and 'Mario Brothers' to The Super Mario Bros. Movie; both are rejected now.",
-    "Drop the bare 'Spider-Man' alias from Spider-Man: Across the Spider-Verse: 'spiderman' charges a life for #36 even when the player means Into the Spider-Verse, which isn't on the list.",
-    "Matcher (src/game, not data): 'cars' charges a life for Cars 2 through a word match, though Cars (2006) isn't on the list. A guess with no number shouldn't land on a numbered sequel of the same name."
+    "scripts/topics.ts (animated-films): `also: [{ tables: [1, 2, 3], name: \"Title\" }]` has no value, so all 89 unranked answers miss with no figure and score nothing in Blitz, though each table has a 'Worldwide gross' column in the list's unit (table 1: Cars 2 $559,853,036, Puss in Boots $554,987,477; table 2: Coraline $185,860,104; table 3: Aladdin $504,050,219, Beauty and the Beast $438,656,843, Spirited Away $395,802,070, Lilo & Stitch $273,144,151). Add `value: \"Worldwide gross\"`.",
+    "Sequel number words: 'frozen two' offers Frozen (#7) to confirm, and says 'already found' once Frozen is in, so it never reaches Frozen II (#5). 'inside out two', 'incredibles two', 'moana two' and 'ne zha two' offer the first film (a life if confirmed), and 'toy story four' and 'toy story three' aren't recognized. Only 'Zootopia Two' and 'Toy story five' work, through redirects. Add number-word aliases for a trailing 2-9 or II-IX in the pipeline, or have the matcher read a trailing number word as its digit (src/game, coordinator's call).",
+    "Add 'Minions 2' as an alias of Minions: The Rise of Gru (#22). Now it offers Minions (#9) to confirm."
   ]
 }

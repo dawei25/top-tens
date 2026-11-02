@@ -1,27 +1,25 @@
 {
   "id": "theme-parks",
   "judgedAt": "2026-11-02",
-  "decision": "fix-first",
-  "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 3, "fun": 3, "blitzDepth": 0 },
-  "casual": { "found": 7, "livesLost": 5, "guesses": 15 },
-  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
-  "blitzCasual": null,
-  "difficulty": 3,
-  "tags": ["travel", "theme parks", "disney"],
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 4, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": { "scored": 18, "named": 20 },
+  "difficulty": 2,
+  "tags": ["entertainment", "travel", "theme parks", "disney"],
   "audience": "Disney fans and travelers",
-  "summary": "Now plays at the right level (casual 7/10), but 'disney' still offers only three wrong answers, one of them a shopping district, and the pool still holds non-park pages, one of them offensive. Small fixes, then it can run as a daily.",
+  "summary": "Ready as a daily: a casual player finds 8 of 10, mostly Disney parks, with Universal Studios Japan at #3 and Chimelong Ocean Kingdom as the surprise. The old fixes are in; a few small leftovers can wait for the next rebuild.",
   "reasons": [
-    "Casual found Magic Kingdom (via 'disney world'), Disneyland, Universal Studios Japan (via 'universal studios'), Epcot, Disneyland Paris, Tokyo Disneyland and Hollywood Studios; lives went on Animal Kingdom #15, Universal Studios Hollywood #16, Cedar Point, Busch Gardens and Islands of Adventure #14. Fan: 10/10 for one life.",
-    "Good curve (Disney gimmes, Shanghai and DisneySea with thought, Chimelong as the stretch) and the famous misses are mostly #11-#17, but eight of ten are Disney, so it gets samey.",
-    "Old fixes done: resorts out, 'tokyo disney' and 'shanghai disney' work, #10 reads 'Disneyland Paris', 'Walt Disney Studios' moved to #20, Universal Beijing merged. The source still stops at 2024."
+    "Casual found Magic Kingdom, Disneyland, Epcot, Universal Studios Japan (via 'universal studios'), Tokyo Disneyland, Disneyland Paris, Hollywood Studios and Shanghai Disneyland; lives went on Animal Kingdom #15, Islands of Adventure #14, Cedar Point and Busch Gardens Tampa Bay, each showing a 2024 figure. Fan: 10/10 in 13 guesses for 3 lives, all on Orlando parks.",
+    "Good curve (Disney gimmes, Shanghai, DisneySea and USJ with thought, Chimelong as the stretch), but eight of ten are Disney and the natural next guesses (Animal Kingdom, Universal Orlando) all cost a life, so it can feel samey and lives go fast.",
+    "Old fixes checked: 'disney' now offers the four Disney top-10 parks, 'disneyland shanghai', 'disneyland hong kong', 'mgm studios', 'universal studios orlando' and 'ocean kingdom' resolve, Downtown Disney, African dodger, Wizarding World and the junk Epcot, Tokyo and Disneyland aliases are gone, and the regional parks show figures. The source stops at 2024 and the prompt says so."
   ],
   "fixes": [
-    "'disney' offers only Disney Adventure World (#20), Disney California Adventure (#11) and Downtown Disney (unranked, not a park): no top-10 park has the word 'Disney' in its name. Add to the theme-parks groups in scripts/intent.ts: Disney: [\"Magic Kingdom\", \"Disneyland\", \"Tokyo Disneyland\", \"Shanghai Disneyland\"] (four owners, inside the 2-4 cap). An exact alias beats the word match, so 'disney' then offers those four and narrows as they are found.",
-    "Word-order aliases: 'Disneyland Shanghai' -> Shanghai Disneyland and 'Disneyland Hong Kong' -> Hong Kong Disneyland. Now both land on #2 Disneyland, and once #2 is found 'disneyland shanghai' says 'already found' and #5 is never credited. Also worth adding: 'MGM Studios' -> Disney's Hollywood Studios, 'Universal Studios Orlando' -> Universal Studios Florida (now it puts USJ in the box), 'Ocean Kingdom' -> Chimelong Ocean Kingdom (both words are generic, so it is not recognized).",
-    "Downtown Disney survives the skip list: its category title is 'Downtown Disney (disambiguation)'. Skip that title (or skip '(disambiguation)' titles in CATEGORY_SKIP).",
-    "Remove non-park category members from the pool. From Amusement parks in the United States: 'African dodger' (a racist carnival game; must not ship in an answer pool), CircusTrix, Great Old Amusement Parks, Trolley park. From Walt Disney Parks and Resorts: Behind the Attraction, E ticket, Go Away Green, Hidden Mickey, MagicBand, MyMagic+, Omnimover, Virtual Magic Kingdom, Vista-United Telecommunications, Wild About Safety, Mickey's Magical Party, Mickey's Very Merry Christmas Party, Summer Nightastic!, Celebration in the Air, Golden Pass, Ellen's Energy Adventure, Pleasure Island, Adventureland, and the never-opened Disney's America, Walt Disney's Riverfront Square, Disneyland in Australia, WestCOT, Disneyland Abu Dhabi. Also The Wizarding World of Harry Potter (a land inside Universal parks; 'harry potter' puts it in the box and costs a life), 20th Century Fox World (never opened), PlayPlace, Margaritaville Resort Orlando.",
-    "Junk aliases on top-10 entries: Epcot 'America' (a generic word: typing 'america' finds Epcot), 'USA Pavilion', 'Epcot Pavilion', 'World Showcase pavilion'; Disney's Hollywood Studios 'Superstar Television', 'The Spirit of Pocahontas', 'Streets of America', 'Pixar Place'; Tokyo Disneyland 'Critter Country' (a land at Disneyland too); Disneyland 'Disneyland Heliport', 'Walt disney project', 'Mickey's Soundsational Parade'."
+    "Three non-park category members still get past the skip list because their category titles carry a qualifier: 'Golden Pass (Disney)', 'Pleasure Island (Walt Disney World)', '20th Century Fox World (Dubai)' (each costs a life if typed). Put those exact titles in the theme-parks skip list in scripts/topics.ts. If build.ts line 530 is changed to test cleanName(title) instead, drop 'Adventureland' from the skip list first: its members are Adventureland (Iowa) and Adventureland (New York), real parks that should stay.",
+    "'universal orlando' and 'universal hollywood' put Universal Studios Japan in the box (the 'Universal' alias plus trailing words), and once USJ is found they answer 'already found (#3 Universal Studios Japan)'. Add to the theme-parks groups in scripts/intent.ts: 'Universal Orlando' shared by Universal Studios Florida and Universal Islands of Adventure, 'Universal Hollywood' for Universal Studios Hollywood. Also 'Ocean Park' for Ocean Park Hong Kong (now 'not an answer for this list').",
+    "The source ranks Disney Adventure World and Everland 'T20' (both 5,598,000); the build shows Everland as #21. A miss on Everland should read #20 (tied)."
   ]
 }
