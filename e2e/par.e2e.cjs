@@ -1,8 +1,8 @@
 // Par: the title card shows it, a finished game shows par and the score histogram (your bar marked), Past runs shows
-// the distance from par, and the knowledge page lists the game's category.
+// the distance from par, and the knowledge page (Home's Stats key, there from the start) lists the game's category.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, VIEWPORTS, open, puzzle, guess, noHScroll } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, open, hash, puzzle, guess, noHScroll } = require("./helpers.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -12,10 +12,16 @@ const LIST = "mountains";
 
 for (const vp of VIEWPORTS) {
   test(`par on the results and the knowledge page (${vp.name})`, async () => {
-    // Before any game: the knowledge page's empty state.
-    const { ctx, page } = await open(browser, vp, "#stats");
+    // Before any game, Home's Stats key is there already; the knowledge page shows its sections with placeholders.
+    const { ctx, page } = await open(browser, vp);
+    await page.getByTestId("stats-key").click();
     await page.getByTestId("knowledge").waitFor();
+    assert.equal(await hash(page), "#stats");
     await page.getByTestId("knowledge-empty").waitFor();
+    assert.equal(await page.getByTestId("know-category-empty").count(), 1);
+    assert.equal(await page.getByTestId("know-tag-empty").count(), 1);
+    assert.equal(await page.getByTestId("know-category").count(), 0);
+    assert.ok(await noHScroll(page));
 
     await page.goto(page.url().replace(/#.*$/, `#p-${LIST}`));
     const pars = await page.evaluate(async () => (await fetch("puzzles/par.json")).json());
@@ -46,14 +52,16 @@ for (const vp of VIEWPORTS) {
       diff === 0 ? "at par" : `${diff > 0 ? "+" : ""}${diff} vs par`,
     );
 
-    // Home links the knowledge page; it lists the game's category.
+    // The knowledge page now lists the game's category, with no placeholder left there.
     await page.getByTestId("nav-home").click();
-    await page.getByTestId("knowledge-link").click();
+    await page.getByTestId("stats-key").click();
     await page.getByTestId("knowledge").waitFor();
     const category = index.find((m) => m.id === LIST).category;
     const row = page.locator(`[data-testid="know-category"][data-name="${category}"]`);
     await row.waitFor();
     assert.equal(Number(await row.getAttribute("data-vs-par")), 2 - par);
+    assert.equal(await page.getByTestId("knowledge-empty").count(), 0);
+    assert.equal(await page.getByTestId("know-category-empty").count(), 0);
     assert.ok(await noHScroll(page));
     await ctx.close();
   });

@@ -421,20 +421,25 @@ export function Home({
             >
               Past runs {plays > 0 && <span className="games-n">{plays}</span>}
             </button>
+            {/* Always here, even before the first game: the page shows its sections with placeholders until then. */}
+            <button
+              className="key key-sm games-key"
+              data-testid="stats-key"
+              onClick={start(() => (location.hash = "#stats"))}
+            >
+              Stats
+            </button>
           </div>
         </section>
       </div>
 
-      {/* Also with only past runs (a list rolled again starts fresh), so the knowledge page stays reachable. */}
+      {/* Also with only past runs (a list rolled again starts fresh). */}
       {(s.played > 0 || st.best > 0 || !!saved.listRuns?.length) && (
         <section data-glass className="panel home-stats" aria-labelledby="stats-title">
           <div className="group-head">
             <h2 id="stats-title" className="label">
               Your record
             </h2>
-            <a className="key key-xs knowledge-key" href="#stats" data-testid="knowledge-link">
-              Your knowledge
-            </a>
           </div>
           <dl className="stat-row">
             <div>
