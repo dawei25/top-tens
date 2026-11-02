@@ -259,7 +259,7 @@
  },
  {
   "id": "music-artists",
-  "title": "Music artists with the most certified sales",
+  "title": "Music artists with the most certified sales and streams",
   "category": "Entertainment",
   "blitz": true
  },
@@ -556,5 +556,17 @@
   "title": "Most common passwords",
   "category": "Oddball",
   "blitz": false
+ },
+ {
+  "id": "athletes-earnings",
+  "title": "Highest-earning athletes of 2026",
+  "category": "Sports",
+  "blitz": false
+ },
+ {
+  "id": "car-models",
+  "title": "Best-selling car models of all time",
+  "category": "Business",
+  "blitz": true
  }
 ]

@@ -1,0 +1,52 @@
+{
+  "Cristiano Ronaldo": {
+    "text": "He is the most-followed athlete on social media, with over 1 billion followers across platforms.",
+    "source": "https://en.wikipedia.org/wiki/Cristiano_Ronaldo",
+    "evidence": "Ronaldo is the most popular athlete on social media, with over 1 billion followers across Facebook, Twitter, YouTube, and Instagram."
+  },
+  "Canelo Álvarez": {
+    "text": "He once fought on the same card as all six of his brothers, all of them professional boxers.",
+    "source": "https://en.wikipedia.org/wiki/Canelo_%C3%81lvarez",
+    "evidence": "all of his brothers also became professional boxers. ... He also made world history on that fight card when he and all six of his brothers fought on the same night, with Canelo being the youngest."
+  },
+  "Lionel Messi": {
+    "text": "He scored 672 goals for Barcelona, a record for one player at a single club.",
+    "source": "https://en.wikipedia.org/wiki/Lionel_Messi",
+    "evidence": "With Barcelona, he set records for most goals for a single club (672) and most goals in La Liga (474)."
+  },
+  "LeBron James": {
+    "text": "He was the first NBA player to earn $1 billion while still an active player.",
+    "source": "https://en.wikipedia.org/wiki/LeBron_James",
+    "evidence": "James was the first player in NBA history to accumulate $1 billion in earnings as an active player"
+  },
+  "Shohei Ohtani": {
+    "text": "In 2024 he became the first MLB player to hit 50 home runs and steal 50 bases in one season.",
+    "source": "https://en.wikipedia.org/wiki/Shohei_Ohtani",
+    "evidence": "after becoming the first player in MLB history to record 50 home runs and 50 stolen bases in a season"
+  },
+  "Stephen Curry": {
+    "text": "He made at least one three-pointer in 268 straight NBA games, from 2018 to 2023.",
+    "source": "https://en.wikipedia.org/wiki/Stephen_Curry",
+    "evidence": "made at least one three-pointer in an NBA-record 268 consecutive games from 2018 to 2023."
+  },
+  "Jon Rahm": {
+    "text": "In 2021 he became the first Spanish golfer to win the U.S. Open.",
+    "source": "https://en.wikipedia.org/wiki/Jon_Rahm",
+    "evidence": "In 2021, Rahm became the first Spanish golfer to win the U.S. Open."
+  },
+  "Karim Benzema": {
+    "text": "His 2022 Ballon d'Or made him the fifth French player to win it.",
+    "source": "https://en.wikipedia.org/wiki/Karim_Benzema",
+    "evidence": "For his performances in 2021 and 2022, Benzema was awarded the UEFA Player of the Year and the Ballon d'Or, becoming the fifth French player to have won the Ballon d'Or."
+  },
+  "Kevin Durant": {
+    "text": "In 2024 he became the first male athlete to win four Olympic gold medals in a team sport.",
+    "source": "https://en.wikipedia.org/wiki/Kevin_Durant",
+    "evidence": "In 2024, he became the first male athlete to win four Olympics gold medals in a team sport."
+  },
+  "Lewis Hamilton": {
+    "text": "At ten he became the youngest driver ever to win the British cadet karting championship.",
+    "source": "https://en.wikipedia.org/wiki/Lewis_Hamilton",
+    "evidence": "Two years later, he became the youngest driver to win the British cadet karting championship at the age of ten."
+  }
+}

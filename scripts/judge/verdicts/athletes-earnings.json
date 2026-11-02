@@ -1,0 +1,22 @@
+{
+  "id": "athletes-earnings",
+  "by": "builder",
+  "judgedAt": "2026-11-02",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 8, "livesLost": 3, "guesses": 14 },
+  "fan": null,
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": ["sports", "money", "athletes"],
+  "audience": "sports fans",
+  "summary": "Written by the data agent at build time, pending a real judge. Ronaldo, Messi, LeBron and Curry are gimmes; Canelo, Ohtani and Hamilton take thought; Jon Rahm and Benzema are the surprises.",
+  "reasons": [
+    "Casual found 8 (Ronaldo, Messi, LeBron, Curry, Durant, Canelo, Ohtani, Hamilton) and lost lives on Neymar, Conor McGregor and Giannis, each showing its last Forbes rank (\"#7 in 2024 ($108 million)\").",
+    "Every Forbes top 10 from 2012 to 2025 is accepted with its year's rank and figure; stars never in one (Mahomes, Jordan) are free, Kobe Bryant too.",
+    "Title and prompt name the year and the measure (earnings, endorsements included). Not Blitz-ready: misses carry other years' figures."
+  ],
+  "fixes": []
+}

@@ -1,0 +1,22 @@
+{
+  "id": "car-models",
+  "by": "builder",
+  "judgedAt": "2026-11-02",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 7, "livesLost": 4, "guesses": 15 },
+  "fan": null,
+  "blitzCasual": { "scored": 15, "named": 23 },
+  "difficulty": 2,
+  "tags": ["business", "cars"],
+  "audience": "anyone",
+  "summary": "Written by the data agent at build time, pending a real judge. Corolla, Civic, Camry, the F-150 and the Beetle come fast; Passat, Hilux and Fiesta are the 'oh right' ones, and the Model T and Mustang miss the cut.",
+  "reasons": [
+    "Casual found 7 (Corolla, Civic, F-150, Camry, Beetle, Accord, Golf) and lost lives on the Mustang, Model T, Prius and Wrangler, each showing its units sold.",
+    "Named by model (\"Corolla\"), so a bare brand (\"toyota\", \"honda\") never offers the top 10; \"toyota corolla\", \"f150\", \"vw beetle\" all work.",
+    "The page lists each brand's best seller only: RAV4, Model 3, Silverado and Focus are free. Blitz: 15 of 23 casual names scored."
+  ],
+  "fixes": []
+}
