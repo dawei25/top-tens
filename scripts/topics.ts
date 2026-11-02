@@ -2476,9 +2476,9 @@ export const TOPICS: Topic[] = [
     name: "Nameplate",
     value: "Units sold",
     metric: "Units sold",
-    // Named by model: "toyota" or "honda" alone would otherwise offer the brand's top-10 models, a giveaway. The
-    // full name ("Toyota Corolla") stays an alias.
-    nameStrip: /^(Toyota|Ford|Volkswagen|Honda)\s+/,
+    // Named "Make Model", the way people say them, like the pool's "Toyota Prius": "toyota" alone then reads as
+    // Toyota's models, top 10 first (named by model only, the brand offered only the pool's Toyotas, each costing a
+    // life). The model alone ("Corolla") is an alias.
     also: [
       // The record holders (the Model T) and each brand's best seller, current and defunct, with units sold.
       { tables: [1], name: "Automobile", value: "Units sold" },
@@ -2498,13 +2498,24 @@ export const TOPICS: Topic[] = [
       "V2CII", "Ford Verve concepts", "Beetle restoration", "Toyota Truck Maintenance", "Toyota Truck Maintainence",
       "Toyota Hilux platform", "Toyota Hi-Lux platform", "Gyurza patrol vehicle", "Toyota Recreational Vehicles",
       "Toyota Taliban", "TruckMasters OX", "Toyota Hilux FCEV concept", "Bug", "Rabbit", "Beetle car",
+      // Plain words left from the brand tables' cells ("Series" cost a life as the Land Rover Series), and cells
+      // that glue several models into one string (their models are aliases in scripts/intent.ts).
+      "Series", "Metropolitan", "Series/Defender", "Nissan Sunny/Sentra/Pulsar/Almera", "VAZ-2105/04/07",
+      "Iso/BMW/VELAM/Romi Isetta",
     ],
-    // The trucks are sold by their model numbers; the Golf was the Rabbit in North America.
+    // The model alone, as people also say it; the trucks are sold by their model numbers; the Golf was the Rabbit in
+    // North America.
     aliases: {
-      "F-Series": ["F-150", "Ford F-150", "F-250"],
-      Golf: ["VW Golf", "Volkswagen Rabbit", "VW Rabbit"],
-      Beetle: ["VW Beetle", "Volkswagen Bug", "VW Bug"],
-      Passat: ["VW Passat"],
+      "Toyota Corolla": ["Corolla"],
+      "Ford F-Series": ["F-Series", "F-150", "Ford F-150", "F-250"],
+      "Volkswagen Golf": ["Golf", "VW Golf", "Volkswagen Rabbit", "VW Rabbit"],
+      "Volkswagen Passat": ["Passat", "VW Passat"],
+      "Honda Civic": ["Civic"],
+      "Toyota Camry": ["Camry"],
+      "Ford Fiesta": ["Fiesta"],
+      "Volkswagen Beetle": ["Beetle", "VW Beetle", "Volkswagen Bug", "VW Bug"],
+      "Toyota Hilux": ["Hilux"],
+      "Honda Accord": ["Accord"],
     },
   },
 ];
