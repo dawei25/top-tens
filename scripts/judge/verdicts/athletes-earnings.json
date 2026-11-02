@@ -1,22 +1,25 @@
 {
   "id": "athletes-earnings",
-  "by": "builder",
   "judgedAt": "2026-11-02",
-  "decision": "daily-list",
+  "decision": "fix-first",
   "alsoBlitz": false,
   "priority": 6,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 8, "livesLost": 3, "guesses": 14 },
-  "fan": null,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 2, "data": 4, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 8, "livesLost": 5, "guesses": 18 },
   "blitzCasual": null,
-  "difficulty": 2,
+  "difficulty": 3,
   "tags": ["sports", "money", "athletes"],
   "audience": "sports fans",
-  "summary": "Written by the data agent at build time, pending a real judge. Ronaldo, Messi, LeBron and Curry are gimmes; Canelo, Ohtani and Hamilton take thought; Jon Rahm and Benzema are the surprises.",
+  "summary": "A good top 10 with a fair curve, but every Forbes top 10 since 2012 costs a life, so a casual player burns out on Tiger, Federer, Neymar and McGregor before reaching Durant or Canelo.",
   "reasons": [
-    "Casual found 8 (Ronaldo, Messi, LeBron, Curry, Durant, Canelo, Ohtani, Hamilton) and lost lives on Neymar, Conor McGregor and Giannis, each showing its last Forbes rank (\"#7 in 2024 ($108 million)\").",
-    "Every Forbes top 10 from 2012 to 2025 is accepted with its year's rank and figure; stars never in one (Mahomes, Jordan) are free, Kobe Bryant too.",
-    "Title and prompt name the year and the measure (earnings, endorsements included). Not Blitz-ready: misses carry other years' figures."
+    "Casual found Ronaldo, Messi, LeBron, Curry and Ohtani, then ran out of lives on Mbappé, Tiger Woods, Neymar, Federer and Conor McGregor at guess 11 (Mbappé and Federer through the confirm box). Durant and Canelo were the next guesses. 5 is under the 6-8 bar.",
+    "Fan found 8 (missed Canelo and Hamilton) and lost 5 on Prescott, Fury, Soto, Giannis and Joe Burrow. Those recent names are fair near misses. Losing lives on 2012-2021 legends, while active stars like Mahomes are free, is not.",
+    "Title and prompt name the measure (earnings with endorsements). Tiger, Federer and Mayweather show dated figures (#8 in 2020, #9 in 2023, #1 in 2018). Not Blitz-ready: only the 10 answers carry a 2026 figure."
   ],
-  "fixes": []
+  "fixes": [
+    "Charge a life only for recent near misses: keep the 2024 and 2025 tables and the $100 million table (tables 1, 2 and 18) in `also`, and drop 2012-2023 (tables 3-6 and 8-15). Tiger Woods, Federer, Mayweather, McGregor, Brady, Djokovic and Nadal then become free (they lose their dated figure). By my count the casual then finds 7 with 3 lives lost.",
+    "Joe Burrow and Oleksandr Usyk cost a life with no figure: give them their year from the $100 million table (\"$100 million+ in 2024\", \"$100 million+ in 2025\").",
+    "Prompt: Forbes' 2026 list covers the 12 months to spring 2026 (Canelo's #2 comes from his September 2025 fight), so \"earned the most in 2026\" is loose. Suggest \"Name the 10 highest-paid athletes on Forbes' 2026 list (salary and winnings plus endorsements)\"."
+  ]
 }
