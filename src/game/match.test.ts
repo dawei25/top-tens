@@ -313,6 +313,14 @@ describe("an answer's name followed by who made it", () => {
   it("needs a real name at the start, not a scrap of one", () => {
     expect(judgeGuess("sta justin bieber", songs, new Set())).toMatchObject({ kind: "unknown" });
   });
+  it("not when the whole guess is a name of its own", () => {
+    const countries: Puzzle = { ...puzzle, id: "countries3", answers: [e(1, "Saudi Arabia"), e(2, "Mexico"), ...puzzle.answers.slice(2)], extras: [] };
+    // A lexicon that knows "Saudi Aramco" and "Mexico City" as names (from other lists in the bank).
+    const lex = { alphabet: "", table: "", names: ["saudi aramco", "mexico city"].map((w) => fnv(w).toString(36)).join(" ") };
+    expect(judgeGuess("saudi aramco", countries, new Set(), lex)).toMatchObject({ kind: "unknown" });
+    expect(judgeGuess("mexico city", countries, new Set(), lex)).toMatchObject({ kind: "unknown" });
+    expect(judgeGuess("saudi arabia riyadh", countries, new Set(), lex)).toMatchObject({ kind: "correct", entry: { rank: 1 } });
+  });
 });
 
 describe("an ordinary word typed alone", () => {

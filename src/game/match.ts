@@ -280,8 +280,9 @@ export function judgeGuess(
   if (partial.length > 0) return fits(partial, true);
 
   // An answer's full name with more words after it, usually who made it ("perfect ed sheeran", "stay justin bieber"):
-  // that answer, put in the box to confirm. The longest name that starts the guess wins.
-  const lead = leadingName(guess, [...puzzle.answers, ...puzzle.extras]);
+  // that answer, put in the box to confirm. The longest name that starts the guess wins. Not when the whole guess is a
+  // name of its own: "saudi aramco" is the company, not Saudi Arabia; "mexico city" is not Mexico.
+  const lead = lex && isKnownName(raw, lex) ? undefined : leadingName(guess, [...puzzle.answers, ...puzzle.extras]);
   if (lead) {
     const c = candidates.find((x) => x.entry === lead);
     if (c) return resolve(c, true);
