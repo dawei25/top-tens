@@ -1234,6 +1234,10 @@ export const TOPICS: Topic[] = [
       "Tupac Shakur": ["2Pac", "Tupac"],
       Rihanna: ["RiRi"],
       "Guns N' Roses": ["Guns and Roses", "GNR"],
+      // Shorthand fans type (judge, cycle 4): free in classic either way, but only an alias scores in Blitz.
+      "Michael Jackson": ["MJ"],
+      "Red Hot Chili Peppers": ["RHCP"],
+      "Led Zeppelin": ["Led Zep"],
     },
     // Songs, albums, tours, labels, fans and relatives among the redirects: CELEBRITY_JUNK in scripts/aliases.ts.
   },
