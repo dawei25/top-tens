@@ -125,18 +125,17 @@ describe("Today's Blitz", () => {
     { n: 5, date: "2026-11-06", id: "e", blitz: "g" },
     { n: 6, date: "2026-11-07", id: "f" },
   ];
-  it("keeps a day's explicit pick, before and after the switch", () => {
+  it("keeps a day's explicit pick", () => {
     expect(blitzOfTheDay(days, lists, "2026-11-04")).toBe("c");
     expect(blitzOfTheDay(days, lists, "2026-11-06")).toBe("g");
   });
-  it("from 2026-11-05, a day without one plays its own list", () => {
-    expect(blitzOfTheDay(days, lists, "2026-11-05")).toBe("d");
-  });
-  it("has no Blitz on a day whose list can't be a Blitz, rather than another topic", () => {
-    expect(blitzOfTheDay(days, lists, "2026-11-07")).toBeUndefined();
-    // Past the end of the schedule, the stand-in's Blitz carries on.
-    expect(blitzOfTheDay(days, lists, "2026-11-09")).toBeUndefined();
-    expect(blitzOfTheDay(days.slice(0, 4), lists, "2026-11-09")).toBe("d");
+  it("a day without its own pick gets another topic, never that day's list or a later daily", () => {
+    for (const date of ["2026-11-05", "2026-11-07", "2026-11-09"]) {
+      const id = blitzOfTheDay(days, lists, date);
+      expect(id).toBeDefined();
+      expect(["d", "e", "f"]).not.toContain(id);
+      expect(lists.find((l) => l.id === id)?.blitz).toBe(true);
+    }
   });
   it("older days keep the date-seeded pick, never that day's daily or a later one", () => {
     // What the pick gave for these dates before the switch existed.
@@ -163,10 +162,13 @@ describe("Blitz spoiler holds", () => {
   });
   it("free Blitz never offers today's daily, a future one, or Today's Blitz before it's played", () => {
     const fresh = saved([]);
-    // 2026-11-04 is before the switch: its Blitz is another list (c, the only one left).
+    // 2026-11-04's Blitz is another list (c, the only one left).
     expect([...blitzHoldouts(days, lists, fresh, "2026-11-04")].sort()).toEqual(["a", "b", "c"]);
     const played: Saved = { ...fresh, blitzDaily: { "2026-11-04": { id: "c", score: 10, answers: 1 } } };
     expect([...blitzHoldouts(days, lists, played, "2026-11-04")].sort()).toEqual(["a", "b"]);
-    expect([...blitzHoldouts(days, lists, fresh, "2026-11-05")]).toEqual(["b"]);
+    // Today's list and Today's Blitz (another topic) are both held back.
+    const todays = blitzOfTheDay(days, lists, "2026-11-05")!;
+    expect(todays).not.toBe("b");
+    expect([...blitzHoldouts(days, lists, fresh, "2026-11-05")].sort()).toEqual(["b", todays].sort());
   });
 });

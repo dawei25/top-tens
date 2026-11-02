@@ -129,18 +129,12 @@ function hash(s: string): number {
   return h >>> 0;
 }
 
-/** From this date on, a day's Blitz is that day's own list: one topic per day for both dailies. */
-export const SAME_TOPIC_FROM = "2026-11-05";
-
 /**
- * Today's Blitz list, the same for everyone on a date:
- * - the schedule's own pick, if the entry names one (past dailies stay as they ran);
- * - from SAME_TOPIC_FROM, the day's own list if it plays as a Blitz, and otherwise no Blitz that day (never a
- *   different topic). While the day's list is unfinished, its Blitz shows only what the player hit (`blitzHold`);
- * - before that, a date-seeded pick among Blitz lists that isn't that date's daily (Blitz shows every answer, so it
- *   would spoil it) and isn't scheduled as a later daily. It may be a list from an earlier daily.
- * A day the schedule hasn't reached yet follows the entry standing in for it (see `todayEntry`): from
- * SAME_TOPIC_FROM that is the stand-in's own Blitz, so the two Today keys still share a topic.
+ * Today's Blitz list, the same for everyone on a date. Today's list and Today's Blitz are separate topics: what makes
+ * a good list (knowing the top 10 and its order) differs from what makes a good Blitz (lots of names that score).
+ * - the schedule's own pick, if the entry names one (`scripts/schedule.ts` writes one for every day);
+ * - otherwise (a day the schedule doesn't cover), a date-seeded pick among Blitz lists that isn't that date's daily
+ *   (Blitz shows every answer, so it would spoil it) and isn't scheduled as a later daily.
  */
 export function blitzOfTheDay(
   schedule: DailyEntry[],
@@ -149,10 +143,6 @@ export function blitzOfTheDay(
 ): string | undefined {
   const entry = todayEntry(schedule, date);
   if (entry?.blitz && entry.date === date) return entry.blitz;
-  if (entry && entry.date >= SAME_TOPIC_FROM) {
-    const id = entry.blitz ?? entry.id;
-    return lists.some((l) => l.id === id && l.blitz) ? id : undefined;
-  }
   const blocked = new Set(schedule.filter((e) => e.date >= date).map((e) => e.id));
   if (entry) blocked.add(entry.id);
   const pool = lists.filter((l) => l.blitz && !blocked.has(l.id)).sort((a, b) => a.id.localeCompare(b.id));
