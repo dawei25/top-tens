@@ -393,6 +393,13 @@ a {
   flex-direction: column;
   gap: 14px;
 }
+/* Wide enough: Today's list and Today's Blitz side by side, half the height. */
+@media (min-width: 640px) {
+  .today-stack {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
 .today-stack .key-sub {
   font-size: 20px;
 }
