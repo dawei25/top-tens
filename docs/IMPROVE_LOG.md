@@ -2,6 +2,29 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-02, cycle 4
+
+- Judged: car-models (daily list, p7: the casual finds 7; added to the bank), music-artists (daily Blitz, p8: the
+  title now names the measure; the casual finds 9, too easy for a list), concert-tours (fix-first, p8: "tour" alone
+  handed over the top 10; otherwise a daily list and a Blitz; re-judge next), athletes-earnings (fix-first, p6:
+  every Forbes top 10 since 2012 cost a life, so the casual found 5; now only 2024+ near misses count, replay 7).
+- Matcher: a list's own noun words are category words ("names" no longer James, "museums" no longer the Vatican
+  Museums); a word shared by 3+ top-10 answers, or a crowd with 2+, asks for more ("tour", "toyota", "china" on
+  banks); a plain word gets one slip at most, onto a ranked answer ("barrel" no longer Brazil, "action" no longer
+  the Amazon; "hungry" still Hungary; lost: "cypress" for Cyprus, now a free miss); short artist names pick by the
+  rest ("u2 vertigo"); a name plus another number is a free miss ("frozen 3", "bridgerton 2").
+- Data: car models named "Toyota Corolla" style; athletes' past stars free, Burrow and Usyk with figures, a Forbes
+  2026 title; tour facts name the artist, tour grosses from infoboxes so 54 of 57 unranked tours score in Blitz;
+  MJ, RHCP, Led Zep. Camp Nou keeps 99,354 (no current figure to override with).
+- Leak rate: 1.5% before this cycle; re-measure on the merged main pending.
+- New topics: netflix-seasons ("Netflix seasons with the most views in their first 91 days"; casual 7, a possible
+  daily; "squid game" is Season 1, later seasons by number) and mcdonalds-countries (casual 9, too easy for a list;
+  Blitz 31/34). Both need a judge.
+- Method: judge brief now types the subject and categories alone, keeps old rankings free on one-year lists, and
+  asks facts to name what players answer by. Test over every built list: its noun never hands over a top-10 answer.
+- Schedule: through Nov 12, 7 approved lists unscheduled, no top-up.
+- Next: judge concert-tours and athletes-earnings (fixed), netflix-seasons and mcdonalds-countries.
+
 ## 2026-11-02, cycle 3
 
 - Judged: instagram (free play, Blitz-ready: the casual found 10/10, too easy for a list, a great Blitz),

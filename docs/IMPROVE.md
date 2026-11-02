@@ -55,6 +55,14 @@ stronger.
 | Concert-tour misses from yearly tables showed no figure; Michael Dell showed his rank from 2000 | one-row-per-year tables, and old figures winning over new ones | `perYear` dated labels (build.test.ts); the newest dated figure wins |
 | Instagram's cache rolled back to a page with a #10/#11 tie | cache merges keeping the older file | the coordinator merges caches newer-wins (step 4) |
 | Nov 4's Blitz was Broadway, Nov 2's list (picked before the no-repeat rule) | a topic running twice | real.test.ts: no list runs twice from Nov 2, every day has its own Blitz; builder verdicts never schedule |
+| "tour" offered top-10 tours four at a time until all were found | a list's subject or category word handing over answers | match.ts: a list's noun words are category words; a word shared by 3+ top-10 answers, or a crowd with 2+, asks for more; real.test.ts checks every list's noun; judge brief: type the subject and categories alone |
+| "toyota" offered only Mirai/Prius, a life each | top 10 named one way, the pool another | rows named like the pool ("Toyota Corolla"), the model alone an alias |
+| "barrel" filled in Brazil, "action" the Amazon | ordinary words stretched into names by the typo budget | match.ts: a plain word gets one slip at most, onto a ranked answer; match.test.ts |
+| "bridgerton 2" put Season 1 in the box, "frozen 3" Frozen | a name plus a different number | `leadingName` requires the number to match; match.test.ts |
+| One show, several ranked seasons | parts of one thing ranked apart | `part` in topics.ts: the show's name and redirects only on its top season; build.test.ts |
+| Tiger, Federer, McGregor cost lives on a 2026 list | old rankings accepted on a one-year list | judge brief: on a one-year list only recent near misses cost a life |
+| Burrow cost a life with no figure; One Direction's tour scored nothing in Blitz | threshold tables read as names only; unranked answers without a stat | dated `figure` from the cell's latest year; `gross` infobox kind, never replacing a table stat; build.test.ts |
+| Tour facts didn't say whose tour | facts omit what players answer by | judge brief: the fact names it |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
 
 ## What good looks like

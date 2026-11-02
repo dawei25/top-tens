@@ -31,9 +31,12 @@ sports statistician.
    definition traps (dependencies counted as countries, a ranking by an unexpected measure), stale or odd values,
    duplicate or garbled names, junk aliases (alias text glued together, redirects that are not names of the thing,
    such as "1937 Nanga Parbat tragedy" for a mountain)? Were obvious ways of typing a top-10 answer *not*
-   recognized in the replay?
+   recognized in the replay? Type the list's subject and its categories alone ("tour", "toyota", "china" on banks):
+   they must never hand over top-10 answers. On a one-year ranking ("of 2026"), only recent near misses should cost
+   a life; past stars from old years are free.
 6. **Check the reveal.** Every top-10 answer should show a fun fact, and your casual player's misses should show a
    rank or a figure. A miss that only says "isn't in the top 10" while the page has numbers for it is a `fixes` item.
+   When players answer by something other than the entry's name (the artist of a tour), the fact names it.
 7. **Score and decide** (below), then write the verdict file.
 
 ## Scores (1 to 5)

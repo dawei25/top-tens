@@ -15,14 +15,18 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       only for lists judged daily-worthy). Antarctic Desert has no fact yet.
 
 - [ ] **List judge leftovers** (re-judge each list after the rebuild):
-      - **stadiums:** Camp Nou's post-renovation capacity (the page still says 99,354; about 105,000 would make it
-        #3).
+      - **stadiums:** Camp Nou: revisit when the renovation completes (2028-29). The article gives 62,652 while
+        stands reopen in phases and 105,000 only as expected; the list keeps 99,354 (#12).
       - Sources still missing: 2025 sales for BMW, Mercedes and Tesla; career points for active NBA stars; Facebook
         follower counts; a deeper city-visitors ranking; 2025 theme-park figures.
 
 - [ ] **`normalize()` and leading "A"** (contract change, needs a full rebuild): "A-Rod" normalizes to "rod"
       because the leading article is dropped, so that alias also catches "rod". Only drop "a" when a word follows it
       with a space, or keep hyphenated forms whole.
+
+- [ ] **Cycle 4 pipeline changes not yet on every list** (apply at each list's next rebuild): "Science in Aotearoa"
+      in the shared country junk list (13 country lists); infobox values never replace a stat from a table (lists
+      using `values`).
 
 - [ ] **Cycle 3 pipeline changes not yet on every list** (apply at each list's next rebuild): intent groups wait for
       all their entries, `stripWords` patterns, short forms ending in a little word dropped, new athletes' junk in
