@@ -574,5 +574,11 @@
   "title": "Netflix seasons with the most views in their first 91 days",
   "category": "Entertainment",
   "blitz": false
+ },
+ {
+  "id": "mcdonalds-countries",
+  "title": "Countries with the most McDonald's restaurants",
+  "category": "Oddball",
+  "blitz": true
  }
 ]

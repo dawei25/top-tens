@@ -333,7 +333,7 @@ export const COMPANY_JUNK = [
 ];
 
 export const COUNTRY_JUNK = [
-  "Snow Mexico", "Finnishness", "The Land of Chocolate", "Day of the Capital", "Abdullah al-Saleh", "Al Rawda Palace",
+  "Science in Aotearoa", "Snow Mexico", "Finnishness", "The Land of Chocolate", "Day of the Capital", "Abdullah al-Saleh", "Al Rawda Palace",
   "Ugandan nationalism", "Ker Alur", "Official language of Southern Sudan", "North Kenya", "Kenya-Africa",
   "Belgian Ubanghi", "Độc lập, tự do, hạnh phúc", "Doc lap, tu do, hanh phuc", "Swedish sin", "Folkland",
   "Federal state", "German infrastructure", "Law and criminal justice of Italy", "Administrative units of Italy",

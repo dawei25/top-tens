@@ -955,7 +955,8 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   // state, every team) that the table leaves out, still count as (wrong) answers.
   seedIntent(topic, entries);
   const extra = await readAlso(topic, rows.at(-1)!.value);
-  for (const u of [topic.universe ?? []].flat()) {
+  // `universeNamesOnly`: the universe names the rows, but adds no answers of its own.
+  for (const u of topic.universeNamesOnly ? [] : [topic.universe ?? []].flat()) {
     // A free row's other names count too: the table's "Macau" is the universe's "Macao".
     const free = new Set(unrankedRows(topic));
     for (const forms of COUNTRY_FORMS) if (forms.some((f) => free.has(normalize(f)))) for (const f of forms) free.add(normalize(f));

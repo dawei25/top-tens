@@ -71,6 +71,11 @@ export interface Topic {
   people?: boolean;
   /** Also accept every member of these sets as a real (life-costing) answer, even ones missing from the table. */
   universe?: Universe | Universe[];
+  /**
+   * The universe only names the rows (country forms, demonyms, the country junk list): members the tables leave out
+   * are free, not answers. A country McDonald's never opened in costs nothing.
+   */
+  universeNamesOnly?: boolean;
   /** Name rows after the universe member they match ("Boston / Milwaukee / Atlanta Braves" → "Atlanta Braves"). */
   canonical?: boolean;
   /** Only keep rows whose `col` cell matches. */
@@ -2586,6 +2591,31 @@ export const TOPICS: Topic[] = [
       ] as const
     ).map(([page, tables]) => ({ page, tables: [...tables], name: "Title", nameFromText: true })),
     noFigures: "Netflix publishes only its all-time top 10; no other season has a figure",
+  },
+  {
+    id: "mcdonalds-countries",
+    category: "Oddball",
+    title: "Countries with the most McDonald's restaurants",
+    noun: "countries",
+    prompt: "Name the 10 countries with the most McDonald's restaurants",
+    page: "List of countries with McDonald's restaurants",
+    tables: [0],
+    name: "Country/territory",
+    value: "No. of operating outlets",
+    metric: "McDonald's restaurants",
+    dataAsOf: "December 2025",
+    universe: "countries",
+    // Every country (and territory) with a McDonald's is an answer; one that never had one is free.
+    universeNamesOnly: true,
+    also: [
+      // Countries it has left, with their count at closing: "Russia: 850 (all closed in 2022)".
+      {
+        tables: [1],
+        name: "Country/territory",
+        value: "Number of stores",
+        dated: { perYear: { col: "Date of closure" }, label: "all closed in {year}" },
+      },
+    ],
   },
 ];
 
