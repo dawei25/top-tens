@@ -184,7 +184,10 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
 
   // "Kotly, Moscow", "Vista Alegre, Belo Horizonte": a place inside the thing, named before it. "Washington, D.C."
   // and "Atlanta, Georgia" start with the thing's own name and stay.
-  const parts = base.split(/\s*,\s*/);
+  // "Apple Computer, Inc." is one name: a company suffix after the comma is no second part.
+  const parts = base.replace(/,\s*(inc|ltd|llc|corp|co|plc|sa|ag)\.?$/i, "").split(/\s*,\s*/);
+  // "Eminem, Marshall Bruce Mathers III": two of its names joined by a comma, which nobody types.
+  if (parts.length === 2 && parts.every((x) => forms.has(normalize(x)))) return "two of its names joined";
   const head = normalize(parts[0]);
   if (parts.length > 1 && !own.has(head) && parts.slice(1).some((p) => forms.has(normalize(p)))) {
     return "a place inside the thing";
@@ -234,6 +237,92 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
  * "Singan", "market" Mecca through "Makkeh"). Dropped on every city list.
  */
 export const CITY_JUNK = ["Singan", "Siking", "Signan", "Makkeh", "Shouer", "Singy", "S'pore", "Dtown"];
+
+/**
+ * Redirects to famous people's articles that are relatives, songs, albums, tours, labels, fan names, scandals and
+ * companies, found by the list judges. The same stars top the follower, streaming and sales lists, so the list is
+ * shared: dropped on every list of people and every follower list (scripts/build.ts).
+ */
+export const CELEBRITY_JUNK = [
+  // Drake, Taylor Swift, Eminem.
+  "I Get paper", "Comeback Season II", "It's Never Enough", "Do Right and Kill Everything", "All Kinds", "Fantasy 416",
+  "Drake Griffin", "Jungle Tour", "Wanna Know", "Please Forgive Me", "Songs recorded by Drake Canada", "Ela É do Tipo",
+  "Frozen Moments", "Nocta", "Sophie Brussaux", "Titles Ruin Everything", "Drake vs. Everybody", "Housekeeping Knows",
+  "The Embassy", "OVOXO", "Lost Files", "Gettin' Paid", "Fr8me", "Coffret 4 CD", "3 CD Collector's Set", "Insane",
+  "Monologue Song", "Andrea Gardner Swift", "Andrea Swift", "Incredible Things", "Track 5", "Andrea Finlay",
+  "Scott Kingsley Swift", "Wonderstruck", "Westbury Road", "Hailie Jade", "Hailie Jade Mathers",
+  "Kimberley Anne Scott Mathers", "Hailey Jade", "Hailie Jade Scott", "John Guerrera", "Deborah Mathers", "Debbie mathers",
+  "Deborah Mathers-Briggs", "Ronnie Polkingharn", "The Slim Shady Show", "Kim Mathers", "Hailie Mathers",
+  "Kimberley Ann Scott Mathers", "Haile Jade Mathers", "Bassmint", "The Way I Am", "Kimberly Anne Scott", "Soul intent",
+  "Diss Me, Diss You", "Eight Mile Style", "8 Mile Style", "Kimberly Mathers", "Deborah Nelson Mathers-Briggs",
+  "Live at Comerica Park", "Straight from the Vault", "Straight From The Vault EP", "Ken Kaniff", "Hailie Jade Scott Mathers",
+  "Lose Yourself Tour", "Evil", "Kimberley Anne Scott", "Shady Ltd.", "Hailie Scott Mathers", "Hailie Scott", "New Jacks",
+  "Bassmint Productions", "Debbie Nelson", "Deborah Rae Nelson", "Deborah R. Nelson", "Debbie Rae Nelson",
+  "Debbie Mathers-Briggs", "Debbie Nelson-Mathers", "Debbie Rae Mathers", "Slim", "Eminem, Marshall Bruce Mathers III",
+  // Beyoncé, Justin Bieber, Michael Jackson, Chris Brown, The Weeknd.
+  "Beyoncé Knowles Records and Achivements", "Beyoncé Knowles' music videos", "Beyoncé' music videos",
+  "Slow Love World Tour", "Beyoncé Pulse", "The Ultimate Collection", "Pulse", "Third Ward Trill",
+  "Rock It Till Water Falls", "Renaissance Trilogy", "Rumi Carter", "Justin Bieber on Twitter", "Skylrk",
+  "Jeremy bieber", "Justin Bieber's hair", "Belieber", "Beliebers", "Bieber Mania", "Bieber Fever", "Biebermania",
+  "Michael Jackson finances", "Prince Michael Jackson ll", "Grace Rwaramba", "Michael Jackson jr", "Prince Michael Jackson I",
+  "Prince Michael Jackson Jr.", "Blanket", "Agent MJ", "Michael Joseph Jackson Jr", "Prince blanket", "MJJ Music",
+  "The skinniest Jackson", "The Hee Hee Guy", "Rhinstone Glove", "John Jay Smith", "Johnny Jay Smith", "In the Zone",
+  "In My Zone", "Boy in Detention", "Put It Up", "Ghetto Tales", "CBE", "Chris Brown Entertainment",
+  "CBE Entertainment", "King Of The Fall", "We're Alone Together", "Starboy", "The Dawn Is Coming", "Kin Kane",
+  "Manic Phase", "Bulleez N Nerdz", "Bullies and Nerds", "Gene Hackerman", "Gene.hackerman", "Sober lite",
+  // Ariana Grande, Katy Perry, Bruno Mars, Lady Gaga, Shakira.
+  "Moonlightbae", "Donutgate", "Ariana Grande credits", "Zandhr", "Dalton Gomez", "Marjorie Grande", "Dolly", "Purr",
+  "Meow", "David Hudson", "David Daniel Hudson", "David D. Hudson", "Mad Potion", "Mind's a Maze", "Minds Amaze",
+  "Immortal Flame", "Daisy Dove Bloom", "De Soi", "Gypsy Love", "Killa on the Run", "The Hooligans", "Kameron Whalum",
+  "Pectoralz", "Los Unidades", "Big Fat Noises", "Little Monsters", "Lady Gaga on Twitter", "Still Have Fun",
+  "Shakira ft. Wyclef Jean", "Shakira Bio", "Shakira & Alejandro Sanz", "Shakira notable concerts", "Milan Piqué",
+  "Milan Pique", "Pies Descalzos World Tour",
+  // Cristiano Ronaldo, Lionel Messi.
+  "Kathryn Mayorga", "Cristiano Ronaldo sexual misconduct allegations", "Cristiano Ronaldo Jr.", "Cristiano Ronaldo Junior",
+  "Cristiano Ronaldo Júnior", "Cristianinho", "Cristiano Jr.", "Cristiano Ronaldo dos Santos Junior",
+  "Cristiano Ronaldo dos Santos Júnior", "Cristiano Ronaldo dos Santos Jr", "UR Cristiano", "UR", "CR", "Ronaldo chop",
+  "Striker Force 7", "Thiago Messi", "Messimania",
+  // Selena Gomez, the Kardashian-Jenners, Dwayne Johnson.
+  "Gracie Elliot Teefey", "Gracie Teefey", "Mandy Teefey", "Brian Teefey", "Ricardo Joel Gomez", "July Moon Productions",
+  "I'll Be Single Soon", "The Kylie Jenner Effect", "Stormi Webster", "Kim Kardashian effect", "Kimye", "KKW Beauty",
+  "SKKY Partners", "Kim Kardashian Productions", "Good American", "The Rock in Video Games", "Rock The Promo",
+  "Lauren Hashian", "The People's Championship",
+  // Narendra Modi, Elon Musk, Barack Obama.
+  "Hiraben Modi", "Heeraben Modi", "HE Hiraben Modi", "Damodardas Mulchand Modi", "Damodardas Modi", "Mulchand Modi",
+  "Narendra Modi's Google+ Hangout", "Use of Technology by Narenda Modi", "NaMo TV", "Founder of SpaceX",
+  "Michelle Obama's husband",
+];
+
+/**
+ * Redirects to company articles that are slogans, subsidiaries, sites, people, products, lawsuits and offices, found
+ * by the list judges and the leak audit. Dropped on every list where web addresses are names (companies, websites),
+ * so a fix on one company list holds on the others: "bookworm" found Amazon through "Bookworm.com" on one list after
+ * it was dropped on another.
+ */
+export const COMPANY_JUNK = [
+  // Amazon: sites it bought or redirects, which only catch typos of ordinary words ("bookworm", "relentless").
+  "Bookworm.com", "Relentless.com", "Unboxed.com", "Soundunwound.com", "Soundunwound", "Sound unwound", "BeautyBar.com",
+  "Wag.com", "Yoyo.com", "AfterSchool.com", "Casa.com", "Myhabit.com", "Look.com", "Junglee", "Junglee.com",
+  "Indigo Starfish", "Lobbying by Amazon", "Lobbying by Amazon.com", "Controversies surrounding Amazon, Inc.",
+  "Amazon leadership principles", "Commingled inventory", "Co-mingled inventory", "Comingled inventory", "AStore",
+  "Katherine L. Adams", "Directly Responsible Individual",
+  // Apple, Microsoft, Nvidia, Meta, SpaceX, TSMC, Symantec, HP.
+  "Boycott Apple", "Apple tax", "Apple tax practices", "Tax avoidance by Apple Inc.", "Spruce Technologies", "Raycer",
+  "Blibbet", "Lift London", ".bing", "Extended Security Updates", "Microsoft.sucks", "WebsiteSpark", "Officelive.com",
+  "Forceware", "IReady", "Controversies surrounding Nvidia", "Project GROOT", "Project Groot", "Nvidia Grace",
+  "Project GR00T", "NVIDIA Project GR00T", "NVIDIA GR00T", "Nvidia GROOT", "Generalist Robot 00 Technology",
+  "Move fast and break things", "Hacker Way", "1 Hacker Way", "One Hacker Way", "Mars Oasis", "SpaceX Hawthorne facility",
+  "SpaceX headquarters", "SpaceX Hawthorne", "Spacex.com", "WaferTech", "TSMC Washington", "Afterburner", "SpeedBooster",
+  "125 High Speed Mode", "125HSM", "Symantec Security", "Symantec Security Response", "HP Associates",
+  // Walmart, Nike, Saudi Aramco, UnitedHealth, Berkshire Hathaway, PetroChina, ICBC, Bank of America, Sega.
+  "Supercenter", "Discount City", "Save Money. Live Better.", "Always Low Prices, Always", "GamePlay", "Just Do It Award",
+  "Carbon emissions by Saudi Aramco", "Tim Noel", "Controversies surrounding UnitedHealth Group", "Logistics Health Incorporated",
+  "Woodstock for Capitalists", "Berkshire Hathaway Annual Shareholders Meeting", "Xinjiang Oilfield Company",
+  "Xinjiang Oil Company", "Great Wall Drilling", "Great Wall Drilling Company", "ICBC.com.cn", "ICBC Leasing",
+  "The Bank of East Asia", "Erica", "Sonic",
+  // " Inc." (Apple's logo) reads as "inc".
+  "Inc.",
+];
 
 export const COUNTRY_JUNK = [
   "Snow Mexico", "Finnishness", "The Land of Chocolate", "Day of the Capital", "Abdullah al-Saleh", "Al Rawda Palace",

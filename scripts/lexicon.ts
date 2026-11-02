@@ -49,11 +49,14 @@ export const NOT_PUZZLES = new Set(["index.json", "lexicon.json", "daily.json", 
  * Every name and alias in the bank. `ranked` is the part from the source tables (ranked entries); the rest are
  * unranked pool members (universes, other tables, category members), thousands of them in some puzzles.
  */
-export function bankNames(dir: string): { ranked: string[]; all: string[] } {
+export function bankNames(dir: string): { ranked: string[]; all: string[]; namesOfNote: string[] } {
   const ranked: string[] = [];
   const all: string[] = [];
+  /** Names of top-10 answers, and of every ranked person (lists with `people`). */
+  const namesOfNote: string[] = [];
   // Passwords are keyboard mash on purpose: "qwerty" stays junk everywhere else.
   const notWords = new Set(TOPICS.filter((t) => t.notWords).map((t) => `${t.id}.json`));
+  const peopleLists = new Set(TOPICS.filter((t) => t.people).map((t) => `${t.id}.json`));
   for (const f of readdirSync(dir)) {
     if (!f.endsWith(".json") || NOT_PUZZLES.has(f) || notWords.has(f)) continue;
     const p: Puzzle = JSON.parse(readFileSync(join(dir, f), "utf8"));
@@ -61,32 +64,67 @@ export function bankNames(dir: string): { ranked: string[]; all: string[] } {
       const forms = [e.name, ...e.aliases];
       all.push(...forms);
       if (e.rank > 0) ranked.push(...forms);
+      if ((e.rank > 0 && e.rank <= 10) || (e.rank > 0 && peopleLists.has(f))) namesOfNote.push(e.name);
     }
   }
-  return { ranked, all };
+  return { ranked, all, namesOfNote };
 }
 
-export function writeLexicon(dir: string): number {
+/**
+ * Ordinary English words (3+ letters) that are a whole word of some name or alias in the bank but no name themselves:
+ * "humans" (Destroy All Humans!), "water" (Avatar: The Way of Water), "trees" (Trees of Mystery). Typed alone they
+ * mean the word, so the matcher doesn't read them as part of a longer name (src/game/junk.ts, `isPlainWord`). Words of
+ * aliases count too: the matcher reads only names' words, but a word typed alone also never becomes a typo of one
+ * ("water" is not Walter Masterson).
+ *
+ * Names keep their readings: any full name or alias in the bank ("jordan", "china", "avengers"), and every word of
+ * `namesOfNote`, the top-10 answers and ranked people. There a word alone is how players name the answer: "cowboys"
+ * is the Dallas Cowboys, "pizza" Pizza Hut, "shark" Baby Shark, "swift" Taylor Swift, "rose" Pete Rose. Without that,
+ * 240 such readings of top-10 answers were lost, and some became typos of something else ("dragon" Doraemon).
+ */
+export function plainWords(names: string[], known: Set<string>, namesOfNote: string[], dictionary: string[]): string[] {
+  const english = new Set(dictionary.map((w) => normalize(w)).filter((w) => w.length >= 3 && !w.includes(" ")));
+  const noted = new Set(namesOfNote.flatMap((n) => normalize(n).split(" ")));
+  const out = new Set<string>();
+  for (const n of names) {
+    for (const w of normalize(n).split(" ")) {
+      if (w.length >= 3 && english.has(w) && !known.has(w) && !noted.has(w)) out.add(w);
+    }
+  }
+  return [...out].sort();
+}
+
+/** Writes public/puzzles/lexicon.json; says what it was trained on. */
+export function writeLexicon(dir: string): string {
   const words: string[] = require("an-array-of-english-words");
   // Countries and capitals too, so "Fiji" or "Ljubljana" never reads as junk.
   const places = [...countries().flatMap((c) => [c.name, ...c.aliases]), ...capitals()];
-  const { ranked, all } = bankNames(dir);
+  const { ranked, all, namesOfNote } = bankNames(dir);
   // The letter model learns from the ranked names only, so huge unranked pools (every YouTuber with an article)
   // don't skew what a plausible word looks like. Every name still counts as known.
   // Weight 2, not the default 5: the ranked bank is several times bigger than when the threshold was tuned.
   const lex = trainLexicon(words, [...ranked, ...places], 2);
   const known = new Set(lex.names.split(" "));
   // States and provinces are real names too: "amazonas" must not be corrected into the city Arapongas.
-  for (const n of [...all, ...SUBDIVISIONS, ...usStates().map((s) => s.name)]) {
+  const knownText = new Set<string>();
+  // Plain words (below) leave out every name, these included.
+  for (const n of [...all, ...places, ...SUBDIVISIONS, ...usStates().map((s) => s.name)]) {
     const s = normalize(n);
-    if (s) known.add(fnv(s).toString(36));
+    if (s) {
+      known.add(fnv(s).toString(36));
+      knownText.add(s);
+    }
   }
   lex.names = [...known].join(" ");
-  writeFileSync(join(dir, "lexicon.json"), JSON.stringify(lex));
-  return all.length + places.length;
+  const plain = plainWords(all, knownText, namesOfNote, words);
+  // `words` is optional in the Lexicon format: older lexicons don't have it.
+  const out = { ...lex, words: plain.map((w) => fnv(w).toString(36)).join(" ") };
+  writeFileSync(join(dir, "lexicon.json"), JSON.stringify(out));
+  if (process.env.WORDS_LOG) writeFileSync(process.env.WORDS_LOG, plain.join("\n") + "\n");
+  return `${all.length + places.length} names, ${plain.length} plain words`;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const dir = join(import.meta.dirname, "..", "public", "puzzles");
-  console.log(`trained on ${writeLexicon(dir)} names`);
+  console.log(`lexicon trained on ${writeLexicon(dir)}`);
 }

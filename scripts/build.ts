@@ -15,7 +15,7 @@ import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./int
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
 import { UNIVERSES, US_STATE_CODES, type Place } from "./gazetteer";
-import { bareWord, baseTitle, blockedAlias, CITY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect } from "./aliases";
+import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
 /** Fewest entries with a stat (`n`) for a list to be playable in Blitz. */
@@ -54,6 +54,8 @@ const MAX_ROWS = 1000;
 interface Row {
   name: string;
   value: number;
+  /** The topic's `tiebreak` column: decides between rows with the same value. */
+  tiebreak?: number;
   valueText: string;
   aliasSeeds: string[];
   redirectTarget: string;
@@ -108,6 +110,17 @@ export function parseValue(text: string): { value: number; display: string } | n
     display: `${m[1]}${digits}${range}${m[4] ? " " + m[4].toLowerCase() : ""}`,
   };
 }
+
+/** A low and a high figure as one range: "400–600 million", "500 million–1 billion", "600 million" if they agree. */
+export function rangeText(low: string, high: string): string {
+  if (low === high) return low;
+  const unit = (s: string) => s.match(/\s(million|billion|trillion)$/)?.[1];
+  if (unit(low) && unit(low) === unit(high)) return `${low.replace(/\s\S+$/, "")}–${high}`;
+  return `${low}–${high}`;
+}
+
+/** Same value, and same tiebreak where the topic has one: a tie the ranking can't split. */
+const sameValue = (a: Row, b: Row) => a.value === b.value && a.tiebreak === b.tiebreak;
 
 /** Aliases a player could type: at least two letters or digits, and not a bare number ("V", "2"). */
 function usableAlias(alias: string, name: string): boolean {
@@ -270,6 +283,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
     const { header, body } = splitHeader(tableGrid($, tables[t]));
     const nc = column(header, topic.name);
     const vc = column(header, topic.value);
+    const tc = topic.tiebreak === undefined ? -1 : column(header, topic.tiebreak);
     const aliasCs = (topic.aliasCols ?? []).map((a) => column(header, a));
     const fromCol = topic.fallback ? column(header, topic.fallback.from) : -1;
     const yc = header.findIndex((h) => /^(year|released?|release date)\b/i.test(h));
@@ -326,10 +340,12 @@ export async function readRows(topic: Topic): Promise<Row[]> {
       const viaCell = redirectTarget(cellText, nameCell, hasCountries(topic));
       const target = topic.articles?.[name] ?? (viaCell !== cellText ? viaCell : redirectTarget(name, nameCell, hasCountries(topic)));
       if (target !== name) seeds.push(target);
+      const t = tc >= 0 ? parseValue(r[tc]?.text ?? "") : null;
       rows.push({
         name,
         value: v.value,
-        valueText: v.display,
+        ...(t ? { tiebreak: t.value } : {}),
+        valueText: t && t.value >= v.value ? rangeText(v.display, t.display) : v.display,
         aliasSeeds: seeds.map(cleanName).filter((s) => s && s.length > 1),
         redirectTarget: target,
         link: nameCell.link,
@@ -340,7 +356,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
   for (const name of Object.keys(topic.overrides ?? {})) {
     if (!rows.some((r) => r.name === (topic.rename?.[name] ?? name))) console.log(`warn ${topic.id}: override for "${name}", which is not a row`);
   }
-  if (!topic.keepOrder) rows.sort((a, b) => b.value - a.value);
+  if (!topic.keepOrder) rows.sort((a, b) => b.value - a.value || (b.tiebreak ?? 0) - (a.tiebreak ?? 0));
   // "3.2 million" among "6,301,972"s reads as another unit: write it out like the rest.
   const worded = rows.filter((r) => /\b(million|billion|trillion)$/.test(r.valueText));
   if (worded.length && worded.length < rows.length / 2) {
@@ -790,7 +806,7 @@ type BuiltPuzzle = Puzzle & { category: Topic["category"]; lowerIsBetter?: true 
 async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   const rows = (await readRows(topic)).slice(0, MAX_ROWS);
   if (rows.length < 10) throw new Error(`only ${rows.length} rows`);
-  if (rows.length > 10 && rows[9].value === rows[10].value) {
+  if (rows.length > 10 && sameValue(rows[9], rows[10])) {
     throw new Error(`tie at #10/#11: ${rows[9].name} / ${rows[10].name}`);
   }
 
@@ -828,8 +844,12 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       const last = row.name.split(" ").at(-1)!;
       if (last.length >= 4 && !isEnglishWord(normalize(last))) aliases.add(last);
     }
+    // A tie below the top 10 shares its rank, as the source writes it ("T20"): Everland is #20 with Disney Adventure
+    // World, not #21. Each top-10 slot keeps its own rank (a tie at #10/#11 is rejected above), and a table kept in
+    // its own order has broken its ties already.
+    const tied = i >= 10 && !topic.keepOrder && sameValue(row, rows[i - 1]);
     entries.push({
-      rank: i + 1,
+      rank: tied ? entries[i - 1].rank : i + 1,
       name: row.name,
       aliases: [...aliases],
       value: (topic.prefix ?? "") + row.valueText + (topic.unit ?? ""),
@@ -895,6 +915,8 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     ...(topic.junkAliases ?? []),
     ...(hasCountries(topic) ? COUNTRY_JUNK : []),
     ...(/\bcities\b/.test(topic.noun) ? CITY_JUNK : []),
+    ...(topic.webNames ? COMPANY_JUNK : []),
+    ...(topic.people || /\b(accounts|pages)\b/.test(topic.noun) ? CELEBRITY_JUNK : []),
   ];
   if (junkList.length) {
     const junk = new Set(junkList.map(normalize));
@@ -982,7 +1004,7 @@ async function main(): Promise<void> {
   const dropped = [...DROPS].sort((a, b) => b[1] - a[1]).map(([why, n]) => `${n} ${why}`);
   console.log(`aliases dropped: ${dropped.join("; ") || "none"}`);
   if (process.env.ALIAS_LOG) writeFileSync(process.env.ALIAS_LOG, dropLog.join("\n") + "\n");
-  console.log(`lexicon trained on ${writeLexicon(OUT_DIR)} names`);
+  console.log(`lexicon trained on ${writeLexicon(OUT_DIR)}`);
   console.log(`${requestCount()} Wikipedia requests (the rest came from the cache)`);
 }
 

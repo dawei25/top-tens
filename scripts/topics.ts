@@ -22,6 +22,12 @@ export interface Topic {
   name: string | number;
   /** Header text or column index for the ranked value. */
   value: string | number;
+  /**
+   * Another column that breaks ties in `value` (higher first), for a source that gives a range: fiction authors rank
+   * by their low sales estimate and the high one decides between equals. The shown value is the range
+   * ("400–600 million"); `value` alone is what Blitz scores.
+   */
+  tiebreak?: string | number;
   metric: string;
   /** Appended to the displayed value, e.g. " km²". */
   unit?: string;
@@ -680,6 +686,11 @@ export const TOPICS: Topic[] = [
     aliasCols: ["Username"],
     people: true,
     also: CELEBRITIES,
+    // Instagram's own: products, users and effects among the redirects (the stars': CELEBRITY_JUNK).
+    junkAliases: [
+      "Effects of Instagram on mental health", "Instagram impact on people", "Instagrammer", "Instagram blogger",
+      "Instagram Kids", "Instagram from Facebook", "Ig.me",
+    ],
   },
   {
     id: "video-games",
@@ -748,6 +759,36 @@ export const TOPICS: Topic[] = [
       "The Da Vinci Code paintings", "Lord of the Rings Prequel", "Vengeance", "Roger Cly", "Mrs. Cruncher",
       "Théophile Gabelle", "Emily Brent", "Vera Claythorne", "Sophie Neveu", "Bezu Fache", "Leigh Teabing", "Cryptex",
       "Arkenstone", "Asteroid B", "B 612", "Tale of Two Cities, A",
+    ],
+  },
+  {
+    id: "fiction-authors",
+    category: "Culture",
+    title: "Best-selling fiction authors",
+    noun: "authors",
+    prompt: "Name the 10 best-selling fiction authors of all time (low estimate of copies sold)",
+    page: "List of best-selling fiction authors",
+    tables: [0],
+    name: "Author",
+    // The high estimates tie at #10/#11 (500 million), and so do the low ones (400 million): ranked by the low
+    // estimate, the high one breaks ties (Enid Blyton, 400-600 million, is #10; Jackie Collins, 400-500, #11).
+    value: "Min. estimated sales",
+    tiebreak: "Max. estimated sales",
+    metric: "Estimated copies sold (low–high)",
+    people: true,
+    // Authors with only a high estimate (Lewis Carroll, David Baldacci, Patricia Cornwell) are answers without a
+    // rank: a miss shows that figure.
+    also: [{ tables: [0], name: "Author", value: "Max. estimated sales", dated: { label: "high estimate only" } }],
+    // Books, relatives, companies and studies among the redirects (pen names stay: Mary Westmacott, Robert Galbraith).
+    junkAliases: [
+      "William Shakespeare biography", "Shakespearean theatre", "Shakespearean scholar", "Shakespearian studies",
+      "Shakespeare studies", "Shakespeareana", "Tropes in Agatha Christie's novels", "Plot devices in Agatha Christie's novels",
+      "Agatha Christie Ltd.", "Christie Estate", "Frederick Alvah Miller", "Clarissa Miller", "Margaret Watts",
+      "Louis Montant Miller", "Frederick Boehmer", "Nathaniel Frary Miller", "Jorge Arantes", "Neil Murray",
+      "Mackenzie Jean Rowling Murray", "Mackenzie Murray", "Mackenzie Rowling", "Jessica Rowling Arantes",
+      "Harry Potter encyclopaedia", "Harry Potter encyclopedia", "J k rowling books", "The Elephant House",
+      "Volant Charitable Trust", "Very Good Lives", "Accidental Heroes", "Dirty Snow", "Trixie Koontz", "Relentless",
+      "Buried Alive", "Voice of Thunder", "Little lost hen", "The Little lose hen", "The Three Golliwogs",
     ],
   },
   {
@@ -874,17 +915,8 @@ export const TOPICS: Topic[] = [
       { page: "List of public corporations by market capitalization", tables: range(1, 27), name: 2, skip: MARKET_CAP_SKIP },
       { page: "List of public corporations by market capitalization", tables: range(1, 27), name: 4, skip: MARKET_CAP_SKIP },
     ],
+    // Junk among the redirects: COMPANY_JUNK in scripts/aliases.ts, shared by every company list.
     webNames: true,
-    junkAliases: [
-      "The Bank of East Asia", "Sonic", "Just Do It Award", "Indigo Starfish", "Lobbying by Amazon", "Lobbying by Amazon.com",
-      "Controversies surrounding Amazon, Inc.", "Amazon leadership principles", "Commingled inventory", "Co-mingled inventory",
-      "Comingled inventory", "Inc.", "Katherine L. Adams", "Boycott Apple", "Directly Responsible Individual", "Apple tax",
-      "Apple tax practices", "Tax avoidance by Apple Inc.", "GamePlay", "Supercenter", "Discount City", "Save Money. Live Better.",
-      "Always Low Prices, Always", "Carbon emissions by Saudi Aramco", "Tim Noel", "Controversies surrounding UnitedHealth Group",
-      "Woodstock for Capitalists", "Berkshire Hathaway Annual Shareholders Meeting", "Xinjiang Oilfield Company",
-      "Xinjiang Oil Company", "Great Wall Drilling", "Great Wall Drilling Company", "Logistics Health Incorporated",
-      "ICBC.com.cn", "ICBC Leasing", "AStore", "Erica",
-    ],
   },
   {
     id: "airports",
@@ -1088,25 +1120,19 @@ export const TOPICS: Topic[] = [
     also: CELEBRITIES,
     // The table's footnote says when its numbers are from.
     dataAsOf: "14 September 2026",
+    // Relatives, songs and scandals of the stars: CELEBRITY_JUNK in scripts/aliases.ts. These are this list's own.
     junkAliases: [
-      "Kathryn Mayorga", "Cristiano Ronaldo sexual misconduct allegations", "RIP Harambe", "Strider Sekhar", "Comet Azure",
-      "Blastar", "Environmental policy of the Obama administration", "Michelle Obama's husband", "Doe 174",
-      "Trump investigations", "Biden's predecessor", "Incumbent POTUS", "Current POTUS", "Hiraben Modi", "Heeraben Modi",
-      "Damodardas Mulchand Modi", "Narendra Modi's Google+ Hangout", "Lost Files", "Fr8me", "Westbury Road", "Insane",
-      "Coffret 4 CD", "3 CD Collector's Set", "NASA Personnel", "NASA Grand Prize", "Aerospace Safety Advisory Panel",
-      "Space Systems Center", "Jeremy bieber", "Skylrk", "Justin Bieber's hair", "David Hudson", "David Daniel Hudson",
-      "Daisy Dove Bloom", "Dolly", "Meow", "Purr", "Mad Potion", "Immortal Flame", "De Soi", "Andrea Swift",
-      "Andrea Gardner Swift", "Andrea Finlay", "Scott Kingsley Swift", "Monologue Song", "Track 5", "Wonderstruck",
-      "Incredible Things", "India", "F.C.", "Times", "X Money", "XMoney",
-      // Polls, relatives, campaign slogans and NASA programmes among the redirects.
+      "RIP Harambe", "Strider Sekhar", "Comet Azure", "Blastar", "Environmental policy of the Obama administration",
+      "Doe 174", "Trump investigations", "Biden's predecessor", "Incumbent POTUS", "Current POTUS", "NASA Personnel",
+      "NASA Grand Prize", "Aerospace Safety Advisory Panel", "Space Systems Center", "India", "F.C.", "Times", "X Money",
+      "XMoney",
+      // Polls, campaign slogans and NASA programmes among the redirects.
       "Donald Trump popularity", "Trump popularity", "Trump popularity rating", "Donald Trump popularity rating",
       "Trump opinion poll", "Donald Trump opinion poll", "Trump poll", "Trump polls", "Trump poll rating",
-      "Donald Trump poll", "Opinion pollings on the Trump presidencies", "HE Hiraben Modi", "Damodardas Modi",
-      "Mulchand Modi", "Sabka saath, sabka vikas", "Sabka saath, sabka vikaas", "Narendra Modi prime ministerial candidacy",
-      "NaMo TV", "David D. Hudson", "Cristiano Ronaldo Jr.", "Cristiano Jr.", "Cristianinho", "Ronaldo chop",
-      "Striker Force 7", "Founder of SpaceX", "Don’t doubt yer vibe", "Don’t Doubt ur Vibe", "Don't doubt yer vibe",
-      "Don't Doubt ur Vibe", "NASA Advisory Council", "NASA Center for Autonomous Control Engineering",
-      "NASA Applied Sciences", "NASAcast", "NASA Edge",
+      "Donald Trump poll", "Opinion pollings on the Trump presidencies", "Sabka saath, sabka vikas",
+      "Sabka saath, sabka vikaas", "Narendra Modi prime ministerial candidacy", "Don’t doubt yer vibe",
+      "Don’t Doubt ur Vibe", "Don't doubt yer vibe", "Don't Doubt ur Vibe", "NASA Advisory Council",
+      "NASA Center for Autonomous Control Engineering", "NASA Applied Sciences", "NASAcast", "NASA Edge",
     ],
     aliases: {
       NASA: ["National Aeronautics and Space Administration"],
@@ -1176,9 +1202,11 @@ export const TOPICS: Topic[] = [
   {
     id: "music-artists",
     category: "Entertainment",
-    title: "Best-selling music artists",
+    // Not "best-selling": that reads as the page's claimed-sales ranking (the Beatles, Elvis, Michael Jackson). This
+    // ranks certified units, where streams count and featured artists get full credit (Drake is #1).
+    title: "Music artists with the most certified sales",
     noun: "artists",
-    prompt: "Name the 10 music artists with the most certified sales (albums, singles and streams, all markets)",
+    prompt: "Name the 10 music artists with the most certified units (sales and streams, from available markets)",
     page: "List of best-selling music artists",
     // The claimed-sales tiers ("Over 250 million", ...). Claimed sales tie a lot; certified units rank cleanly.
     tables: [0, 1, 2, 3, 4, 5],
@@ -1186,39 +1214,9 @@ export const TOPICS: Topic[] = [
     value: "Total certified units",
     metric: "Certified units",
     people: true,
-    // Songs, albums, mixtapes, tours, labels, fans and relatives among the redirects.
-    junkAliases: [
-      "I Get paper", "Comeback Season II", "It's Never Enough", "Do Right and Kill Everything", "All Kinds", "Fantasy 416",
-      "Drake Griffin", "Jungle Tour", "Wanna Know", "Please Forgive Me", "Songs recorded by Drake Canada", "Ela É do Tipo",
-      "Frozen Moments", "Nocta", "Sophie Brussaux", "Titles Ruin Everything", "Drake vs. Everybody", "Housekeeping Knows",
-      "The Embassy", "OVOXO", "Lost Files", "Gettin' Paid", "Fr8me", "Coffret 4 CD", "3 CD Collector's Set", "Insane",
-      "Monologue Song", "Andrea Gardner Swift", "Andrea Swift", "Incredible Things", "Track 5", "Andrea Finlay",
-      "Scott Kingsley Swift", "Wonderstruck", "Hailie Jade", "Hailie Jade Mathers", "Kimberley Anne Scott Mathers",
-      "Hailey Jade", "Hailie Jade Scott", "John Guerrera", "Deborah Mathers", "Debbie mathers", "Deborah Mathers-Briggs",
-      "Ronnie Polkingharn", "The Slim Shady Show", "Kim Mathers", "Hailie Mathers", "Kimberley Ann Scott Mathers",
-      "Haile Jade Mathers", "Bassmint", "The Way I Am", "Kimberly Anne Scott", "Soul intent", "Diss Me, Diss You",
-      "Eight Mile Style", "8 Mile Style", "Kimberly Mathers", "Deborah Nelson Mathers-Briggs", "Live at Comerica Park",
-      "Straight from the Vault", "Straight From The Vault EP", "Ken Kaniff", "Hailie Jade Scott Mathers", "Lose Yourself Tour",
-      "Evil", "Kimberley Anne Scott", "Shady Ltd.", "Hailie Scott Mathers", "Hailie Scott", "New Jacks",
-      "Bassmint Productions", "Debbie Nelson", "Deborah Rae Nelson", "Deborah R. Nelson", "Debbie Rae Nelson",
-      "Debbie Mathers-Briggs", "Debbie Nelson-Mathers", "Debbie Rae Mathers", "Slim",
-      "Beyoncé Knowles Records and Achivements", "Beyoncé Knowles' music videos", "Beyoncé' music videos",
-      "Slow Love World Tour", "Beyoncé Pulse", "The Ultimate Collection", "Pulse", "Third Ward Trill",
-      "Rock It Till Water Falls", "Renaissance Trilogy", "Rumi Carter", "Justin Bieber on Twitter", "Skylrk",
-      "Jeremy bieber", "Belieber", "Beliebers", "Bieber Mania", "Bieber Fever", "Biebermania", "Michael Jackson finances",
-      "Prince Michael Jackson ll", "Grace Rwaramba", "Michael Jackson jr", "Prince Michael Jackson I",
-      "Prince Michael Jackson Jr.", "Blanket", "Agent MJ", "Michael Joseph Jackson Jr", "Prince blanket", "MJJ Music",
-      "The skinniest Jackson", "The Hee Hee Guy", "Rhinstone Glove", "John Jay Smith", "Johnny Jay Smith", "In the Zone",
-      "In My Zone", "Boy in Detention", "Put It Up", "Ghetto Tales", "CBE", "Chris Brown Entertainment",
-      "CBE Entertainment", "King Of The Fall", "We're Alone Together", "Starboy", "The Dawn Is Coming", "Kin Kane",
-      "Manic Phase", "Bulleez N Nerdz", "Bullies and Nerds", "Gene Hackerman", "Gene.hackerman", "Sober lite",
-      "Moonlightbae", "Donutgate", "Ariana Grande credits", "Zandhr", "Dalton Gomez", "Marjorie Grande", "Dolly", "Purr",
-      "Meow", "David Hudson", "David Daniel Hudson", "David D. Hudson", "Mad Potion", "Mind's a Maze", "Minds Amaze",
-      "Immortal Flame", "Daisy Dove Bloom", "De Soi", "Gypsy Love", "Killa on the Run", "The Hooligans", "Kameron Whalum",
-      "Pectoralz", "Los Unidades", "Big Fat Noises", "Little Monsters", "Lady Gaga on Twitter", "Still Have Fun",
-      "Shakira ft. Wyclef Jean", "Shakira Bio", "Shakira & Alejandro Sanz", "Shakira notable concerts", "Milan Piqué",
-      "Pies Descalzos World Tour",
-    ],
+    // First names everyone uses ("West" is a plain word, so the surname rule gives Kanye none).
+    aliases: { "Elvis Presley": ["Elvis"], "Kanye West": ["Kanye"] },
+    // Songs, albums, tours, labels, fans and relatives among the redirects: CELEBRITY_JUNK in scripts/aliases.ts.
   },
   {
     id: "concert-tours",
@@ -1267,7 +1265,10 @@ export const TOPICS: Topic[] = [
     value: "Worldwide gross",
     metric: "Worldwide box office (US$)",
     works: true,
-    also: [{ tables: [1, 2, 3], name: "Title" }],
+    // The computer-animated, stop-motion and traditionally animated top 50s, each with its worldwide gross: Cars 2,
+    // Aladdin and Coraline show and score theirs.
+    also: [{ tables: [1, 2, 3], name: "Title", value: "Worldwide gross" }],
+    aliases: { "Minions: The Rise of Gru": ["Minions 2"] },
     junkAliases: [
       "Inside Out 3", "Zootopia Three", "Frozen IIII", "Jikŋon 2", "Frozen fandom", "Frozen Reo Māori", "The Lion King 4",
       "The Super Mario Bros. Movie 3", "Pratt Mario",
@@ -1641,20 +1642,8 @@ export const TOPICS: Topic[] = [
       },
       { page: "List of largest companies by revenue", tables: [0], name: "Name" },
     ],
+    // Junk among the redirects: COMPANY_JUNK in scripts/aliases.ts, shared by every company list.
     webNames: true,
-    junkAliases: [
-      "Afterburner", "SpeedBooster", "125 High Speed Mode", "125HSM", "Symantec Security", "Symantec Security Response",
-      "HP Associates", "Sonic", "Just Do It Award", "Wag.com", "Casa.com", "Look.com", "Commingled inventory",
-      "Lobbying by Amazon", "Katherine L. Adams", "Directly Responsible Individual", "Boycott Apple", "Apple tax",
-      "Spruce Technologies", "Raycer", "Blibbet", "Lift London", ".bing", "Extended Security Updates", "Microsoft.sucks",
-      "WebsiteSpark", "Forceware", "IReady", "Controversies surrounding Nvidia", "Project GROOT", "Project Groot",
-      "Nvidia Grace", "Move fast and break things", "Hacker Way", "1 Hacker Way", "One Hacker Way", "Mars Oasis",
-      "SpaceX Hawthorne facility", "SpaceX headquarters", "SpaceX Hawthorne", "WaferTech", "TSMC Washington", "Spacex.com",
-      "AStore", "Supercenter", "GamePlay",
-      // "\uf8ff Inc." (Apple's logo) reads as "inc"; Nvidia's robot project is spelled with zeros.
-      "Inc.", "Project GR00T", "NVIDIA Project GR00T", "NVIDIA GR00T", "Nvidia GROOT", "Co-mingled inventory",
-      "Comingled inventory", "Amazon leadership principles", "Generalist Robot 00 Technology",
-    ],
   },
   {
     id: "banks",
@@ -1976,6 +1965,8 @@ export const TOPICS: Topic[] = [
       "Adventureland", "Disney's America", "Walt Disney's Riverfront Square", "Disneyland in Australia", "WestCOT",
       "Disneyland Abu Dhabi", "The Wizarding World of Harry Potter", "20th Century Fox World", "PlayPlace",
       "Margaritaville Resort Orlando",
+      // Category titles skip by their exact text, qualifier included (Adventureland (Iowa) is a real park).
+      "Golden Pass (Disney)", "Pleasure Island (Walt Disney World)", "20th Century Fox World (Dubai)",
     ],
     // #10 is the Paris park; "Disneyland Park" reads like #2.
     rename: { "Disneyland Park": "Disneyland Paris" },
@@ -2017,7 +2008,10 @@ export const TOPICS: Topic[] = [
     // Only capitals are answers: Istanbul, Lagos or Sydney is free ("not one of the capital cities here"), not a
     // life. New Delhi stays as the table has it (the New Delhi council area, 249,998), so "delhi" ranks #148.
     universe: "capitals",
-    skip: ["Hong Kong"],
+    // Hong Kong is no national capital; its "City of Victoria" in the capitals universe isn't either.
+    skip: ["Hong Kong", "City of Victoria"],
+    // The capitals universe spells these cities its own way: the same city, not a second (unranked) answer.
+    aliases: { Ulaanbaatar: ["Ulan Bator"], "Luxembourg City": ["Luxembourg"], "Djibouti City": ["Djibouti"], Tarawa: ["South Tarawa"] },
     // The table still has the 2011 census.
     overrides: { Dhaka: { value: "10,278,882", source: "Dhaka's article, 2022 census (city)" } },
     junkAliases: [
@@ -2110,18 +2104,14 @@ export const TOPICS: Topic[] = [
     value: "Followers",
     metric: "Followers (millions)",
     also: CELEBRITIES,
+    // Relatives, songs and scandals of the stars: CELEBRITY_JUNK in scripts/aliases.ts. These are this list's own.
     junkAliases: [
-      "T-gay", "Kathryn Mayorga", "Cristiano Ronaldo sexual misconduct allegations", "Cristiano Ronaldo Jr.",
-      "Cristiano Ronaldo Junior", "Cristianinho", "Cristiano Jr.", "Cristiano Ronaldo dos Santos Junior",
-      "Cristiano Ronaldo dos Santos Jr", "UR", "CR", "Milan Pique", "Shakira ft. Wyclef Jean", "Shakira & Alejandro Sanz",
-      "Shakira notable concerts", "Pies Descalzos World Tour", "Andrea Gardner Swift", "Monologue Song", "Irma Gobb",
-      "Carles Vilarrubi Carrio", "Johan Cruyff's Dream Team", "FC Barcelona trophies", "Caryn Marooney",
-      "Facebook conspiracy theories", "Conspiracy theories in Facebook groups", "Facebook litigation", "10 year challenge",
-      "10 Year Challenge", "Ten year challenge", "Predictions of Facebook's end", "Controversies surrounding Samsung",
-      "Democratic People's Republic of Samsung", "Republic of Samsung", "Samsung Wave M", "SAMSUNG WB750", "ES70",
-      "Move fast and break things", "Narendra Modi's Google+ Hangout", "Use of Technology by Narenda Modi", "Cinematch",
-      "Qwikster", "Fast.com", "Magic Quill Productions", "The Parades", "Ecce homo qui est faba", "Killer Queen by Katy Perry",
-      "Track 5", "Insane", "Dolly", "Meow", "Purr", "Facebooking",
+      "T-gay", "Irma Gobb", "Carles Vilarrubi Carrio", "Johan Cruyff's Dream Team", "FC Barcelona trophies",
+      "Caryn Marooney", "Facebook conspiracy theories", "Conspiracy theories in Facebook groups", "Facebook litigation",
+      "10 year challenge", "10 Year Challenge", "Ten year challenge", "Predictions of Facebook's end",
+      "Controversies surrounding Samsung", "Democratic People's Republic of Samsung", "Republic of Samsung",
+      "Samsung Wave M", "SAMSUNG WB750", "ES70", "Move fast and break things", "Cinematch", "Qwikster", "Fast.com",
+      "Magic Quill Productions", "The Parades", "Ecce homo qui est faba", "Killer Queen by Katy Perry", "Facebooking",
     ],
   },
   {

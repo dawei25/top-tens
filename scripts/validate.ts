@@ -26,7 +26,6 @@ const DIR = join(import.meta.dirname, "..", "public", "puzzles");
 const FACTS_DIR = join(import.meta.dirname, "facts");
 /** Neighbours in a ranking more than this far apart (ratio of their numbers) get a second look. */
 const JUMP = 20;
-const COUNTRY_SET = new Set(UNIVERSES.countries().map((c) => normalize(c.name)));
 /** Country, state and capital names. */
 const PLACES = new Set(
   [...UNIVERSES.countries(), ...UNIVERSES["us-states"](), ...UNIVERSES.capitals()].map((c) => normalize(c.name)),
@@ -91,6 +90,31 @@ export function junkReason(name: string, numbers = false): string | null {
   return null;
 }
 
+/** "Djibouti City", "City of San Marino": the words that make a city's name without changing which city. */
+const cityless = (s: string) => s.split(" ").filter((w) => !/^(city|of|town)$/.test(w)).join(" ");
+
+/**
+ * Ranked entries that an unranked universe member may duplicate under another name: "Republic of the Congo" and a
+ * ranked "Congo", "South Tarawa" and "Tarawa", "Djibouti" and "Djibouti City". Each pair is one answer (a player
+ * could lose two lives on it, the second with no figure): give the ranked row the member's name as an alias
+ * (`aliases` in topics.ts) and the member merges into it. Other spellings ("Ulan Bator") need a look by eye.
+ */
+export function sameAsUniverse(p: Pick<Puzzle, "answers" | "extras">, topic?: Pick<Topic, "universe">): string[] {
+  const universes = [topic?.universe ?? []].flat();
+  if (!universes.length) return [];
+  const members = new Set(universes.flatMap((u) => UNIVERSES[u]().map((m) => normalize(m.name))));
+  const all = [...p.answers, ...p.extras];
+  const pool = all.filter((e) => e.rank === 0 && members.has(normalize(e.name)));
+  const out: string[] = [];
+  for (const e of all) {
+    const n = normalize(e.name);
+    if (e.rank === 0 || members.has(n)) continue;
+    const same = pool.find((m) => ` ${normalize(m.name)} `.includes(` ${n} `) || cityless(normalize(m.name)) === cityless(n));
+    if (same) out.push(`#${e.rank} "${e.name}" and unranked "${same.name}" may be the same answer`);
+  }
+  return out;
+}
+
 export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = TOPICS.find((t) => t.id === p.id)): Issue[] {
   const issues: Issue[] = [];
   const err = (msg: string) => issues.push({ level: "error", msg });
@@ -134,11 +158,15 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   const all: Entry[] = [...p.answers, ...p.extras];
   if (all.length < MIN_ACCEPTED) warn(`only ${all.length} accepted answers (want ${MIN_ACCEPTED}+)`);
 
-  let lastRank = 10;
+  // Ranks 11+ follow their place in the ranking; a tie shares the first one's rank (#20, #20, #22).
+  let place = 10;
+  let last: Entry | undefined;
   for (const e of p.extras) {
     if (e.rank === 0) continue;
-    if (e.rank !== lastRank + 1) err(`extras rank jumps from ${lastRank} to ${e.rank} (${e.name})`);
-    lastRank = e.rank;
+    place++;
+    const tie = !!last && e.rank === last.rank && e.n !== undefined && e.n === last.n;
+    if (e.rank !== place && !tie) err(`extras rank jumps from ${last?.rank ?? 10} to ${e.rank} (${e.name})`);
+    last = e;
   }
 
   const byName = new Map<string, Entry>();
@@ -225,16 +253,9 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
     }
   }
 
-  // The same country twice: a ranked "Congo" without the aliases of the pool's "Republic of the Congo".
-  if ([topic?.universe ?? []].flat().includes("countries")) {
-    const countries = all.filter((e) => e.rank === 0 && COUNTRY_SET.has(normalize(e.name)));
-    for (const e of all) {
-      if (e.rank === 0 || COUNTRY_SET.has(normalize(e.name))) continue;
-      const n = normalize(e.name);
-      const same = countries.find((c) => ` ${normalize(c.name)} `.includes(` ${n} `));
-      if (same) warn(`#${e.rank} "${e.name}" and unranked "${same.name}" may be the same country`);
-    }
-  }
+  // The same place twice: a ranked "Congo" without the aliases of the pool's "Republic of the Congo", the table's
+  // Ulaanbaatar next to the capitals universe's "Ulan Bator" (a second life for one city, no figure).
+  for (const e of sameAsUniverse(p, topic)) warn(e);
 
   // Blitz scores `n`: it must be present on the top 10, follow the ranking, and share one unit across entries.
   for (const e of all) if (e.n !== undefined && !Number.isFinite(e.n)) err(`"${e.name}": n is not a finite number`);

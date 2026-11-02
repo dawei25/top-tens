@@ -1,0 +1,21 @@
+{
+  "id": "fiction-authors",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 5,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 4, "livesLost": 5, "guesses": 9 },
+  "fan": null,
+  "blitzCasual": { "scored": 24, "named": 30 },
+  "difficulty": 3,
+  "tags": ["culture", "books", "authors"],
+  "audience": "readers",
+  "summary": "Written by the data agent at build time, pending a real judge. Shakespeare, Christie, Rowling and Danielle Steel are gettable; Eiichiro Oda, Barbara Cartland, Simenon and Koontz are the surprises, and Stephen King is only #17.",
+  "reasons": [
+    "Casual found Rowling, Christie, Shakespeare and Danielle Steel, then lost lives on Stephen King (#17), James Patterson (#12), Dan Brown, Tolkien and Dr. Seuss, each showing its estimate.",
+    "Ranked by the low sales estimate, with the high one breaking ties: both estimates tie at #10/#11 alone. Each answer shows its range (\"400-600 million\"); authors with only a high estimate show that.",
+    "Famous authors the page doesn't list (Dickens, Austen, Twain) are free. Blitz: 24 of 30 casual names scored."
+  ],
+  "fixes": []
+}

@@ -38,6 +38,9 @@ describe("junkRedirect", () => {
     expect(junk("Highest mountain in Asia", ["Mount Everest"])).not.toBeNull();
     expect(junk("Tale of Two Cities, A", ["A Tale of Two Cities"])).not.toBeNull();
     expect(junk("Musk, Elon", ["Elon Musk"])).not.toBeNull();
+    expect(junk("Eminem, Marshall Bruce Mathers III", ["Eminem"], ["Marshall Bruce Mathers III"])).not.toBeNull();
+    expect(junk("Atlanta, Georgia", ["Atlanta"])).toBeNull();
+    expect(junk("Apple Computer, Inc.", ["Apple"], ["Apple Computer", "Inc."])).toBeNull();
     expect(junk("City (Alaska)", ["Alaska"])).not.toBeNull();
     expect(junk("Wonderful (Wicked song)", ["Wicked"])).not.toBeNull();
     expect(junk("America (United States)", ["United States"])).toBeNull();
