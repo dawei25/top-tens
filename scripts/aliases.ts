@@ -265,7 +265,7 @@ export const COUNTRY_JUNK = [
   "Iran consumption expenditure", "Nigerian sport", "Indian society", "Indian social structure",
   "Traditional Indian social structure", "Indian traditional social structure", "India etymology", "Bharath Niwas",
   "Alpine Deutschen", "Iraqi Security Forces", "Iraqi Security Force", "Confucian Southeast Asia", "Roman New Republic",
-  "Land of the Irish",
+  "Land of the Irish", "Land of the English",
 ];
 
 let english: Set<string> | undefined;

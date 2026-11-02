@@ -793,6 +793,9 @@ export const INTENT: Record<string, Intent> = {
       "The Bodyguard": ["Bodyguard soundtrack", "The Bodyguard soundtrack"],
       Rumours: ["Rumors"],
       "Saturday Night Fever": ["Saturday Night Fever soundtrack"],
+      "Greatest Hits (Queen)": ["Queen Greatest Hits", "Queen's Greatest Hits"],
+      "Greatest Hits (Journey)": ["Journey Greatest Hits", "Journey's Greatest Hits"],
+      "Greatest Hits (Elton John)": ["Elton John Greatest Hits", "Elton John's Greatest Hits"],
     },
   },
   "concert-tours": {
@@ -1194,6 +1197,8 @@ export const INTENT: Record<string, Intent> = {
   "ballon-dor-countries": {
     same: {
       Germany: ["West Germany"],
+      // England plays as itself here, so the United Kingdom's forms skip this list.
+      England: ["English"],
     },
   },
   "nobel-countries": {

@@ -1168,7 +1168,12 @@ export const TOPICS: Topic[] = [
       "In My Zone", "Boy in Detention", "Put It Up", "Ghetto Tales", "CBE", "Chris Brown Entertainment",
       "CBE Entertainment", "King Of The Fall", "We're Alone Together", "Starboy", "The Dawn Is Coming", "Kin Kane",
       "Manic Phase", "Bulleez N Nerdz", "Bullies and Nerds", "Gene Hackerman", "Gene.hackerman", "Sober lite",
-      "Moonlightbae", "Donutgate", "Ariana Grande credits", "Zandhr", "Dalton Gomez", "Marjorie Grande",
+      "Moonlightbae", "Donutgate", "Ariana Grande credits", "Zandhr", "Dalton Gomez", "Marjorie Grande", "Dolly", "Purr",
+      "Meow", "David Hudson", "David Daniel Hudson", "David D. Hudson", "Mad Potion", "Mind's a Maze", "Minds Amaze",
+      "Immortal Flame", "Daisy Dove Bloom", "De Soi", "Gypsy Love", "Killa on the Run", "The Hooligans", "Kameron Whalum",
+      "Pectoralz", "Los Unidades", "Big Fat Noises", "Little Monsters", "Lady Gaga on Twitter", "Still Have Fun",
+      "Shakira ft. Wyclef Jean", "Shakira Bio", "Shakira & Alejandro Sanz", "Shakira notable concerts", "Milan Piqué",
+      "Pies Descalzos World Tour",
     ],
   },
   {
