@@ -1,0 +1,43 @@
+{
+  "id": "tea-per-capita",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 4,
+  "scores": {
+    "recognizability": 4,
+    "curve": 3,
+    "fairness": 2,
+    "data": 3,
+    "fun": 4,
+    "blitzDepth": 4
+  },
+  "casual": {
+    "found": 5,
+    "livesLost": 5,
+    "guesses": 11
+  },
+  "fan": {
+    "found": 8,
+    "livesLost": 5,
+    "guesses": 16
+  },
+  "blitzCasual": {
+    "scored": 25,
+    "named": 29
+  },
+  "summary": "Turkey drinks the most tea per person and Ireland is second. China (#22), India (#30) and Japan (#13) are the famous traps.",
+  "reasons": [
+    "Casual player finds 5 (UK, Turkey, Russia, Ireland, Morocco) and spends lives on China, India, Japan, Sri Lanka and Kenya.",
+    "The prompt invites the big tea producers, which all cost a life; the reveal is the fun part.",
+    "The figures are from 2016. Written by the builder (data agent), not an independent judge."
+  ],
+  "fixes": [],
+  "difficulty": 3,
+  "tags": [
+    "food",
+    "drinks",
+    "geography"
+  ],
+  "audience": "anyone"
+}

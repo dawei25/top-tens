@@ -5,7 +5,7 @@ export interface Topic {
   /** When the table's numbers are from, if the page doesn't say in a way scripts/dates.ts can read. */
   dataAsOf?: string;
   id: string;
-  category: "Geography" | "Entertainment" | "Sports" | "Business" | "Culture" | "Science";
+  category: "Geography" | "Entertainment" | "Sports" | "Business" | "Culture" | "Science" | "Oddball";
   /** Says what kind of thing the answers are: "Countries emitting the most CO2", not "Biggest CO2 emitters". */
   title: string;
   /**
@@ -111,6 +111,18 @@ export interface Topic {
    * no plain dictionary words ("Display", "Universe").
    */
   categoryNames?: boolean;
+  /**
+   * No redirect aliases: the rows link name articles ("Smith (surname)", "Mary (name)"), whose redirects are other
+   * names ("Smithson", "Blacksmith", "Mae"), not ways of typing this one.
+   */
+  noRedirects?: boolean;
+  /** Names can be numbers ("123456" on passwords): no row is dropped for its digits. */
+  numberNames?: boolean;
+  /**
+   * The names are keyboard mash on purpose (passwords: "qwerty", "1qaz2wsx"): they stay out of the lexicon, so such
+   * input still reads as junk on every other list.
+   */
+  notWords?: boolean;
 }
 
 /** A source of unranked accepted answers: one name column of some tables on a page (default: the topic's). */
@@ -1939,6 +1951,114 @@ export const TOPICS: Topic[] = [
       "Yanfeng Global Automotive Interior Systems", "Yanfeng Automotive Interiors", "Songsan Dolphin", "BYD God's Eye",
       "DiLink", "DiPilot", "E-Platform 2.0", "BYD e-Platform", "DM-i", "BYD J6", "Moia", "CARIAD", "Volkswagen Marine",
     ],
+  },
+  // Oddball: fun lists anyone can throw guesses at, with a surprise or two.
+  {
+    id: "fast-food-chains",
+    category: "Oddball",
+    title: "Fast food chains with the most locations",
+    noun: "fast food chains",
+    prompt: "Name the 10 fast food chains with the most locations worldwide",
+    page: "List of the largest fast food restaurant chains",
+    tables: [1],
+    name: "Name",
+    value: "Number of locations",
+    metric: "Locations",
+    // Each chain's count has its own year; the top 10's are from 2023 to 2026.
+    dataAsOf: "2023–2026",
+    // Redirects that are products, slogans, promotions, people and places, not names of the chain.
+    junkAliases: [
+      "QSC&V", "QSCV", "Speedee", "Speedee Service", "Mckinley mac", "McHappy Day", "Big Yellow M", "McDrive", "McBoat",
+      "McValue", "McRig", "Franchise Realty Interstate Corp", "Starbucks Mermaid", "Verisimo", "Veristi", "Verista",
+      "Verismi", "Starbucks DoubleShot", "Starbucks Entertainment", "Pasqua Coffee", "Trenta", "Race Together", "Cupgate",
+      "Cup-gate", "Donte Robinson", "Stars and Bucks Cafe", "Veggie Delite", "Sandwich artist", "BMT", "Five dollar footlong",
+      "Subway $5 footlong promotion", "5 dollar footlong", "Eat Fresh", "Colonel Sanders", "Family Feast", "KFC Famous Bowls",
+      "KFC in India", "Zinger Burger", "Kentucky Grilled Chicken", "KFC products", "KFC Dipping Platter",
+      "Finger lickin' good", "KFC Eleven", "KFC Mashed Potato Bowl", "KFC 11", "KFC11", "KFC Chicken Nuggets",
+      "Sanders Court & Café", "KFC in Pakistan", "Kentucky Fried Chicken in Pakistan", "It's Finger Lickin' Good!",
+      "Bucket meal", "KFC bucket meal", "Fudgems", "Super Six Mix", "Oreo Pizza", "Leaning Tower of Pizza", "Kristy Hammonds",
+      "Michael Setzer", "30 minutes or it's free", "30-minute guarantee", "Domino's pizza tracker", "James Monaghan",
+      "Dominick DeVarti", "Tom Monaghan's Leaning Tower of Pizza", "MeatZZa", "Cinnastix", "Thin n Crispy",
+      "4-for-all pizza", "Book It", "The Pizza Head Show", "Pizza Head", "Pasta hut", "Pizza Hut P'Zones",
+      "Pizza Hut Stuffed Crust Pizza", "Crown Crust Pizza", "Crown Crust Carnival", "No one outpizzas the hut", "PizzaNet",
+      "Italian Taco", "The Burger King Kids Club Gang", "Big Kids Meal", "Be Your Way", "King Jr Meal", "King Deals",
+      "Zesty sauce", "Taste is king",
+    ],
+  },
+  {
+    id: "us-surnames",
+    category: "Oddball",
+    title: "Most common surnames in the US",
+    noun: "surnames",
+    prompt: "Name the 10 most common surnames in the United States (2020 census)",
+    page: "List of most common surnames in North American countries",
+    tables: [9],
+    name: "Name",
+    value: "Count 2020",
+    metric: "People (2020 census)",
+    noRedirects: true,
+    skip: ["First 20"],
+    // Canada's, Mexico's and Central America's common surnames: real surnames, all outside the US top 10.
+    also: [
+      { tables: [0, 2, 3, 4, 5, 6, 7, 8], name: "Surname" },
+      { tables: [1], name: 1 },
+      { tables: [1], name: 2 },
+      { tables: [1], name: 3 },
+      { tables: [1], name: 4 },
+      { tables: [1], name: 5 },
+    ],
+  },
+  {
+    id: "tea-per-capita",
+    category: "Oddball",
+    title: "Countries that drink the most tea per person",
+    noun: "countries",
+    prompt: "Name the 10 countries that drink the most tea per person",
+    page: "List of countries by tea consumption per capita",
+    tables: [0],
+    name: "Country",
+    value: "Tea consumption",
+    metric: "Kilograms of tea per person per year",
+    unit: " kg",
+    universe: "countries",
+    junkAliases: ["Science in Aotearoa"],
+  },
+  {
+    id: "girls-names",
+    category: "Oddball",
+    title: "Most common girls' names in the US",
+    noun: "girls' names",
+    prompt: "Name the 10 most common names for baby girls born in the US from 1926 to 2025",
+    page: "Popularity of birth names for females (United States)",
+    tables: [0],
+    name: "name",
+    value: "rank",
+    metric: "Rank, 1926-2025 (Social Security records)",
+    dataAsOf: "2025",
+    prefix: "#",
+    keepOrder: true,
+    lowerIsBetter: true,
+    noRedirects: true,
+  },
+  {
+    id: "passwords",
+    category: "Oddball",
+    title: "Most common passwords",
+    noun: "passwords",
+    prompt: "Name the 10 most common passwords (NordPass 2025)",
+    page: "List of the most common passwords",
+    tables: [0],
+    name: "Password",
+    value: "Count",
+    metric: "Accounts using it (NordPass 2025)",
+    dataAsOf: "2025",
+    numberNames: true,
+    notWords: true,
+    noRedirects: true,
+    // "!@$%&" normalizes to "and".
+    skip: ["!@$%&"],
+    // The other surveys' lists (SplashData by year, Keeper, NCSC, Huntress): common passwords outside NordPass's top 10.
+    also: [...range(1, 9).map((c) => ({ tables: [1], name: c })), { tables: [2, 3, 4], name: 1 }],
   },
 ];
 

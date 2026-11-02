@@ -1,0 +1,45 @@
+{
+  "id": "fast-food-chains",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": {
+    "recognizability": 4,
+    "curve": 4,
+    "fairness": 3,
+    "data": 4,
+    "fun": 5,
+    "blitzDepth": 5
+  },
+  "casual": {
+    "found": 7,
+    "livesLost": 5,
+    "guesses": 12
+  },
+  "fan": {
+    "found": 9,
+    "livesLost": 5,
+    "guesses": 15
+  },
+  "blitzCasual": {
+    "scored": 29,
+    "named": 30
+  },
+  "summary": "Seven household names, then the twist: Mixue, a Chinese ice cream and tea chain, has more locations than McDonald's. Taco Bell, Wendy's and Dunkin' all just miss.",
+  "reasons": [
+    "Casual player finds the 7 Western giants, then runs out of lives on Taco Bell #18, Wendy's #22, Dunkin' #11, Chick-fil-A #38 and Tim Hortons #25, each with a rank to learn from.",
+    "Fun surprises: Mixue #1, Luckin Coffee #4 and Wallace #8, three Chinese chains most players have never heard of.",
+    "Meets the daily-list bar in this triage (casual 7, Blitz 29). Written by the builder (data agent), not an independent judge, so held at free-play, the scope the Oddball category was built for."
+  ],
+  "fixes": [
+    "Each chain's count is from its own year (2021 to 2026); Dunkin' (12,700, 2021) and Krispy Kreme are the stalest near misses."
+  ],
+  "difficulty": 2,
+  "tags": [
+    "food",
+    "fast food",
+    "business"
+  ],
+  "audience": "anyone"
+}

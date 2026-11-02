@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { fnv, trainLexicon } from "../src/game/junk";
 import { normalize } from "../src/game/match";
 import { capitals, countries, usStates } from "./gazetteer";
+import { TOPICS } from "./topics";
 import type { Puzzle } from "../src/game/types";
 
 /**
@@ -48,8 +49,10 @@ export const NOT_PUZZLES = new Set(["index.json", "lexicon.json", "daily.json", 
 export function bankNames(dir: string): { ranked: string[]; all: string[] } {
   const ranked: string[] = [];
   const all: string[] = [];
+  // Passwords are keyboard mash on purpose: "qwerty" stays junk everywhere else.
+  const notWords = new Set(TOPICS.filter((t) => t.notWords).map((t) => `${t.id}.json`));
   for (const f of readdirSync(dir)) {
-    if (!f.endsWith(".json") || NOT_PUZZLES.has(f)) continue;
+    if (!f.endsWith(".json") || NOT_PUZZLES.has(f) || notWords.has(f)) continue;
     const p: Puzzle = JSON.parse(readFileSync(join(dir, f), "utf8"));
     for (const e of [...p.answers, ...p.extras]) {
       const forms = [e.name, ...e.aliases];
