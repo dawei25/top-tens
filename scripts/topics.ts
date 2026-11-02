@@ -497,8 +497,14 @@ export const TOPICS: Topic[] = [
     unit: " km²",
     // "Lake Superior", not "Superior" (a word, and Michigan is a state); the table's short names stay aliases.
     nameFromLink: true,
+    // Famous lakes past the table (likely.ts) show their infobox surface area.
+    values: { kind: "area" },
     also: [{ tables: [3], name: "Name", skip: ["Michigan–Huron", "Lake Michigan–Huron"] }],
-    more: { "Great Salt Lake": [] },
+    // Famous lakes the tables and categories miss; their area comes from the article (likely.ts).
+    more: {
+      "Great Salt Lake": [], "Lake Como": [], "Lake Garda": [], "Lake Balaton": [], "Lake Okeechobee": [], "Lake Mead": [],
+      "Lake Powell": [], "Crater Lake": [], "Lake Bled": [],
+    },
     categoryNames: true,
     // Bays, a wind, a river and an agency among the redirects to the top 10.
     junkAliases: [

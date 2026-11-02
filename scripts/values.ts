@@ -82,7 +82,8 @@ function elevation(rows: Row[]): Reading {
 }
 
 function area(rows: Row[]): Reading {
-  const i = rows.findIndex((r) => /^area$/i.test(r.label) || (/^area$/i.test(r.header) && /^•?\s*total$/i.test(r.label)));
+  // Lake infoboxes say "Surface area".
+  const i = rows.findIndex((r) => /^(surface )?area$/i.test(r.label) || (/^area$/i.test(r.header) && /^•?\s*total$/i.test(r.label)));
   if (i < 0) return { skip: "no Area row" };
   let row = rows[i];
   // Country and region boxes: an "Area" group of "• Total", "• Land", "• Water (%)" rows. Islands are ranked by
