@@ -50,7 +50,8 @@ interface Props {
   dailyBlitz?: { date: string; n: number };
   /**
    * That date's daily, when it is this same list and the player hasn't finished it (see blitzHold): the round and
-   * its results show only what the player hit, and the rest waits for the daily.
+   * its results show only what the player hit, and the rest waits for the daily. The schedule gives every day a Blitz
+   * on another list, so this is a guard; the "rest shows once you finish" copy appears only here.
    */
   hold?: DailyEntry;
   /** Today's Blitz list while it's unplayed: a free round on it is closed (it would be practice for a one-try round). */
