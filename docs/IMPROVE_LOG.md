@@ -10,4 +10,6 @@ Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
   Dailies scheduled through Nov 12.
 - Matcher: natural reading for several fits, partial names confirm first, no whole-word typos, no category-word
   corrections. Leak audit (strict) 1.3% → 0.5% before the generosity change.
-- Oddball category started.
+- Oddball category: 5 lists shipped (fast food chains by locations, US surnames, tea per person, girls' names,
+  passwords), each kept only after a casual guess run found 4+. Dropped: beer per person (3/10), boys' names (9/10,
+  no surprise), fastest animals (birds), dog breeds (no data past 10).
