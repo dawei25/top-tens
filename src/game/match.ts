@@ -1,4 +1,4 @@
-import { isJunk, isKnownName, type Lexicon } from "./junk";
+import { isJunk, isKnownName, isPlainWord, type Lexicon } from "./junk";
 import type { Entry, GuessResult, Puzzle } from "./types";
 
 const LEADING_ARTICLE = /^(the|a|an)\s+/;
@@ -100,7 +100,7 @@ interface Candidate {
   ends: boolean;
 }
 
-function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Candidate[] {
+function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useWords = true): Candidate[] {
   const guessDigits = digitsOf(guess);
   const compactGuess = guess.replace(/ /g, "");
   return entries.map((entry) => {
@@ -110,7 +110,7 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean): Can
     let viaWord = false;
     let ends = false;
     const forms = [entry.name, ...entry.aliases];
-    const words = nameWords(entry.name);
+    const words = useWords ? nameWords(entry.name) : [];
     // Words of the name count as forms too, so a misspelled first name ("kareen") lands on its own entry.
     for (const [i, form] of [...forms, ...words].entries()) {
       const f = normalize(form);
@@ -165,9 +165,12 @@ export function judgeGuess(
   const guess = normalize(raw);
   if (!guess) return { kind: "empty" };
 
+  // An ordinary word typed alone ("humans", "water") is a word, not part of a name: names that merely contain it
+  // aren't readings of it. Names and partial names ("jordan", "shenzhen", "kevin") still are.
+  const plain = isPlainWord(raw, lex);
   const candidates = [
-    ...closestPerEntry(guess, puzzle.answers, true),
-    ...closestPerEntry(guess, puzzle.extras, false),
+    ...closestPerEntry(guess, puzzle.answers, true, !plain),
+    ...closestPerEntry(guess, puzzle.extras, false, !plain),
   ].sort((a, b) => a.dist - b.dist);
 
   const best = candidates[0];
@@ -257,7 +260,7 @@ export function judgeGuess(
 
   // A whole word (or run of words) from a longer name is a short form, not a misspelling. It is checked before
   // near-spellings, which are weaker evidence ("wilt" is two letters from "West").
-  const partial = wordMatches(guess, candidates);
+  const partial = plain ? [] : wordMatches(guess, candidates);
   if (partial.length > 0) return fits(partial, true);
 
   // An answer's full name with more words after it, usually who made it ("perfect ed sheeran", "stay justin bieber"):

@@ -11,6 +11,12 @@ export interface Lexicon {
   table: string;
   /** FNV-1a hashes (base 36) of every normalized name in the bank, always treated as real. */
   names: string;
+  /**
+   * FNV-1a hashes (base 36) of ordinary English words that appear as a word inside some answer's name but are not a
+   * name themselves ("humans", "water", "trees"). Typed alone they are a word, not part of a name: the matcher doesn't
+   * read them as one ("humans" is not Destroy All Humans!). Optional: older lexicons don't have it.
+   */
+  words?: string;
 }
 
 export const ALPHABET = "^$ 0abcdefghijklmnopqrstuvwxyz";
@@ -122,6 +128,16 @@ let nameSetCache: { src: string; set: Set<string> } | null = null;
 function knownNames(lex: Lexicon): Set<string> {
   if (nameSetCache?.src !== lex.names) nameSetCache = { src: lex.names, set: new Set(lex.names.split(" ")) };
   return nameSetCache.set;
+}
+
+let wordSetCache: { src: string; set: Set<string> } | null = null;
+
+/** Whether the text is an ordinary English word that is not itself a name in the bank (see `Lexicon.words`). */
+export function isPlainWord(text: string, lex?: Lexicon): boolean {
+  if (!lex?.words) return false;
+  if (wordSetCache?.src !== lex.words) wordSetCache = { src: lex.words, set: new Set(lex.words.split(" ")) };
+  const s = normalize(text);
+  return !s.includes(" ") && wordSetCache.set.has(fnv(s).toString(36)) && !isKnownName(text, lex);
 }
 
 /** Whether the text is exactly some answer or alias in the bank, or a country or capital. */

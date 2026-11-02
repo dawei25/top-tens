@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { fnv } from "./junk";
 import { judgeGuess, normalize } from "./match";
 import type { Entry, Puzzle } from "./types";
 
@@ -311,5 +312,24 @@ describe("an answer's name followed by who made it", () => {
   });
   it("needs a real name at the start, not a scrap of one", () => {
     expect(judgeGuess("sta justin bieber", songs, new Set())).toMatchObject({ kind: "unknown" });
+  });
+});
+
+describe("an ordinary word typed alone", () => {
+  const games: Puzzle = {
+    ...puzzle,
+    id: "games2",
+    answers: [e(1, "Minecraft"), e(2, "Mario Kart 8"), ...puzzle.answers.slice(2)],
+    extras: [e(0, "Destroy All Humans!"), e(0, "Destroy All Humans! 2"), e(0, "Kevin Durant"), e(0, "Walter Masterson")],
+  };
+  // A lexicon whose word list holds "humans" and "water" (and nothing marks them as names).
+  const lex = { alphabet: "", table: "", names: "", words: ["humans", "water"].map((w) => fnv(w).toString(36)).join(" ") };
+  it("is not read as part of a longer name", () => {
+    expect(judgeGuess("humans", games, new Set(), lex)).toMatchObject({ kind: "unknown" });
+    expect(judgeGuess("water", games, new Set(), lex)).toMatchObject({ kind: "unknown" });
+  });
+  it("while names and partial names still are", () => {
+    expect(judgeGuess("kevin", games, new Set(), lex)).toMatchObject({ entry: { name: "Kevin Durant" }, corrected: true });
+    expect(judgeGuess("minecraft", games, new Set(), lex)).toMatchObject({ kind: "correct", entry: { rank: 1 } });
   });
 });
