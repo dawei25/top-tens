@@ -399,6 +399,11 @@ a {
     display: grid;
     grid-template-columns: 2fr 1fr;
   }
+  /* Side by side, the keys don't need their stacked height. */
+  .today-stack .mode-key.today {
+    min-height: 84px;
+    padding: 10px 20px 12px;
+  }
   /* The narrower Blitz key keeps its title on one line. */
   .today-stack .mode-key.today.blitz .key-label {
     font-size: clamp(20px, 2.1vw, 28px);
