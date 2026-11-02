@@ -1,24 +1,27 @@
 {
   "id": "animated-films",
-  "judgedAt": "2026-10-30",
-  "decision": "daily-list",
+  "judgedAt": "2026-11-02",
+  "decision": "fix-first",
   "alsoBlitz": true,
   "priority": 8,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
-  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
-  "blitzCasual": { "scored": 30, "named": 36 },
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 9, "livesLost": 5, "guesses": 15 },
+  "blitzCasual": { "scored": 21, "named": 22 },
   "difficulty": 2,
   "tags": ["film", "animation", "box office"],
   "audience": "anyone",
-  "summary": "An easy, crowd-pleasing list: nearly everyone knows nine of the ten, and Ne Zha 2 at #1 is the surprise. Works even better as a Blitz.",
+  "summary": "A crowd-pleaser that hits the daily target, but the build merged the 1994 and 2019 Lion King into one entry. Restore the original and add year aliases, then run it.",
   "reasons": [
-    "Frozen, Inside Out 2, Zootopia 2, Mario, Minions and Toy Story 5 are gimmes; the fight is over near misses (Toy Story 4 #11, Moana 2 #13, Despicable Me 3 #14), which is where the casual player lost all five lives at 9/10.",
-    "Curve leans easy, with Ne Zha 2 as the one stretch; The Lion King (2019) counting as animated will spark some debate.",
-    "Current and clean at the top; short forms like 'mario', 'frozen 2' and 'lion king' all match."
+    "Most players know 9 of the 10. The casual player found 7 in their first 8 guesses and Zootopia 2 later, then lost all five lives on famous near misses (Toy Story 4 #11, Toy Story 3 #12, Moana 2 #13, Finding Nemo, Shrek 2). Ne Zha 2 at #1 and Toy Story 5 at #10 are the reveals.",
+    "Data bug: rows that share a title are dropped, so the 1994 Lion King ($970.7M, source #20) is missing, everything from Finding Nemo down shows one rank too high, and #4 reads as plain 'The Lion King' with the remake's $1.66B.",
+    "Typing gaps: 'lion king 2019' and 'the lion king (2019)' are rejected as not on the list (that cost the fan #4), and so is 'super mario brothers'. Blitz is excellent: 21 of 22 names scored."
   ],
   "fixes": [
-    "Drop junk aliases: 'Inside Out 3' (Inside Out 2), 'Zootopia Three' (Zootopia 2), 'Frozen IIII' and 'Jikŋon 2' (Frozen II), 'Frozen fandom' and 'Frozen Reo Māori' (Frozen), 'The Lion King 4' (The Lion King), 'The Super Mario Bros. Movie 3' and 'Pratt Mario' (The Super Mario Bros. Movie).",
-    "'toy story' offers only Toy Story 3 / Toy Story 4; add 'Toy Story' as an alias of Toy Story 5 (#10) so the choice includes it."
+    "scripts/build.ts:327 dedups rows by normalized name, which drops The Lion King (1994, $970,707,763; #20 in table 0 and #1 in the traditional table) as a duplicate of the 2019 remake. Keep both, named 'The Lion King (2019)' (#4) and 'The Lion King (1994)' (#20); Finding Nemo becomes #21 and Monsters, Inc. #50.",
+    "Aliases: 'The Lion King 2019', 'Lion King 2019' and 'The Lion King remake' on the 2019 film; 'The Lion King 1994' and 'Lion King 1994' on the original. Decide where bare 'The Lion King' goes: kept on the 2019 film it stays a free #4 for casual players (as 'Avatar' is the 2009 film); shared, the game asks which one, and a player who picks the classic loses a life (casual drops to about 6-7).",
+    "Add 'Super Mario Brothers' and 'Mario Brothers' to The Super Mario Bros. Movie; both are rejected now.",
+    "Drop the bare 'Spider-Man' alias from Spider-Man: Across the Spider-Verse: 'spiderman' charges a life for #36 even when the player means Into the Spider-Verse, which isn't on the list.",
+    "Matcher (src/game, not data): 'cars' charges a life for Cars 2 through a word match, though Cars (2006) isn't on the list. A guess with no number shouldn't land on a numbered sequel of the same name."
   ]
 }

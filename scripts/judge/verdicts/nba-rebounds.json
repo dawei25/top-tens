@@ -1,23 +1,23 @@
 {
   "id": "nba-rebounds",
-  "judgedAt": "2026-10-30",
-  "decision": "daily-list",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
   "alsoBlitz": true,
-  "priority": 7,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
-  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
-  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
-  "blitzCasual": { "scored": 13, "named": 16 },
-  "difficulty": 3,
+  "priority": 3,
+  "scores": { "recognizability": 3, "curve": 3, "fairness": 2, "data": 4, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": { "scored": 15, "named": 22 },
+  "difficulty": 4,
   "tags": ["sports", "basketball", "nba"],
   "audience": "basketball fans",
-  "summary": "A fun classic daily with real surprises: Shaq, Hakeem, Rodman and LeBron all miss the top 10, while Elvin Hayes and Robert Parish are in it.",
+  "summary": "Accurate and fun for basketball fans, but too hard for a daily: the famous guesses (Shaq, Rodman, LeBron) all miss, and Elvin Hayes and Robert Parish are fan-only names.",
   "reasons": [
-    "Casual: Wilt, Russell, Kareem, Duncan, Howard, Garnett and Karl Malone for 7/10; Shaq (#15), Rodman (#24), LeBron (#23), Hakeem (#14) and Ben Wallace cost the five lives on guess 12.",
-    "Those misses are the fun of it: famous big men with a rank to learn from. Fans get 10/10 losing only Hakeem and Shaq.",
-    "Aliases are good ('malone' offers both Malones, 'kg', 'the mailman', 'kareem'); Blitz scores 13 of 16 casual names."
+    "Casual: Wilt, Russell, Kareem, Duncan, Howard and Garnett for 6/10, then out of lives on guess 12 (Shaq #15, Rodman #24, LeBron #23, Yao Ming, Barkley #19). A real casual does worse.",
+    "Most non-fans can't name five of the top 10, so it misses the daily bar. Fans clear it: 10/10 in 13 guesses, losing Shaq, Hakeem and Rodman.",
+    "Good as a Blitz, where those famous big men score: 15 of 22 casual names scored (Kobe, Giannis, Jokic and Embiid score nothing)."
   ],
   "fixes": [
-    "Junk redirect aliases on top-10 entries: Dwight Howard 'Royce Reed', 'Dwightmare'; Bill Russell 'Russell rule', \"Bill Russell's rule\"; Tim Duncan 'Rim Duncan'. Drop redirects naming other people and rules."
+    "Junk redirect aliases on ranks 11+: LeBron James 'Gloria James' (his mother), \"Bronny's dad\", 'LRMR' (his company); Dirk Nowitzki 'Silke Nowitzki', 'Helga Nowitzki', 'Helga Bredenbröcker' (sister, mother); Shaquille O'Neal 'Joe Toney', 'Joseph Toney' (his father), \"Shaq's Size\". Drop redirects that name relatives, companies or article sections."
   ]
 }

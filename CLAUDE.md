@@ -80,12 +80,12 @@ use redirects already in the cache.
   anything else is free. So answer sets should be broad: country lists also include every country.
 - A topic whose #10 and #11 tie is rejected.
 - Aliases come from Wikipedia redirects, short forms and `scripts/intent.ts`. An alias shared by 2-4 entries is kept
-  on all of them; more owners than that, and it is dropped. The game lists the owners only when two share it (or
-  it's what each is called, like "Carolina"); for three or four it asks the player to be more specific, so a
-  franchise alias ("Star Wars") never hands out answers the player didn't name.
-- Never list answers the player didn't type: a guess must not be autocorrected or "offered" into an answer it isn't
-  plausibly a spelling of. `src/game/match.ts` enforces this; aliases must not undo it (no generic English words as
-  aliases).
+  on all of them; more owners than that, and it is dropped.
+- Matching follows the natural reading (`src/game/match.ts`): when several answers fit what was typed, the most
+  prominent one comes first ("jordan" is Michael Jordan; DeAndre Jordan once MJ is found), and partial knowledge
+  helps ("shenzhen", "avengers" offer options). But an unrelated word is never turned into an answer ("pope" is not
+  "Don't Bother Me, I Can't Cope", "islands" is not Ireland). Aliases must not undo that: no generic English words
+  as aliases.
 - `NODE_NO_WARNINGS=1 npx tsx scripts/validate.ts` checks every built puzzle; run it after a rebuild.
 
 ## Writing

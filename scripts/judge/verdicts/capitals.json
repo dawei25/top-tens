@@ -1,30 +1,25 @@
 {
   "id": "capitals",
-  "judgedAt": "2026-10-30",
+  "judgedAt": "2026-11-02",
   "decision": "fix-first",
   "alsoBlitz": true,
-  "priority": 8,
+  "priority": 7,
   "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
   "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
-  "blitzCasual": { "scored": 30, "named": 30 },
+  "blitzCasual": { "scored": 25, "named": 26 },
   "difficulty": 2,
   "tags": ["geography", "cities", "capitals"],
   "audience": "anyone",
-  "summary": "A great daily in the making: famous cities with Kinshasa and Lima as fun surprises, and a superb Blitz. Fix the junk aliases and Hong Kong first.",
+  "summary": "A classic anyone can play: the casual player found 8, and Kinshasa and Lima are fair stretches. Not a daily yet: 'delhi' costs a life at #148 because only the small New Delhi district counts, and Dhaka still uses a 2011 figure.",
   "reasons": [
-    "Casual found 8/10 quickly, then lost lives on true near misses (Dhaka #11, Bangkok #13) and on the city-proper rule (Paris #50, Manila #57, Buenos Aires #28).",
-    "'Delhi' is the classic trap: it offers Delhi / New Delhi, and both cost a life, since New Delhi proper is only #149. Correct, but it will sting.",
-    "Every capital scores in Blitz; a casual player named 30 in 90 seconds and all 30 scored."
+    "Casual found 8 (Tokyo, Beijing, Moscow, London, Mexico City, Cairo, Seoul, Jakarta) but was out of lives by guess 13; the fan got 10/10 for one life. Blitz is deep: 25 of 26 capitals named scored.",
+    "'new delhi' and 'delhi', among the first guesses most players make, cost a life as 'New Delhi is #148, 249,998': the table counts only the New Delhi district, while Beijing, Tokyo, Moscow and Kinshasa count as whole municipalities or provinces.",
+    "Dhaka sits at #11 on a 2011 figure (its 2022 census would rank #6), and non-capitals such as Istanbul cost a life with 'Istanbul isn't in the top 10', which never says it isn't a capital."
   ],
   "fixes": [
-    "Hong Kong is ranked #17 but is not a national capital; drop it from the ranking (and from Blitz scoring).",
-    "Drop junk aliases from Beijing: 'Fuxingmen Inner Street', 'Fuxingmen Outer Street' and 'Fuxing Road, Beijing'.",
-    "Drop junk aliases from Tokyo: 'Tokyo Plain', 'Jūjō, Tokyo' and 'Tokyo in pop culture'.",
-    "Drop junk aliases from Moscow: 'Kotly, Moscow', 'Kotly, Moscow Oblast' and 'Western Moscow'.",
-    "Drop junk aliases from Cairo: 'Abdeen' and 'Cairo in the middle ages'.",
-    "Drop junk aliases from Seoul: 'Sangwon Middle School', 'Five Grand Palaces of Joseon-Dynasty Seoul', 'Five Grand Palaces', 'Seoul castle', 'South Seoul' and 'North Seoul'.",
-    "Drop junk aliases from Mexico City ('Mexican Federal District Transit System') and London ('Londonise', 'Londonize').",
-    "Drop junk alias 'Baku Oilfields' (Baku, #47)."
+    "Dhaka: the source table still uses the 2011 census (8,906,039). Dhaka's own article gives 10,278,882 (2022 census), which ranks #6 and moves London (9,002,488) to #11. Needs a per-row value override with its source; the pipeline has none today. The casual replay still finds 7 with this change.",
+    "New Delhi: the table counts only the New Delhi Municipal Council area (249,998, 2011), so 'delhi' and 'new delhi' cost a life at #148. Count the National Capital Territory of Delhi (16,787,941 in the 2011 census, per Delhi's article), as the table does for Beijing, Tokyo, Moscow and Kinshasa: it ranks #2, Mexico City (#11) and London (#12) become the near misses, and the casual replay still finds 7. The shown value would then differ from the linked Wikipedia table.",
+    "Non-capital cities from `also: CITIES` (Istanbul, Lagos, Karachi, Mumbai, Sydney) cost a life with 'Istanbul isn't in the top 10', which reads as if Istanbul were a capital. Drop `also: CITIES` from this topic so they are free, or (UI) have that miss say it isn't a national capital."
   ]
 }
