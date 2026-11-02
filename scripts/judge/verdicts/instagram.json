@@ -1,22 +1,24 @@
 {
   "id": "instagram",
-  "by": "builder",
   "judgedAt": "2026-11-02",
   "decision": "free-play",
   "alsoBlitz": true,
   "priority": 7,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 8, "livesLost": 4, "guesses": 12 },
-  "fan": null,
-  "blitzCasual": { "scored": 26, "named": 29 },
-  "difficulty": 2,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 3, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 22, "named": 24 },
+  "difficulty": 1,
   "tags": ["entertainment", "social media", "celebrities"],
   "audience": "anyone",
-  "summary": "Written by the data agent at build time, pending a real judge. Celebrities everyone knows: a casual player finds 8, and Instagram's own account at #1 and Khloé Kardashian at #10 are the reveals.",
+  "summary": "Famous names with a fun twist (Instagram's own account is #1), but too easy for Today's list: the casual player found all 10. An excellent Blitz.",
   "reasons": [
-    "Casual found Ronaldo, Messi, Selena Gomez, Kylie Jenner, Kim Kardashian, the Rock, Beyoncé and Ariana Grande; Taylor Swift (#14), Bieber (#12), Kendall Jenner (#13) and Neymar (#17) cost lives, each with a figure.",
-    "No tie at #10/#11 any more (Khloé 291 million, Nike 290). 51 ranked accounts plus the other platforms' famous names; the stars' junk redirects are now one shared list.",
-    "Blitz-ready: 26 of 29 casual names scored."
+    "Casual found all 10 in 14 guesses (Instagram last), losing lives only on Taylor Swift #14, Bieber #12 and Kendall Jenner #13, each with a figure; the fan cleared it in 11. Seven gimmes, so it is above the 6-8 bar.",
+    "Data matches the page as updated 1 Nov 2026; Khloé (291 million) holds #10 over Nike (290) by one million. Famous names off the chart (Lady Gaga, Will Smith, Trump, BTS) cost a life with no figure, since the page has none.",
+    "Blitz: 22 of 24 casual names scored in 90 s; Nicki Minaj (not on the page) and Kris Jenner are free misses."
   ],
-  "fixes": []
+  "fixes": [
+    "The main checkout's cached page (.cache/wiki/ec4385ed3922811b478a6a650a73146f6631b943.html) is the 6 Oct 2026 revision: Khloé and Nike tied at 291, Dwayne Johnson 381 above Kylie Jenner 380. The build used the 1 Nov 2026 revision. Refresh that file before the next rebuild, or instagram fails the #10/#11 tie rule and drops out again.",
+    "Instagram (#1): drop product features that are not names of the account: 'Instagram Stories', 'Instagram story', 'Instagram Direct', 'Instagram Live' (add to junkAliases)."
+  ]
 }
