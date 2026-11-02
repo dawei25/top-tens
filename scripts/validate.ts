@@ -44,16 +44,19 @@ interface Issue {
   msg: string;
 }
 
-/** Why a name looks like table debris rather than an answer, or null if it looks fine. */
-export function junkReason(name: string): string | null {
+/**
+ * Why a name looks like table debris rather than an answer, or null if it looks fine. `numbers`: names can be
+ * numbers on this list ("123456" on passwords).
+ */
+export function junkReason(name: string, numbers = false): string | null {
   if (/\[\s*\w{0,8}\s*\]/.test(name)) return "footnote marker";
   if (/^(list|lists|table) of\b/i.test(name)) return 'starts with "List of"';
   if (/^(grand )?(totals?|subtotal|overall|world|others?|various|unknown|n\/a|rest of( the)? world)$/i.test(name.trim())) {
     return "total/placeholder row";
   }
   // Titles can be numbers ("1989", "21", "2012"); table debris looks like "1,286" or a long serial.
-  if (/\d{6,}/.test(name)) return "long digit run";
-  if (/^[\d\s.,%$€£()+-]+$/.test(name) && (/,\d{3}/.test(name) || /\d{5,}/.test(name))) return "a number, not a name";
+  if (/\d{6,}/.test(name) && !numbers) return "long digit run";
+  if (/^[\d\s.,%$€£()+-]+$/.test(name) && (/,\d{3}/.test(name) || (/\d{5,}/.test(name) && !numbers))) return "a number, not a name";
   if (/\b(citation needed|ref\.)|^(notes?|see also)$/i.test(name)) return "note text";
   if (name.length > 80) return "very long";
   if (/^[^\p{L}\p{N}"'¡¿(.&+]/u.test(name)) return "starts with punctuation";
@@ -94,9 +97,10 @@ function checkPuzzle(p: Puzzle, file: string): Issue[] {
   }
 
   const byName = new Map<string, Entry>();
+  const numbers = !!TOPICS.find((t) => t.id === p.id)?.numberNames;
   for (const e of all) {
     const where = e.rank ? `#${e.rank}` : "unranked";
-    const why = junkReason(e.name);
+    const why = junkReason(e.name, numbers);
     if (why) (e.rank >= 1 && e.rank <= 10 ? err : warn)(`${where} "${e.name}": looks like junk (${why})`);
     const n = normalize(e.name);
     if (!n) err(`${where} "${e.name}": normalizes to nothing`);

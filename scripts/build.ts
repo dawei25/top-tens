@@ -273,7 +273,7 @@ async function readRows(topic: Topic): Promise<Row[]> {
       }
       const name = topic.rename?.[cellText] ?? cellText;
       if (topic.where && !topic.where.match.test(r[column(header, topic.where.col)]?.text ?? "")) continue;
-      if (/\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
+      if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
       let v = parseValue(valueCell.text);
       if (topic.fallback) {
         // A cell that disagrees with the other column by more than 2% was misread on the page ("382.936").
@@ -346,7 +346,7 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const name = familyName(cellName(cell, src), cell.text);
         if (!name || !normalize(name) || SKIP_NAME.test(name)) continue;
         if (topic.skip?.includes(name) || src.skip?.includes(name)) continue;
-        if (/\d{3,}.*\d{3,}/.test(name)) continue;
+        if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue;
         // A family row's text ("Karl and Theo Albrecht") names several people: not an alias of one of them.
         const family = name !== cellName(cell, src);
         const lines = family ? [] : cell.lines.length > 1 ? cell.lines : [cell.text];
@@ -590,7 +590,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   const entries: Entry[] = [];
   for (const [i, row] of rows.entries()) {
     const aliases = new Set(row.aliasSeeds);
-    const redirects = await fetchRedirects(row.redirectTarget, i >= 10);
+    const redirects = topic.noRedirects ? [] : await fetchRedirects(row.redirectTarget, i >= 10);
     const ctx = {
       names: [row.name, row.redirectTarget, ...row.aliasSeeds],
       forms: redirects,
