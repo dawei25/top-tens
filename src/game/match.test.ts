@@ -313,6 +313,36 @@ describe("an answer's name followed by who made it", () => {
   it("needs a real name at the start, not a scrap of one", () => {
     expect(judgeGuess("sta justin bieber", songs, new Set())).toMatchObject({ kind: "unknown" });
   });
+  it("an artist with several entries: the rest of the guess picks one", () => {
+    const tours: Puzzle = {
+      ...puzzle,
+      id: "tours2",
+      answers: [
+        e(1, "The Eras Tour", ["Taylor Swift"]),
+        e(2, "Music of the Spheres World Tour", ["Coldplay"]),
+        e(3, "Mathematics Tour", ["Ed Sheeran"]),
+        e(4, "Divide Tour", ["Ed Sheeran"]),
+        ...puzzle.answers.slice(4),
+      ],
+      extras: [e(18, "A Head Full of Dreams Tour", ["Coldplay"])],
+    };
+    expect(judgeGuess("ed sheeran divide", tours, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 4 } });
+    expect(judgeGuess("coldplay a head full of dreams", tours, new Set())).toMatchObject({ kind: "near", entry: { rank: 18 } });
+    expect(judgeGuess("ed sheeran tour", tours, new Set())).toMatchObject({ kind: "correct", entry: { rank: 3 } });
+  });
+  it("words of a name in order, with some left out, are that name", () => {
+    const tours: Puzzle = {
+      ...puzzle,
+      id: "tours3",
+      answers: [e(1, "Renaissance World Tour"), e(2, "The Lord of the Rings: The Return of the King"), ...puzzle.answers.slice(2)],
+      extras: [e(0, "The 1989 World Tour")],
+    };
+    expect(judgeGuess("renaissance tour", tours, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 1 } });
+    expect(judgeGuess("lord rings", tours, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 2 } });
+    expect(judgeGuess("1989 tour", tours, new Set())).toMatchObject({ kind: "near", entry: { name: "The 1989 World Tour" } });
+    // Out of order, or one distinctive word with a generic one, is not.
+    expect(judgeGuess("tour renaissance", tours, new Set()).kind).toBe("unknown");
+  });
   it("not when the whole guess is a name of its own", () => {
     const countries: Puzzle = { ...puzzle, id: "countries3", answers: [e(1, "Saudi Arabia"), e(2, "Mexico"), ...puzzle.answers.slice(2)], extras: [] };
     // A lexicon that knows "Saudi Aramco" and "Mexico City" as names (from other lists in the bank).

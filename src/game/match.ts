@@ -346,17 +346,31 @@ const QUALIFIERS = new Set(
 
 /**
  * The entry whose full name or alias makes up the first words of a longer guess ("perfect" in "perfect ed sheeran"),
- * the longest such name first. Names under four letters or made only of generic words don't count.
+ * the longest such name first. Names under four letters or made only of generic words don't count. When several
+ * entries share that name (an artist on each of their tours), the rest of the guess picks one: "ed sheeran divide" is
+ * the Divide Tour, "coldplay a head full of dreams" not Coldplay's bigger tour. Otherwise the most prominent.
  */
 function leadingName(guess: string, entries: Entry[]): Entry | undefined {
   const words = guess.split(" ");
+  const forms = (e: Entry) => [e.name, ...e.aliases].map(normalize);
   for (let k = words.length - 1; k >= 1; k--) {
     const head = words.slice(0, k).join(" ");
     if (head.replace(/ /g, "").length < 4 || words.slice(0, k).every((w) => GENERIC.has(w))) continue;
-    const hit = entries.find((e) => [e.name, ...e.aliases].some((f) => normalize(f) === head));
-    if (hit) return hit;
+    const hits = entries.filter((e) => forms(e).includes(head));
+    if (hits.length <= 1) {
+      if (hits.length) return hits[0];
+      continue;
+    }
+    const rest = words.slice(k).filter((w) => w.length >= 2 && !GENERIC.has(w));
+    const named = hits.filter((e) => forms(e).some((f) => rest.every((w) => f.split(" ").includes(w))));
+    return mostProminent(rest.length && named.length ? named : hits);
   }
   return undefined;
+}
+
+function mostProminent(entries: Entry[]): Entry | undefined {
+  const rank = (e: Entry) => (e.rank > 0 ? e.rank : Number.MAX_SAFE_INTEGER);
+  return [...entries].sort((a, b) => rank(a) - rank(b))[0];
 }
 
 /** A name without its qualifiers: "Democratic Republic of the Congo" → congo, "North Carolina" → carolina. */
@@ -381,7 +395,24 @@ function wordMatches(guess: string, candidates: Candidate[]): Candidate[] {
   const words = guess.split(" ");
   const compact = guess.replace(/ /g, "");
   if (compact.length < 4 || words.every((w) => GENERIC.has(w))) return [];
-  return candidates.filter(({ entry }) => hasWordSpan(normalize(entry.name).split(" "), compact));
+  // Two or more distinctive words, in the name's order with some left out: "renaissance tour" is the Renaissance World
+  // Tour, "lord rings" The Lord of the Rings. Partial knowledge, put in the box to confirm.
+  const gapped = words.filter((w) => !GENERIC.has(w)).length >= 2;
+  return candidates.filter(({ entry }) => {
+    const nameWords = normalize(entry.name).split(" ");
+    return hasWordSpan(nameWords, compact) || (gapped && inOrder(nameWords, words));
+  });
+}
+
+/** Whether every word of the guess is a word of the name, in the same order: "1989 tour" in "1989 world tour". */
+function inOrder(nameWords: string[], words: string[]): boolean {
+  let i = 0;
+  for (const w of words) {
+    while (i < nameWords.length && nameWords[i] !== w) i++;
+    if (i === nameWords.length) return false;
+    i++;
+  }
+  return true;
 }
 
 /** Whether consecutive words of a name, joined without spaces, spell the guess ("spiderman" in "spider man no way home"). */
