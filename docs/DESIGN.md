@@ -14,20 +14,25 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
   - **Anything that isn't an accepted answer** for the list: keyboard mash, or a real thing the source doesn't cover.
     A plain miss says how many of what the list holds ("Not one of the 258 countries here."), from the puzzle's
     `noun`, so a wrong kind of guess (cars on a list of countries) is obvious.
-  - **A guess that fits several answers without naming one** ("star wars", "mario kart"): "be more specific".
+  - **A guess that fits several answers** ("jordan", "shenzhen", "avengers"): the natural reading goes in the box or
+    the options are offered (see below); only a word shared by a crowd of minor names asks to be more specific.
 - The game ends at 10/10 or 0 lives; missed slots are then revealed. A give up button reveals everything.
 
 ## 2. Answer matching (`src/game/match.ts`)
 
 1. Normalize: lowercase, strip accents and punctuation, `&` → `and`, drop a leading article, Roman numerals → digits.
 2. Exact match on name or alias submits immediately.
-3. Otherwise fuzzy match (edit distance with transpositions, budget scaled by length). A unique match fills the input.
-   Two equally close readings offer choices; more is noise. Past one slip, a misspelling keeps its first letter
-   ("factories" is not Castries), and one word of a longer name only catches a near-exact typo ("pope" is not
-   "Don't Bother Me, I Can't Cope").
-4. **Never list answers the player didn't type.** A guess that is part of several names (a shared franchise alias,
-   a common word) lists them only when two fit or when it's what each is called ("carolina": North and South
-   Carolina); otherwise it asks the player to be more specific, free.
+3. Otherwise fuzzy match (edit distance with transpositions, budget scaled by length; a slip in the middle of a 6-7
+   letter word gets a third edit). A unique match fills the input. Generous, but never an unrelated word: past one
+   slip a misspelling keeps its first letter ("factories" is not Castries); one word of a longer name only catches a
+   near-exact typo ("pope" is not "Don't Bother Me, I Can't Cope"); a name with whole words added or dropped is not
+   a typo ("neptune" is not Neptune I); a plain category word ("islands") is never corrected.
+4. **The natural reading.** When several answers fit, read it the way a person means it: the most prominent first
+   (the list's own ranking, then the wider pool). "jordan" puts Michael Jordan in the box to confirm, and DeAndre
+   Jordan once MJ is found. Comparable ones are offered, up to four ("shenzhen", "china" on banks), names that are
+   all called that are offered as equals ("carolina", "congo", "new zealand"), and an exact title that is the less
+   likely reading offers the likelier one too ("avengers": Endgame or The Avengers). Part of a name ("american",
+   "cars") asks before it counts or costs a life. Only a word shared by a crowd of minor names asks for more.
 5. Numbers must agree: GTA 6 never matches GTA V.
 6. A guess that is itself a known real name (any name in the bank, any country or capital) is never corrected into a
    different one: "Austria" is not Australia.
