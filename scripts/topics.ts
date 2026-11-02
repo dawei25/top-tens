@@ -1289,11 +1289,21 @@ export const TOPICS: Topic[] = [
       "÷ Tour": "Divide Tour",
       "2023–2025 Tour": "Springsteen and E Street Band 2023–2025 Tour",
     },
+    // Tours the page only has a year's gross for (One Direction's, Bon Jovi's, McCartney's) take the whole tour's
+    // gross from its article, so they score in Blitz.
+    values: { kind: "gross", below: "last" },
     numberNames: true,
     // A tour is named with or without "World" and "Tour": "M72 Tour", "M72", "1989 Tour", "Cowboy Carter". A short
     // form that is one plain word ("Renaissance", "Divide") is left to the matcher, which reads a name's words.
     stripWords: [/\bworld\b/gi, /\b(world )?tour\b/gi],
-    aliases: { "Mathematics Tour": ["The Mathematics Tour"], "Divide Tour": ["The Divide Tour"] },
+    // The surname alone (shared by both of Sheeran's tours: the game asks which), fans' short forms, the usual
+    // spelling of "till".
+    aliases: {
+      "Mathematics Tour": ["The Mathematics Tour", "Sheeran"],
+      "Divide Tour": ["The Divide Tour", "Sheeran"],
+      "Music of the Spheres World Tour": ["MOTS"],
+      "After Hours til Dawn Tour": ["After Hours till Dawn", "After Hours till Dawn Tour"],
+    },
     junkAliases: [
       "Tour", "Bruce Springsteen · E Street Band", "2025 Tour", "Springsteen and E Street Band 2023",
       // Concert films, live albums and an attack plot among the redirects.
