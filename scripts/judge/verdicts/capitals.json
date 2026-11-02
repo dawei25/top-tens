@@ -1,25 +1,24 @@
 {
   "id": "capitals",
   "judgedAt": "2026-11-02",
-  "decision": "fix-first",
+  "decision": "daily-list",
   "alsoBlitz": true,
-  "priority": 7,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
   "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
-  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
-  "blitzCasual": { "scored": 25, "named": 26 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": { "scored": 35, "named": 35 },
   "difficulty": 2,
   "tags": ["geography", "cities", "capitals"],
   "audience": "anyone",
-  "summary": "A classic anyone can play: the casual player found 8, and Kinshasa and Lima are fair stretches. Not a daily yet: 'delhi' costs a life at #148 because only the small New Delhi district counts, and Dhaka still uses a 2011 figure.",
+  "summary": "A classic anyone can play: the casual player found 8, with London #11 and Bangkok #13 as fair near misses and Kinshasa and Lima as stretches. 'delhi' still costs a life at #148, but it shows its figure and no longer blocks a daily.",
   "reasons": [
-    "Casual found 8 (Tokyo, Beijing, Moscow, London, Mexico City, Cairo, Seoul, Jakarta) but was out of lives by guess 13; the fan got 10/10 for one life. Blitz is deep: 25 of 26 capitals named scored.",
-    "'new delhi' and 'delhi', among the first guesses most players make, cost a life as 'New Delhi is #148, 249,998': the table counts only the New Delhi district, while Beijing, Tokyo, Moscow and Kinshasa count as whole municipalities or provinces.",
-    "Dhaka sits at #11 on a 2011 figure (its 2022 census would rank #6), and non-capitals such as Istanbul cost a life with 'Istanbul isn't in the top 10', which never says it isn't a capital."
+    "Earlier fixes hold: Dhaka is #6 on its 2022 census figure, London is now the #11 near miss, and non-capitals such as Istanbul, Shanghai, Lagos and Mumbai are free.",
+    "Casual found 8 (Tokyo, Beijing, Mexico City, Moscow, Cairo, Seoul, Jakarta, Dhaka) and ran out of lives at guess 13 on New Delhi, London, Bangkok, Manila and Buenos Aires. The fan got 10/10 without losing a life. In Blitz, all 35 capitals named scored.",
+    "'delhi' and 'new delhi' at #148 (249,998) is no longer a dealbreaker: it costs one life out of five, matches the linked table, shows its figure, and the casual finds 8 either way. It is still the one miss that feels like a technicality, so fairness stays at 3."
   ],
   "fixes": [
-    "Dhaka: the source table still uses the 2011 census (8,906,039). Dhaka's own article gives 10,278,882 (2022 census), which ranks #6 and moves London (9,002,488) to #11. Needs a per-row value override with its source; the pipeline has none today. The casual replay still finds 7 with this change.",
-    "New Delhi: the table counts only the New Delhi Municipal Council area (249,998, 2011), so 'delhi' and 'new delhi' cost a life at #148. Count the National Capital Territory of Delhi (16,787,941 in the 2011 census, per Delhi's article), as the table does for Beijing, Tokyo, Moscow and Kinshasa: it ranks #2, Mexico City (#11) and London (#12) become the near misses, and the casual replay still finds 7. The shown value would then differ from the linked Wikipedia table.",
-    "Non-capital cities from `also: CITIES` (Istanbul, Lagos, Karachi, Mumbai, Sydney) cost a life with 'Istanbul isn't in the top 10', which reads as if Istanbul were a capital. Drop `also: CITIES` from this topic so they are free, or (UI) have that miss say it isn't a national capital."
+    "Duplicate capitals: the capitals universe adds Ulan Bator, Luxembourg, Djibouti, City of Victoria and South Tarawa as separate unranked entries next to the table's Ulaanbaatar (#66, 1,466,125), Luxembourg City (#160), Djibouti City (#118), Victoria (#194) and Tarawa (#176). 'ulan bator' costs a life with no figure (a second life for a player who already tried 'ulaanbaatar') and scores nothing in Blitz, and 'luxembourg' or 'djibouti' asks the player to pick between two entries for one city. Merge each universe name into its table row as an alias.",
+    "Optional, not blocking: let the New Delhi miss say it counts only the New Delhi council area, not greater Delhi (needs a per-entry note in the puzzle format, a coordinator change)."
   ]
 }
