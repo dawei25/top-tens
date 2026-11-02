@@ -433,6 +433,14 @@ export function datedLabel(d: Pick<Dated, "label">, headers: string[], title: st
   return year && d.label.replace("{year}", year);
 }
 
+/**
+ * The latest year (or span) a cell names: "3 (2023, 2025, 2026)" is 2026, the last time it happened; a lone span
+ * ("2018–2019") stays whole.
+ */
+export function lastYear(text: string): string {
+  return [...text.matchAll(new RegExp(YEARS.source, "g"))].at(-1)?.[0] ?? text;
+}
+
 /** The last year a label names: "1987–1989" is 1989, "Q4 2025" is 2025. */
 export const labelYear = (label: string) => Math.max(0, ...[...label.matchAll(/(?<!\d)(?:19|20)\d{2}(?!\d)/g)].map((m) => Number(m[0])));
 
@@ -525,12 +533,12 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords), ...others].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
         const v = topic.lowerIsBetter ? null : glued ? parseValue(glued[1]) : vc >= 0 ? parseValue(r[vc]?.text ?? "") : null;
-        const label = perYear ? datedLabel(src.dated!, [r[yc]?.text ?? ""], "") : tableLabel;
+        const label = perYear ? datedLabel(src.dated!, [lastYear(r[yc]?.text ?? "")], "") : tableLabel;
         if (src.dated && label) {
           const d = src.dated;
           const sign = d.prefix ?? v?.display.match(/^[$€£]/)?.[0] ?? "";
           const digits = v && (d.scale ? scaledFigure(v.value, d.scale) : v.display.replace(/^[$€£]/, ""));
-          const figure = v && v.value > 0 ? sign + digits + (d.unit ?? topic.unit ?? "") : undefined;
+          const figure = d.figure ?? (v && v.value > 0 ? sign + digits + (d.unit ?? topic.unit ?? "") : undefined);
           const shown = datedValue(label, rc >= 0 ? rankOf(r[rc]?.text) : perYear?.rank, figure, d.source);
           if (shown) {
             entry.value = shown;

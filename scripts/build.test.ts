@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { datedLabel, datedValue, labelYear, matchFacts, mergeIndex, rangeText, rankOf, sameKey, scaledFigure, skipName } from "./build";
+import { datedLabel, datedValue, labelYear, lastYear, matchFacts, mergeIndex, rangeText, rankOf, sameKey, scaledFigure, skipName } from "./build";
 import { COUNTRY_FORMS } from "./intent";
 
 describe("matchFacts", () => {
@@ -69,6 +69,11 @@ describe("dated values", () => {
       "#10 in the US, 2025 ($129 billion)",
     );
     expect(labelYear("the US, 2025")).toBe(2025);
+    // A cell listing every year it happened is labelled by the latest; a fixed figure for a "who passed $100
+    // million" table.
+    expect(lastYear("3 (2023, 2025, 2026)")).toBe("2026");
+    expect(lastYear("2018–2019")).toBe("2018–2019");
+    expect(datedValue(datedLabel({}, [lastYear("1 (2024)")], "")!, undefined, "$100 million+")).toBe("$100 million+ (2024)");
   });
 
   it("scale figures into the list's unit", () => {

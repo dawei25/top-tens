@@ -191,11 +191,17 @@ export interface Dated {
   prefix?: string;
   /** Shown after the figure (default: the topic's unit). */
   unit?: string;
+  /**
+   * The figure every row shows, for a table that only lists who passed a mark: "$100 million+" on the athletes who
+   * earned that much in some year ("Joe Burrow: $100 million+ (2024)").
+   */
+  figure?: string;
   /** The name cell ends with the figure ("Tencent 688,000"): the number is the figure, the rest the name. */
   figureInName?: boolean;
   /**
-   * A table with one row per year (each year's top tour, the record as it grew): `col` holds the row's year, which
-   * fills "{year}" in the label row by row, and `rank` is the rank every row held that year: "#1 in 2025
+   * A table with one row per year (each year's top tour, the record as it grew): `col` holds the row's year (the
+   * latest, if it lists several), which fills "{year}" in the label row by row, and `rank` is the rank every row
+   * held that year: "#1 in 2025
    * ($407,600,113)" for the year's highest-grossing tour.
    */
   perYear?: { col: string | number; rank?: number };
@@ -2437,10 +2443,11 @@ export const TOPICS: Topic[] = [
   {
     id: "athletes-earnings",
     category: "Sports",
-    // Forbes ranks a year's earnings, endorsements included: the title says the year and the measure.
-    title: "Highest-earning athletes of 2026",
+    // Forbes ranks a year's earnings, endorsements included: the title says whose list and the measure. The 2026
+    // list covers the 12 months to spring 2026, not the calendar year.
+    title: "Highest-paid athletes on Forbes' 2026 list",
     noun: "athletes",
-    prompt: "Name the 10 athletes who earned the most in 2026 (Forbes: salary and winnings plus endorsements)",
+    prompt: "Name the 10 highest-paid athletes on Forbes' 2026 list (salary and winnings plus endorsements)",
     page: "Forbes list of the world's highest-paid athletes",
     tables: [0],
     name: "Name",
@@ -2448,19 +2455,21 @@ export const TOPICS: Topic[] = [
     metric: "Earnings incl. endorsements (US$)",
     dataAsOf: "2026",
     people: true,
+    // Only the last two years count against the player. With every top 10 since 2012 accepted, the past stars a
+    // casual player tries after the easy four (Tiger, Federer, Mayweather, Brady, Djokovic) each cost a life, and the
+    // game ended before Durant or Canelo (judge, cycle 4). Now they are free.
     also: [
-      // Every earlier year's top 10 (2012 to 2025), latest first: a miss shows its last appearance ("Kylian Mbappé:
-      // #6 in 2024 ($110 million)"). Not the 2010s decade table, a decade's total.
+      // The 2025 and 2024 top 10s, latest first: a miss shows its last appearance ("Kylian Mbappé: #6 in 2024
+      // ($110 million)").
+      { tables: [1, 2], name: "Name", value: "Total", dated: { rank: "Rank" } },
+      // Athletes who earned $100 million in 2024 or later without making that year's top 10: "Joe Burrow: $100
+      // million+ (2024)". Not the ones whose last such year is older (Mayweather, Federer, McGregor).
       {
-        tables: [...range(1, 6), ...range(8, 15)],
+        tables: [18],
         name: "Name",
-        value: "Total",
-        dated: { rank: "Rank" },
-        // Kobe Bryant (#6 in 2012) has died: naming him is free.
-        skip: ["Kobe Bryant"],
+        where: { col: "$100 million+", match: /\b202[4-9]\b/ },
+        dated: { perYear: { col: "$100 million+" }, figure: "$100 million+" },
       },
-      // Athletes who earned $100 million in some year without making that year's top 10 (Joe Burrow, Oleksandr Usyk).
-      { tables: [18], name: "Name" },
     ],
     // Fights, relatives, staff, companies, pets and jokes among the redirects: CELEBRITY_JUNK, shared with the
     // career lists, where these stars rank too.
