@@ -77,6 +77,12 @@ export interface Topic {
    * isn't measures something else and is dropped.
    */
   values?: { kind: ValueKind; scale?: number; below?: "tenth" | "last" };
+  /**
+   * Why a miss outside a short ranking (25 rows or fewer) shows no figure: no other table or infobox has one
+   * ("every other country has none"). Without it, scripts/validate.ts fails such a list when none of its unranked
+   * answers has a value (give them one with `also` and `dated`, or `values`).
+   */
+  noFigures?: string;
   /** #1 has the smallest number (a rank such as Similarweb's). Such a list is never Blitz: a bigger n isn't better. */
   lowerIsBetter?: boolean;
   /**
@@ -148,6 +154,30 @@ export interface Also {
    * which stops above $200 million. A number at or above the last ranked row's means something else and is dropped.
    */
   value?: string | number;
+  /**
+   * These tables rank the same thing for another year or by another source (the 2024 top 10 on a 2025 list, a 2016
+   * survey): an unranked answer shows its latest rank and figure from them, labelled so it can't pass for the
+   * list's own: "#6 in 2024 (16.5 million)", a rank alone "#3 in 2019", a figure alone "2.98 million (2016)". It
+   * stays unranked and never scores in Blitz (no `n`); the figure isn't capped at #10's, since another year's can
+   * be higher. An answer with the list's own stat (a `value` source without `dated`) keeps that instead.
+   */
+  dated?: Dated;
+}
+
+export interface Dated {
+  /** Column with the row's rank in that table. */
+  rank?: string | number;
+  /**
+   * When the ranking is from. Default: the year in the value, rank or name column's header ("Arrivals 2024"), else
+   * in the table's caption or heading ("1987–1989"). "{year}" in it stands for that year ("Q4 {year}").
+   */
+  label?: string;
+  /** Who ranked it, when that isn't the list's own source: "#43 in 2016 (Mastercard, 2.98 million)". */
+  source?: string;
+  /** Divides the cell's number into the shown unit: 1e6 with `unit` " million" shows 16,500,000 as "16.5 million". */
+  scale?: number;
+  /** Shown after the figure (default: the topic's unit). */
+  unit?: string;
 }
 
 /** Redirects to US states that are jokes, documents, agencies or teams, found by the list judges. */
@@ -1477,7 +1507,19 @@ export const TOPICS: Topic[] = [
     name: "City",
     value: "Arrivals",
     metric: "Arrivals (millions, 2025)",
-    also: [{ tables: [1, 2, 3], name: "City" }, ...CITIES],
+    // The page's earlier rankings give a city outside the 2025 top 10 its latest rank and figure: New York City
+    // "#8 in 2023 (11.7 million)", Singapore "#5 in 2018 (18.6 million)", Mexico City from Mastercard's 2016 list.
+    also: [
+      { tables: [1, 2], name: "City", value: "Arrivals", dated: { rank: "Rank", scale: 1e6, unit: " million" } },
+      { tables: [3], name: "City", value: "Arrivals 2018", dated: { rank: "Rank (Euromonitor)", scale: 1e6, unit: " million" } },
+      {
+        tables: [3],
+        name: "City",
+        value: "Arrivals 2016",
+        dated: { rank: "Rank (Mastercard)", source: "Mastercard", scale: 1e6, unit: " million" },
+      },
+      ...CITIES,
+    ],
     universe: "capitals",
     junkAliases: [
       "SJK Lai Meng", "K.L.C.C.", "Al memzar", "Guzelbag Mahallesi", "Kaleici",

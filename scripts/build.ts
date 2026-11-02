@@ -5,7 +5,7 @@ import { join } from "node:path";
 import type { Entry, Fact, Puzzle } from "../src/game/types";
 import { normalize } from "../src/game/match";
 import { cleanText, splitHeader, statNumber, tableGrid, wikitables, type Cell } from "./table";
-import { TEST_SET, TOPICS, type Topic } from "./topics";
+import { TEST_SET, TOPICS, type Dated, type Topic } from "./topics";
 import { fetchCategory, fetchPage, fetchRedirects, pageUrl, requestCount } from "./wiki";
 import { addValues } from "./values";
 import { writeLexicon } from "./lexicon";
@@ -393,9 +393,78 @@ function rowTag(yearCell: Cell | undefined, link?: string): string | undefined {
   return q?.match(YEAR_IN)?.[0] ?? who ?? yearCell?.text.match(YEAR_IN)?.[0];
 }
 
+/** The latest year of an entry's value from a `dated` table, for keeping its most recent one. */
+const DATED = new WeakMap<Entry, number>();
+
+/** A year or a span of years: "2024", "1987–1989". */
+const YEARS = /(?<!\d)((?:19|20)\d{2})(?:\s*[–-]\s*((?:19|20)\d{2}))?(?!\d)/;
+
+/**
+ * When a `dated` table's ranking is from: its label, with "{year}" (or, without a label, the whole label) taken
+ * from the first header that names a year ("Arrivals 2024", "Rank in 2020"), else from the table's caption or
+ * heading ("1987–1989").
+ */
+export function datedLabel(d: Pick<Dated, "label">, headers: string[], title: string): string | undefined {
+  const year = [...headers, title]
+    .map((t) => t.match(YEARS))
+    .find(Boolean)?.[0]
+    .replace(/\s*[–-]\s*/, "–");
+  if (!d.label) return year;
+  if (!d.label.includes("{year}")) return d.label;
+  return year && d.label.replace("{year}", year);
+}
+
+/** The last year a label names: "1987–1989" is 1989, "Q4 2025" is 2025. */
+export const labelYear = (label: string) => Math.max(0, ...[...label.matchAll(/(?<!\d)(?:19|20)\d{2}(?!\d)/g)].map((m) => Number(m[0])));
+
+/**
+ * How an answer's rank and figure from another year's (or source's) table read: "#6 in 2024 (16.5 million)",
+ * "#3 in 2019" (no figure), "2.98 million (Mastercard, 2016)" (no rank). Undefined when the row has neither.
+ */
+export function datedValue(label: string, rank?: number, figure?: string, source?: string): string | undefined {
+  if (rank) {
+    const more = [source, figure].filter(Boolean);
+    return `#${rank} in ${label}${more.length ? ` (${more.join(", ")})` : ""}`;
+  }
+  return figure ? `${figure} (${[source, label].filter(Boolean).join(", ")})` : undefined;
+}
+
+/** A number in the shown unit: 16,500,000 at scale 1e6 is "16.5", 4,238,000 at 1e3 "4,238", 720,000 at 1e6 "0.72". */
+export function scaledFigure(value: number, scale: number): string {
+  const x = value / scale;
+  if (x >= 100) return Math.round(x).toLocaleString("en-US");
+  if (x >= 1) return x.toFixed(1);
+  return String(Number(x.toPrecision(2)));
+}
+
+/** A rank cell: "6", "=5", "3/4" (shared: the first). Undefined for "-", "N/A" or nothing. */
+export function rankOf(text: string | undefined): number | undefined {
+  const n = Number(text?.match(/^\s*[=T]?-?\s*(\d{1,4})\b/)?.[1]);
+  return n > 0 ? n : undefined;
+}
+
+/** A table's caption, else the heading above it. */
+function tableTitle($: Awaited<ReturnType<typeof fetchPage>>, table: Parameters<typeof tableDataDate>[1]): string {
+  return cleanText($(table).find("caption").first().text()) || cleanText($(table).prevAll("h2, h3, h4, div.mw-heading").first().text());
+}
+
+/**
+ * Gives an answer a dated value from a namesake row of a later `dated` table (or another source's), when the
+ * answer is unranked and has no figure of its own or only an older dated one. The first table listed wins a tie.
+ */
+function adoptDated(owner: Entry, e: Entry): void {
+  const year = DATED.get(e);
+  if (year === undefined || owner.rank !== 0 || owner.n !== undefined) return;
+  const had = DATED.get(owner);
+  if (owner.value !== undefined && (had === undefined || had >= year)) return;
+  owner.value = e.value;
+  DATED.set(owner, year);
+}
+
 /**
  * Unranked accepted answers from other tables (or pages): aliases from the cell and short forms, and the list's
- * stat when the source has a `value` column for it (only below `limit`, the last ranked row's number).
+ * stat when the source has a `value` column for it (only below `limit`, the last ranked row's number), or a rank
+ * and figure from another year's table (`dated`).
  */
 async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
   const out: Entry[] = [];
@@ -406,6 +475,9 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       const { header, body } = splitHeader(tableGrid($, tables[t]));
       const nc = column(header, src.name);
       const vc = src.value === undefined ? -1 : column(header, src.value);
+      const rc = src.dated?.rank === undefined ? -1 : column(header, src.dated.rank);
+      const label = src.dated && datedLabel(src.dated, [vc, rc, nc].filter((c) => c >= 0).map((c) => header[c]), tableTitle($, tables[t]));
+      if (src.dated && !label) throw new Error(`no year for dated table ${t} (give it a label)`);
       const aliasCs = (src.aliasCols ?? []).map((a) => column(header, a));
       for (const r of body) {
         const cell = r[nc];
@@ -422,7 +494,16 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords), ...others].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
         const v = vc >= 0 && !topic.lowerIsBetter ? parseValue(r[vc]?.text ?? "") : null;
-        if (v && v.value > 0 && v.value < limit) {
+        if (src.dated && label) {
+          const d = src.dated;
+          const currency = v?.display.match(/^[$€£]/)?.[0] ?? "";
+          const figure = v && v.value > 0 ? (d.scale ? currency + scaledFigure(v.value, d.scale) : v.display) + (d.unit ?? topic.unit ?? "") : undefined;
+          const shown = datedValue(label, rc >= 0 ? rankOf(r[rc]?.text) : undefined, figure, d.source);
+          if (shown) {
+            entry.value = shown;
+            DATED.set(entry, labelYear(label));
+          }
+        } else if (v && v.value > 0 && v.value < limit) {
           entry.value = (topic.prefix ?? "") + v.display + (topic.unit ?? "");
           entry.n = statNumber(v.value);
         }
@@ -629,6 +710,48 @@ function readFacts(id: string): Record<string, Fact> {
   return Object.fromEntries(Object.entries(raw).map(([name, f]) => [name, { text: f.text, source: f.source }]));
 }
 
+/** "https://en.wikipedia.org/wiki/The_Lion_King_(2019_film)" → "the lion king 2019 film". */
+const urlTitle = (url: string) => {
+  const m = url.match(/\/wiki\/([^?#]+)/);
+  if (!m) return "";
+  try {
+    return normalize(decodeURIComponent(m[1]).replace(/_/g, " "));
+  } catch {
+    return normalize(m[1].replace(/_/g, " "));
+  }
+};
+
+/**
+ * Which fact (by its key in the facts file) belongs to each top-10 answer, so a rename keeps its fact: the exact
+ * name, then the name normalized ("Shape Of You" is "Shape of You"), then a fact whose source is the answer's
+ * article ("The Lion King" sourced from "The Lion King (2019 film)"), then a key that is the article's title or one
+ * of the answer's aliases. Past the exact name, a key only goes to an answer if no other answer fits it at that
+ * step, and each key goes to one answer.
+ */
+export function matchFacts(
+  facts: Record<string, Fact>,
+  top: Pick<Entry, "name" | "aliases" | "article">[],
+): (string | undefined)[] {
+  const out: (string | undefined)[] = top.map(() => undefined);
+  const keys = Object.keys(facts);
+  const steps: ((key: string, e: (typeof top)[number]) => boolean)[] = [
+    (k, e) => k === e.name,
+    (k, e) => normalize(k) === normalize(e.name),
+    (k, e) => !!e.article && urlTitle(facts[k].source ?? "") === normalize(e.article),
+    (k, e) => !!e.article && normalize(k) === normalize(e.article),
+    (k, e) => e.aliases.some((a) => normalize(a) === normalize(k)),
+  ];
+  for (const fits of steps) {
+    const used = new Set(out);
+    for (const k of keys) {
+      if (used.has(k)) continue;
+      const hits = top.flatMap((e, i) => (!out[i] && fits(k, e) ? [i] : []));
+      if (hits.length === 1) out[hits[0]] = k;
+    }
+  }
+  return out;
+}
+
 /** When the topic's first source table says its numbers are from. */
 async function dataDate(topic: Topic): Promise<string | undefined> {
   if (topic.dataAsOf) return topic.dataAsOf;
@@ -696,7 +819,6 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       const last = row.name.split(" ").at(-1)!;
       if (last.length >= 4 && !isEnglishWord(normalize(last))) aliases.add(last);
     }
-    const fact = i < 10 ? facts[row.name] : undefined;
     entries.push({
       rank: i + 1,
       name: row.name,
@@ -704,9 +826,13 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       value: (topic.prefix ?? "") + row.valueText + (topic.unit ?? ""),
       ...(Number.isFinite(row.value) ? { n: statNumber(row.value) } : {}),
       ...(i < 10 ? { article: row.redirectTarget } : {}),
-      ...(fact ? { fact } : {}),
     });
   }
+  const top = entries.slice(0, 10);
+  const factKeys = matchFacts(facts, top);
+  for (const [i, e] of top.entries()) if (factKeys[i]) e.fact = facts[factKeys[i]!];
+  const unused = Object.keys(facts).filter((k) => !factKeys.includes(k));
+  if (unused.length) console.log(`warn ${topic.id}: facts for ${unused.map((k) => `"${k}"`).join(", ")} match no top-10 answer`);
 
   // Unranked but real: rows from other tables, and members of the topic's universe (every country, every
   // state, every team) that the table leaves out, still count as (wrong) answers.
@@ -719,7 +845,10 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     const members = UNIVERSES[u]().filter((p) => !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
     extra.push(...members.map((p) => ({ rank: 0, ...p })));
   }
-  const taken = new Set(entries.flatMap((e) => [e.name, ...e.aliases].map(normalize)));
+  // Every form an entry so far is known by, and that entry: a later namesake is the same answer.
+  const taken = new Map<string, Entry>();
+  const take = (form: string, e: Entry) => taken.has(normalize(form)) || taken.set(normalize(form), e);
+  for (const e of entries) for (const f of [e.name, ...e.aliases]) take(f, e);
   // The same thing written another way ("St. Lawrence River" for the ranked Saint Lawrence, the table's link
   // "Javary River" for Javari) is one entry: the other spelling becomes an alias instead of a second, unranked entry.
   const owner = new Map<string, Entry>();
@@ -729,7 +858,12 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   for (const [i, e] of entries.entries()) own(e, [e.name, ...e.aliases, rows[i].redirectTarget, rows[i].link]);
   for (const e of extra) {
     const forms = ownForms(e).map(normalize).filter(Boolean);
-    if (forms.some((f) => taken.has(f))) continue;
+    const known = forms.find((f) => taken.has(f));
+    if (known) {
+      // Singapore in the 2018 table after the 2016 one: its later figure is the one to show.
+      adoptDated(taken.get(known)!, e);
+      continue;
+    }
     // Add-ons of an entry already listed ("Skyrim – Dragonborn" next to Skyrim) only blur what its name means.
     const base = e.name.split(" – ")[0];
     if (base !== e.name && taken.has(normalize(base))) continue;
@@ -737,12 +871,13 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     if (same) {
       if (!same.aliases.includes(e.name)) same.aliases.push(e.name);
       if (same.n === undefined && e.n !== undefined) Object.assign(same, { value: e.value, n: e.n });
-      taken.add(normalize(e.name));
+      else adoptDated(same, e);
+      take(e.name, same);
       console.log(`     ${topic.id}: "${e.name}" is ${same.rank ? `#${same.rank} ` : ""}"${same.name}"`);
       continue;
     }
     entries.push(e);
-    taken.add(normalize(e.name));
+    take(e.name, e);
     own(e, [e.name, ARTICLE.get(e), LINK.get(e)]);
   }
 

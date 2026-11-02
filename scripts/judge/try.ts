@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Lexicon } from "../../src/game/junk";
 import { judgeGuess } from "../../src/game/match";
+import { shownValue } from "../../src/game/state";
 import { loadBuilt } from "./packet";
 
 const DIR = join(import.meta.dirname, "..", "..", "public", "puzzles");
@@ -35,7 +36,8 @@ export function play(id: string, guesses: string[]): string[] {
         if (!r.corrected) lives--;
         text = r.corrected
           ? `corrected to ${r.entry.name} (rank ${r.entry.rank > 10 ? `#${r.entry.rank}` : "unranked"}); would cost a life if confirmed`
-          : `MISS, costs a life: ${r.entry.name} is ${r.entry.rank > 10 ? `#${r.entry.rank}` : "an accepted answer outside the ranking"}`;
+          : `MISS, costs a life: ${r.entry.name} is ${r.entry.rank > 10 ? `#${r.entry.rank}` : "an accepted answer outside the ranking"}` +
+            (shownValue(r.entry) ? `; shows "${shownValue(r.entry)}"` : "; no figure");
         break;
       case "typo":
         text = `ambiguous, the game offers: ${r.suggestions.join(" / ")} (free)`;
