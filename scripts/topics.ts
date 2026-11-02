@@ -39,8 +39,11 @@ export interface Topic {
   nameStrip?: RegExp;
   /** Prepended to the displayed value, e.g. "#". */
   prefix?: string;
-  /** Words to strip for an extra short-form alias, e.g. /\b(desert)\b/gi turns "Gobi Desert" into "Gobi". */
-  stripWords?: RegExp;
+  /**
+   * Words to strip for an extra short-form alias, e.g. /\b(desert)\b/gi turns "Gobi Desert" into "Gobi". Several
+   * patterns give one short form each ("M72 Tour" and "M72" from "M72 World Tour").
+   */
+  stripWords?: RegExp | RegExp[];
   /** Keep the table's order instead of sorting by value (descending). */
   keepOrder?: boolean;
   /** Skip rows whose first column is not a number (unranked rows like "World"). */
@@ -190,6 +193,12 @@ export interface Dated {
   unit?: string;
   /** The name cell ends with the figure ("Tencent 688,000"): the number is the figure, the rest the name. */
   figureInName?: boolean;
+  /**
+   * A table with one row per year (each year's top tour, the record as it grew): `col` holds the row's year, which
+   * fills "{year}" in the label row by row, and `rank` is the rank every row held that year: "#1 in 2025
+   * ($407,600,113)" for the year's highest-grossing tour.
+   */
+  perYear?: { col: string | number; rank?: number };
 }
 
 /** Redirects to US states that are jokes, documents, agencies or teams, found by the list judges. */
@@ -210,6 +219,12 @@ const DECEASED_BILLIONAIRES = [
   "Kenneth Thomson", "Erivan Haub", "Minoru Mori", "Samuel Newhouse", "Paul Sacher", "Tsai Wan-lin", "Karl Albrecht",
   "Chung Ju-yung", "Paul Allen", "Forrest Mars Sr.", "Jay Pritzker", "John Walton", "Helen Walton", "Ingvar Kamprad",
   "Sheldon Adelson", "Theo Albrecht", "David Koch", "Liliane Bettencourt",
+];
+
+/** Families among the earlier years' top 10s: the list ranks people, so naming a family is free. */
+const BILLIONAIRE_FAMILIES = [
+  "Walton family", "Mars family", "Du Pont family", "Haas family", "Kwok brothers", "Oeri, Hoffman & Sacher families",
+  "Haniel family",
 ];
 
 /** DC and the territories: not states, so naming one on a state list is free (and they take no rank). */
@@ -686,11 +701,8 @@ export const TOPICS: Topic[] = [
     aliasCols: ["Username"],
     people: true,
     also: CELEBRITIES,
-    // Instagram's own: products, users and effects among the redirects (the stars': CELEBRITY_JUNK).
-    junkAliases: [
-      "Effects of Instagram on mental health", "Instagram impact on people", "Instagrammer", "Instagram blogger",
-      "Instagram Kids", "Instagram from Facebook", "Ig.me",
-    ],
+    // Instagram's own features, users and studies (Stories, Live, "Instagrammer") and the stars' relatives and songs
+    // are in CELEBRITY_JUNK (scripts/aliases.ts), shared with the Facebook list, which has an Instagram page too.
   },
   {
     id: "video-games",
@@ -1202,9 +1214,10 @@ export const TOPICS: Topic[] = [
   {
     id: "music-artists",
     category: "Entertainment",
-    // Not "best-selling": that reads as the page's claimed-sales ranking (the Beatles, Elvis, Michael Jackson). This
-    // ranks certified units, where streams count and featured artists get full credit (Drake is #1).
-    title: "Music artists with the most certified sales",
+    // Not "best-selling", nor "sales" alone: that reads as the page's claimed-sales ranking (the Beatles, Elvis,
+    // Michael Jackson). This ranks certified units, where streams count and featured artists get full credit (Drake
+    // is #1), and the title says so.
+    title: "Music artists with the most certified sales and streams",
     noun: "artists",
     prompt: "Name the 10 music artists with the most certified units (sales and streams, from available markets)",
     page: "List of best-selling music artists",
@@ -1215,7 +1228,13 @@ export const TOPICS: Topic[] = [
     metric: "Certified units",
     people: true,
     // First names everyone uses ("West" is a plain word, so the surname rule gives Kanye none).
-    aliases: { "Elvis Presley": ["Elvis"], "Kanye West": ["Kanye"] },
+    aliases: {
+      "Elvis Presley": ["Elvis"],
+      "Kanye West": ["Kanye"],
+      "Tupac Shakur": ["2Pac", "Tupac"],
+      Rihanna: ["RiRi"],
+      "Guns N' Roses": ["Guns and Roses", "GNR"],
+    },
     // Songs, albums, tours, labels, fans and relatives among the redirects: CELEBRITY_JUNK in scripts/aliases.ts.
   },
   {
@@ -1235,8 +1254,24 @@ export const TOPICS: Topic[] = [
       // Each decade's top 10, worldwide, with its gross; a tour split across two decades (marked *) has only part of
       // its gross in each table, so it is left out.
       { tables: [3, 4, 5, 6, 7], name: "Tour title", value: "Actual gross", aliasCols: ["Artist"], where: { col: "Year", match: /^[^*]*$/ } },
-      // Record holders and each year's top North American tour (no worldwide gross).
-      { tables: [2, 8], name: "Tour title", aliasCols: ["Artist"] },
+      // The record as it grew, with the record gross: "Steel Wheels/Urban Jungle Tour: $175,000,000 (the record in
+      // 1990)". Before the yearly table, whose spelling ("Steel Wheels Tour") is shorter.
+      {
+        tables: [2],
+        name: "Tour title",
+        value: "Record gross",
+        aliasCols: ["Artist"],
+        dated: { perYear: { col: "Year" }, label: "the record in {year}" },
+      },
+      // Each year's highest-grossing tour, with that year's gross: "Cowboy Carter Tour: #1 in 2025 ($407,600,113)".
+      // A tour in both tables shows the newer figure (Steel Wheels' 1990 record, not its 1989 gross).
+      {
+        tables: [8],
+        name: "Tour title",
+        value: "Actual gross",
+        aliasCols: ["Artist"],
+        dated: { perYear: { col: "Year", rank: 1 } },
+      },
     ],
     // Ed Sheeran's tours are written in maths symbols, which read as just "tour"; Springsteen's is named by its years.
     rename: {
@@ -1245,6 +1280,9 @@ export const TOPICS: Topic[] = [
       "2023–2025 Tour": "Springsteen and E Street Band 2023–2025 Tour",
     },
     numberNames: true,
+    // A tour is named with or without "World" and "Tour": "M72 Tour", "M72", "1989 Tour", "Cowboy Carter". A short
+    // form that is one plain word ("Renaissance", "Divide") is left to the matcher, which reads a name's words.
+    stripWords: [/\bworld\b/gi, /\b(world )?tour\b/gi],
     aliases: { "Mathematics Tour": ["The Mathematics Tour"], "Divide Tour": ["The Divide Tour"] },
     junkAliases: [
       "Tour", "Bruce Springsteen · E Street Band", "2025 Tour", "Springsteen and E Street Band 2023",
@@ -1678,24 +1716,49 @@ export const TOPICS: Topic[] = [
     metric: "Net worth (US$)",
     people: true,
     // Earlier years' top 10s, latest first (a name is spelled as its latest table spells it); each person shows
-    // their last appearance ("Bill Gates: #7 in 2024 ($128 billion)"). People who have died are free, not a costly
-    // miss ("karl" was Karl Albrecht).
+    // their last appearance ("Bill Gates: #7 in 2024 ($128 billion)"). Forbes and Bloomberg publish no world ranks
+    // past #10 on Wikipedia, so near misses take a newer figure from their country's ranking when it has one
+    // ("Michael Dell: #10 in the US, 2025 ($129 billion)"): the newest year wins, the world ranking a tie. People
+    // who have died are free, not a costly miss ("karl" was Karl Albrecht), and so are families: the list ranks
+    // people ("walton family" offers the three Waltons, intent.ts).
     also: [
       {
         tables: range(1, 37).reverse(),
         name: "Name",
         value: "Net worth",
         dated: { rank: "No." },
-        skip: [...DECEASED_BILLIONAIRES, "Steven Ballmer"],
+        skip: [...DECEASED_BILLIONAIRES, ...BILLIONAIRE_FAMILIES, "Steven Ballmer"],
+      },
+      // "According to Forbes, as of December 2025, the 25 wealthiest people in the United States".
+      {
+        page: "List of Americans by net worth",
+        tables: [0],
+        name: "Name",
+        value: "Net worth",
+        dated: { rank: "Rank", label: "the US, 2025", prefix: "$", unit: " billion" },
+        skip: DECEASED_BILLIONAIRES,
+      },
+      // "India's richest people as per their net worth published by the Forbes (April 2024)".
+      {
+        page: "List of Indians by net worth",
+        tables: [0],
+        name: "Name",
+        value: "Net worth",
+        dated: { rank: "Rank", label: "India, 2024", prefix: "$" },
+        skip: DECEASED_BILLIONAIRES,
+      },
+      // The 2023 Forbes list for France.
+      {
+        page: "List of French billionaires by net worth",
+        tables: [0],
+        name: "Name",
+        value: "Net worth",
+        dated: { rank: "Ranking in France", label: "France, 2023", prefix: "$" },
+        skip: DECEASED_BILLIONAIRES,
+        rename: { "Jacques Saadé, jr.": "Jacques Saadé Jr." },
       },
     ],
     dataAsOf: "2026",
-    // Bettencourt Meyers ranks below the top 10 the page tables, so nothing lists her; "bettencourt" alone
-    // otherwise finds only her late mother.
-    more: {
-      "Françoise Bettencourt Meyers": ["Francoise Bettencourt Meyers", "Bettencourt Meyers", "Bettencourt"],
-      "Gautam Adani": ["Adani"],
-    },
     // Relatives, organizations and jokes among the redirects to the top 10.
     junkAliases: [
       "Gloria Page", "Lucinda Southworth", "Lucy Southworth", "Lucy Page", "Lucinda Page", "Michael Brin",
@@ -2365,6 +2428,80 @@ export const TOPICS: Topic[] = [
       { tables: [3], name: 1, dated: { rank: "Rank", source: "NCSC" } },
       { tables: [2], name: 1, dated: { rank: "Rank", source: "Keeper" } },
     ],
+  },
+  // Cycle 3
+  {
+    id: "athletes-earnings",
+    category: "Sports",
+    // Forbes ranks a year's earnings, endorsements included: the title says the year and the measure.
+    title: "Highest-earning athletes of 2026",
+    noun: "athletes",
+    prompt: "Name the 10 athletes who earned the most in 2026 (Forbes: salary and winnings plus endorsements)",
+    page: "Forbes list of the world's highest-paid athletes",
+    tables: [0],
+    name: "Name",
+    value: "Total",
+    metric: "Earnings incl. endorsements (US$)",
+    dataAsOf: "2026",
+    people: true,
+    also: [
+      // Every earlier year's top 10 (2012 to 2025), latest first: a miss shows its last appearance ("Kylian Mbappé:
+      // #6 in 2024 ($110 million)"). Not the 2010s decade table, a decade's total.
+      {
+        tables: [...range(1, 6), ...range(8, 15)],
+        name: "Name",
+        value: "Total",
+        dated: { rank: "Rank" },
+        // Kobe Bryant (#6 in 2012) has died: naming him is free.
+        skip: ["Kobe Bryant"],
+      },
+      // Athletes who earned $100 million in some year without making that year's top 10 (Joe Burrow, Oleksandr Usyk).
+      { tables: [18], name: "Name" },
+    ],
+    // Fights, relatives, staff, companies, pets and jokes among the redirects: CELEBRITY_JUNK, shared with the
+    // career lists, where these stars rank too.
+  },
+  {
+    id: "car-models",
+    category: "Business",
+    title: "Best-selling car models of all time",
+    noun: "car models",
+    prompt: "Name the 10 best-selling car models (nameplates) of all time",
+    page: "List of best-selling automobiles",
+    tables: [0],
+    name: "Nameplate",
+    value: "Units sold",
+    metric: "Units sold",
+    // Named by model: "toyota" or "honda" alone would otherwise offer the brand's top-10 models, a giveaway. The
+    // full name ("Toyota Corolla") stays an alias.
+    nameStrip: /^(Toyota|Ford|Volkswagen|Honda)\s+/,
+    also: [
+      // The record holders (the Model T) and each brand's best seller, current and defunct, with units sold.
+      { tables: [1], name: "Automobile", value: "Units sold" },
+      {
+        tables: [2, 3],
+        name: "Automobile",
+        value: "Units sold",
+        rename: { Series: "Land Rover Series", Metropolitan: "Nash Metropolitan" },
+      },
+      // Each class's best seller (Mustang, Prius, MX-5).
+      { tables: [4], name: "Automobile", value: "Units sold", rename: { "Iso/BMW/VELAM/Romi Isetta": "Isetta" } },
+    ],
+    // Platforms, concepts, a lawsuit, maintenance and plain words ("Bug", "Rabbit": "vw bug" still works) among the
+    // redirects.
+    junkAliases: [
+      "GM S platform", "Hybrid Electric Vehicle Technologies", "Ford 6+6 trucks", "Eluminator", "Peters v. Honda", "Dogbot",
+      "V2CII", "Ford Verve concepts", "Beetle restoration", "Toyota Truck Maintenance", "Toyota Truck Maintainence",
+      "Toyota Hilux platform", "Toyota Hi-Lux platform", "Gyurza patrol vehicle", "Toyota Recreational Vehicles",
+      "Toyota Taliban", "TruckMasters OX", "Toyota Hilux FCEV concept", "Bug", "Rabbit", "Beetle car",
+    ],
+    // The trucks are sold by their model numbers; the Golf was the Rabbit in North America.
+    aliases: {
+      "F-Series": ["F-150", "Ford F-150", "F-250"],
+      Golf: ["VW Golf", "Volkswagen Rabbit", "VW Rabbit"],
+      Beetle: ["VW Beetle", "Volkswagen Bug", "VW Bug"],
+      Passat: ["VW Passat"],
+    },
   },
 ];
 

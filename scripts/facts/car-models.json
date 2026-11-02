@@ -1,0 +1,52 @@
+{
+  "Corolla": {
+    "text": "Its name is Latin for \"small crown\", and it has been the best-selling car nameplate ever since 1997.",
+    "source": "https://en.wikipedia.org/wiki/Toyota_Corolla",
+    "evidence": "Since 1997, the Corolla has remained the best-selling automobile nameplate of all time, surpassing the Volkswagen Beetle. ... with \"corolla\" meaning \"small crown\" in Latin."
+  },
+  "F-Series": {
+    "text": "It has been America's best-selling vehicle of any kind every year since 1981.",
+    "source": "https://en.wikipedia.org/wiki/Ford_F-Series",
+    "evidence": "Since 1977, the F-Series has remained the best-selling pickup truck line in the United States; it has been the best-selling vehicle overall since 1981."
+  },
+  "Golf": {
+    "text": "It was built to replace the Beetle, and North Americans first bought it as the Volkswagen Rabbit.",
+    "source": "https://en.wikipedia.org/wiki/Volkswagen_Golf",
+    "evidence": "including as the Volkswagen Rabbit in the United States and Canada (Mk1 and Mk5) ... The original Golf Mk1 was a front-engined, front-wheel drive replacement for the air-cooled, rear-engined, rear-wheel drive Volkswagen Beetle."
+  },
+  "Passat": {
+    "text": "It is named after a wind: Passat is the German word for the trade winds.",
+    "source": "https://en.wikipedia.org/wiki/Volkswagen_Passat",
+    "evidence": "The \"Passat\" is one of several Volkswagen models named after a wind: Passat is the German word for \"Trade winds\"."
+  },
+  "Civic": {
+    "text": "Civic Si models took four of the top 10 spots on Canada's list of most-stolen vehicles in 2005.",
+    "source": "https://en.wikipedia.org/wiki/Honda_Civic",
+    "evidence": "In Insurance Bureau of Canada's report on top 10 most stolen vehicles in 2005, 2000 Honda Civic Si 2-door, 1999 Honda Civic Si coupe, 1994 Honda Civic Si 2-door Hatchback, 1995 Honda Civic Si 2-door Hatchback were listed as ranks #1, #2, #5, #8 respectively."
+  },
+  "Camry": {
+    "text": "Its name comes from kanmuri, Japanese for \"crown\", in Toyota's tradition of crown names.",
+    "source": "https://en.wikipedia.org/wiki/Toyota_Camry",
+    "evidence": "The name \"Camry\" derives from the Japanese word kanmuri (冠, かんむり, \"crown\"). This follows Toyota's naming tradition of using the crown name for primary models"
+  },
+  "Fiesta": {
+    "text": "Ford's marketers wanted to call it the Bravo; Henry Ford II chose Fiesta, Spanish for \"party\".",
+    "source": "https://en.wikipedia.org/wiki/Ford_Fiesta",
+    "evidence": "The name \"Fiesta\" (meaning \"party\" in Spanish) ... Ford's marketing team had preferred the name \"Bravo\", but Henry Ford II chose \"Fiesta\"."
+  },
+  "Beetle": {
+    "text": "Built from 1938 to 2003, it had the longest production run of any single generation of car.",
+    "source": "https://en.wikipedia.org/wiki/Volkswagen_Beetle",
+    "evidence": "a small family car produced by the German company Volkswagen from 1938 to 2003. ... Its production period of 65 years is the longest for any single generation of automobile."
+  },
+  "Hilux": {
+    "text": "Top Gear left one in the tide, dropped a building on it and set it on fire; basic tools got it running.",
+    "source": "https://en.wikipedia.org/wiki/Toyota_Hilux",
+    "evidence": "a 1988 diesel N50 Hilux ... was subjected to considerable abuse, including being left on a beach for the incoming tide, left on top of a building as it was demolished, and being set on fire. ... The Hilux suffered severe structural damage, but was still running after being repaired with only the typical tools that would be found in a truck's toolbox"
+  },
+  "Accord": {
+    "text": "In 1982 it became the first car from a Japanese maker to be built in the US, in Marysville, Ohio.",
+    "source": "https://en.wikipedia.org/wiki/Honda_Accord",
+    "evidence": "In 1982, the Accord became the first car from a Japanese manufacturer to be produced in the United States when production commenced in Marysville, Ohio at Honda's Marysville Auto Plant."
+  }
+}

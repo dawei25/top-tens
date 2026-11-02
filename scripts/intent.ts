@@ -325,7 +325,7 @@ export const NICKNAMES: Record<string, string[]> = {
   "Russell Westbrook": ["Russ"],
   "Paul Pierce": ["The Truth"],
   "Damian Lillard": ["Dame", "Dame Time"],
-  "Kyrie Irving": ["Uncle Drew"],
+  "Kyrie Irving": ["Kyrie", "Uncle Drew"],
   "Nikola Jokić": ["Joker", "The Joker"],
   "Larry Bird": ["Larry Legend"],
   "Dennis Rodman": ["The Worm"],
@@ -799,7 +799,17 @@ export const INTENT: Record<string, Intent> = {
     },
   },
   "concert-tours": {
+    same: {
+      // The usual misspelling: "weekend" is a name elsewhere, so it is never corrected as a typo.
+      "After Hours til Dawn Tour": ["The Weekend"],
+      "Not in This Lifetime... Tour": ["Guns and Roses", "GNR"],
+      // Renaissance is a plain word, which the matcher doesn't read as part of a longer name.
+      "Renaissance World Tour": ["Renaissance"],
+    },
     groups: {
+      // Cher's has "The Farewell Tour" in its name, but Elton John's (#4) is the farewell tour most players mean: the
+      // more prominent one goes in the box first.
+      "Farewell Tour": ["Farewell Yellow Brick Road", "Living Proof: The Farewell Tour"],
       // More than four tours each: the artist offers their four biggest.
       "The Rolling Stones": ["A Bigger Bang Tour", "No Filter Tour", "Voodoo Lounge Tour", "Licks Tour"],
       Stones: ["A Bigger Bang Tour", "No Filter Tour", "Voodoo Lounge Tour", "Licks Tour"],
@@ -999,8 +1009,14 @@ export const INTENT: Record<string, Intent> = {
       "Mark Zuckerberg": ["Zuck"],
       "Jensen Huang": ["Jensen"],
       "Warren Buffett": ["Buffet"],
+      "Françoise Bettencourt Meyers": ["Francoise Bettencourt Meyers", "Bettencourt Meyers", "Bettencourt"],
+      "Gautam Adani": ["Adani"],
     },
     groups: {
+      // The family isn't ranked (the list ranks people): naming it offers the three Waltons.
+      "Walton family": ["Jim Walton", "Alice Walton", "S. Robson Walton"],
+      Waltons: ["Jim Walton", "Alice Walton", "S. Robson Walton"],
+      "Koch family": ["Charles Koch", "Julia Koch"],
     },
   },
   broadway: {
@@ -1105,8 +1121,22 @@ export const INTENT: Record<string, Intent> = {
       "Tokyo Disney": ["Tokyo Disneyland", "Tokyo DisneySea"],
     },
   },
+  "car-models": {
+    // Model names that are plain words ("mustang", "impala") aren't read as part of a longer name: say them here.
+    same: {
+      "Ford Model T": ["Model T", "Tin Lizzie"],
+      "Ford Mustang": ["Mustang"],
+      "Chevrolet Impala": ["Impala", "Chevy Impala"],
+      "Jeep Wrangler": ["Wrangler"],
+      "Toyota Prius": ["Prius"],
+      "Tesla Model Y": ["Model Y"],
+      "BMW 3 Series": ["3 Series"],
+      "Mercedes-Benz C-Class": ["C-Class", "Mercedes C-Class"],
+    },
+  },
   "spotify-artists": {
     same: {
+      "Guns N' Roses": ["Guns and Roses", "GNR"],
       "Bruno Mars": ["Bruno"],
       "Lady Gaga": ["Gaga"],
       "Ariana Grande": ["Ariana"],
