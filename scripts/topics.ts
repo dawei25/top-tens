@@ -919,6 +919,8 @@ export const TOPICS: Topic[] = [
     name: "Stadium",
     value: "Capacity",
     metric: "Capacity",
+    // Camp Nou keeps the page's pre-renovation 99,354 (#12). Its article (October 2026) gives 62,652 while stands
+    // reopen in phases and 105,000 only as expected for 2028-29 (that would be #5): no override until it's built.
     // Events, TV shows and scoreboards named after the stadiums.
     junkAliases: [
       "Buckeye Country Superfest", "12th Man TV", "Walk of Champions", "Godzillatron", "Adzillatron", "Salt", "Australia",
