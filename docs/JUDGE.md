@@ -58,9 +58,11 @@ both modes. The owner's target: a typical player averages **5 to 6 out of 10** o
   - the title and prompt say what the player is naming ("Countries emitting the most CO2", not "Biggest CO2
     emitters"); if not, it's `fix-first`;
   - curve >= 3, fairness >= 3, data >= 4;
-  - the casual simulation finds **6 to 8** of the 10 without running out of lives. The judge's casual player knows
+  - the casual simulation finds **6 to 8** of the 10 before the game ends. (A game short of 10/10 always ends at
+    zero lives, so count what was found by then; running out is normal, not a fail.) The judge's casual player knows
     more than a real one, and the synthetic crowd in `scripts/judge/par.ts` sits about 1.2 answers below it, so this
-    lands the estimated average near 5 to 6. Fewer than 6 is too hard for a daily; 9-10 is too easy;
+    lands the estimated average near 5 to 6. Fewer than 6 is too hard for a daily; 9-10 is too easy. How fast famous
+    misses burn lives belongs in `fairness`, not here;
   - Blitz-ready with blitzDepth >= 3 (it is also Today's Blitz).
 - **`daily-blitz`**: kept for older verdicts. A list that only works as a Blitz (expensive films: obvious guesses
   sit outside the top 10) is `free-play` now; Random Blitz still uses it.
