@@ -1,0 +1,21 @@
+{
+  "id": "music-artists",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 4, "guesses": 12 },
+  "fan": null,
+  "blitzCasual": { "scored": 29, "named": 30 },
+  "difficulty": 2,
+  "tags": ["music", "pop", "artists"],
+  "audience": "anyone",
+  "summary": "Written by the data agent at build time, pending a real judge. Everyone knows these names, but certified units favour the streaming era: the Beatles are #11, Elvis #18, Madonna #22.",
+  "reasons": [
+    "Casual run found Drake, Rihanna, Taylor Swift, Eminem, Beyonce, Justin Bieber and Michael Jackson; The Beatles, Madonna, Ed Sheeran and Elton John cost lives.",
+    "Ranked by total certified units (the claimed-sales tiers tie a lot); all 129 tier artists are answers with a figure, so it is a deep Blitz.",
+    "Chris Brown (#8) and the gap between claimed and certified sales may surprise players; the prompt says certified sales."
+  ],
+  "fixes": []
+}

@@ -98,6 +98,11 @@ export interface Topic {
   noParts?: boolean;
   /** Display names for rows, by the name the table gives ("Padma" is shown as "Ganges"). */
   rename?: Record<string, string>;
+  /**
+   * A row's figure when the table's is stale or unreadable, by the name the table gives, with where it comes from:
+   * Dhaka's 2022 census where the table still has 2011's. `value` is read like a table cell ("10,278,882").
+   */
+  overrides?: Record<string, { value: string; source: string }>;
   /** Aliases to drop by exact text (after normalize): junk the rules in scripts/aliases.ts can't tell from a name. */
   junkAliases?: string[];
   /** The Wikipedia article for an entry, by name, when the table links the wrong one (or none). */
@@ -133,6 +138,10 @@ export interface Also {
   nameFromText?: boolean;
   nameFromLink?: boolean;
   skip?: string[];
+  /** Other columns that also name the row (the artist of a tour), as on a topic. */
+  aliasCols?: (string | number)[];
+  /** Only keep rows whose `col` cell matches, as on a topic. */
+  where?: { col: string | number; match: RegExp };
   /**
    * A column with the list's own stat, in the ranked rows' unit: each answer from these tables shows it and scores
    * it in Blitz, unranked. Titanic is in the inflation table's nominal column ($200 million) but not in the ranking,
@@ -375,6 +384,11 @@ export const TOPICS: Topic[] = [
       "Fuxingmen Inner Street", "Fuxingmen Outer Street", "Fuxing Road", "St. Xavier's High School Loyola Hall",
       "Prakash Higher Secondary School", "Prakash school", "Phss", "SJK Lai Meng", "Sichuanese teahouse",
       "Mexican Federal District Transit System", "Sister Cities Chicago",
+      // Parks, temples, a stadium, bridges and a people among the redirects.
+      "Jai Prakash Narayan National Park", "Jayaprakash Narayan National Park", "JP Narain park", "JP Park",
+      "Ambika Niketan Temple", "Chintamani Jain Temple", "Khsetrapal Temple", "Kantareshwar Mahadev Temple",
+      "Ambaji- Balaji Temple", "Rang Upvan Stadium", "Althan National Park", "Bharthana National Park", "Lake Cliff Park",
+      "Four bridges on three lines", "Four bridges on three support", "Shenzhen Software Park", "Shanghai people",
     ],
   },
   {
@@ -483,14 +497,20 @@ export const TOPICS: Topic[] = [
     unit: " km²",
     // "Lake Superior", not "Superior" (a word, and Michigan is a state); the table's short names stay aliases.
     nameFromLink: true,
+    // Famous lakes past the table (likely.ts) show their infobox surface area.
+    values: { kind: "area" },
     also: [{ tables: [3], name: "Name", skip: ["Michigan–Huron", "Lake Michigan–Huron"] }],
-    more: { "Great Salt Lake": [] },
+    // Famous lakes the tables and categories miss; their area comes from the article (likely.ts).
+    more: {
+      "Great Salt Lake": [], "Lake Como": [], "Lake Garda": [], "Lake Balaton": [], "Lake Okeechobee": [], "Lake Mead": [],
+      "Lake Powell": [], "Crater Lake": [], "Lake Bled": [],
+    },
     categoryNames: true,
     // Bays, a wind, a river and an agency among the redirects to the top 10.
     junkAliases: [
       "Misery Bay", "Lakehead Region Conservation Authority", "Hammond Bay", "Lake Huron, Ontario", "Lake Illinois",
       "Good Harbor Bay", "Sleeping Bear Bay", "Platte Bay", "Caspian Sea bordering countries", "Sarma", "Sarma wind",
-      "The Galapagos of Russia", "Dease River", "Lake Niassa and its Coastal Zone", "Boadzulu island",
+      "The Galapagos of Russia", "Dease River", "Lake Niassa and its Coastal Zone", "Boadzulu island", "Caspian area",
     ],
     // The Great Lakes categories hold the region's history, ships and festivals rather than lakes.
     categorySkip: /\b(dispute|crisis|festival|storm|commission|company|lines|program|agreement|compact|charter|conference|clan|people|basin|region|states|surfing|tour|datum|patrol|group|suite|laboratory|alliance|refugee|carp|expedition|shipwrecks?|flood|monster|fishery)\b/i,
@@ -517,7 +537,8 @@ export const TOPICS: Topic[] = [
     category: "Business",
     title: "Countries with the most billionaires",
     noun: "countries",
-    prompt: "Name the 10 countries with the most billionaires (Forbes 2026)",
+    // Hong Kong (#8) is a territory: the source column is "Country/Territory".
+    prompt: "Name the 10 countries or territories with the most billionaires (Forbes 2026)",
     page: "List of countries by number of billionaires",
     tables: [0],
     name: "Country",
@@ -591,8 +612,21 @@ export const TOPICS: Topic[] = [
       { page: "List of most-liked YouTube videos", tables: [0, 1], name: "Video name" },
     ],
     universeCategories: ["Viral videos", "YouTube videos"],
-    // Category members that are a person, a device or a film, not a video.
-    skip: ["Ronaldinho", "I/O Brush", "Myspace – The Movie"],
+    // Category members that are a person, a channel, a web series, a device, a film or a trend, not a video.
+    skip: [
+      "Ronaldinho", "I/O Brush", "Myspace – The Movie", "Viral video", "Donald Trump",
+      "Donald Trump (Last Week Tonight with John Oliver)", "Geoffrey Baron", "Tom Brier",
+      "Stuart Chaifetz", "Vic DiBitetto", "Irene Esser", "Robert Greenwald", "Connor Michalek", "Germano Mosconi",
+      "Hansell Riojas", "Janina San Miguel", "Israa Seblani", "Martin Ssempa", "Chuck Testa", "Pita Taufatofua",
+      "Piotr Szczerek", "Ricardo Milos", "Deltalina", "Grindmother", "Moymoy Palaboy", "Kratu", "Joueur du Grenier",
+      "Mrwhosetheboss", "Good Mythical Morning", "Nostalgia Critic", "Red Letter Media", "Red vs. Blue", "Annoying Orange",
+      "The Juice Media", "Primitive Technology", "Mo Mountain Mutts", "Skibidi Toilet", "The Show with No Name",
+      "Rickrolling", "Bottle flipping", "Mannequin Challenge", "Silhouette Challenge", "Golden retriever egg challenge",
+      "Soda geyser", "Battle of Buulo Mareer", "Norfolk Southern–Gregson Street Overpass", "St. Patrick's Day beating",
+      "Montgomery Riverfront brawl", "Mitt Romney's 47 percent comments",
+    ],
+    // Killings and other incidents filmed and shared: events, not videos a player names.
+    categorySkip: /^(killing|killing and dismemberment|murder|torture|firing) of\b|\bincident$/i,
     // Cocomelon's own upload of the song; "Baby Shark" means Pinkfong's #1 (intent.ts).
     rename: { "Baby Shark": "Baby Shark (Cocomelon)" },
   },
@@ -1026,7 +1060,22 @@ export const TOPICS: Topic[] = [
       "Daisy Dove Bloom", "Dolly", "Meow", "Purr", "Mad Potion", "Immortal Flame", "De Soi", "Andrea Swift",
       "Andrea Gardner Swift", "Andrea Finlay", "Scott Kingsley Swift", "Monologue Song", "Track 5", "Wonderstruck",
       "Incredible Things", "India", "F.C.", "Times", "X Money", "XMoney",
+      // Polls, relatives, campaign slogans and NASA programmes among the redirects.
+      "Donald Trump popularity", "Trump popularity", "Trump popularity rating", "Donald Trump popularity rating",
+      "Trump opinion poll", "Donald Trump opinion poll", "Trump poll", "Trump polls", "Trump poll rating",
+      "Donald Trump poll", "Opinion pollings on the Trump presidencies", "HE Hiraben Modi", "Damodardas Modi",
+      "Mulchand Modi", "Sabka saath, sabka vikas", "Sabka saath, sabka vikaas", "Narendra Modi prime ministerial candidacy",
+      "NaMo TV", "David D. Hudson", "Cristiano Ronaldo Jr.", "Cristiano Jr.", "Cristianinho", "Ronaldo chop",
+      "Striker Force 7", "Founder of SpaceX", "Don’t doubt yer vibe", "Don’t Doubt ur Vibe", "Don't doubt yer vibe",
+      "Don't Doubt ur Vibe", "NASA Advisory Council", "NASA Center for Autonomous Control Engineering",
+      "NASA Applied Sciences", "NASAcast", "NASA Edge",
     ],
+    aliases: {
+      NASA: ["National Aeronautics and Space Administration"],
+      "Manchester United F.C.": ["Manchester United", "Man United", "Man Utd"],
+    },
+    // Famous through the other platforms' lists, but with no X account: naming him is free.
+    skip: ["Lionel Messi"],
   },
   {
     id: "tiktok-accounts",
@@ -1066,6 +1115,7 @@ export const TOPICS: Topic[] = [
     titleCase: true,
     // A phrasal verb keeps its capital (the article is "Take On Me").
     rename: { "Take on Me": "Take On Me" },
+    aliases: { "Sweet Child O' Mine": ["Sweet Child of Mine"], "7 Rings": ["Seven Rings"] },
   },
   {
     id: "albums",
@@ -1086,6 +1136,88 @@ export const TOPICS: Topic[] = [
     junkAliases: ["For Crying Out Loud"],
   },
   {
+    id: "music-artists",
+    category: "Entertainment",
+    title: "Best-selling music artists",
+    noun: "artists",
+    prompt: "Name the 10 music artists with the most certified sales (albums, singles and streams, all markets)",
+    page: "List of best-selling music artists",
+    // The claimed-sales tiers ("Over 250 million", ...). Claimed sales tie a lot; certified units rank cleanly.
+    tables: [0, 1, 2, 3, 4, 5],
+    name: "Artist",
+    value: "Total certified units",
+    metric: "Certified units",
+    people: true,
+    // Songs, albums, mixtapes, tours, labels, fans and relatives among the redirects.
+    junkAliases: [
+      "I Get paper", "Comeback Season II", "It's Never Enough", "Do Right and Kill Everything", "All Kinds", "Fantasy 416",
+      "Drake Griffin", "Jungle Tour", "Wanna Know", "Please Forgive Me", "Songs recorded by Drake Canada", "Ela É do Tipo",
+      "Frozen Moments", "Nocta", "Sophie Brussaux", "Titles Ruin Everything", "Drake vs. Everybody", "Housekeeping Knows",
+      "The Embassy", "OVOXO", "Lost Files", "Gettin' Paid", "Fr8me", "Coffret 4 CD", "3 CD Collector's Set", "Insane",
+      "Monologue Song", "Andrea Gardner Swift", "Andrea Swift", "Incredible Things", "Track 5", "Andrea Finlay",
+      "Scott Kingsley Swift", "Wonderstruck", "Hailie Jade", "Hailie Jade Mathers", "Kimberley Anne Scott Mathers",
+      "Hailey Jade", "Hailie Jade Scott", "John Guerrera", "Deborah Mathers", "Debbie mathers", "Deborah Mathers-Briggs",
+      "Ronnie Polkingharn", "The Slim Shady Show", "Kim Mathers", "Hailie Mathers", "Kimberley Ann Scott Mathers",
+      "Haile Jade Mathers", "Bassmint", "The Way I Am", "Kimberly Anne Scott", "Soul intent", "Diss Me, Diss You",
+      "Eight Mile Style", "8 Mile Style", "Kimberly Mathers", "Deborah Nelson Mathers-Briggs", "Live at Comerica Park",
+      "Straight from the Vault", "Straight From The Vault EP", "Ken Kaniff", "Hailie Jade Scott Mathers", "Lose Yourself Tour",
+      "Evil", "Kimberley Anne Scott", "Shady Ltd.", "Hailie Scott Mathers", "Hailie Scott", "New Jacks",
+      "Bassmint Productions", "Debbie Nelson", "Deborah Rae Nelson", "Deborah R. Nelson", "Debbie Rae Nelson",
+      "Debbie Mathers-Briggs", "Debbie Nelson-Mathers", "Debbie Rae Mathers", "Slim",
+      "Beyoncé Knowles Records and Achivements", "Beyoncé Knowles' music videos", "Beyoncé' music videos",
+      "Slow Love World Tour", "Beyoncé Pulse", "The Ultimate Collection", "Pulse", "Third Ward Trill",
+      "Rock It Till Water Falls", "Renaissance Trilogy", "Rumi Carter", "Justin Bieber on Twitter", "Skylrk",
+      "Jeremy bieber", "Belieber", "Beliebers", "Bieber Mania", "Bieber Fever", "Biebermania", "Michael Jackson finances",
+      "Prince Michael Jackson ll", "Grace Rwaramba", "Michael Jackson jr", "Prince Michael Jackson I",
+      "Prince Michael Jackson Jr.", "Blanket", "Agent MJ", "Michael Joseph Jackson Jr", "Prince blanket", "MJJ Music",
+      "The skinniest Jackson", "The Hee Hee Guy", "Rhinstone Glove", "John Jay Smith", "Johnny Jay Smith", "In the Zone",
+      "In My Zone", "Boy in Detention", "Put It Up", "Ghetto Tales", "CBE", "Chris Brown Entertainment",
+      "CBE Entertainment", "King Of The Fall", "We're Alone Together", "Starboy", "The Dawn Is Coming", "Kin Kane",
+      "Manic Phase", "Bulleez N Nerdz", "Bullies and Nerds", "Gene Hackerman", "Gene.hackerman", "Sober lite",
+      "Moonlightbae", "Donutgate", "Ariana Grande credits", "Zandhr", "Dalton Gomez", "Marjorie Grande", "Dolly", "Purr",
+      "Meow", "David Hudson", "David Daniel Hudson", "David D. Hudson", "Mad Potion", "Mind's a Maze", "Minds Amaze",
+      "Immortal Flame", "Daisy Dove Bloom", "De Soi", "Gypsy Love", "Killa on the Run", "The Hooligans", "Kameron Whalum",
+      "Pectoralz", "Los Unidades", "Big Fat Noises", "Little Monsters", "Lady Gaga on Twitter", "Still Have Fun",
+      "Shakira ft. Wyclef Jean", "Shakira Bio", "Shakira & Alejandro Sanz", "Shakira notable concerts", "Milan Piqué",
+      "Pies Descalzos World Tour",
+    ],
+  },
+  {
+    id: "concert-tours",
+    category: "Entertainment",
+    title: "Highest-grossing concert tours",
+    noun: "concert tours",
+    prompt: "Name the 10 highest-grossing concert tours of all time (not adjusted for inflation)",
+    page: "List of highest-grossing concert tours",
+    tables: [1],
+    name: "Tour title",
+    value: "Actual gross",
+    metric: "Gross (US$)",
+    // Players name the artist: "taylor swift" is The Eras Tour, "coldplay" offers both of theirs.
+    aliasCols: ["Artist"],
+    also: [
+      // Each decade's top 10, worldwide, with its gross; a tour split across two decades (marked *) has only part of
+      // its gross in each table, so it is left out.
+      { tables: [3, 4, 5, 6, 7], name: "Tour title", value: "Actual gross", aliasCols: ["Artist"], where: { col: "Year", match: /^[^*]*$/ } },
+      // Record holders and each year's top North American tour (no worldwide gross).
+      { tables: [2, 8], name: "Tour title", aliasCols: ["Artist"] },
+    ],
+    // Ed Sheeran's tours are written in maths symbols, which read as just "tour"; Springsteen's is named by its years.
+    rename: {
+      "+−=÷× Tour": "Mathematics Tour",
+      "÷ Tour": "Divide Tour",
+      "2023–2025 Tour": "Springsteen and E Street Band 2023–2025 Tour",
+    },
+    numberNames: true,
+    aliases: { "Mathematics Tour": ["The Mathematics Tour"], "Divide Tour": ["The Divide Tour"] },
+    junkAliases: [
+      "Tour", "Bruce Springsteen · E Street Band", "2025 Tour", "Springsteen and E Street Band 2023",
+      // Concert films, live albums and an attack plot among the redirects.
+      "Attempted Taylor Swift concert terrorist plot", "Live in Ahmedabad", "Coldplay - Live in Ahmedabad", "Tutto Passa",
+      "Coldplay – Live in Paris", "The Weeknd Live at SoFi Stadium", "Kiss the future tour",
+    ],
+  },
+  {
     id: "animated-films",
     category: "Entertainment",
     title: "Highest-grossing animated films",
@@ -1101,6 +1233,8 @@ export const TOPICS: Topic[] = [
     junkAliases: [
       "Inside Out 3", "Zootopia Three", "Frozen IIII", "Jikŋon 2", "Frozen fandom", "Frozen Reo Māori", "The Lion King 4",
       "The Super Mario Bros. Movie 3", "Pratt Mario",
+      // Across the Spider-Verse (#37) is not every Spider-Man film: "spiderman" mostly means Into the Spider-Verse.
+      "Spider-Man",
     ],
   },
   {
@@ -1135,8 +1269,11 @@ export const TOPICS: Topic[] = [
     value: "Sales",
     metric: "Copies sold (millions)",
     universeCategories: ["Video game franchises"],
-    // A spin-off article, and sub-series counted in Mario (intent.ts gives Mario their names).
-    skip: ["Educational games in the Sonic the Hedgehog series", "Mario Party", "Mario Kart"],
+    // A spin-off article, and sub-series counted in Mario and Final Fantasy (intent.ts gives the series their names).
+    skip: [
+      "Educational games in the Sonic the Hedgehog series", "Mario Party", "Mario Kart", "Compilation of Final Fantasy VII",
+      "Final Fantasy Crystal Chronicles", "Fabula Nova Crystallis Final Fantasy",
+    ],
     // Famous franchises the category misses ("uncharted" was corrected to Uncharted Waters, "pacman" to Rayman).
     more: { Uncharted: [], "Pac-Man": ["Pacman", "Pac Man"] },
     junkAliases: [
@@ -1145,6 +1282,28 @@ export const TOPICS: Topic[] = [
       "Gym Badge", "Elite Four", "Giovanni", "Steven Stone", "Noland", "Sakaki", "Arklay forest", "Raccoon Dam",
       "Caliban Cove", "Nova 6", "Urzikstan", "Russell Adler", "Lance Vance", "Wanted level", "Alex Hunter", "Piemonte Calcio",
       "L-Block", "Tetris music", "Tetrimino", "Tetromino", "Abstergo", "Precursor Genome", "Pokey",
+      // Characters, enemies, places, mechanics, soundtracks and a film among the redirects (cycle 1 judge).
+      "Kamek the Magikoopa", "Toadsworth", "Koopa kid", "Fire Bro", "Fire Brother", "Toad Town", "Professor E. Gadd",
+      "Professor Elvin Gadd", "Lord Fawful", "FawfuI", "Cheep-Cheep", "Bob-Omb", "Bobomb", "Bomb-omb", "Dry Bones",
+      "Buzzy Beetle", "Snifit", "Lumalee", "Bloober", "Ignatius Koopa", "Petey Piranha", "Petey Piranah", "Petey Pirahana",
+      "Peach's Castle", "Mushroom Kingdom", "Mushroom World", "Super Mario Bros film", "SMB Film", "Mario Takes America",
+      "Magikoopa", "Magikoopas", "Boss Boo", "Boomerang Bros", "Boomerang Brothers", "Boomerang Brother", "Sledge Bro",
+      "Sledge Bros", "Sumo Bros.", "Ice Bros.", "Gerakobits", "Mario Villains", "Mario Bosses", "Super mario bosses",
+      "Mario series enemies", "Mario characters", "Characters in Mario games", "Mario series characters",
+      "Mario character list", "Mario characters list", "Super Mario Characters", "Mario Bros. characters",
+      "Pokémon moves", "Pokémon move", "Pokémon natures", "Pokémon breeding", "Pokémon evolution", "Pokémon abilities",
+      "Pokémon ability", "Pokémon battling", "Pokémon game mechanics", "Gym Leader", "Gym Leaders", "Pokemon Gym Leaders",
+      "Gym Badges", "Pokémon Gym", "Pokémon Gyms", "Pokéball", "Giovani", "Professor Odamaki", "Yukinari Ôkido-Hakase",
+      "Yukinari Ookido-Hakase", "Pokémon crime syndicates", "Pokémon Trainers", "Pokémon Trainer", "Pokemon characters",
+      "Pokémon Professors", "Pokemon Professor", "Pokémon Appearances in Super Smash Bros.",
+      "Biohazard 4 Original Soundtrack", "Biohazard Orchestra", "Biohazard Sound Chronicle", "Biohazard Outbreak Soundtrack",
+      "Biohazard Outbreak Original Soundtrack", "Resident evil 2 soundtrack", "Resident evil outbreak soundtrack",
+      "Biohazard 3 Original Soundtrack", "Biohazard 3 soundtrack", "Resident evil 3 soundtrack",
+      "Biohazard Original Soundtrack Remix", "Biohazard Outbreak Origonal Soundtrack", "Biohazard 3 Origonal Soundtrack",
+      "Biohazard 5 Original Soundtrack", "Resident Evil Orchestra", "Resident Evil list of books", "The Umbrella Conspiracy",
+      "Arklay Forrest", "Arklay Mountains", "Raccoon City Outbreak", "Operation Bacillus Terminate", "Bio-Organic Weapon",
+      "Drain Demios", "Abstergo Industries", "Creed's Assassin", "L-BIock", "Lists of Grand Theft Auto characters",
+      "FIFA leagues",
     ],
   },
   {
@@ -1203,16 +1362,21 @@ export const TOPICS: Topic[] = [
     name: "City",
     value: "Official population",
     metric: "Population",
-    // EU cities under 1 million (Lyon, Naples, Amsterdam) are answers too, with their population.
+    // EU, UK and Ukrainian cities under 1 million (Lyon, Leeds, Lviv) are answers too, with their population (UK:
+    // the city council area, as the main table counts Birmingham). Before CITIES, so Manchester gets its figure.
     also: [
       { page: "List of cities in the European Union by population within city limits", tables: [0], name: "City", value: "Official population" },
+      { page: "List of cities in the United Kingdom", tables: [0], name: "City", value: "Population" },
+      { page: "List of cities in Ukraine", tables: [0], name: "Name", value: 3 },
       ...CITIES,
     ],
     universe: "capitals",
     junkAliases: [
       "Immigration to Madrid", "Madrilenian cuisine", "Paris culture", "Paris agglomeration", "Washington Place, Berlin",
       "Cecchignola", "Rumeli", "Kotly, Moscow", "Kotly, Moscow Oblast", "Western Moscow", "Baku Oilfields", "Baku Today",
-      "Kyiv vs. Kiev", "Kiev vs. Kyiv",
+      "Kyiv vs. Kiev", "Kiev vs. Kyiv", "CityBerlin", "Berlin.de", "Silicon Allee", "Paris.fr", "Paris, Banks of the Seine",
+      "Londonise", "Londonize", "Four bridges on three lines", "Four bridges on three support", "Cahkt-Netep6ypr",
+      "Kiyeff Kiev", "Gente di roma", "Rome, Republic and Empire",
     ],
   },
   {
@@ -1422,6 +1586,9 @@ export const TOPICS: Topic[] = [
       "Nvidia Grace", "Move fast and break things", "Hacker Way", "1 Hacker Way", "One Hacker Way", "Mars Oasis",
       "SpaceX Hawthorne facility", "SpaceX headquarters", "SpaceX Hawthorne", "WaferTech", "TSMC Washington", "Spacex.com",
       "AStore", "Supercenter", "GamePlay",
+      // "\uf8ff Inc." (Apple's logo) reads as "inc"; Nvidia's robot project is spelled with zeros.
+      "Inc.", "Project GR00T", "NVIDIA Project GR00T", "NVIDIA GR00T", "Nvidia GROOT", "Co-mingled inventory",
+      "Comingled inventory", "Amazon leadership principles", "Generalist Robot 00 Technology",
     ],
   },
   {
@@ -1505,6 +1672,8 @@ export const TOPICS: Topic[] = [
     metric: "Nobel laureates",
     universe: "countries",
     junkAliases: ["Swedish sin", "Folkland"],
+    // The table's "1–6" counts laureates by several definitions; the list ranks by the low end, so it shows that.
+    overrides: { Taiwan: { value: "1", source: "the table's 1–6, at its low end" } },
   },
   {
     id: "military-spending",
@@ -1722,6 +1891,14 @@ export const TOPICS: Topic[] = [
       "Disney Regional Entertainment", "Disney Experiences", "Adventures by Disney", "Disney Magic Kingdoms", "Club Disney",
       "World of Disney", "Downtown Disney", "Walt Disney Attractions Japan", "Universal Kids Resort",
       "Hale's Tours of the World", "Port Disney", "Universal Beijing",
+      // Category members that are no park: a racist carnival game, rides, lands, services, events, never-opened parks.
+      "African dodger", "CircusTrix", "Great Old Amusement Parks", "Trolley park", "Behind the Attraction", "E ticket",
+      "Go Away Green", "Hidden Mickey", "MagicBand", "MyMagic+", "Omnimover", "Virtual Magic Kingdom",
+      "Vista-United Telecommunications", "Wild About Safety", "Mickey's Magical Party", "Mickey's Very Merry Christmas Party",
+      "Summer Nightastic!", "Celebration in the Air", "Golden Pass", "Ellen's Energy Adventure", "Pleasure Island",
+      "Adventureland", "Disney's America", "Walt Disney's Riverfront Square", "Disneyland in Australia", "WestCOT",
+      "Disneyland Abu Dhabi", "The Wizarding World of Harry Potter", "20th Century Fox World", "PlayPlace",
+      "Margaritaville Resort Orlando",
     ],
     // #10 is the Paris park; "Disneyland Park" reads like #2.
     rename: { "Disneyland Park": "Disneyland Paris" },
@@ -1730,7 +1907,9 @@ export const TOPICS: Topic[] = [
       "Magic Kingdom Parade", "Disney's Dreams Come True Parade", "Hard Rock Cafe Osaka",
       "Hard Rock Cafe Universal CityWalk Osaka", "Universal CityWalk Osaka", "Team Disney Anaheim",
       "DisneySea Transit Steamer Line", "Hollywood Hills Amphitheater", "Disney's Doug Live!", "Chante, C'est Noel",
-      "Epcot '94", "Epcot '95",
+      "Epcot '94", "Epcot '95", "America", "USA Pavilion", "Epcot Pavilion", "World Showcase pavilion",
+      "Superstar Television", "The Spirit of Pocahontas", "Streets of America", "Pixar Place", "Critter Country",
+      "Disneyland Heliport", "Walt disney project", "Mickey's Soundsational Parade",
     ],
   },
   {
@@ -1758,9 +1937,12 @@ export const TOPICS: Topic[] = [
     name: "Capital",
     value: "Population",
     metric: "Population",
-    also: CITIES,
+    // Only capitals are answers: Istanbul, Lagos or Sydney is free ("not one of the capital cities here"), not a
+    // life. New Delhi stays as the table has it (the New Delhi council area, 249,998), so "delhi" ranks #148.
     universe: "capitals",
     skip: ["Hong Kong"],
+    // The table still has the 2011 census.
+    overrides: { Dhaka: { value: "10,278,882", source: "Dhaka's article, 2022 census (city)" } },
     junkAliases: [
       "Fuxingmen Inner Street", "Fuxingmen Outer Street", "Fuxing Road, Beijing", "Tokyo Plain", "Jūjō, Tokyo",
       "Tokyo in pop culture", "Kotly, Moscow", "Kotly, Moscow Oblast", "Western Moscow", "Abdeen", "Cairo in the middle ages",
@@ -1810,7 +1992,8 @@ export const TOPICS: Topic[] = [
       "Part 2", "Avatar IV", "Inside Out 3", "Frozen IIII", "Jikŋon 2", "Star Wars 10", "Last Skywalker", "Top Gun 3",
       "Untitled third Top Gun film", "The Lion King 4", "The Super Mario Bros. Movie 3", "Zootopia Three",
       "Deadpool & Friend", "Titanic DVD releases", "Titanic DVD Release", "Titanic DVD", "Titanic VHS", "Titanic 5 Disc",
-      "Titanic Blu-ray", "Spider-Man 3",
+      "Titanic Blu-ray", "Spider-Man 3", "Titanic 4 Disc", "Titanic 5-disc Deluxe Limited Edition",
+      "Titanic Special Edition DVD", "Titanic Five Disc Deluxe Limited Edition",
     ],
     // The US and UK titles of one film.
     skip: ["Harry Potter and the Philosopher's Stone"],
@@ -1940,7 +2123,8 @@ export const TOPICS: Topic[] = [
       "Vauxhall Motors", "Alfa Romeo", "Alfa Romeo Quadrifoglio", "Maserati", "Lancia", "DS Automobiles", "Fiat-Chrysler",
       "FCA", "PSA Group", "Groupe PSA", "PSA Peugeot Citroën", "Audi", "Porsche", "Škoda Auto", "SEAT", "Cupra",
       "Cupra Racing", "Bentley", "Lamborghini", "Lexus", "Daihatsu", "Acura", "Volvo Cars", "Polestar", "Lotus Cars",
-      "MG Cars", "Lincoln Motor Company", "Infiniti", "Datsun", "Maruti Suzuki",
+      "MG Cars", "Lincoln Motor Company", "Infiniti", "Datsun", "Maruti Suzuki", "Mercedes", "Tata Motors Passenger Vehicles",
+      "Jaguar Cars", "Land Rover", "Mini", "Mini (marque)", "Rolls-Royce Motor Cars",
     ],
     junkAliases: [
       "Toyota sewing machine", "Shigeru Hayakawa", "Controversies surrounding Toyota", "Toyota automobile collectibles",
@@ -1950,6 +2134,11 @@ export const TOPICS: Topic[] = [
       "Honda Soltec", "Honda Werther", "INNOCEAN", "Hyundai Innocean Communications",
       "Yanfeng Global Automotive Interior Systems", "Yanfeng Automotive Interiors", "Songsan Dolphin", "BYD God's Eye",
       "DiLink", "DiPilot", "E-Platform 2.0", "BYD e-Platform", "DM-i", "BYD J6", "Moia", "CARIAD", "Volkswagen Marine",
+      "The Power of Dreams", "Honda Clio", "Honda Primo", "Honda Verno", "Honda Outboard", "Honda Marine Group",
+      "Built Ford Tough", "Ford Research and Innovation Center", "Ford Advanced Vehicles", "New Auto",
+      "Volkswagen Financial Services", "Volkswagen Financial Services AG", "Toyota Financial Services", "Toyota FTAC",
+      "Toyota Baltic", "BYD Toyota EV Technology", "GAC BYD", "BYD TianShen", "BYD Dual Mode", "Geely GC2",
+      "Geely-Kandi Panda", "General Motors in motorsport",
     ],
   },
   // Oddball: fun lists anyone can throw guesses at, with a surprise or two.

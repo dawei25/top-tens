@@ -35,6 +35,9 @@ const SUBDIVISIONS = [
   "Northern Territory",
   // United Kingdom
   "England", "Scotland", "Wales", "Northern Ireland",
+  // Former countries and historic lands ("prussia" was corrected to Russia on a country list)
+  "Prussia", "Yugoslavia", "Czechoslovakia", "Austria-Hungary", "Ottoman Empire", "Rhodesia", "Bohemia", "Bavaria",
+  "Catalonia", "Kurdistan", "Siberia", "Scandinavia", "Mesopotamia",
 ];
 
 const require = createRequire(import.meta.url);

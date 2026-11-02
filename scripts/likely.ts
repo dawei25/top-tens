@@ -102,6 +102,14 @@ export const LIKELY: Record<string, string[]> = {
     "Sri Lanka", "Taiwan", "Jamaica", "Cuba", "Haiti", "Dominican Republic", "Puerto Rico", "Iceland", "Ireland",
     "United Kingdom", "Greenland", "Madagascar",
   ],
+  // Famous lakes past the top 100 by area.
+  lakes: [
+    "Great Salt Lake", "Aral Sea", "Lake Chad", "Dead Sea", "Lake Tahoe", "Loch Ness", "Lake Geneva", "Lake Nasser",
+    "Lake Kariba", "Lake Kivu", "Lake Champlain", "Lake Constance", "Lake Lucerne", "Lake Maracaibo",
+    "Kati Thanda–Lake Eyre", "Lake Biwa", "Loch Lomond", "Lake Como", "Lake Garda", "Lake Balaton", "Lake Okeechobee",
+    "Lake Titicaca", "Lake Mead", "Lake Powell", "Crater Lake", "Lake Bled", "Lake Annecy", "Lake Zurich",
+    "Lake Maggiore", "Lake Ohrid", "Lake Toba", "Lake Inari", "Lake Vänern", "Lake Ladoga", "Lake Onega",
+  ],
   "nba-points": [
     "Magic Johnson", "Julius Erving", "Yao Ming", "Dennis Rodman", "Scottie Pippen", "Bill Russell", "Steve Nash",
     "Jason Kidd", "John Stockton", "Isiah Thomas", "Tracy McGrady", "Klay Thompson", "Draymond Green",

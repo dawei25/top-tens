@@ -25,6 +25,10 @@ const ARTICLE = new WeakMap<Entry, string>();
 const articleOf = (e: Entry) => ARTICLE.get(e) ?? e.name;
 /** The article a table cell links for an unranked entry, whatever the cell says: another name for the same thing. */
 const LINK = new WeakMap<Entry, string | undefined>();
+/** Aliases an unranked entry takes from other columns (the artist of a tour): names of something else, so they never
+ * make it the same thing as another entry. */
+const COLUMN_ALIASES = new WeakMap<Entry, Set<string>>();
+const ownForms = (e: Entry) => [e.name, ...e.aliases.filter((a) => !COLUMN_ALIASES.get(e)?.has(a))];
 
 const SPELLED_OUT: Record<string, string> = { st: "saint", ste: "sainte", mt: "mount", ft: "fort" };
 
@@ -37,7 +41,8 @@ const MOVABLE = new Set(["river", "lake", "loch", "lough", "mount", "isle", "isl
  * stays ("John Collins" is not "Collins John").
  */
 export function sameKey(name: string): string {
-  const words = normalize(baseTitle(name))
+  // "Nukuʻalofa" and "Nuku'alofa": normalize() reads the ʻokina as a word break, the apostrophe as nothing.
+  const words = normalize(baseTitle(name).replace(/[ʻʼ`'’]/g, ""))
     .split(" ")
     .map((w) => SPELLED_OUT[w] ?? w);
   if (words.length > 1 && MOVABLE.has(words[0])) words.push(words.shift()!);
@@ -54,6 +59,10 @@ interface Row {
   redirectTarget: string;
   /** The article the name cell links, even when it isn't used for redirects. */
   link?: string;
+  /** What tells this row apart from another row with the same name: its year or its article's qualifier. */
+  tag?: string;
+  /** The name it shares with such a namesake ("The Lion King" for "The Lion King (1994)"). */
+  plain?: string;
 }
 
 function column(header: string[], spec: string | number): number {
@@ -172,9 +181,16 @@ function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink"
   return name;
 }
 
-/** Total rows, notes and tier headings ("$50 billion+") that tables mix in with real rows. */
+/**
+ * Total rows, notes and tier headings ("$50 billion+") that tables mix in with real rows. "Total" must be a whole
+ * word ("TotalEnergies" and "TotalBiscuit" are names), and a title-cased word after it makes a name too ("Total War",
+ * "Total Recall", "Total Eclipse of the Heart"), unless that word names the area being totalled ("Total US and
+ * territories").
+ */
 const SKIP_NAME =
-  /^(totals?|grand total|subtotal|as of\b|last updated\b|world( total)?$|others?$|various$|unknown$|[$€£]\d|(player|name|rank|country|team|title)$)/i;
+  /^(as of\b|last updated\b|world( total)?$|others?$|various$|unknown$|[$€£]\d|(player|name|rank|country|team|title)$)/i;
+const TOTAL_ROW = /^(?:[Gg]rand [Tt]otal|GRAND TOTAL|[Ss]ubtotal|SUBTOTAL|[Tt]otals?|TOTALS?)\b(?!\s+(?!(?:US|U\.S\.|USA|World|EU|Europe|Global|All)\b)\p{Lu})/u;
+export const skipName = (name: string) => SKIP_NAME.test(name) || TOTAL_ROW.test(name);
 
 /**
  * Use the linked article for redirects only if it is about the thing itself ("Avatar (2009 film)", not
@@ -245,7 +261,7 @@ function universeName(text: string, members: Place[]): string | undefined {
 const UNRANKED_ROWS = new Map<string, Set<string>>();
 const unrankedRows = (topic: Topic) => UNRANKED_ROWS.get(topic.id) ?? UNRANKED_ROWS.set(topic.id, new Set()).get(topic.id)!;
 
-async function readRows(topic: Topic): Promise<Row[]> {
+export async function readRows(topic: Topic): Promise<Row[]> {
   const $ = await fetchPage(topic.page);
   const tables = wikitables($);
   const rows: Row[] = [];
@@ -256,13 +272,14 @@ async function readRows(topic: Topic): Promise<Row[]> {
     const vc = column(header, topic.value);
     const aliasCs = (topic.aliasCols ?? []).map((a) => column(header, a));
     const fromCol = topic.fallback ? column(header, topic.fallback.from) : -1;
+    const yc = header.findIndex((h) => /^(year|released?|release date)\b/i.test(h));
     if (!topic.fallback) checkNumbers(topic, header, body, vc);
     for (const r of body) {
       const nameCell = r[nc];
       const valueCell = r[vc];
       if (!nameCell || !valueCell || nameCell.isHeader && !nameCell.text) continue;
       const cellText = (members.length && universeName(nameCell.text, members)) || cellName(nameCell, topic);
-      if (!cellText || !normalize(cellText) || topic.skip?.includes(cellText) || SKIP_NAME.test(cellText)) continue;
+      if (!cellText || !normalize(cellText) || topic.skip?.includes(cellText) || skipName(cellText)) continue;
       // A row the ranking leaves out (no rank, no figure) is free where the topic says so: Monaco has no IMF figure.
       const unranked = () => {
         if (topic.unrankedRowsFree) unrankedRows(topic).add(normalize(cellText));
@@ -274,8 +291,10 @@ async function readRows(topic: Topic): Promise<Row[]> {
       const name = topic.rename?.[cellText] ?? cellText;
       if (topic.where && !topic.where.match.test(r[column(header, topic.where.col)]?.text ?? "")) continue;
       if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
-      let v = parseValue(valueCell.text);
-      if (topic.fallback) {
+      const override = topic.overrides?.[cellText];
+      if (override) console.log(`     ${topic.id}: ${cellText} ${valueCell.text} → ${override.value} (${override.source})`);
+      let v = parseValue(override?.value ?? valueCell.text);
+      if (topic.fallback && !override) {
         // A cell that disagrees with the other column by more than 2% was misread on the page ("382.936").
         const alt = convertedValue(r[fromCol], topic.fallback.factor);
         if (alt && (!v || Math.abs(v.value / alt.value - 1) > 0.02)) {
@@ -314,8 +333,12 @@ async function readRows(topic: Topic): Promise<Row[]> {
         aliasSeeds: seeds.map(cleanName).filter((s) => s && s.length > 1),
         redirectTarget: target,
         link: nameCell.link,
+        tag: rowTag(yc >= 0 ? r[yc] : undefined, nameCell.link),
       });
     }
+  }
+  for (const name of Object.keys(topic.overrides ?? {})) {
+    if (!rows.some((r) => r.name === (topic.rename?.[name] ?? name))) console.log(`warn ${topic.id}: override for "${name}", which is not a row`);
   }
   if (!topic.keepOrder) rows.sort((a, b) => b.value - a.value);
   // "3.2 million" among "6,301,972"s reads as another unit: write it out like the rest.
@@ -323,8 +346,51 @@ async function readRows(topic: Topic): Promise<Row[]> {
   if (worded.length && worded.length < rows.length / 2) {
     for (const r of worded) r.valueText = Math.round(r.value).toLocaleString("en-US");
   }
-  const seen = new Set<string>();
-  return rows.filter((r) => !seen.has(normalize(r.name)) && seen.add(normalize(r.name)));
+  return distinctRows(topic, rows);
+}
+
+/**
+ * One name, several rows. The same thing listed twice (one article, or nothing to tell them apart) is one entry,
+ * the first. Different things that share a name stay apart: The Lion King of 1994 and of 2019, the city and the
+ * district of North Vancouver. Each is named with its year or its article's qualifier ("The Lion King (1994)",
+ * "North Vancouver (city)") and keeps the plain name as an alias, which the game reads the natural way.
+ */
+function distinctRows(topic: Topic, rows: Row[]): Row[] {
+  const kept = new Map<string, Row[]>();
+  for (const r of rows) {
+    const k = normalize(r.name);
+    const same = kept.get(k);
+    if (!same) kept.set(k, [r]);
+    else if (r.link && r.tag && same.every((s) => s.link && s.link !== r.link && s.tag && s.tag !== r.tag)) same.push(r);
+  }
+  const out: Row[] = [];
+  for (const r of rows) {
+    const group = kept.get(normalize(r.name))!;
+    if (!group.includes(r)) continue;
+    if (group.length > 1) {
+      if (!r.aliasSeeds.includes(r.name)) r.aliasSeeds.push(r.name);
+      r.plain = r.name;
+      r.name = `${r.name} (${r.tag})`;
+      console.log(`     ${topic.id}: "${r.name}" kept apart from its namesake (${r.link})`);
+    }
+    out.push(r);
+  }
+  return out;
+}
+
+/** A year in a cell or a qualifier: "1994", "(2019 film)". */
+const YEAR_IN = /\b(1[89]\d\d|20\d\d)\b/;
+/** The qualifier of an article title: "city" in "North Vancouver (city)". */
+const qualifierOf = (title?: string) => title?.match(/\(([^()]+)\)$/)?.[1];
+
+/**
+ * What tells a row apart from a namesake: the year in its article's qualifier ("(2019 film)"), else the qualifier
+ * without the kind of work ("Queen" from "(Queen album)", "city", "Berlin"), else its Year column ("1994").
+ */
+function rowTag(yearCell: Cell | undefined, link?: string): string | undefined {
+  const q = qualifierOf(link);
+  const who = q?.replace(/\s+(album|song|single|film|novel|book|video game|game|TV series)$/i, "");
+  return q?.match(YEAR_IN)?.[0] ?? who ?? yearCell?.text.match(YEAR_IN)?.[0];
 }
 
 /**
@@ -340,17 +406,20 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       const { header, body } = splitHeader(tableGrid($, tables[t]));
       const nc = column(header, src.name);
       const vc = src.value === undefined ? -1 : column(header, src.value);
+      const aliasCs = (src.aliasCols ?? []).map((a) => column(header, a));
       for (const r of body) {
         const cell = r[nc];
         if (!cell || (cell.isHeader && !cell.text)) continue;
+        if (src.where && !src.where.match.test(r[column(header, src.where.col)]?.text ?? "")) continue;
         const name = familyName(cellName(cell, src), cell.text);
-        if (!name || !normalize(name) || SKIP_NAME.test(name)) continue;
+        if (!name || !normalize(name) || skipName(name)) continue;
         if (topic.skip?.includes(name) || src.skip?.includes(name)) continue;
         if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue;
         // A family row's text ("Karl and Theo Albrecht") names several people: not an alias of one of them.
         const family = name !== cellName(cell, src);
         const lines = family ? [] : cell.lines.length > 1 ? cell.lines : [cell.text];
-        const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords)].map(cleanName);
+        const others = aliasCs.flatMap((c) => (r[c] ? [r[c].linkText ?? "", ...r[c].lines.flatMap((l) => l.split("/")).map((p) => p.split(",")[0])] : []));
+        const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords), ...others].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
         const v = vc >= 0 && !topic.lowerIsBetter ? parseValue(r[vc]?.text ?? "") : null;
         if (v && v.value > 0 && v.value < limit) {
@@ -359,6 +428,7 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         }
         ARTICLE.set(entry, family ? name : redirectTarget(name, cell, hasCountries(topic)));
         LINK.set(entry, cell.link);
+        COLUMN_ALIASES.set(entry, new Set(others.map(cleanName).filter((a) => a && !lines.map(cleanName).includes(a))));
         out.push(entry);
       }
     }
@@ -370,7 +440,7 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       if (CATEGORY_SKIP.test(title) || topic.categorySkip?.test(title) || topic.skip?.includes(title)) continue;
       if (topic.categoryNames && !looksLikeName(baseTitle(title))) continue;
       const name = cleanName(title);
-      if (!normalize(name) || SKIP_NAME.test(name)) continue;
+      if (!normalize(name) || skipName(name)) continue;
       // The title's qualifier ("Ben Taylor (first baseman, born 1888)") is nothing a player types.
       const entry: Entry = { rank: 0, name, aliases: name === baseTitle(title) ? [] : [baseTitle(title)] };
       ARTICLE.set(entry, title);
@@ -398,7 +468,7 @@ function looksLikeName(title: string): boolean {
 const CATEGORY_CAP = 3000;
 /** Category members that are not things a player would name: lists, overviews, years, other namespaces. */
 const CATEGORY_SKIP =
-  /^((lists?|index|outline|history|timeline|glossary|bibliography|discography|filmography) of\b|\d{3,4}\b|(category|template|wikipedia|portal|file|help|draft|module):)/i;
+  /^((lists?|index|outline|history|timeline|glossary|bibliography|discography|filmography) of\b|\d{3,4}\b|(category|template|wikipedia|portal|file|help|draft|module):)|\(disambiguation\)$/i;
 
 /** An alias shared by more entries than this is too generic to mean any of them ("Mount", "Lake"). */
 const MAX_GROUP = 4;
@@ -407,9 +477,10 @@ const MAX_GROUP = 4;
  * Alias hygiene. An alias that is another entry's name is dropped (typing "Avatar" means Avatar).
  * An alias shared by 2-4 entries stays on all of them, so the game can ask which one was meant; the same goes
  * for an alias that starts other entries' names ("Grand Theft Auto" joins GTA V, GTA IV and San Andreas).
- * Anything broader is dropped.
+ * Anything broader is dropped. `namesakes`: the plain name of entries kept apart by year or qualifier ("The Lion
+ * King"), which belongs to them as a name does: no other entry keeps it ("Mufasa: The Lion King").
  */
-function pruneAliases(entries: Entry[]): void {
+function pruneAliases(entries: Entry[], namesakes = new Map<string, Set<Entry>>()): void {
   const owners = new Map<string, Set<Entry>>();
   const byName = new Map<string, Entry>();
   for (const e of entries) {
@@ -429,6 +500,11 @@ function pruneAliases(entries: Entry[]): void {
       if (!n || n === own || kept.get(e)!.has(n) || !usableAlias(a, e.name)) continue;
       const named = byName.get(n);
       if (named && named !== e) continue;
+      const same = namesakes.get(n);
+      if (same) {
+        if (same.has(e)) for (const g of same) kept.get(g)!.set(n, a);
+        continue;
+      }
       const group = new Set(owners.get(n));
       for (const other of names) if (other !== own && other.startsWith(n + " ")) group.add(byName.get(other)!);
       if (group.size > MAX_GROUP) continue;
@@ -464,7 +540,7 @@ function curated(topic: Topic, entries: Entry[], final: boolean): Curated[] {
       return entries.find((e) => forms.has(normalize(e.name)));
     };
     const [drc, roc] = [congo("DR Congo"), congo("Republic of the Congo")];
-    if (drc && roc) out.push({ alias: "Congo", targets: [drc, roc], strict: false });
+    if (drc && roc) for (const alias of ["Congo", "Congolese"]) out.push({ alias, targets: [drc, roc], strict: false });
   }
   if (/\bcities\b/.test(topic.noun)) {
     for (const forms of CITY_FORMS) {
@@ -652,12 +728,12 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   };
   for (const [i, e] of entries.entries()) own(e, [e.name, ...e.aliases, rows[i].redirectTarget, rows[i].link]);
   for (const e of extra) {
-    const forms = [e.name, ...e.aliases].map(normalize).filter(Boolean);
+    const forms = ownForms(e).map(normalize).filter(Boolean);
     if (forms.some((f) => taken.has(f))) continue;
     // Add-ons of an entry already listed ("Skyrim – Dragonborn" next to Skyrim) only blur what its name means.
     const base = e.name.split(" – ")[0];
     if (base !== e.name && taken.has(normalize(base))) continue;
-    const same = [e.name, ...e.aliases, ARTICLE.get(e), LINK.get(e)].map((f) => f && owner.get(sameKey(f))).find(Boolean);
+    const same = [...ownForms(e), ARTICLE.get(e), LINK.get(e)].map((f) => f && owner.get(sameKey(f))).find(Boolean);
     if (same) {
       if (!same.aliases.includes(e.name)) same.aliases.push(e.name);
       if (same.n === undefined && e.n !== undefined) Object.assign(same, { value: e.value, n: e.n });
@@ -682,7 +758,11 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       e.aliases = e.aliases.filter((a) => !junk.has(normalize(a)));
     }
   }
-  pruneAliases(entries);
+  const namesakes = new Map<string, Set<Entry>>();
+  for (const [i, r] of rows.entries()) {
+    if (r.plain) namesakes.set(normalize(r.plain), (namesakes.get(normalize(r.plain)) ?? new Set()).add(entries[i]));
+  }
+  pruneAliases(entries, namesakes);
   applyIntent(topic, entries);
   // Whatever the source (redirect, cell, universe), a slur never ships.
   for (const e of entries) e.aliases = e.aliases.filter((a) => !blockedAlias(a, [e.name]));
@@ -712,31 +792,53 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   };
 }
 
-// `--test` builds only the test set (fast iteration) and indexes just those lists; ids build only those ids
-// (index untouched); no arguments builds everything.
-const args = process.argv.slice(2);
-const testMode = args.includes("--test");
-// Test mode also builds every list on the daily schedule, so scheduled dailies always exist and are indexed.
-const scheduled: string[] = existsSync(join(OUT_DIR, "daily.json"))
-  ? JSON.parse(readFileSync(join(OUT_DIR, "daily.json"), "utf8")).map((e: { id: string }) => e.id)
-  : [];
-const only = testMode ? [...new Set([...TEST_SET, ...scheduled])] : args.filter((a) => !a.startsWith("--"));
-mkdirSync(OUT_DIR, { recursive: true });
-const index: { id: string; title: string; category: string; blitz: boolean }[] = [];
-for (const topic of TOPICS) {
-  if (only.length && !only.includes(topic.id)) continue;
-  try {
-    const p = await buildPuzzle(topic);
-    writeFileSync(join(OUT_DIR, `${p.id}.json`), JSON.stringify(p));
-    index.push({ id: p.id, title: p.title, category: topic.category, blitz: !!p.blitz });
-    console.log(`ok   ${p.id.padEnd(24)} ${p.answers.map((a) => a.name).join(", ")}`);
-  } catch (err) {
-    console.log(`FAIL ${topic.id.padEnd(24)} ${(err as Error).message}`);
-  }
+type IndexEntry = { id: string; title: string; category: string; blitz: boolean };
+
+/**
+ * The index after building some lists: every list already indexed stays, the ones just built are updated or added,
+ * all in topic order (lists topics.ts no longer has keep their place at the end).
+ */
+export function mergeIndex(old: IndexEntry[], built: IndexEntry[]): IndexEntry[] {
+  const byId = new Map(old.map((e) => [e.id, e]));
+  for (const e of built) byId.set(e.id, e);
+  const order = new Map(TOPICS.map((t, i) => [t.id, i]));
+  const at = (e: IndexEntry) => order.get(e.id) ?? TOPICS.length;
+  return [...byId.values()].sort((a, b) => at(a) - at(b));
 }
-if (!only.length || testMode) writeFileSync(join(OUT_DIR, "index.json"), JSON.stringify(index, null, 1));
-const dropped = [...DROPS].sort((a, b) => b[1] - a[1]).map(([why, n]) => `${n} ${why}`);
-console.log(`aliases dropped: ${dropped.join("; ") || "none"}`);
-if (process.env.ALIAS_LOG) writeFileSync(process.env.ALIAS_LOG, dropLog.join("\n") + "\n");
-console.log(`lexicon trained on ${writeLexicon(OUT_DIR)} names`);
-console.log(`${requestCount()} Wikipedia requests (the rest came from the cache)`);
+
+// `--test` builds only the test set (fast iteration) and indexes just those lists; ids build only those ids (and
+// update their index entries); no arguments builds everything.
+async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const testMode = args.includes("--test");
+  // Test mode also builds every list on the daily schedule, so scheduled dailies always exist and are indexed.
+  const scheduled: string[] = existsSync(join(OUT_DIR, "daily.json"))
+    ? JSON.parse(readFileSync(join(OUT_DIR, "daily.json"), "utf8")).map((e: { id: string }) => e.id)
+    : [];
+  const only = testMode ? [...new Set([...TEST_SET, ...scheduled])] : args.filter((a) => !a.startsWith("--"));
+  mkdirSync(OUT_DIR, { recursive: true });
+  const index: IndexEntry[] = [];
+  for (const topic of TOPICS) {
+    if (only.length && !only.includes(topic.id)) continue;
+    try {
+      const p = await buildPuzzle(topic);
+      writeFileSync(join(OUT_DIR, `${p.id}.json`), JSON.stringify(p));
+      index.push({ id: p.id, title: p.title, category: topic.category, blitz: !!p.blitz });
+      console.log(`ok   ${p.id.padEnd(24)} ${p.answers.map((a) => a.name).join(", ")}`);
+    } catch (err) {
+      console.log(`FAIL ${topic.id.padEnd(24)} ${(err as Error).message}`);
+    }
+  }
+  const indexFile = join(OUT_DIR, "index.json");
+  if (!only.length || testMode) writeFileSync(indexFile, JSON.stringify(index, null, 1));
+  else if (existsSync(indexFile)) {
+    writeFileSync(indexFile, JSON.stringify(mergeIndex(JSON.parse(readFileSync(indexFile, "utf8")), index), null, 1));
+  }
+  const dropped = [...DROPS].sort((a, b) => b[1] - a[1]).map(([why, n]) => `${n} ${why}`);
+  console.log(`aliases dropped: ${dropped.join("; ") || "none"}`);
+  if (process.env.ALIAS_LOG) writeFileSync(process.env.ALIAS_LOG, dropLog.join("\n") + "\n");
+  console.log(`lexicon trained on ${writeLexicon(OUT_DIR)} names`);
+  console.log(`${requestCount()} Wikipedia requests (the rest came from the cache)`);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) await main();
