@@ -1,22 +1,27 @@
 {
   "id": "concert-tours",
-  "by": "builder",
   "judgedAt": "2026-11-02",
-  "decision": "free-play",
-  "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 2 },
-  "casual": { "found": 7, "livesLost": 1, "guesses": 13 },
-  "fan": null,
-  "blitzCasual": { "scored": 14, "named": 26 },
-  "difficulty": 2,
-  "tags": ["music", "concerts", "tours"],
+  "decision": "fix-first",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "blitzCasual": { "scored": 16, "named": 22 },
+  "difficulty": 3,
+  "tags": ["music", "concerts", "pop"],
   "audience": "pop fans",
-  "summary": "Written by the data agent at build time, pending a real judge. Players name artists and the game finds their tour: taylor swift is The Eras Tour, coldplay offers their two.",
+  "summary": "A good daily you can play by artist name, with a fair spread and a few surprises. Fix two alias traps first: \"the weekend\" says The Weeknd isn't on the list, and \"farewell tour\" costs a life as Cher's tour.",
   "reasons": [
-    "Casual run by artist found The Eras Tour, Music of the Spheres, After Hours til Dawn, Farewell Yellow Brick Road, 360, M72 and Love On Tour; Bruno Mars cost a life.",
-    "Each tour has its artist as an alias, shared across that artist's tours (the Rolling Stones and U2 offer their four biggest).",
-    "Small pool (67 tours, 51 with a gross), so a thin Blitz: famous artists without a listed tour score nothing."
+    "The title clearly asks for tours, and artist names work: each artist gives their biggest tour to confirm, and Ed Sheeran offers both of his top-10 tours. Casual found 6, fan 8.",
+    "Lives go fast. Beyonce (#13), Pink (#11), the Stones (#16), Madonna and Michael Jackson are natural guesses that each cost a life, but each one shows its rank or gross.",
+    "Swift, Coldplay, Sheeran and Styles are gimmes, Elton John, U2 and The Weeknd take some thought, and Metallica and Springsteen are fair stretches."
   ],
-  "fixes": []
+  "fixes": [
+    "\"the weekend\" (the usual misspelling of The Weeknd, #3) gets \"isn't an answer for this list\": \"weekend\" is a known name in the lexicon, so the one-letter correction is blocked. Add an intent alias for this topic, or let the correction run when the clashing name isn't on this list. \"guns and roses\" is also not recognized (#12).",
+    "\"farewell tour\" costs a life as Cher's Living Proof: The Farewell Tour through its alias \"The Farewell Tour\", but players mean Elton John's (#4). Drop that generic alias, and map \"farewell tour\" to Farewell Yellow Brick Road in intent.ts, since Cher's full name still contains the words.",
+    "Short forms not recognized: \"renaissance tour\", \"1989 tour\", \"m72\" and \"m72 tour\" (M72 is under the 4-letter word-match minimum). Add \"<X> Tour\" for \"<X> World Tour\" names, plus \"M72\".",
+    "Matcher (src/game/match.ts, coordinator): leadingName takes the first entry carrying a shared artist alias and ignores the rest of the guess. \"ed sheeran divide\" offers Mathematics Tour, and \"coldplay a head full of dreams\" offers Music of the Spheres (#2), a free top-10 hit for a #18 guess. When the leading alias has several owners, use the trailing words to choose. Guard with a test for both.",
+    "Cowboy Carter Tour (a likely Beyonce guess), The MDNA Tour, The 1989 World Tour and the other table 2 and 8 entries show no figure, but the page has one: table 8 (Highest-grossing tours annually) gives Cowboy Carter $407,600,113 in 2025, and table 2 gives Steel Wheels/Urban Jungle $175,000,000. Show them as dated figures. The topics.ts comment calling table 8 North American looks wrong (the 1989 World Tour's $250.7M there is its worldwide total)."
+  ]
 }
