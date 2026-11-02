@@ -10,7 +10,7 @@ import { FIXED_VALUE, NO_VALUE, pickLikely } from "./likely";
 import type { Topic } from "./topics";
 import { fetchPage, NotFound } from "./wiki";
 
-export type ValueKind = "elevation" | "area" | "nba-points" | "subscribers" | "passengers" | "length";
+export type ValueKind = "elevation" | "area" | "nba-points" | "subscribers" | "passengers" | "length" | "gross";
 
 export interface Reading {
   /** The number as shown, without the topic's unit: "4,478", "27.5 million". */
@@ -181,6 +181,28 @@ function subscribers(rows: Row[], names: string[]): Reading {
   };
 }
 
+/**
+ * A concert tour's gross in US dollars: the infobox "Box office" row ("US$290.2 million", "$408 million ($588
+ * million in 2024 dollars)"). Amounts in parentheses (adjusted, per leg) are not the gross; two others are skipped.
+ */
+function gross(rows: Row[]): Reading {
+  const row = rows.find((r) => /^(box office|gross)$/i.test(r.label));
+  if (!row) return { skip: "no Box office row" };
+  const outside = row.data.replace(/\([^)]*\)/g, " ");
+  const amounts = [...outside.matchAll(new RegExp(String.raw`(?:US)?\$\s?` + NUM + String.raw`(?:\s*(million|billion))?`, "gi"))].map(
+    (m) => {
+      const digits = m[1] + (m[2] ?? "");
+      const word = m[3]?.toLowerCase();
+      return { digits, word, value: parseFloat(digits.replace(/,/g, "")) * (word === "billion" ? 1e9 : word === "million" ? 1e6 : 1) };
+    },
+  );
+  if (!amounts.length) return { skip: "no US$ amount", raw: row.data };
+  if (new Set(amounts.map((a) => a.value)).size > 1) return { skip: "several amounts", raw: row.data };
+  const [a] = amounts;
+  if (a.value < 1e6) return { skip: "implausible gross", raw: row.data };
+  return { display: `$${a.digits}${a.word ? " " + a.word : ""}`, number: a.value, raw: row.data };
+}
+
 function passengers(rows: Row[]): Reading {
   const row = rows.find((r) => /^(total )?passengers(\s*\((19|20)\d{2}\))?$/i.test(r.label));
   if (!row) return { skip: "no Passengers row" };
@@ -206,7 +228,7 @@ export function readValue($: CheerioAPI, kind: ValueKind, scale = 1, names: stri
   if ($("#disambigbox, .dmbox-disambig").length) return { skip: "disambiguation page" };
   const rows = infoboxRows($);
   if (!rows) return { skip: "no infobox" };
-  const read = { elevation, area, "nba-points": nbaPoints, subscribers, passengers, length }[kind];
+  const read = { elevation, area, "nba-points": nbaPoints, subscribers, passengers, length, gross }[kind];
   const r = read(rows, names);
   if (r.number !== undefined) r.number /= scale;
   return r;
@@ -220,6 +242,16 @@ const LIKELY_DIR = join(import.meta.dirname, "unranked");
  */
 const KIND_QUALIFIER =
   /^(mountain|volcano|island|islands|archipelago|massif|peak|gamer|youtuber|internet personality|presenter|entertainer|comedian|band|web series|media franchise|basketball|basketball player|.*\bborn \d{4})$/i;
+
+/**
+ * A qualifier made of the entry's own words names whose it is, not a namesake: "Where We Are Tour (One Direction)"
+ * for the tour with the artist "One Direction", "The River Tour (2016)" for "The River Tour 2016".
+ */
+function ownQualifier(qualifier: string, entry: Entry): boolean {
+  const words = new Set([entry.name, ...entry.aliases].flatMap((f) => normalize(f).split(" ")));
+  const q = normalize(qualifier).split(" ");
+  return q.every((w) => words.has(w)) || /^(concert )?tour$/i.test(qualifier);
+}
 
 /**
  * Sets `value` on the topic's likeliest unranked entries from their articles' infoboxes, and records every pick
@@ -244,7 +276,7 @@ export async function addValues(
     const fixed = FIXED_VALUE[topic.id]?.[entry.name];
     if (NO_VALUE[topic.id]?.[entry.name]) r = { skip: NO_VALUE[topic.id][entry.name] };
     else if (fixed) r = { display: fixed.display, number: fixed.number / scale, raw: `fixed: ${fixed.source}` };
-    else if (qualifier && !entry.name.includes("(") && !KIND_QUALIFIER.test(qualifier)) {
+    else if (qualifier && !entry.name.includes("(") && !KIND_QUALIFIER.test(qualifier) && !ownQualifier(qualifier, entry)) {
       // "Channel Islands (California)": a player typing the plain name means the better-known namesake.
       r = { skip: `article is the "${qualifier}" one; the plain name usually means a better-known namesake` };
     } else {

@@ -559,7 +559,7 @@
  },
  {
   "id": "athletes-earnings",
-  "title": "Highest-earning athletes of 2026",
+  "title": "Highest-paid athletes on Forbes' 2026 list",
   "category": "Sports",
   "blitz": false
  },
@@ -567,6 +567,18 @@
   "id": "car-models",
   "title": "Best-selling car models of all time",
   "category": "Business",
+  "blitz": true
+ },
+ {
+  "id": "netflix-seasons",
+  "title": "Netflix seasons with the most views in their first 91 days",
+  "category": "Entertainment",
+  "blitz": false
+ },
+ {
+  "id": "mcdonalds-countries",
+  "title": "Countries with the most McDonald's restaurants",
+  "category": "Oddball",
   "blitz": true
  }
 ]

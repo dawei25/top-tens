@@ -31,6 +31,13 @@ export interface Topic {
   metric: string;
   /** Appended to the displayed value, e.g. " km²". */
   unit?: string;
+  /**
+   * Header text or column index saying which part of the named thing a row is ("Season 2"): the rows are parts,
+   * named "Squid Game (Season 2)". The thing's own name and article go to its highest-ranked part only, so
+   * "squid game" is the season that ranks highest; the others are typed with their number ("squid game 2"). A part
+   * that isn't numbered ("Limited Series") is named like the thing. `rename` takes "Monster (Season 1)" too.
+   */
+  part?: string | number;
   /** Take names from cell text instead of the first link's text. */
   nameFromText?: boolean;
   /** Take names from the first link's article title ("Nokia 1100" for a cell showing "1100"). */
@@ -64,6 +71,11 @@ export interface Topic {
   people?: boolean;
   /** Also accept every member of these sets as a real (life-costing) answer, even ones missing from the table. */
   universe?: Universe | Universe[];
+  /**
+   * The universe only names the rows (country forms, demonyms, the country junk list): members the tables leave out
+   * are free, not answers. A country McDonald's never opened in costs nothing.
+   */
+  universeNamesOnly?: boolean;
   /** Name rows after the universe member they match ("Boston / Milwaukee / Atlanta Braves" → "Atlanta Braves"). */
   canonical?: boolean;
   /** Only keep rows whose `col` cell matches. */
@@ -191,11 +203,17 @@ export interface Dated {
   prefix?: string;
   /** Shown after the figure (default: the topic's unit). */
   unit?: string;
+  /**
+   * The figure every row shows, for a table that only lists who passed a mark: "$100 million+" on the athletes who
+   * earned that much in some year ("Joe Burrow: $100 million+ (2024)").
+   */
+  figure?: string;
   /** The name cell ends with the figure ("Tencent 688,000"): the number is the figure, the rest the name. */
   figureInName?: boolean;
   /**
-   * A table with one row per year (each year's top tour, the record as it grew): `col` holds the row's year, which
-   * fills "{year}" in the label row by row, and `rank` is the rank every row held that year: "#1 in 2025
+   * A table with one row per year (each year's top tour, the record as it grew): `col` holds the row's year (the
+   * latest, if it lists several), which fills "{year}" in the label row by row, and `rank` is the rank every row
+   * held that year: "#1 in 2025
    * ($407,600,113)" for the year's highest-grossing tour.
    */
   perYear?: { col: string | number; rank?: number };
@@ -901,6 +919,8 @@ export const TOPICS: Topic[] = [
     name: "Stadium",
     value: "Capacity",
     metric: "Capacity",
+    // Camp Nou keeps the page's pre-renovation 99,354 (#12). Its article (October 2026) gives 62,652 while stands
+    // reopen in phases and 105,000 only as expected for 2028-29 (that would be #5): no override until it's built.
     // Events, TV shows and scoreboards named after the stadiums.
     junkAliases: [
       "Buckeye Country Superfest", "12th Man TV", "Walk of Champions", "Godzillatron", "Adzillatron", "Salt", "Australia",
@@ -1234,6 +1254,10 @@ export const TOPICS: Topic[] = [
       "Tupac Shakur": ["2Pac", "Tupac"],
       Rihanna: ["RiRi"],
       "Guns N' Roses": ["Guns and Roses", "GNR"],
+      // Shorthand fans type (judge, cycle 4): free in classic either way, but only an alias scores in Blitz.
+      "Michael Jackson": ["MJ"],
+      "Red Hot Chili Peppers": ["RHCP"],
+      "Led Zeppelin": ["Led Zep"],
     },
     // Songs, albums, tours, labels, fans and relatives among the redirects: CELEBRITY_JUNK in scripts/aliases.ts.
   },
@@ -1279,11 +1303,21 @@ export const TOPICS: Topic[] = [
       "÷ Tour": "Divide Tour",
       "2023–2025 Tour": "Springsteen and E Street Band 2023–2025 Tour",
     },
+    // Tours the page only has a year's gross for (One Direction's, Bon Jovi's, McCartney's) take the whole tour's
+    // gross from its article, so they score in Blitz.
+    values: { kind: "gross", below: "last" },
     numberNames: true,
     // A tour is named with or without "World" and "Tour": "M72 Tour", "M72", "1989 Tour", "Cowboy Carter". A short
     // form that is one plain word ("Renaissance", "Divide") is left to the matcher, which reads a name's words.
     stripWords: [/\bworld\b/gi, /\b(world )?tour\b/gi],
-    aliases: { "Mathematics Tour": ["The Mathematics Tour"], "Divide Tour": ["The Divide Tour"] },
+    // The surname alone (shared by both of Sheeran's tours: the game asks which), fans' short forms, the usual
+    // spelling of "till".
+    aliases: {
+      "Mathematics Tour": ["The Mathematics Tour", "Sheeran"],
+      "Divide Tour": ["The Divide Tour", "Sheeran"],
+      "Music of the Spheres World Tour": ["MOTS"],
+      "After Hours til Dawn Tour": ["After Hours till Dawn", "After Hours till Dawn Tour"],
+    },
     junkAliases: [
       "Tour", "Bruce Springsteen · E Street Band", "2025 Tour", "Springsteen and E Street Band 2023",
       // Concert films, live albums and an attack plot among the redirects.
@@ -2433,10 +2467,11 @@ export const TOPICS: Topic[] = [
   {
     id: "athletes-earnings",
     category: "Sports",
-    // Forbes ranks a year's earnings, endorsements included: the title says the year and the measure.
-    title: "Highest-earning athletes of 2026",
+    // Forbes ranks a year's earnings, endorsements included: the title says whose list and the measure. The 2026
+    // list covers the 12 months to spring 2026, not the calendar year.
+    title: "Highest-paid athletes on Forbes' 2026 list",
     noun: "athletes",
-    prompt: "Name the 10 athletes who earned the most in 2026 (Forbes: salary and winnings plus endorsements)",
+    prompt: "Name the 10 highest-paid athletes on Forbes' 2026 list (salary and winnings plus endorsements)",
     page: "Forbes list of the world's highest-paid athletes",
     tables: [0],
     name: "Name",
@@ -2444,19 +2479,21 @@ export const TOPICS: Topic[] = [
     metric: "Earnings incl. endorsements (US$)",
     dataAsOf: "2026",
     people: true,
+    // Only the last two years count against the player. With every top 10 since 2012 accepted, the past stars a
+    // casual player tries after the easy four (Tiger, Federer, Mayweather, Brady, Djokovic) each cost a life, and the
+    // game ended before Durant or Canelo (judge, cycle 4). Now they are free.
     also: [
-      // Every earlier year's top 10 (2012 to 2025), latest first: a miss shows its last appearance ("Kylian Mbappé:
-      // #6 in 2024 ($110 million)"). Not the 2010s decade table, a decade's total.
+      // The 2025 and 2024 top 10s, latest first: a miss shows its last appearance ("Kylian Mbappé: #6 in 2024
+      // ($110 million)").
+      { tables: [1, 2], name: "Name", value: "Total", dated: { rank: "Rank" } },
+      // Athletes who earned $100 million in 2024 or later without making that year's top 10: "Joe Burrow: $100
+      // million+ (2024)". Not the ones whose last such year is older (Mayweather, Federer, McGregor).
       {
-        tables: [...range(1, 6), ...range(8, 15)],
+        tables: [18],
         name: "Name",
-        value: "Total",
-        dated: { rank: "Rank" },
-        // Kobe Bryant (#6 in 2012) has died: naming him is free.
-        skip: ["Kobe Bryant"],
+        where: { col: "$100 million+", match: /\b202[4-9]\b/ },
+        dated: { perYear: { col: "$100 million+" }, figure: "$100 million+" },
       },
-      // Athletes who earned $100 million in some year without making that year's top 10 (Joe Burrow, Oleksandr Usyk).
-      { tables: [18], name: "Name" },
     ],
     // Fights, relatives, staff, companies, pets and jokes among the redirects: CELEBRITY_JUNK, shared with the
     // career lists, where these stars rank too.
@@ -2472,9 +2509,9 @@ export const TOPICS: Topic[] = [
     name: "Nameplate",
     value: "Units sold",
     metric: "Units sold",
-    // Named by model: "toyota" or "honda" alone would otherwise offer the brand's top-10 models, a giveaway. The
-    // full name ("Toyota Corolla") stays an alias.
-    nameStrip: /^(Toyota|Ford|Volkswagen|Honda)\s+/,
+    // Named "Make Model", the way people say them, like the pool's "Toyota Prius": "toyota" alone then reads as
+    // Toyota's models, top 10 first (named by model only, the brand offered only the pool's Toyotas, each costing a
+    // life). The model alone ("Corolla") is an alias.
     also: [
       // The record holders (the Model T) and each brand's best seller, current and defunct, with units sold.
       { tables: [1], name: "Automobile", value: "Units sold" },
@@ -2494,14 +2531,93 @@ export const TOPICS: Topic[] = [
       "V2CII", "Ford Verve concepts", "Beetle restoration", "Toyota Truck Maintenance", "Toyota Truck Maintainence",
       "Toyota Hilux platform", "Toyota Hi-Lux platform", "Gyurza patrol vehicle", "Toyota Recreational Vehicles",
       "Toyota Taliban", "TruckMasters OX", "Toyota Hilux FCEV concept", "Bug", "Rabbit", "Beetle car",
+      // Plain words left from the brand tables' cells ("Series" cost a life as the Land Rover Series), and cells
+      // that glue several models into one string (their models are aliases in scripts/intent.ts).
+      "Series", "Metropolitan", "Series/Defender", "Nissan Sunny/Sentra/Pulsar/Almera", "VAZ-2105/04/07",
+      "Iso/BMW/VELAM/Romi Isetta",
     ],
-    // The trucks are sold by their model numbers; the Golf was the Rabbit in North America.
+    // The model alone, as people also say it; the trucks are sold by their model numbers; the Golf was the Rabbit in
+    // North America.
     aliases: {
-      "F-Series": ["F-150", "Ford F-150", "F-250"],
-      Golf: ["VW Golf", "Volkswagen Rabbit", "VW Rabbit"],
-      Beetle: ["VW Beetle", "Volkswagen Bug", "VW Bug"],
-      Passat: ["VW Passat"],
+      "Toyota Corolla": ["Corolla"],
+      "Ford F-Series": ["F-Series", "F-150", "Ford F-150", "F-250"],
+      "Volkswagen Golf": ["Golf", "VW Golf", "Volkswagen Rabbit", "VW Rabbit"],
+      "Volkswagen Passat": ["Passat", "VW Passat"],
+      "Honda Civic": ["Civic"],
+      "Toyota Camry": ["Camry"],
+      "Ford Fiesta": ["Fiesta"],
+      "Volkswagen Beetle": ["Beetle", "VW Beetle", "Volkswagen Bug", "VW Bug"],
+      "Toyota Hilux": ["Hilux"],
+      "Honda Accord": ["Accord"],
     },
+  },
+  // Cycle 4
+  {
+    id: "netflix-seasons",
+    category: "Entertainment",
+    // Netflix ranks seasons (and limited series), English and not, by views in their first 91 days; films are a
+    // table of their own and not answers here. The page keeps only the top 10, one combined table.
+    title: "Netflix seasons with the most views in their first 91 days",
+    noun: "Netflix series",
+    prompt: "Name the 10 most-watched seasons of Netflix series (views in their first 91 days; a series can be in it more than once)",
+    page: "List of most-watched Netflix original programming",
+    tables: [1],
+    name: "Title",
+    value: "Views",
+    metric: "Views in the first 91 days (millions)",
+    part: "Season",
+    works: true,
+    // The anthology's first season has a title of its own, which is how people know it.
+    rename: { "Monster (Season 1)": "Monster: The Jeffrey Dahmer Story" },
+    articles: { "Monster: The Jeffrey Dahmer Story": "Monster: The Jeffrey Dahmer Story" },
+    aliases: { "Monster: The Jeffrey Dahmer Story": ["Monster", "Dahmer", "Jeffrey Dahmer"] },
+    // Episodes, attractions, shops, characters and the novels among the redirects.
+    junkAliases: [
+      "One More Game", "Byeori binnaneun bame", "Stranger Things Experience", "Stranger Things Store",
+      "Stranger Things popup", "The Duke and I", "Penelope Bridgerton", "Viscount Bridgerton", "Violet Bridgerton",
+      "Romancing Mister Bridgerton", "The One About Matthew Perry", "Spirit Riding Free: Riding Academy",
+      "Waffles + Mochi's Restaurant", "Blippi's Job Show",
+    ],
+    // A spin-off docuseries whose cell links the show it follows: "manifest" is Manifest.
+    skip: ["Arrivals: A New Manifest Mystery"],
+    // Every Netflix original series, current and ended: scripted, docuseries, reality, continuations (Black Mirror,
+    // Cobra Kai) and co-productions. Not the one-off specials, nor the shows still in development. Named by the
+    // title as written: a docuseries' cell can link its subject ("Big Vape: The Rise and Fall of Juul").
+    also: (
+      [
+        ["List of Netflix original programming", range(0, 47)],
+        ["List of ended Netflix original programming (2012–2015)", [...range(0, 7), ...range(9, 14)]],
+        ["List of ended Netflix original programming (2016–2020)", [...range(0, 21), ...range(23, 30)]],
+        ["List of ended Netflix original programming (2021–2025)", [...range(0, 29), ...range(31, 35)]],
+        ["List of ended Netflix original programming (2026–present)", [...range(0, 6), ...range(8, 10)]],
+      ] as const
+    ).map(([page, tables]) => ({ page, tables: [...tables], name: "Title", nameFromText: true })),
+    noFigures: "Netflix publishes only its all-time top 10; no other season has a figure",
+  },
+  {
+    id: "mcdonalds-countries",
+    category: "Oddball",
+    title: "Countries with the most McDonald's restaurants",
+    noun: "countries",
+    prompt: "Name the 10 countries with the most McDonald's restaurants",
+    page: "List of countries with McDonald's restaurants",
+    tables: [0],
+    name: "Country/territory",
+    value: "No. of operating outlets",
+    metric: "McDonald's restaurants",
+    dataAsOf: "December 2025",
+    universe: "countries",
+    // Every country (and territory) with a McDonald's is an answer; one that never had one is free.
+    universeNamesOnly: true,
+    also: [
+      // Countries it has left, with their count at closing: "Russia: 850 (all closed in 2022)".
+      {
+        tables: [1],
+        name: "Country/territory",
+        value: "Number of stores",
+        dated: { perYear: { col: "Date of closure" }, label: "all closed in {year}" },
+      },
+    ],
   },
 ];
 

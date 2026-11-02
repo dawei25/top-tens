@@ -126,7 +126,7 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   if (p.prompt && !p.prompt.startsWith("Name the 10 ")) warn(`prompt doesn't start "Name the 10": ${p.prompt}`);
   // Plural and lower case except proper nouns: "countries", "NBA players", "YouTube channels".
   const first = p.noun?.split(" ")[0] ?? "";
-  if (/^[A-Z][a-z]+$/.test(first) && !/^(Broadway|Instagram|Facebook)$/.test(first)) warn(`noun "${p.noun}" starts with a capital`);
+  if (/^[A-Z][a-z]+$/.test(first) && !/^(Broadway|Instagram|Facebook|Netflix)$/.test(first)) warn(`noun "${p.noun}" starts with a capital`);
   if (p.noun && !/(s|people)$/.test(p.noun)) warn(`noun "${p.noun}" doesn't look plural`);
   if (topicNoun(p.id) && p.noun !== topicNoun(p.id)) err(`noun "${p.noun}" differs from topics.ts`);
   if (!p.source?.url || !p.source?.asOf) err("missing source url or asOf");

@@ -59,8 +59,15 @@ interface Row {
   valueText: string;
   aliasSeeds: string[];
   redirectTarget: string;
+  /** False: `redirectTarget` is only the row's article (the whole show of a lower season), not a source of aliases. */
+  redirects?: false;
   /** The article the name cell links, even when it isn't used for redirects. */
   link?: string;
+  /**
+   * A row that is one part of a thing (`part` in topics.ts): the thing's name, the part's own article, and whether
+   * a higher-ranked part of the same thing holds the name.
+   */
+  part?: { base: string; link?: string; lower?: true };
   /** What tells this row apart from another row with the same name: its year or its article's qualifier. */
   tag?: string;
   /** The name it shares with such a namesake ("The Lion King" for "The Lion King (1994)"). */
@@ -290,6 +297,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
     const aliasCs = (topic.aliasCols ?? []).map((a) => column(header, a));
     const fromCol = topic.fallback ? column(header, topic.fallback.from) : -1;
     const yc = header.findIndex((h) => /^(year|released?|release date)\b/i.test(h));
+    const pc = topic.part === undefined ? -1 : column(header, topic.part);
     if (!topic.fallback) checkNumbers(topic, header, body, vc);
     for (const r of body) {
       const nameCell = r[nc];
@@ -305,7 +313,11 @@ export async function readRows(topic: Topic): Promise<Row[]> {
         unranked();
         continue;
       }
-      const name = topic.rename?.[cellText] ?? cellText;
+      // One season of a show: "Squid Game (Season 2)". A part that isn't numbered ("Limited Series") is the whole thing.
+      const partText = pc >= 0 ? cleanName(r[pc]?.text ?? "") : "";
+      const numbered = NUMBERED_PART.test(partText);
+      const base = topic.rename?.[cellText] ?? cellText;
+      const name = numbered ? (topic.rename?.[`${cellText} (${partText})`] ?? `${base} (${partText})`) : base;
       if (topic.where && !topic.where.match.test(r[column(header, topic.where.col)]?.text ?? "")) continue;
       if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
       const override = topic.overrides?.[cellText];
@@ -331,6 +343,8 @@ export async function readRows(topic: Topic): Promise<Row[]> {
         topic.nameStrip ? s.replace(topic.nameStrip, "").trim() : s,
       );
       if (name !== cellText) seeds.push(cellText);
+      // "Squid Game 2", as people say a season.
+      if (numbered) seeds.push(`${base} ${partText.match(/\d+/)![0]}`);
       // The cell can say more than the name: "Mississippi–Missouri–Jefferson" names the Mississippi row.
       for (const line of lines) if (cleanName(line) !== name) seeds.push(...shortForms(cleanName(line)));
       for (const c of aliasCs) {
@@ -341,7 +355,10 @@ export async function readRows(topic: Topic): Promise<Row[]> {
       // The article's own title is never among its redirects ("Acadia National Park" for "Acadia").
       // A renamed row ("Disneyland Park" shown as "Disneyland Paris") keeps the article its table name links.
       const viaCell = redirectTarget(cellText, nameCell, hasCountries(topic));
-      const target = topic.articles?.[name] ?? (viaCell !== cellText ? viaCell : redirectTarget(name, nameCell, hasCountries(topic)));
+      // A season's article is its show's (the name cell's link), else its own (the season cell's).
+      const partTarget = numbered ? (nameCell.link ? viaCell : r[pc]?.link) : undefined;
+      const target =
+        topic.articles?.[name] ?? partTarget ?? (viaCell !== cellText ? viaCell : redirectTarget(name, nameCell, hasCountries(topic)));
       if (target !== name) seeds.push(target);
       const t = tc >= 0 ? parseValue(r[tc]?.text ?? "") : null;
       rows.push({
@@ -353,6 +370,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
         redirectTarget: target,
         link: nameCell.link,
         tag: rowTag(yc >= 0 ? r[yc] : undefined, nameCell.link),
+        ...(numbered ? { part: { base, link: r[pc]?.link } } : {}),
       });
     }
   }
@@ -360,12 +378,43 @@ export async function readRows(topic: Topic): Promise<Row[]> {
     if (!rows.some((r) => r.name === (topic.rename?.[name] ?? name))) console.log(`warn ${topic.id}: override for "${name}", which is not a row`);
   }
   if (!topic.keepOrder) rows.sort((a, b) => b.value - a.value || (b.tiebreak ?? 0) - (a.tiebreak ?? 0));
+  lowerParts(rows);
   // "3.2 million" among "6,301,972"s reads as another unit: write it out like the rest.
   const worded = rows.filter((r) => /\b(million|billion|trillion)$/.test(r.valueText));
   if (worded.length && worded.length < rows.length / 2) {
     for (const r of worded) r.valueText = Math.round(r.value).toLocaleString("en-US");
   }
   return distinctRows(topic, rows);
+}
+
+/** A part cell that numbers the part: "Season 2", "Part 3", "Series 1", "Volume 2". */
+const NUMBERED_PART = /^(season|series|part|volume|vol\.?|chapter|book)\s*\d+$/i;
+
+/**
+ * Parts of one thing (seasons of a show, best first): the thing's own name, its article and that article's
+ * redirects belong to its highest-ranked part, so "squid game" is Season 1 (#1). The other parts are named with
+ * their number ("squid game season 2", "squid game 2") and take their own article's redirects, if they have one.
+ */
+export function lowerParts<R extends Pick<Row, "part" | "aliasSeeds" | "redirectTarget" | "redirects" | "link">>(rows: R[]): void {
+  const first = new Map<string, R>();
+  for (const r of rows) {
+    if (!r.part) continue;
+    const base = normalize(r.part.base);
+    const top = first.get(base);
+    if (!top) {
+      first.set(base, r);
+      continue;
+    }
+    r.part.lower = true;
+    r.aliasSeeds = r.aliasSeeds.filter((s) => normalize(s) !== base);
+    r.link = r.part.link;
+    if (r.part.link) r.redirectTarget = r.part.link;
+    else {
+      // No article of its own: the show's is its article, but the show's redirects are the top season's names.
+      r.redirectTarget = top.redirectTarget;
+      r.redirects = false;
+    }
+  }
 }
 
 /**
@@ -431,6 +480,14 @@ export function datedLabel(d: Pick<Dated, "label">, headers: string[], title: st
   if (!d.label) return year;
   if (!d.label.includes("{year}")) return d.label;
   return year && d.label.replace("{year}", year);
+}
+
+/**
+ * The latest year (or span) a cell names: "3 (2023, 2025, 2026)" is 2026, the last time it happened; a lone span
+ * ("2018–2019") stays whole.
+ */
+export function lastYear(text: string): string {
+  return [...text.matchAll(new RegExp(YEARS.source, "g"))].at(-1)?.[0] ?? text;
 }
 
 /** The last year a label names: "1987–1989" is 1989, "Q4 2025" is 2025. */
@@ -525,12 +582,12 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords), ...others].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
         const v = topic.lowerIsBetter ? null : glued ? parseValue(glued[1]) : vc >= 0 ? parseValue(r[vc]?.text ?? "") : null;
-        const label = perYear ? datedLabel(src.dated!, [r[yc]?.text ?? ""], "") : tableLabel;
+        const label = perYear ? datedLabel(src.dated!, [lastYear(r[yc]?.text ?? "")], "") : tableLabel;
         if (src.dated && label) {
           const d = src.dated;
           const sign = d.prefix ?? v?.display.match(/^[$€£]/)?.[0] ?? "";
           const digits = v && (d.scale ? scaledFigure(v.value, d.scale) : v.display.replace(/^[$€£]/, ""));
-          const figure = v && v.value > 0 ? sign + digits + (d.unit ?? topic.unit ?? "") : undefined;
+          const figure = d.figure ?? (v && v.value > 0 ? sign + digits + (d.unit ?? topic.unit ?? "") : undefined);
           const shown = datedValue(label, rc >= 0 ? rankOf(r[rc]?.text) : perYear?.rank, figure, d.source);
           if (shown) {
             entry.value = shown;
@@ -592,9 +649,10 @@ const MAX_GROUP = 4;
  * An alias shared by 2-4 entries stays on all of them, so the game can ask which one was meant; the same goes
  * for an alias that starts other entries' names ("Grand Theft Auto" joins GTA V, GTA IV and San Andreas).
  * Anything broader is dropped. `namesakes`: the plain name of entries kept apart by year or qualifier ("The Lion
- * King"), which belongs to them as a name does: no other entry keeps it ("Mufasa: The Lion King").
+ * King"), which belongs to them as a name does: no other entry keeps it ("Mufasa: The Lion King"). `lower`: lower
+ * seasons and their show's name, which stays with the top season ("Squid Game" doesn't join Season 2).
  */
-function pruneAliases(entries: Entry[], namesakes = new Map<string, Set<Entry>>()): void {
+function pruneAliases(entries: Entry[], namesakes = new Map<string, Set<Entry>>(), lower = new Map<Entry, string>()): void {
   const owners = new Map<string, Set<Entry>>();
   const byName = new Map<string, Entry>();
   for (const e of entries) {
@@ -620,7 +678,10 @@ function pruneAliases(entries: Entry[], namesakes = new Map<string, Set<Entry>>(
         continue;
       }
       const group = new Set(owners.get(n));
-      for (const other of names) if (other !== own && other.startsWith(n + " ")) group.add(byName.get(other)!);
+      for (const other of names) {
+        const o = byName.get(other)!;
+        if (other !== own && other.startsWith(n + " ") && !n.startsWith(lower.get(o) ?? "\0")) group.add(o);
+      }
       if (group.size > MAX_GROUP) continue;
       for (const g of group) if (!kept.get(g)!.has(n) && normalize(g.name) !== n) kept.get(g)!.set(n, a);
     }
@@ -829,7 +890,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   const entries: Entry[] = [];
   for (const [i, row] of rows.entries()) {
     const aliases = new Set(row.aliasSeeds);
-    const redirects = topic.noRedirects ? [] : await fetchRedirects(row.redirectTarget, i >= 10);
+    const redirects = topic.noRedirects || row.redirects === false ? [] : await fetchRedirects(row.redirectTarget, i >= 10);
     const ctx = {
       names: [row.name, row.redirectTarget, ...row.aliasSeeds],
       forms: redirects,
@@ -854,6 +915,18 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       aliases.add(r);
     }
     for (const a of topic.aliases?.[row.name] ?? []) aliases.add(a);
+    // A lower season's redirects ("Squid Game (season 2)") lose their qualifier: the bare name stays with the top one.
+    if (row.part?.lower) for (const a of aliases) if (normalize(baseTitle(a)) === normalize(row.part.base)) aliases.delete(a);
+    // A season's redirects can name another season ("Bridgerton season 3" on Season 1) or the show's episode and
+    // season overviews ("Squid Game episodes").
+    if (row.part) {
+      const own = row.name.match(/\s(\d+)\)$/)?.[1];
+      for (const a of aliases) {
+        const n = normalize(a);
+        const other = n.match(/\b(?:season|series|part|volume|vol|chapter) (\d+)\b/)?.[1];
+        if ((other && other !== own) || /\b(seasons?|episodes?)$/.test(n)) aliases.delete(a);
+      }
+    }
     if (topic.people) {
       // "Bryant", not "Park" (Linkin Park) or "Brown": a surname that is a plain word means other things.
       const last = row.name.split(" ").at(-1)!;
@@ -882,7 +955,8 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   // state, every team) that the table leaves out, still count as (wrong) answers.
   seedIntent(topic, entries);
   const extra = await readAlso(topic, rows.at(-1)!.value);
-  for (const u of [topic.universe ?? []].flat()) {
+  // `universeNamesOnly`: the universe names the rows, but adds no answers of its own.
+  for (const u of topic.universeNamesOnly ? [] : [topic.universe ?? []].flat()) {
     // A free row's other names count too: the table's "Macau" is the universe's "Macao".
     const free = new Set(unrankedRows(topic));
     for (const forms of COUNTRY_FORMS) if (forms.some((f) => free.has(normalize(f)))) for (const f of forms) free.add(normalize(f));
@@ -944,7 +1018,9 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   for (const [i, r] of rows.entries()) {
     if (r.plain) namesakes.set(normalize(r.plain), (namesakes.get(normalize(r.plain)) ?? new Set()).add(entries[i]));
   }
-  pruneAliases(entries, namesakes);
+  const lower = new Map<Entry, string>();
+  for (const [i, r] of rows.entries()) if (r.part?.lower) lower.set(entries[i], normalize(r.part.base));
+  pruneAliases(entries, namesakes, lower);
   applyIntent(topic, entries);
   // Whatever the source (redirect, cell, universe), a slur never ships.
   for (const e of entries) e.aliases = e.aliases.filter((a) => !blockedAlias(a, [e.name]));

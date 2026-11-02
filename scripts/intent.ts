@@ -1132,6 +1132,13 @@ export const INTENT: Record<string, Intent> = {
       "Tesla Model Y": ["Model Y"],
       "BMW 3 Series": ["3 Series"],
       "Mercedes-Benz C-Class": ["C-Class", "Mercedes C-Class"],
+      // "cutlass" was corrected to the C-Class.
+      "Oldsmobile Cutlass Supreme": ["Cutlass", "Oldsmobile Cutlass", "Cutlass Supreme"],
+      // Cells that glue several names of one line ("Nissan Sunny/Sentra/Pulsar/Almera"), one name each.
+      "Nissan Sunny": ["Nissan Sentra", "Sentra", "Nissan Pulsar", "Nissan Almera", "Almera"],
+      "Land Rover Series": ["Land Rover Defender"],
+      "Lada Riva": ["VAZ-2105", "VAZ-2104", "VAZ-2107", "Lada 2105", "Lada 2107"],
+      Isetta: ["BMW Isetta"],
     },
   },
   "spotify-artists": {

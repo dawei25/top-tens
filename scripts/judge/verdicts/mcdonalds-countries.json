@@ -1,0 +1,22 @@
+{
+  "id": "mcdonalds-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-02",
+  "decision": "daily-blitz",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 2, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 5 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": null,
+  "blitzCasual": { "scored": 31, "named": 34 },
+  "difficulty": 1,
+  "tags": ["food", "fast food", "geography"],
+  "audience": "anyone",
+  "summary": "Written by the data agent at build time, pending a real judge. The big rich countries are all there, so a casual player finds 9 (all but the Philippines): too easy for Today's list, but a deep Blitz, since almost any country scores.",
+  "reasons": [
+    "Casual found 9 and ran out on Mexico (#19), Russia, India (#12), Italy (#11) and Spain (#13), each showing its count; Russia shows 850 (all closed in 2022).",
+    "Blitz: 31 of 34 casual names scored. A country McDonald's never opened in (North Korea, Nigeria) is free, not a miss.",
+    "Figures are McDonald's own counts at the end of 2025."
+  ],
+  "fixes": []
+}

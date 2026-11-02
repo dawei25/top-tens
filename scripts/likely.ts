@@ -197,7 +197,8 @@ const bare = (title: string) => normalize(title.replace(/\s*\(.*?\)\s*/g, " "));
  * Wikipedia title.
  */
 export async function pickLikely(id: string, entries: Entry[], articleOf: (e: Entry) => string): Promise<Pick[]> {
-  const pool = entries.filter((e) => e.rank === 0);
+  // An entry with the list's own stat from a table keeps it: the infobox is the second source.
+  const pool = entries.filter((e) => e.rank === 0 && e.n === undefined);
   if (pool.length <= LIKELY_CAP) return pool.map((entry) => ({ entry, why: "whole pool" }));
 
   const vital = new Set<Entry>();
