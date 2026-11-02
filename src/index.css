@@ -1697,7 +1697,7 @@ a {
   color: var(--cyan);
   font-variant-numeric: tabular-nums;
 }
-.arch-row.today .arch-n {
+.arch-day.today .arch-n {
   color: var(--gold);
 }
 .arch-date {
@@ -2193,20 +2193,85 @@ a.text-btn {
   }
 }
 
-/* Archive: that day's Blitz score under the daily result. A Blitz on another list (older dates) names that list, on
-   its own line under the title, where there is room for it. */
-.arch-result .arch-blitz,
-.arch-title .arch-blitz {
-  display: block;
-  font-size: 15px;
-  letter-spacing: 0.08em;
-  color: var(--gold);
+/* Archive: each date is a pair, its list and directly under it its Blitz, one block between the day dividers. Each
+   row is its own link and names its number and date, but a pair shows them once: down its left edge as one
+   number-over-date stack (the number on the list row, the date on the Blitz row), on phones as a head line over the
+   pair. The copies not shown stay for screen readers. The mode tags line the two titles up. */
+.arch-day.pair .arch-row {
+  grid-template-areas: "n title result";
+  padding-bottom: 3px;
 }
-.arch-title .arch-blitz {
-  margin-top: 2px;
+.arch-day.pair .arch-blitz-row {
+  grid-template-areas: "date title result";
+  padding-top: 3px;
+  padding-bottom: 8px;
 }
-.arch-blitz b {
-  font-weight: 400;
+.arch-blitz-row .arch-date {
+  line-height: 1;
+}
+.arch-blitz-row .arch-n,
+.arch-day.pair .arch-row:first-child .arch-date {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.arch-day .arch-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.arch-day .arch-title .mode-tag {
+  flex: none;
+  width: 5.2em;
+  text-align: center;
+  /* The tag's trailing letter-spacing, put back on the left so the word sits centred. */
+  text-indent: 0.2em;
+}
+.arch-name {
+  min-width: 0;
+}
+@media (max-width: 520px) {
+  /* Phones: number and date on a head line, then the title across the row with its tag in front (the title wraps
+     under the tag) and the result on the right. */
+  .arch-day .arch-row,
+  .arch-day.pair .arch-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "n date date"
+      "title title result";
+    column-gap: 10px;
+    row-gap: 2px;
+  }
+  .arch-day.pair .arch-blitz-row {
+    grid-template-areas: "title title result";
+  }
+  .arch-day.pair .arch-row:first-child .arch-date {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+  .arch-blitz-row .arch-date {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .arch-day .arch-title {
+    display: block;
+  }
+  .arch-day .arch-title .mode-tag {
+    width: auto;
+    margin-right: 8px;
+    text-indent: 0;
+    vertical-align: 0.15em;
+  }
 }
 .results-meta p.gold b {
   color: var(--gold);
