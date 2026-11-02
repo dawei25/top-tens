@@ -568,5 +568,11 @@
   "title": "Best-selling car models of all time",
   "category": "Business",
   "blitz": true
+ },
+ {
+  "id": "netflix-seasons",
+  "title": "Netflix seasons with the most views in their first 91 days",
+  "category": "Entertainment",
+  "blitz": false
  }
 ]

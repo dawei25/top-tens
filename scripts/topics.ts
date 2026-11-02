@@ -31,6 +31,13 @@ export interface Topic {
   metric: string;
   /** Appended to the displayed value, e.g. " km²". */
   unit?: string;
+  /**
+   * Header text or column index saying which part of the named thing a row is ("Season 2"): the rows are parts,
+   * named "Squid Game (Season 2)". The thing's own name and article go to its highest-ranked part only, so
+   * "squid game" is the season that ranks highest; the others are typed with their number ("squid game 2"). A part
+   * that isn't numbered ("Limited Series") is named like the thing. `rename` takes "Monster (Season 1)" too.
+   */
+  part?: string | number;
   /** Take names from cell text instead of the first link's text. */
   nameFromText?: boolean;
   /** Take names from the first link's article title ("Nokia 1100" for a cell showing "1100"). */
@@ -2536,6 +2543,49 @@ export const TOPICS: Topic[] = [
       "Toyota Hilux": ["Hilux"],
       "Honda Accord": ["Accord"],
     },
+  },
+  // Cycle 4
+  {
+    id: "netflix-seasons",
+    category: "Entertainment",
+    // Netflix ranks seasons (and limited series), English and not, by views in their first 91 days; films are a
+    // table of their own and not answers here. The page keeps only the top 10, one combined table.
+    title: "Netflix seasons with the most views in their first 91 days",
+    noun: "Netflix series",
+    prompt: "Name the 10 most-watched seasons of Netflix series (views in their first 91 days; a series can be in it more than once)",
+    page: "List of most-watched Netflix original programming",
+    tables: [1],
+    name: "Title",
+    value: "Views",
+    metric: "Views in the first 91 days (millions)",
+    part: "Season",
+    works: true,
+    // The anthology's first season has a title of its own, which is how people know it.
+    rename: { "Monster (Season 1)": "Monster: The Jeffrey Dahmer Story" },
+    articles: { "Monster: The Jeffrey Dahmer Story": "Monster: The Jeffrey Dahmer Story" },
+    aliases: { "Monster: The Jeffrey Dahmer Story": ["Monster", "Dahmer", "Jeffrey Dahmer"] },
+    // Episodes, attractions, shops, characters and the novels among the redirects.
+    junkAliases: [
+      "One More Game", "Byeori binnaneun bame", "Stranger Things Experience", "Stranger Things Store",
+      "Stranger Things popup", "The Duke and I", "Penelope Bridgerton", "Viscount Bridgerton", "Violet Bridgerton",
+      "Romancing Mister Bridgerton", "The One About Matthew Perry", "Spirit Riding Free: Riding Academy",
+      "Waffles + Mochi's Restaurant", "Blippi's Job Show",
+    ],
+    // A spin-off docuseries whose cell links the show it follows: "manifest" is Manifest.
+    skip: ["Arrivals: A New Manifest Mystery"],
+    // Every Netflix original series, current and ended: scripted, docuseries, reality, continuations (Black Mirror,
+    // Cobra Kai) and co-productions. Not the one-off specials, nor the shows still in development. Named by the
+    // title as written: a docuseries' cell can link its subject ("Big Vape: The Rise and Fall of Juul").
+    also: (
+      [
+        ["List of Netflix original programming", range(0, 47)],
+        ["List of ended Netflix original programming (2012–2015)", [...range(0, 7), ...range(9, 14)]],
+        ["List of ended Netflix original programming (2016–2020)", [...range(0, 21), ...range(23, 30)]],
+        ["List of ended Netflix original programming (2021–2025)", [...range(0, 29), ...range(31, 35)]],
+        ["List of ended Netflix original programming (2026–present)", [...range(0, 6), ...range(8, 10)]],
+      ] as const
+    ).map(([page, tables]) => ({ page, tables: [...tables], name: "Title", nameFromText: true })),
+    noFigures: "Netflix publishes only its all-time top 10; no other season has a figure",
   },
 ];
 

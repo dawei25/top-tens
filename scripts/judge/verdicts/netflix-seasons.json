@@ -1,0 +1,22 @@
+{
+  "id": "netflix-seasons",
+  "by": "builder",
+  "judgedAt": "2026-11-02",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": null,
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": ["entertainment", "tv", "netflix"],
+  "audience": "anyone",
+  "summary": "Written by the data agent at build time, pending a real judge. Six shows make the top 10: Squid Game (three seasons), Wednesday and Stranger Things (two each), Adolescence, Dahmer and Bridgerton. Typing a show names its best season; later seasons are named by number.",
+  "reasons": [
+    "Casual found 7 (Stranger Things, Squid Game, Wednesday, Bridgerton, Dahmer, Squid Game 2, Adolescence) and ran out of lives on The Crown, Money Heist, The Witcher, Ozark and Emily in Paris.",
+    "Those misses show no figure: Netflix publishes only its all-time top 10, so every other season has none. The title says the measure (views in the first 91 days) and the prompt says a series can appear more than once.",
+    "Not Blitz-ready: only the 10 answers have a figure. Films (KPop Demon Hunters, Red Notice) are a separate table and free here."
+  ],
+  "fixes": []
+}
