@@ -648,7 +648,7 @@ a {
   gap: 12px;
 }
 /* Free play and Your games: stacked on phones; from 700px side by side (about 65/35), tops and heights aligned,
-   Your games' two keys stacked in its column. */
+   Your games' three keys stacked in its column, about as tall as a free-play key and its strip. */
 .home-pair {
   display: flex;
   flex-direction: column;
@@ -663,13 +663,15 @@ a {
   }
   .games-group .games-row {
     flex-direction: column;
+    gap: 8px;
   }
   .games-group .games-key {
     justify-content: space-between;
-    min-height: 52px;
+    min-height: 38px;
   }
 }
 .games-key {
+  flex: 1 1 auto;
   gap: 10px;
 }
 /* Wide screens: Home is one centred column inside the play screens' frame; the same 16px of ocean between cards as
@@ -2468,14 +2470,6 @@ a.text-btn {
   font-size: 16px;
   letter-spacing: 0.08em;
   color: var(--muted);
-}
-
-/* Home's record panel: the knowledge key on the right of its head. */
-.home-stats .group-head {
-  align-items: center;
-}
-.knowledge-key {
-  color: var(--cyan);
 }
 
 /* ---------- Your knowledge ---------- */
