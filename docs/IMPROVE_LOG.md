@@ -16,7 +16,9 @@ Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
   names; judge brief: the title names an unexpected measure.
 - Matcher: number words count as digits ("frozen two"); a guess that is a name of its own isn't read as an answer
   plus who made it ("saudi aramco" is not Saudi Arabia).
-- Leak rate: 2.7% before this cycle; re-measure on the merged main pending.
+- Leak rate: 2.7% -> 1.6% (1377 of 86,645 wrong guesses, 93 lists). Most of the drop is the "saudi aramco" rule
+  (about 21 country lists); plain words alone took it to 2.5%. Worst left: theme-parks, stadiums, youtube-channels,
+  video-games ("planes", "water", "humans", "music"), which the narrower known-name rule should cut.
 - New topics: instagram (most-followed accounts; casual 8, Blitz 26/29; could be a daily, needs a judge) and
   fiction-authors (ranked by the low estimate, ties broken by the high; casual 4, free play).
 - Next: judge instagram, concert-tours and music-artists; the narrower known-name rule for plain words
