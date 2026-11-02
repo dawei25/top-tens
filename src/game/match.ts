@@ -247,6 +247,10 @@ export function judgeGuess(
       prominence(a) - prominence(b) || nameWordCount(a) - nameWordCount(b) || a.entry.name.localeCompare(b.entry.name);
     const open = cs.filter((c) => !(c.inTop10 && found.has(c.entry.rank))).sort(byProminence);
     if (open.length === 0) return resolve([...cs].sort(byProminence)[0], false);
+    // A word that fits a crowd including several top-10 answers ("tour" on concert tours, "toyota" on car models) is
+    // too common to read: offering a few, again and again, would hand over the top 10. One top-10 answer in a crowd
+    // ("star wars" on box office) is still the natural reading.
+    if (cs.length > VAGUE_ABOVE && cs.filter((c) => c.inTop10).length > 1) return { kind: "unknown", junk: false, vague: cs.length };
     const [top, next] = open;
     if (!next) return resolve(top, true);
     const standsOut = (top.inTop10 && !next.inTop10) || (top.entry.rank > 0 && next.entry.rank === 0);
@@ -272,6 +276,14 @@ export function judgeGuess(
     return natural(cs, MAX_CHOICES);
   };
 
+  // What the list is about ("tour" on concert tours, "museums", "names") or a plain category word ("islands") is never
+  // read as an answer that merely contains or resembles it. An answer named exactly that still counts: the Instagram
+  // account on Instagram accounts (above), "moon" on moons.
+  const subject = subjectWords(puzzle.noun);
+  if (guess.split(" ").every((w) => GENERIC.has(w) || subject.has(w))) {
+    return strong.length ? fits(strong, false) : { kind: "unknown", junk: false };
+  }
+
   if (exact.length > 0) return fits(exact, !strong.length);
 
   // A whole word (or run of words) from a longer name is a short form, not a misspelling. It is checked before
@@ -288,14 +300,15 @@ export function judgeGuess(
     if (c) return resolve(c, true);
   }
 
-  // A plain category word ("islands", "lake", "city") is never a misspelling of an answer.
-  if (guess.split(" ").every((w) => GENERIC.has(w))) return { kind: "unknown", junk: false };
-
   // Near-spellings are corrected in the input for the player to confirm. Two equally close readings
   // ("Irak": Iran or Iraq) become a choice; more than that is noise, and listing them would leak answers.
   const len = Math.min(guess.length, best?.len ?? guess.length);
   // Six or seven letters get a third edit when the first and last letters agree: a slip in the middle ("hungray").
-  const close = candidates.filter((c) => c.dist <= typoBudget(len) + (c.ends && len >= 6 && len <= 7 ? 1 : 0));
+  // An ordinary word was typed on purpose: at most one slip, and only onto a ranked answer ("hungry" is Hungary; "barrel"
+  // is not Brazil, "church" not Czechia, "rice" not the pool's Nice).
+  const close = candidates.filter((c) =>
+    plain ? c.dist <= 1 && c.entry.rank > 0 : c.dist <= typoBudget(len) + (c.ends && len >= 6 && len <= 7 ? 1 : 0),
+  );
   if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
     const tied = close.filter((c) => c.dist === close[0].dist);
     // As with exact matches, a whole name or alias beats one word of another entry's name: "lotse" is Lhotse, not a
@@ -336,6 +349,19 @@ const GENERIC = new Set(
   ).split(" "),
 );
 
+/** The words of a list's noun, singular and plural: "concert tours" → concert, tours, tour. */
+function subjectWords(noun?: string): Set<string> {
+  const out = new Set<string>();
+  for (const w of normalize(noun ?? "").split(" ")) {
+    if (w.length < 3) continue;
+    out.add(w);
+    if (w.endsWith("ies")) out.add(`${w.slice(0, -3)}y`);
+    else if (w.endsWith("es")) out.add(w.slice(0, -2)).add(w.slice(0, -1));
+    else if (w.endsWith("s")) out.add(w.slice(0, -1));
+  }
+  return out;
+}
+
 /** Words that qualify a place's name without being the name: North Carolina, New Jersey, Republic of the Congo. */
 const QUALIFIERS = new Set(
   (
@@ -355,14 +381,15 @@ function leadingName(guess: string, entries: Entry[]): Entry | undefined {
   const forms = (e: Entry) => [e.name, ...e.aliases].map(normalize);
   for (let k = words.length - 1; k >= 1; k--) {
     const head = words.slice(0, k).join(" ");
-    if (head.replace(/ /g, "").length < 4 || words.slice(0, k).every((w) => GENERIC.has(w))) continue;
+    if (words.slice(0, k).every((w) => GENERIC.has(w))) continue;
+    // A short name ("u2", "bts") counts only to pick among the entries it shares by the rest ("u2 vertigo").
+    const short = head.replace(/ /g, "").length < 4;
     const hits = entries.filter((e) => forms(e).includes(head));
-    if (hits.length <= 1) {
-      if (hits.length) return hits[0];
-      continue;
-    }
+    if (hits.length === 0 || (short && hits.length === 1)) continue;
+    if (hits.length === 1) return hits[0];
     const rest = words.slice(k).filter((w) => w.length >= 2 && !GENERIC.has(w));
     const named = hits.filter((e) => forms(e).some((f) => rest.every((w) => f.split(" ").includes(w))));
+    if (short) return rest.length ? mostProminent(named) : undefined;
     return mostProminent(rest.length && named.length ? named : hits);
   }
   return undefined;

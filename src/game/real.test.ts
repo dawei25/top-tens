@@ -144,3 +144,23 @@ describe("the daily schedule", () => {
     for (const d of days) expect(d.blitz, d.date).toBeTruthy();
   });
 });
+
+describe("every built list", () => {
+  const index = read<{ id: string }[]>("index.json");
+  // Typing what the list is about ("tour", "songs", "car") must never hand over a top-10 answer.
+  it("never offers a top-10 answer for its own noun", () => {
+    const leaks: string[] = [];
+    for (const { id } of index) {
+      const p = read<Puzzle>(`${id}.json`);
+      const top = new Set(p.answers.map((a) => a.name));
+      const words = p.noun.toLowerCase().split(/\s+/).filter((w) => w.length >= 3);
+      for (const g of new Set([p.noun.toLowerCase(), ...words, ...words.map((w) => w.replace(/(e?s)$/, ""))])) {
+        const r = judgeGuess(g, p, new Set(), lex);
+        // An answer named exactly that is fine: the Instagram account on Instagram accounts.
+        const given = r.kind === "typo" ? r.suggestions.filter((s) => top.has(s)) : r.kind === "correct" && r.corrected ? [r.entry.name] : [];
+        if (given.length) leaks.push(`${id}: "${g}" -> ${given.join(", ")}`);
+      }
+    }
+    expect(leaks).toEqual([]);
+  });
+});

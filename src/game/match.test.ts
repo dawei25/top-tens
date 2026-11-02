@@ -343,6 +343,17 @@ describe("an answer's name followed by who made it", () => {
     // Out of order, or one distinctive word with a generic one, is not.
     expect(judgeGuess("tour renaissance", tours, new Set()).kind).toBe("unknown");
   });
+  it("a short shared name picks by the rest, and alone is not a lead", () => {
+    const tours: Puzzle = {
+      ...puzzle,
+      id: "tours4",
+      answers: [e(1, "U2 360° Tour", ["U2"]), ...puzzle.answers.slice(1)],
+      extras: [e(14, "Vertigo Tour", ["U2"]), e(20, "The Joshua Tree Tour 2017", ["U2"])],
+    };
+    expect(judgeGuess("u2 vertigo", tours, new Set())).toMatchObject({ kind: "near", entry: { name: "Vertigo Tour" } });
+    expect(judgeGuess("u2 joshua tree", tours, new Set())).toMatchObject({ kind: "near", entry: { rank: 20 } });
+    expect(judgeGuess("u2 elephant", tours, new Set()).kind).toBe("unknown");
+  });
   it("not when the whole guess is a name of its own", () => {
     const countries: Puzzle = { ...puzzle, id: "countries3", answers: [e(1, "Saudi Arabia"), e(2, "Mexico"), ...puzzle.answers.slice(2)], extras: [] };
     // A lexicon that knows "Saudi Aramco" and "Mexico City" as names (from other lists in the bank).
@@ -370,6 +381,13 @@ describe("an ordinary word typed alone", () => {
     expect(judgeGuess("kevin", games, new Set(), lex)).toMatchObject({ entry: { name: "Kevin Durant" }, corrected: true });
     expect(judgeGuess("minecraft", games, new Set(), lex)).toMatchObject({ kind: "correct", entry: { rank: 1 } });
   });
+  it("is never stretched into a name: one slip at most, onto a ranked answer", () => {
+    const countries: Puzzle = { ...puzzle, id: "countries4", answers: [e(1, "Brazil"), ...puzzle.answers.slice(1)], extras: [e(40, "Hungary"), e(0, "Nice")] };
+    const lex2 = { ...lex, words: ["barrel", "hungry", "rice"].map((w) => fnv(w).toString(36)).join(" ") };
+    expect(judgeGuess("barrel", countries, new Set(), lex2)).toMatchObject({ kind: "unknown" });
+    expect(judgeGuess("rice", countries, new Set(), lex2)).toMatchObject({ kind: "unknown" });
+    expect(judgeGuess("hungry", countries, new Set(), lex2)).toMatchObject({ kind: "near", entry: { name: "Hungary" }, corrected: true });
+  });
   it("and an entry named exactly that word still matches", () => {
     const withWater: Puzzle = { ...games, extras: [...games.extras, e(0, "Water")] };
     expect(judgeGuess("water", withWater, new Set(), lex)).toMatchObject({ kind: "near", entry: { name: "Water" }, corrected: false });
@@ -392,5 +410,24 @@ describe("number words", () => {
     expect(j("one direction")).toMatchObject({ kind: "near", entry: { name: "One Direction" } });
     // Plain "frozen" is the less prominent film, so the sequel is offered too.
     expect(j("frozen")).toMatchObject({ kind: "typo", suggestions: ["Frozen", "Frozen II"] });
+  });
+});
+
+describe("a word that fits a crowd", () => {
+  const names = ["Eras", "Spheres", "Farewell", "Divide", "Mathematics", "Renaissance", "Love On", "M72", "Summer", "Joshua Tree", "Vertigo", "Bigger Bang"];
+  const tours: Puzzle = {
+    ...puzzle,
+    id: "tours5",
+    answers: names.slice(0, 10).map((n, i) => e(i + 1, `${n} World Tour`)),
+    extras: names.slice(10).map((n, i) => e(i + 11, `${n} World Tour`)),
+  };
+  it("asks for more, rather than handing over the top 10 a few at a time", () => {
+    expect(judgeGuess("tour", tours, new Set())).toMatchObject({ kind: "unknown", vague: 12 });
+    expect(judgeGuess("world tour", tours, new Set())).toMatchObject({ kind: "unknown" });
+    expect(judgeGuess("tour", tours, new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]))).toMatchObject({ kind: "unknown" });
+  });
+  it("while a distinctive word still finds its entry", () => {
+    expect(judgeGuess("renaissance tour", tours, new Set())).toMatchObject({ kind: "correct", entry: { rank: 6 } });
+    expect(judgeGuess("vertigo", tours, new Set())).toMatchObject({ kind: "near", entry: { rank: 11 } });
   });
 });
