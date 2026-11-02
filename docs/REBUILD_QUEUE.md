@@ -15,8 +15,6 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       only for lists judged daily-worthy). Antarctic Desert has no fact yet.
 
 - [ ] **List judge leftovers** (re-judge each list after the rebuild):
-      - **richest-people:** ranks 11-25 so famous near misses (Michael Dell, the Waltons, Bill Gates, Gautam Adani)
-        show a rank. Needs a new source: The World's Billionaires table has only the top 10.
       - **stadiums:** Camp Nou's post-renovation capacity (the page still says 99,354; about 105,000 would make it
         #3).
       - Sources still missing: 2025 sales for BMW, Mercedes and Tesla; career points for active NBA stars; Facebook
@@ -26,16 +24,17 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       because the leading article is dropped, so that alias also catches "rod". Only drop "a" when a word follows it
       with a space, or keep hyphenated forms whole.
 
-- [ ] **Shared junk lists not yet applied** (cycle 2): x-accounts, facebook-pages and tiktok-accounts get
-      `CELEBRITY_JUNK` and shared ranks for ties below the top 10 at their next rebuild (cached, no fetches).
-
-- [ ] **Plain words, narrower "known name"** (lexicon + `isPlainWord`, cycle 3): `isPlainWord` vetoes any word that
-      is the exact name of an obscure pool entry ("humans", "music"), so those still leak. Let the lexicon decide
-      instead: count only ranked names and places as names when building `words` (about 670 more plain words), and
-      drop the known-name check in `isPlainWord`. Measure with the leak audit and the plain-word test.
+- [ ] **Cycle 3 pipeline changes not yet on every list** (apply at each list's next rebuild): intent groups wait for
+      all their entries, `stripWords` patterns, short forms ending in a little word dropped, new athletes' junk in
+      the shared celebrity list and their cached redirects. Also: the French billionaires table links Tanya Saadé
+      Zeenny to Jacques Saadé Jr.'s article, so they merge into one entry on richest-people.
 
 ## Done
 
+- **Cycle 3** (2026-11-02): richest-people near misses take the newest figure from the US, India and France
+  rankings (world ranks 11+ don't exist on Wikipedia); x-accounts, facebook-pages and tiktok-accounts rebuilt with
+  the shared celebrity junk list; plain words decided by the lexicon (pool names no longer veto, except words of an
+  entry with a figure).
 - **Matcher: "title artist" guesses** (2026-11-02): "perfect ed sheeran" puts Perfect in the box
   (`leadingName`), but not when the whole guess is a name of its own ("saudi aramco").
 - **Quality pass and full rebuild** (2026-11-02): every title and prompt says what the player names, every puzzle

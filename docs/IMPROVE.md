@@ -22,7 +22,8 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
    `validate.ts` and `scripts/judge/par.ts`. Its own verdict on a new list carries `"by": "builder"`: par uses it,
    the scheduler doesn't, until a real judge has looked.
 4. **Coordinator:** matcher findings in `src/game/match.ts` with unit tests; the leak audit (wrong guesses that get
-   an answer offered); review the data branch; merge; `npm test`, typecheck, build, e2e; push main (it deploys).
+   an answer offered); review the data branch; copy its `.cache/wiki` newer-wins (`cp -ru`, so a refreshed page
+   replaces the stale one); merge; `npm test`, typecheck, build, e2e; push main (it deploys).
    Never rebuild today's or tomorrow's daily list.
 5. **Schedule:** when fewer than 7 approved days remain, schedule newly approved dailies
    (`scripts/schedule.ts`), pacing difficulty and rotating categories.
@@ -48,7 +49,11 @@ stronger.
 | Music artists titled "best-selling" but ranked by certified units (Drake #1, the Beatles #11) | a title that hides an unexpected measure | judge brief: the title names the measure when it isn't the obvious one, else `fix-first` |
 | Capitals had Ulaanbaatar ranked and "Ulan Bator" unranked (two lives, one city) | one place under two names | validate.ts warns when an unranked universe member duplicates a ranked row; merge with `aliases` |
 | "bookworm" and "relentless" found Amazon | junk redirects on company and celebrity lists | shared `COMPANY_JUNK` and `CELEBRITY_JUNK` lists in scripts/aliases.ts, applied to every such list |
-| "humans" offered Destroy All Humans!, "water" Fritz-Walter-Stadion | an ordinary word read as part of a longer name | plain words in the lexicon (`isPlainWord`), never the words top-10 answers are known by; scripts/lexicon.test.ts |
+| "humans" offered Destroy All Humans!, "water" Fritz-Walter-Stadion | an ordinary word read as part of a longer name | plain words in the lexicon (`bankPlainWords`, `isPlainWord`): the lexicon alone decides, keeping the words of top-10 answers, ranked people and entries with a figure; scripts/lexicon.test.ts |
+| "farewell tour" cost a life as Cher's, not Elton John's #4 | a curated alias group applied before all its entries exist | `seedIntent` in build.ts waits for the whole group |
+| "ed sheeran divide" filled in Sheeran's other tour | a shared name (the artist) read without the rest of the guess | `leadingName` lets the rest pick among the entries sharing the name; match.test.ts |
+| Concert-tour misses from yearly tables showed no figure; Michael Dell showed his rank from 2000 | one-row-per-year tables, and old figures winning over new ones | `perYear` dated labels (build.test.ts); the newest dated figure wins |
+| Instagram's cache rolled back to a page with a #10/#11 tie | cache merges keeping the older file | the coordinator merges caches newer-wins (step 4) |
 | Nov 4's Blitz was Broadway, Nov 2's list (picked before the no-repeat rule) | a topic running twice | real.test.ts: no list runs twice from Nov 2, every day has its own Blitz; builder verdicts never schedule |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
 

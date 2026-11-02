@@ -2,6 +2,32 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-02, cycle 3
+
+- Judged: instagram (free play, Blitz-ready: the casual found 10/10, too easy for a list, a great Blitz),
+  music-artists (fix-first again: the title still said "sales"; now "most certified sales and streams", re-judge
+  next), concert-tours (fix-first: aliases, artist + tour readings, figures for misses; all fixed, re-judge next,
+  likely a daily), richest-people (free play: the casual found 9; misses now show the newest US, India or France
+  figure, since world ranks past #10 aren't on Wikipedia).
+- Schedule: Nov 4's Blitz was Broadway, Nov 2's list, frozen before the no-repeat rule; now beer-per-capita. Builder
+  verdicts (`"by": "builder"`) no longer schedule (instagram almost ran on one). Test: no list runs twice from Nov 2.
+  Scheduled through Nov 12, so no top-up.
+- Matcher: an artist with several entries lets the rest of the guess pick ("ed sheeran divide"); a name's words in
+  order with some left out read as that name ("renaissance tour", "lord rings", "harry potter stone"); the lexicon
+  alone decides plain words.
+- Data: plain words no longer vetoed by obscure pool names, except words of an entry with a figure (the strict rule
+  lost 139 readings with figures for 11 fewer leaks); x-accounts, facebook-pages and tiktok-accounts rebuilt with the
+  shared junk list; concert-tours aliases ("the weekend", "m72", "farewell tour" to Elton) and dated figures from
+  yearly tables; 2Pac and RiRi.
+- Leak rate: 1.6% before this cycle; re-measure on the merged main pending.
+- New topics: athletes-earnings ("Highest-earning athletes of 2026", every Forbes top 10 since 2012 accepted with its
+  year; casual 8, par 6) and car-models ("Best-selling car models of all time"; casual 7, Blitz 15/23). Both need a
+  judge. Known cost on car-models: "gold" is corrected to Golf.
+- Method: cache merges newer-wins (a stale Instagram page nearly brought back a #10/#11 tie); intent groups wait for
+  all their entries; one-row-per-year tables get dated labels.
+- Next: judge athletes-earnings, car-models, concert-tours and music-artists (both fixed); typo corrections of plain
+  English words ("gold" to Golf, "rice" to Nice) are now the biggest leak class.
+
 ## 2026-11-02, cycle 2
 
 - Judged: capitals (daily list, p8, also Blitz), animated-films (daily list, p8, also Blitz), theme-parks (daily
