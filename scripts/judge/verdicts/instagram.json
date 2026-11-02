@@ -1,0 +1,21 @@
+{
+  "id": "instagram",
+  "judgedAt": "2026-11-02",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 4, "guesses": 12 },
+  "fan": null,
+  "blitzCasual": { "scored": 26, "named": 29 },
+  "difficulty": 2,
+  "tags": ["entertainment", "social media", "celebrities"],
+  "audience": "anyone",
+  "summary": "Written by the data agent at build time, pending a real judge. Celebrities everyone knows: a casual player finds 8, and Instagram's own account at #1 and Khloé Kardashian at #10 are the reveals.",
+  "reasons": [
+    "Casual found Ronaldo, Messi, Selena Gomez, Kylie Jenner, Kim Kardashian, the Rock, Beyoncé and Ariana Grande; Taylor Swift (#14), Bieber (#12), Kendall Jenner (#13) and Neymar (#17) cost lives, each with a figure.",
+    "No tie at #10/#11 any more (Khloé 291 million, Nike 290). 51 ranked accounts plus the other platforms' famous names; the stars' junk redirects are now one shared list.",
+    "Blitz-ready: 26 of 29 casual names scored."
+  ],
+  "fixes": []
+}
