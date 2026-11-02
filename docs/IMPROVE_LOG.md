@@ -2,6 +2,15 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-02, par model fixed (player feedback, second round)
+
+- The uniform shift after "par too high" pushed hard lists to absurd pars (city visitors par 1; a player who got 5
+  was "top 10%"). Replaced with a compressed model: the typical player is 1.5 + 0.45 x the judge's casual score, so
+  pars run 3-7 instead of 0-7 (city visitors 4, stadiums 3, countries by population 7, Nov 5-12 dailies 5-6).
+- Daily bar back to the casual finding 6 to 8 (estimated average 5 to 6).
+- Lesson: one simulated run per list plus a global offset is too crude to shift by hand; real scores (Phase 1) are
+  the fix.
+
 ## 2026-11-02, cycle 1
 
 - Judged: market-cap-peak (daily list), youtube-videos (daily list), car-makers (daily list), theme-parks (fix-first:

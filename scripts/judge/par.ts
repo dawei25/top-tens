@@ -29,18 +29,21 @@ function rng(seed: string) {
 }
 
 /**
- * The crowd: most players well below the judge's casual player (a model that knows more than it admits and never
- * blanks), some in between, a few fans. Real players' feedback (Nov 2026): par read too high, so typical players sit
- * about 3.5 answers under the judge's casual player, and the crowd's average about 2.6 under it. Scores are whole
- * answers, 0 to 10.
+ * The crowd, built from the judge's simulated casual and fan players. Real players bunch in the middle more than the
+ * judge's runs do: almost everyone gets the three or four obvious answers on any list, and few get everything. So
+ * the typical player is a compressed version of the judge's casual score (1.5 + 0.45 x casual: 4 found → about 3.3,
+ * 8 → about 5.1), with a group a bit above and a few fans. Calibrated on players' feedback (Nov 2026): par read too
+ * high on easy lists (a uniform shift then made hard lists absurd: city visitors at par 1). Real scores replace this
+ * once a list has 50 players. Scores are whole answers, 0 to 10.
  */
 export function crowd(v: Verdict): number[] {
   const casual = v.casual?.found ?? 5;
   const fan = v.fan?.found ?? Math.min(10, casual + 3);
+  const typical = 1.5 + 0.45 * casual;
   const groups: [share: number, mean: number, spread: number][] = [
-    [0.6, Math.max(0, casual - 3.5), 2],
-    [0.3, Math.max(0, (casual + fan) / 2 - 3), 1.8],
-    [0.1, fan - 1.5, 1.5],
+    [0.6, typical, 1.6],
+    [0.3, typical + 1.5, 1.5],
+    [0.1, Math.min(10, Math.max(typical + 3, fan - 1)), 1.2],
   ];
   const r = rng(v.id);
   const normal = () => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r());
