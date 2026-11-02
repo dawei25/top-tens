@@ -29,17 +29,18 @@ function rng(seed: string) {
 }
 
 /**
- * The crowd: most players a couple of answers below the judge's casual player (a model that knows more than it
- * admits and never blanks; real players average lower), some in between, a few fans. Scores are whole answers,
- * 0 to 10.
+ * The crowd: most players well below the judge's casual player (a model that knows more than it admits and never
+ * blanks), some in between, a few fans. Real players' feedback (Nov 2026): par read too high, so typical players sit
+ * about 3.5 answers under the judge's casual player, and the crowd's average about 2.6 under it. Scores are whole
+ * answers, 0 to 10.
  */
 export function crowd(v: Verdict): number[] {
   const casual = v.casual?.found ?? 5;
   const fan = v.fan?.found ?? Math.min(10, casual + 3);
   const groups: [share: number, mean: number, spread: number][] = [
-    [0.6, Math.max(0, casual - 2), 2],
-    [0.3, Math.max(0, (casual + fan) / 2 - 1.5), 1.6],
-    [0.1, fan - 0.5, 1.2],
+    [0.6, Math.max(0, casual - 3.5), 2],
+    [0.3, Math.max(0, (casual + fan) / 2 - 3), 1.8],
+    [0.1, fan - 1.5, 1.5],
   ];
   const r = rng(v.id);
   const normal = () => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r());

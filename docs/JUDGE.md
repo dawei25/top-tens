@@ -59,11 +59,12 @@ fire off that all score). The owner's target for Today's list: a typical player 
   - the title and prompt say what the player is naming ("Countries emitting the most CO2", not "Biggest CO2
     emitters"); if not, it's `fix-first`;
   - curve >= 3, fairness >= 3, data >= 4;
-  - the casual simulation finds **6 to 8** of the 10 before the game ends. (A game short of 10/10 always ends at
-    zero lives, so count what was found by then; running out is normal, not a fail.) The judge's casual player knows
-    more than a real one, and the synthetic crowd in `scripts/judge/par.ts` sits about 1.2 answers below it, so this
-    lands the estimated average near 5 to 6. Fewer than 6 is too hard for a daily; 9-10 is too easy. How fast famous
-    misses burn lives belongs in `fairness`, not here;
+  - the casual simulation finds **7 to 9** of the 10 before the game ends, ideally 8. (A game short of 10/10 always
+    ends at zero lives, so count what was found by then; running out is normal, not a fail.) Real players came in
+    well under the judge's casual player (Nov 2026 feedback: par read too high), and the crowd in
+    `scripts/judge/par.ts` now sits about 2.6 answers below it: 8 lands the estimated average near 5.3, 9 near 6.2,
+    7 near 4.4 (a harder day). 10 is too easy; 6 or fewer too hard. How fast famous misses burn lives belongs in
+    `fairness`, not here;
 - **Today's Blitz** is drawn by the scheduler from any Blitz-ready list whose verdict scores blitzDepth >= 4,
   data >= 4 and recognizability >= 4 (and isn't `reject` or `fix-first`), whatever its list decision: a list too
   easy or too punishing as a classic (US states by GDP, world cities) can be a great Blitz. Simulate the casual
