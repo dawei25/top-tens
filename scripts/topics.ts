@@ -930,6 +930,7 @@ export const TOPICS: Topic[] = [
     name: "Franchise",
     value: "Wins",
     metric: "Super Bowl wins",
+    noFigures: "every other team has no Super Bowl win",
     universe: "nfl-teams",
     canonical: true,
     junkAliases: [
@@ -973,6 +974,7 @@ export const TOPICS: Topic[] = [
     name: "Country",
     value: "Wins",
     metric: "Grand Prix wins",
+    noFigures: "every other country has no Grand Prix win",
     universe: "countries",
     junkAliases: ["Swedish sin"],
   },
@@ -2133,6 +2135,7 @@ export const TOPICS: Topic[] = [
     name: "Country",
     value: "Wins",
     metric: "Ballon d'Or wins",
+    noFigures: "every other country has no Ballon d'Or",
     universe: "countries",
     // Yashin's win counts for the Soviet Union; "Russia" is half right, so it is free rather than a costly miss.
     skip: ["Russia"],
