@@ -333,3 +333,22 @@ describe("an ordinary word typed alone", () => {
     expect(judgeGuess("minecraft", games, new Set(), lex)).toMatchObject({ kind: "correct", entry: { rank: 1 } });
   });
 });
+
+describe("number words", () => {
+  const films: Puzzle = {
+    ...puzzle,
+    id: "films2",
+    answers: [e(1, "Frozen II"), e(2, "Inside Out 2"), e(3, "One Piece Film: Red"), ...puzzle.answers.slice(3)],
+    extras: [e(12, "Frozen"), e(13, "Inside Out"), e(0, "One Direction")],
+  };
+  const j = (g: string) => judgeGuess(g, films, new Set());
+  it("count as their digits", () => {
+    expect(j("frozen two")).toMatchObject({ kind: "correct", entry: { rank: 1 } });
+    expect(j("inside out two")).toMatchObject({ kind: "correct", entry: { rank: 2 } });
+  });
+  it("still match names spelled with words", () => {
+    expect(j("one direction")).toMatchObject({ kind: "near", entry: { name: "One Direction" } });
+    // Plain "frozen" is the less prominent film, so the sequel is offered too.
+    expect(j("frozen")).toMatchObject({ kind: "typo", suggestions: ["Frozen", "Frozen II"] });
+  });
+});

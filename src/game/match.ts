@@ -25,6 +25,20 @@ export function normalize(s: string): string {
 
 const CODE = /^[A-Z0-9]{2,4}$/;
 
+const NUMBER_WORDS: Record<string, string> = Object.fromEntries(
+  "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty"
+    .split(" ")
+    .map((w, i) => [w, String(i + 1)]),
+);
+
+/** Number words as digits, so "frozen two" meets "Frozen II" (normalized "frozen 2"). */
+function numbersAsDigits(s: string): string {
+  return s
+    .split(" ")
+    .map((w) => NUMBER_WORDS[w] ?? w)
+    .join(" ");
+}
+
 function digitsOf(s: string): string {
   return (s.match(/\d+/g) ?? []).join(" ");
 }
@@ -101,7 +115,8 @@ interface Candidate {
 }
 
 function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useWords = true): Candidate[] {
-  const guessDigits = digitsOf(guess);
+  const numGuess = numbersAsDigits(guess);
+  const guessDigits = digitsOf(numGuess);
   const compactGuess = guess.replace(/ /g, "");
   return entries.map((entry) => {
     let best = Infinity;
@@ -115,10 +130,11 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
     for (const [i, form] of [...forms, ...words].entries()) {
       const f = normalize(form);
       // Numbers are identity, not spelling: GTA 6 is not GTA 5, Mario Kart 7 is not Mario Kart.
-      if (guessDigits && digitsOf(f) !== guessDigits) continue;
+      if (guessDigits && digitsOf(numbersAsDigits(f)) !== guessDigits) continue;
       // Spacing never matters: "spiderman" is "Spider-Man". Words both sides share ("mount", "canyon") aren't
       // evidence of a typo: only the rest is compared, so "mount whitney" is not a misspelling of "mount lhotse".
-      const spacing = f.replace(/ /g, "") === compactGuess;
+      // Number words count as their digits: "frozen two" is Frozen II.
+      const spacing = f.replace(/ /g, "") === compactGuess || (numGuess !== guess && numbersAsDigits(f) === numGuess);
       const [g, rest] = spacing ? [guess, f] : withoutSharedWords(guess, f);
       const dist = spacing ? 0 : editDistance(g, rest);
       // Codes (ATL, EDDF, PRC) match exactly or not at all; fuzzy they catch keyboard mash like "asdf".
