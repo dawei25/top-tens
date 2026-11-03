@@ -3,7 +3,7 @@ import { archive, blitzOfTheDay, dailyGame, type DailyEntry } from "../game/dail
 import type { PuzzleMeta } from "../game/puzzles";
 import { load, type DailyBlitzResult } from "../game/storage";
 import type { GameState } from "../game/state";
-import { ScreenHead, formatAsOf } from "./pixel";
+import { ScreenHead, shortDate } from "./pixel";
 
 interface Props {
   index: PuzzleMeta[];
@@ -13,15 +13,27 @@ interface Props {
   onHome: () => void;
 }
 
-function result(g?: GameState): { text: string; tone: string } {
-  if (!g) return { text: "not played", tone: "faint" };
+/** A cell's status under its title. Unplayed cells show none: a new player would see "not played" on every row. */
+function result(g?: GameState): { text: string; tone: string } | undefined {
+  if (!g) return undefined;
   if (g.status === "playing") return { text: `playing ${g.found.length}/10`, tone: "cyan" };
   if (g.status === "gave-up") return { text: `gave up ${g.found.length}/10`, tone: "muted" };
   return { text: `${g.found.length}/10`, tone: g.status === "won" ? "gold" : "text" };
 }
 
-function blitzResult(r?: DailyBlitzResult): { text: string; tone: string } {
-  return r ? { text: `${r.score} pts`, tone: "gold" } : { text: "not played", tone: "faint" };
+function blitzResult(r?: DailyBlitzResult): { text: string; tone: string } | undefined {
+  return r ? { text: `${r.score} pts`, tone: "gold" } : undefined;
+}
+
+/** The status line, or (unplayed) a word for screen readers only. */
+function Status({ r }: { r?: { text: string; tone: string } }) {
+  return r ? (
+    <span className={`arch-status ${r.tone}`} data-testid="archive-status">
+      {r.text}
+    </span>
+  ) : (
+    <span className="sr-only">not played</span>
+  );
 }
 
 /**
@@ -34,7 +46,11 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
   const list = archive(schedule, today);
   const title = (id: string) => index.find((p) => p.id === id)?.title ?? id;
   const firstRef = useRef<HTMLAnchorElement>(null);
-  useEffect(() => firstRef.current?.focus({ preventScroll: true }), []);
+  // Keyboard-first: Enter opens the newest list. Touch screens have no Enter, so no focus ring on a cell nobody chose.
+  useEffect(() => {
+    if (typeof matchMedia === "function" && !matchMedia("(pointer: fine)").matches) return;
+    firstRef.current?.focus({ preventScroll: true });
+  }, []);
 
   return (
     <main className="screen archive past-dailies">
@@ -61,7 +77,7 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
           {list.map((e, i) => {
             const r = result(dailyGame(saved, e));
             const isToday = e.date === today;
-            const date = formatAsOf(e.date).replace(/, \d{4}$/, "");
+            const date = shortDate(e.date, today);
             // That date's Blitz: the round played if there is one (the pick for an old date can move as the schedule
             // and the lists grow), else the date's pick, as #dailyblitz-<date> opens it.
             const played = saved.blitzDaily?.[e.date];
@@ -88,7 +104,7 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
                     {title(e.id)}
                     <span className="sr-only">,</span>
                   </span>
-                  <span className={`arch-status ${r.tone}`}>{r.text}</span>
+                  <Status r={r} />
                 </a>
                 {blitzId ? (
                   <a
@@ -104,7 +120,7 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
                       {title(blitzId)}
                       <span className="sr-only">,</span>
                     </span>
-                    <span className={`arch-status ${b.tone}`}>{b.text}</span>
+                    <Status r={b} />
                   </a>
                 ) : (
                   <span className="arch-cell blitz none" data-testid="archive-blitz-none" data-date={e.date}>

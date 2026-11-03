@@ -38,8 +38,8 @@ const SCREENS = [
     name: "home, how to play open",
     scope: ".howto",
     setup: async (page) => {
-      await page.getByTestId("help-open").click();
-      await page.getByTestId("help-close").waitFor();
+      await page.getByTestId("howto-key").click();
+      await page.getByTestId("howto-close").waitFor();
     },
   },
   {
@@ -47,7 +47,7 @@ const SCREENS = [
     scope: "#list-categories",
     keepFocus: true,
     setup: async (page) => {
-      await page.getByTestId("help-close").click();
+      await page.getByTestId("howto-close").click();
       await page.getByTestId("random-list-categories").click();
       await page.getByTestId("category").first().waitFor();
     },

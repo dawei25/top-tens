@@ -719,14 +719,11 @@ a {
   letter-spacing: 0.1em;
 }
 
-.home-stats {
-  padding: 14px 18px 16px;
-}
+/* Your record is a Home card like the others (.home-group): same width, same padding, same label. */
 .stat-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px 8px;
-  margin-top: 10px;
 }
 @media (min-width: 520px) {
   .stat-row {
@@ -770,11 +767,32 @@ a {
   margin-left: auto;
 }
 
-/* How to play */
+/* How to play: a modal dialog over Home, centred, scrolling inside itself when the screen is short. The dialog box
+   has no padding of its own, so a click whose target is the dialog is on the backdrop. */
 .howto {
-  padding: 14px 18px 18px;
+  width: min(560px, calc(100% - 2 * var(--gutter)));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  /* Solid, unlike the glass cards: the keys behind it would read through the rules. */
+  background: var(--panel) var(--scan);
+  color: var(--text);
   border-left: 3px solid var(--pink);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.howto[open] {
   animation: rise 0.35s ease-out both;
+}
+.howto:focus {
+  outline: none;
+}
+.howto::backdrop {
+  background: rgba(2, 4, 9, 0.7);
+}
+.howto-body {
+  padding: 14px 18px 18px;
 }
 .panel-head {
   display: flex;
@@ -1498,6 +1516,18 @@ a {
 .text-btn.danger:hover {
   color: var(--danger);
 }
+/* A text key that swaps its words (reset all progress -> sure?): both are laid out in one cell, the idle one hidden,
+   so the key never changes size under the finger. */
+.swap-btn {
+  display: inline-grid;
+  place-items: center;
+}
+.swap-btn > span {
+  grid-area: 1 / 1;
+}
+.swap-btn > [data-off] {
+  visibility: hidden;
+}
 
 .misses {
   display: flex;
@@ -1744,36 +1774,7 @@ a {
 .archive .prompt h1 {
   margin-top: 0;
 }
-.arch-list {
-  list-style: none;
-  padding: 6px 0;
-}
-.arch-list li + li {
-  border-top: 1px solid rgba(125, 147, 184, 0.08);
-}
-.arch-row {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) auto;
-  grid-template-areas:
-    "n title result"
-    "date title result";
-  column-gap: 14px;
-  align-items: center;
-  padding: 8px 18px;
-  color: var(--text);
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-}
-@media (hover: hover) {
-  .arch-row:hover {
-    background: rgba(77, 227, 255, 0.05);
-  }
-}
-.arch-row:focus-visible {
-  outline-offset: -3px;
-}
 .arch-n {
-  grid-area: n;
   font-size: 28px;
   line-height: 1;
   color: var(--cyan);
@@ -1783,59 +1784,35 @@ a {
   color: var(--gold);
 }
 .arch-date {
-  grid-area: date;
   font-size: 15px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--muted);
 }
-.arch-title {
-  grid-area: title;
-  font-size: 21px;
-  line-height: 1.15;
-  overflow-wrap: anywhere;
-}
-.arch-result {
-  grid-area: result;
-  font-size: 19px;
-  text-align: right;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-.arch-result.faint,
-.arch-status.faint {
+/* Result tones, shared by the archive's cells and Past runs' rows. */
+.arch-status.faint,
+.play-result.faint {
   color: var(--faint);
 }
-.arch-result.muted,
-.arch-status.muted {
+.arch-status.muted,
+.play-result.muted {
   color: var(--muted);
 }
-.arch-result.cyan,
-.arch-status.cyan {
+.arch-status.cyan,
+.play-result.cyan {
   color: var(--cyan);
 }
-.arch-result.gold,
-.arch-status.gold {
+.arch-status.gold,
+.play-result.gold {
   color: var(--gold);
 }
-.arch-result.text,
-.arch-status.text {
+.arch-status.text,
+.play-result.text {
   color: var(--text);
 }
 @media (max-width: 420px) {
-  .arch-row {
-    grid-template-columns: 52px minmax(0, 1fr) auto;
-    column-gap: 10px;
-    padding: 8px 12px;
-  }
   .arch-n {
     font-size: 24px;
-  }
-  .arch-title {
-    font-size: 19px;
-  }
-  .arch-result {
-    font-size: 17px;
   }
 }
 .source {
@@ -2444,47 +2421,132 @@ a.arch-cell:active .arch-name {
   color: var(--gold);
 }
 
-/* Past runs */
-.play-row .play-date {
-  font-size: 20px;
-  line-height: 1.1;
-  white-space: nowrap;
+/*
+ * Past runs: one header per day (Today, Yesterday, Nov 1), then that day's runs, each one link to its own run: the
+ * time, the list's title, one tag under it (the mode, and the daily's number) in the mode's color, and the result on
+ * the right with the distance from the players' average under it. Phones move the result under the title, next to
+ * the tag. The states match the archive's cells: a shade lighter, the mode's bar, the title in the mode's color.
+ */
+.play-list {
+  padding: 0 0 6px;
+}
+.play-day + .play-day {
+  border-top: 1px solid var(--hairline);
+}
+.play-day-name {
+  padding: 14px 18px 6px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
   color: var(--label);
 }
-.play-tags {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
+.play-rows {
+  list-style: none;
+  padding: 0;
+}
+.play-rows > li + li {
+  border-top: 1px solid rgba(125, 147, 184, 0.08);
+}
+.play-row {
+  --accent: var(--pink);
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "time title result"
+    ". tag vs";
+  column-gap: 14px;
+  row-gap: 3px;
+  align-items: baseline;
+  padding: 10px 18px 11px;
+  color: var(--text);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  outline-offset: -3px;
+  transition:
+    background-color 120ms linear,
+    box-shadow 120ms linear;
+}
+.play-row.blitz {
+  --accent: var(--gold);
+}
+@media (hover: hover) {
+  .play-row:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+  .play-row:hover .play-title {
+    color: var(--accent);
+  }
+}
+.play-row:focus-visible {
+  background-color: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.play-row:active {
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.play-row:focus-visible .play-title,
+.play-row:active .play-title {
+  color: var(--accent);
+}
+.play-time {
+  grid-area: time;
+  font-size: 19px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.play-title {
+  grid-area: title;
+  min-width: 0;
+  font-size: 21px;
+  line-height: 1.15;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 .play-tag {
+  grid-area: tag;
   font-size: 14px;
+  line-height: 1.2;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--accent);
 }
-.play-tag.blitz {
-  color: var(--gold);
-}
-.play-row .arch-result {
+.play-result {
+  grid-area: result;
   font-size: 18px;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.play-vs {
+  grid-area: vs;
+  text-align: right;
+  white-space: nowrap;
 }
 @media (max-width: 520px) {
-  /* Phones: the result moves under the title instead of squeezing it. */
-  .play-row .play-date {
-    font-size: 17px;
+  .play-day-name {
+    padding: 12px 12px 4px;
   }
   .play-row {
-    grid-template-columns: 58px minmax(0, 1fr);
+    grid-template-columns: 46px minmax(0, 1fr) auto;
     grid-template-areas:
-      "n title"
-      "date result";
-    row-gap: 2px;
+      "time title title"
+      ". tag result"
+      ". . vs";
+    column-gap: 10px;
+    padding: 8px 12px 9px;
   }
-  .play-row .arch-result {
-    text-align: left;
-    white-space: normal;
+  .play-time {
+    font-size: 17px;
+  }
+  .play-title {
+    font-size: 19px;
+  }
+  .play-result {
+    font-size: 17px;
   }
 }
 

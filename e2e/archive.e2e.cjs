@@ -1,5 +1,6 @@
 // Archive -> an old daily -> Back -> archive -> Back -> home; a deep link to an old daily goes Back to the archive.
-// An old daily is one try: once finished it stays on its result, even after a roll replays the same list.
+// An old daily is one try: once finished it stays on its result, even after a roll replays the same list. Unplayed
+// cells show only their title (no "not played" thirty times for a new player); played ones show their score.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, openTab, hash, store, noHScroll } = require("./helpers.cjs");
@@ -17,6 +18,7 @@ for (const vp of VIEWPORTS) {
     // Newest first; the oldest is the first daily.
     const dates = await rows.evaluateAll((els) => els.map((e) => e.getAttribute("data-date")));
     assert.deepEqual([...dates].sort().reverse(), dates);
+    assert.equal(await page.getByTestId("archive-status").count(), 0, "nothing played: no status anywhere");
     const old = dates.at(-1);
     await page.locator(`[data-testid="archive-row"][data-date="${old}"]`).click();
     await page.getByTestId("slot").first().waitFor();
@@ -62,6 +64,8 @@ for (const vp of VIEWPORTS) {
     }, id);
     await page.getByTestId("nav-back").click();
     await row.waitFor();
+    assert.equal(await row.getByTestId("archive-status").count(), 1, "a played cell shows its score");
+    assert.equal(await page.getByTestId("archive-status").count(), 1);
     await row.click();
     await page.getByTestId("results").waitFor();
     assert.equal(await page.getByTestId("give-up").count(), 0);

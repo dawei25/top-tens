@@ -19,6 +19,12 @@ export function formatAsOf(asOf: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
+/** A day the way the screens name it: "2026-11-10" -> "Nov 10", with the year only when it isn't `today`'s. */
+export function shortDate(date: string, today: string): string {
+  const full = formatAsOf(date);
+  return date.slice(0, 4) === today.slice(0, 4) ? full.replace(/, \d{4}$/, "") : full;
+}
+
 /** "Wikipedia: List of ..." -> "Wikipedia". */
 export function sourceSite(name: string): string {
   return name.split(":")[0].trim() || name;
