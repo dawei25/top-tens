@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "e2e": "node e2e/run.mjs",
-    "verify": "npm test && tsc -p tsconfig.app.json --noEmit && npm run lint && npm run lint:css && npm run e2e",
+    "verify": "npm test && tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.api.json --noEmit && npm run lint && npm run lint:css && npm run e2e",
     "verify:deploy": "vitest run src && tsc -p tsconfig.app.json --noEmit && npm run lint:css && vite build",
     "inspect": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/inspect.ts",
     "build:puzzles": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/build.ts",
