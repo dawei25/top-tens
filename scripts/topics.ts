@@ -2838,6 +2838,13 @@ export const TOPICS: Topic[] = [
     value: "Worldwide",
     metric: "Worldwide box office (US$)",
     works: true,
+    // Lifetime grosses, as the table gives Toy Story's (re-releases included): the table stops at these two films'
+    // first runs, before their 2012 3D re-releases (judge, cycle 7). Monsters, Inc.'s text says $577.4 million; the
+    // infobox's $579.7 million is the later Box Office Mojo figure.
+    overrides: {
+      "Finding Nemo": { value: "$940.3 million", source: "Finding Nemo's article: cumulative worldwide total after the 2012 3D re-release" },
+      "Monsters, Inc.": { value: "$579.7 million", source: "Monsters, Inc.'s article infobox (Box Office Mojo), with the 2012 3D re-release" },
+    },
     // Other studios' famous animated films (Frozen, Shrek, Minions, Zootopia) are free, and still real names: "cars"
     // never reads "Planes" nor "frozen" a Pixar film. Pixar's announced films (Incredibles 3, Coco 2) are free too.
     knownOnly: [

@@ -125,6 +125,16 @@ describe("validate: ranks past the top 10", () => {
   });
 });
 
+describe("validate: value formats", () => {
+  it("fails a ranked figure missing the currency sign the others show", () => {
+    const p = puzzle();
+    for (const e of [...p.answers, ...p.extras]) if (e.rank) e.value = `$${e.value}`;
+    expect(errors(p)).toEqual([]);
+    p.answers[6].value = "940,300,000";
+    expect(errors(p)).toEqual(['#7 Answer 7: value "940,300,000" lacks the currency sign the others show']);
+  });
+});
+
 describe("validate: placeholder rows", () => {
   it("fails an answer that is a title not announced yet", () => {
     const p = puzzle();

@@ -331,6 +331,11 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
       err(`#${e.rank} ${e.name}: value "${e.value}" looks misread (a dot as thousands separator)`);
     }
   }
+  // One figure without the currency the rest show: "940,300,000" among "$871,014,978"s (an override written out).
+  const signed = shown.filter(([e]) => /^[$€£]/.test(e.value!));
+  if (signed.length > shown.length / 2) {
+    for (const [e] of shown) if (!/^[$€£]/.test(e.value!)) err(`#${e.rank} ${e.name}: value "${e.value}" lacks the currency sign the others show`);
+  }
   // A big jump between neighbours in the ranking suggests a misread or mixed units.
   const ranked = all.filter((e) => e.rank > 0 && e.n !== undefined && e.n > 0).sort((a, b) => a.rank - b.rank);
   if (!topic?.lowerIsBetter) {

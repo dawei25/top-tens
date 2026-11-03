@@ -408,10 +408,11 @@ export async function readRows(topic: Topic): Promise<Row[]> {
   }
   if (!topic.keepOrder) rows.sort((a, b) => b.value - a.value || (b.tiebreak ?? 0) - (a.tiebreak ?? 0));
   lowerParts(rows);
-  // "3.2 million" among "6,301,972"s reads as another unit: write it out like the rest.
+  // "3.2 million" among "6,301,972"s reads as another unit: write it out like the rest, keeping its currency sign
+  // ("$940.3 million" is "$940,300,000", not "940,300,000").
   const worded = rows.filter((r) => /\b(million|billion|trillion)$/.test(r.valueText));
   if (worded.length && worded.length < rows.length / 2) {
-    for (const r of worded) r.valueText = Math.round(r.value).toLocaleString("en-US");
+    for (const r of worded) r.valueText = (r.valueText.match(/^[$€£]/)?.[0] ?? "") + Math.round(r.value).toLocaleString("en-US");
   }
   return distinctRows(topic, rows);
 }
