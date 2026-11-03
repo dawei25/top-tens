@@ -359,8 +359,9 @@ export async function readRows(topic: Topic): Promise<Row[]> {
       // A count of nothing (a team with no titles) ranks nothing; the universe still accepts the name.
       if (!v || (v.value === 0 && !topic.lowerIsBetter)) {
         if (!v) unranked();
-        // The Padres' "0": a guess shows it (judge, cycle 6), but a count of nothing never scores in Blitz.
-        else zeroRows(topic).set(normalize(name), (topic.prefix ?? "") + v.display + (topic.unit ?? ""));
+        // The Padres' "0": a guess shows it (judge, cycle 6), but a count of nothing never scores in Blitz. A "0.00"
+        // is a figure too small to print (the Faroe Islands' CO2), not a zero: no figure beats a wrong one.
+        else if (!/\.\d/.test(v.display)) zeroRows(topic).set(normalize(name), (topic.prefix ?? "") + v.display + (topic.unit ?? ""));
         continue;
       }
       // One name per line of the cell: "Mount Everest / Sagarmatha / Chomolungma" are three aliases, not one glued string.
