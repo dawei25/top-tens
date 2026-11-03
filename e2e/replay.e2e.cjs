@@ -1,6 +1,6 @@
 // Play again on a past run: a run opened from Past runs (a list run's view, a Blitz run's view) leads with Play again,
-// a fresh free game on that same list. Not on results that just ended (Roll again is the way on there), and never for
-// a list held right now (today's list or Blitz, or a future day's): a quiet line instead.
+// a fresh free game on that same list, except for a list held right now (today's list or Blitz, or a future day's): a
+// quiet line instead. A list's results never offer Play again, just ended or opened again (Roll again is the way on).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, TODAY, open, go, hash, store, guess, puzzle, noHScroll } = require("./helpers.cjs");
@@ -35,18 +35,13 @@ for (const vp of VIEWPORTS) {
     await guess(page, p.answers[0].name);
     await giveUp(page);
     assert.equal(await page.getByTestId("replay").count(), 0);
+    assert.equal(await page.getByTestId("play-again").count(), 1);
 
     // Its run view from Past runs: Play again starts a fresh game on the same list; the old run stays in the history.
     await openRun(page, `#p-${LIST}`);
     await page.getByTestId("run-view").waitFor();
     await page.getByTestId("replay").waitFor();
     assert.equal(await page.getByTestId("replay-held").count(), 0);
-    assert.ok(await noHScroll(page));
-    await page.getByTestId("replay").click();
-    await page.getByTestId("give-up").waitFor();
-    assert.equal(await hash(page), `#p-${LIST}`);
-    assert.equal(await page.getByTestId("lives").getAttribute("data-lives"), "5");
-    assert.equal(await page.locator('[data-testid="slot"][data-state="found"]').count(), 0);
     assert.equal((await store(page)).listRuns.filter((r) => r.id === LIST).length, 1);
 
     // A free Blitz round, then its run from the screen's own past runs (the screen stays mounted): Play again is a

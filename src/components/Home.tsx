@@ -5,8 +5,9 @@ import { load, save, stats } from "../game/storage";
 import { recentPlays } from "../game/history";
 import { Countdown } from "./Countdown";
 import { HowToPlay } from "./HowToPlay";
-import { EnterHint, TipLabel, type Mode } from "./pixel";
+import { EnterHint, type Mode } from "./pixel";
 import { STREAK_NOTE } from "./copy";
+import { FloatNote } from "./Note";
 import { SoundToggle } from "./sound/SoundToggle";
 
 /**
@@ -121,8 +122,6 @@ export function Home({
   const st = streak(saved);
   /** No list game finished yet: the record shows placeholders. */
   const fresh = s.played === 0 && st.best === 0;
-  /** The "days in a row" note under the record, opened by tap, click or keyboard. */
-  const [streakNote, setStreakNote] = useState(false);
   // The rules stay closed until asked for, even on a first visit; they open as a dialog over the page.
   const [help, setHelp] = useState(false);
   const helpKey = useRef<HTMLButtonElement>(null);
@@ -471,14 +470,7 @@ export function Home({
           </div>
           <div>
             <dt>
-              <TipLabel
-                label="days in a row"
-                note={STREAK_NOTE}
-                open={streakNote}
-                onToggle={() => setStreakNote((o) => !o)}
-                controls="home-streak-note"
-                testId="streak-tip"
-              />
+              <FloatNote label="days in a row" note={STREAK_NOTE} id="home-streak-note" testId="streak-tip" />
             </dt>
             <dd className="pink">{fresh ? NONE : st.current}</dd>
           </div>
@@ -487,9 +479,6 @@ export function Home({
             <dd>{fresh ? NONE : st.best}</dd>
           </div>
         </dl>
-        <p id="home-streak-note" className="tip-note" hidden={!streakNote}>
-          {STREAK_NOTE.toLowerCase()}
-        </p>
       </section>
 
       <footer className="home-foot" data-glass data-testid="home-foot">

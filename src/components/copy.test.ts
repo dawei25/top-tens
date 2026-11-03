@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { blitzPrompt, NO_LIFE_LOST, notOnList } from "./copy";
+import { blitzPrompt, confirmGuess, GUESS_HINT, GUESS_HINT_SHORT, NO_LIFE_LOST, notOnList, SO_CLOSE } from "./copy";
 
 const NBSP = String.fromCharCode(160);
 const entries = (n: number) => Array.from({ length: n }, (_, i) => ({ rank: i + 1, name: `e${i}`, aliases: [] }));
@@ -19,6 +19,16 @@ describe("miss copy", () => {
   it("keeps the noun's last word with its 'here.', and 'No life lost.' in one piece", () => {
     expect(notOnList({ noun: "NBA players", answers: entries(10), extras: [] })).toContain(`players${NBSP}here.`);
     expect(NO_LIFE_LOST).toBe(["No", "life", "lost."].join(NBSP));
+  });
+});
+
+describe("guess copy", () => {
+  it("never names a key a phone doesn't have", () => {
+    for (const s of [GUESS_HINT, GUESS_HINT_SHORT, confirmGuess("Poland")]) expect(s).not.toMatch(/enter/i);
+    expect(confirmGuess("Poland")).toBe("Did you mean Poland? Guess again to confirm.");
+  });
+  it("keeps 'So close.' on one line", () => {
+    expect(SO_CLOSE).toBe(["So", "close."].join(NBSP));
   });
 });
 
