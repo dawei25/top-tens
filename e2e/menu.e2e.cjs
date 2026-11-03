@@ -214,9 +214,12 @@ for (const vp of VIEWPORTS) {
   });
 }
 
-test("narrow phones: the five lives fit between BACK and the header's three keys", async () => {
+test("narrow phones: the five lives fit between BACK and the header's three keys; the menu key keeps Home's right edge", async () => {
   for (const width of [320, 360, 390]) {
-    const { ctx, page } = await open(browser, { viewport: { width, height: 700 }, isMobile: true, hasTouch: true }, "#p-mountains");
+    const { ctx, page } = await open(browser, { viewport: { width, height: 700 }, isMobile: true, hasTouch: true });
+    await page.getByTestId("today-list").waitFor();
+    const onHome = await place(page.getByTestId("menu-key"));
+    await go(page, "#p-mountains");
     await page.getByTestId("lives").waitFor();
     const [back, lives, sound, menu] = await Promise.all(
       ["nav-back", "lives", "sound-toggle", "menu-key"].map((id) => page.getByTestId(id).boundingBox()),
@@ -224,6 +227,7 @@ test("narrow phones: the five lives fit between BACK and the header's three keys
     assert.ok(lives.x >= back.x + back.width, `${width}: lives clear of BACK`);
     assert.ok(lives.x + lives.width <= sound.x, `${width}: lives clear of the sound key (${lives.x + lives.width} > ${sound.x})`);
     assert.ok(menu.x + menu.width <= width, `${width}: the menu key on screen`);
+    assert.ok(Math.abs(menu.x + menu.width - (onHome.x + onHome.w)) <= 1, `${width}: the menu key's right edge as on Home`);
     assert.ok(await noHScroll(page), `${width}`);
     await ctx.close();
   }

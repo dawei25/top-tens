@@ -2725,6 +2725,12 @@ a.arch-cell:active .arch-name {
     right: calc(max(var(--gutter), env(safe-area-inset-right)) + 7px);
   }
 }
+/* Narrow phones: the header card's side padding is 4px there. */
+@media (max-width: 380px) {
+  .home-keys {
+    right: calc(max(var(--gutter), env(safe-area-inset-right)) + 5px);
+  }
+}
 
 /* ---------- Players' average (par.json) ---------- */
 /*
