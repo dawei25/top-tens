@@ -2794,6 +2794,49 @@ export const TOPICS: Topic[] = [
       Bulldog: ["English Bulldog", "British Bulldog", "Bulldogs"],
     },
   },
+  // Cycle 6
+  {
+    id: "pixar-films",
+    category: "Entertainment",
+    title: "Highest-grossing Pixar films",
+    noun: "Pixar films",
+    prompt: "Name the 10 highest-grossing Pixar films (worldwide box office, not adjusted)",
+    page: "List of Pixar films",
+    // "Box office": every released feature with its worldwide gross, so every Pixar film is an answer with a figure.
+    tables: [2],
+    name: "Film",
+    value: "Worldwide",
+    metric: "Worldwide box office (US$)",
+    works: true,
+    // Other studios' famous animated films (Frozen, Shrek, Minions, Zootopia) are free, and still real names: "cars"
+    // never reads "Planes" nor "frozen" a Pixar film. Pixar's announced films (Incredibles 3, Coco 2) are free too.
+    knownOnly: [
+      { page: "List of highest-grossing animated films", tables: [0, 1, 2, 3], name: "Title" },
+      { tables: [1], name: "Film" },
+    ],
+    // The famous ones those tables leave out (first films of franchises, Disney's own studio, DreamWorks,
+    // Illumination), and Planes, the Cars spin-off Pixar didn't make.
+    knownNames: [
+      "Shrek", "Despicable Me", "How to Train Your Dragon", "Madagascar", "Kung Fu Panda 3", "Kung Fu Panda 4",
+      "Encanto", "Wreck-It Ralph", "Ralph Breaks the Internet", "Bolt", "Wish", "Raya and the Last Dragon",
+      "Meet the Robinsons", "Chicken Little", "Treasure Planet", "Spider-Man: Into the Spider-Verse",
+      "Into the Spider-Verse", "Sing 2", "The Lego Movie", "Cloudy with a Chance of Meatballs", "Rio",
+      "Hotel Transylvania", "Megamind", "Trolls", "The Boss Baby", "The Bad Guys", "The Wild Robot", "Ferdinand",
+      "Planes", "Planes: Fire & Rescue", "The Polar Express", "Happy Feet", "Monsters vs. Aliens", "Shark Tale",
+      "Antz", "Over the Hedge", "Bee Movie", "Flushed Away", "Robots", "Ice Age: Collision Course", "Luck",
+    ],
+    aliases: {
+      "Toy Story": ["Toy Story 1"],
+      Cars: ["Cars 1"],
+      "The Incredibles": ["Incredibles 1", "The Incredibles 1"],
+      "Monsters, Inc.": ["Monsters Inc", "Monsters Incorporated"],
+      "WALL-E": ["Wall E", "Walle"],
+      "A Bug's Life": ["Bugs Life"],
+      "Finding Dory": ["Dory"],
+    },
+    // An announced sequel's name, character pages and a study named for the film.
+    junkAliases: ["Inside Out 3", "Finding Nemo Characters", "Nemo effect"],
+  },
 ];
 
 /** Table indexes from..to, inclusive. */
