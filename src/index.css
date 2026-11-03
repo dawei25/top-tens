@@ -2263,7 +2263,7 @@ a.text-btn {
  * Archive (past dailies): a table, one row per day. The day on the left (its number over its date, TODAY under
  * today's), then that day's list and its Blitz in two columns, named once in the header in their modes' colors (List
  * pink, Blitz gold), never on the rows. Each cell is its own link, the title with its status under it, and fills its
- * row's height. Hover, focus and press tint the cell and light its mode's bar down its left edge: color and shadow
+ * row's height. Hover, focus and press light the cell in its mode's color (see the states below): color and shadow
  * only, so nothing moves. A day without a Blitz keeps the column, with a quiet dash.
  */
 @media (min-width: 1100px) {
@@ -2353,6 +2353,7 @@ a.text-btn {
   font-size: 21px;
   line-height: 1.15;
   overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 .arch-cell.none {
   color: var(--faint);
@@ -2362,19 +2363,28 @@ a.text-btn {
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
+/* The states: the cell lifts a shade, its mode's bar lights and its title takes the mode's color (as the category
+   strips do). A tint of the mode's color would go grey for gold on navy. */
 @media (hover: hover) {
   a.arch-cell:hover {
-    background-color: color-mix(in srgb, var(--accent) 9%, transparent);
+    background-color: rgba(255, 255, 255, 0.04);
     box-shadow: inset 3px 0 0 var(--accent);
+  }
+  a.arch-cell:hover .arch-name {
+    color: var(--accent);
   }
 }
 a.arch-cell:focus-visible {
-  background-color: color-mix(in srgb, var(--accent) 9%, transparent);
+  background-color: rgba(255, 255, 255, 0.04);
   box-shadow: inset 3px 0 0 var(--accent);
 }
 a.arch-cell:active {
-  background-color: color-mix(in srgb, var(--accent) 16%, transparent);
+  background-color: rgba(255, 255, 255, 0.08);
   box-shadow: inset 3px 0 0 var(--accent);
+}
+a.arch-cell:focus-visible .arch-name,
+a.arch-cell:active .arch-name {
+  color: var(--accent);
 }
 .arch-empty {
   padding: 10px 8px;

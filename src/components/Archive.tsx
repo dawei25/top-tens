@@ -84,7 +84,10 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
                   href={`#daily-${e.date}`}
                 >
                   <span className="sr-only">{day}, List: </span>
-                  <span className="arch-name">{title(e.id)}</span>{" "}
+                  <span className="arch-name">
+                    {title(e.id)}
+                    <span className="sr-only">,</span>
+                  </span>
                   <span className={`arch-status ${r.tone}`}>{r.text}</span>
                 </a>
                 {blitzId ? (
@@ -97,7 +100,10 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
                     href={`#dailyblitz-${e.date}`}
                   >
                     <span className="sr-only">{day}, Blitz: </span>
-                    <span className="arch-name">{title(blitzId)}</span>{" "}
+                    <span className="arch-name">
+                      {title(blitzId)}
+                      <span className="sr-only">,</span>
+                    </span>
                     <span className={`arch-status ${b.tone}`}>{b.text}</span>
                   </a>
                 ) : (
