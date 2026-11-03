@@ -1053,6 +1053,9 @@ export const TOPICS: Topic[] = [
       "Yankees Suck", "New York Yankees Roster", "Yankees Roster", "Dodgers Roster", "Reds Roster",
       "St. Louis Cardinals roster", "Detroit Tigers roster", "Pittsburgh Pirates roster", "Kruk and Kuip", "Talksox",
       "Piratefest", "Atlanta Braves 1990s pitching rotation", "Philadelphia / Kansas City / Oakland / Athletics",
+      // Staff, executives, traditions and a song among the redirects (judge, cycle 6).
+      "Lonn A. Trost", "Truck Day", "Win Dance Repeat", "Red Sox Pitching Coach", "Red Sox Hitting Coach",
+      "Red Sox Bench Coach", "Red Sox First Base Coach", "Douglas Danforth",
       // Cities with another team too: "new york" was the Giants, "philadelphia" the Athletics.
       "Philadelphia", "Kansas City", "New York", "Milwaukee",
     ],

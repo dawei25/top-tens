@@ -96,10 +96,19 @@ const TEAMS: Record<"nba" | "nfl" | "mlb" | "nhl", string[]> = {
 
 const MULTI_WORD_NICKNAMES = /\b(Red Sox|White Sox|Blue Jays|Trail Blazers|Maple Leafs|Red Wings|Blue Jackets|Golden Knights)$/;
 
+/** Short forms fans write besides the nickname (no plain words: "cards" and "halos" are left out). */
+const TEAM_SHORT: Record<string, string[]> = {
+  "Arizona Diamondbacks": ["D-backs", "Dbacks"],
+  "Washington Nationals": ["Nats"],
+  "Philadelphia Phillies": ["Phils"],
+  "Toronto Blue Jays": ["Jays"],
+  "Jacksonville Jaguars": ["Jags"],
+};
+
 function teams(league: keyof typeof TEAMS): Place[] {
   return TEAMS[league].map((name) => {
     const nickname = name.match(MULTI_WORD_NICKNAMES)?.[1] ?? name.split(" ").at(-1)!;
-    return { name, aliases: nickname === name ? [] : [nickname] };
+    return { name, aliases: [...(nickname === name ? [] : [nickname]), ...(TEAM_SHORT[name] ?? [])] };
   });
 }
 

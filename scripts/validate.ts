@@ -115,6 +115,29 @@ export function sameAsUniverse(p: Pick<Puzzle, "answers" | "extras">, topic?: Pi
   return out;
 }
 
+/**
+ * Teams of a team universe the list can't take by nickname: every member's other names ("Cubs", "Nats") must be
+ * names of the entry that is that team, ranked or not (judge, cycle 6: the teams in the source table had none).
+ * A nickname another member owns ("Giants" on NFL and MLB lists is one team each) is that member's.
+ */
+export function missingNicknames(p: Pick<Puzzle, "answers" | "extras">, topic?: Pick<Topic, "universe" | "skip">): string[] {
+  const out: string[] = [];
+  const all = [...p.answers, ...p.extras];
+  for (const u of [topic?.universe ?? []].flat().filter((u) => /-teams$/.test(u))) {
+    for (const m of UNIVERSES[u]()) {
+      if (topic?.skip?.includes(m.name)) continue;
+      const e = all.find((x) => normalize(x.name) === normalize(m.name)) ?? all.find((x) => x.aliases.some((a) => normalize(a) === normalize(m.name)));
+      if (!e) {
+        out.push(`${m.name} (${u}) is no answer`);
+        continue;
+      }
+      const forms = new Set([e.name, ...e.aliases].map(normalize));
+      for (const a of m.aliases) if (!forms.has(normalize(a))) out.push(`${e.rank ? `#${e.rank} ` : ""}${e.name}: no "${a}"`);
+    }
+  }
+  return out;
+}
+
 export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = TOPICS.find((t) => t.id === p.id)): Issue[] {
   const issues: Issue[] = [];
   const err = (msg: string) => issues.push({ level: "error", msg });
@@ -260,6 +283,7 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   // The same place twice: a ranked "Congo" without the aliases of the pool's "Republic of the Congo", the table's
   // Ulaanbaatar next to the capitals universe's "Ulan Bator" (a second life for one city, no figure).
   for (const e of sameAsUniverse(p, topic)) warn(e);
+  for (const e of missingNicknames(p, topic)) err(`team nickname: ${e}`);
 
   // Blitz scores `n`: it must be present on the top 10, follow the ranking, and share one unit across entries.
   for (const e of all) if (e.n !== undefined && !Number.isFinite(e.n)) err(`"${e.name}": n is not a finite number`);
