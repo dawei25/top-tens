@@ -1,25 +1,26 @@
 {
   "id": "world-series-wins",
-  "judgedAt": "2026-10-30",
+  "judgedAt": "2026-11-03",
   "decision": "fix-first",
-  "alsoBlitz": true,
+  "alsoBlitz": false,
   "priority": 6,
-  "scores": { "recognizability": 4, "curve": 3, "fairness": 4, "data": 3, "fun": 3, "blitzDepth": 4 },
-  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
-  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
-  "blitzCasual": { "scored": 20, "named": 20 },
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 3, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 9, "livesLost": 3, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 11 },
+  "blitzCasual": null,
   "difficulty": 3,
   "tags": ["sports", "baseball", "mlb"],
   "audience": "baseball fans",
-  "summary": "A solid, fair list for anyone who knows MLB team names, but the data is from the middle of the 2026 World Series and must be rebuilt once it ends.",
+  "summary": "Correct and current through the Brewers' 2026 title, with a good curve, but most nicknames outside the top 10 are not recognized, so 'cubs' and 'mets' are free and the game says they are not answers. Fix the aliases and it can run as a daily.",
   "reasons": [
-    "Yankees, Red Sox, Dodgers, Cardinals and Giants are gimmes; A's, Reds, Pirates, Tigers and Braves take thought. Cubs at #11 is a good near miss.",
-    "US-centric: easy for American players, much harder for other English speakers.",
-    "Blitz works, since every team scores, but teams with zero titles score too."
+    "Old fixes done: data covers the finished 2026 Series (Brewers beat the Rays 4-1), #10 Braves at 4 vs #11 Cubs at 3 is not a tie, zero-title teams no longer score, and the listed junk aliases are gone.",
+    "Good curve: Yankees, Red Sox, Dodgers, Cardinals and Giants are gimmes, Braves, Tigers, Pirates and the A's take thought, the Reds are the stretch. A fan finds all 10.",
+    "As built the casual finds 9 only because 'cubs' and 'mets' cost nothing. With them costing a life as they should, the same guesses end at 7 found with 5 lives lost, inside the 6-8 band. Famous teams with 2-3 titles (Cubs, Mets, Astros, Phillies, White Sox) burn lives fast."
   ],
   "fixes": [
-    "Rebuild after the 2026 World Series ends: the data is dated 2026-10-30, mid-series. If a 3-title team (Cubs, Orioles, Twins, White Sox) wins, #9-#12 tie at 4 and the topic trips the #10/#11 tie rule.",
-    "Rays, Padres, Rockies and Mariners carry n=0 and score in Blitz; a team with no titles should not score.",
-    "Drop junk aliases: 'Yankees Suck', 'New York Yankees Roster', 'Yankees Roster', 'Dodgers Roster', 'Reds Roster', 'St. Louis Cardinals roster', 'Detroit Tigers roster', 'Pittsburgh Pirates roster', 'Kruk and Kuip', 'Talksox', 'Piratefest', 'Atlanta Braves 1990s pitching rotation', and raw table text like 'Philadelphia / Kansas City / Oakland / Athletics'."
+    "Give every team its nickname as a direct alias. Ranks 11+ only have them for the four zero-title teams that came in from the mlb-teams universe, so 'cubs', 'mets', 'orioles', 'rangers', 'marlins', 'brewers', 'angels', 'nationals', 'diamondbacks', 'd-backs' and 'nats' are NOT RECOGNIZED (free, and the game says they are not answers), including #11 Cubs and the 2026 champion Brewers. 'phillies', 'white sox', 'twins', 'royals', 'guardians', 'blue jays' and the top-10 'cardinals', 'giants', 'tigers', 'pirates', 'reds' only match through a did-you-mean. Merge the universe nickname onto table-matched rows (likely the same gap on other team lists) or add them in scripts/intent.ts.",
+    "Padres, Rays, Rockies and Mariners cost a life with no figure, but the page's by-team table lists each with 0 wins (the Rays are 0-3 in World Series). Show '0' on the miss without making them score in Blitz.",
+    "Drop 'St. Louis Browns' from the Cardinals: it is the famous name of the Orioles' predecessor (they met the Cardinals in the 1944 Series), and typing it offers the Cardinals.",
+    "Drop leftover junk aliases: 'Lonn A. Trost', 'Carlos Ahern', 'Red Sox Pitching Coach', 'Red Sox Hitting Coach', 'Red Sox Bench Coach', 'Red Sox First Base Coach', 'Truck Day', 'Win Dance Repeat', 'Tessie the Green Monster', 'SFG Productions', 'Douglas Danforth', 'Captain jolly roger', 'Boston Braves To Milwaukee'."
   ]
 }
