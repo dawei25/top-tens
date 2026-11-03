@@ -79,14 +79,18 @@ for (const vp of [phone, desktop]) {
     assert.deepEqual(await rating(page), { rating: "-1", reason: "unfair" });
     assert.deepEqual(await pressed(page), ["false", "true"]);
 
-    // "why?" brings the reasons back with the chosen one marked; Escape closes them and stays on the screen.
+    // "why?" brings the reasons back with the chosen one marked (and focused); Escape closes them, gives focus back
+    // to the thumbs down, and stays on the screen.
     await page.getByTestId("rate-why").click();
     await reasons.waitFor();
-    assert.equal(await page.locator('[data-testid="rate-reason"][aria-pressed="true"]').getAttribute("data-reason"), "unfair");
+    const chosen = page.locator('[data-testid="rate-reason"][aria-pressed="true"]');
+    assert.equal(await chosen.getAttribute("data-reason"), "unfair");
+    assert.ok(await chosen.evaluate((el) => el === document.activeElement));
     const at = await page.evaluate(() => location.hash);
     await page.keyboard.press("Escape");
     await reasons.waitFor({ state: "detached" });
     assert.equal(await page.evaluate(() => location.hash), at);
+    assert.ok(await page.getByTestId("rate-down").evaluate((el) => el === document.activeElement));
 
     // The chosen key again takes the rating back.
     await page.getByTestId("rate-down").click();

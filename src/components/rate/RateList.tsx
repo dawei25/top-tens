@@ -62,6 +62,8 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
   const wrap = useRef<HTMLDivElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   const downKey = useRef<HTMLButtonElement>(null);
+  /** Opened from "why?", which goes away as they open: focus moves into them (the chosen reason, or the first). */
+  const focusReasons = useRef(false);
 
   const rate = (rating: -1 | 0 | 1, reason?: RatingReason) => {
     rateList(listId, mode, rating, reason);
@@ -116,6 +118,12 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
     const row = wrap.current?.getBoundingClientRect();
     if (!asking || !el || !row) return;
     el.dataset.down = String(row.top - el.offsetHeight - 8 < 0 && row.bottom + el.offsetHeight + 8 <= innerHeight);
+    if (focusReasons.current) {
+      focusReasons.current = false;
+      (el.querySelector<HTMLElement>('.rate-reason[aria-pressed="true"]') ?? el.querySelector<HTMLElement>(".rate-reason"))?.focus({
+        preventScroll: true,
+      });
+    }
   }, [asking]);
 
   const rating = mine?.rating ?? 0;
@@ -156,7 +164,15 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
       {/* Always laid out, so the keys never shift: the picked reason, or "why?" to give one, after a thumbs down. */}
       <span className="rate-note">
         {rating === -1 && !asking && (
-          <button type="button" className="text-btn rate-why" data-testid="rate-why" onClick={() => setAsking(true)}>
+          <button
+            type="button"
+            className="text-btn rate-why"
+            data-testid="rate-why"
+            onClick={() => {
+              focusReasons.current = true;
+              setAsking(true);
+            }}
+          >
             {mine?.reason ? PICKED[mine.reason] : "why?"}
           </button>
         )}
