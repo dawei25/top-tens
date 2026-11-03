@@ -1,7 +1,8 @@
 // Today's list and Today's Blitz are separate topics: a day's Blitz is the list daily.json names in its `blitz`. The
-// archive shows each date as a pair, its list row and under it its Blitz row (one try each). Random rolls never land
-// on today's list or Blitz, played or not, or on a future day's list or Blitz. The Blitz title card and a miss say what the
-// list is made of (the puzzle's noun). The spoiler hold still guards a Blitz on its day's own list.
+// archive is a table, one row per date: its list and its Blitz side by side, under List and Blitz headers named once
+// (one try each). Random rolls never land on today's list or Blitz, played or not, or on a future day's list or Blitz.
+// The Blitz title card and a miss say what the list is made of (the puzzle's noun). The spoiler hold still guards a
+// Blitz on its day's own list.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, go, hash, puzzle, store, noHScroll, guess } = require("./helpers.cjs");
@@ -62,7 +63,7 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 
-  test(`the archive pairs each day's list with its Blitz (${vp.name})`, async () => {
+  test(`the archive shows each day's list and Blitz side by side (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp, "#archive", SEED, at);
     const listRows = page.getByTestId("archive-row");
     await listRows.first().waitFor();
@@ -70,19 +71,32 @@ for (const vp of VIEWPORTS) {
     const index = await indexOf(page);
     const title = (id) => index.find((m) => m.id === id).title;
 
-    // Two rows per date, newest first: the list, then directly under it that date's Blitz. No old sub-line.
+    // One row per date, newest first: the list's cell, then that date's Blitz cell. No old sub-line.
     const order = await page
       .locator('[data-testid="archive-row"], [data-testid="archive-blitz-row"]')
       .evaluateAll((els) => els.map((e) => `${e.dataset.testid === "archive-row" ? "list" : "blitz"} ${e.dataset.date}`));
     const dates = days.map((e) => e.date).sort().reverse();
     assert.deepEqual(order, dates.flatMap((d) => [`list ${d}`, `blitz ${d}`]));
+    assert.deepEqual(await page.getByTestId("archive-day").evaluateAll((els) => els.map((e) => e.dataset.date)), dates);
     assert.equal(await page.getByTestId("archive-blitz").count(), 0);
     const row = (date) => page.locator(`[data-testid="archive-row"][data-date="${date}"]`);
     const blitzRow = (date) => page.locator(`[data-testid="archive-blitz-row"][data-date="${date}"]`);
-    const [lb, bb] = [await row(DAY).boundingBox(), await blitzRow(DAY).boundingBox()];
-    assert.ok(Math.abs(bb.y - (lb.y + lb.height)) <= 1, "the Blitz row sits right under its list row");
 
-    // Each Blitz row is the schedule's pick, or the list that was played; it opens that date's Blitz.
+    // Two columns, each named once at the top: a day's Blitz sits beside its list, and every cell lines up under
+    // its column's header (phones too).
+    const head = { list: page.getByTestId("archive-col-list"), blitz: page.getByTestId("archive-col-blitz") };
+    assert.equal(await head.list.count(), 1);
+    assert.equal(await head.blitz.count(), 1);
+    const [hl, hb] = [await head.list.boundingBox(), await head.blitz.boundingBox()];
+    const [lb, bb] = [await row(DAY).boundingBox(), await blitzRow(DAY).boundingBox()];
+    assert.ok(Math.abs(bb.y - lb.y) <= 1 && bb.x >= lb.x + lb.width, "the Blitz cell sits beside its list cell");
+    assert.ok(hl.y + hl.height <= lb.y, "the headers sit above the first row");
+    for (const d of dates) {
+      const [l, b] = [await row(d).boundingBox(), await blitzRow(d).boundingBox()];
+      assert.ok(Math.abs(l.x - hl.x) <= 1 && Math.abs(b.x - hb.x) <= 1, `${d}: the cells line up under List and Blitz`);
+    }
+
+    // Each Blitz cell is the schedule's pick, or the list that was played; it opens that date's Blitz.
     for (const e of days) {
       const b = blitzRow(e.date);
       const id = e.date === OLD.date ? OLD.blitz : e.blitz;
@@ -95,7 +109,7 @@ for (const vp of VIEWPORTS) {
     assert.equal(await blitzRow(DAY).getAttribute("data-score"), null);
     assert.ok(await noHScroll(page));
 
-    // An old date's Blitz from its row: one round, locked after, its score on the row.
+    // An old date's Blitz from its cell: one round, locked after, its score on the cell.
     const old = days.find((e) => e.date < DAY && e.date !== OLD.date);
     await blitzRow(old.date).click();
     await page.getByTestId("blitz-clock").waitFor();
@@ -169,7 +183,7 @@ test("free Blitz never lands on today's list or Blitz, or a future day's", async
   await ctx.close();
 });
 
-test("a date with no Blitz shows only its list row", async () => {
+test("a date with no Blitz keeps its Blitz column, empty", async () => {
   const NONE = "2026-10-25";
   const { ctx, page } = await open(browser, VIEWPORTS[0], "#archive", SEED, {
     ...at,
@@ -185,9 +199,20 @@ test("a date with no Blitz shows only its list row", async () => {
       });
     },
   });
-  await page.locator(`[data-testid="archive-row"][data-date="${NONE}"]`).waitFor();
-  assert.equal(await page.locator(`[data-testid="archive-blitz-row"][data-date="${NONE}"]`).count(), 0);
-  assert.equal(await page.locator(`[data-testid="archive-blitz-row"][data-date="${DAY}"]`).count(), 1);
+  const cell = (id, date) => page.locator(`[data-testid="${id}"][data-date="${date}"]`);
+  await cell("archive-row", NONE).waitFor();
+  assert.equal(await cell("archive-blitz-row", NONE).count(), 0);
+  assert.equal(await cell("archive-blitz-row", DAY).count(), 1);
+
+  // Its Blitz cell is empty but holds the column: the same place and width as any Blitz cell, nothing to open, and
+  // its list cell is as wide as any other.
+  const none = cell("archive-blitz-none", NONE);
+  assert.equal(await none.count(), 1);
+  assert.equal(await none.getAttribute("href"), null);
+  const [nb, bb] = [await none.boundingBox(), await cell("archive-blitz-row", DAY).boundingBox()];
+  assert.ok(Math.abs(nb.x - bb.x) <= 1 && Math.abs(nb.width - bb.width) <= 1, "the empty cell sits in the Blitz column");
+  const [nl, dl] = [await cell("archive-row", NONE).boundingBox(), await cell("archive-row", DAY).boundingBox()];
+  assert.ok(Math.abs(nl.x - dl.x) <= 1 && Math.abs(nl.width - dl.width) <= 1, "its list cell lines up with the others");
   await ctx.close();
 });
 
