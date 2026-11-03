@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ListRun } from "../../game/history";
+import { withFirstTries } from "../../game/storage";
 import { SyncConflict, syncSave, type LocalSave, type RemoteSave, type SaveRemote } from "./engine";
 import { sameSave, type SyncSave } from "./merge";
 
@@ -14,7 +15,8 @@ const run = (id: string, startedAt: number): ListRun => ({
   lives: 0,
   hints: 0,
 });
-const withRuns = (...runs: ListRun[]): SyncSave => ({ games: {}, daily: {}, seenHelp: false, listRuns: runs });
+/** A save as the game keeps it (first tries filled in, as loading does). */
+const withRuns = (...runs: ListRun[]): SyncSave => withFirstTries({ games: {}, daily: {}, seenHelp: false, listRuns: runs });
 
 /** A server holding one save with a version, compare-and-swap writes, and hooks to simulate other devices. */
 class FakeServer implements SaveRemote {

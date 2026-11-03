@@ -1,18 +1,20 @@
 import { compareWithPlayers, formatCount, MIN_PLAYERS } from "../../net/crowd";
 import { useListAverages } from "../../net";
 import type { PuzzleMeta } from "../../game/puzzles";
+import { firstListRuns } from "../../game/history";
 import { load } from "../../game/storage";
 import { signed } from "../par";
 import "./account.css";
 
 /**
  * The knowledge page next to real players: for each list you've finished that at least MIN_PLAYERS players have
- * finished too, your average against theirs (one score per player: their first game). Nothing until there's one.
+ * finished too, your first try against their average (one score per player: their first game, as your stats count
+ * yours). Nothing until there's one.
  */
 export default function CrowdPanel({ index }: { index: PuzzleMeta[] }) {
   const averages = useListAverages();
   if (!averages) return null;
-  const rows = compareWithPlayers(load().listRuns ?? [], averages);
+  const rows = compareWithPlayers(firstListRuns(load()), averages);
   if (!rows.length) return null;
 
   const games = rows.reduce((a, r) => a + r.games, 0);
@@ -47,7 +49,7 @@ export default function CrowdPanel({ index }: { index: PuzzleMeta[] }) {
               <span className="know-name">
                 {title(r.id)}
                 <span className="know-sub">
-                  {r.games} game{r.games === 1 ? "" : "s"} · you {r.you.toFixed(1)} · players {r.players.toFixed(1)} ({formatCount(r.n)})
+                  you {r.you} · players avg {r.players.toFixed(1)} ({formatCount(r.n)})
                 </span>
               </span>
               <span className="know-bar" aria-hidden="true">

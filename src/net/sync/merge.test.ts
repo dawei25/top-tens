@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BLITZ_SECONDS, MAX_BLITZ_RUNS, type BlitzRun, type BlitzState } from "../../game/blitz";
 import { MAX_LIST_RUNS, type ListRun } from "../../game/history";
 import type { GameState } from "../../game/state";
+import { stats, withFirstTries } from "../../game/storage";
 import { mergeSaves, pickGame, pruneBefore, retireLive, sameSave, sanitize, stableJson, type SyncSave } from "./merge";
 
 const T = Date.UTC(2026, 10, 1, 12); // 2026-11-01 12:00 UTC
@@ -41,6 +42,8 @@ const live = (puzzleId: string, startedAt: number, hits: number): BlitzState => 
 });
 const empty = (): SyncSave => ({ games: {}, daily: {}, seenHelp: false });
 const save = (s: Partial<SyncSave>): SyncSave => ({ ...empty(), ...s });
+/** A save as the game loads it: first tries filled in from its history. */
+const loaded = (s: Partial<SyncSave>): SyncSave => withFirstTries(save(s));
 
 describe("mergeSaves: basics", () => {
   it("merges two empty saves into an empty save", () => {
@@ -48,7 +51,7 @@ describe("mergeSaves: basics", () => {
   });
 
   it("takes a side as it is when the other is empty", () => {
-    const a = save({
+    const a = loaded({
       games: { mountains: game("mountains", T) },
       daily: { "2026-11-01": "mountains" },
       seenHelp: true,
@@ -56,12 +59,13 @@ describe("mergeSaves: basics", () => {
       blitzRuns: { airports: [blitzRun(T, 300)] },
       blitzBest: { airports: 300 },
     });
+    expect(a.firstTries).toEqual({ list: { mountains: listRun("mountains", T) }, blitz: { airports: blitzRun(T, 300) } });
     expect(mergeSaves(a, empty(), NOW)).toEqual(a);
     expect(mergeSaves(empty(), a, NOW)).toEqual(a);
   });
 
   it("reads garbage from the server as nothing, and drops malformed entries", () => {
-    const a = save({ listRuns: [listRun("mountains", T)] });
+    const a = loaded({ listRuns: [listRun("mountains", T)] });
     for (const bad of [null, undefined, "x", 42, [], { games: "no", daily: 3, listRuns: {} }]) {
       expect(mergeSaves(a, bad, NOW)).toEqual(a);
     }
@@ -250,6 +254,73 @@ describe("mergeSaves: games and dailies", () => {
   });
 });
 
+describe("mergeSaves: first tries (what stats count)", () => {
+  it("keeps each list's earliest first try, whichever device has it", () => {
+    const first = listRun("x", T, 3);
+    const later = listRun("x", T + 60 * MIN, 9);
+    const a = loaded({ listRuns: [first] });
+    const b = loaded({ listRuns: [later] });
+    for (const m of [mergeSaves(a, b, NOW), mergeSaves(b, a, NOW)]) {
+      expect(m.firstTries!.list).toEqual({ x: first });
+      // Stats count the first try only: playing the list again on the other device didn't lift them.
+      expect(stats(m)).toMatchObject({ played: 1, avgFound: 3 });
+    }
+  });
+
+  it("never replaces a first try with a later one, even once the history has dropped the first", () => {
+    // The history is capped; the first try outlives it.
+    const first = listRun("x", T - 600 * MIN, 1);
+    const a = save({ listRuns: [listRun("x", T + 5 * MIN, 10)], firstTries: { list: { x: first } } });
+    const b = loaded({ listRuns: [listRun("x", T, 7)] });
+    expect(mergeSaves(a, b, NOW).firstTries!.list).toEqual({ x: first });
+    expect(mergeSaves(b, a, NOW).firstTries!.list).toEqual({ x: first });
+  });
+
+  it("counts the oldest game of a copy without first tries (an older build)", () => {
+    const old = save({ listRuns: [listRun("x", T - 60 * MIN, 2), listRun("x", T - 30 * MIN, 8)], games: { y: game("y", T - 90 * MIN, "won") } });
+    const mine = loaded({ listRuns: [listRun("x", T, 5)] });
+    const m = mergeSaves(mine, old, NOW);
+    expect(m.firstTries!.list!.x).toEqual(listRun("x", T - 60 * MIN, 2));
+    expect(m.firstTries!.list!.y).toMatchObject({ id: "y", startedAt: T - 90 * MIN, status: "won" });
+  });
+
+  it("keeps each list's first Blitz round, the fuller copy of the same round", () => {
+    const first = blitzRun(T, 100);
+    const a = loaded({ blitzRuns: { x: [first] } });
+    const b = loaded({ blitzRuns: { x: [blitzRun(T + 10 * MIN, 900)], y: [blitzRun(T, 50)] } });
+    expect(mergeSaves(a, b, NOW).firstTries!.blitz).toEqual({ x: first, y: blitzRun(T, 50) });
+    expect(mergeSaves(b, a, NOW).firstTries!.blitz).toEqual({ x: first, y: blitzRun(T, 50) });
+    const short = blitzRun(T, 120, 2);
+    const full = blitzRun(T, 160, 4);
+    expect(mergeSaves(loaded({ blitzRuns: { x: [short] } }), loaded({ blitzRuns: { x: [full] } }), NOW).firstTries!.blitz).toEqual({ x: full });
+  });
+
+  it("keeps the first finish when the same first game finished on both devices, as the history does", () => {
+    const early = listRun("x", T, 3, T + 5 * MIN);
+    const late = listRun("x", T, 8, T + 30 * MIN);
+    const m = mergeSaves(loaded({ listRuns: [late] }), loaded({ listRuns: [early] }), NOW);
+    expect(m.firstTries!.list).toEqual({ x: early });
+    expect(m.listRuns).toEqual([early]);
+  });
+
+  it("files a retired round as a list's first Blitz round when it has none", () => {
+    const old = live("x", NOW - 10 * MIN, 3);
+    const m = mergeSaves(save({ blitzLive: { x: live("x", NOW - 20_000, 1) } }), save({ blitzLive: { x: old } }), NOW);
+    expect(m.firstTries!.blitz!.x.startedAt).toBe(old.startedAt);
+    expect(sameSave(mergeSaves(m, m, NOW), m)).toBe(true);
+  });
+
+  it("drops malformed first tries and fills them in from the history", () => {
+    const remote = {
+      ...empty(),
+      listRuns: [listRun("x", T)],
+      firstTries: { list: { x: listRun("other", T - MIN), y: { id: "y" } }, blitz: { z: { score: "lots" } } },
+    };
+    const m = mergeSaves(empty(), remote, NOW);
+    expect(m.firstTries).toEqual({ list: { x: listRun("x", T) }, blitz: {} });
+  });
+});
+
 describe("mergeSaves: a reset made while signed in", () => {
   const before = T - 60 * MIN;
   const after = T + 60 * MIN;
@@ -263,6 +334,7 @@ describe("mergeSaves: a reset made while signed in", () => {
     blitzDaily: { "2026-10-31": { id: "x", score: 900, answers: 9, startedAt: before }, old: { id: "y", score: 1, answers: 1 } },
     dailyGames: { "2026-10-31": game("a", before), "2026-11-02": game("q", after) },
     blitzLive: { z: live("z", before, 1) },
+    firstTries: { list: { a: listRun("a", before) }, blitz: { x: blitzRun(before, 900), y: blitzRun(before, 50) } },
   });
 
   it("drops everything from before it, on whichever side", () => {
@@ -277,6 +349,10 @@ describe("mergeSaves: a reset made while signed in", () => {
       expect(m.dailyGames).toEqual({ "2026-11-02": game("q", after) });
       expect(m.blitzLive).toEqual({});
       expect(m.seenHelp).toBe(true);
+      // First tries from before the reset go too; a list played after it starts counting again.
+      expect(m.firstTries!.list!.b).toEqual(listRun("b", after));
+      expect(Object.keys(m.firstTries!.list!).sort()).toEqual(["b", "q"]);
+      expect(m.firstTries!.blitz).toEqual({ x: blitzRun(after, 100) });
     }
   });
 
@@ -341,7 +417,13 @@ function randomSave(rand: () => number): SyncSave {
       s.daily[d] = s.dailyGames[d].puzzleId;
     }
   }
-  return mergeSaves(s, empty(), NOW); // normalized: sorted, capped
+  // Some first tries older than anything left in the history (it's capped; they aren't).
+  s.firstTries = { list: {}, blitz: {} };
+  for (const id of ids) {
+    if (rand() < 0.3) s.firstTries.list![id] = listRun(id, T - Math.floor(1 + rand() * 30) * MIN, Math.floor(rand() * 11));
+    if (rand() < 0.3) s.firstTries.blitz![id] = blitzRun(T - Math.floor(1 + rand() * 30) * MIN, 10 + Math.floor(rand() * 900));
+  }
+  return mergeSaves(s, empty(), NOW); // normalized: sorted, capped, first tries filled in
 }
 
 describe("mergeSaves: properties", () => {
@@ -362,6 +444,20 @@ describe("mergeSaves: properties", () => {
       for (const [id, best] of Object.entries({ ...a.blitzBest, ...b.blitzBest })) expect(m.blitzBest![id]).toBeGreaterThanOrEqual(best);
       for (const id of Object.keys({ ...a.games, ...b.games })) expect(m.games[id]).toBeDefined();
       expect(m.seenHelp).toBe(a.seenHelp || b.seenHelp);
+    }
+  });
+
+  it("keeps each list's earliest first try, per mode, from either side", () => {
+    for (const [a, b] of pairs) {
+      const m = mergeSaves(a, b, NOW);
+      for (const mode of ["list", "blitz"] as const) {
+        const ids = new Set([...Object.keys(a.firstTries?.[mode] ?? {}), ...Object.keys(b.firstTries?.[mode] ?? {})]);
+        expect(new Set(Object.keys(m.firstTries?.[mode] ?? {}))).toEqual(ids);
+        for (const id of ids) {
+          const starts = [a.firstTries?.[mode]?.[id]?.startedAt, b.firstTries?.[mode]?.[id]?.startedAt].filter((t) => t !== undefined);
+          expect(m.firstTries![mode]![id].startedAt).toBe(Math.min(...starts));
+        }
+      }
     }
   });
 

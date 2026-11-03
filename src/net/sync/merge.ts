@@ -2,7 +2,7 @@ import { BLITZ_SECONDS, MAX_BLITZ_RUNS, blitzScore, type BlitzRun, type BlitzSta
 import { localDate } from "../../game/daily";
 import { MAX_LIST_RUNS, type ListRun } from "../../game/history";
 import type { GameState } from "../../game/state";
-import type { DailyBlitzResult, Saved } from "../../game/storage";
+import { withFirstTries, type DailyBlitzResult, type Saved } from "../../game/storage";
 
 /**
  * Merging two copies of the save (this device's `top-tens:v1` and the account's copy on the server) into one that
@@ -10,10 +10,15 @@ import type { DailyBlitzResult, Saved } from "../../game/storage";
  *
  * The rules, field by field:
  * - listRuns, blitzRuns: the union, one run per (list, startedAt), newest first, capped as the game caps them.
+ * - firstTries (what stats count, per list and mode): each side first fills in what its own history implies, as
+ *   loading a save does (a copy from an older build may not have them yet); then per list the earliest start wins.
+ *   An existing first try is never replaced by a later one, so playing a list again on another device can't change
+ *   its stats. The same game on both sides keeps the copy its history keeps (first finish; the fuller round).
  * - games (one per list): the same game (same startedAt) keeps its finished state over an in-progress one, and the
  *   further-along of two in-progress ones. Different games: the newer one; an older finished one is already in
  *   listRuns, so nothing is lost.
- * - dailyGames, blitzDaily: one try per date, so the first finish of that date wins on both devices.
+ * - dailyGames, blitzDaily: one try per date (locked), so the first try of that date wins on both devices: the first
+ *   finished daily game, the Blitz round that started first.
  * - daily (streak days): the union. seenHelp: true if either side has it. blitzBest: the max.
  * - blitzLive (a round in progress per list): the newer round; the other one, if its time is up, becomes a run.
  * - resetAt: a reset made while signed in. Anything older than the newest reset is dropped from both sides, so a
@@ -31,6 +36,7 @@ export interface SyncSave extends Saved {
 }
 
 type Rec<T> = Record<string, T>;
+type FirstTries = NonNullable<Saved["firstTries"]>;
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === "object" && x !== null && !Array.isArray(x);
 const isNum = (x: unknown): x is number => typeof x === "number" && Number.isFinite(x);
@@ -83,7 +89,16 @@ export function sanitize(x: unknown): SyncSave {
   setOpt(out, "dailyGames", isObj(s.dailyGames) ? filterRec(s.dailyGames, isGame) : undefined);
   setOpt(out, "listRuns", Array.isArray(s.listRuns) ? s.listRuns.filter(isListRun) : undefined);
   setOpt(out, "blitzLive", isObj(s.blitzLive) ? filterRec(s.blitzLive, isBlitzState) : undefined);
+  setOpt(out, "firstTries", isObj(s.firstTries) ? sanitizeFirstTries(s.firstTries) : undefined);
   setOpt(out, "resetAt", isNum(s.resetAt) && s.resetAt > 0 ? s.resetAt : undefined);
+  return out;
+}
+
+function sanitizeFirstTries(f: Record<string, unknown>): FirstTries {
+  const out: FirstTries = {};
+  // A list's first try is filed under its own id.
+  if (isObj(f.list)) out.list = filterRec(f.list, (v, k): v is ListRun => isListRun(v) && v.id === k);
+  if (isObj(f.blitz)) out.blitz = filterRec(f.blitz, isBlitzRun);
   return out;
 }
 
@@ -142,6 +157,21 @@ function pickRun(x: BlitzRun, y: BlitzRun): BlitzRun {
 /** Two copies of the same list game in the history: the first finish. */
 function pickListRun(x: ListRun, y: ListRun): ListRun {
   return smaller(x, y, (r) => r.finishedAt);
+}
+
+/** A list's first try on each side: the one that started first; the same game on both, as `same` keeps it. */
+function earliest<T extends { startedAt: number }>(same: (x: T, y: T) => T) {
+  return (x: T, y: T): T => (x.startedAt === y.startedAt ? same(x, y) : y.startedAt < x.startedAt ? y : x);
+}
+
+function mergeFirstTries(a: FirstTries | undefined, b: FirstTries | undefined): FirstTries | undefined {
+  if (!a && !b) return undefined;
+  const out: FirstTries = {};
+  const list = mergeOptRec(a?.list, b?.list, earliest(pickListRun));
+  const blitz = mergeOptRec(a?.blitz, b?.blitz, earliest(pickRun));
+  if (list) out.list = list;
+  if (blitz) out.blitz = blitz;
+  return out;
 }
 
 function mergeRunList(a: BlitzRun[] = [], b: BlitzRun[] = []): BlitzRun[] {
@@ -203,7 +233,19 @@ export function pruneBefore(save: SyncSave, t: number): SyncSave {
   }
   if (save.blitzDaily) out.blitzDaily = filterRec(save.blitzDaily, (d): d is DailyBlitzResult => isDailyBlitz(d) && keep(d.startedAt));
   if (save.blitzLive) out.blitzLive = filterRec(save.blitzLive, (l): l is BlitzState => isBlitzState(l) && keep(l.startedAt));
+  if (save.firstTries) {
+    // A list played again after the reset gets its new first try from what's left (see mergeSaves).
+    const f: FirstTries = {};
+    if (save.firstTries.list) f.list = filterRec(save.firstTries.list, (r): r is ListRun => isListRun(r) && keep(r.startedAt));
+    if (save.firstTries.blitz) f.blitz = filterRec(save.firstTries.blitz, (r): r is BlitzRun => isBlitzRun(r) && keep(r.startedAt));
+    out.firstTries = f;
+  }
   return out;
+}
+
+/** The first tries a side's own history implies, filled in as loading a save does (existing ones stay). */
+function withOwnFirstTries(save: SyncSave): SyncSave {
+  return withFirstTries(save) as SyncSave;
 }
 
 /**
@@ -218,6 +260,8 @@ export function mergeSaves(local: unknown, remote: unknown, now: number): SyncSa
     a = pruneBefore(a, resetAt);
     b = pruneBefore(b, resetAt);
   }
+  a = withOwnFirstTries(a);
+  b = withOwnFirstTries(b);
 
   const out: SyncSave = {
     ...a,
@@ -273,8 +317,10 @@ export function mergeSaves(local: unknown, remote: unknown, now: number): SyncSa
   setOpt(out, "blitzBest", best);
   setOpt(out, "blitzRuns", runs);
   setOpt(out, "blitzLive", live);
+  setOpt(out, "firstTries", mergeFirstTries(a.firstTries, b.firstTries));
   setOpt(out, "resetAt", resetAt || undefined);
-  return out;
+  // A round retired above may be a list's first Blitz round: filled in like any other (existing first tries stay).
+  return withOwnFirstTries(out);
 }
 
 /** JSON with sorted keys, so two saves with the same content compare equal whatever order they were built in. */
