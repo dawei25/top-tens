@@ -82,6 +82,7 @@ stronger.
 | "Play again" on a random list read as replaying the same list | a label that doesn't say what happens | "Roll again" (primary) on free-play results; Play again only in Past runs; UX.md principle 1 |
 | A random list rolled today's Blitz topic and showed its answers | random play overlapping the dailies | `rollHoldouts`: today's pair and every scheduled day held from random play; daily.test.ts and e2e |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
+| The Google client ID was pasted into Vercel with a trailing newline | env values with stray whitespace | `src/net/config.ts` trims every public env value and ignores a client ID that isn't one; index.test.ts, and the e2e Google build uses a client ID ending in "\n" |
 
 ## What good looks like
 
