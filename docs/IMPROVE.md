@@ -70,6 +70,12 @@ stronger.
 | English Pointer merged into German Shorthaired Pointer | a junk redirect claiming another entry by its article | build.ts: junk aliases never match a namesake by article or link |
 | "season 3" gave away a top-10 season; "music", "band" offered tours | words that name no entry alone | "season", "part", "music", "band" are category words; the subject with a small number names nothing; match.test.ts |
 | "john rahm" wasn't Jon Rahm; "planes" offered Our Planet; "doodle" Poodle | slips judged on the wrong part, or onto obscure names | a slip beside a shared word counts; obscure pool names (no rank, no figure) need the first and last letters; a plain word's slip keeps its first letter; simulated typos of 2,088 answers checked each change |
+| "cubs", "mets", "brewers" not recognized on World Series titles ("cowboys" on Super Bowl wins) | universe nicknames lost when the team is a table row | build.ts gives a team universe member's names to the row it merges with; validate.ts errors when a team's nickname doesn't reach it |
+| Padres, Rays (0 titles) showed no figure | zero counts dropped as "no figure" | rows counting zero show "0", never scoring in Blitz |
+| "golden doodle", "aussie doodle", "monster menendez" read as answers | famous non-answers in their usual spellings | `knownNames` in topics.ts; a known name matches however it's spaced; builders replay famous non-answers as people spell them |
+| "charli xcx" offered Charli D'Amelio | part of a name followed by someone else's | `leadingName` skips an entry whose name lacks the rest of the guess; match.test.ts |
+| "steel" offered Steel Pier because a film list ranks Man of Steel | plain words decided across the bank | the matcher decides per list: a word is plain unless a notable entry on this list carries it |
+| "squid game second season" read as Season 1 | ordinals and instalment words | ordinals count as digits; "season", "part", "of" set aside around a number |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
 
 ## What good looks like

@@ -25,7 +25,10 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       with a space, or keep hyphenated forms whole.
 
 - [ ] **Topic ideas parked:** most valuable sports teams (Forbes 2025 ties at #10/#11, Bears and Yankees at $8.2B;
-      the 2024 table has no tie but is a year older). Retry when Wikipedia has the 2026 list.
+      the 2024 table has no tie but is a year older). Retry when Wikipedia has the 2026 list. Best-selling book
+      series (five series tie at #10 with 200 million each).
+
+- [ ] **Junk alias:** "How Bout Dem Cowboys" on the Dallas Cowboys (super-bowl-wins).
 
 - [ ] **Cycle 4 pipeline changes not yet on every list** (apply at each list's next rebuild): "Science in Aotearoa"
       in the shared country junk list (13 country lists); infobox values never replace a stat from a table (lists

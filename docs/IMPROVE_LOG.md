@@ -2,6 +2,24 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-03, cycle 6
+
+- Judged: netflix-seasons (daily list p7: the casual finds 8; leans easy now that only 2 non-top-10 seasons cost a
+  life), dog-breeds (daily list p7: the casual finds 8), tiktok-accounts (free play, Blitz-ready: the casual finds 5),
+  world-series-wins (fix-first p6: ranked teams' nicknames weren't recognized; fixed in the pipeline, re-judge next).
+  Daily bank: 11 approved lists unscheduled; scheduled through Nov 12, no top-up.
+- Matcher: plain words decided per list (a word is plain unless a notable entry on this list carries it; the
+  lexicon now lists 7,677 such words); known names match however they're spaced ("golden doodle"); part of a name
+  followed by something not in it is someone else ("charli xcx", "monster menendez", "stranger things final
+  season"); ordinals and instalment words ("squid game second season"); "story" a category word.
+- Data: team universe nicknames reach the table rows they merge with (World Series and Super Bowl lists; validate.ts
+  check); zero counts show "0"; `knownNames` for usual spellings of famous non-answers (crossbreeds, Monster
+  seasons); brand-account junk shared across the social lists; Lisa and Lena's 2017 figure; French Poodle.
+- Leak rate: 1.4% before this cycle; re-measure pending.
+- New topics: pixar-films ("Highest-grossing Pixar films"; casual 6, Blitz 19/20; every Pixar feature with its
+  gross, other studios' films free). Parked: best-selling book series (five-way tie at #10).
+- Next: judge pixar-films and world-series-wins (fixed); oldest Oct 30 verdicts (us-metros, empires, museums).
+
 ## 2026-11-03, cycle 5
 
 - Judged: concert-tours (daily list p9, also Blitz: the casual finds 7), athletes-earnings (daily list p7: the casual
