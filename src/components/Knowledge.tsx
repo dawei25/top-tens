@@ -3,7 +3,7 @@ import { firstListRuns } from "../game/history";
 import type { ParFile } from "../game/par";
 import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
-import { Est, signed, usePar } from "./par";
+import { signed, usePar } from "./par";
 import { ScreenHead } from "./pixel";
 
 interface Props {
@@ -17,8 +17,9 @@ interface Props {
 interface Group {
   name: string;
   games: number;
+  /** The player's own average score. */
   avg: number;
-  /** Average score minus average par, over the games whose list has a par. */
+  /** The player's score minus the list's players' average (its par), averaged over the games whose list has one. */
   vsPar: number;
 }
 
@@ -70,8 +71,8 @@ function knowledge(index: PuzzleMeta[], par: ParFile) {
 }
 
 /**
- * One row: name and games, a bar out from the par line (right: over par, left: under), the number. With no rows yet,
- * one placeholder row says what will show there.
+ * One row: name, games and your average, a bar out from the players' average line (right: above it, left: below),
+ * the number. With no rows yet, one placeholder row says what will show there.
  */
 function Bars({ title, rows, kind, scale, empty }: { title: string; rows: Group[]; kind: string; scale: number; empty: string }) {
   return (
@@ -81,22 +82,23 @@ function Bars({ title, rows, kind, scale, empty }: { title: string; rows: Group[
           {title}
         </h2>
         <span className="know-axis" aria-hidden="true">
-          <span>under</span>
-          <span>par</span>
-          <span>over</span>
+          <span>below</span>
+          <span>avg</span>
+          <span>above</span>
         </span>
       </div>
       <ol>
         {rows.map((g) => {
-          // Twelve steps each side of par; at least one when it isn't exactly at par.
+          // Twelve steps each side of the average; at least one when it isn't exactly on it.
           const steps = Math.round((Math.abs(g.vsPar) / scale) * 12);
           const w = `${((g.vsPar === 0 ? 0 : Math.max(1, steps)) * 50) / 12}%`;
           return (
             <li key={g.name} className="know-row" data-testid={`know-${kind}`} data-name={g.name} data-vs-par={g.vsPar.toFixed(1)}>
               <span className="know-name">
                 {g.name}
+                {/* "your avg": the bare "avg" on this page is the players' average. */}
                 <span className="know-sub">
-                  {g.games} game{g.games === 1 ? "" : "s"} · avg {g.avg.toFixed(1)}
+                  {g.games} game{g.games === 1 ? "" : "s"} · your avg {g.avg.toFixed(1)}
                 </span>
               </span>
               <span className="know-bar" aria-hidden="true">
@@ -120,9 +122,15 @@ function Bars({ title, rows, kind, scale, empty }: { title: string; rows: Group[
   );
 }
 
+/** The overall distance from the players' average, read out in words ("+0.5 vs avg" on screen). */
+function vsAvgLabel(v: number): string {
+  const n = Math.abs(v).toFixed(1);
+  return v > 0.05 ? `${n} above the average per game` : v < -0.05 ? `${n} below the average per game` : "level with the average";
+}
+
 /**
- * "Your knowledge" (Home's Stats key): how your finished list games compare with par, overall, by category and by
- * topic. Before the first game the same sections show, with placeholders.
+ * "Your knowledge" (Home's Stats key): how your finished list games compare with the players' average, overall, by
+ * category and by topic. Before the first game the same sections show, with placeholders.
  */
 export function Knowledge({ index, entry, onBack, onHome }: Props) {
   const par = usePar();
@@ -139,15 +147,15 @@ export function Knowledge({ index, entry, onBack, onHome }: Props) {
 
       <section data-glass className="panel prompt know-top">
         <h1>Your knowledge</h1>
-        <p className="caption">your list games against par: what a typical player gets on each list.</p>
+        <p className="caption">your list games against the players' average on each list.</p>
         {k && !k.overall && (
           <div className="know-overall know-none" data-testid="knowledge-empty">
-            <p className="know-headline" aria-label="no games against par yet">
+            <p className="know-headline" aria-label="no games against the average yet">
               <span className="know-big none" aria-hidden="true">
                 --
               </span>
               <span className="know-big-of" aria-hidden="true">
-                vs par
+                vs avg
               </span>
             </p>
             <dl className="know-stats">
@@ -156,11 +164,11 @@ export function Knowledge({ index, entry, onBack, onHome }: Props) {
                 <dd>0</dd>
               </div>
               <div>
-                <dt>avg / 10</dt>
+                <dt>your avg / 10</dt>
                 <dd>--</dd>
               </div>
             </dl>
-            <p className="know-empty-line">play a list to see how you do against par.</p>
+            <p className="know-empty-line">play a list to see how you do against the average.</p>
             {dailyOpen && (
               <a className="key key-pink key-sm" href={`#daily-${entry.date}`}>
                 Today's list
@@ -170,13 +178,11 @@ export function Knowledge({ index, entry, onBack, onHome }: Props) {
         )}
         {k?.overall && (
           <div className="know-overall">
-            <p className="know-headline" data-testid="vs-par" aria-label={`${signed(k.overall.vsPar, 1)} vs par on average`}>
+            <p className="know-headline" data-testid="vs-par" aria-label={vsAvgLabel(k.overall.vsPar)}>
               <span className={`know-big ${k.overall.vsPar > 0.05 ? "over" : k.overall.vsPar < -0.05 ? "under" : ""}`}>
                 {signed(k.overall.vsPar, 1)}
               </span>
-              <span className="know-big-of">
-                {k.overall.vsPar > 0.05 ? "over par" : k.overall.vsPar < -0.05 ? "under par" : "at par"}
-              </span>
+              <span className="know-big-of">vs avg</span>
             </p>
             <dl className="know-stats">
               <div>
@@ -184,15 +190,11 @@ export function Knowledge({ index, entry, onBack, onHome }: Props) {
                 <dd>{k.overall.games}</dd>
               </div>
               <div>
-                <dt>avg / 10</dt>
+                <dt>your avg / 10</dt>
                 <dd>{k.overall.avg.toFixed(1)}</dd>
               </div>
             </dl>
-            {k.estimated && (
-              <p className="par-line know-est">
-                par <Est />
-              </p>
-            )}
+            {k.estimated && <p className="know-est">averages are estimated until enough people have played.</p>}
           </div>
         )}
       </section>

@@ -2498,13 +2498,7 @@ a.arch-cell:active .arch-name {
   right: max(var(--gutter), env(safe-area-inset-right));
 }
 
-/* ---------- Par ---------- */
-/* The title card's par: quiet, next to the found counter. */
-.count-wrap {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
+/* ---------- Players' average (par.json) ---------- */
 /*
  * The title card's right end: the score, then PLAY BLITZ. It takes the room the category leaves; when both don't
  * fit there (a long category, a narrow phone), the key wraps under the score, still on the right.
@@ -2517,14 +2511,9 @@ a.arch-cell:active .arch-name {
   align-items: baseline;
   gap: 6px 12px;
 }
-.count-par {
-  font-size: 16px;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-  white-space: nowrap;
-}
 
-/* The results panel: par and a pixel histogram of how players score, then where this score stands. */
+/* The results panel: the players' average and a pixel histogram of how players score, then where this score
+   stands. Only here: the game's header shows the score alone. */
 .par-block {
   display: flex;
   flex-direction: column;
@@ -2534,11 +2523,12 @@ a.arch-cell:active .arch-name {
   padding: 10px 0 2px;
   border-top: 1px dashed var(--hairline);
 }
+/* "PLAYERS AVG" keeps to one line beside the histogram down to a 360px phone (the gap is only the minimum). */
 .par-row {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 .par-stat {
   display: flex;
@@ -2578,7 +2568,7 @@ a.arch-cell:active .arch-name {
   background: var(--pink);
   box-shadow: 0 0 8px var(--pink-glow);
 }
-/* Par: a gold pixel caret under its bar. */
+/* The players' average: a gold pixel caret under its bar. */
 .histo-col[data-par]::after {
   content: "";
   position: absolute;
@@ -2601,29 +2591,14 @@ a.arch-cell:active .arch-name {
   letter-spacing: 0.06em;
   color: var(--text);
 }
-.est {
-  min-height: 0;
-  padding: 0 2px;
-  border: 0;
-  background: none;
+/* "(estimated)": plain words, quieter than the line it qualifies, wrapping as one piece. */
+.par-est {
   font-size: 16px;
-  letter-spacing: 0.08em;
   color: var(--muted);
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
-  cursor: help;
-}
-.est:hover {
-  color: var(--text);
-}
-.est-note {
-  display: block;
-  font-size: 16px;
-  letter-spacing: 0.06em;
-  color: var(--muted);
+  white-space: nowrap;
 }
 
-/* A label that explains itself (days in a row): dotted like "est.", hover for the note, tap to read it inline. */
+/* A label that explains itself (days in a row): dotted, hover for the note, tap to read it inline. */
 .tip {
   margin: 0;
   padding: 0;
@@ -2647,7 +2622,7 @@ a.arch-cell:active .arch-name {
   margin-top: 10px;
 }
 
-/* Past runs: the classic result's distance from par, under it. */
+/* Past runs: the classic result's distance from the players' average ("+2 vs avg"), under it. */
 .vs-par {
   display: block;
   font-size: 16px;
@@ -2704,8 +2679,11 @@ a.arch-cell:active .arch-name {
   line-height: 1;
   color: var(--cyan);
 }
+/* "averages are estimated ...": a line of its own under the numbers. */
 .know-est {
+  flex-basis: 100%;
   font-size: 16px;
+  letter-spacing: 0.06em;
   color: var(--muted);
 }
 /* Before the first game: the same sections, their numbers blank and faint, and a line saying what will show. */
@@ -2781,7 +2759,7 @@ a.arch-cell:active .arch-name {
   letter-spacing: 0.06em;
   color: var(--muted);
 }
-/* The bar grows out from the par line in the middle: right for over par, left for under. */
+/* The bar grows out from the players' average line in the middle: right for above it, left for below. */
 .know-bar {
   position: relative;
   height: 16px;

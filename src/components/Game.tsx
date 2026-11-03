@@ -39,8 +39,13 @@ interface Props {
   lexicon?: Lexicon;
   onBack: () => void;
   onHome: () => void;
-  /** A fresh random list: Play again on a random list, Random list on a finished daily. */
+  /** A fresh random list: Roll again on a random list, Random list on a finished daily. */
   onRoll: () => void;
+  /**
+   * Play again on a past run (a finished game opened again, say from Past runs): a fresh free game on this same list.
+   * Missing while the list is held (today's list or Blitz, or a future day's).
+   */
+  onReplay?: () => void;
   /** Today's Blitz, while it's unplayed (a finished daily offers it). */
   onDailyBlitz?: () => void;
   /**
@@ -92,7 +97,7 @@ function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
   }
 }
 
-export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, onDailyBlitz, todaysBlitz }: Props) {
+export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, onReplay, onDailyBlitz, todaysBlitz }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -322,6 +327,10 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
       sv.games[id] = game;
       return blitzAvailable(puzzle, schedule, today, sv);
     })();
+  // A past run: a finished game opened again (from Past runs, a link, a reload), not one that just ended here. Its
+  // main action is Play again on this same list; a held list has a quiet line instead.
+  const pastRun = over && !endedHere;
+  const replayKey = pastRun && !!onReplay;
 
   const missChips = misses.length > 0 && (
     <section className="misses" aria-label="Wrong guesses" data-glass>
@@ -359,17 +368,11 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-            {/* The score, then the list's Blitz key; on a narrow card the key drops under the score. */}
+            {/* The score, then the list's Blitz key; on a narrow card the key drops under the score. The players'
+                average waits for the results, where it says how you did. */}
             <span className="prompt-end">
-              <span className="count-wrap">
-                <span className="count" aria-label={`${game.found.length} of 10 found`}>
-                  <b>{game.found.length}</b>/10
-                </span>
-                {par && (
-                  <span className="count-par" data-testid="title-par" title={par.estimated ? "par: what a typical player gets (estimated)" : "par: what a typical player gets"}>
-                    par {par.par}
-                  </span>
-                )}
+              <span className="count" aria-label={`${game.found.length} of 10 found`}>
+                <b>{game.found.length}</b>/10
               </span>
               {blitzOpen && !over && (
                 <a className="key key-xs key-blitz-sm" data-testid="title-blitz" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
@@ -639,10 +642,15 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 </div>
               )}
               <div className="results-actions">
-                <button ref={shareRef} className="key key-pink" onClick={share}>
+                {replayKey && (
+                  <button className="key key-pink" data-testid="replay" onClick={onReplay}>
+                    Play again
+                  </button>
+                )}
+                <button ref={shareRef} className={replayKey ? "key" : "key key-pink"} onClick={share}>
                   {copied ? "Copied" : "Share"}
                 </button>
-                {/* A daily is one try: no Play again, just somewhere else to go. Today's Blitz list offers that round. */}
+                {/* A daily is one try: no replay, just somewhere else to go. Today's Blitz list offers that round. */}
                 {(daily || heldBlitz) && onDailyBlitz && (
                   <button className="key key-blitz" data-testid="results-daily-blitz" onClick={onDailyBlitz}>
                     Today's Blitz
@@ -659,11 +667,17 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     Random list
                   </button>
                 ) : (
+                  // Free play: a new random list, never this one again (so not "Play again").
                   <button className="key" data-testid="play-again" onClick={onRoll}>
-                    Play again
+                    Roll again
                   </button>
                 )}
               </div>
+              {pastRun && !onReplay && (
+                <p className="caption" data-testid="replay-held">
+                  back in free play after its day.
+                </p>
+              )}
               <p className="source">
                 {puzzle.metric && <>ranked by {puzzle.metric.toLowerCase()}. </>}
                 source:{" "}

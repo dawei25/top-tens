@@ -1,4 +1,4 @@
-// Today's Blitz: one round. It counts, there is no Play again, reopening shows that round (locked), home shows it
+// Today's Blitz: one round. It counts, there is no Roll again, reopening shows that round (locked), home shows it
 // as done, and Random Blitz rolls a fresh round on another list.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
@@ -20,7 +20,7 @@ for (const vp of VIEWPORTS) {
     assert.notEqual(id, (await todaysDaily(page)).id, "never today's daily list");
     const p = await puzzle(page, id);
 
-    // The round counts; no Play again after it.
+    // The round counts; no Roll again after it.
     await guess(page, p.answers[0].name);
     await page.clock.fastForward(91_000);
     await page.getByTestId("daily-blitz-line").waitFor();

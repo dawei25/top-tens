@@ -61,10 +61,15 @@ interface Props {
   onBack: () => void;
   onHome: () => void;
   /**
-   * A fresh round on another random open Blitz list: Play again after a round, Random Blitz after Today's Blitz.
+   * A fresh round on another random open Blitz list: Roll again after a round, Random Blitz after Today's Blitz.
    * Missing when no other list is open.
    */
   onRoll?: () => void;
+  /**
+   * Play again on a past run: a fresh free round on this same list. Missing while the list is held (today's list or
+   * Blitz, or a future day's).
+   */
+  onReplay?: () => void;
 }
 
 interface Feedback {
@@ -260,6 +265,7 @@ export function Blitz({
   onBack,
   onHome,
   onRoll,
+  onReplay,
 }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -489,11 +495,22 @@ export function Blitz({
           </p>
           {isBest && <p className="gold">best on this list</p>}
         </div>
+        {/* Play again leads: a fresh round on this same list. A held list waits for its day. */}
         <div className="results-actions">
-          <button className="key" onClick={onBack} autoFocus>
+          {onReplay && (
+            <button className="key key-gold" data-testid="replay" onClick={onReplay} autoFocus>
+              Play again
+            </button>
+          )}
+          <button className="key" onClick={onBack} autoFocus={!onReplay}>
             Back
           </button>
         </div>
+        {!onReplay && (
+          <p className="caption" data-testid="replay-held">
+            back in free play after its day.
+          </p>
+        )}
       </section>
     );
     board = <RoundLists puzzle={puzzle} hits={viewRun.hits} byName={byName} waitFor={waitFor} />;
@@ -618,7 +635,7 @@ export function Blitz({
               </p>
             ))}
         </div>
-        {/* A date's Blitz is one round: no Play again there, a random Blitz instead. */}
+        {/* A date's Blitz is one round: no Roll again there, a Random Blitz instead. */}
         <div className="results-actions">
           {!locked?.gone && (
             <button className="key key-gold" onClick={share}>
@@ -637,8 +654,9 @@ export function Blitz({
                 Random Blitz
               </button>
             ) : (
+              // A new random Blitz list, never this one again (so not "Play again").
               <button className="key" data-testid="blitz-again" onClick={onRoll} autoFocus>
-                Play again
+                Roll again
               </button>
             ))}
           {!hold && theList && (

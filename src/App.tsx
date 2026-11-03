@@ -109,8 +109,10 @@ function Screens() {
    */
   const trail = useRef<string[]>([location.hash]);
   const replacing = useRef(false);
-  /** The category each random game in this tab was rolled in (by its hash), so Play again rolls in it too. */
+  /** The category each random game in this tab was rolled in (by its hash), so Roll again rolls in it too. */
   const rolledIn = useRef(new Map<string, string | undefined>());
+  /** Bumped by Play again, so the screen it opens starts over even when it's the one on screen (same list). */
+  const [replays, setReplays] = useState(0);
 
   useEffect(() => {
     loadIndex().then(setIndex);
@@ -200,9 +202,22 @@ function Screens() {
     location.hash = `#blitz-${id}`;
     return true;
   };
-  /** Play again on a Blitz: another random open list (in the round's category, if it was rolled in one). */
+  /** Roll again on a Blitz: another random open list (in the round's category, if it was rolled in one). */
   const blitzAgain = (id: string, category?: string) =>
     blitzChoices(category, id).open.length > 0 ? () => void blitzRoll(category, id) : undefined;
+  // Play again on a past run: a fresh free game on that same list (a roll, but of this list). Never on a list held
+  // right now (today's list or Blitz, or a future day's): it's back in free play after its day.
+  const replay = (mode: "list" | "blitz", id: string) => {
+    if (rollHoldouts(schedule, index, load(), today).has(id)) return undefined;
+    const to = mode === "list" ? `#p-${id}` : `#blitz-${id}`;
+    return () => {
+      save(mode === "list" ? freshList(load(), id) : freshBlitz(load(), id));
+      // Not rolled in a category: Roll again after it rolls from every list.
+      rolledIn.current.delete(to);
+      setReplays((n) => n + 1);
+      location.hash = to;
+    };
+  };
   // Today's Blitz, while it's still there to play (a list's results offer it). Until then its list has no free Blitz.
   const todaysBlitz = blitzOfTheDay(schedule, index, today);
   const dailyBlitzOpen = !!todaysBlitz && !load().blitzDaily?.[today];
@@ -212,7 +227,7 @@ function Screens() {
   if (route.screen === "blitz") {
     return (
       <Blitz
-        key={route.id}
+        key={`${route.id}:${replays}`}
         id={route.id}
         meta={index.find((p) => p.id === route.id)}
         schedule={schedule}
@@ -225,6 +240,7 @@ function Screens() {
         onBack={back}
         onHome={home}
         onRoll={blitzAgain(route.id, rolledIn.current.get(`#blitz-${route.id}`))}
+        onReplay={replay("blitz", route.id)}
       />
     );
   }
@@ -260,6 +276,7 @@ function Screens() {
         onBack={back}
         onHome={home}
         onRoll={blitzAgain(id)}
+        onReplay={replay("blitz", id)}
       />
     );
   }
@@ -277,7 +294,7 @@ function Screens() {
     const id = entry ? entry.id : (route as { id: string }).id;
     return (
       <Game
-        key={entry ? `daily-${entry.date}` : id}
+        key={entry ? `daily-${entry.date}` : `${id}:${replays}`}
         id={id}
         meta={index.find((p) => p.id === id)}
         daily={entry}
@@ -286,9 +303,10 @@ function Screens() {
         lexicon={lexicon}
         onBack={back}
         onHome={home}
-        // Play again on a random list rolls another in the same category (if it was rolled in one); a finished daily
+        // Roll again on a random list rolls another in the same category (if it was rolled in one); a finished daily
         // offers a plain random list instead.
         onRoll={() => roll(entry ? undefined : rolledIn.current.get(`#p-${id}`), id)}
+        onReplay={replay("list", id)}
         onDailyBlitz={dailyBlitzOpen ? () => (location.hash = `#dailyblitz-${today}`) : undefined}
         todaysBlitz={heldBlitz}
       />
