@@ -18,7 +18,7 @@ const SHARED_FORMS = [
   "Congolese",
 ];
 import { bareWord, blockedAlias, gluedAlias, junkRedirect, placeholderName } from "./aliases";
-import { citysCountries, countryOf, isContinent, UNIVERSES } from "./gazetteer";
+import { citysCountries, countryOf, isContinent, MAJOR_CITIES, UNIVERSES, whereIs, type Where } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
 import { TOPICS, type Topic } from "./topics";
 
@@ -36,6 +36,8 @@ const isPlaceList = (p: Puzzle) => {
   return !!t?.universe || /cities|capitals|countries|population|states|metros|islands/.test(p.id);
 };
 const topicNoun = (id: string) => TOPICS.find((t) => t.id === id)?.noun;
+/** The fields of an entry in the puzzle format (src/game/types.ts `Entry`). */
+const ENTRY_FIELDS = new Set(["rank", "name", "aliases", "value", "n", "article", "fact", "elsewhere"]);
 /** Below this many accepted answers, wrong-but-real guesses are likely to be free. */
 const MIN_ACCEPTED = 30;
 /**
@@ -52,11 +54,14 @@ export interface Issue {
   msg: string;
 }
 
-/** How many answers the source ranks, and how many of the rest (rank 0) show a figure when missed. */
+/**
+ * How many answers the source ranks, and how many of the rest (rank 0) show a figure when missed. Places outside a
+ * regional list's region aren't counted: their miss says so instead.
+ */
 export function figureShare(p: Pick<Puzzle, "answers" | "extras">): { ranked: number; unranked: number; withValue: number } {
-  const unranked = p.extras.filter((e) => e.rank === 0);
+  const unranked = p.extras.filter((e) => e.rank === 0 && !e.elsewhere);
   return {
-    ranked: p.answers.length + p.extras.length - unranked.length,
+    ranked: [...p.answers, ...p.extras].filter((e) => e.rank > 0).length,
     unranked: unranked.length,
     withValue: unranked.filter((e) => e.value?.trim()).length,
   };
@@ -104,7 +109,8 @@ export function sameAsUniverse(p: Pick<Puzzle, "answers" | "extras">, topic?: Pi
   if (!universes.length) return [];
   const members = new Set(universes.flatMap((u) => UNIVERSES[u]().map((m) => normalize(m.name))));
   const all = [...p.answers, ...p.extras];
-  const pool = all.filter((e) => e.rank === 0 && members.has(normalize(e.name)));
+  // A place outside a regional list's region is another place by definition.
+  const pool = all.filter((e) => e.rank === 0 && !e.elsewhere && members.has(normalize(e.name)));
   const out: string[] = [];
   for (const e of all) {
     const n = normalize(e.name);
@@ -168,33 +174,85 @@ export function undeclaredRegion(topic?: Pick<Topic, "title" | "prompt" | "noun"
 }
 
 /**
- * Unranked answers outside a regional list's `region`: a country of another continent, or a city whose country is
- * (a capital, or one of the world's largest cities in gazetteer.ts). Each would cost a life the source never
- * covers. A transcontinental country passes on either of its continents (the build lets the page decide). A city
- * with a figure came from the list's own regional tables, so it is that region's namesake: Plymouth, England, not
- * Montserrat's capital (the world's city tables bring names only).
+ * Regional lists built on or after this day say their region and mark the places outside it (`elsewhere`); older
+ * builds (europe-population's, patched by hand) only warn until they are rebuilt.
  */
-export function outsideRegion(p: Pick<Puzzle, "answers" | "extras" | "noun">, topic?: Pick<Topic, "region" | "noun">): string[] {
+export const REGION_REQUIRED_FROM = "2026-11-03";
+
+type RegionalTopic = Pick<Topic, "region" | "noun" | "skip">;
+const isCityList = (p: Pick<Puzzle, "noun">, topic?: Pick<Topic, "noun">) => /\b(cities|capitals)\b/.test(topic?.noun ?? p.noun ?? "");
+
+/**
+ * Where the gazetteer puts an entry of a regional list: its countries (a country list's entry is one; a city is its
+ * country's capital, one of the world's largest cities, or a city-state) and, over them, "inside" if any is in the
+ * region, "unsure" if any may be (a transcontinental country), else "outside". Undefined for a place it doesn't know.
+ */
+function placeOf(e: Entry, region: string, cities: boolean): { countries: string[]; where: Where } | undefined {
+  const named = cities ? [...citysCountries(e.name), countryOf(e.name)?.name] : [[e.name, ...e.aliases].map((f) => countryOf(f)).find(Boolean)?.name];
+  const countries = [...new Set(named.filter((c): c is string => !!c))];
+  if (!countries.length) return undefined;
+  const wheres = countries.map((c) => whereIs(c, region));
+  const where = wheres.includes("inside") ? "inside" : wheres.includes("unsure") ? "unsure" : "outside";
+  return { countries, where };
+}
+
+/** "Japan" (Asia) on a country list, "Tokyo" (Japan) on a city list. */
+const placeLabel = (e: Entry, countries: string[], cities: boolean) =>
+  `"${e.name}" (${cities ? countries.join(" or ") : countryOf(countries[0])!.continents.join(" or ")})`;
+
+/**
+ * `elsewhere` entries that break the format, whenever the list was built: one off a regional list, one ranked or
+ * with a figure, or one the gazetteer puts inside the region (or on its debatable edge: Egypt on Asia stays free).
+ */
+export function elsewhereErrors(p: Pick<Puzzle, "answers" | "extras" | "noun" | "region">, topic?: RegionalTopic): string[] {
+  const out: string[] = [];
+  const all = [...p.answers, ...p.extras];
+  if (!topic?.region) {
+    if (p.region) out.push(`region "${p.region}" on a list whose topic has none`);
+    const marked = all.filter((e) => e.elsewhere);
+    if (marked.length) out.push(`${marked.length} entries marked elsewhere on a list with no region, e.g. "${marked[0].name}"`);
+    return out;
+  }
+  const cities = isCityList(p, topic);
+  for (const e of all.filter((x) => x.elsewhere)) {
+    if (e.rank !== 0 || e.value !== undefined || e.n !== undefined) out.push(`"${e.name}" is marked elsewhere but has a rank or a figure`);
+    const place = placeOf(e, topic.region, cities);
+    if (place && place.where !== "outside") {
+      out.push(`"${e.name}" is marked elsewhere but is ${place.where === "inside" ? "in" : "maybe in"} ${topic.region} (${place.countries.join(" or ")})`);
+    }
+  }
+  return out;
+}
+
+/**
+ * What a regional list built from REGION_REQUIRED_FROM must have: its region said on the puzzle, every unranked
+ * place outside the region marked `elsewhere` (so "Japan" costs a life and says "Japan isn't in Europe.", not
+ * "outside the top 55"), and, on a country list, every country plainly outside the region present (a transcontinental
+ * one reaching it stays free); on a city list, the world's largest cities outside it. A city with a figure came from
+ * the list's own regional tables, so it is that region's namesake: Plymouth, England, not Montserrat's capital.
+ */
+export function regionGaps(p: Pick<Puzzle, "answers" | "extras" | "noun" | "region">, topic?: RegionalTopic): string[] {
   const region = topic?.region;
   if (!region) return [];
-  const inside = (country: string) => {
-    const c = countryOf(country);
-    if (!c) return true;
-    return isContinent(region) ? c.continents.includes(region) : c.name === (countryOf(region)?.name ?? region);
-  };
-  const cities = /\b(cities|capitals)\b/.test(topic.noun ?? p.noun);
   const out: string[] = [];
-  for (const e of [...p.answers, ...p.extras]) {
-    if (e.rank !== 0 || (cities && e.value)) continue;
-    // A city-state is a country by name ("Singapore", "Monaco"); other cities by the gazetteer.
-    const where = cities
-      ? [...new Set([...citysCountries(e.name), countryOf(e.name)?.name].filter((c): c is string => !!c))]
-      : [[e.name, ...e.aliases].map((f) => countryOf(f)).find(Boolean)?.name].filter((c): c is string => !!c);
-    if (!where.length || where.some(inside)) continue;
-    // "Tokyo" (Japan) on a city list, "Japan" (Asia) on a country list.
-    const shown = cities ? where : countryOf(where[0])!.continents;
-    out.push(`"${e.name}" (${shown.join(" or ")})`);
-  }
+  if (p.region !== region) out.push(`the puzzle says region ${p.region ? `"${p.region}"` : "nothing"}, the topic "${region}"`);
+  const cities = isCityList(p, topic);
+  const all = [...p.answers, ...p.extras];
+  const unmarked = all
+    .filter((e) => e.rank === 0 && !e.elsewhere && !(cities && e.value))
+    .flatMap((e) => {
+      const place = placeOf(e, region, cities);
+      return place?.where === "outside" ? [placeLabel(e, place.countries, cities)] : [];
+    });
+  if (unmarked.length) out.push(`${unmarked.length} unranked place(s) outside ${region} not marked elsewhere: ${unmarked.slice(0, 5).join(", ")}`);
+  const names = new Set(all.flatMap((e) => [e.name, ...e.aliases]).map(normalize));
+  const expected = cities
+    ? MAJOR_CITIES.filter(([, country]) => whereIs(country, region) === "outside").map(([city]) => city)
+    : UNIVERSES.countries()
+        .filter((c) => whereIs(c.name, region) === "outside" && !topic.skip?.includes(c.name))
+        .map((c) => c.name);
+  const missing = expected.filter((n) => !names.has(normalize(n)));
+  if (missing.length) out.push(`${missing.length} place(s) outside ${region} missing, so free instead of elsewhere: ${missing.slice(0, 5).join(", ")}`);
   return out;
 }
 
@@ -350,12 +408,18 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   for (const e of sameAsUniverse(p, topic)) warn(e);
   for (const e of missingNicknames(p, topic)) err(`team nickname: ${e}`);
 
-  // A regional list takes only its region's answers: "Japan" on European countries is free (DESIGN §1).
+  // A regional list's places outside its region cost a life and say so: "Japan isn't in Europe." (owner, cycle 7).
   const named = undeclaredRegion(topic);
-  if (named) err(`the title names ${named}, but the topic has no \`region\`: its universe or other pages add the whole world`);
+  if (named) err(`the title names ${named}, but the topic has no \`region\`: its places outside it would pass for answers`);
   if (topic?.region && !isContinent(topic.region) && !countryOf(topic.region)) err(`region "${topic.region}" is no continent or country`);
-  const outside = outsideRegion(p, topic);
-  if (outside.length) err(`${outside.length} unranked answer(s) outside ${topic!.region}, where guessing them should be free: ${outside.slice(0, 5).join(", ")}`);
+  for (const m of elsewhereErrors(p, topic)) err(m);
+  const regionRequired = (p.source?.asOf ?? "") >= REGION_REQUIRED_FROM;
+  for (const m of regionGaps(p, topic)) (regionRequired ? err : warn)(m);
+  // Only the puzzle format's fields ship: a build-only field (a capital's `country`) is noise in every download.
+  for (const e of all) {
+    const extra = Object.keys(e).filter((k) => !ENTRY_FIELDS.has(k));
+    if (extra.length) err(`"${e.name}": fields outside the puzzle format: ${extra.join(", ")}`);
+  }
 
   // Blitz scores `n`: it must be present on the top 10, follow the ranking, and share one unit across entries.
   for (const e of all) if (e.n !== undefined && !Number.isFinite(e.n)) err(`"${e.name}": n is not a finite number`);
