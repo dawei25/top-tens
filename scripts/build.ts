@@ -1,12 +1,14 @@
 // Builds public/puzzles/*.json from the Wikipedia tables listed in topics.ts.
 // Usage: npm run build:puzzles [-- topic-id ...]
+import type { CheerioAPI } from "cheerio";
+import type { AnyNode } from "domhandler";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Entry, Fact, Puzzle } from "../src/game/types";
 import { normalize } from "../src/game/match";
 import { cleanText, splitHeader, statNumber, tableGrid, wikitables, type Cell } from "./table";
 import { TEST_SET, TOPICS, type Also, type Dated, type Topic } from "./topics";
-import { fetchCategory, fetchPage, fetchRedirects, pageUrl, requestCount } from "./wiki";
+import { fetchCategory, fetchPage, fetchRedirects, NotFound, pageUrl, requestCount } from "./wiki";
 import { addValues } from "./values";
 import { KNOWN_DIR, writeLexicon } from "./lexicon";
 import { tableDataDate } from "./dates";
@@ -14,7 +16,7 @@ import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./int
 
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
-import { countryOf, UNIVERSES, US_STATE_CODES, whereIs, type Place, type Where } from "./gazetteer";
+import { countryOf, UNIVERSES, US_STATE_CODES, whereIs, type Place, type Region, type Where } from "./gazetteer";
 import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, placeholderName } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
@@ -602,15 +604,120 @@ export function regionColumn(topic: Pick<Topic, "id" | "page" | "region">, src: 
   return cc;
 }
 
-/**
- * A place outside the region whose table links a qualified article ("Toledo, Ohio", "Kingston, Jamaica"): the bare
- * name is another place's on Wikipedia (Toledo is Spain's), so it is no `elsewhere` entry; the guess stays free.
- */
-export const qualifiedLink = (name: string, link?: string) => !!link && /[,(]/.test(link) && !/[,(]/.test(name);
+/** A title's name without its qualifier: "Toledo, Ohio" → Toledo, "Valencia (Venezuela)" → Valencia. */
+const titleHead = (title: string) => title.split(/,| \(/)[0].trim();
 
-/** Names of places outside a topic's region left free for being another place's too (see qualifiedLink). */
+/**
+ * A place whose table links its name with a qualifier ("Toledo, Ohio", "Kingston, Jamaica"): Wikipedia gives the
+ * bare name to another article (a disambiguation page, or Toledo in Spain), which regionalNamesake then reads.
+ * "Washington D.C." linking "Washington, D.C." is the same name, not a qualified one.
+ */
+export const qualifiedLink = (name: string, link?: string) =>
+  !!link && link !== name && !/\(page does not exist\)/.test(link) && normalize(titleHead(link)) === normalize(name);
+
+/** Descriptions of places nobody names on a list of cities: a namesake village doesn't make "Arlington" European. */
+const MINOR_PLACE = /\b(village|hamlet|parish|suburb|neighbou?rhood|locality|ward|unincorporated|ghost town|census-designated|townland)\b/i;
+
+/** A heading element's text: the h2-h5 itself, or the one inside a `div.mw-heading` wrapper. */
+function headingText($: CheerioAPI, h: AnyNode): string {
+  const hx = $(h).is("h2, h3, h4, h5") ? $(h) : $(h).find("h2, h3, h4, h5").first();
+  return cleanText(hx.text());
+}
+
+/**
+ * The headings a list item sits under, nearest first ("England", then "United Kingdom"): its `section`s' headings
+ * in Wikipedia's page HTML, else the headings before its block in flat markup.
+ */
+function sectionTitles($: CheerioAPI, li: AnyNode): string[] {
+  const out: string[] = [];
+  $(li)
+    .parents("section")
+    .each((_, s) => {
+      const h = $(s).children("div.mw-heading, h2, h3, h4, h5").first();
+      if (h.length) out.push(headingText($, h[0]));
+    });
+  if (out.length) return out;
+  let level = 7;
+  $(li)
+    .parentsUntil(".mw-parser-output")
+    .last()
+    .prevAll("div.mw-heading, h2, h3, h4, h5")
+    .each((_, h) => {
+      const hx = $(h).is("h2, h3, h4, h5") ? $(h) : $(h).find("h2, h3, h4, h5").first();
+      const l = Number((hx.prop("tagName") ?? "H7").slice(1));
+      if (l >= level) return;
+      level = l;
+      out.push(headingText($, h));
+    });
+  return out;
+}
+
+/**
+ * Whether a piece of text names a country inside the region ("Spain", "Scotland"), or is the region ("Europe");
+ * with `edge`, a transcontinental country reaching it counts too (Russia for Saint Petersburg). A list's line
+ * doesn't take the edge: its "Georgia" is as often the US state.
+ */
+function namesRegion(text: string, region: Region, edge = false): boolean | undefined {
+  const t = text.trim();
+  if (!t) return undefined;
+  if (normalize(t) === normalize(region)) return true;
+  const where = countryOf(t) && whereIs(t, region);
+  return where ? where === "inside" || (edge && where === "unsure") : undefined;
+}
+
+/**
+ * Whether Wikipedia's page for a bare place name gives the name to a place inside the region, so a guess of it may
+ * mean that place: the article itself (its infobox's country: Valencia is Spain's, St. Petersburg Russia's), or a
+ * disambiguation page's place titled with the name and a qualifier ("Toledo, Spain", "Hamilton, South Lanarkshire")
+ * whose qualifier or line names a country in the region, else whose section does. Villages and suburbs don't count
+ * (MINOR_PLACE), nor other things of the name ("The Phoenix (magazine), Ireland").
+ */
+export function regionalNamesake($: CheerioAPI, name: string, region: Region): boolean {
+  const infoboxCountry = $("table.infobox tr")
+    .filter((_, tr) => /^(country|sovereign state)$/i.test(cleanText($(tr).find("th").first().text())))
+    .map((_, tr) => cleanText($(tr).find("td").first().text()))
+    .get();
+  if (infoboxCountry.some((c) => namesRegion(c, region, true))) return true;
+  const listing = $("#disambigbox, .dmbox, .setindexbox").length > 0 || /disambiguation|set index/i.test($("#catlinks").text());
+  if (!listing) return false;
+  return $(".mw-parser-output li")
+    .toArray()
+    .some((li) => {
+      const title = $(li).find("a").first().attr("title") ?? "";
+      // A place's article: the name, a comma, where it is.
+      if (!title.includes(",") || normalize(titleHead(title)) !== normalize(name)) return false;
+      // The item's own line (a nested list's lines are other items), without asides: "Scotland (formerly Cadzow)".
+      const line = cleanText($(li).clone().children("ul, ol").remove().end().text()).replace(/\([^)]*\)/g, "");
+      if (MINOR_PLACE.test(line)) return false;
+      const parts = [...title.split(",").slice(1), ...line.split(/,|\bin\b|\bof\b/)];
+      const own = parts.map((p) => namesRegion(p, region)).filter((w) => w !== undefined);
+      if (own.length) return own.includes(true);
+      const section = sectionTitles($, li).map((s) => namesRegion(s, region)).find((w) => w !== undefined);
+      return section === true;
+    });
+}
+
+/** Names of places outside a topic's region left free for being a place inside it too (see regionalNamesake). */
 const SHARED_NAMES = new Map<string, Set<string>>();
 const sharedNames = (topic: Topic) => SHARED_NAMES.get(topic.id) ?? SHARED_NAMES.set(topic.id, new Set()).get(topic.id)!;
+/** Bare names already looked up, per region: one page read per name however many tables link it. */
+const NAMESAKES = new Map<string, boolean>();
+
+/** Whether a place outside the region shares its name with one inside it (Toledo, Ohio and Toledo, Spain). */
+async function hasRegionalNamesake(name: string, link: string | undefined, region: Region): Promise<boolean> {
+  if (!qualifiedLink(name, link)) return false;
+  const key = `${region}\t${normalize(name)}`;
+  if (!NAMESAKES.has(key)) {
+    let found = false;
+    try {
+      found = regionalNamesake(await fetchPage(name), name, region);
+    } catch (e) {
+      if (!(e instanceof NotFound)) throw e;
+    }
+    NAMESAKES.set(key, found);
+  }
+  return NAMESAKES.get(key)!;
+}
 
 /**
  * Unranked accepted answers from other tables (or pages): aliases from the cell and short forms, and the list's
@@ -671,8 +778,8 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         if (!name || !normalize(name) || skipName(name)) continue;
         if (topic.skip?.includes(name) || src.skip?.includes(name)) continue;
         if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue;
-        if (where === "outside" && qualifiedLink(name, cell.link)) {
-          sharedNames(topic).add(normalize(name));
+        if (where === "outside" && (await hasRegionalNamesake(name, cell.link, topic.region!))) {
+          sharedNames(topic).add(name);
           continue;
         }
         // A family row's text ("Karl and Theo Albrecht") names several people: not an alias of one of them.
@@ -707,7 +814,8 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
     }
   }
   if (unsure) console.log(`     ${topic.id}: ${unsure} rows of other pages in transcontinental countries left out (free)`);
-  if (sharedNames(topic).size) console.log(`     ${topic.id}: ${sharedNames(topic).size} places outside ${topic.region} named like another place left out (free)`);
+  const shared = [...sharedNames(topic)];
+  if (shared.length) console.log(`     ${topic.id}: ${shared.length} places outside ${topic.region} named like one inside left out (free): ${shared.join(", ")}`);
   if (unknown.size) console.log(`warn ${topic.id}: rows in no known country left out (gazetteer.ts): ${[...unknown].join(", ")}`);
   for (const cat of topic.universeCategories ?? []) {
     const titles = await fetchCategory(cat, topic.categoryDepth ?? 0, CATEGORY_CAP);
@@ -1094,10 +1202,9 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     // A free row's other names count too: the table's "Macau" is the universe's "Macao".
     const free = new Set(unrankedRows(topic));
     for (const forms of COUNTRY_FORMS) if (forms.some((f) => free.has(normalize(f)))) for (const f of forms) free.add(normalize(f));
-    // A place outside the region named like another place (Kingston, Jamaica) is left free, as in readAlso.
-    const placed = UNIVERSES[u]().filter(
-      (p) => where(p) === "inside" || (where(p) === "outside" && !sharedNames(topic).has(normalize(p.name))),
-    );
+    // A place outside the region named like one inside it is left free, as in readAlso.
+    const shared = new Set([...sharedNames(topic)].map(normalize));
+    const placed = UNIVERSES[u]().filter((p) => where(p) === "inside" || (where(p) === "outside" && !shared.has(normalize(p.name))));
     const members = placed.filter((p) => !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
     if (topic.region) {
       const out = members.filter((p) => where(p) === "outside").length;
