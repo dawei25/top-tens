@@ -29,6 +29,7 @@ import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
 import { ParBlock, usePar } from "./par";
 import { reportList } from "../net";
+import { RateList } from "./rate/RateList";
 
 interface Props {
   id: string;
@@ -689,6 +690,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 </a>
                 , {asOf}.
               </p>
+              <RateList listId={puzzle.id} mode="list" />
             </section>
           </>
         )}

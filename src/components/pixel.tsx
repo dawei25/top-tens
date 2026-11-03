@@ -71,7 +71,7 @@ export function EnterHint() {
 }
 
 /** Builds a crisp SVG path from a pixel map ("#" = on). */
-function pixels(rows: string[]): string {
+export function pixels(rows: string[]): string {
   let d = "";
   rows.forEach((row, y) => {
     for (let x = 0; x < row.length; x++) if (row[x] === "#") d += `M${x} ${y}h1v1h-1z`;

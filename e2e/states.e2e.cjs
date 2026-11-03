@@ -2,8 +2,9 @@
 // shadow, opacity, outline and transform only, never the size or position of anything on the page.
 //
 // One player's walk through the screens (home, its How to play and category picker, a rolled list before its first
-// guess, a list game with its clue confirm, the list's end with and without its facts open, a rolled Blitz before its
-// clock, a Blitz round and its end, home with both dailies played, the archive, past runs, stats) at three widths: desktop, a mid width just above the 640px breakpoint, and a phone.
+// guess, a list game with its clue confirm, the list's end with and without its facts open and with the rating's
+// reasons open, a rolled Blitz before its clock, a Blitz round and its end, home with both dailies played, the
+// archive, past runs, stats) at three widths: desktop, a mid width just above the 640px breakpoint, and a phone.
 // On each screen every visible enabled interactive element is hovered (not on the phone), pressed (pointer down, then
 // moved away and released outside, so no click fires) and focused from the keyboard (Tab through the page, so
 // focus-visible and keyboard-modality styles apply), and every element's layout box is compared with the screen at
@@ -96,6 +97,16 @@ const SCREENS = [
     setup: async (page) => {
       await page.getByTestId("facts-toggle").click();
       await page.locator(".slot.fact-open").first().waitFor();
+    },
+  },
+  {
+    // "Good list?": after a thumbs down the reasons float over the result card; nothing in or around them moves.
+    name: "list game over, rating reasons open",
+    scope: '[data-testid="rate-reasons"]',
+    keepFocus: true,
+    setup: async (page) => {
+      await page.getByTestId("rate-down").click();
+      await page.getByTestId("rate-reason").first().waitFor();
     },
   },
   {

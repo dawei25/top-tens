@@ -1,0 +1,148 @@
+/* "Good list?" (RateList.tsx): a quiet row at the foot of a result card. The reasons after a thumbs down float over
+   the card, so the row and everything around it stay put. */
+.rate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--hairline);
+}
+.rate-q {
+  flex: none;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+.rate-key {
+  flex: none;
+  min-height: 34px;
+  width: 46px;
+  padding: 0;
+  color: var(--label);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 3px 0 var(--key-shadow);
+}
+.rate-key:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 0 var(--key-shadow);
+}
+.rate-key:hover:not(:disabled) {
+  color: var(--text);
+}
+/* Two screen pixels per pixel of the thumb, so its edges stay crisp. */
+.rate-key .thumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+/* Chosen: up in the game's cyan, down in its pink (the colour of a miss). */
+.rate-key.up[aria-pressed="true"] {
+  background: var(--cyan);
+  color: #04202a;
+  box-shadow: 0 3px 0 var(--cyan-edge);
+}
+.rate-key.up[aria-pressed="true"]:hover:not(:disabled) {
+  background-color: #7aeaff;
+  color: #04202a;
+}
+.rate-key.up[aria-pressed="true"]:active:not(:disabled) {
+  box-shadow: 0 1px 0 var(--cyan-edge);
+}
+.rate-key.down[aria-pressed="true"] {
+  background: var(--pink);
+  color: var(--pink-ink);
+  box-shadow: 0 3px 0 var(--pink-shadow);
+}
+.rate-key.down[aria-pressed="true"]:hover:not(:disabled) {
+  background-color: #ff7aa3;
+  color: var(--pink-ink);
+}
+.rate-key.down[aria-pressed="true"]:active:not(:disabled) {
+  box-shadow: 0 1px 0 var(--pink-shadow);
+}
+/* The rest of the row: the picked reason or "why?" after a thumbs down, cut short rather than wrapped. */
+.rate-note {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+/* No taller than the keys, so it appearing never grows the row. */
+.rate-why {
+  min-height: 34px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rate-reasons {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 12px;
+  border-radius: 8px;
+  /* Opaque: the keys under it would show through glass. */
+  background: var(--panel) var(--scan);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--pink) 45%, transparent),
+    0 8px 0 rgba(0, 0, 0, 0.45),
+    0 14px 30px rgba(0, 0, 0, 0.5);
+  animation: rise 0.15s ease-out both;
+}
+.rate-reasons[data-down="true"] {
+  top: calc(100% + 6px);
+  bottom: auto;
+}
+.rate-reasons-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.rate-reason-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rate-reason {
+  min-height: 36px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--key);
+  color: var(--text);
+  font: inherit;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  box-shadow:
+    inset 0 0 0 1px var(--hairline),
+    0 3px 0 var(--key-shadow);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.rate-reason:hover {
+  color: var(--pink);
+}
+.rate-reason:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 0 0 1px var(--hairline),
+    0 1px 0 var(--key-shadow);
+}
+.rate-reason[aria-pressed="true"] {
+  background: var(--pink);
+  color: var(--pink-ink);
+  box-shadow: 0 3px 0 var(--pink-shadow);
+}
