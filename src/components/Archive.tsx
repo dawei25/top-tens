@@ -108,7 +108,7 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
                   </a>
                 ) : (
                   <span className="arch-cell blitz none" data-testid="archive-blitz-none" data-date={e.date}>
-                    <span aria-hidden="true">{"–"}</span>
+                    <span aria-hidden="true">&ndash;</span>
                     <span className="sr-only">{day}: no Blitz</span>
                   </span>
                 )}
