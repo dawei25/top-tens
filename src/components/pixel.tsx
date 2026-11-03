@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SoundToggle } from "./sound/SoundToggle";
+import { MenuKey } from "./menu";
 
 export function reducedMotion(): boolean {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -172,9 +173,10 @@ export function SwapLabel({ on, off, active }: { off: ReactNode; on: ReactNode; 
 }
 
 /**
- * Every screen's header: BACK (one step up) on the left, the screen's own middle, the sound key and HOME on the
- * right. Escape is Back too, except while typing in a field or when something on the screen already used the
- * Escape (a hint confirm marks it with preventDefault).
+ * Every screen's header: BACK (one step up) on the left, the screen's own middle, the sound key, HOME and the menu
+ * key on the right. Escape is Back too, except while typing in a field, while a dialog is open over the screen (the
+ * Escape closes it), or when something on the screen already used the Escape (a hint confirm marks it with
+ * preventDefault).
  */
 export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; onHome: () => void; children: ReactNode }) {
   const back = useRef(onBack);
@@ -184,6 +186,7 @@ export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; o
       if (e.key !== "Escape" || e.defaultPrevented) return;
       const el = document.activeElement;
       if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return;
+      if (document.querySelector("dialog[open]")) return;
       back.current();
     };
     document.addEventListener("keydown", onKey);
@@ -202,6 +205,7 @@ export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; o
         <button className="key key-icon" onClick={onHome} aria-label="Home" title="Home" data-testid="nav-home">
           <HomeIcon />
         </button>
+        <MenuKey />
       </div>
     </header>
   );

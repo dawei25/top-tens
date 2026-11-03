@@ -2680,10 +2680,21 @@ a.arch-cell:active .arch-name {
 .home {
   position: relative;
 }
-.home-sound {
+/* Home's header keys (sound, menu) sit where the other screens' headers keep theirs: the right end, inset as a
+   header card insets them (its 1px edge and 8px padding; 6px on phones, where they stay above the logo). */
+.home-keys {
   position: absolute;
-  top: 16px;
-  right: max(var(--gutter), env(safe-area-inset-right));
+  top: 25px;
+  right: calc(max(var(--gutter), env(safe-area-inset-right)) + 9px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 480px) {
+  .home-keys {
+    top: 16px;
+    right: calc(max(var(--gutter), env(safe-area-inset-right)) + 7px);
+  }
 }
 
 /* ---------- Players' average (par.json) ---------- */

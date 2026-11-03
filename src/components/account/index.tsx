@@ -1,66 +1,18 @@
-import { lazy, Suspense, useRef, useState } from "react";
+import { lazy, Suspense } from "react";
 import { blitzPercentile, formatCount, MIN_PLAYERS } from "../../net/crowd";
-import { accountsOn, backendOn, useAccount, useListStats } from "../../net";
+import { accountsOn, backendOn, useListStats } from "../../net";
 import { percentileLabel } from "../../game/par";
 import type { PuzzleMeta } from "../../game/puzzles";
-import { syncLabel } from "./labels";
 
 /**
  * The backend's pieces of the screens. Each renders nothing in a build without a backend (no env), and the bigger
- * ones (the sign-in sheet, the account panel, the comparison with players, the privacy page) are separate chunks,
- * downloaded only when shown.
+ * ones (the account panel, the comparison with players, the privacy page) are separate chunks, downloaded only when
+ * shown. The sign-in sheet opens from the menu (components/menu) and the account panel.
  */
 
-const SignInSheet = lazy(() => import("./SignInSheet"));
 const AccountPanel = lazy(() => import("./AccountPanel"));
 const CrowdPanel = lazy(() => import("./CrowdPanel"));
 const Privacy = lazy(() => import("./Privacy"));
-
-/**
- * Home's account key, in Your games: Sign in (opens the sheet) when signed out; your name and the sync state when
- * signed in (to the account panel on the knowledge page).
- */
-export function AccountKey() {
-  const account = useAccount();
-  const [open, setOpen] = useState(false);
-  const opener = useRef<HTMLButtonElement>(null);
-  if (!accountsOn || account.status === "off") return null;
-  if (account.status === "in" && account.user) {
-    return (
-      <a className="key key-sm games-key account-key" href="#stats" data-testid="account-key" data-signed-in="true">
-        {/* Long names end in an ellipsis rather than stretch the key. */}
-        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{account.user.name}</span>
-        <span className="games-n" data-testid="sync-status" data-sync={account.sync}>
-          {syncLabel(account)}
-        </span>
-      </a>
-    );
-  }
-  return (
-    <>
-      <button
-        ref={opener}
-        type="button"
-        className="key key-sm games-key account-key"
-        data-testid="account-key"
-        disabled={account.status === "loading"}
-        onClick={() => setOpen(true)}
-      >
-        Sign in
-      </button>
-      {open && (
-        <Suspense fallback={null}>
-          <SignInSheet
-            onClose={() => {
-              setOpen(false);
-              opener.current?.focus();
-            }}
-          />
-        </Suspense>
-      )}
-    </>
-  );
-}
 
 /** The knowledge page's account section (sign in, or your name, sync, sign out, delete). */
 export function AccountSection() {
