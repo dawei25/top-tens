@@ -18,10 +18,12 @@
     "build:test": "NODE_NO_WARNINGS=1 NODE_USE_ENV_PROXY=1 tsx scripts/build.ts --test"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.118.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

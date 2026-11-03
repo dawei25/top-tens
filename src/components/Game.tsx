@@ -27,6 +27,7 @@ import { CLUE_LABEL, NO_LIFE_LOST, notOnList, STREAK_NOTE } from "./copy";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
 import { ParBlock, usePar } from "./par";
+import { reportList } from "../net";
 
 interface Props {
   id: string;
@@ -224,6 +225,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     if (state.status !== "playing" && game.status === "playing") {
       setEndedHere(true);
       emitPlay({ kind: "end", status: state.status, lives: state.lives, found: state.found.length });
+      // Score stats (and sync): a no-op without a backend. Only today's daily counts as a daily there.
+      reportList(state, daily?.date === today ? today : undefined);
     }
     setGame(state);
   };
@@ -613,7 +616,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <span className={`score-n ${game.status === "won" ? "gold" : ""}`}><CountUp value={game.found.length} /></span>
                 <span className="score-of">/10</span>
               </p>
-              {par && <ParBlock list={par} score={game.found.length} />}
+              {par && <ParBlock list={par} score={game.found.length} id={puzzle.id} />}
               <p className="caption">
                 {game.status === "won"
                   ? `with ${game.lives} ${game.lives === 1 ? "life" : "lives"} to spare.`

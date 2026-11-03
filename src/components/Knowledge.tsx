@@ -5,6 +5,7 @@ import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
 import { signed, usePar } from "./par";
 import { ScreenHead } from "./pixel";
+import { AccountSection, CrowdSection } from "./account";
 
 interface Props {
   index: PuzzleMeta[];
@@ -203,8 +204,10 @@ export function Knowledge({ index, entry, onBack, onHome }: Props) {
         <>
           <Bars title="By category" rows={k.categories} kind="category" scale={scale} empty="none yet. finish a list." />
           <Bars title="By topic" rows={k.tags} kind="tag" scale={scale} empty="none yet. a topic needs two games." />
+          <CrowdSection index={index} />
         </>
       )}
+      <AccountSection />
     </main>
   );
 }

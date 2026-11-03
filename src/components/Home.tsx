@@ -8,6 +8,8 @@ import { HowToPlay, markHelpSeen } from "./HowToPlay";
 import { EnterHint, TipLabel, type Mode } from "./pixel";
 import { STREAK_NOTE } from "./copy";
 import { SoundToggle } from "./sound/SoundToggle";
+import { AccountKey, PrivacyLink } from "./account";
+import { noteReset } from "../net";
 
 /**
  * A home key: its status on top (right), the action below. Today's keys carry their mode's accent while unplayed
@@ -206,6 +208,8 @@ export function Home({
     if (!confirmReset) return setConfirmReset(true);
     setConfirmReset(false);
     save({ games: {}, daily: {}, seenHelp: load().seenHelp });
+    // Signed in, the reset reaches the account and every device instead of syncing back.
+    noteReset();
     setVersion((v) => v + 1);
     focusDaily();
   };
@@ -432,6 +436,7 @@ export function Home({
             >
               Stats
             </button>
+            <AccountKey />
           </div>
         </section>
       </div>
@@ -496,6 +501,7 @@ export function Home({
         )}
         <span className="home-foot-end">
           <span className="caption">data from wikipedia</span>
+          <PrivacyLink />
           {hasProgress && (
             <button
               type="button"
