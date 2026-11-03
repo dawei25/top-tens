@@ -78,7 +78,9 @@ stronger.
 | "steel" offered Steel Pier because a film list ranks Man of Steel | plain words decided across the bank | the matcher decides per list: a word is plain unless a notable entry on this list carries it |
 | "squid game second season" read as Season 1 | ordinals and instalment words | ordinals count as digits; "season", "part", "of" set aside around a number |
 | The Today key grew 89 to 116px on hover (desktop); the ENTER cap widened the Blitz key | interaction states changing layout; a breakpoint override losing to a state rule | `npm run lint:css` (no layout in state rules); e2e/states.e2e.cjs hovers, focuses and presses every control at three widths; DESIGN.md §5a |
-| "par 6" not understood (asked twice) | meaning only on hover, jargon labels | DESIGN.md §5a: labels explain themselves, explanations open on tap too |
+| "par 6" not understood (asked twice) | jargon labels, meaning only on hover | no average during play; the results say "Players avg"; DESIGN.md §5a and UX.md: labels explain themselves, explanations open on tap too |
+| "Play again" on a random list read as replaying the same list | a label that doesn't say what happens | "Roll again" (primary) on free-play results; Play again only in Past runs; UX.md principle 1 |
+| A random list rolled today's Blitz topic and showed its answers | random play overlapping the dailies | `rollHoldouts`: today's pair and every scheduled day held from random play; daily.test.ts and e2e |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
 
 ## What good looks like
