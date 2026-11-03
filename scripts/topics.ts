@@ -1,4 +1,4 @@
-import { UNIVERSES, type Universe } from "./gazetteer";
+import { UNIVERSES, type Region, type Universe } from "./gazetteer";
 import type { ValueKind } from "./values";
 
 export interface Topic {
@@ -71,6 +71,14 @@ export interface Topic {
   people?: boolean;
   /** Also accept every member of these sets as a real (life-costing) answer, even ones missing from the table. */
   universe?: Universe | Universe[];
+  /**
+   * The list covers one continent or country ("Europe", "China"): its universe and its other pages' tables only add
+   * answers from there, so "Japan" is free on European countries (DESIGN §1: what the source doesn't cover is free).
+   * A transcontinental country follows the source page: in where its table lists it (Turkey on Europe), else free
+   * (Egypt on Asia). Members of the region the table leaves out (Vatican City) stay answers. scripts/validate.ts
+   * fails a regional list without one, and any unranked answer outside it.
+   */
+  region?: Region;
   /**
    * The universe only names the rows (country forms, demonyms, the country junk list): members the tables leave out
    * are free, not answers. A country McDonald's never opened in costs nothing.
@@ -191,6 +199,11 @@ export interface Also {
   /** Names for these tables' rows, by the name the table gives: "Mercedes" is the pool's "Mercedes-Benz". */
   rename?: Record<string, string>;
   /**
+   * The country every row of these tables is in, for a regional topic (`region`): a table of another country's
+   * cities adds nothing there. Without it, another page's table needs a Country (or Member state) column.
+   */
+  country?: string;
+  /**
    * A column with the list's own stat, in the ranked rows' unit: each answer from these tables shows it and scores
    * it in Blitz, unranked. Titanic is in the inflation table's nominal column ($200 million) but not in the ranking,
    * which stops above $200 million. A number at or above the last ranked row's means something else and is dropped.
@@ -277,16 +290,19 @@ const MARKET_CAP_SKIP = [
   "Samsung",
 ];
 
-/** Big city tables, so any sincere city guess on a city list is an accepted answer. */
+/**
+ * Big city tables, so any sincere city guess on a city list is an accepted answer. A regional list takes only its
+ * region's rows: by `country`, or by the table's Country column.
+ */
 const CITIES: Also[] = [
   { page: "List of largest cities", tables: [0], name: "City" },
-  { page: "List of United States cities by population", tables: [1], name: "Municipality" },
+  { page: "List of United States cities by population", tables: [1], name: "Municipality", country: "United States" },
   { page: "List of national capitals by population", tables: [0], name: "Capital" },
   { page: "List of European cities by population within city limits", tables: [0], name: "City" },
-  { page: "List of cities in India by population", tables: [0], name: "Name", skip: ["India"] },
-  { page: "List of cities in China by population", tables: [2, 3], name: "City" },
-  { page: "List of cities in Brazil by population", tables: [1], name: "Municipality" },
-  { page: "List of the 100 largest municipalities in Canada by population", tables: [0], name: "Municipality" },
+  { page: "List of cities in India by population", tables: [0], name: "Name", skip: ["India"], country: "India" },
+  { page: "List of cities in China by population", tables: [2, 3], name: "City", country: "China" },
+  { page: "List of cities in Brazil by population", tables: [1], name: "Municipality", country: "Brazil" },
+  { page: "List of the 100 largest municipalities in Canada by population", tables: [0], name: "Municipality", country: "Canada" },
   { page: "List of cities by international visitors", tables: [0, 1, 2, 3], name: "City" },
 ];
 
@@ -385,6 +401,7 @@ export const TOPICS: Topic[] = [
     metric: "Population",
     rankedOnly: true,
     universe: "countries",
+    region: "Africa",
     // "Congo" is the Republic of the Congo here; the bare name offers both Congos (build.ts).
     rename: { Congo: "Republic of the Congo" },
   },
@@ -401,6 +418,7 @@ export const TOPICS: Topic[] = [
     metric: "Population",
     rankedOnly: true,
     universe: "countries",
+    region: "Asia",
     // UN 2023 estimates; Hong Kong and Macau have no rank in the table, so naming them is free.
     dataAsOf: "2023",
     unrankedRowsFree: true,
@@ -418,6 +436,7 @@ export const TOPICS: Topic[] = [
     metric: "Population (UN 2025)",
     skip: ["Europe"],
     universe: "countries",
+    region: "Europe",
   },
   {
     id: "us-states-population",
@@ -1524,11 +1543,14 @@ export const TOPICS: Topic[] = [
     // the city council area, as the main table counts Birmingham). Before CITIES, so Manchester gets its figure.
     also: [
       { page: "List of cities in the European Union by population within city limits", tables: [0], name: "City", value: "Official population" },
-      { page: "List of cities in the United Kingdom", tables: [0], name: "City", value: "Population" },
-      { page: "List of cities in Ukraine", tables: [0], name: "Name", value: 3 },
+      { page: "List of cities in the United Kingdom", tables: [0], name: "City", value: "Population", country: "United Kingdom" },
+      { page: "List of cities in Ukraine", tables: [0], name: "Name", value: 3, country: "Ukraine" },
       ...CITIES,
     ],
     universe: "capitals",
+    // Only Europe's cities and capitals: Tokyo or Mumbai is free, not "outside the top 38". Turkey's and Russia's
+    // cities count where the page lists them (Istanbul, Kazan), as the page counts Europe.
+    region: "Europe",
     junkAliases: [
       "Immigration to Madrid", "Madrilenian cuisine", "Paris culture", "Paris agglomeration", "Washington Place, Berlin",
       "Cecchignola", "Rumeli", "Kotly, Moscow", "Kotly, Moscow Oblast", "Western Moscow", "Baku Oilfields", "Baku Today",

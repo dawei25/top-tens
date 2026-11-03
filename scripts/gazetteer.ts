@@ -1,28 +1,149 @@
 import { createRequire } from "node:module";
+import { normalize } from "../src/game/match";
+import { COUNTRY_FORMS } from "./intent";
 
 const require = createRequire(import.meta.url);
 
 export interface Place {
   name: string;
   aliases: string[];
+  /** The country a place inside one is in (a capital's), for regional lists. */
+  country?: string;
 }
+
+interface CountryData {
+  name: string;
+  native: string;
+  alias?: string[];
+  capital: string;
+  continent: string;
+  /** Transcontinental countries only: every continent they reach ("AS", "EU" for Russia). */
+  continents?: string[];
+}
+
+const DATA = () =>
+  require("countries-list") as { countries: Record<string, CountryData>; continents: Record<string, string> };
 
 /** Every country and territory, with its native name. */
 export function countries(): Place[] {
-  const { countries } = require("countries-list") as {
-    countries: Record<string, { name: string; native: string; capital: string }>;
-  };
-  return Object.values(countries).map((c) => ({
+  return Object.values(DATA().countries).map((c) => ({
     name: c.name,
     aliases: [c.native].filter((a) => a && a !== c.name),
   }));
 }
 
 export function capitals(): string[] {
-  const { countries } = require("countries-list") as { countries: Record<string, { capital: string }> };
-  return Object.values(countries)
-    .map((c) => c.capital)
-    .filter(Boolean);
+  return capitalPlaces().map((c) => c.name);
+}
+
+/** Every country's capital, with its country. */
+function capitalPlaces(): Place[] {
+  return Object.values(DATA().countries)
+    .filter((c) => c.capital)
+    .map((c) => ({ name: c.capital, aliases: [], country: c.name }));
+}
+
+export type Continent = "Africa" | "Antarctica" | "Asia" | "Europe" | "North America" | "Oceania" | "South America";
+/**
+ * Where a regional list's answers are: a continent ("Europe") or one country ("China"). Its universe and its other
+ * pages' tables only add answers from there (build.ts); anything else is free (DESIGN §1).
+ */
+export type Region = Continent | (string & {});
+
+export interface Country {
+  name: string;
+  continents: Continent[];
+}
+
+/**
+ * Continents countries-list gives a country through a territory it also lists apart: Denmark reaches North America
+ * only by Greenland (its own entry, GL), so Copenhagen is plainly in Europe.
+ */
+const CONTINENTS_APART: Record<string, string[]> = { DK: ["NA"] };
+
+/**
+ * Places tables name as a country that countries-list lacks, by the entry they count under (breakaway states by
+ * their de jure country): Tiraspol is Moldova's, so Europe's. "Congo" alone is the Republic (both are Africa's).
+ */
+const PLACES_UNDER: Record<string, string> = {
+  Transnistria: "Moldova",
+  "Northern Cyprus": "Cyprus",
+  Abkhazia: "Georgia",
+  "South Ossetia": "Georgia",
+  Somaliland: "Somalia",
+  "Sahrawi Arab Democratic Republic": "Western Sahara",
+  "Hong Kong SAR": "Hong Kong",
+  "Macau SAR": "Macao",
+  "Cocos Islands": "Cocos (Keeling) Islands",
+  Congo: "Republic of the Congo",
+};
+
+let COUNTRY_BY_NAME: Map<string, Country> | undefined;
+
+/**
+ * The country a name means (countries-list's name, native name or alias, or a form in COUNTRY_FORMS: "Czech
+ * Republic", "Holland"), with its continents (several for a transcontinental country). Undefined for a name that is
+ * no country (or one countries-list lacks: "Soviet Union", "Somaliland").
+ */
+export function countryOf(name: string): Country | undefined {
+  if (!COUNTRY_BY_NAME) {
+    const { countries, continents } = DATA();
+    COUNTRY_BY_NAME = new Map();
+    for (const [code, c] of Object.entries(countries)) {
+      const keys = (c.continents ?? [c.continent]).filter((k) => !CONTINENTS_APART[code]?.includes(k));
+      const country = { name: c.name, continents: keys.map((k) => continents[k] as Continent) };
+      for (const n of [c.name, c.native, ...(c.alias ?? [])]) if (n && !COUNTRY_BY_NAME.has(normalize(n))) COUNTRY_BY_NAME.set(normalize(n), country);
+    }
+    for (const forms of COUNTRY_FORMS) {
+      const country = forms.map((f) => COUNTRY_BY_NAME!.get(normalize(f))).find(Boolean);
+      if (country) for (const f of forms) if (!COUNTRY_BY_NAME.has(normalize(f))) COUNTRY_BY_NAME.set(normalize(f), country);
+    }
+    for (const [place, under] of Object.entries(PLACES_UNDER)) {
+      const country = COUNTRY_BY_NAME.get(normalize(under));
+      if (!country) throw new Error(`gazetteer: "${place}" counts under "${under}", which is no country`);
+      if (!COUNTRY_BY_NAME.has(normalize(place))) COUNTRY_BY_NAME.set(normalize(place), country);
+    }
+  }
+  return COUNTRY_BY_NAME.get(normalize(name.replace(/[*†‡]/g, "")));
+}
+
+const CONTINENTS = new Set<string>(["Africa", "Antarctica", "Asia", "Europe", "North America", "Oceania", "South America"]);
+export const isContinent = (region: Region): region is Continent => CONTINENTS.has(region);
+
+/**
+ * Whether a country is in a region. A transcontinental country (Russia, Turkey, Egypt, Kazakhstan) follows the
+ * source page's own scope: it is in only where the page lists it (`listed`, countries named by the table's rows),
+ * so Egypt is free on the Asian list and Turkey's cities other than Istanbul are free on the European one.
+ * Undefined for a name that is no known country.
+ */
+export function inRegion(country: string, region: Region, listed: ReadonlySet<string> = new Set()): boolean | undefined {
+  const c = countryOf(country);
+  if (!c) return undefined;
+  if (!isContinent(region)) return c.name === (countryOf(region)?.name ?? region);
+  if (c.continents.length > 1) return listed.has(c.name);
+  return c.continents[0] === region;
+}
+
+/**
+ * Some of the world's largest cities that are no capital, with their country: with the capitals, enough for
+ * scripts/validate.ts to tell when a regional city list has taken in the world's cities.
+ */
+export const MAJOR_CITIES: [string, string][] = [
+  ["Shanghai", "China"], ["Guangzhou", "China"], ["Shenzhen", "China"], ["Chongqing", "China"], ["Chengdu", "China"],
+  ["Mumbai", "India"], ["Kolkata", "India"], ["Bangalore", "India"], ["Chennai", "India"], ["Karachi", "Pakistan"],
+  ["Lahore", "Pakistan"], ["Osaka", "Japan"], ["Ho Chi Minh City", "Vietnam"], ["São Paulo", "Brazil"],
+  ["Rio de Janeiro", "Brazil"], ["New York City", "United States"], ["Los Angeles", "United States"],
+  ["Chicago", "United States"], ["Houston", "United States"], ["Lagos", "Nigeria"], ["Johannesburg", "South Africa"],
+  ["Alexandria", "Egypt"], ["Toronto", "Canada"], ["Sydney", "Australia"], ["Melbourne", "Australia"], ["Dubai", "United Arab Emirates"],
+];
+
+/** The countries a city is known to be in (as a capital, or one of MAJOR_CITIES); empty for any other name. */
+export function citysCountries(city: string): string[] {
+  const n = normalize(city);
+  return [
+    ...capitalPlaces().filter((c) => normalize(c.name) === n).map((c) => c.country!),
+    ...MAJOR_CITIES.filter(([name]) => normalize(name) === n).map(([, country]) => country),
+  ];
 }
 
 const US_STATES: [string, string][] = [
@@ -114,7 +235,7 @@ function teams(league: keyof typeof TEAMS): Place[] {
 
 export const UNIVERSES = {
   countries,
-  capitals: () => capitals().map((name) => ({ name, aliases: [] })),
+  capitals: capitalPlaces,
   "us-states": usStates,
   "nba-teams": () => teams("nba"),
   "nfl-teams": () => teams("nfl"),

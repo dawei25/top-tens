@@ -1,6 +1,47 @@
 import { describe, expect, it } from "vitest";
-import { datedLabel, datedValue, labelYear, lastYear, lowerParts, matchFacts, mergeIndex, rangeText, rankOf, sameKey, scaledFigure, skipName } from "./build";
+import { datedLabel, datedValue, labelYear, lastYear, lowerParts, matchFacts, mergeIndex, rangeText, rankOf, regionColumn, sameKey, scaledFigure, skipName } from "./build";
+import { inRegion, UNIVERSES } from "./gazetteer";
 import { COUNTRY_FORMS } from "./intent";
+
+describe("regional lists", () => {
+  it("keep a country to its continent, and a transcontinental one to where the page lists it", () => {
+    expect(inRegion("Japan", "Europe")).toBe(false);
+    expect(inRegion("Vatican City", "Europe")).toBe(true);
+    expect(inRegion("Czech Republic", "Europe")).toBe(true);
+    // Denmark reaches North America only by Greenland, listed apart: Copenhagen is Europe's.
+    expect(inRegion("Denmark", "Europe")).toBe(true);
+    // A breakaway state counts under its de jure country: Tiraspol (Transnistria) is Moldova's.
+    expect(inRegion("Transnistria", "Europe")).toBe(true);
+    expect(inRegion("Brazil", "Africa")).toBe(false);
+    // Egypt is free on the Asian list, whose table leaves it out; Turkey counts on Europe where the table lists it.
+    expect(inRegion("Egypt", "Asia")).toBe(false);
+    expect(inRegion("Turkey", "Europe")).toBe(false);
+    expect(inRegion("Turkey", "Europe", new Set(["Türkiye"]))).toBe(true);
+    expect(inRegion("China", "China")).toBe(true);
+    expect(inRegion("India", "China")).toBe(false);
+    expect(inRegion("Atlantis", "Europe")).toBeUndefined();
+  });
+
+  it("keep the capitals universe to the region's capitals", () => {
+    const europe = UNIVERSES.capitals().filter((c) => inRegion(c.country!, "Europe"));
+    expect(europe.map((c) => c.name)).toEqual(expect.arrayContaining(["Lisbon", "Vatican City", "Kyiv"]));
+    expect(europe.map((c) => c.name)).not.toEqual(expect.arrayContaining(["Tokyo"]));
+    expect(europe.map((c) => c.name)).not.toContain("Ankara");
+  });
+
+  it("take another page's rows by its country or its Country column, and fail a table that says neither", () => {
+    const topic = { id: "europe-cities", page: "Europe page", region: "Europe" };
+    const header = ["City", "Country", "Population"];
+    expect(regionColumn(topic, { page: "World page" }, header, 0)).toBe(1);
+    expect(regionColumn(topic, { page: "EU page" }, ["City", "Member state"], 0)).toBe(1);
+    expect(regionColumn(topic, { page: "UK page", country: "United Kingdom" }, ["City"], 0)).toBe(-1);
+    expect(regionColumn(topic, { page: "US page", country: "United States" }, ["City"], 0)).toBeNull();
+    // The topic's own page is its scope; a list without a region takes everything.
+    expect(regionColumn(topic, {}, ["City"], 0)).toBe(-1);
+    expect(regionColumn({ ...topic, region: undefined }, { page: "World page" }, ["City"], 0)).toBe(-1);
+    expect(() => regionColumn(topic, { page: "World page" }, ["City", "Population"], 0)).toThrow(/says no country/);
+  });
+});
 
 describe("matchFacts", () => {
   const fact = (source: string) => ({ text: "A fact.", source: `https://en.wikipedia.org/wiki/${source}` });

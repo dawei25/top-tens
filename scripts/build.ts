@@ -5,7 +5,7 @@ import { join } from "node:path";
 import type { Entry, Fact, Puzzle } from "../src/game/types";
 import { normalize } from "../src/game/match";
 import { cleanText, splitHeader, statNumber, tableGrid, wikitables, type Cell } from "./table";
-import { TEST_SET, TOPICS, type Dated, type Topic } from "./topics";
+import { TEST_SET, TOPICS, type Also, type Dated, type Topic } from "./topics";
 import { fetchCategory, fetchPage, fetchRedirects, pageUrl, requestCount } from "./wiki";
 import { addValues } from "./values";
 import { KNOWN_DIR, writeLexicon } from "./lexicon";
@@ -14,7 +14,7 @@ import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./int
 
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
-import { UNIVERSES, US_STATE_CODES, type Place } from "./gazetteer";
+import { countryOf, inRegion, UNIVERSES, US_STATE_CODES, type Place } from "./gazetteer";
 import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, placeholderName } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
@@ -569,6 +569,26 @@ function adoptDated(owner: Entry, e: Entry): void {
   DATED.set(owner, year);
 }
 
+/** A table's column naming each row's country. */
+const COUNTRY_COLUMN = /^(country|member state|sovereign state)\b/i;
+
+/**
+ * How a regional topic (`region`) reads another page's table: -1 takes every row (no region, the topic's own page,
+ * or a table of one country in the region), null none (one country outside it), else the column whose country
+ * decides each row. A table that says neither is an error: it would let in the world.
+ */
+export function regionColumn(topic: Pick<Topic, "id" | "page" | "region">, src: Pick<Also, "page" | "country">, header: string[], t: number): number | null {
+  if (!topic.region || (src.page ?? topic.page) === topic.page) return -1;
+  if (src.country) {
+    const inside = inRegion(src.country, topic.region);
+    if (inside === undefined) throw new Error(`${topic.id}: country "${src.country}" of ${src.page} is no country`);
+    return inside ? -1 : null;
+  }
+  const cc = header.findIndex((h) => COUNTRY_COLUMN.test(h));
+  if (cc < 0) throw new Error(`${topic.id}: ${src.page} table ${t} says no country (give it \`country\`), so it can't be kept to ${topic.region}`);
+  return cc;
+}
+
 /**
  * Unranked accepted answers from other tables (or pages): aliases from the cell and short forms, and the list's
  * stat when the source has a `value` column for it (only below `limit`, the last ranked row's number), or a rank
@@ -576,11 +596,21 @@ function adoptDated(owner: Entry, e: Entry): void {
  */
 async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
   const out: Entry[] = [];
+  let outside = 0;
+  /** Country cells that name no known country (left out): give them their country in gazetteer.ts. */
+  const unknown = new Set<string>();
   for (const src of topic.also ?? []) {
     const $ = await fetchPage(src.page ?? topic.page);
     const tables = wikitables($);
     for (const t of src.tables) {
       const { header, body } = splitHeader(tableGrid($, tables[t]));
+      // A regional list takes another page's rows from its region only (the source page's own are its scope): a
+      // whole table by its `country`, else row by row by the table's Country column.
+      const cc = regionColumn(topic, src, header, t);
+      if (cc === null) {
+        outside += body.length;
+        continue;
+      }
       const nc = column(header, src.name);
       const vc = src.value === undefined ? -1 : column(header, src.value);
       const rc = src.dated?.rank === undefined ? -1 : column(header, src.dated.rank);
@@ -595,6 +625,15 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const cell = r[nc];
         if (!cell || (cell.isHeader && !cell.text)) continue;
         if (src.where && !src.where.match.test(r[column(header, src.where.col)]?.text ?? "")) continue;
+        if (cc >= 0) {
+          const country = cleanName(r[cc]?.text ?? "");
+          const inside = inRegion(country, topic.region!);
+          if (inside === undefined && country) unknown.add(country);
+          if (inside !== true) {
+            outside++;
+            continue;
+          }
+        }
         // "Tencent 688,000": the figure follows the name in the same cell.
         const glued = src.dated?.figureInName ? cell.text.match(FIGURE_END) : null;
         const unglue = (s: string) => (src.dated?.figureInName ? s.replace(FIGURE_END, "") : s);
@@ -633,6 +672,8 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       }
     }
   }
+  if (outside) console.log(`     ${topic.id}: ${outside} rows of other pages outside ${topic.region} left out`);
+  if (unknown.size) console.log(`warn ${topic.id}: rows in no known country left out (gazetteer.ts): ${[...unknown].join(", ")}`);
   for (const cat of topic.universeCategories ?? []) {
     const titles = await fetchCategory(cat, topic.categoryDepth ?? 0, CATEGORY_CAP);
     if (!titles.length) console.log(`warn ${topic.id}: category "${cat}" is empty or missing`);
@@ -1010,11 +1051,17 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   // `universeNamesOnly`: the universe names the rows, but adds no answers of its own.
   // Members of a universe whose other names are nicknames (teams): those names belong to the row they merge with.
   const nicknamed = new Set<Entry>();
+  // A regional list's universe is its region's members (a capital by its country); a transcontinental country
+  // only where the table lists it.
+  const listed = new Set(rows.map((r) => countryOf(r.name)?.name).filter((n): n is string => !!n));
+  const regional = (p: Place) => !topic.region || inRegion(p.country ?? p.name, topic.region, listed) === true;
   for (const u of topic.universeNamesOnly ? [] : [topic.universe ?? []].flat()) {
     // A free row's other names count too: the table's "Macau" is the universe's "Macao".
     const free = new Set(unrankedRows(topic));
     for (const forms of COUNTRY_FORMS) if (forms.some((f) => free.has(normalize(f)))) for (const f of forms) free.add(normalize(f));
-    const members = UNIVERSES[u]().filter((p) => !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
+    const all = UNIVERSES[u]();
+    const members = all.filter((p) => regional(p) && !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
+    if (topic.region) console.log(`     ${topic.id}: ${all.filter((p) => !regional(p)).length} of ${all.length} ${u} outside ${topic.region} left out`);
     const added = members.map((p) => ({ rank: 0, ...p, aliases: [...p.aliases] }));
     if (TEAM_UNIVERSE.test(u)) for (const m of added) nicknamed.add(m);
     extra.push(...added);
