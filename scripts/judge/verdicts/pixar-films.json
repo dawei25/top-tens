@@ -1,22 +1,23 @@
 {
   "id": "pixar-films",
-  "by": "builder",
   "judgedAt": "2026-11-03",
   "decision": "daily-list",
   "alsoBlitz": true,
   "priority": 8,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 5, "fun": 4, "blitzDepth": 4 },
-  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
-  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
-  "blitzCasual": { "scored": 19, "named": 20 },
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": { "scored": 20, "named": 21 },
   "difficulty": 2,
   "tags": ["movies", "animation", "pixar"],
   "audience": "anyone",
-  "summary": "Written by the data agent at build time, pending a real judge. Every top 10 film is a household name, but the sequels beat the classics: Up is #11, Monsters, Inc. #16, the first Toy Story #21.",
+  "summary": "Every top 10 film is a household name, but sequels and recent hits beat the classics: Up is #11, Monsters, Inc. #16, the first Toy Story #21. Toy Story 5 at #3 keeps it current.",
   "reasons": [
-    "Casual found Finding Nemo, Inside Out 2, Incredibles 2, Coco, Toy Story 4 and Inside Out, and lost lives on the first Toy Story and The Incredibles (both offered with their sequels, confirmed as typed), Up, Monsters, Inc. and Cars. Typing the sequels first finds 8 or 9.",
-    "Every Pixar feature is an answer with its gross, so every miss shows a figure; other studios' films (Frozen, Shrek, Minions, Zootopia, Planes) and announced sequels (Incredibles 3, Coco 2) are free.",
-    "Blitz-ready with 31 films: a casual names about 20 in 90 seconds."
+    "Casual found 6 (Finding Nemo, Incredibles 2, Inside Out 2, Toy Story 3, Coco, Finding Dory) and lost lives on the classics: the first Toy Story (picked from the free 'toy story' menu), Up, Monsters, Inc., Cars and Ratatouille. Tapping a sequel from that menu instead finds 7. Every miss shows its gross, and 'sequels win' is a lesson players learn mid-game.",
+    "Sequels typed every way work ('toy story four', 'inside out two', 'the incredibles 2', 'finding nemo 2', 'monsters u'); 'toy story', 'finding' and 'inside' offer the films; 'pixar', 'disney' and other studios' films (Frozen, Shrek, Zootopia 2, Moana, Minions) are free.",
+    "The fan swept 10/10 without a miss; a casual Blitz names about 21 Pixar titles in 90 seconds and scores 20 (Frozen is free)."
   ],
-  "fixes": []
+  "fixes": [
+    "Finding Nemo (#7) shows $871,014,978, its 2003 run only, as the List of Pixar films box office table gives it, while that table's Toy Story and Toy Story 2 figures include re-releases. Its own article gives $940.3 million with the 2012 3D re-release. Monsters, Inc. ($528,773,250, $255.9 million domestic) also leaves out its 2012 re-release; its lifetime gross (about $577 million, check its article) would move it from #16 above Cars 2 and Brave. Top 10 and its order are unchanged: override these two values with lifetime grosses in scripts/topics.ts (pixar-films) at the next rebuild."
+  ]
 }
