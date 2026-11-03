@@ -359,17 +359,11 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-            {/* The score, then the list's Blitz key; on a narrow card the key drops under the score. */}
+            {/* The score, then the list's Blitz key; on a narrow card the key drops under the score. The players'
+                average waits for the results, where it says how you did. */}
             <span className="prompt-end">
-              <span className="count-wrap">
-                <span className="count" aria-label={`${game.found.length} of 10 found`}>
-                  <b>{game.found.length}</b>/10
-                </span>
-                {par && (
-                  <span className="count-par" data-testid="title-par" title={par.estimated ? "par: what a typical player gets (estimated)" : "par: what a typical player gets"}>
-                    par {par.par}
-                  </span>
-                )}
+              <span className="count" aria-label={`${game.found.length} of 10 found`}>
+                <b>{game.found.length}</b>/10
               </span>
               {blitzOpen && !over && (
                 <a className="key key-xs key-blitz-sm" data-testid="title-blitz" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
