@@ -1,4 +1,4 @@
-import { accountsOn, backendOn, PRIVACY_CONTACT } from "../../net/config";
+import { accountsOn, BACKEND, backendOn, PRIVACY_CONTACT } from "../../net/config";
 import { ScreenHead } from "../pixel";
 import "./account.css";
 
@@ -60,6 +60,9 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
           </h2>
           <ul>
             <li>Your email address, to sign you in. With Google, also the name and picture Google sends.</li>
+            {BACKEND?.signIn.includes("password") && (
+              <li>With a password, only a scrambled form of it (a hash) is stored. Nobody can read it back, us included.</li>
+            )}
             <li>
               Your save: the same games, streaks and bests this browser keeps, so they follow you to other devices.
             </li>

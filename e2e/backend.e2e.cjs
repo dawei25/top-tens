@@ -64,9 +64,19 @@ function stats(id, mode) {
   return { n: 120, counts: [2, 4, 8, 12, 16, 20, 18, 14, 12, 8, 6], avg: 5.2 };
 }
 
-/** Answer Supabase's endpoints, recording what the game sent. */
+/** Someone who signs up with an email and password. */
+const PW_USER = { ...USER, id: "22222222-2222-4222-8222-222222222222", email: "fox@example.com", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: {} };
+const PW_SESSION = { ...SESSION, user: PW_USER };
+const PASSWORD = "trustno1";
+/** Auth's refusals, as the server words them. */
+const refusal = (status, code, msg) => ({ status, body: { code: status, error_code: code, msg } });
+
+/**
+ * Answer Supabase's endpoints, recording what the game sent. Password sign-in knows one account (fox@example.com,
+ * trustno1); sign-up takes any new address, refuses taken@example.com, and asks confirm@example.com to confirm first.
+ */
 async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
-  const calls = { submit: [], stats: [], otp: [], authorize: [], saves: [], deleted: [] };
+  const calls = { submit: [], stats: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [] };
   let row = save;
   const cors = {
     "access-control-allow-origin": "*",
@@ -109,6 +119,24 @@ async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
       case "/auth/v1/otp":
         calls.otp.push(req.postDataJSON());
         return json(200, {});
+      case "/auth/v1/signup": {
+        const body = req.postDataJSON();
+        calls.signup.push(body);
+        if (body.email === "taken@example.com") {
+          const r = refusal(422, "user_already_exists", "User already registered");
+          return json(r.status, r.body);
+        }
+        if (body.email === "confirm@example.com") return json(200, { ...PW_USER, email: body.email, identities: [{}] });
+        return json(200, PW_SESSION);
+      }
+      case "/auth/v1/token": {
+        if (url.searchParams.get("grant_type") !== "password") return json(400, {});
+        const body = req.postDataJSON();
+        calls.password.push(body);
+        if (body.email === PW_USER.email && body.password === PASSWORD) return json(200, PW_SESSION);
+        const r = refusal(400, "invalid_credentials", "Invalid login credentials");
+        return json(r.status, r.body);
+      }
       case "/auth/v1/authorize":
         calls.authorize.push(url);
         return route.fulfill({ status: 200, contentType: "text/html", body: "<title>Google</title>" });
@@ -161,11 +189,12 @@ test("finished games are sent once, and results use real players from 50 (deskto
   await page.getByTestId("give-up").click();
   await page.getByTestId("give-up").click();
 
-  // Real numbers: 120 players, no "est." mark.
+  // Real numbers: 120 players averaging 5.2, their spread, and no "(estimated)".
   const block = page.locator('[data-testid="results"] [data-testid="par"][data-source="players"]');
   await block.waitFor();
   assert.equal(await block.getAttribute("data-n"), "120");
-  assert.equal(await block.getByRole("button", { name: /^est\./ }).count(), 0);
+  assert.equal(await block.getAttribute("data-par"), "5.2");
+  assert.equal(await block.getByTestId("histogram").locator("[data-par]").getAttribute("data-score"), "5");
   assert.equal(await block.getByTestId("histogram").locator("[data-you]").getAttribute("data-score"), "2");
 
   await until(() => calls.submit.length > 0);
@@ -220,10 +249,15 @@ test("sign-in key, sheet and privacy page (desktop)", async () => {
   await key.waitFor();
   assert.equal(await key.getAttribute("data-signed-in"), null);
 
-  // The sheet: an email link.
+  // The sheet: every method this build offers (google,email,password); the password form first, a link one press away.
   await key.click();
   const sheet = page.getByRole("dialog", { name: "Sign in" });
   await sheet.waitFor();
+  await page.getByTestId("sign-in-google").waitFor();
+  await page.locator('[data-testid="sign-in-password-form"][data-mode="in"]').waitFor();
+  assert.equal(await page.getByTestId("sign-in-email").count(), 0);
+  await page.getByTestId("sign-in-switch").click();
+  assert.equal(await page.getByTestId("sign-in-password-form").count(), 0);
   await page.getByTestId("sign-in-email").fill("dana@example.com");
   await page.getByTestId("sign-in-send").click();
   await page.getByTestId("sign-in-sent").waitFor();
@@ -251,6 +285,116 @@ test("sign-in key, sheet and privacy page (desktop)", async () => {
   assert.equal(auth.searchParams.get("provider"), "google");
   assert.equal(auth.searchParams.get("redirect_to"), base);
   assert.ok(auth.searchParams.get("code_challenge"));
+  await ctx.close();
+});
+
+test("email and password: refusals in plain words, confirm-first, create an account and sync (phone)", async () => {
+  const mine = { id: "islands", startedAt: NOW.getTime() - 3_600_000, finishedAt: NOW.getTime() - 3_300_000, status: "lost", found: [1, 2, 3], lives: 0, hints: 0 };
+  const { ctx, page, calls } = await open(phone, "", { "top-tens:v1": { games: {}, daily: {}, seenHelp: true, listRuns: [mine] } });
+  const key = page.getByTestId("account-key");
+  await key.click();
+  const form = page.getByTestId("sign-in-password-form");
+  await form.waitFor();
+  const sheet = page.getByTestId("sign-in-sheet");
+  const box = await sheet.boundingBox();
+  assert.ok(box.x >= 0 && box.x + box.width <= phone.viewport.width + 0.5);
+  assert.ok(await noHScroll(page));
+  // No reset by email yet: the sheet says who to ask (the privacy contact).
+  assert.equal(await page.getByTestId("sign-in-forgot").getByRole("link").getAttribute("href"), "mailto:privacy@example.com");
+  const email = page.getByTestId("sign-in-pw-email");
+  const password = page.getByTestId("sign-in-password");
+  const submit = page.getByTestId("sign-in-password-submit");
+  const error = page.getByTestId("sign-in-error");
+
+  // A wrong password: refused, nothing else happens.
+  await email.fill("fox@example.com");
+  await password.fill("wrong one");
+  assert.equal(await password.getAttribute("type"), "password");
+  await page.getByTestId("sign-in-show-password").click();
+  assert.equal(await password.getAttribute("type"), "text");
+  await submit.click();
+  await error.waitFor();
+  assert.deepEqual(calls.password, [{ email: "fox@example.com", password: "wrong one", gotrue_meta_security: {} }]);
+  assert.equal(await key.getAttribute("data-signed-in"), null);
+
+  // Create an account: too short is caught here; a taken address and a confirm-first project are explained.
+  await page.getByTestId("sign-in-mode").click();
+  await page.locator('[data-testid="sign-in-password-form"][data-mode="up"]').waitFor();
+  assert.equal(await page.getByTestId("sign-in-forgot").count(), 0);
+  assert.equal(await password.getAttribute("autocomplete"), "new-password");
+  await password.fill("abc");
+  await submit.click();
+  await error.waitFor();
+  assert.equal(calls.signup.length, 0);
+  await email.fill("taken@example.com");
+  await password.fill(PASSWORD);
+  await submit.click();
+  await until(() => calls.signup.length === 1);
+  await error.waitFor();
+  await email.fill("confirm@example.com");
+  await submit.click();
+  await page.getByTestId("sign-in-confirm").waitFor();
+  await page.locator('[data-testid="sign-in-password-form"][data-mode="in"]').waitFor();
+  assert.equal(await key.getAttribute("data-signed-in"), null);
+
+  // A new account: signed in at once, the sheet closes, and this device's games go to the account.
+  await page.getByTestId("sign-in-mode").click();
+  await email.fill("fox@example.com");
+  await password.fill(PASSWORD);
+  await submit.click();
+  await page.locator('[data-testid="account-key"][data-signed-in="true"]').waitFor();
+  await sheet.waitFor({ state: "detached" });
+  const sent = calls.signup.at(-1);
+  assert.equal(sent.email, "fox@example.com");
+  assert.equal(sent.password, PASSWORD);
+  await until(() => calls.saves.some((c) => c.method === "POST"));
+  assert.deepEqual(calls.saves.find((c) => c.method === "POST").body.data.listRuns.map((r) => r.id), ["islands"]);
+  assert.ok(await noHScroll(page));
+  await ctx.close();
+});
+
+test("email and password: sign in to an existing account (desktop)", async () => {
+  const { ctx, page, calls } = await open(desktop, "#stats", FRESH);
+  await page.locator('[data-testid="account-panel"][data-signed-in="false"]').waitFor();
+  await page.getByTestId("account-sign-in").click();
+  await page.getByTestId("sign-in-pw-email").fill("fox@example.com");
+  await page.getByTestId("sign-in-password").fill(PASSWORD);
+  await page.getByTestId("sign-in-password").press("Enter");
+  await page.locator('[data-testid="account-panel"][data-signed-in="true"]').waitFor();
+  assert.equal(await page.getByTestId("account-name").textContent(), "fox");
+  assert.equal(calls.password.length, 1);
+  assert.equal(calls.signup.length, 0);
+  await ctx.close();
+});
+
+// The suite's main build has no backend env (run.mjs clears it): it must stay a plain static game.
+test("a build without the env vars sends nothing anywhere and offers no sign-in", { skip: !process.env.E2E_URL }, async () => {
+  const ctx = await browser.newContext({ viewport: desktop.viewport, timezoneId: "America/New_York" });
+  const outside = [];
+  ctx.on("request", (r) => {
+    const host = new URL(r.url()).hostname;
+    // The page's own server, and the font (Google Fonts), are all a plain build talks to.
+    if (!["localhost", "127.0.0.1", "fonts.googleapis.com", "fonts.gstatic.com"].includes(host)) outside.push(r.url());
+  });
+  await ctx.addInitScript((save) => localStorage.setItem("top-tens:v1", JSON.stringify(save)), FRESH["top-tens:v1"]);
+  const page = await ctx.newPage();
+  await page.clock.install({ time: NOW });
+  const url = process.env.E2E_URL;
+  await page.goto(url + "#p-mountains");
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("give-up").click();
+  await page.locator('[data-testid="results"] [data-testid="par"][data-source="estimate"]').waitFor();
+  await page.goto(url);
+  await page.getByTestId("stats-key").waitFor();
+  assert.equal(await page.getByTestId("account-key").count(), 0);
+  assert.equal(await page.getByTestId("privacy-link").count(), 0);
+  await page.goto(url + "#stats");
+  await page.getByTestId("knowledge").waitFor();
+  await settle();
+  assert.equal(await page.getByTestId("account-panel").count(), 0);
+  assert.deepEqual(outside, []);
+  const keys = await page.evaluate(() => Object.keys(localStorage).sort());
+  assert.deepEqual(keys, ["top-tens:v1"]);
   await ctx.close();
 });
 

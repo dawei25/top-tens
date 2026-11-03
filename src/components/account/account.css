@@ -99,6 +99,19 @@
     0 0 0 3px var(--cyan-glow),
     0 0 18px rgba(77, 227, 255, 0.18);
 }
+/* A field's label with a small control on the right (the password's show / hide). */
+.sheet-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sheet-field-head .text-btn {
+  min-height: 28px;
+}
+.sheet-switch {
+  align-self: flex-start;
+}
 .sheet-note {
   font-size: 18px;
   letter-spacing: 0.04em;
