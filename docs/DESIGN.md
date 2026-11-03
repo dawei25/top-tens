@@ -49,7 +49,7 @@ Puzzles are prebuilt from Wikipedia tables (`scripts/topics.ts`, `scripts/build.
 with every table row as an accepted answer, aliases from redirects, and a source link with an "as of" date.
 Modes: daily (Today's list and Today's Blitz, from `public/puzzles/daily.json`) and free play (a random list or Blitz,
 optionally by category). **Dailies are one try each**, archive dailies included: a finished daily always reopens on
-its result. Free play is endless: Play again rolls a new random game, keeping the category if one was picked, and
+its result. Free play is endless: Roll again rolls a new random game, keeping the category if one was picked, and
 prefers lists the player hasn't played in that mode.
 
 **Separate topics.** Today's list and Today's Blitz are different lists, because a good list rewards knowing the
@@ -73,8 +73,10 @@ Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
    A finished daily offers Today's Blitz and Random list instead. The archive is a table, one row per date: number and
    date, then a List cell and a Blitz cell (title, and score or "not played" under it), with "List" and "Blitz" named
    once at the top; each cell opens its own one-try game.
-4. **How to play** on first visit.
-5. **Stats** (`#stats`, Your knowledge): list games against par, overall, by category and by topic; placeholders
+4. **Past runs:** every game played; a finished run offers Play again (a fresh free game on that same list), except
+   on a list held today (today's pair or a future day's): "back in free play after its day".
+5. **How to play** on first visit.
+6. **Stats** (`#stats`, Your knowledge): first tries on each list against the players' average, overall, by category and by topic; placeholders
    before the first game.
 
 ## 5. Visual direction: Krillion's language, arcade high-score table
