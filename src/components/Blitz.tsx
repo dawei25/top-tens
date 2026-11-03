@@ -61,7 +61,7 @@ interface Props {
   onBack: () => void;
   onHome: () => void;
   /**
-   * A fresh round on another random open Blitz list: Play again after a round, Random Blitz after Today's Blitz.
+   * A fresh round on another random open Blitz list: Roll again after a round, Random Blitz after Today's Blitz.
    * Missing when no other list is open.
    */
   onRoll?: () => void;
@@ -618,7 +618,7 @@ export function Blitz({
               </p>
             ))}
         </div>
-        {/* A date's Blitz is one round: no Play again there, a random Blitz instead. */}
+        {/* A date's Blitz is one round: no Roll again there, a Random Blitz instead. */}
         <div className="results-actions">
           {!locked?.gone && (
             <button className="key key-gold" onClick={share}>
@@ -637,8 +637,9 @@ export function Blitz({
                 Random Blitz
               </button>
             ) : (
+              // A new random Blitz list, never this one again (so not "Play again").
               <button className="key" data-testid="blitz-again" onClick={onRoll} autoFocus>
-                Play again
+                Roll again
               </button>
             ))}
           {!hold && theList && (

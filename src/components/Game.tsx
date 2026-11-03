@@ -39,7 +39,7 @@ interface Props {
   lexicon?: Lexicon;
   onBack: () => void;
   onHome: () => void;
-  /** A fresh random list: Play again on a random list, Random list on a finished daily. */
+  /** A fresh random list: Roll again on a random list, Random list on a finished daily. */
   onRoll: () => void;
   /** Today's Blitz, while it's unplayed (a finished daily offers it). */
   onDailyBlitz?: () => void;
@@ -642,7 +642,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button ref={shareRef} className="key key-pink" onClick={share}>
                   {copied ? "Copied" : "Share"}
                 </button>
-                {/* A daily is one try: no Play again, just somewhere else to go. Today's Blitz list offers that round. */}
+                {/* A daily is one try: no replay, just somewhere else to go. Today's Blitz list offers that round. */}
                 {(daily || heldBlitz) && onDailyBlitz && (
                   <button className="key key-blitz" data-testid="results-daily-blitz" onClick={onDailyBlitz}>
                     Today's Blitz
@@ -659,8 +659,9 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     Random list
                   </button>
                 ) : (
+                  // Free play: a new random list, never this one again (so not "Play again").
                   <button className="key" data-testid="play-again" onClick={onRoll}>
-                    Play again
+                    Roll again
                   </button>
                 )}
               </div>
