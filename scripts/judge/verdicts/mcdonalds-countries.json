@@ -1,22 +1,21 @@
 {
   "id": "mcdonalds-countries",
-  "by": "builder",
-  "judgedAt": "2026-11-02",
+  "judgedAt": "2026-11-03",
   "decision": "daily-blitz",
   "alsoBlitz": true,
-  "priority": 6,
-  "scores": { "recognizability": 5, "curve": 2, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 5 },
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 2, "fairness": 4, "data": 5, "fun": 3, "blitzDepth": 5 },
   "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
   "fan": null,
-  "blitzCasual": { "scored": 31, "named": 34 },
+  "blitzCasual": { "scored": 31, "named": 32 },
   "difficulty": 1,
-  "tags": ["food", "fast food", "geography"],
+  "tags": ["food", "geography", "fast food"],
   "audience": "anyone",
-  "summary": "Written by the data agent at build time, pending a real judge. The big rich countries are all there, so a casual player finds 9 (all but the Philippines): too easy for Today's list, but a deep Blitz, since almost any country scores.",
+  "summary": "Eight of the ten are the big rich countries anyone types first, so a casual player finds 9: too easy for Today's list. As a Blitz it is excellent, since nearly every country a player can name scores.",
   "reasons": [
-    "Casual found 9 and ran out on Mexico (#19), Russia, India (#12), Italy (#11) and Spain (#13), each showing its count; Russia shows 850 (all closed in 2022).",
-    "Blitz: 31 of 34 casual names scored. A country McDonald's never opened in (North Korea, Nigeria) is free, not a miss.",
-    "Figures are McDonald's own counts at the end of 2025."
+    "Casual found 9 (all but the Philippines) and ran out on Mexico (#19), Russia (850, all closed in 2022), India (#12), Italy (#11) and Spain (#13); every miss shows its count, so the misses teach something.",
+    "Blitz: 31 of 32 casual names scored; only Russia scored nothing. One clean source (McDonald's own counts, December 31, 2025), all ten facts present.",
+    "Common forms work (america, england, holland, korea, phillipines), and the subject words (mcdonalds, burger, restaurants, united, south) hand over nothing."
   ],
   "fixes": []
 }
