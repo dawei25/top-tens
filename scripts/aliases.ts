@@ -299,6 +299,12 @@ export const CELEBRITY_JUNK = [
   // Instagram's own account: features, users and studies of the app (on the Instagram and Facebook lists).
   "Instagram Stories", "Instagram story", "Instagram Direct", "Instagram Live", "Effects of Instagram on mental health",
   "Instagram impact on people", "Instagrammer", "Instagram blogger", "Instagram Kids", "Instagram from Facebook", "Ig.me",
+  // Brand accounts: FC Barcelona's board members and eras, Netflix's algorithm, studios, spin-offs and fan sites,
+  // Samsung's scandals and models (on every follower list, not just the Facebook one).
+  "Carles Vilarrubi Carrio", "Johan Cruyff's Dream Team", "FC Barcelona trophies", "Cinematch", "Qwikster", "Quikster",
+  "Fast.com", "Magic Quill Productions", "FLIXPAC", "UNoGS", "Unofficial Netflix Online Global Search",
+  "Still Watching Netflix", "Netflix machine", "Controversies surrounding Samsung", "Democratic People's Republic of Samsung",
+  "Republic of Samsung", "Samsung Wave M", "SAMSUNG WB750", "ES70",
 ];
 
 /**
