@@ -1,6 +1,6 @@
-// Play again on a past run: a finished game opened again (a list's results from Past runs, a Blitz run's view) leads
-// with Play again, a fresh free game on that same list. Not on results that just ended (Roll again is the way on
-// there), and never for a list held right now (today's list or Blitz, or a future day's): a quiet line instead.
+// Play again on a past run: a run opened from Past runs (a list run's view, a Blitz run's view) leads with Play again,
+// a fresh free game on that same list. Not on results that just ended (Roll again is the way on there), and never for
+// a list held right now (today's list or Blitz, or a future day's): a quiet line instead.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, TODAY, open, go, hash, store, guess, puzzle, noHScroll } = require("./helpers.cjs");
@@ -19,10 +19,11 @@ async function giveUp(page) {
   await page.getByTestId("results").waitFor();
 }
 
-/** Past runs, then the row that opens `href`. */
+/** Past runs, then the row that opens `href` (or, for a list, the newest row whose href starts with `#p-<id>/run-`). */
 async function openRun(page, href) {
   await go(page, "#history");
-  await page.locator(`[data-testid="history-row"][href="${href}"]`).first().click();
+  const sel = href.startsWith("#p-") ? `[href^="${href}/run-"]` : `[href="${href}"]`;
+  await page.locator(`[data-testid="history-row"]${sel}`).first().click();
 }
 
 for (const vp of VIEWPORTS) {
@@ -35,8 +36,9 @@ for (const vp of VIEWPORTS) {
     await giveUp(page);
     assert.equal(await page.getByTestId("replay").count(), 0);
 
-    // Opened again from Past runs: Play again starts a fresh game on the same list; the old run stays in the history.
+    // Its run view from Past runs: Play again starts a fresh game on the same list; the old run stays in the history.
     await openRun(page, `#p-${LIST}`);
+    await page.getByTestId("run-view").waitFor();
     await page.getByTestId("replay").waitFor();
     assert.equal(await page.getByTestId("replay-held").count(), 0);
     assert.ok(await noHScroll(page));
@@ -71,7 +73,8 @@ for (const vp of VIEWPORTS) {
     await page.getByTestId("today-list").click();
     await page.getByTestId("give-up").waitFor();
     await giveUp(page);
-    await openRun(page, `#daily-${TODAY}`);
+    await openRun(page, `#p-${(await store(page)).dailyGames[TODAY].puzzleId}`);
+    await page.getByTestId("run-view").waitFor();
     await page.getByTestId("replay-held").waitFor();
     assert.equal(await page.getByTestId("replay").count(), 0);
 

@@ -3,9 +3,11 @@ import { Home } from "./components/Home";
 import { Archive } from "./components/Archive";
 import { Blitz } from "./components/Blitz";
 import { History } from "./components/History";
+import { ListRun } from "./components/ListRun";
 import { Knowledge } from "./components/Knowledge";
 import { Ocean } from "./components/ocean";
 import { Game, Loading } from "./components/Game";
+import { shortDate } from "./components/pixel";
 import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
 import { blitzAvailable, freshBlitz } from "./game/blitz";
@@ -30,6 +32,7 @@ type Route =
   | { screen: "archive" }
   | { screen: "daily"; date: string }
   | { screen: "game"; id: string }
+  | { screen: "listrun"; id: string; run: number }
   | { screen: "blitz"; id: string; runs: boolean; run?: number }
   | { screen: "history" }
   | { screen: "stats" }
@@ -51,6 +54,9 @@ function readHash(): Route {
   if (blitz) return { screen: "blitz", id: blitz[1], runs: blitz[2] === "/runs", run: blitz[3] ? Number(blitz[3]) : undefined };
   const date = h.match(/^#daily-(\d{4}-\d{2}-\d{2})$/);
   if (date) return { screen: "daily", date: date[1] };
+  // One finished list game from Past runs (dailies too): #p-<id>/run-<startedAt>.
+  const listRun = h.match(/^#p-([\w-]+?)\/run-(\d+)$/);
+  if (listRun) return { screen: "listrun", id: listRun[1], run: Number(listRun[2]) };
   const m = h.match(/^#(daily|p)-([\w-]+)/);
   if (!m) return { screen: "home" };
   // Old daily links named the list itself: play it as a roll.
@@ -60,12 +66,13 @@ function readHash(): Route {
 
 /**
  * One step up from a screen when there's no in-app previous screen to return to (a shared or reloaded link):
- * a past Blitz run -> that list's Blitz screen with its past runs open; an old daily -> the archive;
- * everything else -> home.
+ * a past Blitz run -> that list's Blitz screen with its past runs open; a past list run -> Past runs; an old daily
+ * -> the archive; everything else -> home.
  */
 function parentOf(hash: string, today: string): string {
   const run = hash.match(/^(#(?:blitz|dailyblitz)-[\w-]+?)\/run-\d+$/);
   if (run) return `${run[1]}/runs`;
+  if (/^#p-[\w-]+?\/run-\d+$/.test(hash)) return "#history";
   const daily = hash.match(/^#daily-(\d{4}-\d{2}-\d{2})$/);
   if (daily && daily[1] < today) return "#archive";
   return "";
@@ -246,7 +253,21 @@ function Screens() {
   }
 
   if (route.screen === "history") {
-    return <History index={index} schedule={schedule} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;
+    return <History index={index} schedule={schedule} today={today} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;
+  }
+
+  if (route.screen === "listrun") {
+    return (
+      <ListRun
+        key={`${route.id}/${route.run}`}
+        id={route.id}
+        meta={index.find((p) => p.id === route.id)}
+        startedAt={route.run}
+        onBack={back}
+        onHome={home}
+        onReplay={replay("list", route.id)}
+      />
+    );
   }
 
   if (route.screen === "stats") {
@@ -258,7 +279,7 @@ function Screens() {
     // was played (the pick for an old date can move as the schedule and the lists grow).
     const saved = load();
     const id = route.date > today ? undefined : (saved.blitzDaily?.[route.date]?.id ?? blitzOfTheDay(schedule, index, route.date));
-    if (!id) return <NoList text={`There's no Blitz for ${route.date} yet.`} onHome={home} />;
+    if (!id) return <NoList text={`There's no Blitz for ${shortDate(route.date, today)} yet.`} onHome={home} />;
     const n = (entryForDate(schedule, route.date) ?? todayEntry(schedule, route.date))?.n ?? 0;
     return (
       <Blitz
@@ -289,7 +310,7 @@ function Screens() {
     const entry = route.screen === "daily" ? entryForDate(schedule, route.date) : undefined;
     // A daily from the future (or a date with no list) isn't playable yet.
     if (route.screen === "daily" && (!entry || entry.date > today)) {
-      return <NoList text={`There's no daily for ${route.date} yet.`} onHome={home} />;
+      return <NoList text={`There's no daily for ${shortDate(route.date, today)} yet.`} onHome={home} />;
     }
     const id = entry ? entry.id : (route as { id: string }).id;
     return (

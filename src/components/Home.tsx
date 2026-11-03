@@ -4,7 +4,7 @@ import { dailyGame as dailyGameOf, streak, type DailyEntry } from "../game/daily
 import { load, save, stats } from "../game/storage";
 import { recentPlays } from "../game/history";
 import { Countdown } from "./Countdown";
-import { HowToPlay, markHelpSeen } from "./HowToPlay";
+import { HowToPlay } from "./HowToPlay";
 import { EnterHint, TipLabel, type Mode } from "./pixel";
 import { STREAK_NOTE } from "./copy";
 import { SoundToggle } from "./sound/SoundToggle";
@@ -60,11 +60,22 @@ function ModeKey({
 
 type Pick = "list" | "blitz";
 
-/** Categories in index order, with how many lists each has. */
-function countByCategory(lists: PuzzleMeta[]): [string, number][] {
+/** A record number before there is one. */
+const NONE = (
+  <>
+    <span aria-hidden="true">--</span>
+    <span className="sr-only">none yet</span>
+  </>
+);
+
+/**
+ * The categories `lists` covers, with how many lists each has, in one order for both pickers: the order categories
+ * first appear in the full index (the Blitz lists open right now would order them differently).
+ */
+function countByCategory(index: PuzzleMeta[], lists: PuzzleMeta[]): [string, number][] {
   const counts = new Map<string, number>();
   for (const m of lists) counts.set(m.category, (counts.get(m.category) ?? 0) + 1);
-  return [...counts];
+  return [...new Set(index.map((m) => m.category))].flatMap((c) => (counts.has(c) ? [[c, counts.get(c)!] as [string, number]] : []));
 }
 
 interface Props {
@@ -108,11 +119,13 @@ export function Home({
   const saved = load();
   const s = stats(saved);
   const st = streak(saved);
+  /** No list game finished yet: the record shows placeholders. */
+  const fresh = s.played === 0 && st.best === 0;
   /** The "days in a row" note under the record, opened by tap, click or keyboard. */
   const [streakNote, setStreakNote] = useState(false);
-  // The rules stay closed until asked for, even on a first visit.
+  // The rules stay closed until asked for, even on a first visit; they open as a dialog over the page.
   const [help, setHelp] = useState(false);
-  const [helpAsked, setHelpAsked] = useState(false);
+  const helpKey = useRef<HTMLButtonElement>(null);
   const dailyRef = useRef<HTMLButtonElement>(null);
   const blitzRef = useRef<HTMLButtonElement>(null);
   const dailyGame = entry && dailyGameOf(saved, entry);
@@ -209,14 +222,9 @@ export function Home({
     setVersion((v) => v + 1);
     focusDaily();
   };
-  const listCats = countByCategory(index);
-  const blitzCats = countByCategory(blitzLists);
+  const listCats = countByCategory(index, index);
+  const blitzCats = countByCategory(index, blitzLists);
 
-  // Starting a game with the rules on screen counts as having seen them.
-  const start = (fn: () => void) => () => {
-    if (help) markHelpSeen();
-    fn();
-  };
   const blitzRoll = (category?: string) => {
     setNoBlitz(false);
     onBlitz(category).then((ok) => setNoBlitz(!ok));
@@ -304,12 +312,12 @@ export function Home({
           data-testid="category"
           data-mode={kind}
           data-category={c}
-          onClick={start(() => {
+          onClick={() => {
             setPicker(null);
             strip.current?.focus({ preventScroll: true });
             if (kind === "list") onRoll(c);
             else blitzRoll(c);
-          })}
+          }}
         >
           {c} <span className="cat-n">{n}</span>
         </button>
@@ -329,20 +337,19 @@ export function Home({
 
       {help && (
         <HowToPlay
-          scroll={helpAsked}
           onClose={() => {
             setHelp(false);
-            focusDaily();
+            helpKey.current?.focus({ preventScroll: true });
           }}
         />
       )}
 
-      <section className="home-group" data-glass aria-labelledby="today-title">
+      <section className="home-group" data-glass data-testid="today-group" aria-labelledby="today-title">
         <div className="group-head">
           <h2 id="today-title" className="label">
-            Today{entry ? ` · no. ${entry.n}` : ""}
+            Today{entry ? ` · #${entry.n}` : ""}
           </h2>
-          <Countdown label="new lists in" />
+          <Countdown />
         </div>
         <div className="today-stack">
           <ModeKey
@@ -354,7 +361,7 @@ export function Home({
             status={!entry ? "none yet" : dailyDone ? `${dailyGame.found.length}/10` : dailyGame ? "playing" : "new"}
             done={dailyDone}
             disabled={!entry}
-            onClick={start(onDaily)}
+            onClick={onDaily}
           />
           {hasDailyBlitz && (
             <ModeKey
@@ -365,7 +372,7 @@ export function Home({
               title="Today's Blitz"
               status={dailyBlitzDone ? `${dailyBlitzDone.score} pts` : "new"}
               done={!!dailyBlitzDone}
-              onClick={start(onDailyBlitz)}
+              onClick={onDailyBlitz}
             />
           )}
         </div>
@@ -388,7 +395,7 @@ export function Home({
                 testId="random-list"
                 title="Random list"
                 status={`${index.length} lists`}
-                onClick={start(() => onRoll())}
+                onClick={() => onRoll()}
               />,
               listCats,
               listStrip,
@@ -400,7 +407,7 @@ export function Home({
                 testId="random-blitz"
                 title="Random Blitz"
                 status={`${blitzLists.length} lists`}
-                onClick={start(() => blitzRoll())}
+                onClick={() => blitzRoll()}
               />,
               blitzCats,
               blitzStrip,
@@ -414,13 +421,13 @@ export function Home({
             Your games
           </h2>
           <div className="games-row">
-            <button className="key key-sm games-key" data-testid="archive-key" onClick={start(onArchive)}>
+            <button className="key key-sm games-key" data-testid="archive-key" onClick={onArchive}>
               Archive <span className="games-n">{archiveCount}</span>
             </button>
             <button
               className="key key-sm games-key"
               data-testid="history-key"
-              onClick={start(() => (location.hash = "#history"))}
+              onClick={() => (location.hash = "#history")}
             >
               Past runs {plays > 0 && <span className="games-n">{plays}</span>}
             </button>
@@ -428,7 +435,7 @@ export function Home({
             <button
               className="key key-sm games-key"
               data-testid="stats-key"
-              onClick={start(() => (location.hash = "#stats"))}
+              onClick={() => (location.hash = "#stats")}
             >
               Stats
             </button>
@@ -436,75 +443,75 @@ export function Home({
         </section>
       </div>
 
-      {/* Also with only past runs (a list rolled again starts fresh). */}
-      {(s.played > 0 || st.best > 0 || !!saved.listRuns?.length) && (
-        <section data-glass className="panel home-stats" aria-labelledby="stats-title">
-          <div className="group-head">
-            <h2 id="stats-title" className="label">
-              Your record
-            </h2>
+      {/* Always here: before the first list game every number is a placeholder. */}
+      <section
+        data-glass
+        className="home-group home-stats"
+        data-testid="home-record"
+        data-empty={fresh || undefined}
+        aria-labelledby="stats-title"
+      >
+        <div className="group-head">
+          <h2 id="stats-title" className="label">
+            Your record
+          </h2>
+        </div>
+        <dl className="stat-row">
+          <div>
+            <dt>played</dt>
+            <dd>{fresh ? NONE : s.played}</dd>
           </div>
-          <dl className="stat-row">
-            <div>
-              <dt>played</dt>
-              <dd>{s.played}</dd>
-            </div>
-            <div>
-              <dt>avg / 10</dt>
-              <dd>{s.avgFound.toFixed(1)}</dd>
-            </div>
-            <div>
-              <dt>perfect</dt>
-              <dd className="gold">{s.perfect}</dd>
-            </div>
-            <div>
-              <dt>
-                <TipLabel
-                  label="days in a row"
-                  note={STREAK_NOTE}
-                  open={streakNote}
-                  onToggle={() => setStreakNote((o) => !o)}
-                  controls="home-streak-note"
-                  testId="streak-tip"
-                />
-              </dt>
-              <dd className="pink">{st.current}</dd>
-            </div>
-            <div>
-              <dt>most in a row</dt>
-              <dd>{st.best}</dd>
-            </div>
-          </dl>
-          <p id="home-streak-note" className="tip-note" hidden={!streakNote}>
-            {STREAK_NOTE.toLowerCase()}
-          </p>
-        </section>
-      )}
+          <div>
+            <dt>avg / 10</dt>
+            <dd>{s.played ? s.avgFound.toFixed(1) : NONE}</dd>
+          </div>
+          <div>
+            <dt>perfect</dt>
+            <dd className="gold">{fresh ? NONE : s.perfect}</dd>
+          </div>
+          <div>
+            <dt>
+              <TipLabel
+                label="days in a row"
+                note={STREAK_NOTE}
+                open={streakNote}
+                onToggle={() => setStreakNote((o) => !o)}
+                controls="home-streak-note"
+                testId="streak-tip"
+              />
+            </dt>
+            <dd className="pink">{fresh ? NONE : st.current}</dd>
+          </div>
+          <div>
+            <dt>most in a row</dt>
+            <dd>{fresh ? NONE : st.best}</dd>
+          </div>
+        </dl>
+        <p id="home-streak-note" className="tip-note" hidden={!streakNote}>
+          {STREAK_NOTE.toLowerCase()}
+        </p>
+      </section>
 
-      <footer className="home-foot" data-glass>
-        {!help && (
-          <button
-            className="key key-sm"
-            data-testid="help-open"
-            onClick={() => {
-              setHelpAsked(true);
-              setHelp(true);
-            }}
-          >
-            How to play
-          </button>
-        )}
+      <footer className="home-foot" data-glass data-testid="home-foot">
+        {/* Stays put while the rules are open (they float over the page). */}
+        <button ref={helpKey} type="button" className="key key-sm" data-testid="howto-key" aria-haspopup="dialog" onClick={() => setHelp(true)}>
+          How to play
+        </button>
         <span className="home-foot-end">
           <span className="caption">data from wikipedia</span>
           {hasProgress && (
+            // Both words are always laid out, one hidden, so the key keeps its width while it asks (a second tap
+            // lands on it).
             <button
               type="button"
-              className={`text-btn ${confirmReset ? "danger" : ""}`}
+              className={`text-btn swap-btn ${confirmReset ? "danger" : ""}`}
               data-testid="reset-all"
+              data-armed={confirmReset || undefined}
               onClick={resetAll}
               onBlur={() => setConfirmReset(false)}
             >
-              {confirmReset ? "sure?" : "reset all progress"}
+              <span data-off={confirmReset || undefined}>reset all progress</span>
+              <span data-off={!confirmReset || undefined}>sure?</span>
             </button>
           )}
         </span>

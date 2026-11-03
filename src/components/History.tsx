@@ -1,21 +1,23 @@
 import { isDailyBlitzRun } from "../game/blitz";
-import { entryForDate, todayEntry, type DailyEntry } from "../game/daily";
+import { entryForDate, localDate, todayEntry, type DailyEntry } from "../game/daily";
 import { recentPlays, type Play } from "../game/history";
 import type { PuzzleMeta } from "../game/puzzles";
 import { load, type Saved } from "../game/storage";
-import { runTime } from "./Blitz";
-import { ScreenHead, ModeTag } from "./pixel";
+import { ScreenHead, shortDate } from "./pixel";
 import { usePar, vsParText } from "./par";
 
 interface Props {
   index: PuzzleMeta[];
   schedule: DailyEntry[];
+  /** The player's local date, for the day headers (Today, Yesterday). */
+  today: string;
   /** Today's daily, for the empty state's key. */
   entry?: DailyEntry;
   onBack: () => void;
   onHome: () => void;
 }
 
+/** The score first, then how it ended. */
 function result(p: Play): { text: string; tone: string } {
   if (p.kind === "blitz") {
     const k = p.run.hits.length;
@@ -23,9 +25,9 @@ function result(p: Play): { text: string; tone: string } {
   }
   const r = p.run;
   const n = r.found.length;
-  if (r.status === "gave-up") return { text: `gave up ${n}/10`, tone: "muted" };
+  if (r.status === "gave-up") return { text: `${n}/10 · gave up`, tone: "muted" };
   if (r.status === "lost") return { text: `${n}/10 · out of lives`, tone: "text" };
-  return { text: `10/10 · ${r.lives} ${r.lives === 1 ? "life" : "lives"}`, tone: "gold" };
+  return { text: `10/10 · ${r.lives} ${r.lives === 1 ? "life" : "lives"} left`, tone: "gold" };
 }
 
 /** The date whose Blitz a round was (Today's Blitz, on the day or later from a link), if it was one. */
@@ -35,23 +37,51 @@ function blitzDate(p: Play, saved: Saved): string | undefined {
 }
 
 /**
- * Where a row leads: the list (or its daily), or a Blitz run's own results; a date's Blitz round opens on that date's
- * Blitz screen, which keeps it from spoiling that date's list.
+ * Where a row leads: always its own run. A list game opens its run view; a Blitz round its run's results, a date's
+ * round on that date's Blitz screen (which keeps it from spoiling that date's list).
  */
-function href(p: Play, schedule: DailyEntry[], date?: string): string {
+function href(p: Play, date?: string): string {
   if (p.kind === "blitz") return date ? `#dailyblitz-${date}/run-${p.run.startedAt}` : `#blitz-${p.id}/run-${p.run.startedAt}`;
-  const day = p.run.daily ? schedule.find((e) => e.n === p.run.daily && e.id === p.id) : undefined;
-  return day ? `#daily-${day.date}` : `#p-${p.id}`;
+  return `#p-${p.id}/run-${p.run.startedAt}`;
 }
 
-/** Everything played, list games and Blitz rounds alike, newest first. */
-export function History({ index, schedule, entry, onBack, onHome }: Props) {
+/** The row's one tag: the mode, and the daily's number when it was a daily. */
+function tag(p: Play, saved: Saved, schedule: DailyEntry[]): string {
+  if (p.kind === "list") return p.run.daily ? `Daily list #${p.run.daily}` : "List";
+  const day = blitzDate(p, saved);
+  if (!day) return "Blitz";
+  const n = (entryForDate(schedule, day) ?? todayEntry(schedule, day))?.n;
+  return n ? `Daily Blitz #${n}` : "Daily Blitz";
+}
+
+/** "21:40" in the player's time. */
+function clock(ms: number): string {
+  const d = new Date(ms);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** The day header: Today, Yesterday, then "Nov 1". */
+function dayName(date: string, today: string): string {
+  if (date === today) return "Today";
+  const [y, m, d] = today.split("-").map(Number);
+  if (date === localDate(new Date(y, m - 1, d - 1))) return "Yesterday";
+  return shortDate(date, today);
+}
+
+/** Everything played, list games and Blitz rounds alike, newest first, under one header per day. */
+export function History({ index, schedule, today, entry, onBack, onHome }: Props) {
   const saved = load();
   const plays = recentPlays(saved, 100);
   const par = usePar();
+  const days = new Map<string, Play[]>();
+  for (const p of plays) {
+    const day = localDate(new Date(p.at));
+    days.set(day, [...(days.get(day) ?? []), p]);
+  }
 
   return (
-    <main className="screen archive">
+    <main className="screen archive past-runs">
       <ScreenHead onBack={onBack} onHome={onHome}>
         <span className="label mode">Past runs</span>
       </ScreenHead>
@@ -62,39 +92,40 @@ export function History({ index, schedule, entry, onBack, onHome }: Props) {
       </section>
 
       {plays.length ? (
-        <ol data-glass className="panel arch-list">
-          {plays.map((p) => {
-            const r = result(p);
-            const [date, time] = runTime(p.at).split(", ");
-            const day = blitzDate(p, saved);
-            const dayN = day && (entryForDate(schedule, day) ?? todayEntry(schedule, day))?.n;
-            return (
-              <li key={`${p.kind}-${p.id}-${p.at}`}>
-                <a className="arch-row play-row" data-testid="history-row" data-kind={p.kind} href={href(p, schedule, day)}>
-                  <span className="arch-n play-date">{date}</span>
-                  <span className="arch-date">{time}</span>
-                  <span className="arch-title">
-                    {index.find((m) => m.id === p.id)?.title ?? p.id}
-                    <span className="play-tags">
-                      <ModeTag mode={p.kind === "blitz" ? "blitz" : "classic"} />
-                      {p.kind === "list" && p.run.daily && <span className="play-tag">daily #{p.run.daily}</span>}
-                      {/* A date's Blitz round, numbered like the dailies; the row's title is the list it ran on. */}
-                      {day && <span className="play-tag blitz">{dayN ? `blitz #${dayN}` : "today's blitz"}</span>}
-                    </span>
-                  </span>
-                  <span className={`arch-result ${r.tone}`}>
-                    {r.text}
-                    {p.kind === "list" && par?.[p.id] && (
-                      <span className="vs-par" data-testid="history-vs-par">
-                        {vsParText(p.run.found.length - par[p.id].par)}
-                      </span>
-                    )}
-                  </span>
-                </a>
-              </li>
-            );
-          })}
-        </ol>
+        <section data-glass className="panel play-list" data-testid="history-list">
+          {[...days].map(([day, dayPlays]) => (
+            <section key={day} className="play-day" data-testid="history-day" data-date={day} aria-labelledby={`day-${day}`}>
+              <h2 id={`day-${day}`} className="play-day-name">
+                {dayName(day, today)}
+              </h2>
+              <ol className="play-rows">
+                {dayPlays.map((p) => {
+                  const r = result(p);
+                  const mode = p.kind === "blitz" ? "blitz" : "classic";
+                  return (
+                    <li key={`${p.kind}-${p.id}-${p.at}`}>
+                      <a className={`play-row ${mode}`} data-testid="history-row" data-kind={p.kind} href={href(p, blitzDate(p, saved))}>
+                        <time className="play-time" dateTime={new Date(p.at).toISOString()}>
+                          {clock(p.at)}
+                        </time>
+                        <span className="play-title">{index.find((m) => m.id === p.id)?.title ?? p.id}</span>
+                        <span className="play-tag" data-testid="history-tag">
+                          {tag(p, saved, schedule)}
+                        </span>
+                        <span className={`play-result ${r.tone}`}>{r.text}</span>
+                        {p.kind === "list" && par?.[p.id] && (
+                          <span className="play-vs vs-par" data-testid="history-vs-par">
+                            {vsParText(p.run.found.length - par[p.id].par)}
+                          </span>
+                        )}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          ))}
+        </section>
       ) : (
         <section data-glass className="panel error">
           <p>nothing played yet.</p>
