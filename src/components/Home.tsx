@@ -485,6 +485,7 @@ export function Home({
         {!help && (
           <button
             className="key key-sm"
+            data-testid="help-open"
             onClick={() => {
               setHelpAsked(true);
               setHelp(true);

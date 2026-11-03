@@ -537,6 +537,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button
                   type="button"
                   className="fact-all"
+                  data-testid="facts-toggle"
                   aria-pressed={allFactsOpen}
                   onClick={() => setOpenFacts(allFactsOpen ? new Set() : new Set(factRanks))}
                 >
