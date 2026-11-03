@@ -3,7 +3,8 @@
 //
 // One player's walk through the screens (home, its How to play and category picker, a list game with its clue
 // confirm, the list's end with and without its facts open, a Blitz round and its end, home with both dailies played,
-// the archive, past runs, stats) at three widths: desktop, a mid width just above the 640px breakpoint, and a phone.
+// the archive, past runs, stats, the menu open over it, settings) at three widths: desktop, a mid width just above the
+// 640px breakpoint, and a phone.
 // On each screen every visible enabled interactive element is hovered (not on the phone), pressed (pointer down, then
 // moved away and released outside, so no click fires) and focused from the keyboard (Tab through the page, so
 // focus-visible and keyboard-modality styles apply), and every element's layout box is compared with the screen at
@@ -150,6 +151,25 @@ const SCREENS = [
     setup: async (page) => {
       await go(page, "#stats");
       await page.getByTestId("know-category").first().waitFor();
+    },
+  },
+  {
+    // The menu over the page: its tiles and close key; the page behind is measured too and must not move.
+    name: "stats, menu open",
+    scope: '[data-testid="menu"]',
+    setup: async (page) => {
+      await page.getByTestId("menu-key").click();
+      await page.getByTestId("menu").waitFor();
+      await tick(page);
+    },
+  },
+  {
+    name: "settings",
+    setup: async (page) => {
+      await page.keyboard.press("Escape");
+      await page.getByTestId("menu").waitFor({ state: "detached" });
+      await go(page, "#settings");
+      await page.getByTestId("settings").waitFor();
     },
   },
 ];
