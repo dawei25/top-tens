@@ -1,7 +1,7 @@
 # Backend: score stats and accounts
 
 TENtacle stays a static site. A backend is optional and off until you set two env vars; without them the game sends
-nothing, stores nothing beyond the browser, and never downloads the backend code.
+nothing, stores nothing beyond the browser, and never downloads the backend code (`e2e/backend.e2e.cjs` checks it).
 
 ## How it fits together
 
@@ -10,108 +10,127 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
 - **The client** is `src/net/`. The screens only touch a tiny facade (`src/net/index.ts`); the real work and
   `@supabase/supabase-js` (pinned) live in `src/net/service.ts`, loaded with a dynamic `import()` only in a build with
   the env vars, and only when there's work: a finished game, a stats view, a stored session, a sign-in.
-- **Phase 1, anonymous stats.** A finished list game or Blitz round goes into a localStorage outbox and is sent once
-  to `submit_play` (a `security definer` function: players can't read or write `plays` directly). The function
-  checks the payload and ignores duplicates. Offline, it waits and retries. Results read `list_stats` (cached 5 min):
-  from 50 players on a list (`MIN_PLAYERS`, `src/net/crowd.ts`) the histogram and percentile are real ("top 12% of
-  1,203 players") instead of "est.". Blitz results get a percentile line from 50 players. The knowledge page reads
-  `list_averages` and compares your average with players' on lists with 50+ players. Each player counts once per list
-  and mode (their first game), so replays and repeat visits don't tilt it.
-- **Phase 2, accounts.** Sign in with Google or an emailed link (PKCE flow; the email also carries a code for opening
-  on another device). The save syncs on sign-in, after every finished game and when the tab comes back (at most every
-  30 s): read the account's copy, merge it with this device's (`src/net/sync/merge.ts`: nothing is lost, see its
-  header), write the merge back only if the copy is still the version that was read, else merge again. Never
-  overwrite. Plays sent while signed in are linked to the account. The first sign-in on a device takes that device's
-  games along. Signing out syncs once more, then clears the device (the games are in the account), so the next person
-  to sign in there doesn't inherit them; if that last sync can't happen (offline), the games stay and are set aside for
-  their account if someone else signs in. "Reset all progress" while signed in resets the account too (`resetAt` in
-  the save), instead of being merged back from other devices.
-- **Account deletion** is `api/delete-account.ts`, a Vercel function: deleting a sign-in needs Supabase's service
-  role key, which must stay on a server. The function asks Supabase Auth whether the caller's access token is valid,
-  then deletes that user's plays, save and sign-in. Why not a Postgres function: `delete from auth.users` in a
-  `security definer` function can work, but `auth` is Supabase's managed schema and the Admin API is the supported way
-  to remove a user (it also cleans up sessions and identities).
+- **Score stats.** A finished list game or Blitz round goes into a localStorage outbox and is sent once to
+  `submit_play` (a `security definer` function: players can't read or write `plays` directly). The function checks
+  the payload and ignores duplicates. Offline, it waits and retries. Results read `list_stats` (cached 5 min). Until 50
+  players have finished a list (`MIN_PLAYERS`, `src/net/crowd.ts`), the results show the estimate from
+  `public/puzzles/par.json`: "PLAYERS AVG 6", the histogram, "better than 19% of players (estimated)". From 50, real
+  players replace it: their average, their histogram, "better than 12% of 1,203 players". Blitz results get a line
+  like that from 50 players. Stats adds "Vs players" (`list_averages`) for lists with 50+ players. Each player counts
+  once per list and mode (their first game), like the game's own stats (first tries only).
+- **Accounts.** Sign-in methods come from `VITE_SIGN_IN`: Google, an email and password (`password`: nothing is
+  emailed), or a link by email (`email`, PKCE; the email also carries a code for another device). The save syncs on
+  sign-in, after every finished game and when the tab comes back (at most every 30 s): read the account's copy, merge
+  it with this device's (`src/net/sync/merge.ts`: nothing is lost, see its header), write the merge back only if the
+  copy is still the version that was read, else merge again. Never overwrite. Plays sent while signed in are linked to
+  the account. The first sign-in on a device takes that device's games along. Signing out syncs once more, then clears
+  the device (the games are in the account); if that sync can't happen (offline), the games stay and are set aside
+  for their account if someone else signs in. "Reset all progress" while signed in resets the account too.
+- **Account deletion** is `api/delete-account.ts`, a Vercel function: deleting a sign-in needs the secret key, which
+  must stay on a server. It asks Supabase Auth whether the caller's access token is valid, then deletes that user's
+  plays, save and sign-in (Auth's Admin API, the supported way to remove a user).
 
-What's personal: only in Phase 2, the email (plus name and picture with Google, as Google sends them) and the save.
-`plays` holds a random per-browser id, never an IP address. The in-game `#privacy` page says this to players.
+What's personal: only with an account, the email (plus name and picture with Google; a password only as Supabase's
+hash) and the save. `plays` holds a random per-browser id, never an IP address. The in-game `#privacy` page says this.
 
 ## Switch it on
 
-1. **Create the Supabase project** at supabase.com: free plan, region nearest your players (Frankfurt for Europe,
-   N. Virginia for the US east coast). Keep the database password somewhere safe. From Project Settings > API, note
-   the **Project URL**, the **anon public** key and the **service_role** key (secret).
-2. **Run the migrations**, in order. Easiest: SQL Editor > New query > paste
-   `supabase/migrations/20261101000000_plays.sql` > Run; then the same with `20261101000100_accounts.sql`.
-   Or with the CLI: `npx supabase init` (keeps the existing migrations folder), `npx supabase link --project-ref
-   <ref>`, `npx supabase db push`. Phase 1 alone only needs the first file.
-3. **Sign-in URLs**: Authentication > URL Configuration. Site URL: `https://<your-domain>`. Redirect URLs:
-   `https://<your-domain>/**` and, for local testing, `http://localhost:5100/**` (or your dev port). Vercel preview
-   deployments need their own pattern too, for example `https://*-<your-team>.vercel.app/**`.
-4. **Email links**: Authentication > Sign In / Providers > Email is on by default. Then:
-   - Authentication > Emails > Templates > Magic Link: add a line with the code, so a link requested on a laptop
-     can be finished on a phone: `<p>Or type this code in the game: {{ .Token }}</p>`.
-   - Custom SMTP (Authentication > Emails > SMTP Settings): **needed for real players.** The built-in sender only
-     delivers to your own team's addresses, at a couple of emails an hour; it's for testing. Any SMTP provider works
-     (Resend, Brevo, Postmark, ...; most have a free tier). Then raise the email rate limit under Authentication >
-     Rate Limits if needed.
-5. **Google**:
-   - Google Cloud Console > APIs & Services > OAuth consent screen: External, app name TENtacle, your support email,
-     scopes `openid`, `email`, `profile`. Publish it (in testing mode only listed test users can sign in).
-   - Credentials > Create credentials > OAuth client ID > Web application. Authorized JavaScript origins:
-     `https://<your-domain>` and `http://localhost:5100`. Authorized redirect URI:
-     `https://<project-ref>.supabase.co/auth/v1/callback` (Supabase's callback, not the game's URL).
-   - Copy the client ID and secret into Supabase: Authentication > Sign In / Providers > Google > enable.
-6. **Env vars in Vercel** (Project > Settings > Environment Variables, for Production and Preview):
-   - `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`: **public**. They're built into the JavaScript, which is what
-     they're for; row level security and the functions decide what anyone can do with them.
-   - `SUPABASE_SERVICE_ROLE_KEY`: **secret**, mark it Sensitive. Only `api/delete-account.ts` reads it. Never give it
-     a `VITE_` prefix (that would ship it to browsers) and never commit it.
-   - Optional: `VITE_SIGN_IN` (`google,email` by default; `email`, `google`, or `none` for stats without accounts),
-     `VITE_PRIVACY_CONTACT` (an address shown on the privacy page; worth setting).
-   - `.env.example` lists them all. Locally, copy it to `.env.local` (gitignored).
-7. **Redeploy** (Deployments > Redeploy, or push a commit). `VITE_` vars are read at build time, so an existing
-   deployment doesn't pick them up.
-8. **Check it works:**
-   - Finish a list game on the site. Supabase > Table Editor > `plays` shows a row (or in the SQL editor:
-     `select * from plays order by created_at desc limit 5;`). The browser's network tab shows
-     `rpc/submit_play` answering `true`.
-   - `select list_stats('mountains', 'list');` returns `{"n": ..., "counts": [...]}`. The results keep saying "est."
-     until 50 players have finished that list.
-   - A "Sign in" key appears in Home's Your games. Sign in with Google, then with an email link in another browser.
-     `saves` gets a row; play on one device, focus the other, and the game shows up there.
-   - Your knowledge > Account > delete account: the `saves` row and the user (Authentication > Users) are gone.
-   - A build without the env vars (`npx vite --port 5100` with no `.env.local`) makes no requests to Supabase and
-     shows no Sign in key.
+1. **Create the Supabase project** at supabase.com: free plan, region nearest your players. "Automatically expose
+   new tables" off and automatic RLS on are the right choices: the migrations turn RLS on and grant exactly what the
+   game uses. Project Settings > API Keys: note the **Project URL**, the **publishable key** (`sb_publishable_...`)
+   and a **secret key** (`sb_secret_...`). Legacy anon and service_role keys work too, until Supabase retires them
+   (end of 2026).
+2. **Run the migrations**, in order: SQL Editor > New query > paste the file > Run.
+   1. `supabase/migrations/20261101000000_plays.sql` (score stats)
+   2. `supabase/migrations/20261101000100_accounts.sql` (saves)
+   3. `supabase/migrations/20261103000000_deletion_grants.sql` (lets account deletion clear a player's rows; safe to
+      run twice)
 
-To ship Phase 1 first, set `VITE_SIGN_IN=none`: steps 3 to 5 and the service role key can wait.
+   Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push`. Stats alone only need the first.
+3. **Sign-in URLs**: Authentication > URL Configuration. Site URL: `https://<your-domain>`. Redirect URLs:
+   `https://<your-domain>/**`, and for local testing `http://localhost:5100/**`. Vercel previews need their own
+   pattern, for example `https://*-<your-team>.vercel.app/**`.
+4. **Sign-in methods** (`VITE_SIGN_IN`, step 6). For each one you list:
+   - `password`: Authentication > Sign In / Providers > Email: on, and **turn off "Confirm email"**, so a new account
+     is signed in at once and no email is ever sent. (Left on, the game says "check your email to confirm", and
+     you'd need custom SMTP: see `email`.) The game asks for 6+ characters, Supabase's default; a stricter rule set
+     under Email is shown to players in its own words. There's no password reset: the sign-in sheet says "forgot your
+     password? ask us at <VITE_PRIVACY_CONTACT>" (nothing without a contact). To help someone, set a new password
+     with the Admin API from a trusted machine (`auth.admin.updateUserById(id, { password })`, secret key), or delete
+     the user in Authentication > Users (their save goes too).
+   - `google`, in Google Cloud Console > Google Auth Platform:
+     - **Branding**: app name TENtacle, support email; under Authorized domains, your domain and `<ref>.supabase.co`.
+     - **Audience**: User type External, then **Publish app** (in Testing only listed test users can sign in).
+     - **Data Access**: `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile`. Nothing else; these need no
+       review by Google.
+     - **Clients** > Create client > **Web application**. Authorized JavaScript origins: `https://<your-domain>` and
+       `http://localhost:5100`. Authorized redirect URI: `https://<ref>.supabase.co/auth/v1/callback` (Supabase's
+       callback, not the game's URL).
+     - Copy the client ID and secret into Supabase: Authentication > Sign In / Providers > Google > enable.
+   - `email` (a link): Authentication > Emails > Templates > Magic Link: add `<p>Or type this code in the game:
+     {{ .Token }}</p>`. Custom SMTP (Authentication > Emails > SMTP Settings) is **needed for real players**: the
+     built-in sender only delivers to your team's addresses, a couple an hour.
+5. **Data API**: nothing to expose by hand. The game calls three functions (`submit_play`, `list_stats`,
+   `list_averages`) and reads and writes only its own `saves` row; the migrations grant exactly that.
+6. **Env vars in Vercel** (Project > Settings > Environment Variables, Production and Preview):
+   - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` = the publishable key (`VITE_SUPABASE_PUBLISHABLE_KEY` works
+     too). **Public**: built into the JavaScript, which is what they're for; RLS and the functions decide what anyone
+     can do with them.
+   - `SUPABASE_SERVICE_ROLE_KEY` = the secret key (`SUPABASE_SECRET_KEY` works too). **Secret**: mark it Sensitive.
+     Only `api/delete-account.ts` reads it. Never give it a `VITE_` prefix, never commit it.
+   - `VITE_SIGN_IN`: for example `google,password`. Default `google,email`; `none` for stats without accounts.
+     Unknown names are ignored.
+   - `VITE_PRIVACY_CONTACT`: an address for privacy questions and forgotten passwords. Worth setting.
+   - `.env.example` lists them all. Locally, copy it to `.env.local` (gitignored).
+7. **Redeploy** (Deployments > Redeploy, or push a commit): `VITE_` vars are read at build time.
+8. **Check it works:**
+   - Finish a list game. Table Editor > `plays` shows a row; the browser's network tab shows `rpc/submit_play`
+     answering `true`. `select list_stats('mountains', 'list');` returns `{"n": ..., "counts": [...]}`.
+   - Home's Your games has a "Sign in" key. Create an account with a password in one browser, sign in with Google in
+     another. `saves` gets a row; play on one, focus the other, and the game shows up there.
+   - Stats > Account > delete account: the `saves` row and the user (Authentication > Users) are gone.
+   - A build without the env vars (`npx vite --port 5100`, no `.env.local`) makes no requests to Supabase and shows no
+     Sign in key.
+
+To ship stats first, set `VITE_SIGN_IN=none`: steps 3 and 4 and the secret key can wait.
+
+## Keys
+
+supabase-js 2.118.0 knows both formats (`sb_publishable_`, `sb_secret_`) and treats them as Supabase documents:
+always the `apikey` header; never a bearer token for Edge Functions (the game has none). Signed out, the client also
+sends the publishable key as the bearer for the Data API, which the live project accepted on Nov 3 (`list_stats`,
+read only). The deletion function sends the secret key as `apikey`, the player's own token to `auth.getUser`, then
+deletes their rows and calls `auth.admin.deleteUser`; `src/net/delete-account.test.ts` pins down those requests.
+Supabase refuses secret keys in requests from a browser, so the function is the only place it can live. The env var
+names stay as they were; the new names are accepted too.
 
 ## Costs and limits
 
-Figures as of late 2026, from secondary sources (supabase.com wasn't reachable when this was written): check
-supabase.com/pricing and vercel.com/pricing.
+Figures as of late 2026, from secondary sources: check supabase.com/pricing and vercel.com/pricing.
 
-- **Supabase Free**: about 500 MB of database per project, 50,000 monthly active users for Auth, two active free
-  projects, a few GB of egress. A free project **pauses after a week without traffic**: the game then quietly falls
-  back to its estimates and local saves until you restore it in the dashboard (Pro, $25/month, never pauses).
-- **Space**: a play row is about 200 bytes with its indexes, so a million games is around 200 MB. A save is a few to a
-  few hundred KB (stored compressed). Watch Database size under Reports.
-- **Email**: the built-in sender is test-only (see step 4); custom SMTP providers' free tiers cover a small game.
+- **Supabase Free**: about 500 MB of database, 50,000 monthly active users for Auth, two active free projects, a few
+  GB of egress. A free project **pauses after a week without traffic**: the game then quietly falls back to its
+  estimates and local saves until you restore it in the dashboard (Pro, $25/month, never pauses).
+- **Space**: a play row is about 200 bytes with its indexes, so a million games is around 200 MB. A save is a few to
+  a few hundred KB. Watch Database size under Reports.
+- **Email**: none with `google,password` and Confirm email off. The `email` method needs custom SMTP (step 4).
 - **Vercel Hobby** is free but for **personal, non-commercial use only**. Ads, sponsorship or paid features mean the
   Pro plan. The one function (account deletion) runs rarely.
-- Google sign-in is free.
 
 ## Running it
 
 - **Tuning**: `MIN_PLAYERS` (50) in `src/net/crowd.ts`; Blitz buckets are 50 points (`list_stats`); stats cache
   5 min, averages 10 min (`src/net/service.ts`).
-- **Par** still comes from `public/puzzles/par.json` (the title card shows it during play). Once lists have real
-  players, par.json could be regenerated from `list_stats` medians.
+- **The average**: the results switch to real players per list from 50. Past runs and Stats' "vs avg" still compare
+  with `public/puzzles/par.json` (players never see the word "par"); once lists have real players, par.json could be
+  regenerated from `list_stats`.
 - **Abuse**: anyone can call `submit_play` with the public key. It checks shapes and ranges, counts each player once
   per list, and ignores a browser past 120 games an hour, but a determined script with fresh ids can still skew a
   quiet list. If that happens, find the ids (`select client_id, count(*) from plays group by 1 order by 2 desc`) and
   delete their rows.
-- **Local development**: `.env.local` with the URL and anon key, `npx vite --port 5100`, and that URL in Supabase's
-  Redirect URLs. `/api/delete-account` only runs on Vercel (`npx vercel dev` locally).
+- **Local development**: `.env.local` with the URL and publishable key, `npx vite --port 5100`, and that URL in
+  Supabase's Redirect URLs. `/api/delete-account` only runs on Vercel (`npx vercel dev` locally).
 - **Tests**: `npm test` covers the client (`src/net/*.test.ts`), the merge and the database functions
-  (`supabase/migrations.test.ts`, in PGlite). `npm run e2e` runs the browser suite with no backend, plus
-  `e2e/backend.e2e.cjs`, which builds a copy with fake env vars and mocks Supabase.
+  (`supabase/migrations.test.ts`, in PGlite, with and without new tables exposed). `npm run e2e` runs the browser
+  suite with no backend, plus `e2e/backend.e2e.cjs`, which builds a copy with fake env vars (`e2e/backend-env.cjs`,
+  every sign-in method on) and mocks Supabase.
