@@ -2637,6 +2637,12 @@ export const TOPICS: Topic[] = [
         ["List of ended Netflix original programming (2026–present)", [...range(0, 6), ...range(8, 10)]],
       ] as const
     ).map(([page, tables]) => ({ page, tables: [...tables], name: "Title", nameFromText: true })),
+    // The anthology's other seasons as people type them, free: "monster menendez" was read as the Dahmer season
+    // (judge, cycle 6). Season 2's title says "Monsters", which players drop.
+    knownNames: [
+      "Monster Menendez", "Monsters Menendez", "Monster: The Lyle and Erik Menendez Story", "Menendez Brothers",
+      "Monster Ed Gein", "Monster Gein", "Monster: Ed Gein", "Ed Gein", "Monster Lizzie Borden", "Lizzie Borden",
+    ],
     cited: {
       "Money Heist (Part 4)": {
         value: "106 million views",
