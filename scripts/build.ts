@@ -8,14 +8,14 @@ import { cleanText, splitHeader, statNumber, tableGrid, wikitables, type Cell } 
 import { TEST_SET, TOPICS, type Dated, type Topic } from "./topics";
 import { fetchCategory, fetchPage, fetchRedirects, pageUrl, requestCount } from "./wiki";
 import { addValues } from "./values";
-import { writeLexicon } from "./lexicon";
+import { KNOWN_DIR, writeLexicon } from "./lexicon";
 import { tableDataDate } from "./dates";
 import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./intent";
 
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
 import { UNIVERSES, US_STATE_CODES, type Place } from "./gazetteer";
-import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect } from "./aliases";
+import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, placeholderName } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
 /** Fewest entries with a stat (`n`) for a list to be playable in Blitz. */
@@ -42,7 +42,10 @@ const MOVABLE = new Set(["river", "lake", "loch", "lough", "mount", "isle", "isl
  */
 export function sameKey(name: string): string {
   // "Nukuʻalofa" and "Nuku'alofa": normalize() reads the ʻokina as a word break, the apostrophe as nothing.
-  const words = normalize(baseTitle(name).replace(/[ʻʼ`'’]/g, ""))
+  // A numbered part is a different thing: "Bridgerton (Season 3)" is not "Bridgerton (Season 1)".
+  const part = name.match(/\(([^()]+)\)\s*$/)?.[1];
+  const kept = part && NUMBERED_PART.test(part.trim()) ? `${baseTitle(name)} ${part}` : baseTitle(name);
+  const words = normalize(kept.replace(/[ʻʼ`'’]/g, ""))
     .split(" ")
     .map((w) => SPELLED_OUT[w] ?? w);
   if (words.length > 1 && MOVABLE.has(words[0])) words.push(words.shift()!);
@@ -229,7 +232,8 @@ function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink"
 const SKIP_NAME =
   /^(as of\b|last updated\b|world( total)?$|others?$|various$|unknown$|[$€£]\d|(player|name|rank|country|team|title)$)/i;
 const TOTAL_ROW = /^(?:[Gg]rand [Tt]otal|GRAND TOTAL|[Ss]ubtotal|SUBTOTAL|[Tt]otals?|TOTALS?)\b(?!\s+(?!(?:US|U\.S\.|USA|World|EU|Europe|Global|All)\b)\p{Lu})/u;
-export const skipName = (name: string) => SKIP_NAME.test(name) || TOTAL_ROW.test(name);
+/** Also a stand-in for a title not announced yet ("Untitled ... series", "Awaiting release"). */
+export const skipName = (name: string) => SKIP_NAME.test(name) || TOTAL_ROW.test(name) || placeholderName(name);
 
 /**
  * Use the linked article for redirects only if it is about the thing itself ("Avatar (2009 film)", not
@@ -359,8 +363,9 @@ export async function readRows(topic: Topic): Promise<Row[]> {
         topic.nameStrip ? s.replace(topic.nameStrip, "").trim() : s,
       );
       if (name !== cellText) seeds.push(cellText);
-      // "Squid Game 2", as people say a season.
+      // "Squid Game 2", as people say a season, and "Squid Game S2", as people write one.
       if (numbered) seeds.push(`${base} ${partText.match(/\d+/)![0]}`);
+      if (numbered && /^(season|series)\b/i.test(partText)) seeds.push(`${base} S${partText.match(/\d+/)![0]}`);
       // The cell can say more than the name: "Mississippi–Missouri–Jefferson" names the Mississippi row.
       for (const line of lines) if (cleanName(line) !== name) seeds.push(...shortForms(cleanName(line)));
       for (const c of aliasCs) {
@@ -635,7 +640,25 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
     }
   }
   for (const [name, aliases] of Object.entries(topic.more ?? {})) out.push({ rank: 0, name, aliases: [...aliases] });
+  for (const [name, c] of Object.entries(topic.cited ?? {})) {
+    if (!(c.n < limit)) throw new Error(`cited "${name}": ${c.n} is not below the last ranked row's ${limit}`);
+    console.log(`     ${topic.id}: ${name} ${c.value} (${c.source})`);
+    out.push({ rank: 0, name, aliases: [...c.aliases], value: c.value, n: statNumber(c.n) });
+  }
   return out;
+}
+
+/**
+ * The topic's `knownOnly` names (and their short forms), minus the answers' own, for the lexicon: real names that
+ * aren't answers. Written to scripts/known/<id>.json.
+ */
+async function writeKnown(topic: Topic, entries: Entry[]): Promise<void> {
+  const free = await readAlso({ ...topic, also: topic.knownOnly, more: undefined, cited: undefined, universeCategories: undefined }, Infinity);
+  const answers = new Set(entries.flatMap((e) => [e.name, ...e.aliases]).map(normalize));
+  const names = [...new Set(free.flatMap((e) => [e.name, ...e.aliases]))].filter((n) => normalize(n) && !answers.has(normalize(n)));
+  mkdirSync(KNOWN_DIR, { recursive: true });
+  writeFileSync(join(KNOWN_DIR, `${topic.id}.json`), JSON.stringify(names.sort((a, b) => a.localeCompare(b)), null, 0) + "\n");
+  console.log(`     ${topic.id}: ${names.length} known names that aren't answers (scripts/known)`);
 }
 
 /** Lowercase words a name can have in the middle ("Leaning Tower of Pisa", "Mont Blanc du Tacul"). */
@@ -1040,6 +1063,11 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   }
   const lower = new Map<Entry, string>();
   for (const [i, r] of rows.entries()) if (r.part?.lower) lower.set(entries[i], normalize(r.part.base));
+  // An unranked part ("Bridgerton (Season 3)", cited) is lower than any ranked one: "bridgerton" stays Season 1's.
+  for (const e of entries.slice(rows.length)) {
+    const m = e.name.match(/^(.+?) \(([^()]+)\)$/);
+    if (m && NUMBERED_PART.test(m[2])) lower.set(e, normalize(m[1]));
+  }
   pruneAliases(entries, namesakes, lower);
   applyIntent(topic, entries);
   // Whatever the source (redirect, cell, universe), a slur never ships.
@@ -1049,6 +1077,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     console.log(`     ${topic.id}: values for ${found} of ${tried} likely unranked answers`);
   }
   const dataAsOf = await dataDate(topic);
+  if (topic.knownOnly) await writeKnown(topic, entries);
 
   return {
     id: topic.id,

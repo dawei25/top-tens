@@ -136,6 +136,18 @@ export interface Topic {
   articles?: Record<string, string>;
   /** Unranked accepted answers no source lists, with their aliases (a famous name that only misses the cut). */
   more?: Record<string, string[]>;
+  /**
+   * Unranked accepted answers whose figure only an article's text gives, with where it says so: Netflix's ranking
+   * stops at 10, but Bridgerton's article gives Season 3's 106 million views. `value` is shown as written; `n` is the
+   * same number in the ranked rows' unit, below #10's.
+   */
+  cited?: Record<string, { value: string; n: number; aliases: string[]; source: string }>;
+  /**
+   * Names of the list's kind that are not answers, read like `also`: free to guess (no figure to learn from), but
+   * still real names to the game. The build records them in scripts/known/<id>.json and the lexicon learns them, so
+   * typed in full one is never junk nor corrected into an answer, and their words still count as plain words.
+   */
+  knownOnly?: Also[];
   /** Category members to leave out of the pool (titles that aren't the kind of thing the list is about). */
   categorySkip?: RegExp;
   /**
@@ -2575,15 +2587,16 @@ export const TOPICS: Topic[] = [
     junkAliases: [
       "One More Game", "Byeori binnaneun bame", "Stranger Things Experience", "Stranger Things Store",
       "Stranger Things popup", "The Duke and I", "Penelope Bridgerton", "Viscount Bridgerton", "Violet Bridgerton",
-      "Romancing Mister Bridgerton", "The One About Matthew Perry", "Spirit Riding Free: Riding Academy",
-      "Waffles + Mochi's Restaurant", "Blippi's Job Show",
+      "Romancing Mister Bridgerton", "The One About Matthew Perry",
     ],
-    // A spin-off docuseries whose cell links the show it follows: "manifest" is Manifest.
-    skip: ["Arrivals: A New Manifest Mystery"],
-    // Every Netflix original series, current and ended: scripted, docuseries, reality, continuations (Black Mirror,
-    // Cobra Kai) and co-productions. Not the one-off specials, nor the shows still in development. Named by the
-    // title as written: a docuseries' cell can link its subject ("Big Vape: The Rise and Fall of Juul").
-    also: (
+    // Only seasons with a figure are answers; every other show is free. The pool used to be all 2,372 Netflix
+    // originals, each costing a life with no figure to learn from (judge, cycle 5), and their words offered obscure
+    // shows (14.3% of the leak audit's wrong guesses: "cars" Comedians in Cars Getting Coffee). Netflix's ranking
+    // stops at 10; these two seasons' 91-day views are in their articles. The Queen's Gambit and the others just
+    // past the cut have no such figure on Wikipedia. The originals stay known names (`knownOnly`): every Netflix
+    // original series, current and ended (scripted, docuseries, reality, continuations, co-productions), named by the
+    // title as written.
+    knownOnly: (
       [
         ["List of Netflix original programming", range(0, 47)],
         ["List of ended Netflix original programming (2012–2015)", [...range(0, 7), ...range(9, 14)]],
@@ -2592,7 +2605,20 @@ export const TOPICS: Topic[] = [
         ["List of ended Netflix original programming (2026–present)", [...range(0, 6), ...range(8, 10)]],
       ] as const
     ).map(([page, tables]) => ({ page, tables: [...tables], name: "Title", nameFromText: true })),
-    noFigures: "Netflix publishes only its all-time top 10; no other season has a figure",
+    cited: {
+      "Money Heist (Part 4)": {
+        value: "106 million views",
+        n: 106,
+        aliases: ["Money Heist", "Money Heist 4", "Money Heist Part 4", "La Casa de Papel", "Casa de Papel", "La Casa de Papel 4"],
+        source: "Money Heist: part 4 had \"106 million views\" on Netflix's most popular non-English TV list (TheWrap, Feb 2024)",
+      },
+      "Bridgerton (Season 3)": {
+        value: "106 million views",
+        n: 106,
+        aliases: ["Bridgerton 3", "Bridgerton S3"],
+        source: "Bridgerton: Season 3 sixth on Netflix's all-time top 10, \"846.5 million hours viewed/106 million views\" (Jan 2025)",
+      },
+    },
   },
   {
     id: "mcdonalds-countries",
