@@ -1,25 +1,24 @@
 {
   "id": "athletes-earnings",
-  "judgedAt": "2026-11-02",
-  "decision": "fix-first",
+  "judgedAt": "2026-11-03",
+  "decision": "daily-list",
   "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 2, "data": 4, "fun": 3, "blitzDepth": 0 },
-  "casual": { "found": 5, "livesLost": 5, "guesses": 14 },
-  "fan": { "found": 8, "livesLost": 5, "guesses": 18 },
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 6, "livesLost": 2, "guesses": 14 },
+  "fan": { "found": 6, "livesLost": 5, "guesses": 11 },
   "blitzCasual": null,
   "difficulty": 3,
   "tags": ["sports", "money", "athletes"],
-  "audience": "sports fans",
-  "summary": "A good top 10 with a fair curve, but every Forbes top 10 since 2012 costs a life, so a casual player burns out on Tiger, Federer, Neymar and McGregor before reaching Durant or Canelo.",
+  "audience": "anyone",
+  "summary": "A familiar top 10 with a good spread: Ronaldo, Messi, LeBron and Curry come easily, Canelo at #2 and Hamilton at #10 are the surprises. Old stars are now free, so a casual player finds 6 with lives to spare.",
   "reasons": [
-    "Casual found Ronaldo, Messi, LeBron, Curry and Ohtani, then ran out of lives on Mbappé, Tiger Woods, Neymar, Federer and Conor McGregor at guess 11 (Mbappé and Federer through the confirm box). Durant and Canelo were the next guesses. 5 is under the 6-8 bar.",
-    "Fan found 8 (missed Canelo and Hamilton) and lost 5 on Prescott, Fury, Soto, Giannis and Joe Burrow. Those recent names are fair near misses. Losing lives on 2012-2021 legends, while active stars like Mahomes are free, is not.",
-    "Title and prompt name the measure (earnings with endorsements). Tiger, Federer and Mayweather show dated figures (#8 in 2020, #9 in 2023, #1 in 2018). Not Blitz-ready: only the 10 answers carry a 2026 figure."
+    "Casual found 6 in 14 guesses (Ronaldo, Messi, LeBron, Curry, Ohtani, Durant) and lost 2 lives, on Neymar (#7 in 2024) and Mbappe (#6 in 2024, through the confirm box). Tiger, McGregor, Djokovic, Mahomes, Jake Paul and Haaland were free. Canelo, Rahm, Benzema and Hamilton feel fair when revealed.",
+    "A fan who leads with last year's list burns out: Fury, Usyk (confirm box), Prescott, Burrow and Soto took all 5 lives at guess 11, with 6 found and Benzema, Durant and Rahm still to come. Each miss shows its 2025 or 2024 figure, so they are near misses you learn from, but the list rewards knowing this year's changes.",
+    "Title and prompt name Forbes' 2026 list and the measure, the top 10 matches the page, every answer has a fact, and category words (forbes, nba, boxing, golf, f1, real madrid) give nothing away. Not Blitz-ready: only the 10 answers score."
   ],
   "fixes": [
-    "Charge a life only for recent near misses: keep the 2024 and 2025 tables and the $100 million table (tables 1, 2 and 18) in `also`, and drop 2012-2023 (tables 3-6 and 8-15). Tiger Woods, Federer, Mayweather, McGregor, Brady, Djokovic and Nadal then become free (they lose their dated figure). By my count the casual then finds 7 with 3 lives lost.",
-    "Joe Burrow and Oleksandr Usyk cost a life with no figure: give them their year from the $100 million table (\"$100 million+ in 2024\", \"$100 million+ in 2025\").",
-    "Prompt: Forbes' 2026 list covers the 12 months to spring 2026 (Canelo's #2 comes from his September 2025 fight), so \"earned the most in 2026\" is loose. Suggest \"Name the 10 highest-paid athletes on Forbes' 2026 list (salary and winnings plus endorsements)\"."
+    "\"john rahm\" and \"jhon rahm\" are not recognized: the game tells a player who knows #7 that he isn't an answer (\"rahm\" and \"jon ram\" work). Add \"John Rahm\" as an alias (scripts/intent.ts). The class is in the matcher (src/game/match.ts, coordinator): with the surname shared, \"john\" vs \"jon\" is compared alone at length 3, which gets no typo budget.",
+    "Unranked answers match only their full name: \"fury\" and \"burrow\" say \"isn't an answer for this list\" while \"tyson fury\" and \"joe burrow\" cost a life with a figure. Give the extras the surname short forms the top 10 get (only Giannis has aliases now), so the reveal is true either way."
   ]
 }
