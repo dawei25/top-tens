@@ -2,7 +2,8 @@ import { BLITZ_SECONDS, MAX_BLITZ_RUNS, blitzScore, type BlitzRun, type BlitzSta
 import { localDate } from "../../game/daily";
 import { MAX_LIST_RUNS, type ListRun } from "../../game/history";
 import type { GameState } from "../../game/state";
-import { withFirstTries, type DailyBlitzResult, type Saved } from "../../game/storage";
+import { withFirstTries, type DailyBlitzResult, type ListRating, type Saved } from "../../game/storage";
+import { isReason, RATING_KEY } from "../ratings";
 
 /**
  * Merging two copies of the save (this device's `top-tens:v1` and the account's copy on the server) into one that
@@ -20,6 +21,8 @@ import { withFirstTries, type DailyBlitzResult, type Saved } from "../../game/st
  * - dailyGames, blitzDaily: one try per date (locked), so the first try of that date wins on both devices: the first
  *   finished daily game, the Blitz round that started first.
  * - daily (streak days): the union. seenHelp: true if either side has it. blitzBest: the max.
+ * - ratings ("Good list?", per list and mode): the one given last (latest `at`) wins, a rating taken back (0)
+ *   included, so taking it back on one device takes it back on all of them.
  * - blitzLive (a round in progress per list): the newer round; the other one, if its time is up, becomes a run.
  * - resetAt: a reset made while signed in. Anything older than the newest reset is dropped from both sides, so a
  *   reset reaches every device instead of being merged back.
@@ -50,6 +53,12 @@ const isBlitzRun = (r: unknown): r is BlitzRun =>
   isObj(r) && isNum(r.startedAt) && isNum(r.endedAt) && isNum(r.score) && Array.isArray(r.hits);
 const isBlitzState = (s: unknown): s is BlitzState => isObj(s) && isStr(s.puzzleId) && Array.isArray(s.hits) && isNum(s.startedAt);
 const isDailyBlitz = (d: unknown): d is DailyBlitzResult => isObj(d) && isStr(d.id) && isNum(d.score) && isNum(d.answers);
+const isRating = (r: unknown, key: string): r is ListRating =>
+  RATING_KEY.test(key) &&
+  isObj(r) &&
+  (r.rating === -1 || r.rating === 0 || r.rating === 1) &&
+  isNum(r.at) &&
+  (r.reason === undefined || (r.rating === -1 && isReason(r.reason)));
 
 function filterRec<T>(x: unknown, ok: (v: unknown, k: string) => v is T): Rec<T> {
   const out: Rec<T> = {};
@@ -90,6 +99,7 @@ export function sanitize(x: unknown): SyncSave {
   setOpt(out, "listRuns", Array.isArray(s.listRuns) ? s.listRuns.filter(isListRun) : undefined);
   setOpt(out, "blitzLive", isObj(s.blitzLive) ? filterRec(s.blitzLive, isBlitzState) : undefined);
   setOpt(out, "firstTries", isObj(s.firstTries) ? sanitizeFirstTries(s.firstTries) : undefined);
+  setOpt(out, "ratings", isObj(s.ratings) ? filterRec(s.ratings, isRating) : undefined);
   setOpt(out, "resetAt", isNum(s.resetAt) && s.resetAt > 0 ? s.resetAt : undefined);
   return out;
 }
@@ -146,6 +156,11 @@ export function pickGame(x: GameState, y: GameState): GameState {
 /** A date's Blitz: the round that started first (one round per date; old results without a start count as first). */
 function firstDailyBlitz(x: DailyBlitzResult, y: DailyBlitzResult): DailyBlitzResult {
   return smaller(x, y, (d) => d.startedAt ?? -Infinity);
+}
+
+/** A list's rating on both sides: the one given last. */
+function lastRating(x: ListRating, y: ListRating): ListRating {
+  return smaller(x, y, (r) => -r.at);
 }
 
 /** Two copies of the same finished round: the more complete one. */
@@ -240,6 +255,7 @@ export function pruneBefore(save: SyncSave, t: number): SyncSave {
     if (save.firstTries.blitz) f.blitz = filterRec(save.firstTries.blitz, (r): r is BlitzRun => isBlitzRun(r) && keep(r.startedAt));
     out.firstTries = f;
   }
+  if (save.ratings) out.ratings = filterRec(save.ratings, (r, k): r is ListRating => isRating(r, k) && keep(r.at));
   return out;
 }
 
@@ -318,6 +334,7 @@ export function mergeSaves(local: unknown, remote: unknown, now: number): SyncSa
   setOpt(out, "blitzRuns", runs);
   setOpt(out, "blitzLive", live);
   setOpt(out, "firstTries", mergeFirstTries(a.firstTries, b.firstTries));
+  setOpt(out, "ratings", mergeOptRec(a.ratings, b.ratings, lastRating));
   setOpt(out, "resetAt", resetAt || undefined);
   // A round retired above may be a list's first Blitz round: filled in like any other (existing first tries stay).
   return withOwnFirstTries(out);

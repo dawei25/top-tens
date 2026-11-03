@@ -1,8 +1,8 @@
 // The backend switched on: this spec builds its own copy with fake Supabase env vars, serves it on a free port, and
 // answers Supabase's endpoints itself. Checks: each finished game is sent once with the right payload; results use
-// real players' numbers once the stats say 50+; the menu's account section (Sign in, Sign out) and Feedback, the
-// sign-in sheet and privacy page; and a signed-in session syncing its save (merge both ways), with the account panel,
-// the comparison with players, and account deletion.
+// real players' numbers once the stats say 50+; a list rating goes to rate_list (and waits while offline); the menu's
+// account section (Sign in, Sign out) and Feedback, the sign-in sheet and privacy page; and a signed-in session
+// syncing its save (merge both ways), with the account panel, the comparison with players, and account deletion.
 // (Signing in itself ends at Google's or the email's door: the redirect and the email request are checked, not the
 // return trip. The merge and the session handling have unit tests in src/net.) This build has no Google client ID:
 // Google sign-in is Supabase's redirect, and Google's own script never loads. backend-google.e2e.cjs covers the build
@@ -11,7 +11,7 @@ const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { VIEWPORTS, NOW, TODAY, guess, noHScroll } = require("./helpers.cjs");
 const { BACKEND_ENV } = require("./backend-env.cjs");
-const { serveBuild, opener, openMenu, openSignIn, USER, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
+const { SUPA, serveBuild, opener, openMenu, openSignIn, USER, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
 
 const desktop = VIEWPORTS.find((v) => v.name === "desktop");
 const phone = VIEWPORTS.find((v) => v.name === "phone");
@@ -88,6 +88,58 @@ test("finished games are sent once, and results use real players from 50 (deskto
   assert.ok(round.p_score > 0);
   await page.getByTestId("blitz-crowd").waitFor();
   assert.equal(await page.getByTestId("blitz-crowd").getAttribute("data-n"), "80");
+  await ctx.close();
+});
+
+test("a rating goes to rate_list: the latest per list and mode, with this browser's id (phone)", async () => {
+  const { ctx, page, calls } = await open(phone, "#p-mountains", FRESH);
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("results").waitFor();
+  await until(() => calls.submit.length === 1);
+  const id = calls.submit[0].p_client_id;
+
+  await page.getByTestId("rate-up").click();
+  await until(() => calls.rate.length === 1);
+  assert.deepEqual(calls.rate[0], { p_list_id: "mountains", p_mode: "list", p_rating: 1, p_reason: null, p_client_id: id });
+
+  // Down, then a reason: the server ends with the reason.
+  await page.getByTestId("rate-down").click();
+  await page.locator('[data-testid="rate-reason"][data-reason="wrong-data"]').click();
+  await until(() => calls.rate.at(-1)?.p_reason === "wrong-data");
+  assert.deepEqual(calls.rate.at(-1), { p_list_id: "mountains", p_mode: "list", p_rating: -1, p_reason: "wrong-data", p_client_id: id });
+  for (const sent of calls.rate) assert.deepEqual(Object.keys(sent).sort(), ["p_client_id", "p_list_id", "p_mode", "p_rating", "p_reason"]);
+
+  // Taken back: 0. Nothing is left waiting.
+  await page.getByTestId("rate-down").click();
+  await until(() => calls.rate.at(-1)?.p_rating === 0);
+  assert.equal(calls.rate.at(-1).p_reason, null);
+  await settle();
+  assert.deepEqual((await page.evaluate(() => JSON.parse(localStorage.getItem("top-tens:rating-outbox")))).pending, []);
+
+  // Offline (the request never gets an answer), a rating waits in the outbox and goes when the connection is back.
+  const before = calls.rate.length;
+  const rpc = `${SUPA}/rest/v1/rpc/rate_list`;
+  await page.route(rpc, (route) => route.abort("internetdisconnected"));
+  await page.getByTestId("rate-up").click();
+  await settle();
+  assert.equal(calls.rate.length, before);
+  const waiting = (await page.evaluate(() => JSON.parse(localStorage.getItem("top-tens:rating-outbox")))).pending;
+  assert.deepEqual(waiting.map((r) => [r.listId, r.mode, r.rating]), [["mountains", "list", 1]]);
+  await page.unroute(rpc);
+  await page.evaluate(() => dispatchEvent(new Event("online")));
+  await until(() => calls.rate.length === before + 1);
+  assert.deepEqual(calls.rate.at(-1), { p_list_id: "mountains", p_mode: "list", p_rating: 1, p_reason: null, p_client_id: id });
+
+  // A Blitz round's rating is its own (mode blitz).
+  await page.goto(base + "#blitz-airports");
+  await page.getByTestId("blitz-clock").waitFor();
+  await guess(page, "Dubai");
+  await page.clock.fastForward(91_000);
+  await page.getByTestId("blitz-results").waitFor();
+  await page.getByTestId("rate-down").click();
+  await until(() => calls.rate.at(-1)?.p_mode === "blitz");
+  assert.deepEqual(calls.rate.at(-1), { p_list_id: "airports", p_mode: "blitz", p_rating: -1, p_reason: null, p_client_id: id });
   await ctx.close();
 });
 
@@ -256,6 +308,10 @@ test("a build without the env vars sends nothing anywhere and offers no sign-in"
   await page.getByTestId("give-up").click();
   await page.getByTestId("give-up").click();
   await page.locator('[data-testid="results"] [data-testid="par"][data-source="estimate"]').waitFor();
+  // A rating stays in the save.
+  await page.getByTestId("rate-down").click();
+  await page.locator('[data-testid="rate-reason"][data-reason="boring"]').click();
+  assert.equal(await page.getByTestId("rate").getAttribute("data-reason"), "boring");
   await page.goto(url);
   await page.getByTestId("stats-key").waitFor();
   assert.equal(await page.getByTestId("privacy-link").count(), 0);

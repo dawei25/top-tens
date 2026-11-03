@@ -137,6 +137,18 @@ describe("without a backend (no env)", () => {
     expect(imported).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();
     expect(store.size).toBe(0);
+
+    // A rating is kept in the save (to show it as chosen later), and nothing else is stored or sent.
+    net.rateList("mountains", "list", -1, "too-hard");
+    net.rateList("airports", "blitz", 1, "boring");
+    await new Promise((r) => setTimeout(r, 10));
+    expect([...store.keys()]).toEqual(["top-tens:v1"]);
+    const ratings = JSON.parse(store.get("top-tens:v1")!).ratings;
+    expect(ratings["list:mountains"]).toMatchObject({ rating: -1, reason: "too-hard" });
+    // A reason only goes with a thumbs down.
+    expect(ratings["blitz:airports"]).toEqual({ rating: 1, at: expect.any(Number) });
+    expect(imported).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
     expect(listeners).toEqual([]);
     const { getAccount } = await import("./store");
     expect(getAccount().status).toBe("off");
@@ -167,6 +179,39 @@ describe("with a backend", () => {
     await vi.waitFor(() => expect(svc.reportBlitz).toHaveBeenCalled());
     expect(svc.reportList).toHaveBeenCalledWith(game, "2026-11-01");
     expect(svc.reportBlitz).toHaveBeenCalledWith(round, undefined);
+  });
+
+  it("keeps a rating in the save and hands it to the backend code, always after the one it replaces", async () => {
+    configure();
+    const svc = { start: vi.fn(), rateList: vi.fn() };
+    vi.doMock("./service", () => svc);
+    const { store } = fakeBrowser();
+    const now = Date.UTC(2026, 10, 3, 12);
+    vi.useFakeTimers({ now, toFake: ["Date"] });
+    try {
+      const net = await import("./index");
+      net.rateList("mountains", "list", 1);
+      net.rateList("mountains", "list", -1, "unfair");
+      await vi.waitFor(() => expect(svc.rateList).toHaveBeenCalledTimes(2));
+      const [first, second] = svc.rateList.mock.calls.map(([r]) => r);
+      expect(first).toEqual({ listId: "mountains", mode: "list", rating: 1, reason: null, at: now });
+      // The clock didn't move: the second still comes after the first.
+      expect(second).toEqual({ listId: "mountains", mode: "list", rating: -1, reason: "unfair", at: now + 1 });
+      expect(JSON.parse(store.get("top-tens:v1")!).ratings).toEqual({ "list:mountains": { rating: -1, reason: "unfair", at: now + 1 } });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("loads the backend code at startup when plays or ratings are waiting, or a session is stored", async () => {
+    configure();
+    const svc = { start: vi.fn() };
+    vi.doMock("./service", () => svc);
+    const { store } = fakeBrowser();
+    store.set("top-tens:rating-outbox", JSON.stringify({ pending: [{ listId: "mountains" }], sent: [] }));
+    const net = await import("./index");
+    net.startNet();
+    await vi.waitFor(() => expect(svc.start).toHaveBeenCalled());
   });
 
   it("loads the backend code at startup when plays are waiting or a session is stored", async () => {

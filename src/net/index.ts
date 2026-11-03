@@ -4,6 +4,7 @@ import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import { accountsOn, backendOn } from "./config";
 import type { CrowdStats, ListAverages } from "./crowd";
+import { invalidRating, ratingKey, withRating, type Rating, type RatingMode, type RatingReason } from "./ratings";
 import type { SyncSave } from "./sync/merge";
 import {
   accountUser,
@@ -65,7 +66,7 @@ let throttleUntil = 0;
  */
 export function startNet(): void {
   if (!backendOn) return;
-  const pending = /"pending":\[\{/.test(stored(KEYS.outbox) ?? "");
+  const pending = [KEYS.outbox, KEYS.ratingOutbox].some((k) => /"pending":\[\{/.test(stored(k) ?? ""));
   const session = accountsOn && (!!stored(KEYS.auth) || authCallback());
   // A stored session names its player, so Home can show them at once; the backend code confirms it a moment later.
   let user: AccountUser | undefined;
@@ -85,7 +86,12 @@ export function startNet(): void {
         else if (getAccount().status === "in") setAccount({ sync: "offline" });
       });
   }
-  addEventListener("online", () => withService((s) => s.flushPlays()));
+  addEventListener("online", () =>
+    withService((s) => {
+      void s.flushPlays();
+      void s.flushRatings();
+    }),
+  );
   // Coming back to the tab: catch up with other devices (at most every 30 s).
   const back = () => {
     if (document.visibilityState === "hidden" || getAccount().status !== "in" || Date.now() < throttleUntil) return;
@@ -111,6 +117,25 @@ export function reportBlitz(state: BlitzState, daily?: string): void {
   withService((s) => {
     s.start();
     s.reportBlitz(state, daily);
+  });
+}
+
+/**
+ * "Good list?": the player rated a list in a mode (1 or -1, a reason only with -1), or took their rating back (0).
+ * Kept in this device's save at once, so it shows as chosen later, offline and without a backend; with a backend it
+ * is also sent (the latest per list and mode, retried while offline) and synced to the player's other devices.
+ */
+export function rateList(listId: string, mode: RatingMode, rating: -1 | 0 | 1, reason?: RatingReason): void {
+  const saved = load();
+  // Always after the rating it replaces, even within one millisecond (or a stopped clock): the latest must win.
+  const at = Math.max(Date.now(), (saved.ratings?.[ratingKey(mode, listId)]?.at ?? 0) + 1);
+  const r: Rating = { listId, mode, rating, reason: rating === -1 ? (reason ?? null) : null, at };
+  if (invalidRating(r)) return;
+  save(withRating(saved, r));
+  if (!backendOn) return;
+  withService((s) => {
+    s.start();
+    s.rateList(r);
   });
 }
 

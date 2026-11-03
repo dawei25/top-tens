@@ -167,6 +167,60 @@ describe("plays", () => {
   });
 });
 
+describe("ratings", () => {
+  const sentRatings = () => fake.calls.rpc.filter(([fn]) => fn === "rate_list").map(([, args]) => args);
+  const rating = (over: Partial<import("./ratings").Rating> = {}): import("./ratings").Rating => ({
+    listId: "mountains",
+    mode: "list",
+    rating: 1,
+    reason: null,
+    at: Date.now(),
+    ...over,
+  });
+
+  it("sends a rating to rate_list with this browser's id", async () => {
+    const svc = await import("./service");
+    svc.rateList(rating({ rating: -1, reason: "wrong-data" }));
+    await vi.waitFor(() => expect(sentRatings()).toHaveLength(1));
+    expect(sentRatings()[0]).toEqual({
+      p_list_id: "mountains",
+      p_mode: "list",
+      p_rating: -1,
+      p_reason: "wrong-data",
+      p_client_id: store.get("top-tens:client-id"),
+    });
+    await vi.waitFor(() => expect(JSON.parse(store.get("top-tens:rating-outbox")!).pending).toEqual([]));
+  });
+
+  it("keeps the latest rating while offline and sends it when the connection is back", async () => {
+    const svc = await import("./service");
+    const real = fake.answers.rpc;
+    fake.answers.rpc = (fn, args) => (fn === "rate_list" ? { data: null, error: { message: "TypeError: Failed to fetch" }, status: 0 } : real(fn, args));
+    const at = Date.now();
+    svc.rateList(rating({ at }));
+    await vi.waitFor(() => expect(sentRatings()).toHaveLength(1));
+    await new Promise((r) => setTimeout(r, 0));
+    svc.rateList(rating({ rating: -1, reason: "boring", at: at + 1 }));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(JSON.parse(store.get("top-tens:rating-outbox")!).pending.map((r: { rating: number }) => r.rating)).toEqual([-1]);
+
+    fake.answers.rpc = real;
+    await svc.flushRatings();
+    expect(sentRatings().at(-1)).toMatchObject({ p_rating: -1, p_reason: "boring" });
+    expect(JSON.parse(store.get("top-tens:rating-outbox")!).pending).toEqual([]);
+  });
+
+  it("doesn't send a rating another device has replaced since (that device sends its own)", async () => {
+    const at = Date.now() - 60_000;
+    store.set("top-tens:v1", JSON.stringify({ games: {}, daily: {}, seenHelp: true, ratings: { "list:mountains": { rating: -1, at: at + 1000 } } }));
+    store.set("top-tens:rating-outbox", JSON.stringify({ pending: [rating({ at })], sent: [] }));
+    const svc = await import("./service");
+    await svc.flushRatings();
+    expect(sentRatings()).toEqual([]);
+    expect(JSON.parse(store.get("top-tens:rating-outbox")!).pending).toEqual([]);
+  });
+});
+
 describe("stats", () => {
   it("asks once per list and mode (with GET, it's a read), then answers from the cache", async () => {
     const svc = await import("./service");

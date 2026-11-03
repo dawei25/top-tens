@@ -75,6 +75,8 @@ export const KEYS = {
   auth: "top-tens:auth",
   /** Finished games waiting to be sent. */
   outbox: "top-tens:outbox",
+  /** List ratings waiting to be sent (the latest per list and mode). */
+  ratingOutbox: "top-tens:rating-outbox",
   /** The account this device's save was last synced with. */
   owner: "top-tens:sync-owner",
   /** A save set aside for its account (`${stash}${user id}`) when someone else signed in on this device. */

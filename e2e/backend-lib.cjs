@@ -73,7 +73,7 @@ const REFUSED_SUB = "refuse-me";
  * A Google ID token signs Dana in, unless its `sub` is REFUSED_SUB.
  */
 async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
-  const calls = { submit: [], stats: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
+  const calls = { submit: [], rate: [], stats: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
   let row = save;
   const cors = {
     "access-control-allow-origin": "*",
@@ -89,6 +89,9 @@ async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
     switch (url.pathname) {
       case "/rest/v1/rpc/submit_play":
         calls.submit.push(req.postDataJSON());
+        return json(200, true);
+      case "/rest/v1/rpc/rate_list":
+        calls.rate.push(req.postDataJSON());
         return json(200, true);
       case "/rest/v1/rpc/list_stats":
         calls.stats.push([url.searchParams.get("p_list_id"), url.searchParams.get("p_mode")]);

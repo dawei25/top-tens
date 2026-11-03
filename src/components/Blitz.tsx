@@ -37,6 +37,7 @@ import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
 import { BlitzCrowdLine } from "./account";
 import { reportBlitz } from "../net";
+import { RateList } from "./rate/RateList";
 
 interface Props {
   id: string;
@@ -538,6 +539,7 @@ export function Blitz({
             back in free play after its day.
           </p>
         )}
+        <RateList listId={puzzle.id} mode="blitz" />
       </section>
     );
     board = <RoundLists puzzle={puzzle} hits={viewRun.hits} byName={byName} waitFor={waitFor} />;
@@ -702,6 +704,7 @@ export function Blitz({
           )}
         </div>
         {!onRoll && <p className="caption">no other lists are open for blitz yet.</p>}
+        <RateList listId={puzzle.id} mode="blitz" />
       </section>
     );
     board = (

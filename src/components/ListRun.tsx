@@ -8,6 +8,7 @@ import { runTime } from "./Blitz";
 import { Loading } from "./Game";
 import { ParBlock, usePar } from "./par";
 import { formatAsOf, ordinal, ScreenHead, sourceSite } from "./pixel";
+import { RateList } from "./rate/RateList";
 import { ClassicSquid } from "./squid";
 
 interface Props {
@@ -217,6 +218,7 @@ export function ListRun({ id, meta, startedAt, onBack, onHome, onReplay }: Props
             </a>
             , {asOf}.
           </p>
+          <RateList listId={puzzle.id} mode="list" />
         </section>
       </div>
       <ClassicSquid found={run.found} status={run.status} />

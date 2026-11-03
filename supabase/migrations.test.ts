@@ -6,8 +6,8 @@ import { beforeAll, describe, expect, it } from "vitest";
 /**
  * The migrations, run in PGlite (Postgres in WebAssembly) against small stand-ins for what Supabase provides: the
  * anon, authenticated and service_role roles, auth.users and auth.uid(). Checks the contract the game relies on: who
- * can touch what, what submit_play accepts, what the stats functions return, the save's version check, and what
- * account deletion (api/delete-account.ts, as service_role) needs.
+ * can touch what, what submit_play and rate_list accept, what the stats and ratings functions return, the save's
+ * version check, and what account deletion (api/delete-account.ts, as service_role) needs.
  *
  * Everything runs twice: once as older projects set up public (every new table and function handed to the API roles,
  * which the migrations must take back), once with "Automatically expose new tables" off (nothing handed out, as in
@@ -63,6 +63,15 @@ function suite(exposeNewTables: boolean) {
       args.client ?? client(1),
       args.started ?? ago(5),
       args.daily ?? null,
+    ]);
+
+  const rate = (args: { list?: string; mode?: string; rating?: number | null; reason?: string | null; client?: string | null }) =>
+    db.query<{ ok: boolean }>("select public.rate_list($1, $2, $3, $4, $5) as ok", [
+      args.list ?? "mountains",
+      args.mode ?? "list",
+      args.rating === undefined ? 1 : args.rating,
+      args.reason ?? null,
+      args.client === undefined ? client(1) : args.client,
     ]);
 
   async function code(p: Promise<unknown>): Promise<string | undefined> {
@@ -194,6 +203,128 @@ function suite(exposeNewTables: boolean) {
     });
   });
 
+  describe("ratings", () => {
+    type Row = { list_id: string; mode: string; rating: number; reason: string | null; user_id: string | null; client_id: string };
+    const rows = (list: string) =>
+      db.query<Row>("select list_id, mode, rating, reason, user_id, client_id from public.ratings where list_id = $1 order by mode, client_id", [list]);
+    type Totals = { list_id: string; mode: string; up: number; down: number; too_hard: number; too_easy: number; boring: number; unfair: number; wrong_data: number; last_rated: Date };
+    const totals = async (list: string, since?: string) =>
+      (
+        await as("anon", null, () =>
+          since ? db.query<Totals>("select * from public.list_ratings($1)", [since]) : db.query<Totals>("select * from public.list_ratings()"),
+        )
+      ).rows.filter((r) => r.list_id === list);
+
+    it("takes a rating, and a player's latest replaces their earlier one; 0 takes it back", async () => {
+      await as("anon", null, async () => {
+        expect((await rate({ list: "r-mountains", client: client(500) })).rows[0].ok).toBe(true);
+        expect((await rate({ list: "r-mountains", client: client(500), rating: -1, reason: "too-hard" })).rows[0].ok).toBe(true);
+      });
+      expect((await rows("r-mountains")).rows).toEqual([
+        { list_id: "r-mountains", mode: "list", rating: -1, reason: "too-hard", user_id: null, client_id: client(500) },
+      ]);
+      const stamp = await db.query<{ later: boolean }>("select updated_at >= created_at as later from public.ratings where list_id = 'r-mountains'");
+      expect(stamp.rows[0].later).toBe(true);
+      await as("anon", null, async () => {
+        // The reason goes when the next rating has none; Blitz is a rating of its own.
+        await rate({ list: "r-mountains", client: client(500), rating: -1 });
+        await rate({ list: "r-mountains", mode: "blitz", client: client(500) });
+      });
+      expect((await rows("r-mountains")).rows.map((r) => [r.mode, r.rating, r.reason])).toEqual([
+        ["blitz", 1, null],
+        ["list", -1, null],
+      ]);
+      await as("anon", null, () => rate({ list: "r-mountains", client: client(500), rating: 0 }));
+      expect((await rows("r-mountains")).rows.map((r) => r.mode)).toEqual(["blitz"]);
+    });
+
+    it("refuses malformed ratings with invalid_parameter_value (a 400 from the API)", async () => {
+      await as("anon", null, async () => {
+        const bad = [
+          { list: "Bad Id" },
+          { list: "x".repeat(65) },
+          { mode: "classic" },
+          { rating: 2 },
+          { rating: -2 },
+          { rating: null },
+          { rating: -1, reason: "meh" },
+          { rating: 1, reason: "boring" },
+          { rating: 0, reason: "boring" },
+          { client: null },
+        ];
+        for (const args of bad) expect(await code(rate({ list: "r-bad", client: client(501), ...args })), JSON.stringify(args)).toBe("22023");
+        for (const reason of ["too-hard", "too-easy", "boring", "unfair", "wrong-data"]) {
+          expect((await rate({ list: "r-bad", client: client(501), rating: -1, reason })).rows[0].ok).toBe(true);
+        }
+      });
+      expect((await rows("r-bad")).rows.map((r) => r.reason)).toEqual(["wrong-data"]);
+    });
+
+    it("gives players no direct access to the table", async () => {
+      for (const [role, user] of [["anon", null], ["authenticated", A]] as const) {
+        await as(role, user, async () => {
+          expect(await code(db.query("select * from public.ratings"))).toBe("42501");
+          expect(await code(db.query("insert into public.ratings (list_id, mode, rating, client_id) values ('x', 'list', 1, $1)", [client(502)]))).toBe("42501");
+          expect(await code(db.query("update public.ratings set rating = 1"))).toBe("42501");
+          expect(await code(db.query("delete from public.ratings"))).toBe("42501");
+        });
+      }
+    });
+
+    it("links a signed-in player's rating, one per list and mode across their devices", async () => {
+      await as("authenticated", A, () => rate({ list: "r-islands", client: client(510) }));
+      expect((await rows("r-islands")).rows.map((r) => [r.client_id, r.rating, r.user_id])).toEqual([[client(510), 1, A]]);
+      // The same player on another device: that device's rating replaces the first one.
+      await as("authenticated", A, () => rate({ list: "r-islands", client: client(511), rating: -1, reason: "boring" }));
+      // Someone else's rating of the list stays.
+      await as("anon", null, () => rate({ list: "r-islands", client: client(512) }));
+      expect((await rows("r-islands")).rows.map((r) => [r.client_id, r.rating, r.user_id])).toEqual([
+        [client(511), -1, A],
+        [client(512), 1, null],
+      ]);
+      // Taken back from a third device: gone everywhere.
+      await as("authenticated", A, () => rate({ list: "r-islands", client: client(513), rating: 0 }));
+      expect((await rows("r-islands")).rows.map((r) => r.client_id)).toEqual([client(512)]);
+    });
+
+    it("ignores a browser past 120 ratings an hour", async () => {
+      await as("anon", null, async () => {
+        for (let i = 0; i < 120; i++) expect((await rate({ list: `r-spam-${i}`, client: client(520) })).rows[0].ok).toBe(true);
+        expect((await rate({ list: "r-spam-x", client: client(520) })).rows[0].ok).toBe(false);
+        // Another browser is fine.
+        expect((await rate({ list: "r-spam-x", client: client(521) })).rows[0].ok).toBe(true);
+      });
+      expect((await rows("r-spam-x")).rows.map((r) => r.client_id)).toEqual([client(521)]);
+    });
+
+    it("totals each list per mode, one rating per player, with no ids, for the public key", async () => {
+      await as("anon", null, async () => {
+        for (let i = 0; i < 3; i++) await rate({ list: "r-airports", client: client(530 + i) });
+        await rate({ list: "r-airports", client: client(533), rating: -1, reason: "too-hard" });
+        await rate({ list: "r-airports", client: client(534), rating: -1, reason: "wrong-data" });
+        await rate({ list: "r-airports", client: client(535), rating: -1 });
+        await rate({ list: "r-airports", mode: "blitz", client: client(530) });
+      });
+      // B on two devices, and an older row of theirs from before one rating per player was kept: counted once (the latest).
+      await as("authenticated", B, () => rate({ list: "r-airports", client: client(536), rating: -1, reason: "boring" }));
+      await db.query("insert into public.ratings (list_id, mode, rating, client_id, user_id, updated_at) values ('r-airports', 'list', 1, $1, $2, now() - interval '1 day')", [client(537), B]);
+
+      const all = await totals("r-airports");
+      expect(all.map((t) => Object.keys(t))).toEqual(Array(2).fill(["list_id", "mode", "up", "down", "too_hard", "too_easy", "boring", "unfair", "wrong_data", "last_rated"]));
+      expect(all.map(({ last_rated, ...t }) => (expect(last_rated).toBeInstanceOf(Date), t))).toEqual([
+        { list_id: "r-airports", mode: "blitz", up: 1, down: 0, too_hard: 0, too_easy: 0, boring: 0, unfair: 0, wrong_data: 0 },
+        { list_id: "r-airports", mode: "list", up: 3, down: 4, too_hard: 1, too_easy: 0, boring: 1, unfair: 0, wrong_data: 1 },
+      ]);
+
+      // Since a date: only ratings given or changed after it.
+      await db.query("update public.ratings set updated_at = now() - interval '3 days' where list_id = 'r-airports' and client_id in ($1, $2)", [client(530), client(533)]);
+      const recent = await totals("r-airports", new Date(Date.now() - 86_400_000).toISOString());
+      expect(recent.map((t) => [t.mode, t.up, t.down, t.too_hard])).toEqual([["list", 2, 3, 0]]);
+      // A list nobody rated isn't there.
+      expect(await totals("nobody-rated")).toEqual([]);
+    });
+  });
+
   describe("saves", () => {
     const select = () => db.query<{ user_id: string; version: number; data: unknown }>("select user_id, version, data from public.saves order by user_id");
 
@@ -232,22 +363,28 @@ function suite(exposeNewTables: boolean) {
       });
     });
 
-    it("lets account deletion (the server, as service_role) clear a player's games and save", async () => {
+    it("lets account deletion (the server, as service_role) clear a player's ratings, games and save", async () => {
       await as("authenticated", B, () => db.query("insert into public.saves (user_id, data) values ($1, '{}')", [B]));
       const others = await db.query<{ n: number }>("select count(*)::int as n from public.plays where user_id is distinct from $1", [B]);
+      const otherRatings = await db.query<{ n: number }>("select count(*)::int as n from public.ratings where user_id is distinct from $1", [B]);
       await as("service_role", null, async () => {
         // What api/delete-account.ts sends through the API: a delete filtered on the user.
+        expect((await db.query("delete from public.ratings where user_id = $1", [B])).affectedRows).toBe(2);
         expect((await db.query("delete from public.plays where user_id = $1", [B])).affectedRows).toBe(2);
         expect((await db.query("delete from public.saves where user_id = $1", [B])).affectedRows).toBe(1);
       });
       expect((await db.query<{ n: number }>("select count(*)::int as n from public.plays")).rows[0].n).toBe(others.rows[0].n);
+      expect((await db.query<{ n: number }>("select count(*)::int as n from public.ratings")).rows[0].n).toBe(otherRatings.rows[0].n);
     });
 
-    it("goes, with the account's linked games, when the sign-in is deleted", async () => {
+    it("goes, with the account's linked games and ratings, when the sign-in is deleted", async () => {
+      await as("authenticated", A, () => rate({ list: "deleted-with-a", client: client(900) }));
+      expect((await db.query("select * from public.ratings where user_id = $1", [A])).rows).toHaveLength(1);
       const before = await db.query<{ n: number }>("select count(*)::int as n from public.plays where user_id is null");
       await db.query("delete from auth.users where id = $1", [A]);
       expect((await db.query("select * from public.saves where user_id = $1", [A])).rows).toEqual([]);
       expect((await db.query("select * from public.plays where user_id = $1", [A])).rows).toEqual([]);
+      expect((await db.query("select * from public.ratings where user_id = $1", [A])).rows).toEqual([]);
       // Anonymous games stay in the totals.
       expect((await db.query<{ n: number }>("select count(*)::int as n from public.plays where user_id is null")).rows[0].n).toBe(before.rows[0].n);
     });

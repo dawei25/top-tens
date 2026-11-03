@@ -6,6 +6,7 @@ import { accountsOn, BACKEND } from "./config";
 import { parseAverages, parseStats, type CrowdStats, type ListAverages } from "./crowd";
 import { localOutboxStore, Outbox, retryDelay, type SendResult } from "./outbox";
 import { blitzPlay, clientId, listPlay, rpcArgs, type Play } from "./plays";
+import { RATINGS, rateArgs, ratingKey, type Rating } from "./ratings";
 import { accountUser, bumpSaves, getAccount, KEYS, remember, setAccount, type AccountUser } from "./store";
 import { syncSave, type SaveRemote } from "./sync/engine";
 import { mergeSaves, type SyncSave } from "./sync/merge";
@@ -76,6 +77,45 @@ export function reportList(game: GameState, daily?: string): void {
 
 export function reportBlitz(state: BlitzState, daily?: string): void {
   queue(blitzPlay(state, daily));
+}
+
+// ---------- Ratings ----------
+
+/** "Good list?" answers waiting to be sent: the latest per list and mode, sent like plays (offline, they wait). */
+const ratingBox = new Outbox<Rating>(
+  localOutboxStore<Rating>(globalThis.localStorage, KEYS.ratingOutbox),
+  async (r) => {
+    // A newer rating of this list came from another device (a sync): that device sends its own.
+    const latest = load().ratings?.[ratingKey(r.mode, r.listId)];
+    if (latest && latest.at > r.at) return "drop";
+    const { error, status } = await sb().rpc("rate_list", rateArgs(r, clientId()));
+    return sendResult(status, error);
+  },
+  Date.now,
+  RATINGS,
+);
+
+let ratingRetries = 0;
+let ratingTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Send the ratings waiting, with the same backoff as plays. */
+export async function flushRatings(): Promise<void> {
+  clearTimeout(ratingTimer);
+  try {
+    if ((await ratingBox.flush()) === "retry") {
+      ratingRetries++;
+      clearTimeout(ratingTimer);
+      ratingTimer = setTimeout(() => void flushRatings(), retryDelay(ratingRetries));
+    } else ratingRetries = 0;
+  } catch {
+    // Never let ratings get in the way.
+  }
+}
+
+/** The player rated a list (0: took it back). It's in the save already: send it, and sync it to their devices. */
+export function rateList(r: Rating): void {
+  if (ratingBox.add(r)) void flushRatings();
+  if (getAccount().status === "in") syncSoon(1500);
 }
 
 // ---------- Stats ----------
@@ -178,6 +218,7 @@ export async function start(): Promise<void> {
   if (started) return;
   started = true;
   void flushPlays();
+  void flushRatings();
   if (!accountsOn) return;
   try {
     const hadVerifier = verifierWaiting();

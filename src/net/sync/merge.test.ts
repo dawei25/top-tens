@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BLITZ_SECONDS, MAX_BLITZ_RUNS, type BlitzRun, type BlitzState } from "../../game/blitz";
 import { MAX_LIST_RUNS, type ListRun } from "../../game/history";
 import type { GameState } from "../../game/state";
-import { stats, withFirstTries } from "../../game/storage";
+import { stats, withFirstTries, type ListRating } from "../../game/storage";
 import { mergeSaves, pickGame, pruneBefore, retireLive, sameSave, sanitize, stableJson, type SyncSave } from "./merge";
 
 const T = Date.UTC(2026, 10, 1, 12); // 2026-11-01 12:00 UTC
@@ -375,6 +375,62 @@ describe("mergeSaves: a reset made while signed in", () => {
   });
 });
 
+describe("mergeSaves: list ratings", () => {
+  const up = (at: number): ListRating => ({ rating: 1, at });
+  const down = (at: number, reason?: ListRating["reason"]): ListRating => (reason ? { rating: -1, reason, at } : { rating: -1, at });
+  const back = (at: number): ListRating => ({ rating: 0, at });
+
+  it("keeps the rating given last on either device, with its reason", () => {
+    const a = save({ ratings: { "list:mountains": up(T), "blitz:mountains": down(T + 5 * MIN, "too-hard"), "list:islands": up(T) } });
+    const b = save({ ratings: { "list:mountains": down(T + MIN, "boring"), "blitz:mountains": up(T + 2 * MIN), "list:rivers": down(T) } });
+    for (const m of [mergeSaves(a, b, NOW), mergeSaves(b, a, NOW)]) {
+      expect(m.ratings).toEqual({
+        "list:mountains": down(T + MIN, "boring"),
+        "blitz:mountains": down(T + 5 * MIN, "too-hard"),
+        "list:islands": up(T),
+        "list:rivers": down(T),
+      });
+    }
+  });
+
+  it("takes a rating back on every device: a later 0 beats an earlier rating", () => {
+    const m = mergeSaves(save({ ratings: { "list:mountains": up(T) } }), save({ ratings: { "list:mountains": back(T + MIN) } }), NOW);
+    expect(m.ratings).toEqual({ "list:mountains": back(T + MIN) });
+    // And a rating given again after that wins over the 0.
+    const again = mergeSaves(m, save({ ratings: { "list:mountains": down(T + 2 * MIN) } }), NOW);
+    expect(again.ratings).toEqual({ "list:mountains": down(T + 2 * MIN) });
+  });
+
+  it("drops malformed ratings", () => {
+    const m = mergeSaves(
+      {
+        games: {},
+        daily: {},
+        ratings: {
+          "list:mountains": up(T),
+          mountains: up(T),
+          "classic:mountains": up(T),
+          "list:Bad Id": up(T),
+          "list:a": { rating: 2, at: T },
+          "list:b": { rating: 1, reason: "boring", at: T },
+          "list:c": { rating: -1, reason: "meh", at: T },
+          "list:d": { rating: -1 },
+          "list:e": "up",
+        },
+      },
+      empty(),
+      NOW,
+    );
+    expect(m.ratings).toEqual({ "list:mountains": up(T) });
+    expect(sanitize({ ratings: "nope" }).ratings).toBeUndefined();
+  });
+
+  it("drops ratings from before a reset made while signed in", () => {
+    const m = mergeSaves(save({ resetAt: T }), save({ ratings: { "list:a": up(T - MIN), "list:b": down(T + MIN) } }), NOW);
+    expect(m.ratings).toEqual({ "list:b": down(T + MIN) });
+  });
+});
+
 /** A small deterministic random generator, so the property tests are reproducible. */
 function rng(seed: number) {
   return () => {
@@ -423,6 +479,15 @@ function randomSave(rand: () => number): SyncSave {
     if (rand() < 0.3) s.firstTries.list![id] = listRun(id, T - Math.floor(1 + rand() * 30) * MIN, Math.floor(rand() * 11));
     if (rand() < 0.3) s.firstTries.blitz![id] = blitzRun(T - Math.floor(1 + rand() * 30) * MIN, 10 + Math.floor(rand() * 900));
   }
+  s.ratings = {};
+  for (const id of ids) {
+    for (const mode of ["list", "blitz"]) {
+      if (rand() >= 0.4) continue;
+      const at = T + Math.floor(rand() * 20) * MIN;
+      const rating = pick([-1, 0, 1] as const);
+      s.ratings[`${mode}:${id}`] = rating === -1 && rand() < 0.5 ? { rating, reason: pick(["too-hard", "boring"] as const), at } : { rating, at };
+    }
+  }
   return mergeSaves(s, empty(), NOW); // normalized: sorted, capped, first tries filled in
 }
 
@@ -458,6 +523,15 @@ describe("mergeSaves: properties", () => {
           expect(m.firstTries![mode]![id].startedAt).toBe(Math.min(...starts));
         }
       }
+    }
+  });
+
+  it("keeps each list's latest rating, per mode, from either side", () => {
+    for (const [a, b] of pairs) {
+      const m = mergeSaves(a, b, NOW);
+      const keys = new Set([...Object.keys(a.ratings ?? {}), ...Object.keys(b.ratings ?? {})]);
+      expect(new Set(Object.keys(m.ratings ?? {}))).toEqual(keys);
+      for (const k of keys) expect(m.ratings![k].at).toBe(Math.max(a.ratings?.[k]?.at ?? 0, b.ratings?.[k]?.at ?? 0));
     }
   });
 
