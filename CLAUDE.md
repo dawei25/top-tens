@@ -3,7 +3,8 @@
 A browser game (TENtacle): a category is shown ("Most populous countries"), the player names the top 10, 5 lives.
 Static site (Vite + React + TypeScript), no backend. Puzzles are prebuilt from Wikipedia into JSON.
 
-Read `docs/DESIGN.md` for the rules of the game and the visual direction.
+Read `docs/DESIGN.md` for the rules of the game and the visual direction, and `docs/UX.md` (the owner's UX principles,
+learned from his feedback) before any UI change.
 
 Changes that need a full puzzle rebuild are batched in `docs/REBUILD_QUEUE.md`: add to it instead of rebuilding.
 
