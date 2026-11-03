@@ -76,8 +76,9 @@ export interface Topic {
    * its other pages' tables add answers from there; their places outside it are `elsewhere` entries: "japan" costs
    * a life on European countries and says "Japan isn't in Europe." (the owner: a guess from outside the region is on
    * the player). A transcontinental country follows the source page: in where its table lists it (Turkey on
-   * Europe), else free, as are its cities (Egypt on Asia, Ankara on Europe): its region is debatable. Members of the
-   * region the table leaves out (Vatican City) stay answers. scripts/validate.ts checks all of this.
+   * Europe), else free, as are its cities (Egypt on Asia, Ankara on Europe): its region is debatable. So is a place
+   * outside whose name Wikipedia also gives a place inside (Toledo, Ohio: Toledo, Spain; build.ts regionalNamesake).
+   * Members of the region the table leaves out (Vatican City) stay answers. scripts/validate.ts checks all of this.
    */
   region?: Region;
   /**
