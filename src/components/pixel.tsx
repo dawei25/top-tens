@@ -39,12 +39,23 @@ export function sourceSite(name: string): string {
 
 /**
  * Mode identity, the same everywhere: classic (name the top 10, 5 lives) is pink, Blitz (90 s, points) is gold.
- * The tag names the mode; the screens themselves (lives, the clock) show the rules.
+ * A game screen's header names its mode once; the screen itself (lives, the clock) shows the rules.
  */
 export type Mode = "classic" | "blitz";
-const MODE_TAG: Record<Mode, string> = { classic: "List", blitz: "Blitz" };
-export function ModeTag({ mode }: { mode: Mode }) {
-  return <span className={`mode-tag ${mode}`}>{MODE_TAG[mode]}</span>;
+
+/**
+ * Roll again before play (a rolled list before its first guess, a rolled Blitz before its clock starts): a navy key
+ * right of GUESS in the guess row, as tall as GUESS. Where it can show (`slot`) its slot stays for the whole game: when
+ * play starts (`on` goes false) it fades out in place, so the guess box and GUESS never move. Where it never shows
+ * (dailies, Today's Blitz, links, replays) there is no slot.
+ */
+export function RerollKey({ slot, on, onRoll }: { slot: boolean; on: boolean; onRoll?: () => void }) {
+  if (!slot) return null;
+  return (
+    <button type="button" className="key key-reroll" data-testid="reroll" data-gone={on ? undefined : ""} disabled={!on} onClick={onRoll}>
+      Roll again
+    </button>
+  );
 }
 
 /**

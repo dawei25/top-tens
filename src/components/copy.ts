@@ -31,8 +31,9 @@ export const SO_CLOSE = ["So", "close."].join(NBSP);
  * copy names the guess, not the key.
  */
 export const GUESS_HINT = "type a name and guess. typos are free.";
-/** The same hint where it shares its line with a key (Roll again, before a rolled list's first guess). */
-export const GUESS_HINT_SHORT = "typos are free.";
+/** The guess box's placeholder. Where Roll again shares the row the box is about 160px, room for ten letters. */
+export const PLACEHOLDER = "type a guess...";
+export const PLACEHOLDER_SHORT = "your guess";
 export const confirmGuess = (name: string) => `Did you mean ${name}? Guess again to confirm.`;
 
 /**
