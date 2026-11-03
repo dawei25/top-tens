@@ -657,7 +657,11 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
 async function writeKnown(topic: Topic, entries: Entry[]): Promise<void> {
   const free = await readAlso({ ...topic, also: topic.knownOnly, more: undefined, cited: undefined, universeCategories: undefined }, Infinity);
   const answers = new Set(entries.flatMap((e) => [e.name, ...e.aliases]).map(normalize));
-  const names = [...new Set(free.flatMap((e) => [e.name, ...e.aliases]))].filter((n) => normalize(n) && !answers.has(normalize(n)));
+  // A renamed cell's own text ("Cavoodle or Cavapoo") is no name to know.
+  const renamed = new Set((topic.knownOnly ?? []).flatMap((s) => Object.keys(s.rename ?? {})));
+  const names = [...new Set([...free.flatMap((e) => [e.name, ...e.aliases]), ...(topic.knownNames ?? [])])].filter(
+    (n) => normalize(n) && !answers.has(normalize(n)) && !renamed.has(n),
+  );
   mkdirSync(KNOWN_DIR, { recursive: true });
   writeFileSync(join(KNOWN_DIR, `${topic.id}.json`), JSON.stringify(names.sort((a, b) => a.localeCompare(b)), null, 0) + "\n");
   console.log(`     ${topic.id}: ${names.length} known names that aren't answers (scripts/known)`);
@@ -1083,7 +1087,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     console.log(`     ${topic.id}: values for ${found} of ${tried} likely unranked answers`);
   }
   const dataAsOf = await dataDate(topic);
-  if (topic.knownOnly) await writeKnown(topic, entries);
+  if (topic.knownOnly || topic.knownNames) await writeKnown(topic, entries);
 
   return {
     id: topic.id,

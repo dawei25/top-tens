@@ -150,6 +150,11 @@ export interface Topic {
    * typed in full one is never junk nor corrected into an answer, and their words still count as plain words.
    */
   knownOnly?: Also[];
+  /**
+   * More known names no table lists, as `knownOnly` (free, real names): the usual spellings of crossbreeds the
+   * crossbreed page leaves out ("Aussiedoodle", "Yorkipoo").
+   */
+  knownNames?: string[];
   /** Category members to leave out of the pool (titles that aren't the kind of thing the list is about). */
   categorySkip?: RegExp;
   /**
@@ -2743,7 +2748,23 @@ export const TOPICS: Topic[] = [
       "Treeing Walker Coonhound": ["Treeing Walker", "Walker Coonhound"],
     },
     // Crossbreeds are free, but real names: "labradoodle" is never read as a typo of Labrador.
-    knownOnly: [{ page: "List of dog crossbreeds", tables: [0], name: "Name" }],
+    knownOnly: [
+      {
+        page: "List of dog crossbreeds",
+        tables: [0],
+        name: "Name",
+        // Two names in one cell: each is a name of its own (below).
+        rename: { "Cavoodle or Cavapoo": "Cavapoo", "Jackabee or Jack-A-Bee": "Jackabee" },
+      },
+    ],
+    // The usual spellings of the doodles and other designer crosses the page leaves out (judge, cycle 6): with the
+    // matcher reading a spaced guess by its spaceless form, "aussie doodle" and "yorkie poo" are these, free.
+    knownNames: [
+      "Cavoodle", "Jack-A-Bee", "Aussiedoodle", "Aussiepoo", "Bernese Doodle", "Bernesedoodle", "Yorkipoo",
+      "Golden Mountain Doodle", "Mini Goldendoodle", "Mini Labradoodle", "Pomsky", "Pitsky", "Shorkie", "Peekapoo",
+      "Bordoodle", "Newfypoo", "Saint Berdoodle", "Boxador", "Frenchton", "Cavapoochon", "Maltipom", "Huskydoodle",
+      "Doxiepoo", "Shepadoodle",
+    ],
     noFigures: "the AKC's ranks past 10 aren't on Wikipedia; breeds from its earlier top 10s show their last rank",
     // How owners say them.
     aliases: {
@@ -2752,7 +2773,7 @@ export const TOPICS: Topic[] = [
       "Golden Retriever": ["Golden", "Goldens", "Golden Retrievers", "Goldie"],
       "German Shepherd": ["GSD", "German Shepherd Dog", "German Shepherds", "Alsatian"],
       Dachshund: ["Doxie", "Wiener dog", "Weiner dog", "Sausage dog", "Dachshunds", "Daschund"],
-      Poodle: ["Poodles", "Standard Poodle", "Toy Poodle", "Miniature Poodle", "Mini Poodle"],
+      Poodle: ["Poodles", "Standard Poodle", "Toy Poodle", "Miniature Poodle", "Mini Poodle", "French Poodle"],
       Beagle: ["Beagles"],
       Rottweiler: ["Rottie", "Rottweilers"],
       "German Shorthaired Pointer": ["GSP", "Shorthaired Pointer", "German Shorthair"],
