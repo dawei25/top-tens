@@ -394,6 +394,9 @@ describe("an ordinary word typed alone", () => {
     expect(judgeGuess("barrel", countries, new Set(), lex2)).toMatchObject({ kind: "unknown" });
     expect(judgeGuess("rice", countries, new Set(), lex2)).toMatchObject({ kind: "unknown" });
     expect(judgeGuess("hungry", countries, new Set(), lex2)).toMatchObject({ kind: "near", entry: { name: "Hungary" }, corrected: true });
+    const dogs: Puzzle = { ...puzzle, id: "dogs5", answers: [e(1, "Poodle"), ...puzzle.answers.slice(1)], extras: [] };
+    const lex3 = { ...lex, words: ["doodle"].map((w) => fnv(w).toString(36)).join(" ") };
+    expect(judgeGuess("doodle", dogs, new Set(), lex3).kind).toBe("unknown");
   });
   it("and an entry named exactly that word still matches", () => {
     const withWater: Puzzle = { ...games, extras: [...games.extras, e(0, "Water")] };

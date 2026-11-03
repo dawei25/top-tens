@@ -114,6 +114,8 @@ interface Candidate {
   ends: boolean;
   /** Whole words were shared with the best form and the rest starts with the same letter: "john rahm" / "jon rahm". */
   besideShared: boolean;
+  /** The best form starts with the same letter as the guess. */
+  sameStart: boolean;
 }
 
 function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useWords = true): Candidate[] {
@@ -127,6 +129,7 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
     let viaWord = false;
     let ends = false;
     let besideShared = false;
+    let sameStart = false;
     const forms = [entry.name, ...entry.aliases];
     const words = useWords ? nameWords(entry.name) : [];
     // Words of the name count as forms too, so a misspelled first name ("kareen") lands on its own entry.
@@ -157,9 +160,10 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
         viaWord = i >= forms.length;
         ends = g[0] === rest[0] && g[g.length - 1] === rest[rest.length - 1];
         besideShared = g !== guess && g[0] === rest[0];
+        sameStart = g[0] === rest[0];
       }
     }
-    return { entry, inTop10, dist: best, len, fullName, viaWord, ends, besideShared };
+    return { entry, inTop10, dist: best, len, fullName, viaWord, ends, besideShared, sameStart };
   });
 }
 
@@ -315,13 +319,13 @@ export function judgeGuess(
   // ("Irak": Iran or Iraq) become a choice; more than that is noise, and listing them would leak answers.
   const len = Math.min(guess.length, best?.len ?? guess.length);
   // Six or seven letters get a third edit when the first and last letters agree: a slip in the middle ("hungray").
-  // An ordinary word was typed on purpose: at most one slip, and only onto a ranked answer ("hungry" is Hungary; "barrel"
-  // is not Brazil, "church" not Czechia, "rice" not the pool's Nice).
   // The wider pool's obscure names (no rank, no figure) only take a slip in the middle, with the first and last letters
   // kept: "planes" is not Our Planet. Beside a whole word both share ("rahm"), one slip in a short word is still a
   // slip: "john rahm" is Jon Rahm.
   const close = candidates.filter((c) => {
-    if (plain) return c.dist <= 1 && c.entry.rank > 0;
+    // An ordinary word was typed on purpose: one slip at most, keeping its first letter, onto a ranked answer ("hungry"
+    // is Hungary; "barrel" is not Brazil, "rice" not the pool's Nice, "doodle" not Poodle).
+    if (plain) return c.dist <= 1 && c.sameStart && c.entry.rank > 0;
     const notable = c.entry.rank > 0 || c.entry.value !== undefined;
     const budget = typoBudget(len) + (notable && c.ends && len >= 6 && len <= 7 ? 1 : 0);
     return c.dist <= Math.max(budget, c.besideShared ? 1 : 0) && (notable || c.ends);
