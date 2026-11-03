@@ -2,6 +2,22 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-03, cycle 7 (lean), then the loop paused
+
+- Judged: pixar-films (daily list p5: the casual finds 6), world-series-wins (daily list p5: the casual finds 6, the
+  nickname fix confirmed). Daily bank: 4 approved lists (world-series-wins, pixar-films, theme-parks,
+  netflix-seasons) wait for Blitz picks; dailies scheduled through Nov 21. Blitz approvals are now the bottleneck.
+- Data: regional geography lists (Africa, Asia, European cities) take their answers from their region (`region` in
+  topics.ts, `elsewhere` entries, validate.ts errors). Owner's call after the first version: a place outside the
+  region costs a life and says so ("Tokyo isn't in Europe."); places on two continents that the source leaves out
+  stay free. europe-population was a daily that day, so it was hand-patched and its rebuild is queued from Nov 4.
+- Leak audit: not re-run (no matcher change this cycle).
+- Method change: player ratings ("Good list?" after every list and Blitz, the `ratings` table, `list_ratings`) feed
+  the loop from the next cycle (docs/IMPROVE.md step 0). The owner's complaint behind it: topics feel samey
+  ("countries with the most <sport> wins"); the variety rule in step 1 already applies.
+- The loop's schedule is paused (owner's session credits). Next cycle: judge Blitz candidates first, then the oldest
+  Oct 30 verdicts (us-metros, empires, museums); pull `list_ratings`.
+
 ## 2026-11-03, cycle 6
 
 - Judged: netflix-seasons (daily list p7: the casual finds 8; leans easy now that only 2 non-top-10 seasons cost a

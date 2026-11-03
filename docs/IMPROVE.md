@@ -8,6 +8,15 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
 
 0. **Don't stack cycles.** If the previous cycle's agents are still running, check on them, merge what's done, and
    start nothing new.
+   **Read the player ratings** ("Good list?" after every list and Blitz): `list_ratings(p_since => <last cycle>)`
+   with the public key (`docs/BACKEND.md`, Running it) gives per list and mode the ups, downs and downs per reason,
+   one per player. A list with clearly more downs than ups (down ≥ 2 × up with 10+ ratings) goes back to a judge,
+   and out of the daily bank if it fails. Reasons route the work: "wrong data" goes to the data agent as a bug
+   (check the source table and the answer set; add a guard); "too hard" and "too easy" go to the judge's difficulty
+   bar and to par; "boring" goes to topic selection; "answers felt unfair" goes to matching and aliases. New topics
+   lean toward the kinds of lists players rate up, and away from patterns the bank already has plenty of or that
+   keep drawing "boring". Log the counts each cycle, even when they're too small to act on. Ratings are a signal,
+   not a verdict: anyone can send them, so a judge still decides.
 1. **Pick the work** (a budget of 4 judges and 1 data agent per cycle):
    - Judge 4 lists: verdicts judged longest ago first (`judgedAt`), then lists whose `fixes` a rebuild has since
      addressed. Skip today's and the next two days' dailies.
