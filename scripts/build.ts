@@ -1012,14 +1012,15 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       ...(topic.people || /\b(accounts|pages)\b/.test(topic.noun) ? CELEBRITY_JUNK : []),
     ].map(normalize),
   );
-  // Every form an entry so far is known by, and that entry: a later namesake is the same answer. A junk alias is
-  // no form of it: the redirect "Pointer" doesn't make the English Pointer the German Shorthaired Pointer.
+  // Every form an entry so far is known by, and that entry: a later namesake is the same answer.
   const taken = new Map<string, Entry>();
   const take = (form: string, e: Entry) => taken.has(normalize(form)) || taken.set(normalize(form), e);
-  const real = (e: Entry) => e.aliases.filter((a) => !junk.has(normalize(a)));
-  for (const e of entries) for (const f of [e.name, ...real(e)]) take(f, e);
+  for (const e of entries) for (const f of [e.name, ...e.aliases]) take(f, e);
   // The same thing written another way ("St. Lawrence River" for the ranked Saint Lawrence, the table's link
   // "Javary River" for Javari) is one entry: the other spelling becomes an alias instead of a second, unranked entry.
+  // A junk alias is no such spelling: the redirect "Pointer" doesn't make the article "Pointer (dog breed)" the
+  // German Shorthaired Pointer.
+  const real = (e: Entry) => e.aliases.filter((a) => !junk.has(normalize(a)));
   const owner = new Map<string, Entry>();
   const own = (e: Entry, forms: (string | undefined)[]) => {
     for (const f of forms) if (f && sameKey(f) && !owner.has(sameKey(f))) owner.set(sameKey(f), e);
