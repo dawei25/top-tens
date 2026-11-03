@@ -39,13 +39,9 @@ export function sourceSite(name: string): string {
 
 /**
  * Mode identity, the same everywhere: classic (name the top 10, 5 lives) is pink, Blitz (90 s, points) is gold.
- * The tag names the mode; the screens themselves (lives, the clock) show the rules.
+ * A game screen's header names its mode once; the screen itself (lives, the clock) shows the rules.
  */
 export type Mode = "classic" | "blitz";
-const MODE_TAG: Record<Mode, string> = { classic: "List", blitz: "Blitz" };
-export function ModeTag({ mode }: { mode: Mode }) {
-  return <span className={`mode-tag ${mode}`}>{MODE_TAG[mode]}</span>;
-}
 
 /**
  * The keyboard hint on a home key, on its status line. Always laid out; CSS makes it visible only on the focused key,

@@ -415,24 +415,6 @@ a {
   font-size: 20px;
 }
 
-.mode-tag {
-  display: inline-block;
-  padding: 1px 7px;
-  border: 1px solid currentColor;
-  border-radius: 3px;
-  font-size: 14px;
-  line-height: 1.2;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.mode-tag.classic {
-  color: var(--pink);
-}
-.mode-tag.blitz {
-  color: var(--gold);
-}
-
 .mode-key {
   --accent: var(--pink);
   --accent-ink: var(--pink-ink);

@@ -31,7 +31,7 @@ import { shownValue } from "../game/state";
 import { emitPlay } from "../game/events";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
-import { END_FOCUS_MS, ModeTag, ScreenHead, SwapLabel } from "./pixel";
+import { END_FOCUS_MS, ScreenHead, SwapLabel } from "./pixel";
 import { blitzPrompt, notOnList } from "./copy";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
@@ -724,9 +724,9 @@ export function Blitz({
 
       <div className="board-col">
         <section className="panel prompt" data-glass data-testid="title-card">
+          {/* The header already says BLITZ: the card names the category only. */}
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-            <ModeTag mode="blitz" />
           </div>
           <h1>{puzzle.title}</h1>
           <p className="caption" data-testid="title-prompt">
