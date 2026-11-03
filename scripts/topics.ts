@@ -1077,6 +1077,8 @@ export const TOPICS: Topic[] = [
       "Red Sox Bench Coach", "Red Sox First Base Coach", "Douglas Danforth",
       // Cities with another team too: "new york" was the Giants, "philadelphia" the Athletics.
       "Philadelphia", "Kansas City", "New York", "Milwaukee",
+      // A person, a production company and mascots among the redirects (judge, cycle 7).
+      "Carlos Ahern", "SFG Productions", "Tessie the Green Monster", "Captain jolly roger",
     ],
   },
   {
