@@ -116,8 +116,8 @@ Screenshots of Krillion, taken by an earlier agent, are in
   screen at three widths and fails if any element moves or resizes. (Nov 3: the Today key grew 89 to 116px on hover
   because a desktop size override lost to the hover rule's full size, and the ENTER cap widened the Blitz key.)
 - **A breakpoint override covers every state** of what it changes. Simplest: state rules carry no layout at all.
-- **Nothing means something only on hover.** Phones have no hover. Labels explain themselves ("avg 6", not "par 6"),
-  and any extra explanation opens on tap as well as hover, floating over the page.
+- **Nothing means something only on hover.** Phones have no hover. Labels explain themselves ("average", not
+  "par"), and any extra explanation opens on tap as well as hover, floating over the page.
 - **Phone first:** every screen is designed at 390px, then widened.
 - **Visual baselines** (`e2e/baselines/`, fixed fixture data) are the reference look. A change to them is reviewed
   image by image before it merges.
