@@ -173,6 +173,23 @@ function pageLib() {
   let restFocus = null;
   let targets = [];
   const seen = new Set();
+  /** How many of each kind of element were checked in the current pass (see `kind`). */
+  let kinds = new Map();
+  let perKind = 2;
+  /**
+   * Elements of one kind (tag, classes, test id, state, and their container's classes: the nine empty rows of a
+   * board, the archive's rows) share their styles: `perKind` of each are checked, not all of them.
+   */
+  const kind = (el) =>
+    [el.tagName, [...el.classList].sort().join("."), el.dataset.testid ?? "", el.dataset.state ?? "", el.getAttribute("type") ?? "",
+      el.parentElement ? [...el.parentElement.classList].sort().join(".") : ""].join("|");
+  const take = (el) => {
+    const k = kind(el);
+    const n = kinds.get(k) ?? 0;
+    if (n >= perKind) return false;
+    kinds.set(k, n + 1);
+    return true;
+  };
 
   function neutral() {
     const spots = [
@@ -201,11 +218,16 @@ function pageLib() {
       scrollTo(0, 0);
       return neutral();
     },
-    /** Records the rest layout and the elements to act on (in `scope`, a selector, if given). Returns their labels. */
-    setRest(scope) {
+    /**
+     * Records the rest layout and the elements to act on (in `scope`, a selector, if given; `all` for every one of
+     * each kind). Returns their labels and how many were left out as more of a kind already checked.
+     */
+    setRest(scope, all) {
       rest = measure();
+      perKind = all ? Infinity : 2;
+      kinds = new Map();
       const root = scope ? document.querySelector(scope) : document.body;
-      targets = root
+      const candidates = root
         ? elements(root).filter((el) => {
             if (!el.matches(INTERACTIVE)) {
               // A clickable row or card without a button of its own: the top of its pointer cursor.
@@ -214,7 +236,9 @@ function pageLib() {
             return enabled(el) && visible(el);
           })
         : [];
-      return { labels: targets.map(label), boxes: rest.boxes.size };
+      targets = candidates.filter(take);
+      kinds = new Map();
+      return { labels: targets.map(label), same: candidates.length - targets.length, boxes: rest.boxes.size };
     },
     /** Focus back where it was at rest (or nowhere). */
     restore() {
@@ -268,6 +292,7 @@ function pageLib() {
     /** Starts a Tab walk: from the top of the page, or (in a scope) from its first interactive element. */
     focusStart(scope) {
       seen.clear();
+      kinds = new Map();
       if (scope) {
         const first = targets.find((el) => el.matches(INTERACTIVE));
         first?.focus({ preventScroll: true });
@@ -292,7 +317,15 @@ function pageLib() {
       if (scope && !root?.contains(el)) return { done: true, outside: label(el) };
       if (seen.has(el)) return { done: true };
       seen.add(el);
+      // More of a kind already checked in this walk: Tab on past it.
+      if (!take(el)) return { skipped: true };
       return { label: label(el), changes: this.check() };
+    },
+    /** Checks the state now (after hovering target `i`) and gets the point for target `next`, in one round trip. */
+    hoverStep(next) {
+      const changes = this.check();
+      this.restore();
+      return { changes, next: next === null ? null : this.point(next) };
     },
     focusEnd() {
       document.querySelector("[data-states-sentinel]")?.remove();
@@ -305,9 +338,9 @@ const install = (page) => page.evaluate(pageLib);
 
 /**
  * Hovers (if `hover`), presses and Tab-focuses every visible enabled interactive element on the screen in front of
- * `page`, comparing the layout with the screen at rest. `screen.scope` limits the elements acted on (all of the page is
- * still measured); `screen.keepFocus` keeps the element focused at rest focused (an open picker closes on blur).
- * Returns { failures, counts }.
+ * `page` (two of each kind; STATES_ALL=1 for every one), comparing the layout with the screen at rest.
+ * `screen.scope` limits the elements acted on (all of the page is still measured); `screen.keepFocus` keeps the element
+ * focused at rest focused (an open picker closes on blur). Returns { failures, counts }.
  */
 async function checkScreen(page, screen, { hover }) {
   await install(page);
@@ -334,26 +367,32 @@ async function checkScreen(page, screen, { hover }) {
 
   await page.evaluate((keep) => window.__states.begin(keep), !!screen.keepFocus);
   await settle();
-  const { labels } = await page.evaluate((scope) => window.__states.setRest(scope), screen.scope ?? null);
+  const { labels, same } = await page.evaluate(
+    ([scope, all]) => window.__states.setRest(scope, all),
+    [screen.scope ?? null, !!process.env.STATES_ALL],
+  );
+  counts.same = same;
+  const pointAt = (n) => (n === null ? null : page.evaluate((i) => window.__states.point(i), n));
 
-  if (hover) {
+  if (hover && labels.length) {
+    let pt = await pointAt(0);
     for (let i = 0; i < labels.length; i++) {
-      const pt = await page.evaluate((n) => window.__states.point(n), i);
+      const next = i + 1 < labels.length ? i + 1 : null;
       if (!pt) {
         counts.covered.push(labels[i]);
+        pt = await pointAt(next);
         continue;
       }
       await page.mouse.move(pt.x, pt.y);
-      // Hovering a Today key focuses it (Enter then means that key): part of its hover state, undone after.
-      const r = await page.evaluate(() => {
-        const c = window.__states.check();
-        window.__states.restore();
-        return c;
-      });
+      // Checks this hover, undoes any focus it moved (hovering a Today key focuses it, so Enter means that key: part
+      // of its hover state), and finds the next point, in one round trip.
+      const r = await page.evaluate((n) => window.__states.hoverStep(n), next);
       counts.hover += 1;
-      if (r) {
-        fail("hover", labels[i], r);
+      pt = r.next;
+      if (r.changes) {
+        fail("hover", labels[i], r.changes);
         await recover("hover", labels[i]);
+        pt = await pointAt(next);
       }
     }
     await recover("hover", "(the hover pass)");
@@ -396,6 +435,7 @@ async function checkScreen(page, screen, { hover }) {
       await page.keyboard.press("Tab");
       const r = await page.evaluate((scope) => window.__states.focusStep(scope), screen.scope ?? null);
       if (r.done) break;
+      if (r.skipped) continue;
       counts.focus += 1;
       if (r.changes) fail("focus", r.label, r.changes);
     }

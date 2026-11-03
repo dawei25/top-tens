@@ -7,7 +7,8 @@
 // On each screen every visible enabled interactive element is hovered (not on the phone), pressed (pointer down, then
 // moved away and released outside, so no click fires) and focused from the keyboard (Tab through the page, so
 // focus-visible and keyboard-modality styles apply), and every element's layout box is compared with the screen at
-// rest (e2e/states-lib.cjs). Real puzzle data: a screen is only ever compared with itself.
+// rest (e2e/states-lib.cjs). Two of each kind of element are checked (two of the nine empty rows, say);
+// STATES_ALL=1 npm run e2e -- states checks every one. Real puzzle data: a screen is only ever compared with itself.
 // The static half of the rule is npm run lint:css (e2e/css-states.mjs).
 const { describe, test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
@@ -171,6 +172,7 @@ describe("interaction states", { concurrency: true }, () => {
         const c = r.counts;
         summary.push(
           `${screen.name}: ${width.hover ? `${c.hover} hovered, ` : ""}${c.press} pressed, ${c.focus} focused` +
+            (c.same ? ` (+${c.same} more of the same kinds)` : "") +
             (c.covered.length ? ` (${c.covered.length} covered, not hovered: ${c.covered.join(", ")})` : "") +
             ` [${((Date.now() - t) / 1000).toFixed(1)} s]` +
             (r.failures.length ? `: ${r.failures.length} FAILED` : ""),

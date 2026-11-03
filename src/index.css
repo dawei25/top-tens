@@ -473,11 +473,14 @@ a {
   opacity: 1;
 }
 
-/* Today's pair: always filled with the mode's color, on every device. */
-.mode-key.today,
-.mode-key.today:hover:not(:disabled) {
+/* Today's pair: always filled with the mode's color, on every device. Size lives on the key alone: a state rule that
+   repeated it beat the desktop override below and grew the key on hover (Nov 3). */
+.mode-key.today {
   min-height: 116px;
   padding: 16px 22px 18px;
+}
+.mode-key.today,
+.mode-key.today:hover:not(:disabled) {
   background: var(--accent);
   box-shadow: 0 5px 0 var(--accent-shadow);
 }
@@ -510,9 +513,21 @@ a {
   letter-spacing: 0.1em;
 }
 
-/* The keyboard hint, on the focused key only. */
+/*
+ * The keyboard hint, on the focused key only: a small legend on the status line, at the key's top left, like the
+ * second legend on a keycap. It is always laid out and only made visible, and it floats over the line's empty left
+ * end, so showing it moves nothing. (Next to the title it doesn't fit: beside "Today's Blitz" there are as few as 23px
+ * to spare, at 640px wide, and the cap needs 62.)
+ */
+.mode-key-top {
+  position: relative;
+}
 .enter-hint {
-  display: none;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  translate: 0 -50%;
+  visibility: hidden;
   padding: 0 6px;
   border: 1px solid currentColor;
   border-radius: 3px;
@@ -531,7 +546,7 @@ a {
 @media (pointer: fine) {
   .mode-key.today:hover .enter-hint,
   html[data-modality="keyboard"] .mode-key:focus .enter-hint {
-    display: inline-block;
+    visibility: visible;
   }
   /* Today's keys lift and grow a touch under the mouse, in their own color; transform only, so nothing moves. */
   .mode-key.today {
@@ -1423,6 +1438,7 @@ a {
     background: rgba(77, 227, 255, 0.05);
   }
   /* data-hover is set on the first pointer move, so a row revealed under a resting mouse stays shut. */
+  /* state-layout-ok: the hover fact is a panel absolutely positioned over the rows below; nothing moves */
   .slot.has-fact[data-hover]:not(.fact-open):hover .fact {
     display: block;
     position: absolute;
@@ -1447,6 +1463,7 @@ a {
     border-left-color: var(--faint);
   }
   /* The bottom rows open upward, over the rows above, so the panel stays on the board. */
+  /* state-layout-ok: places that floating fact panel above its row instead of below; nothing moves */
   .slot.has-fact[data-hover]:not(.fact-open):nth-child(n + 8):hover .fact {
     top: auto;
     bottom: calc(100% - 1px);

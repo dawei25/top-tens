@@ -34,7 +34,10 @@ export function ModeTag({ mode }: { mode: Mode }) {
   return <span className={`mode-tag ${mode}`}>{MODE_TAG[mode]}</span>;
 }
 
-/** The keyboard hint on a home key; CSS shows it only on the focused key, and only with a fine pointer. */
+/**
+ * The keyboard hint on a home key, on its status line. Always laid out; CSS makes it visible only on the focused key,
+ * and only with a fine pointer, so showing it never moves anything.
+ */
 export function EnterHint() {
   return (
     <span className="enter-hint" aria-hidden="true">
