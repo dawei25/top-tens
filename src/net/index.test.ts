@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BlitzState } from "../game/blitz";
 import type { GameState } from "../game/state";
-import { readBackend } from "./config";
+import { readBackend, readGoogleClientId } from "./config";
 
 const game: GameState = { puzzleId: "mountains", found: [1, 2], lives: 0, log: [], status: "lost", startedAt: Date.now() - 60_000, finishedAt: Date.now() };
 const round: BlitzState = { puzzleId: "airports", startedAt: Date.now() - 95_000, endedAt: Date.now() - 5000, hits: [] };
@@ -53,6 +53,45 @@ describe("readBackend", () => {
   it("ignores sign-in methods it doesn't know", () => {
     expect(readBackend("https://x.supabase.co", "k", "google,facebook,passwrd")?.signIn).toEqual(["google"]);
     expect(readBackend("https://x.supabase.co", "k", "sms")?.signIn).toEqual([]);
+  });
+});
+
+describe("env values pasted with a trailing newline (Vercel keeps it)", () => {
+  it("are trimmed: URL, key, sign-in methods, Google client ID", async () => {
+    vi.stubEnv("VITE_SUPABASE_URL", "https://example.supabase.co\n");
+    vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "\n");
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "sb_publishable_key\n");
+    vi.stubEnv("VITE_SIGN_IN", "google,password\n");
+    vi.stubEnv("VITE_GOOGLE_CLIENT_ID", "1234-abc.apps.googleusercontent.com\n");
+    const config = await import("./config");
+    expect(config.BACKEND).toEqual({ url: "https://example.supabase.co", anonKey: "sb_publishable_key", signIn: ["google", "password"] });
+    expect(config.GOOGLE_CLIENT_ID).toBe("1234-abc.apps.googleusercontent.com");
+  });
+});
+
+describe("the Google client ID", () => {
+  it("is a web client ID, trimmed; anything else keeps the redirect sign-in", () => {
+    expect(readGoogleClientId("1234-abc_D.apps.googleusercontent.com")).toBe("1234-abc_D.apps.googleusercontent.com");
+    expect(readGoogleClientId("  1234-abc.apps.googleusercontent.com\r\n")).toBe("1234-abc.apps.googleusercontent.com");
+    expect(readGoogleClientId()).toBe("");
+    expect(readGoogleClientId("\n")).toBe("");
+    expect(readGoogleClientId("GOCSPX-secret")).toBe("");
+    expect(readGoogleClientId("1234-abc.apps.googleusercontent.com 5678-def.apps.googleusercontent.com")).toBe("");
+  });
+
+  it("is used only when the build offers Google", async () => {
+    vi.stubEnv("VITE_SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "k");
+    vi.stubEnv("VITE_GOOGLE_CLIENT_ID", "1234-abc.apps.googleusercontent.com");
+    vi.stubEnv("VITE_SIGN_IN", "password");
+    expect((await import("./config")).GOOGLE_CLIENT_ID).toBe("");
+    vi.resetModules();
+    vi.stubEnv("VITE_SIGN_IN", "google");
+    expect((await import("./config")).GOOGLE_CLIENT_ID).toBe("1234-abc.apps.googleusercontent.com");
+    // No backend, no Google.
+    vi.resetModules();
+    vi.stubEnv("VITE_SUPABASE_URL", "");
+    expect((await import("./config")).GOOGLE_CLIENT_ID).toBe("");
   });
 });
 

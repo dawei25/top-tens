@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { BACKEND, PRIVACY_CONTACT } from "../../net/config";
+import { BACKEND, GOOGLE_CLIENT_ID, PRIVACY_CONTACT } from "../../net/config";
 import { loadService, useAccount } from "../../net";
 import { setAccount } from "../../net/store";
+import GoogleSignIn from "./GoogleSignIn";
 import "./account.css";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -15,12 +16,19 @@ type Service = NonNullable<Awaited<ReturnType<typeof loadService>>>;
  * Sign in with the methods this build offers (VITE_SIGN_IN): Google; an email and password (sign in or create an
  * account, nothing emailed); a link (and a code, for opening it on another device) by email. A sheet over the screen:
  * Escape, the close key or a press outside closes it; focus stays inside while it's open.
+ *
+ * Google: Google's own button and popup when the build has a client ID (VITE_GOOGLE_CLIENT_ID), so Google's account
+ * chooser names this site; else (or if Google's script can't load) our key, which goes through Supabase's redirect.
  */
 export default function SignInSheet({ onClose }: { onClose: () => void }) {
   const account = useAccount();
   const methods = BACKEND?.signIn ?? [];
   const hasPassword = methods.includes("password");
   const hasLink = methods.includes("email");
+  const hasGoogle = methods.includes("google");
+  // Google's script didn't load (offline, blocked): fall back to the redirect.
+  const [gisFailed, setGisFailed] = useState(false);
+  const gis = hasGoogle && !!GOOGLE_CLIENT_ID && !gisFailed;
   const [view, setView] = useState<"password" | "link">(hasPassword ? "password" : "link");
   const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
@@ -38,10 +46,12 @@ export default function SignInSheet({ onClose }: { onClose: () => void }) {
     close.current = onClose;
   }, [onClose]);
 
-  // Focus the first control; Escape closes (before any screen's Escape-is-Back); Tab stays in the sheet.
+  // Focus the first control; with Google's button first (it's in Google's frame), the sheet itself, so no keyboard
+  // pops up on a phone. Escape closes (before any screen's Escape-is-Back); Tab stays in the sheet.
   useEffect(() => {
     const el = sheet.current;
-    el?.querySelector<HTMLElement>("input, button:not([data-close])")?.focus();
+    if (el?.querySelector("[data-testid=sign-in-google-gis]")) el.focus();
+    else el?.querySelector<HTMLElement>("input, button:not([data-close])")?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -90,6 +100,7 @@ export default function SignInSheet({ onClose }: { onClose: () => void }) {
   };
 
   const google = () => void run("google", (s) => s.signInWithGoogle());
+  const googleToken = (token: string, nonce: string) => void run("google", (s) => s.signInWithGoogleToken(token, nonce));
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     const to = email.trim();
@@ -259,7 +270,16 @@ export default function SignInSheet({ onClose }: { onClose: () => void }) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div ref={sheet} className="panel sheet" role="dialog" aria-modal="true" aria-labelledby="sign-in-title" data-testid="sign-in-sheet" data-glass>
+      <div
+        ref={sheet}
+        className="panel sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sign-in-title"
+        tabIndex={-1}
+        data-testid="sign-in-sheet"
+        data-glass
+      >
         <div className="sheet-head">
           <h2 id="sign-in-title" className="label cyan">
             Sign in
@@ -275,12 +295,18 @@ export default function SignInSheet({ onClose }: { onClose: () => void }) {
           </p>
         )}
 
-        {methods.includes("google") && (
+        {gis && <GoogleSignIn disabled={!!busy} onCredential={googleToken} onUnavailable={() => setGisFailed(true)} />}
+        {gis && busy === "google" && (
+          <p className="sheet-note" role="status" data-testid="sign-in-google-busy">
+            signing in with google.
+          </p>
+        )}
+        {hasGoogle && !gis && (
           <button type="button" className="key sheet-wide" data-testid="sign-in-google" disabled={!!busy} onClick={google}>
             {busy === "google" ? "Opening Google" : "Continue with Google"}
           </button>
         )}
-        {methods.includes("google") && (hasPassword || hasLink) && <p className="sheet-or">or</p>}
+        {hasGoogle && (hasPassword || hasLink) && <p className="sheet-or">or</p>}
 
         {showPassword && passwordForm}
         {showLink && linkForm}
