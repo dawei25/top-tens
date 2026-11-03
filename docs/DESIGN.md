@@ -64,10 +64,12 @@ Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
 
 1. **Home:** Today's list and Blitz; Free play (Random list, Random Blitz, each with a floating by-category picker);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
-2. **Game:** title card with the prompt, score, par and a Play Blitz key; lives; 10 rank slots, each empty one with a
+2. **Game:** title card with the prompt, score (no average during play: it's revealed on the results) and a Play
+   Blitz key; lives; 10 rank slots, each empty one with a
    clue magnifier; feedback line; chips for life-costing misses.
    Blitz's title card shows the prompt and "name as many <noun> as you can".
-3. **Results:** score, par and histogram, full list with values, source link, share, Play again (rolls a new game).
+3. **Results:** score, the average and histogram (where you stand), full list with values, source link, share, Roll
+   again (a new random game).
    A finished daily offers Today's Blitz and Random list instead. The archive lists each date as a pair: the list
    row and directly under it the Blitz row (BLITZ tag, that list's title, score or not played), each opening its own
    one-try game.

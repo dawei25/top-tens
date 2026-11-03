@@ -10,7 +10,7 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 ## Words
 
 1. **Say what happens, in plain words.** A button names its effect: "Roll again" for a new random list (not "Play
-   again", which reads as the same list), "Play Blitz" (not "Blitz"). A number says what it is: "avg 6" (not "par 6",
+   again", which reads as the same list), "Play Blitz" (not "Blitz"). A number says what it is: "average" (not "par",
    asked about twice), "days in a row" (not "streak").
 2. **No jargon a casual player has to decode.** Golf, stats or game-design terms (par, percentile, streak, delta)
    get replaced or explained on the screen itself.
@@ -37,14 +37,16 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 11. **Nothing moves on hover, focus or press.** Only color, shadow, opacity and transform change (the Today key grew
     on hover). Enforced by `npm run lint:css` and `e2e/states.e2e.cjs`.
 12. **Phone first, no hover-only meaning.** Phones have no hover; anything explained on hover also opens on tap.
-13. **One mental model per mode.** Dailies are one try; free play is endless and new every time (Play again rolled the
+13. **Save the comparison for the end.** During play the player sees only their own score; the average and where
+    they stand are revealed on the results, the hook to see how they did (par was dropped from the game header).
+14. **One mental model per mode.** Dailies are one try; free play is endless and new every time (Play again rolled the
     same list).
-14. **Never spoil a daily.** Nothing shows a list's answers before its day: random play never lands on today's or a
+15. **Never spoil a daily.** Nothing shows a list's answers before its day: random play never lands on today's or a
     future day's list or Blitz (a random list landed on today's Blitz topic).
-15. **Generous, never unrelated.** Autocorrect helps partial knowledge ("shenzhen", "jordan") but never turns an
+16. **Generous, never unrelated.** Autocorrect helps partial knowledge ("shenzhen", "jordan") but never turns an
     unrelated word into an answer ("pope").
 
 ## Look
 
-16. **Keep the brand look unless asked.** Don't retune the palette or type (the pink and yellow were faded once,
+17. **Keep the brand look unless asked.** Don't retune the palette or type (the pink and yellow were faded once,
     unasked). The visual baselines are the reference.
