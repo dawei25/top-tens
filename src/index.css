@@ -707,14 +707,11 @@ a {
   letter-spacing: 0.1em;
 }
 
-.home-stats {
-  padding: 14px 18px 16px;
-}
+/* Your record is a Home card like the others (.home-group): same width, same padding, same label. */
 .stat-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px 8px;
-  margin-top: 10px;
 }
 @media (min-width: 520px) {
   .stat-row {
@@ -758,11 +755,32 @@ a {
   margin-left: auto;
 }
 
-/* How to play */
+/* How to play: a modal dialog over Home, centred, scrolling inside itself when the screen is short. The dialog box
+   has no padding of its own, so a click whose target is the dialog is on the backdrop. */
 .howto {
-  padding: 14px 18px 18px;
+  width: min(560px, calc(100% - 2 * var(--gutter)));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  /* Solid, unlike the glass cards: the keys behind it would read through the rules. */
+  background: var(--panel) var(--scan);
+  color: var(--text);
   border-left: 3px solid var(--pink);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.howto[open] {
   animation: rise 0.35s ease-out both;
+}
+.howto:focus {
+  outline: none;
+}
+.howto::backdrop {
+  background: rgba(2, 4, 9, 0.7);
+}
+.howto-body {
+  padding: 14px 18px 18px;
 }
 .panel-head {
   display: flex;
@@ -1483,6 +1501,18 @@ a {
 .text-btn.danger,
 .text-btn.danger:hover {
   color: var(--danger);
+}
+/* A text key that swaps its words (reset all progress -> sure?): both are laid out in one cell, the idle one hidden,
+   so the key never changes size under the finger. */
+.swap-btn {
+  display: inline-grid;
+  place-items: center;
+}
+.swap-btn > span {
+  grid-area: 1 / 1;
+}
+.swap-btn > [data-off] {
+  visibility: hidden;
 }
 
 .misses {
