@@ -25,8 +25,9 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
    an answer offered); review the data branch; copy its `.cache/wiki` newer-wins (`cp -ru`, so a refreshed page
    replaces the stale one); merge; `npm test`, typecheck, build, e2e; push main (it deploys).
    Never rebuild today's or tomorrow's daily list.
-5. **Schedule:** when fewer than 7 approved days remain, schedule newly approved dailies
-   (`scripts/schedule.ts`), pacing difficulty and rotating categories.
+5. **Schedule:** schedule every newly approved daily right away (`scripts/schedule.ts <n> --write`, then
+   `--blitz --write` for any day missing a Blitz), as far as there are Blitz picks for its days. A scheduled day is
+   held out of random play until it has run, so a new list debuts as a daily and joins random play the day after.
 6. **Log** one entry in `docs/IMPROVE_LOG.md`: lists judged and decisions, fixes shipped, the leak rate, topic
    ideas (built, queued or dropped), and any method change.
 7. **Fix the method, not just the list.** When the same kind of problem shows up on two or more lists (a demonym

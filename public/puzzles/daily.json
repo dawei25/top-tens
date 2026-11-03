@@ -142,5 +142,59 @@
   "date": "2026-11-12",
   "id": "island-countries",
   "blitz": "spotify-songs"
+ },
+ {
+  "n": 25,
+  "date": "2026-11-13",
+  "id": "dog-breeds",
+  "blitz": "us-states-area"
+ },
+ {
+  "n": 26,
+  "date": "2026-11-14",
+  "id": "market-cap-peak",
+  "blitz": "mcdonalds-countries"
+ },
+ {
+  "n": 27,
+  "date": "2026-11-15",
+  "id": "athletes-earnings",
+  "blitz": "music-artists"
+ },
+ {
+  "n": 28,
+  "date": "2026-11-16",
+  "id": "concert-tours",
+  "blitz": "us-metros"
+ },
+ {
+  "n": 29,
+  "date": "2026-11-17",
+  "id": "capitals",
+  "blitz": "instagram"
+ },
+ {
+  "n": 30,
+  "date": "2026-11-18",
+  "id": "car-makers",
+  "blitz": "countries-area"
+ },
+ {
+  "n": 31,
+  "date": "2026-11-19",
+  "id": "animated-films",
+  "blitz": "us-cities"
+ },
+ {
+  "n": 32,
+  "date": "2026-11-20",
+  "id": "car-models",
+  "blitz": "tiktok-accounts"
+ },
+ {
+  "n": 33,
+  "date": "2026-11-21",
+  "id": "youtube-videos",
+  "blitz": "asia-population"
  }
 ]
