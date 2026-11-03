@@ -87,6 +87,7 @@ stronger.
 | Roll again seemed missing on a Random Blitz (it sat on the score line) | controls placed where players don't look | Roll again sits right of Guess on both screens; reroll.e2e.cjs checks the Home key path |
 | "Japan" cost a life on Most populous European countries | a world universe on a regional list | regional universes in the pipeline; validate.ts error (cycle 7) |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
+| The Google client ID was pasted into Vercel with a trailing newline | env values with stray whitespace | `src/net/config.ts` trims every public env value and ignores a client ID that isn't one; index.test.ts, and the e2e Google build uses a client ID ending in "\n" |
 
 ## What good looks like
 

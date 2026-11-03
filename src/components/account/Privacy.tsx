@@ -1,4 +1,4 @@
-import { accountsOn, BACKEND, backendOn, PRIVACY_CONTACT } from "../../net/config";
+import { accountsOn, BACKEND, backendOn, GOOGLE_CLIENT_ID, PRIVACY_CONTACT } from "../../net/config";
 import { ScreenHead } from "../pixel";
 import "./account.css";
 
@@ -84,6 +84,12 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
               ? " Like any server, both see your IP address and keep it in short-lived logs. The game itself never stores it."
               : " Like any server, it sees your IP address and keeps it in short-lived logs."}
           </li>
+          {GOOGLE_CLIENT_ID && (
+            <li data-testid="privacy-google">
+              Opening Sign in loads Google's sign-in button from Google. Like any server, Google sees that request; if
+              you're signed in to Google, it uses that to offer your account.
+            </li>
+          )}
           <li>The font comes from Google Fonts. The lists come from Wikipedia, read when the puzzles were made.</li>
         </ul>
       </section>
