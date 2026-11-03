@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build, preview } from "vite";
-import { BACKEND_ENV } from "./backend-env.cjs";
+import { BACKEND_ENV, GOOGLE_ENV } from "./backend-env.cjs";
 
 const PORT = Number(process.env.E2E_PORT) || 5101;
 const dir = fileURLToPath(new URL(".", import.meta.url));
@@ -29,6 +29,7 @@ const BACKEND_KEYS = [
   "VITE_SUPABASE_ANON_KEY",
   "VITE_SUPABASE_PUBLISHABLE_KEY",
   "VITE_SIGN_IN",
+  "VITE_GOOGLE_CLIENT_ID",
   "VITE_PRIVACY_CONTACT",
 ];
 const noBackend = () => {
@@ -37,25 +38,29 @@ const noBackend = () => {
 noBackend();
 
 await build({ logLevel: "warn" });
-// backend.e2e.cjs plays a copy built with fake Supabase keys against a mocked Supabase. Built here, before the specs
-// start in parallel, so the build doesn't slow the others down.
-let backendDist;
-if (files.some((f) => f.endsWith("backend.e2e.cjs"))) {
-  backendDist = mkdtempSync(join(tmpdir(), "tentacle-backend-e2e-"));
-  Object.assign(process.env, BACKEND_ENV);
-  await build({ logLevel: "warn", build: { outDir: backendDist, emptyOutDir: true } });
+// The backend specs play copies built with fake Supabase keys against a mocked Supabase: backend.e2e.cjs without a
+// Google client ID, backend-google.e2e.cjs with one. Built here, before the specs start in parallel, so the builds
+// don't slow the others down.
+const extra = {};
+async function buildWith(spec, env, distVar) {
+  if (!files.some((f) => f.endsWith(spec))) return;
+  extra[distVar] = mkdtempSync(join(tmpdir(), "tentacle-backend-e2e-"));
+  Object.assign(process.env, env);
+  await build({ logLevel: "warn", build: { outDir: extra[distVar], emptyOutDir: true } });
   noBackend();
 }
+await buildWith("backend.e2e.cjs", BACKEND_ENV, "E2E_BACKEND_DIST");
+await buildWith("backend-google.e2e.cjs", GOOGLE_ENV, "E2E_GOOGLE_DIST");
 const server = await preview({ preview: { port: PORT, strictPort: true }, logLevel: "warn" });
 const code = await new Promise((resolve) => {
   const run = spawn(process.execPath, ["--test", "--test-reporter=spec", ...files], {
     stdio: "inherit",
-    env: { ...process.env, E2E_URL: `http://localhost:${PORT}/`, ...(backendDist && { E2E_BACKEND_DIST: backendDist }) },
+    env: { ...process.env, E2E_URL: `http://localhost:${PORT}/`, ...extra },
   });
   run.on("exit", (c) => resolve(c ?? 1));
 });
 
 await new Promise((r) => server.httpServer.close(r));
-if (backendDist) rmSync(backendDist, { recursive: true, force: true });
+for (const dist of Object.values(extra)) rmSync(dist, { recursive: true, force: true });
 console.log(`\ne2e: ${code === 0 ? "passed" : "FAILED"} in ${((Date.now() - started) / 1000).toFixed(1)} s (build included)`);
 process.exit(code);
