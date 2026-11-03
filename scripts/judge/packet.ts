@@ -41,7 +41,8 @@ export function packet(id: string): string {
     `RANKS 11+ (accepted, cost a life in classic; score in Blitz): ${ranked.length} entries. First 40:`,
     ...ranked.slice(0, 40).map(line),
     ``,
-    `UNRANKED ACCEPTED ANSWERS (cost a life in classic, score nothing): ${unranked.length}. Sample: ${unranked
+    `UNRANKED ACCEPTED ANSWERS (cost a life in classic; in Blitz only the ${unranked.filter((e) => e.n !== undefined).length} ` +
+      `with the list's own stat score, figures from another year or source don't): ${unranked.length}. Sample: ${unranked
       .slice(0, 30)
       .map((e) => e.name)
       .join(", ")}`,

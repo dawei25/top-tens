@@ -805,6 +805,12 @@ export const INTENT: Record<string, Intent> = {
       "Not in This Lifetime... Tour": ["Guns and Roses", "GNR"],
       // Renaissance is a plain word, which the matcher doesn't read as part of a longer name.
       "Renaissance World Tour": ["Renaissance"],
+      // The artist's surname or first name alone ("styles" offered two Rolling Stones tours), and U2's tours with the
+      // band's name: "U2" itself already has its four owners (more would drop it from the 360° Tour).
+      "Love On Tour": ["Styles"],
+      "Farewell Yellow Brick Road": ["Elton"],
+      "Elevation Tour": ["Elevation", "U2 Elevation", "U2 Elevation Tour"],
+      "Zoo TV Tour": ["U2 Zoo TV", "U2 Zoo TV Tour", "Zoo TV"],
     },
     groups: {
       // Cher's has "The Farewell Tour" in its name, but Elton John's (#4) is the farewell tour most players mean: the
