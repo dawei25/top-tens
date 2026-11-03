@@ -73,9 +73,10 @@ Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
    A finished daily offers Today's Blitz and Random list instead. The archive is a table, one row per date: number and
    date, then a List cell and a Blitz cell (title, and score or "not played" under it), with "List" and "Blitz" named
    once at the top; each cell opens its own one-try game.
-4. **Past runs:** every game played; a finished run offers Play again (a fresh free game on that same list), except
-   on a list held today (today's pair or a future day's): "back in free play after its day".
-5. **How to play** on first visit.
+4. **Past runs:** every game played, under a header per day, one tag per row. Each row opens its own run (the board
+   as it ended, or the Blitz round), which offers Play again (a fresh free game on that same list), the only replay
+   in the game, except on a list held today (today's pair or a future day's): "back in free play after its day".
+5. **How to play:** closed by default; the footer key opens it as a dialog over the page.
 6. **Stats** (`#stats`, Your knowledge): first tries on each list against the players' average, overall, by category and by topic; placeholders
    before the first game.
 
