@@ -14,7 +14,7 @@ import {
   blitzHold,
   blitzHoldouts,
   blitzOfTheDay,
-  dailyHoldouts,
+  rollHoldouts,
   entryForDate,
   loadSchedule,
   localDate,
@@ -144,9 +144,10 @@ function Screens() {
   if (!index || !schedule) return <Loading />;
 
   // A roll is always a fresh game, even on a list played before (its result stays in Past runs). It never lands on
-  // today's or a future daily, or on `leave` (the list on screen). A category with nothing else left widens to all.
+  // today's list or Blitz, a future day's list or Blitz, or `leave` (the list on screen). A category with nothing
+  // else left widens to all.
   const roll = (category?: string, leave?: string) => {
-    const exclude = dailyHoldouts(schedule, today);
+    const exclude = rollHoldouts(schedule, index, load(), today);
     if (leave) exclude.add(leave);
     if (category && !index.some((m) => m.category === category && !exclude.has(m.id))) category = undefined;
     const id = randomPuzzleId(index, category, exclude, lastPlayed(load(), "list"));
@@ -163,7 +164,7 @@ function Screens() {
     location.replace(`${location.pathname}${location.search}${parentOf(location.hash, today) || "#"}`);
   };
   // The lists open for a free Blitz right now (Home's counts and the Blitz roll use the same filter): never today's
-  // daily, a future one, or Today's Blitz before it's played.
+  // list or Blitz, or a future day's.
   const openBlitz = (saved = load()) => {
     const held = blitzHoldouts(schedule, index, saved, today);
     return index.filter((m) => m.blitz && !held.has(m.id) && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));

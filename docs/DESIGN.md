@@ -54,8 +54,9 @@ prefers lists the player hasn't played in that mode.
 
 **Separate topics.** Today's list and Today's Blitz are different lists, because a good list rewards knowing the
 top 10 and a good Blitz rewards breadth. `daily.json` gives every day a `blitz`; a day without one gets a
-date-seeded Blitz list that isn't that day's daily or a later one. Free Blitz never lands on today's daily, a future
-one, or Today's Blitz before it's played. If a Blitz ever runs on its day's own list, it shows only the player's hits
+date-seeded Blitz list that isn't that day's daily or a later one. Random rolls (list or Blitz) never land on today's
+list or Blitz, played or not, or on a future day's: a day's pair joins random play the day after it runs. If a Blitz
+ever runs on its day's own list, it shows only the player's hits
 until that list is finished (`blitzHold`). The judge's bars (docs/JUDGE.md): a typical player averages 5 to 6 on
 Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
 

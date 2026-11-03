@@ -52,10 +52,11 @@ export function entryForDate(schedule: DailyEntry[], date: string): DailyEntry |
 }
 
 /**
- * Lists a random roll must not land on: today's daily (its save is today's result) and every future one (spoilers).
+ * Lists a random roll must not land on: today's daily (its save is today's result) and every future day's list and
+ * Blitz (a roll shows the full list at the end, so it would spoil them).
  */
 export function dailyHoldouts(schedule: DailyEntry[], today = localDate()): Set<string> {
-  const ids = new Set(schedule.filter((e) => e.date > today).map((e) => e.id));
+  const ids = new Set(schedule.filter((e) => e.date > today).flatMap((e) => (e.blitz ? [e.id, e.blitz] : [e.id])));
   const current = todayEntry(schedule, today);
   if (current) ids.add(current.id);
   return ids;
@@ -163,17 +164,22 @@ export function blitzHold(schedule: DailyEntry[], date: string, id: string, save
 }
 
 /**
- * Lists a free Blitz never offers: today's daily and every future one (as for list rolls), and Today's Blitz until
- * it's played (a free round on it first would be a practice run at a one-try round).
+ * Lists a random roll (list or Blitz) never lands on: today's list and Today's Blitz, played or not, and every future
+ * day's list and Blitz (`dailyHoldouts`). Before the Blitz, a random list on its topic would show the full top 10 and
+ * a free Blitz on it would be a practice run (Nov 3: a random list rolled the day's Blitz topic); after it, a roll on
+ * it would replay answers just seen. They come back to random play the next day.
  */
-export function blitzHoldouts(
+export function rollHoldouts(
   schedule: DailyEntry[],
   lists: { id: string; blitz?: boolean }[],
-  saved: Saved,
+  _saved?: Saved,
   today = localDate(),
 ): Set<string> {
   const ids = dailyHoldouts(schedule, today);
   const todays = blitzOfTheDay(schedule, lists, today);
-  if (todays && !saved.blitzDaily?.[today]) ids.add(todays);
+  if (todays) ids.add(todays);
   return ids;
 }
+
+/** The holdouts for a free Blitz: the same as for any roll. */
+export const blitzHoldouts = rollHoldouts;

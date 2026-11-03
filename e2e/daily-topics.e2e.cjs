@@ -1,6 +1,6 @@
 // Today's list and Today's Blitz are separate topics: a day's Blitz is the list daily.json names in its `blitz`. The
-// archive shows each date as a pair, its list row and under it its Blitz row (one try each). Free Blitz never lands
-// on today's daily, a future one, or Today's Blitz before it's played. The Blitz title card and a miss say what the
+// archive shows each date as a pair, its list row and under it its Blitz row (one try each). Random rolls never land
+// on today's list or Blitz, played or not, or on a future day's list or Blitz. The Blitz title card and a miss say what the
 // list is made of (the puzzle's noun). The spoiler hold still guards a Blitz on its day's own list.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
@@ -113,14 +113,15 @@ for (const vp of VIEWPORTS) {
   });
 }
 
-test("free Blitz never lands on today's daily, a future one, or Today's Blitz before it's played", async () => {
+test("free Blitz never lands on today's list or Blitz, or a future day's", async () => {
   const { ctx, page } = await open(browser, VIEWPORTS[0], "", SEED, at);
   await page.getByTestId("random-blitz").waitFor();
   const days = await schedule(page);
   const index = await indexOf(page);
   const entry = days.find((e) => e.date === DAY);
   const future = days.filter((e) => e.date > DAY).map((e) => e.id);
-  const held = new Set([entry.id, ...future, entry.blitz]);
+  const futureBlitz = days.filter((e) => e.date > DAY && e.blitz).map((e) => e.blitz);
+  const held = new Set([entry.id, ...future, ...futureBlitz, entry.blitz]);
   const openCount = (extra = held) => index.filter((m) => m.blitz && !extra.has(m.id)).length;
   const blitzCount = async () => parseInt(await page.getByTestId("random-blitz-status").textContent(), 10);
   assert.equal(await blitzCount(), openCount());
@@ -155,13 +156,14 @@ test("free Blitz never lands on today's daily, a future one, or Today's Blitz be
   await page.getByTestId("today-blitz").waitFor();
   assert.equal(await page.evaluate(() => document.activeElement?.dataset.testid), "today-blitz");
 
-  // Played: Today's Blitz list opens for free Blitz (rolls still skip today's daily: its save is today's result).
+  // Played: rolls still skip today's pair for the rest of the day (its answers were just shown), but a link to
+  // Today's Blitz list opens a free round.
   await page.keyboard.press("Enter");
   await page.getByTestId("blitz-clock").waitFor();
   await playRound(page);
   await go(page, "");
   await page.getByTestId("random-blitz").waitFor();
-  assert.equal(await blitzCount(), openCount(new Set([entry.id, ...future])));
+  assert.equal(await blitzCount(), openCount());
   await go(page, `#blitz-${entry.blitz}`);
   await page.getByTestId("blitz-clock").waitFor();
   await ctx.close();

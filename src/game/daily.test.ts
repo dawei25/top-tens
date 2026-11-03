@@ -9,6 +9,7 @@ import {
   formatCountdown,
   lockDaily,
   msUntilNextDaily,
+  rollHoldouts,
   streak,
   todayEntry,
   type DailyEntry,
@@ -160,15 +161,31 @@ describe("Blitz spoiler holds", () => {
     // A day past the end of the schedule follows its stand-in.
     expect(blitzHold(days, "2026-11-07", "b", fresh)?.n).toBe(2);
   });
-  it("free Blitz never offers today's daily, a future one, or Today's Blitz before it's played", () => {
+  it("free Blitz never offers today's daily, a future one, or Today's Blitz", () => {
     const fresh = saved([]);
-    // 2026-11-04's Blitz is another list (c, the only one left).
+    // 2026-11-04's Blitz is another list (c, the only one left), held back played or not.
     expect([...blitzHoldouts(days, lists, fresh, "2026-11-04")].sort()).toEqual(["a", "b", "c"]);
     const played: Saved = { ...fresh, blitzDaily: { "2026-11-04": { id: "c", score: 10, answers: 1 } } };
-    expect([...blitzHoldouts(days, lists, played, "2026-11-04")].sort()).toEqual(["a", "b"]);
+    expect([...blitzHoldouts(days, lists, played, "2026-11-04")].sort()).toEqual(["a", "b", "c"]);
     // Today's list and Today's Blitz (another topic) are both held back.
     const todays = blitzOfTheDay(days, lists, "2026-11-05")!;
     expect(todays).not.toBe("b");
     expect([...blitzHoldouts(days, lists, fresh, "2026-11-05")].sort()).toEqual(["b", todays].sort());
+  });
+  it("a random roll never lands on today's list or Blitz, played or not, or on a future day's", () => {
+    const sched: DailyEntry[] = [
+      { n: 1, date: "2026-11-03", id: "a", blitz: "m" },
+      { n: 2, date: "2026-11-04", id: "b", blitz: "n" },
+    ];
+    const all = [...lists, { id: "m", blitz: true }, { id: "n", blitz: true }, { id: "z", blitz: true }];
+    const fresh = saved([]);
+    // Nov 3: today's list a, today's Blitz m (unplayed), and Nov 4's list b and Blitz n are all held back.
+    expect([...rollHoldouts(sched, all, fresh, "2026-11-03")].sort()).toEqual(["a", "b", "m", "n"]);
+    // Played or not, today's pair stays out of random play for the day; the next day it's back.
+    const played: Saved = { ...fresh, blitzDaily: { "2026-11-03": { id: "m", score: 5, answers: 3 } } };
+    expect([...rollHoldouts(sched, all, played, "2026-11-03")].sort()).toEqual(["a", "b", "m", "n"]);
+    expect([...rollHoldouts(sched, all, played, "2026-11-04")].sort()).toEqual(["b", "n"]);
+    // Future Blitz topics are held even from the plain daily holdouts.
+    expect(dailyHoldouts(sched, "2026-11-03").has("n")).toBe(true);
   });
 });
