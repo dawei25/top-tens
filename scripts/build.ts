@@ -255,6 +255,8 @@ function redirectTarget(name: string, cell: Cell, countries = false): string {
 }
 
 const hasCountries = (topic: Topic) => [topic.universe ?? []].flat().includes("countries");
+/** Universes whose members' other names are nicknames ("Cubs"), which every row naming the team takes. */
+export const TEAM_UNIVERSE = /-teams$/;
 
 /** A value from another column, converted (`fallback` in topics.ts), shown rounded with commas. */
 function convertedValue(cell: Cell | undefined, factor: number): { value: number; display: string } | null {
@@ -303,6 +305,9 @@ function universeName(text: string, members: Place[]): string | undefined {
 /** Names of the rows a topic's tables leave unranked, where `unrankedRowsFree` makes them free. */
 const UNRANKED_ROWS = new Map<string, Set<string>>();
 const unrankedRows = (topic: Topic) => UNRANKED_ROWS.get(topic.id) ?? UNRANKED_ROWS.set(topic.id, new Set()).get(topic.id)!;
+/** Rows whose count is zero (a team with no titles), by normalized name: shown as "0" when guessed, never ranked. */
+const ZERO_ROWS = new Map<string, Map<string, string>>();
+const zeroRows = (topic: Topic) => ZERO_ROWS.get(topic.id) ?? ZERO_ROWS.set(topic.id, new Map()).get(topic.id)!;
 
 export async function readRows(topic: Topic): Promise<Row[]> {
   const $ = await fetchPage(topic.page);
@@ -354,6 +359,9 @@ export async function readRows(topic: Topic): Promise<Row[]> {
       // A count of nothing (a team with no titles) ranks nothing; the universe still accepts the name.
       if (!v || (v.value === 0 && !topic.lowerIsBetter)) {
         if (!v) unranked();
+        // The Padres' "0": a guess shows it (judge, cycle 6), but a count of nothing never scores in Blitz. A "0.00"
+        // is a figure too small to print (the Faroe Islands' CO2), not a zero: no figure beats a wrong one.
+        else if (!/\.\d/.test(v.display)) zeroRows(topic).set(normalize(name), (topic.prefix ?? "") + v.display + (topic.unit ?? ""));
         continue;
       }
       // One name per line of the cell: "Mount Everest / Sagarmatha / Chomolungma" are three aliases, not one glued string.
@@ -657,7 +665,11 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
 async function writeKnown(topic: Topic, entries: Entry[]): Promise<void> {
   const free = await readAlso({ ...topic, also: topic.knownOnly, more: undefined, cited: undefined, universeCategories: undefined }, Infinity);
   const answers = new Set(entries.flatMap((e) => [e.name, ...e.aliases]).map(normalize));
-  const names = [...new Set(free.flatMap((e) => [e.name, ...e.aliases]))].filter((n) => normalize(n) && !answers.has(normalize(n)));
+  // A renamed cell's own text ("Cavoodle or Cavapoo") is no name to know.
+  const renamed = new Set((topic.knownOnly ?? []).flatMap((s) => Object.keys(s.rename ?? {})));
+  const names = [...new Set([...free.flatMap((e) => [e.name, ...e.aliases]), ...(topic.knownNames ?? [])])].filter(
+    (n) => normalize(n) && !answers.has(normalize(n)) && !renamed.has(n),
+  );
   mkdirSync(KNOWN_DIR, { recursive: true });
   writeFileSync(join(KNOWN_DIR, `${topic.id}.json`), JSON.stringify(names.sort((a, b) => a.localeCompare(b)), null, 0) + "\n");
   console.log(`     ${topic.id}: ${names.length} known names that aren't answers (scripts/known)`);
@@ -996,12 +1008,16 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   seedIntent(topic, entries);
   const extra = await readAlso(topic, rows.at(-1)!.value);
   // `universeNamesOnly`: the universe names the rows, but adds no answers of its own.
+  // Members of a universe whose other names are nicknames (teams): those names belong to the row they merge with.
+  const nicknamed = new Set<Entry>();
   for (const u of topic.universeNamesOnly ? [] : [topic.universe ?? []].flat()) {
     // A free row's other names count too: the table's "Macau" is the universe's "Macao".
     const free = new Set(unrankedRows(topic));
     for (const forms of COUNTRY_FORMS) if (forms.some((f) => free.has(normalize(f)))) for (const f of forms) free.add(normalize(f));
     const members = UNIVERSES[u]().filter((p) => !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
-    extra.push(...members.map((p) => ({ rank: 0, ...p })));
+    const added = members.map((p) => ({ rank: 0, ...p, aliases: [...p.aliases] }));
+    if (TEAM_UNIVERSE.test(u)) for (const m of added) nicknamed.add(m);
+    extra.push(...added);
   }
   const junk = new Set(
     [
@@ -1030,9 +1046,20 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     const forms = ownForms(e).map(normalize).filter(Boolean);
     const known = forms.find((f) => taken.has(f));
     if (known) {
+      // A team row by the member's own name first: the Orioles' cell also names their 1901 self, "Milwaukee Brewers".
+      const into = (nicknamed.has(e) && entries.find((x) => normalize(x.name) === normalize(e.name))) || taken.get(known)!;
+      // A team the table names in full ("Chicago Cubs") is typed by its nickname too: the universe's "Cubs", "Nats"
+      // (judge, cycle 6: only the teams missing from the table had them).
+      if (nicknamed.has(e)) {
+        for (const a of e.aliases) {
+          if (taken.has(normalize(a)) || junk.has(normalize(a))) continue;
+          into.aliases.push(a);
+          take(a, into);
+        }
+      }
       // The same answer in another dated table: the latest figure is the one to show (New York City keeps its
       // 2023 rank, not 2018's).
-      adoptDated(taken.get(known)!, e);
+      adoptDated(into, e);
       continue;
     }
     // Add-ons of an entry already listed ("Skyrim – Dragonborn" next to Skyrim) only blur what its name means.
@@ -1050,6 +1077,10 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     entries.push(e);
     take(e.name, e);
     own(e, [e.name, ARTICLE.get(e), LINK.get(e)]);
+  }
+  for (const [name, shown] of zeroRows(topic)) {
+    const e = taken.get(name);
+    if (e && e.rank === 0 && e.value === undefined) e.value = shown;
   }
   if (topic.people) {
     // A near miss with a figure ("Tyson Fury: #3 in 2025") is typed by surname like the ranked: "prescott" is Dak
@@ -1083,7 +1114,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     console.log(`     ${topic.id}: values for ${found} of ${tried} likely unranked answers`);
   }
   const dataAsOf = await dataDate(topic);
-  if (topic.knownOnly) await writeKnown(topic, entries);
+  if (topic.knownOnly || topic.knownNames) await writeKnown(topic, entries);
 
   return {
     id: topic.id,

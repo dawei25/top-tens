@@ -586,5 +586,11 @@
   "title": "Most popular dog breeds in the US (AKC registrations, 2025)",
   "category": "Oddball",
   "blitz": false
+ },
+ {
+  "id": "pixar-films",
+  "title": "Highest-grossing Pixar films",
+  "category": "Entertainment",
+  "blitz": true
  }
 ]

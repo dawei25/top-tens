@@ -1,7 +1,10 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Entry, Puzzle } from "../src/game/types";
-import type { Topic } from "./topics";
-import { checkPuzzle, FACTS_REQUIRED_FROM, factIssues, figureShare } from "./validate";
+import { UNIVERSES } from "./gazetteer";
+import { TOPICS, type Topic } from "./topics";
+import { checkPuzzle, FACTS_REQUIRED_FROM, factIssues, figureShare, missingNicknames } from "./validate";
 
 const fact = { text: "A plain fact.", source: "https://en.wikipedia.org/wiki/Example" };
 
@@ -131,5 +134,27 @@ describe("validate: placeholder rows", () => {
       expect.stringContaining('"Untitled Peaky Blinders sequel series": a placeholder'),
       expect.stringContaining('"Awaiting release": a placeholder'),
     ]);
+  });
+});
+
+describe("validate: team nicknames", () => {
+  it("fails a team in the source table that its universe's nickname doesn't reach", () => {
+    const teams = UNIVERSES["mlb-teams"]();
+    const p = puzzle({ unranked: 0 });
+    // Every team with its universe names, except the Cubs, named in full only (as the table writes them).
+    p.extras.push(...teams.map((t, i): Entry => ({ rank: 11 + i, name: t.name, aliases: t.name === "Chicago Cubs" ? [] : [...t.aliases] })));
+    const cubs = p.extras.find((e) => e.name === "Chicago Cubs")!;
+    expect(missingNicknames(p, { universe: "mlb-teams" })).toEqual([`#${cubs.rank} Chicago Cubs: no "Cubs"`]);
+    cubs.aliases.push("Cubs");
+    expect(missingNicknames(p, { universe: "mlb-teams" })).toEqual([]);
+  });
+
+  it("holds on every team list as built", () => {
+    const lists = TOPICS.filter((t) => [t.universe ?? []].flat().some((u) => /-teams$/.test(u)));
+    expect(lists.length).toBeGreaterThan(0);
+    for (const t of lists) {
+      const built: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${t.id}.json`), "utf8"));
+      expect(missingNicknames(built, t), t.id).toEqual([]);
+    }
   });
 });

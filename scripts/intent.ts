@@ -716,6 +716,8 @@ export const INTENT: Record<string, Intent> = {
       "St. Louis Cardinals": ["Cards", "St Louis Cardinals"],
       "New York Yankees": ["Yanks", "Bronx Bombers"],
       "Pittsburgh Pirates": ["Bucs"],
+      // The Cardinals' 1880s name redirects to them, but it is the Orioles' (1902-1953) that people mean.
+      "Baltimore Orioles": ["St. Louis Browns"],
     },
   },
   "premier-league-goals": {

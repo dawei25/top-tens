@@ -150,6 +150,11 @@ export interface Topic {
    * typed in full one is never junk nor corrected into an answer, and their words still count as plain words.
    */
   knownOnly?: Also[];
+  /**
+   * More known names no table lists, as `knownOnly` (free, real names): the usual spellings of crossbreeds the
+   * crossbreed page leaves out ("Aussiedoodle", "Yorkipoo").
+   */
+  knownNames?: string[];
   /** Category members to leave out of the pool (titles that aren't the kind of thing the list is about). */
   categorySkip?: RegExp;
   /**
@@ -1048,6 +1053,9 @@ export const TOPICS: Topic[] = [
       "Yankees Suck", "New York Yankees Roster", "Yankees Roster", "Dodgers Roster", "Reds Roster",
       "St. Louis Cardinals roster", "Detroit Tigers roster", "Pittsburgh Pirates roster", "Kruk and Kuip", "Talksox",
       "Piratefest", "Atlanta Braves 1990s pitching rotation", "Philadelphia / Kansas City / Oakland / Athletics",
+      // Staff, executives, traditions and a song among the redirects (judge, cycle 6).
+      "Lonn A. Trost", "Truck Day", "Win Dance Repeat", "Red Sox Pitching Coach", "Red Sox Hitting Coach",
+      "Red Sox Bench Coach", "Red Sox First Base Coach", "Douglas Danforth",
       // Cities with another team too: "new york" was the Giants, "philadelphia" the Athletics.
       "Philadelphia", "Kansas City", "New York", "Milwaukee",
     ],
@@ -1211,12 +1219,26 @@ export const TOPICS: Topic[] = [
     metric: "Followers (millions)",
     aliasCols: ["Username"],
     people: true,
-    also: [{ tables: [1], name: "Owner" }],
+    also: [
+      { tables: [1], name: "Owner" },
+      // The record holders past: Lisa and Lena (no longer ranked) show their count when they took the record,
+      // "18.9 million (most-followed in 2017)" (judge, cycle 6). Baby Ariel's row has no date.
+      {
+        tables: [1],
+        name: "Owner",
+        where: { col: "Date achieved", match: /\d{4}/ },
+        value: "Followers",
+        dated: { perYear: { col: "Date achieved" }, label: "most-followed in {year}", unit: " million" },
+      },
+    ],
+    aliases: { IShowSpeed: ["I Show Speed"] },
     junkAliases: [
       "Chandler Hallow", "Ava Kris Tyson", "Chris Tyson", "Nolan Hansen", "Zaira Nucci", "Heidi D'Amelio", "Marc D'Amelio",
       "MrBeast allegations", "T-Series vs MrBeast", "Would You Risk Dying for $500,000?", "Legal issues with TikTok",
       "Project Texas", "TikTok Star", "TikToker", "Tiktokers", "TikTok dance", "TikTok trend", "Dolls", "Dolls EP",
       "FIFA World Cup tiebreakers", "Sports", "League", "The Parades",
+      // A first name the surname rule takes from the duo "Lisa and Lena".
+      "Lena",
     ],
   },
   {
@@ -2228,12 +2250,9 @@ export const TOPICS: Topic[] = [
     also: CELEBRITIES,
     // Relatives, songs and scandals of the stars: CELEBRITY_JUNK in scripts/aliases.ts. These are this list's own.
     junkAliases: [
-      "T-gay", "Irma Gobb", "Carles Vilarrubi Carrio", "Johan Cruyff's Dream Team", "FC Barcelona trophies",
-      "Caryn Marooney", "Facebook conspiracy theories", "Conspiracy theories in Facebook groups", "Facebook litigation",
-      "10 year challenge", "10 Year Challenge", "Ten year challenge", "Predictions of Facebook's end",
-      "Controversies surrounding Samsung", "Democratic People's Republic of Samsung", "Republic of Samsung",
-      "Samsung Wave M", "SAMSUNG WB750", "ES70", "Move fast and break things", "Cinematch", "Qwikster", "Fast.com",
-      "Magic Quill Productions", "The Parades", "Ecce homo qui est faba", "Killer Queen by Katy Perry", "Facebooking",
+      "T-gay", "Irma Gobb", "Caryn Marooney", "Facebook conspiracy theories", "Conspiracy theories in Facebook groups",
+      "Facebook litigation", "10 year challenge", "10 Year Challenge", "Ten year challenge", "Predictions of Facebook's end",
+      "Move fast and break things", "The Parades", "Ecce homo qui est faba", "Killer Queen by Katy Perry", "Facebooking",
     ],
   },
   {
@@ -2618,6 +2637,12 @@ export const TOPICS: Topic[] = [
         ["List of ended Netflix original programming (2026–present)", [...range(0, 6), ...range(8, 10)]],
       ] as const
     ).map(([page, tables]) => ({ page, tables: [...tables], name: "Title", nameFromText: true })),
+    // The anthology's other seasons as people type them, free: "monster menendez" was read as the Dahmer season
+    // (judge, cycle 6). Season 2's title says "Monsters", which players drop.
+    knownNames: [
+      "Monster Menendez", "Monsters Menendez", "Monster: The Lyle and Erik Menendez Story", "Menendez Brothers",
+      "Monster Ed Gein", "Monster Gein", "Monster: Ed Gein", "Ed Gein", "Monster Lizzie Borden", "Lizzie Borden",
+    ],
     cited: {
       "Money Heist (Part 4)": {
         value: "106 million views",
@@ -2743,7 +2768,23 @@ export const TOPICS: Topic[] = [
       "Treeing Walker Coonhound": ["Treeing Walker", "Walker Coonhound"],
     },
     // Crossbreeds are free, but real names: "labradoodle" is never read as a typo of Labrador.
-    knownOnly: [{ page: "List of dog crossbreeds", tables: [0], name: "Name" }],
+    knownOnly: [
+      {
+        page: "List of dog crossbreeds",
+        tables: [0],
+        name: "Name",
+        // Two names in one cell: each is a name of its own (below).
+        rename: { "Cavoodle or Cavapoo": "Cavapoo", "Jackabee or Jack-A-Bee": "Jackabee" },
+      },
+    ],
+    // The usual spellings of the doodles and other designer crosses the page leaves out (judge, cycle 6): with the
+    // matcher reading a spaced guess by its spaceless form, "aussie doodle" and "yorkie poo" are these, free.
+    knownNames: [
+      "Cavoodle", "Jack-A-Bee", "Aussiedoodle", "Aussiepoo", "Bernese Doodle", "Bernesedoodle", "Yorkipoo",
+      "Golden Mountain Doodle", "Mini Goldendoodle", "Mini Labradoodle", "Pomsky", "Pitsky", "Shorkie", "Peekapoo",
+      "Bordoodle", "Newfypoo", "Saint Berdoodle", "Boxador", "Frenchton", "Cavapoochon", "Maltipom", "Huskydoodle",
+      "Doxiepoo", "Shepadoodle",
+    ],
     noFigures: "the AKC's ranks past 10 aren't on Wikipedia; breeds from its earlier top 10s show their last rank",
     // How owners say them.
     aliases: {
@@ -2752,12 +2793,55 @@ export const TOPICS: Topic[] = [
       "Golden Retriever": ["Golden", "Goldens", "Golden Retrievers", "Goldie"],
       "German Shepherd": ["GSD", "German Shepherd Dog", "German Shepherds", "Alsatian"],
       Dachshund: ["Doxie", "Wiener dog", "Weiner dog", "Sausage dog", "Dachshunds", "Daschund"],
-      Poodle: ["Poodles", "Standard Poodle", "Toy Poodle", "Miniature Poodle", "Mini Poodle"],
+      Poodle: ["Poodles", "Standard Poodle", "Toy Poodle", "Miniature Poodle", "Mini Poodle", "French Poodle"],
       Beagle: ["Beagles"],
       Rottweiler: ["Rottie", "Rottweilers"],
       "German Shorthaired Pointer": ["GSP", "Shorthaired Pointer", "German Shorthair"],
       Bulldog: ["English Bulldog", "British Bulldog", "Bulldogs"],
     },
+  },
+  // Cycle 6
+  {
+    id: "pixar-films",
+    category: "Entertainment",
+    title: "Highest-grossing Pixar films",
+    noun: "Pixar films",
+    prompt: "Name the 10 highest-grossing Pixar films (worldwide box office, not adjusted)",
+    page: "List of Pixar films",
+    // "Box office": every released feature with its worldwide gross, so every Pixar film is an answer with a figure.
+    tables: [2],
+    name: "Film",
+    value: "Worldwide",
+    metric: "Worldwide box office (US$)",
+    works: true,
+    // Other studios' famous animated films (Frozen, Shrek, Minions, Zootopia) are free, and still real names: "cars"
+    // never reads "Planes" nor "frozen" a Pixar film. Pixar's announced films (Incredibles 3, Coco 2) are free too.
+    knownOnly: [
+      { page: "List of highest-grossing animated films", tables: [0, 1, 2, 3], name: "Title" },
+      { tables: [1], name: "Film" },
+    ],
+    // The famous ones those tables leave out (first films of franchises, Disney's own studio, DreamWorks,
+    // Illumination), and Planes, the Cars spin-off Pixar didn't make.
+    knownNames: [
+      "Shrek", "Despicable Me", "How to Train Your Dragon", "Madagascar", "Kung Fu Panda 3", "Kung Fu Panda 4",
+      "Encanto", "Wreck-It Ralph", "Ralph Breaks the Internet", "Bolt", "Wish", "Raya and the Last Dragon",
+      "Meet the Robinsons", "Chicken Little", "Treasure Planet", "Spider-Man: Into the Spider-Verse",
+      "Into the Spider-Verse", "Sing 2", "The Lego Movie", "Cloudy with a Chance of Meatballs", "Rio",
+      "Hotel Transylvania", "Megamind", "Trolls", "The Boss Baby", "The Bad Guys", "The Wild Robot", "Ferdinand",
+      "Planes", "Planes: Fire & Rescue", "The Polar Express", "Happy Feet", "Monsters vs. Aliens", "Shark Tale",
+      "Antz", "Over the Hedge", "Bee Movie", "Flushed Away", "Robots", "Ice Age: Collision Course", "Luck",
+    ],
+    aliases: {
+      "Toy Story": ["Toy Story 1"],
+      Cars: ["Cars 1"],
+      "The Incredibles": ["Incredibles 1", "The Incredibles 1"],
+      "Monsters, Inc.": ["Monsters Inc", "Monsters Incorporated"],
+      "WALL-E": ["Wall E", "Walle"],
+      "A Bug's Life": ["Bugs Life"],
+      "Finding Dory": ["Dory"],
+    },
+    // An announced sequel's name, character pages and a study named for the film.
+    junkAliases: ["Inside Out 3", "Finding Nemo Characters", "Nemo effect"],
   },
 ];
 
