@@ -19,8 +19,9 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 
 ## Layout
 
-4. **Structure over repetition.** Don't repeat the same tag or label on every row; say it once in a header or a
-   column (the archive's LIST/BLITZ pill on every row).
+4. **Structure over repetition.** Don't repeat the same tag or label on every row or screen part; say it once in a
+   header or a column (the archive's LIST/BLITZ pill on every row; the Blitz title card repeating the header's
+   BLITZ).
 5. **Every element earns its place.** Info that doesn't help the next decision goes ("5 lives" and "90 s" boxes on
    free play read as random).
 6. **The main thing gets the most room.** Today's list is the main feature: two thirds of the row, Blitz one third.

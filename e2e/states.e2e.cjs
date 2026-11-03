@@ -1,10 +1,10 @@
 // Nothing moves on hover, focus or press (docs/UX.md, principle 11): those states may change color, background,
 // shadow, opacity, outline and transform only, never the size or position of anything on the page.
 //
-// One player's walk through the screens (home, its How to play and category picker, a list game with its clue
-// confirm, the list's end with and without its facts open, a Blitz round and its end, home with both dailies played,
-// the archive, past runs, stats, the menu open over it, settings) at three widths: desktop, a mid width just above the
-// 640px breakpoint, and a phone.
+// One player's walk through the screens (home, its How to play and category picker, a rolled list before its first
+// guess, a list game with its clue confirm, the list's end with and without its facts open, a rolled Blitz before its
+// clock, a Blitz round and its end, home with both dailies played, the archive, past runs, stats, the menu open over
+// it, settings) at three widths: desktop, a mid width just above the 640px breakpoint, and a phone.
 // On each screen every visible enabled interactive element is hovered (not on the phone), pressed (pointer down, then
 // moved away and released outside, so no click fires) and focused from the keyboard (Tab through the page, so
 // focus-visible and keyboard-modality styles apply), and every element's layout box is compared with the screen at
@@ -54,6 +54,14 @@ const SCREENS = [
     },
   },
   {
+    // A Random list before its first guess: Roll again beside GUESS. (The picker has closed: focus left it.)
+    name: "rolled list, Roll again",
+    setup: async (page) => {
+      await page.getByTestId("random-list").click();
+      await page.getByTestId("reroll").waitFor();
+    },
+  },
+  {
     name: "list game",
     setup: async (page) => {
       await go(page, `#p-${LIST}`);
@@ -89,6 +97,15 @@ const SCREENS = [
     setup: async (page) => {
       await page.getByTestId("facts-toggle").click();
       await page.locator(".slot.fact-open").first().waitFor();
+    },
+  },
+  {
+    // A Random Blitz before its clock starts: Roll again beside GUESS.
+    name: "rolled Blitz, Roll again",
+    setup: async (page) => {
+      await go(page, "");
+      await page.getByTestId("random-blitz").click();
+      await page.getByTestId("reroll").waitFor();
     },
   },
   {

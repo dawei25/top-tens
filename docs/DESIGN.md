@@ -82,7 +82,7 @@ Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
 
 ## 5. Visual direction: Krillion's language, arcade high-score table
 
-Krillion (krillion.cc) is the reference the owner likes. Borrow its visual language, not its ocean art: our
+Krillion (krillion.io; krillion.cc is a copycat) is the reference the owner likes. Borrow its visual language, not its ocean art: our
 metaphor is a **retro arcade high-score table**, which a top 10 already is.
 
 **From Krillion (observed):**

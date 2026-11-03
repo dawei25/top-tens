@@ -12,7 +12,10 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
    - Judge 4 lists: verdicts judged longest ago first (`judgedAt`), then lists whose `fixes` a rebuild has since
      addressed. Skip today's and the next two days' dailies.
    - Topic ideas: 2 new candidates, verified on Wikipedia with `npm run inspect` (`NODE_USE_ENV_PROXY=1` for
-     uncached pages). Prefer mainstream lists that could meet the daily bar (docs/JUDGE.md); the daily bank is the
+     uncached pages). **Variety first** (owner): no new list on a pattern the bank already has twice or more
+     ("countries with the most <sport> wins", "most-followed <platform> accounts"); prefer new kinds of things
+     (food, brands, inventions, shows, places people visit, everyday "most common" lists) and what players rate up
+     once ratings exist. Prefer mainstream lists that could meet the daily bar (docs/JUDGE.md); the daily bank is the
      bottleneck. Oddball lists (free play, fun, guessable without specialist knowledge) otherwise.
 2. **Judge** with `list-judge` agents in triage mode, in parallel, in the main checkout. They write only their
    verdict file and name scratch files after their list.
@@ -81,7 +84,10 @@ stronger.
 | "par 6" not understood (asked twice) | jargon labels, meaning only on hover | no average during play; the results say "Players avg"; DESIGN.md §5a and UX.md: labels explain themselves, explanations open on tap too |
 | "Play again" on a random list read as replaying the same list | a label that doesn't say what happens | "Roll again" (primary) on free-play results; Play again only in Past runs; UX.md principle 1 |
 | A random list rolled today's Blitz topic and showed its answers | random play overlapping the dailies | `rollHoldouts`: today's pair and every scheduled day held from random play; daily.test.ts and e2e |
+| Roll again seemed missing on a Random Blitz (it sat on the score line) | controls placed where players don't look | Roll again sits right of Guess on both screens; reroll.e2e.cjs checks the Home key path |
+| "Japan" cost a life on Most populous European countries | a world universe on a regional list | regional universes in the pipeline; validate.ts error (cycle 7) |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
+| The Google client ID was pasted into Vercel with a trailing newline | env values with stray whitespace | `src/net/config.ts` trims every public env value and ignores a client ID that isn't one; index.test.ts, and the e2e Google build uses a client ID ending in "\n" |
 
 ## What good looks like
 

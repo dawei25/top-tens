@@ -1,26 +1,25 @@
 {
   "id": "world-series-wins",
   "judgedAt": "2026-11-03",
-  "decision": "fix-first",
+  "decision": "daily-list",
   "alsoBlitz": false,
   "priority": 6,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 3, "fun": 3, "blitzDepth": 0 },
-  "casual": { "found": 9, "livesLost": 3, "guesses": 15 },
-  "fan": { "found": 10, "livesLost": 0, "guesses": 11 },
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
   "blitzCasual": null,
   "difficulty": 3,
   "tags": ["sports", "baseball", "mlb"],
-  "audience": "baseball fans",
-  "summary": "Correct and current through the Brewers' 2026 title, with a good curve, but most nicknames outside the top 10 are not recognized, so 'cubs' and 'mets' are free and the game says they are not answers. Fix the aliases and it can run as a daily.",
+  "audience": "sports fans",
+  "summary": "A clean baseball list with a good spread: the Yankees, Red Sox and Dodgers are gimmes, and the old A's, Reds and Pirates dynasties are fair stretches. Famous teams with few titles (Cubs, Mets, Astros) burn lives fast, but each one shows its count.",
   "reasons": [
-    "Old fixes done: data covers the finished 2026 Series (Brewers beat the Rays 4-1), #10 Braves at 4 vs #11 Cubs at 3 is not a tie, zero-title teams no longer score, and the listed junk aliases are gone.",
-    "Good curve: Yankees, Red Sox, Dodgers, Cardinals and Giants are gimmes, Braves, Tigers, Pirates and the A's take thought, the Reds are the stretch. A fan finds all 10.",
-    "As built the casual finds 9 only because 'cubs' and 'mets' cost nothing. With them costing a life as they should, the same guesses end at 7 found with 5 lives lost, inside the 6-8 band. Famous teams with 2-3 titles (Cubs, Mets, Astros, Phillies, White Sox) burn lives fast."
+    "Casual found 6 (Yankees, Red Sox, Dodgers, Giants, Cardinals, Braves), then ran out of lives on the Cubs, Mets, Astros, White Sox and Phillies, each showing its title count.",
+    "Data is current (2025 Dodgers and 2026 Brewers titles counted) and franchise counts include old cities. Nicknames, cities and old names all work, and the subject words and other sports' teams are free.",
+    "Tough for players who don't follow baseball: 20 of the 30 teams cost a life, so it sits at the low edge of the daily target."
   ],
   "fixes": [
-    "Give every team its nickname as a direct alias. Ranks 11+ only have them for the four zero-title teams that came in from the mlb-teams universe, so 'cubs', 'mets', 'orioles', 'rangers', 'marlins', 'brewers', 'angels', 'nationals', 'diamondbacks', 'd-backs' and 'nats' are NOT RECOGNIZED (free, and the game says they are not answers), including #11 Cubs and the 2026 champion Brewers. 'phillies', 'white sox', 'twins', 'royals', 'guardians', 'blue jays' and the top-10 'cardinals', 'giants', 'tigers', 'pirates', 'reds' only match through a did-you-mean. Merge the universe nickname onto table-matched rows (likely the same gap on other team lists) or add them in scripts/intent.ts.",
-    "Padres, Rays, Rockies and Mariners cost a life with no figure, but the page's by-team table lists each with 0 wins (the Rays are 0-3 in World Series). Show '0' on the miss without making them score in Blitz.",
-    "Drop 'St. Louis Browns' from the Cardinals: it is the famous name of the Orioles' predecessor (they met the Cardinals in the 1944 Series), and typing it offers the Cardinals.",
-    "Drop leftover junk aliases: 'Lonn A. Trost', 'Carlos Ahern', 'Red Sox Pitching Coach', 'Red Sox Hitting Coach', 'Red Sox Bench Coach', 'Red Sox First Base Coach', 'Truck Day', 'Win Dance Repeat', 'Tessie the Green Monster', 'SFG Productions', 'Douglas Danforth', 'Captain jolly roger', 'Boston Braves To Milwaukee'."
+    "'boston' should mean the Red Sox. Right now it offers 'Atlanta Braves / Boston Red Sox' with the Braves first, and once the Red Sox are found it turns into 'did you mean Atlanta Braves', because the Braves have the bare alias 'Boston'. Drop 'Boston' from the Braves and keep 'Boston Braves'. This is the same class as New York, Philadelphia, Kansas City and Milwaukee, which are already in junkAliases. junkAliases applies to the whole topic, so check that 'boston' still reaches the Red Sox afterwards.",
+    "Add to junkAliases the redirects that aren't names of a team: 'Carlos Ahern' (Red Sox), 'SFG Productions' (Giants), and the mascots 'Tessie the Green Monster' (Red Sox) and 'Captain jolly roger' (Pirates).",
+    "Old nicknames on their own aren't recognized: 'indians' (Cleveland Guardians, 2) and 'expos' (Washington Nationals, 1) say they aren't answers for this list when they should show the count. Add 'Indians' and 'Expos' as aliases."
   ]
 }

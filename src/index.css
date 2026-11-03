@@ -415,24 +415,6 @@ a {
   font-size: 20px;
 }
 
-.mode-tag {
-  display: inline-block;
-  padding: 1px 7px;
-  border: 1px solid currentColor;
-  border-radius: 3px;
-  font-size: 14px;
-  line-height: 1.2;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.mode-tag.classic {
-  color: var(--pink);
-}
-.mode-tag.blitz {
-  color: var(--gold);
-}
-
 .mode-key {
   --accent: var(--pink);
   --accent-ink: var(--pink-ink);
@@ -1630,7 +1612,6 @@ a {
   gap: 8px;
 }
 .feedback-line {
-  position: relative;
   min-height: 28px;
   display: flex;
   align-items: flex-end;
@@ -1653,9 +1634,8 @@ a {
     box-shadow: 0 -1px 0 var(--hairline);
     pointer-events: none;
   }
-  /* Its own small plate, as wide as its words. Not positioned here: Roll again sits at the dock's right end. */
+  /* Its own small plate, as wide as its words. */
   .guess .feedback-line {
-    position: static;
     min-height: 0;
     max-width: 100%;
     padding: 3px 10px 4px;
@@ -1722,33 +1702,6 @@ a {
   font-size: 18px;
   animation: none;
 }
-/*
- * Roll again before play (a rolled list before its first guess, a rolled Blitz before its clock starts): small and
- * quiet, at the right end of the panel's top line, out of the flow so nothing moves as it comes and goes.
- */
-.key-reroll {
-  position: absolute;
-  z-index: 1;
-  min-height: 28px;
-  padding: 0 10px;
-  font-size: 15px;
-  letter-spacing: 0.15em;
-  color: var(--label);
-}
-.feedback-line > .key-reroll {
-  right: 0;
-  bottom: 0;
-}
-@media (max-width: 699px) {
-  /* Phones: the dock's top right, level with the feedback plate. */
-  .guess .feedback-line > .key-reroll {
-    top: 0;
-    bottom: auto;
-    min-height: 0;
-    height: 30px;
-  }
-}
-
 .suggestion {
   min-height: 36px;
   padding: 2px 12px;
@@ -1797,6 +1750,27 @@ a {
 .guess-row .key {
   flex: none;
   padding: 0 18px;
+}
+/*
+ * Roll again before play (a rolled list before its first guess, a rolled Blitz before its clock starts): a navy key
+ * right of GUESS and as tall, a size smaller, so GUESS stays the main action. Its slot stays for the whole game: when
+ * play starts it fades out in place (opacity, then visibility), so the guess box and GUESS never move. Rows without
+ * it (dailies, Today's Blitz, links) keep their full-width box.
+ */
+.guess-row .key-reroll {
+  font-size: 20px;
+  letter-spacing: 0.15em;
+  transition:
+    transform 60ms linear,
+    box-shadow 60ms linear,
+    background-color 120ms linear,
+    opacity 150ms linear,
+    visibility 0s linear 150ms;
+}
+.guess-row .key-reroll[data-gone] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 .guess-row.shake {
   animation: shake 0.3s linear;
@@ -1999,6 +1973,37 @@ a {
 }
 
 /*
+ * A guess row with Roll again in a narrow place: the phone dock and the wide screen's control column both leave the
+ * row about 346px. GUESS and Roll again close up (letter-spacing, padding, a tighter gap), so the box keeps about
+ * 165px for a typed name. Narrower phones close up a step more.
+ */
+@media (max-width: 699px), (min-width: 1100px) {
+  .guess-row.has-reroll {
+    gap: 6px;
+  }
+  .guess-row.has-reroll .key {
+    padding: 0 12px;
+    letter-spacing: 0.1em;
+  }
+  .guess-row.has-reroll .key-reroll {
+    padding: 0 10px;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+  }
+}
+@media (max-width: 379px) {
+  .guess-row.has-reroll .key {
+    padding: 0 10px;
+    letter-spacing: 0.05em;
+  }
+  .guess-row.has-reroll .key-reroll {
+    padding: 0 8px;
+    font-size: 15px;
+    letter-spacing: 0;
+  }
+}
+
+/*
  * Short screens: a phone with its keyboard up (Android shrinks the page to what's left, about 390 x 470). The title
  * card comes down to its title (a list keeps its score line), and Blitz's clock card gets compact, so the clock and
  * score stay in view above the guess box and a list's board starts high enough to see a few rows.
@@ -2179,11 +2184,6 @@ a {
   position: relative;
   align-items: flex-end;
   text-align: right;
-}
-/* Roll again before the clock starts: on SCORE's line, just left of it (the clock below reads 90 then, narrow). */
-.blitz-meter-cell.right > .key-reroll {
-  top: -5px;
-  right: calc(100% + 14px);
 }
 .blitz-clock {
   font-size: clamp(72px, 22vw, 104px);

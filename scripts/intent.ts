@@ -710,7 +710,9 @@ export const INTENT: Record<string, Intent> = {
     same: {
       "Los Angeles Dodgers": ["Brooklyn Dodgers", "LA Dodgers"],
       Athletics: ["Oakland Athletics", "Oakland A's", "A's", "Philadelphia Athletics", "Kansas City Athletics"],
-      "Boston Red Sox": ["Boston Americans", "BoSox"],
+      // "Boston" alone is the Red Sox: the Braves left in 1953, and their franchise cell's "Boston" offered both
+      // (judge, cycle 7). "Boston Braves" still reaches the Braves.
+      "Boston Red Sox": ["Boston Americans", "BoSox", "Boston"],
       "San Francisco Giants": ["New York Giants", "SF Giants"],
       "Atlanta Braves": ["Boston Braves", "Milwaukee Braves"],
       "St. Louis Cardinals": ["Cards", "St Louis Cardinals"],
@@ -718,6 +720,9 @@ export const INTENT: Record<string, Intent> = {
       "Pittsburgh Pirates": ["Bucs"],
       // The Cardinals' 1880s name redirects to them, but it is the Orioles' (1902-1953) that people mean.
       "Baltimore Orioles": ["St. Louis Browns"],
+      // Former nicknames people still use, so the miss shows the count (judge, cycle 7).
+      "Cleveland Guardians": ["Indians"],
+      "Washington Nationals": ["Expos"],
     },
   },
   "premier-league-goals": {
