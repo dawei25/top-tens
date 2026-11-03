@@ -33,7 +33,8 @@ sports statistician.
    such as "1937 Nanga Parbat tragedy" for a mountain)? Were obvious ways of typing a top-10 answer *not*
    recognized in the replay? Type the list's subject and its categories alone ("tour", "toyota", "china" on banks):
    they must never hand over top-10 answers. On a one-year ranking ("of 2026"), only recent near misses should cost
-   a life; past stars from old years are free.
+   a life; past stars from old years are free. Try the famous things of the same kind that aren't on the list
+   (crossbreeds on dog breeds, non-Netflix shows): they should be free, not corrected into an answer.
 6. **Check the reveal.** Every top-10 answer should show a fun fact, and your casual player's misses should show a
    rank or a figure. A miss that only says "isn't in the top 10" while the page has numbers for it is a `fixes` item.
    When players answer by something other than the entry's name (the artist of a tour), the fact names it.

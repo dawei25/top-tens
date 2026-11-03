@@ -24,6 +24,9 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       because the leading article is dropped, so that alias also catches "rod". Only drop "a" when a word follows it
       with a space, or keep hyphenated forms whole.
 
+- [ ] **Topic ideas parked:** most valuable sports teams (Forbes 2025 ties at #10/#11, Bears and Yankees at $8.2B;
+      the 2024 table has no tie but is a year older). Retry when Wikipedia has the 2026 list.
+
 - [ ] **Cycle 4 pipeline changes not yet on every list** (apply at each list's next rebuild): "Science in Aotearoa"
       in the shared country junk list (13 country lists); infobox values never replace a stat from a table (lists
       using `values`).

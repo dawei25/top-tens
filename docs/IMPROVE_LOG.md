@@ -2,6 +2,29 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-03, cycle 5
+
+- Judged: concert-tours (daily list p9, also Blitz: the casual finds 7), athletes-earnings (daily list p7: the casual
+  finds 6 now that past stars are free), mcdonalds-countries (daily Blitz p7: the casual finds 9; Blitz 31/32, no
+  fixes), netflix-seasons (fix-first p6: every Netflix original cost a life with no figure; now only seasons with a
+  figure are answers, the rest free; re-judge next). Daily bank: 9 approved lists unscheduled; scheduled through
+  Nov 12, no top-up.
+- Matcher: a slip beside a shared word counts ("john rahm"); obscure pool names (no rank, no figure) take only
+  mid-word slips ("planes" no longer Our Planet; "titanik" still Titanic, which has a figure); a plain word's slip
+  keeps its first letter ("doodle" no longer Poodle); "season", "part", "music", "band" are category words and the
+  subject with a small number names nothing ("season 3"); a short name with the rest naming its only entry ("bts
+  arirang"). Each change checked against simulated typos of 2,088 answers: none lost.
+- Data: placeholder rows never answers (validate.ts errors); Netflix free pool via `knownOnly` (its leak 145 -> 0);
+  near misses with a figure typed by surname; concert-tours Styles, Elton, Elevation, Zoo TV; junk redirects never
+  claim a namesake by article.
+- Leak rate: 1.5% before the merge; re-measure pending.
+- New topics: dog-breeds ("Most popular dog breeds in the US (AKC registrations, 2025)"; casual 8, a possible daily;
+  crossbreeds free). Parked: most valuable sports teams (Forbes 2025 ties at #10/#11).
+- Incident: a container restart killed the data agent mid-cycle. Its committed work survived in the worktree; a
+  new agent resumed there. Ten old merged worktrees removed.
+- Next: judge netflix-seasons (fixed) and dog-breeds; the daily-list "too easy" 9s from Oct 30 (countries-area,
+  us-metros, asia-population) as Blitz candidates.
+
 ## 2026-11-02, cycle 4
 
 - Judged: car-models (daily list, p7: the casual finds 7; added to the bank), music-artists (daily Blitz, p8: the

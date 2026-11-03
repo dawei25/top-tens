@@ -63,6 +63,13 @@ stronger.
 | Tiger, Federer, McGregor cost lives on a 2026 list | old rankings accepted on a one-year list | judge brief: on a one-year list only recent near misses cost a life |
 | Burrow cost a life with no figure; One Direction's tour scored nothing in Blitz | threshold tables read as names only; unranked answers without a stat | dated `figure` from the cell's latest year; `gross` infobox kind, never replacing a table stat; build.test.ts |
 | Tour facts didn't say whose tour | facts omit what players answer by | judge brief: the fact names it |
+| "peaky blinders" cost a life as an untitled Netflix sequel | placeholder rows ("Untitled ... series", "TBA", "Awaiting release") read as answers | the build skips them; validate.ts errors on one; build.test.ts, validate.test.ts |
+| Every Netflix original cost a life with no figure (and 14% of the leak audit) | a huge pool of answers with nothing to learn from | only entries with a figure are answers; the rest are `knownOnly` names (scripts/known): free, still known to the lexicon |
+| "prescott", "soto" were free while "dak prescott" cost a life | near misses with a figure not typed by surname | unranked people with a figure get surname short forms, same rule as ranked rows |
+| "labradoodle" scored as Labrador | famous non-answers of the list's kind corrected into answers | crossbreeds as `knownOnly`; builders replay the list's famous non-answers |
+| English Pointer merged into German Shorthaired Pointer | a junk redirect claiming another entry by its article | build.ts: junk aliases never match a namesake by article or link |
+| "season 3" gave away a top-10 season; "music", "band" offered tours | words that name no entry alone | "season", "part", "music", "band" are category words; the subject with a small number names nothing; match.test.ts |
+| "john rahm" wasn't Jon Rahm; "planes" offered Our Planet; "doodle" Poodle | slips judged on the wrong part, or onto obscure names | a slip beside a shared word counts; obscure pool names (no rank, no figure) need the first and last letters; a plain word's slip keeps its first letter; simulated typos of 2,088 answers checked each change |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
 
 ## What good looks like
