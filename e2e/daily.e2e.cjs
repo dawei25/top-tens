@@ -60,12 +60,31 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("results-daily-blitz").count(), 1);
     assert.equal(await page.getByTestId("results-roll").count(), 1);
 
-    // The days-in-a-row count explains itself: a tap or click opens its note (Home's record has the same).
+    // The days-in-a-row count explains itself: a tap or click opens its note (Home's record has the same). The note
+    // floats: the results panel doesn't grow. A second press closes it, and so does Escape (without leaving).
     const tip = page.getByTestId("results").getByTestId("streak-tip");
-    assert.match(await tip.getAttribute("aria-label"), /in a row .*Today's list/);
-    await tip.click();
+    // Measured once the panel has risen into place (its own entrance only; the squid in it animates forever).
+    await page
+      .getByTestId("results")
+      .evaluate((el) => Promise.all(el.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished)));
+    const resultsBox = async () => {
+      const { width, height } = await page.getByTestId("results").boundingBox();
+      return { width, height };
+    };
+    const shut = await resultsBox();
+    const note = page.locator(`#${await tip.getAttribute("aria-controls")}`);
+    assert.equal(await tip.getAttribute("aria-describedby"), await tip.getAttribute("aria-controls"));
+    await (vp.hasTouch ? tip.tap() : tip.click());
     assert.equal(await tip.getAttribute("aria-expanded"), "true");
-    assert.ok(await page.locator(`#${await tip.getAttribute("aria-controls")}`).isVisible());
+    assert.ok(await note.isVisible());
+    assert.deepEqual(await resultsBox(), shut, "the note doesn't grow the results");
+    await (vp.hasTouch ? tip.tap() : tip.click());
+    assert.equal(await tip.getAttribute("aria-expanded"), "false");
+    await (vp.hasTouch ? tip.tap() : tip.click());
+    await page.keyboard.press("Escape");
+    assert.equal(await tip.getAttribute("aria-expanded"), "false");
+    assert.equal(await note.isVisible(), false);
+    await page.getByTestId("results").waitFor();
 
     // Reopening it (reload) shows the finished board and results, never a fresh game.
     await page.reload();
@@ -78,6 +97,15 @@ for (const vp of VIEWPORTS) {
     await page.getByTestId("today-list").waitFor();
     assert.equal(await page.getByTestId("today-list").getAttribute("data-done"), "true");
     assert.equal(await page.getByTestId("streak-tip").count(), 1);
+    // Home's note floats too: the record panel keeps its height.
+    const record = page.getByTestId("streak-tip").locator("xpath=ancestor::section[1]");
+    const recordHeight = async () => (await record.boundingBox()).height;
+    const recordShut = await recordHeight();
+    await (vp.hasTouch ? page.getByTestId("streak-tip").tap() : page.getByTestId("streak-tip").click());
+    assert.equal(await page.getByTestId("streak-tip").getAttribute("aria-expanded"), "true");
+    assert.equal(await recordHeight(), recordShut, "the note doesn't grow Your record");
+    await page.keyboard.press("Escape");
+    assert.equal(await page.getByTestId("streak-tip").getAttribute("aria-expanded"), "false");
     // From Home too.
     await page.getByTestId("today-list").click();
     await page.getByTestId("results").waitFor();

@@ -22,8 +22,9 @@ import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { ClueIcon, formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, TipLabel, TypeIn } from "./pixel";
-import { CLUE_LABEL, NO_LIFE_LOST, notOnList, STREAK_NOTE } from "./copy";
+import { ClueIcon, END_FOCUS_MS, formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, SwapLabel, TypeIn } from "./pixel";
+import { CLUE_LABEL, confirmGuess, GUESS_HINT, GUESS_HINT_SHORT, NO_LIFE_LOST, notOnList, SO_CLOSE, STREAK_NOTE } from "./copy";
+import { FloatNote } from "./Note";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
 import { ParBlock, usePar } from "./par";
@@ -43,10 +44,10 @@ interface Props {
   /** A fresh random list: Roll again on a random list, Random list on a finished daily. */
   onRoll: () => void;
   /**
-   * Play again on a past run (a finished game opened again, say from Past runs): a fresh free game on this same list.
-   * Missing while the list is held (today's list or Blitz, or a future day's).
+   * This game was rolled (Random list, a category, Roll again) in this tab. Until the first guess it offers Roll again
+   * in the guess panel, to skip to another list; never once play starts, so a losing game can't be dodged.
    */
-  onReplay?: () => void;
+  rolled?: boolean;
   /** Today's Blitz, while it's unplayed (a finished daily offers it). */
   onDailyBlitz?: () => void;
   /**
@@ -83,7 +84,7 @@ function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
             : rankedDepth(puzzle) > 10
               ? `${r.entry.name} is outside the top ${rankedDepth(puzzle)}.`
               : `${r.entry.name} isn't in the top 10.`
-          : `${r.entry.name} is #${r.entry.rank}${shownValue(r.entry) ? `, ${shownValue(r.entry)}` : ""}.${r.entry.rank <= 15 ? " So close." : ""}`,
+          : `${r.entry.name} is #${r.entry.rank}${shownValue(r.entry) ? `, ${shownValue(r.entry)}` : ""}.${r.entry.rank <= 15 ? ` ${SO_CLOSE}` : ""}`,
       };
     case "typo":
       return { tone: "warn", text: "Did you mean", suggestions: r.suggestions };
@@ -98,7 +99,7 @@ function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
   }
 }
 
-export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, onReplay, onDailyBlitz, todaysBlitz }: Props) {
+export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, rolled, onDailyBlitz, todaysBlitz }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -119,8 +120,6 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   /** The hidden row showing the "first letter?" confirm. */
   const [hintAsk, setHintAsk] = useState<number | null>(null);
   const yesRef = useRef<HTMLButtonElement>(null);
-  /** The "days in a row" note on a daily's results, opened by tap, click or keyboard. */
-  const [streakNote, setStreakNote] = useState(false);
   const parFile = usePar();
 
   useEffect(() => {
@@ -186,13 +185,14 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const missedCount = puzzle && game ? puzzle.answers.length - game.found.length : 0;
   const resultsDelay = endedHere && !reducedMotion() ? missedCount * REVEAL_STEP + 350 : 0;
 
-  // Second beat of the end: once the table has revealed, bring the verdict into view and focus SHARE.
+  // Second beat of the end: once the table has revealed, bring the verdict into view and focus SHARE. Never at once,
+  // even without the reveal: the Enter that sent the last guess (or one right behind it) must land on nothing.
   useEffect(() => {
     if (!over || !endedHere) return;
     const t = setTimeout(() => {
       shareRef.current?.focus({ preventScroll: true });
       resultsRef.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "nearest" });
-    }, resultsDelay);
+    }, Math.max(resultsDelay, END_FOCUS_MS));
     return () => clearTimeout(t);
   }, [over, endedHere, resultsDelay]);
 
@@ -236,7 +236,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     const preview = judgeGuess(text, puzzle, new Set(game.found), lexicon, offered);
     if ((preview.kind === "correct" || preview.kind === "near") && preview.corrected) {
       fill(preview.entry.name);
-      setFeedback({ tone: "warn", text: `Did you mean ${preview.entry.name}? Press Enter to guess it.`, key: Date.now() });
+      setFeedback({ tone: "warn", text: confirmGuess(preview.entry.name), key: Date.now() });
       return;
     }
     const { state, result } = applyGuess(game, puzzle, text, lexicon, offered);
@@ -312,6 +312,9 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const allFactsOpen = factRanks.length > 0 && factRanks.every((r) => openFacts.has(r));
 
   const hints = game.hints ?? [];
+  // Roll again before play: a rolled list nobody has touched yet (no guess, no clue, nothing said in the feedback line,
+  // which it shares with the key).
+  const reroll = !!rolled && !daily && game.status === "playing" && game.log.length === 0 && hints.length === 0 && !feedback;
   const par = parFile?.[puzzle.id];
   // Count this game in before the save effect has run, so the results show the streak it just made.
   let dailyStreak: ReturnType<typeof streak> | null = null;
@@ -333,10 +336,6 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
       sv.games[id] = game;
       return blitzAvailable(puzzle, schedule, today, sv);
     })();
-  // A past run: a finished game opened again (from Past runs, a link, a reload), not one that just ended here. Its
-  // main action is Play again on this same list; a held list has a quiet line instead.
-  const pastRun = over && !endedHere;
-  const replayKey = pastRun && !!onReplay;
 
   const missChips = misses.length > 0 && (
     <section className="misses" aria-label="Wrong guesses" data-glass>
@@ -494,16 +493,18 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     </span>
                     {revealed && shownValue(a) && <span className="value">{shownValue(a)}</span>}
                   </span>
+                  {/* The confirm takes the row's own place, on one line over its dots and magnifier (QUIT -> SURE?
+                      style), so nothing on the board moves. A second press on the row closes it. */}
                   {asking && (
-                    <div className="hint-ask">
+                    <div className="hint-ask" data-testid="hint-ask">
                       {canHint(game, a.rank) ? (
                         <>
-                          <span>clue: first letter? costs 1 life</span>
+                          <span className="hint-q">first letter? 1 life</span>
                           <button
                             ref={yesRef}
                             data-testid="hint-yes"
                             type="button"
-                            className="key key-xs key-gold"
+                            className="key key-xs key-gold key-inrow"
                             onClick={(e) => {
                               e.stopPropagation();
                               takeHint(a.rank);
@@ -513,7 +514,9 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                           </button>
                         </>
                       ) : (
-                        <span role="status" data-testid="hint-refused">no clues on your last life</span>
+                        <span className="hint-q" role="status" data-testid="hint-refused">
+                          no clues on your last life
+                        </span>
                       )}
                     </div>
                   )}
@@ -535,9 +538,11 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
                 onClick={quit}
                 data-testid="give-up"
+                data-confirm={confirmQuit || undefined}
                 onBlur={() => setConfirmQuit(false)}
               >
-                {confirmQuit ? "Sure?" : "Give up"}
+                {/* The key keeps GIVE UP's width while it asks, so the second press lands where the first did. */}
+                <SwapLabel off="Give up" on="Sure?" active={confirmQuit} />
               </button>
             </div>
           ) : (
@@ -574,7 +579,13 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     ))}
                   </div>
                 ) : (
-                  <p className="feedback hint">type a name, press enter. typos are free.</p>
+                  <p className="feedback hint">{reroll ? GUESS_HINT_SHORT : GUESS_HINT}</p>
+                )}
+                {/* Positioned over the line's right end, so it never moves anything as it comes and goes. */}
+                {reroll && (
+                  <button type="button" className="key key-xs key-reroll" data-testid="reroll" onClick={onRoll}>
+                    Roll again
+                  </button>
                 )}
               </div>
               <div key={shake.n} className={`guess-row ${shake.n ? "shake" : ""} ${shake.hit ? "hit" : ""}`}>
@@ -629,33 +640,24 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                   {hints.length > 0 && <p>clues used: {hints.length}</p>}
                   {dailyStreak && (
                     <p>
-                      <TipLabel
-                        label="days in a row"
-                        note={STREAK_NOTE}
-                        open={streakNote}
-                        onToggle={() => setStreakNote((o) => !o)}
-                        controls="streak-note"
-                        testId="streak-tip"
-                      />{" "}
+                      <FloatNote label="days in a row" note={STREAK_NOTE} id="streak-note" testId="streak-tip" />{" "}
                       <b className="pink">{dailyStreak.current}</b> · most <b>{dailyStreak.best}</b>
-                    </p>
-                  )}
-                  {dailyStreak && (
-                    <p id="streak-note" className="tip-note" hidden={!streakNote}>
-                      {STREAK_NOTE.toLowerCase()}
                     </p>
                   )}
                   {daily && <Countdown />}
                 </div>
               )}
+              {/* No autofocus here: SHARE takes focus a beat after the end (above), so a key still held lands nowhere. */}
               <div className="results-actions">
-                {replayKey && (
-                  <button className="key key-pink" data-testid="replay" onClick={onReplay}>
-                    Play again
+                {/* Free play leads with Roll again: a new random list, never this one (so not "Play again"). The same
+                    list again is only ever offered from its run in Past runs. */}
+                {!daily && (
+                  <button className="key key-pink" data-testid="play-again" onClick={onRoll}>
+                    Roll again
                   </button>
                 )}
-                <button ref={shareRef} className={replayKey ? "key" : "key key-pink"} onClick={share}>
-                  {copied ? "Copied" : "Share"}
+                <button ref={shareRef} className={daily ? "key key-pink" : "key"} data-testid="share" onClick={share}>
+                  <SwapLabel off="Share" on="Copied" active={copied} />
                 </button>
                 {/* A daily is one try: no replay, just somewhere else to go. Today's Blitz list offers that round. */}
                 {(daily || heldBlitz) && onDailyBlitz && (
@@ -669,24 +671,19 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     Play Blitz
                   </a>
                 )}
-                {daily ? (
+                {daily && (
                   <button className="key" data-testid="results-roll" onClick={onRoll}>
                     Random list
                   </button>
-                ) : (
-                  // Free play: a new random list, never this one again (so not "Play again").
-                  <button className="key" data-testid="play-again" onClick={onRoll}>
-                    Roll again
-                  </button>
                 )}
               </div>
-              {pastRun && !onReplay && (
-                <p className="caption" data-testid="replay-held">
-                  back in free play after its day.
-                </p>
-              )}
               <p className="source">
-                {puzzle.metric && <>ranked by {puzzle.metric.toLowerCase()}. </>}
+                {/* The metric as the list writes it: lowercasing it would turn "UN 2025" into "un 2025". */}
+                {puzzle.metric && (
+                  <>
+                    ranked by <span className="metric">{puzzle.metric}</span>.{" "}
+                  </>
+                )}
                 source:{" "}
                 <a href={puzzle.source.url} target="_blank" rel="noreferrer">
                   {puzzle.source.name}

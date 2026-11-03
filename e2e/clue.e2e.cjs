@@ -31,7 +31,19 @@ for (const vp of VIEWPORTS) {
     const key3 = slot(3).getByRole("button", { name: `#3 not found yet. ${CLUE}` });
     assert.equal(await key3.getAttribute("title"), CLUE);
 
-    // Pressing the magnifier asks first (nothing spent yet); YES spends a life and shows the first letter.
+    // Pressing the magnifier asks first (nothing spent yet), in the row's own place on one line: nothing on the board
+    // moves. A second press on the row backs out; YES spends a life and shows the first letter.
+    const rows = () => Promise.all([3, 4, 10].map(async (r) => (await slot(r).boundingBox()).y + "/" + (await slot(r).boundingBox()).height));
+    const shut = await rows();
+    await press(slot(3).getByTestId("clue"));
+    await page.getByTestId("hint-yes").waitFor();
+    assert.deepEqual(await rows(), shut, "the clue confirm moves nothing");
+    const ask = await page.getByTestId("hint-ask").boundingBox();
+    const row3 = await slot(3).boundingBox();
+    assert.ok(ask.y >= row3.y && ask.y + ask.height <= row3.y + row3.height + 0.5, "the confirm stays inside its row");
+    const atStart = { position: { x: 4, y: Math.round(ask.height / 2) } };
+    await (vp.hasTouch ? page.getByTestId("hint-ask").tap(atStart) : page.getByTestId("hint-ask").click(atStart));
+    assert.equal(await page.getByTestId("hint-yes").count(), 0);
     await press(slot(3).getByTestId("clue"));
     await page.getByTestId("hint-yes").waitFor();
     assert.equal(await key3.getAttribute("aria-expanded"), "true");
@@ -63,8 +75,10 @@ for (const vp of VIEWPORTS) {
       await press(page.getByTestId("hint-yes"));
     }
     assert.equal(await lives(), "1");
+    const shut8 = await slot(8).boundingBox();
     await press(slot(8).getByTestId("clue"));
     await page.getByTestId("hint-refused").waitFor();
+    assert.deepEqual(await slot(8).boundingBox(), shut8, "the refusal takes the row's place too");
     assert.equal(await page.getByTestId("hint-yes").count(), 0);
     assert.equal(await lives(), "1");
     assert.equal(await slot(8).getAttribute("data-state"), "hidden");
