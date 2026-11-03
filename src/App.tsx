@@ -240,6 +240,7 @@ function Screens() {
         onBack={back}
         onHome={home}
         onRoll={blitzAgain(route.id, rolledIn.current.get(`#blitz-${route.id}`))}
+        rolled={rolledIn.current.has(`#blitz-${route.id}`)}
         onReplay={replay("blitz", route.id)}
       />
     );
@@ -306,7 +307,7 @@ function Screens() {
         // Roll again on a random list rolls another in the same category (if it was rolled in one); a finished daily
         // offers a plain random list instead.
         onRoll={() => roll(entry ? undefined : rolledIn.current.get(`#p-${id}`), id)}
-        onReplay={replay("list", id)}
+        rolled={!entry && rolledIn.current.has(`#p-${id}`)}
         onDailyBlitz={dailyBlitzOpen ? () => (location.hash = `#dailyblitz-${today}`) : undefined}
         todaysBlitz={heldBlitz}
       />

@@ -23,9 +23,13 @@ for (const vp of VIEWPORTS) {
     // The round counts; no Roll again after it.
     await guess(page, p.answers[0].name);
     await page.clock.fastForward(91_000);
-    await page.getByTestId("daily-blitz-line").waitFor();
+    await page.getByTestId("blitz-results").waitFor();
     const first = (await store(page)).blitzDaily[TODAY].score;
     assert.ok(first > 0);
+    // The day's score is the big number; no second line repeats it, and a first round says nothing about a best.
+    assert.equal(await page.getByTestId("blitz-final").textContent(), String(first));
+    assert.equal(await page.getByTestId("daily-blitz-line").count(), 0);
+    assert.equal(await page.getByTestId("blitz-best").count(), 0);
     assert.equal(await page.getByTestId("blitz-again").count(), 0);
     assert.equal(await page.getByTestId("blitz-roll").count(), 1);
 

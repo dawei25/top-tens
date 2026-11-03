@@ -5,6 +5,13 @@ export function reducedMotion(): boolean {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+/**
+ * The least time between a game's or round's end and SHARE taking focus. Results never autofocus a key: until this
+ * passes focus is nowhere, so a key the player was still pressing (Enter on the last guess, held or pressed twice)
+ * presses nothing on the results.
+ */
+export const END_FOCUS_MS = 900;
+
 export function ordinal(n: number): string {
   const s = n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th");
   return `${n}${s}`;
@@ -138,37 +145,20 @@ export function ClueIcon() {
 }
 
 /**
- * A label that explains itself: hover shows the note (title), a tap, click or Enter toggles it inline. The caller
- * renders the note where it fits (`open`), so it can sit under a whole row of stats.
+ * A key's label that changes in place (GIVE UP -> SURE?, SHARE -> COPIED): both words take the same spot and the key
+ * keeps the width of the longer one, so a second press in the same place still lands on it (UX 11). Only the shown
+ * word is read out.
  */
-export function TipLabel({
-  label,
-  note,
-  open,
-  onToggle,
-  controls,
-  testId,
-}: {
-  label: string;
-  note: string;
-  open: boolean;
-  onToggle: () => void;
-  controls: string;
-  testId?: string;
-}) {
+export function SwapLabel({ on, off, active }: { off: ReactNode; on: ReactNode; active: boolean }) {
   return (
-    <button
-      type="button"
-      className="tip"
-      title={note}
-      aria-label={note}
-      aria-expanded={open}
-      aria-controls={controls}
-      data-testid={testId}
-      onClick={onToggle}
-    >
-      {label}
-    </button>
+    <span className="swap">
+      <span data-shown={!active || undefined} aria-hidden={active || undefined}>
+        {off}
+      </span>
+      <span data-shown={active || undefined} aria-hidden={!active || undefined}>
+        {on}
+      </span>
+    </span>
   );
 }
 

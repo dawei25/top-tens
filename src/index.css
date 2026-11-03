@@ -1273,16 +1273,39 @@ a {
 .slot.hinted .rank {
   color: var(--label);
 }
+/*
+ * The clue confirm, in the row's own place: one line over the row's dots and magnifier (which keep their space,
+ * unseen), the question on the left and YES where the magnifier was. Out of the flow, so the board never moves.
+ */
+.slot.asking .blank-toggle > * {
+  visibility: hidden;
+}
 .hint-ask {
-  grid-column: 2 / -1;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--slot-pad) + var(--rank-col) + var(--slot-gap));
+  right: var(--slot-pad);
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 6px 12px;
-  margin: 2px 0 6px;
+  justify-content: space-between;
+  gap: 10px;
   font-size: 19px;
-  line-height: 1.2;
+  line-height: 1;
+  white-space: nowrap;
   color: var(--gold);
+}
+.hint-q {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* YES inside a row: a key-xs a size down, so it fits the row's height on a phone. */
+.key-inrow {
+  flex: none;
+  min-height: 28px;
+  padding: 0 12px;
+  font-size: 16px;
 }
 .key-xs {
   min-height: 32px;
@@ -1320,10 +1343,11 @@ a {
   color: var(--gold);
   opacity: 0.8;
 }
+/* Missed answers at the end: muted (about 5.9:1 on the board), quieter than the found ones but easy to read. */
 .slot.missed .rank,
 .slot.missed .name,
 .slot.missed .value {
-  color: var(--faint);
+  color: var(--muted);
 }
 
 .type-cursor {
@@ -1334,7 +1358,7 @@ a {
   background: var(--gold);
 }
 .slot.missed .type-cursor {
-  background: var(--faint);
+  background: var(--muted);
 }
 .type-ghost {
   color: transparent;
@@ -1533,25 +1557,45 @@ a {
   gap: 8px;
 }
 .feedback-line {
+  position: relative;
   min-height: 28px;
   display: flex;
   align-items: flex-end;
 }
+/*
+ * Phones: the dock. An opaque band from just above the feedback line down to the screen's bottom edge, edge to edge,
+ * so the board scrolls cleanly under it: nothing shows through the feedback plate or the pill, or peeks out below
+ * them. The plate and the pill sit on it, opaque too.
+ */
 @media (max-width: 699px) {
+  .guess::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -8px;
+    bottom: calc(-1 * var(--dock-gap));
+    left: calc(-1 * max(var(--gutter), env(safe-area-inset-left)));
+    right: calc(-1 * max(var(--gutter), env(safe-area-inset-right)));
+    background: var(--page-bottom);
+    box-shadow: 0 -1px 0 var(--hairline);
+    pointer-events: none;
+  }
+  /* Its own small plate, as wide as its words. Not positioned here: Roll again sits at the dock's right end. */
   .guess .feedback-line {
+    position: static;
     min-height: 0;
     max-width: 100%;
     padding: 3px 10px 4px;
     border-radius: var(--radius);
-    background: var(--glass-bar);
+    background: var(--bar);
     box-shadow: inset 0 0 0 1px var(--hairline);
   }
-  /* The pill: the input and GUESS in one rounded glass capsule. */
+  /* The pill: the input and GUESS in one rounded capsule. */
   .guess .guess-row {
     align-self: stretch;
     padding: 6px;
     border-radius: 999px;
-    background: var(--glass-bar);
+    background: var(--bar);
     box-shadow:
       inset 0 0 0 1px var(--hairline),
       0 6px 0 rgba(0, 0, 0, 0.35);
@@ -1575,7 +1619,8 @@ a {
     max-width: 600px;
     padding: 10px 12px 12px;
     border-radius: 8px;
-    background: var(--glass-bar) var(--scan);
+    /* Opaque: it floats over the board, whose rows would otherwise read through it. */
+    background: var(--bar) var(--scan);
     box-shadow:
       inset 0 0 0 1px var(--hairline),
       0 6px 0 rgba(0, 0, 0, 0.35);
@@ -1604,6 +1649,33 @@ a {
   font-size: 18px;
   animation: none;
 }
+/*
+ * Roll again before play (a rolled list before its first guess, a rolled Blitz before its clock starts): small and
+ * quiet, at the right end of the panel's top line, out of the flow so nothing moves as it comes and goes.
+ */
+.key-reroll {
+  position: absolute;
+  z-index: 1;
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 15px;
+  letter-spacing: 0.15em;
+  color: var(--label);
+}
+.feedback-line > .key-reroll {
+  right: 0;
+  bottom: 0;
+}
+@media (max-width: 699px) {
+  /* Phones: the dock's top right, level with the feedback plate. */
+  .guess .feedback-line > .key-reroll {
+    top: 0;
+    bottom: auto;
+    min-height: 0;
+    height: 30px;
+  }
+}
+
 .suggestion {
   min-height: 36px;
   padding: 2px 12px;
@@ -1906,6 +1978,40 @@ a {
   }
 }
 
+/*
+ * Short screens: a phone with its keyboard up (Android shrinks the page to what's left, about 390 x 470). The title
+ * card comes down to its title (a list keeps its score line), and Blitz's clock card gets compact, so the clock and
+ * score stay in view above the guess box and a list's board starts high enough to see a few rows.
+ */
+@media (max-height: 560px) and (max-width: 1099px) {
+  .game {
+    gap: 10px;
+    padding-top: 8px;
+  }
+  .game .prompt {
+    padding: 8px 14px 10px;
+  }
+  .game .prompt .caption,
+  .game .prompt .asof,
+  .blitz .prompt .prompt-top {
+    display: none;
+  }
+  .game .prompt h1 {
+    margin-top: 0;
+    font-size: 24px;
+  }
+  .blitz-meter {
+    align-items: center;
+    padding: 6px 14px 8px;
+  }
+  .blitz-clock {
+    font-size: 56px;
+  }
+  .blitz-score {
+    font-size: 40px;
+  }
+}
+
 /* Motion */
 @keyframes rise {
   from {
@@ -2050,8 +2156,14 @@ a {
   gap: 2px;
 }
 .blitz-meter-cell.right {
+  position: relative;
   align-items: flex-end;
   text-align: right;
+}
+/* Roll again before the clock starts: on SCORE's line, just left of it (the clock below reads 90 then, narrow). */
+.blitz-meter-cell.right > .key-reroll {
+  top: -5px;
+  right: calc(100% + 14px);
 }
 .blitz-clock {
   font-size: clamp(72px, 22vw, 104px);
@@ -2130,7 +2242,7 @@ a {
   padding: 0 18px 6px;
 }
 .blitz-list.missed .blitz-pts {
-  color: var(--faint);
+  color: var(--muted);
 }
 .blitz-list.missed .blitz-name {
   color: var(--label);
@@ -2598,8 +2710,15 @@ a.arch-cell:active .arch-name {
   white-space: nowrap;
 }
 
-/* A label that explains itself (days in a row): dotted, hover for the note, tap to read it inline. */
-.tip {
+/*
+ * A label that explains itself (components/Note.tsx: days in a row): dotted, and its note floats over the page below
+ * it (above, near the screen's bottom), never growing the panel. Opaque, with the fact panels' hard shadow.
+ */
+.note {
+  position: relative;
+  display: inline-block;
+}
+.note-key {
   margin: 0;
   padding: 0;
   border: 0;
@@ -2609,17 +2728,67 @@ a.arch-cell:active .arch-name {
   text-underline-offset: 3px;
   cursor: help;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-.tip:hover {
+.note-key:hover,
+.note-key[aria-expanded="true"] {
   color: var(--text);
 }
-.tip-note {
-  font-size: 16px;
-  letter-spacing: 0.06em;
-  color: var(--muted);
+.note-bubble {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  translate: var(--shift, 0px) 0;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 32px));
+  padding: 6px 12px 7px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--hairline);
+  border-left: 2px solid var(--cyan-edge);
+  border-radius: 4px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+  font-size: 18px;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+  color: var(--text);
 }
-.home-stats .tip-note {
-  margin-top: 10px;
+.note-bubble[data-up="true"] {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+/* Bridges the gap to the label, so a mouse moving onto the note keeps it open. */
+.note-bubble::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8px;
+  height: 8px;
+}
+.note-bubble[data-up="true"]::before {
+  top: auto;
+  bottom: -8px;
+}
+
+/* SwapLabel (pixel.tsx): both words in one spot, the key as wide as the longer one; only the shown one is seen. */
+.swap {
+  display: inline-grid;
+}
+.swap > * {
+  grid-area: 1 / 1;
+  text-align: center;
+}
+.swap > :not([data-shown]) {
+  visibility: hidden;
+}
+
+/* A list's metric in running copy ("scored by Spending (US$ billions)"): as the list writes it, a shade brighter. */
+.metric {
+  color: var(--label);
 }
 
 /* Past runs: the classic result's distance from the players' average ("+2 vs avg"), under it. */
