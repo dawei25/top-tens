@@ -100,7 +100,8 @@ sign-in sheet loads it from Google. The in-game `#privacy` page says this.
    - `VITE_GOOGLE_CLIENT_ID`: the Google OAuth web client ID (`...apps.googleusercontent.com`, Google Auth Platform
      > Clients; not the secret). **Public**, like the Supabase key. With it, Google sign-in is Google's own button and
      the account chooser names the game's domain; without it, the redirect through Supabase. A value that isn't a
-     client ID is ignored (the redirect stays).
+     client ID is ignored (the redirect stays). **Production only**: Google's button works only on the client's
+     Authorized JavaScript origins, which take no wildcards, so preview URLs keep the redirect.
    - Pasted values are trimmed: a trailing newline or space doesn't matter.
    - `VITE_PRIVACY_CONTACT`: an address for privacy questions and forgotten passwords. Worth setting.
    - `.env.example` lists them all. Locally, copy it to `.env.local` (gitignored).
