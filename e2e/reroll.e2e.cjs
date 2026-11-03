@@ -87,14 +87,16 @@ for (const vp of VIEWPORTS) {
     await goneInPlace(page, was);
     assert.equal(await top(board), boardTop, "the board stays put");
 
-    // Not on today's list, nor on a list opened directly.
+    // Not on today's list, nor on a list opened directly. Rolls are really random, and a list rolled in this tab
+    // keeps its Roll again, so open one that neither roll landed on (a fixed id failed whenever a roll hit it).
     await page.getByTestId("nav-home").click();
     await page.getByTestId("today-list").click();
     await page.getByTestId("give-up").waitFor();
     assert.equal(await reroll.count(), 0);
-    await go(page, "#p-mountains");
+    const direct = ["#p-mountains", "#p-capitals", "#p-dog-breeds"].find((h) => h !== first && h !== second);
+    await go(page, direct);
     await page.getByTestId("give-up").waitFor();
-    assert.equal(await hash(page), "#p-mountains");
+    assert.equal(await hash(page), direct);
     assert.equal(await reroll.count(), 0);
     await ctx.close();
   });
