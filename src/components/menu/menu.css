@@ -1,0 +1,214 @@
+/* The menu: a panel of large tiles that slides in from the right over the dimmed page (a modal dialog). Same language
+   as the rest: a solid panel with scan lines, keycap tiles, pixel icons, pixel type. */
+
+/* The dialog box is the panel. It has no padding of its own (its body fills it), so a press whose target is the
+   dialog is on the backdrop. Phones: full height, nearly full width (a 44px strip of the page shows, wide enough to
+   tap away); wider screens: 420px. */
+.menu {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(420px, calc(100% - 44px));
+  max-width: none;
+  height: auto;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-left: 3px solid var(--cyan);
+  /* Solid, like the rules: the keys behind would read through glass. */
+  background: var(--panel) var(--scan);
+  color: var(--text);
+  box-shadow: -6px 0 0 rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+.menu[open] {
+  animation: menu-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.menu:focus {
+  outline: none;
+}
+.menu::backdrop {
+  background: rgba(2, 4, 9, 0.7);
+}
+.menu[open]::backdrop {
+  animation: fade 0.18s ease-out both;
+}
+@keyframes menu-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu[open],
+  .menu[open]::backdrop {
+    animation: none;
+  }
+}
+
+.menu-body {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 16px max(24px, env(safe-area-inset-bottom));
+  padding-right: max(16px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* "TENtacle" small, "MENU" big, in the logo's pixel style (white and gold, the pink and cyan fringe). */
+.menu-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.menu-brand {
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  color: var(--text);
+  text-shadow:
+    -1px 0 var(--pink),
+    1px 0 var(--cyan);
+}
+.menu-brand span:last-child {
+  color: var(--gold);
+}
+.menu-title {
+  margin-top: 4px;
+  font-weight: 400;
+  font-size: 60px;
+  line-height: 0.9;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-shadow:
+    -2px 0 var(--pink),
+    2px 0 var(--cyan),
+    0 4px 0 rgba(0, 0, 0, 0.5);
+}
+/* A full-size tap target (48px), unlike the header's keys. */
+.menu-close {
+  flex: none;
+  width: 48px;
+  min-height: 48px;
+}
+.menu-close .pixel-icon {
+  width: 20px;
+}
+
+/* During a Blitz round: the clock doesn't stop for the menu, said first. */
+.menu-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--gold);
+  background: rgba(255, 209, 102, 0.08);
+  font-size: 19px;
+  color: var(--gold);
+}
+.menu-note-icon {
+  display: block;
+  flex: none;
+}
+
+.menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* A section's label runs into a dashed rule. */
+.menu-group > .label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.menu-group > .label::after {
+  content: "";
+  flex: 1;
+  border-top: 1px dashed var(--hairline);
+}
+.menu-email {
+  font-size: 18px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 10px;
+}
+
+/* A tile: a keycap with its icon (and today's status) on top and its name below. */
+.menu-tile {
+  min-height: 84px;
+  padding: 12px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 19px;
+  line-height: 1.1;
+  letter-spacing: 0.14em;
+  white-space: normal;
+  text-align: left;
+}
+.menu-tile-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.menu-tile-icon {
+  display: block;
+  flex: none;
+  color: var(--cyan);
+}
+.menu-tile-icon.classic {
+  color: var(--pink);
+}
+.menu-tile-icon.blitz {
+  color: var(--gold);
+}
+.menu-tile-status {
+  font-size: 15px;
+  opacity: 1;
+  color: var(--muted);
+}
+.menu-tile-status.classic {
+  color: var(--pink);
+}
+.menu-tile-status.blitz {
+  color: var(--gold);
+}
+.menu-tile-label {
+  overflow-wrap: anywhere;
+}
+/* Under the mouse: a cyan edge (keyboard focus has the cyan ring), never the screen-on-show pink. */
+.menu-tile:hover:not(:disabled) {
+  box-shadow:
+    inset 0 0 0 2px var(--cyan-edge),
+    0 5px 0 var(--key-shadow);
+}
+.menu-tile:active:not(:disabled) {
+  box-shadow:
+    inset 0 0 0 2px var(--cyan-edge),
+    0 2px 0 var(--key-shadow);
+}
+/* The screen on show: a pink edge and a pink name, whatever the pointer does. Choosing it only closes the menu. */
+.menu-tile[aria-current="page"],
+.menu-tile[aria-current="page"]:hover:not(:disabled) {
+  box-shadow:
+    inset 0 0 0 2px var(--pink),
+    0 5px 0 var(--key-shadow);
+}
+.menu-tile[aria-current="page"]:active:not(:disabled) {
+  box-shadow:
+    inset 0 0 0 2px var(--pink),
+    0 2px 0 var(--key-shadow);
+}
+.menu-tile[aria-current="page"] .menu-tile-label {
+  color: var(--pink);
+}

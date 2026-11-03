@@ -1,5 +1,6 @@
-// Visual baselines: the key screens at phone 390 and desktop 1440, at rest, plus the Today keys hovered on desktop,
-// compared pixel by pixel with the PNGs in e2e/baselines (docs/UX.md: "The visual baselines are the reference").
+// Visual baselines: the key screens at phone 390 and desktop 1440, at rest, plus the Today keys hovered on desktop and
+// the menu open, compared pixel by pixel with the PNGs in e2e/baselines (docs/UX.md: "The visual baselines are the
+// reference").
 //
 // Deterministic: puzzle data from e2e/fixtures/visual/puzzles (frozen copies, so a puzzle rebuild never moves a
 // baseline: only UI changes do), the web font from e2e/fixtures/fonts, a frozen clock, reduced motion, animations
@@ -123,13 +124,14 @@ describe("visual baselines", { concurrency: true }, () => {
       await page.clock.runFor(2000);
       await page.addStyleTag({ content: CAPTURE });
       const problems = [];
-      const shot = async (name, target = page) => {
+      // The whole page, or (`window`) what the window shows: a panel fixed over the page (the menu).
+      const shot = async (name, target = page, { window = false } = {}) => {
         if (target === page) await settle(page);
         const png = await target.screenshot({
           animations: "disabled",
           caret: "hide",
           scale: "css",
-          ...(target === page && { fullPage: true }),
+          ...(target === page && !window && { fullPage: true }),
         });
         const p = compare(`${name}-${vp.name}`, png);
         if (p) problems.push(p);
@@ -200,6 +202,11 @@ describe("visual baselines", { concurrency: true }, () => {
       await go(page, "#stats");
       await page.getByTestId("know-category").first().waitFor();
       await shot("stats");
+
+      // The menu open over it: today's pair played, Stats marked as the screen on show.
+      await page.getByTestId("menu-key").click();
+      await page.getByTestId("menu").waitFor();
+      await shot("menu", page, { window: true });
 
       await ctx.close();
       assert.deepEqual([...missing], [], "every puzzle file the flow loads has a fixture in e2e/fixtures/visual/puzzles");

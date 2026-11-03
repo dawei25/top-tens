@@ -57,8 +57,8 @@ const WHITE = "#e8fbff";
 
 /** Panels the ocean shows through: marked [data-glass], or (a layout without the marks) the app's column. */
 const GLASS = "[data-glass]";
-/** Bare UI the squid keeps out from behind too (not glass, but it would hide there): Home's logo and sound key. */
-const SOLID = ".home .logo, .home-sound";
+/** Bare UI the squid keeps out from behind too (not glass, but it would hide there): Home's logo and header keys. */
+const SOLID = ".home .logo, .home-keys";
 const DOCK = "[data-guess-dock]";
 const DOCK_FALLBACK = ".guess-row";
 /** The heading check (dev stats): travel faster than this (CSS px/s) must be within OFF_DEG of the heading. */

@@ -9,7 +9,7 @@ const assert = require("node:assert/strict");
 const { createHash } = require("node:crypto");
 const { VIEWPORTS, NOW, noHScroll } = require("./helpers.cjs");
 const { GOOGLE_ENV, GOOGLE_CLIENT_ID } = require("./backend-env.cjs");
-const { serveBuild, opener, FRESH, REFUSED_SUB, until, settle } = require("./backend-lib.cjs");
+const { serveBuild, opener, openSignIn, menuSignedIn, FRESH, REFUSED_SUB, until, settle } = require("./backend-lib.cjs");
 
 const desktop = VIEWPORTS.find((v) => v.name === "desktop");
 const phone = VIEWPORTS.find((v) => v.name === "phone");
@@ -84,14 +84,13 @@ test("Google's button: the ID token and the raw nonce reach Supabase, the device
   const mine = { id: "islands", startedAt: NOW.getTime() - 3_600_000, finishedAt: NOW.getTime() - 3_300_000, status: "lost", found: [1, 2, 3], lives: 0, hints: 0 };
   const { ctx, page, calls } = await open(phone, "", { "top-tens:v1": { ...FRESH["top-tens:v1"], listRuns: [mine] } }, undefined, fakeGis);
   const google = watchGoogle(page);
-  const key = page.getByTestId("account-key");
-  await key.waitFor();
+  await page.getByTestId("today-list").waitFor();
   await settle();
-  // Nothing from Google until the sheet opens.
+  // Nothing from Google until the sheet opens (from the menu's Sign in).
   assert.deepEqual(google, []);
   assert.equal(await page.locator(`script[src="${GIS_SRC}"]`).count(), 0);
 
-  await key.click();
+  await openSignIn(page);
   const slot = page.locator('[data-testid="sign-in-google-gis"][data-ready="true"]');
   await slot.waitFor();
   assert.deepEqual(google, [GIS_SRC]);
@@ -115,8 +114,9 @@ test("Google's button: the ID token and the raw nonce reach Supabase, the device
   assert.equal(await page.evaluate(() => document.activeElement?.dataset.testid), "sign-in-sheet");
 
   await page.getByTestId("fake-gis-button").click();
-  await page.locator('[data-testid="account-key"][data-signed-in="true"]').waitFor();
+  // Signed in: the sheet closes itself, and the menu shows the account.
   await sheet.waitFor({ state: "detached" });
+  await menuSignedIn(page, "dana@example.com");
   assert.equal(calls.idToken.length, 1);
   const sent = calls.idToken[0];
   assert.equal(sent.provider, "google");
@@ -133,8 +133,10 @@ test("Google's button: the ID token and the raw nonce reach Supabase, the device
 
 test("Google's button: closed says nothing, blocked gets a hint, refused an error, then a new nonce works (desktop)", async () => {
   const { ctx, page, calls } = await open(desktop, "", FRESH, undefined, fakeGis);
-  const key = page.getByTestId("account-key");
-  await key.click();
+  await openSignIn(page);
+  const sheet = page.getByTestId("sign-in-sheet");
+  /** Still signed out: the sheet stays open (it closes itself on signing in). */
+  const signedOut = async () => assert.ok(await sheet.isVisible(), "still signed out");
   await page.locator('[data-testid="sign-in-google-gis"][data-ready="true"]').waitFor();
   const button = page.getByTestId("fake-gis-button");
   const hint = page.getByTestId("sign-in-google-popup");
@@ -152,8 +154,7 @@ test("Google's button: closed says nothing, blocked gets a hint, refused an erro
   assert.equal(await error.count(), 0);
   assert.equal(await page.getByRole("alert").count(), 0);
   assert.equal(calls.idToken.length, 0);
-  assert.equal(await key.getAttribute("data-signed-in"), null);
-  await page.getByTestId("sign-in-sheet").waitFor();
+  await signedOut();
 
   // Nothing opened (blocked): after a few seconds, a hint about pop-ups. Not an error.
   await mode("blocked");
@@ -170,7 +171,7 @@ test("Google's button: closed says nothing, blocked gets a hint, refused an erro
   await page.clock.runFor(400);
   await error.waitFor();
   assert.equal(calls.idToken.length, 1);
-  assert.equal(await key.getAttribute("data-signed-in"), null);
+  await signedOut();
 
   // The next try asks Google with a new nonce, and works.
   const { inits } = await gis();
@@ -179,7 +180,8 @@ test("Google's button: closed says nothing, blocked gets a hint, refused an erro
   await mode("ok");
   await button.click();
   await page.clock.runFor(400);
-  await page.locator('[data-testid="account-key"][data-signed-in="true"]').waitFor();
+  await sheet.waitFor({ state: "detached" });
+  await menuSignedIn(page, "dana@example.com");
   assert.equal(calls.idToken.length, 2);
   assert.equal(sha256(calls.idToken[1].nonce), inits[1].nonce);
   assert.equal((await gis()).presses, 4);
@@ -188,7 +190,7 @@ test("Google's button: closed says nothing, blocked gets a hint, refused an erro
 
 test("Google's script doesn't load: the sheet offers the redirect key instead (desktop)", async () => {
   const { ctx, page, calls } = await open(desktop, "", FRESH, undefined, (c) => c.route(GIS_SRC, (route) => route.abort()));
-  await page.getByTestId("account-key").click();
+  await openSignIn(page);
   const fallback = page.getByTestId("sign-in-google");
   await fallback.waitFor();
   assert.equal(await page.getByTestId("sign-in-google-gis").count(), 0);

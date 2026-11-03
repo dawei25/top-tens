@@ -1,7 +1,4 @@
-import { useSyncExternalStore } from "react";
-import { audio } from "./engine";
-import { renderOn } from "./cues";
-import { soundPref } from "./pref";
+import { useSound } from "./useSound";
 
 /** Builds a crisp SVG path from a pixel map ("#" = on). */
 function pixels(rows: string[]): string {
@@ -32,16 +29,11 @@ const SPEAKER_OFF = pixels([
 ]);
 
 /**
- * The speaker key: sound on or off for the whole game, remembered on this device. Turning it on is the gesture
- * that starts audio, and answers with a soft blip.
+ * The speaker key, in every screen's header: sound on or off for the whole game (useSound), remembered on this
+ * device. Turning it on is the gesture that starts audio, and answers with a soft blip.
  */
 export function SoundToggle({ className = "" }: { className?: string }) {
-  const on = useSyncExternalStore(soundPref.subscribe, soundPref.get, () => false);
-  const toggle = () => {
-    const next = !on;
-    soundPref.set(next);
-    if (next && audio()) renderOn();
-  };
+  const [on, toggle] = useSound();
   return (
     <button
       type="button"
