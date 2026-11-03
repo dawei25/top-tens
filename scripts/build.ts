@@ -172,6 +172,22 @@ function shortForms(name: string, strip?: RegExp | RegExp[]): string[] {
 }
 
 const GAP = "\u0002";
+
+/**
+ * A person's surname as a short form: "Bryant", not "Park" (Linkin Park) or "Brown": a surname that is a plain word
+ * means other things. Undefined for one-word names and short surnames.
+ */
+function surname(name: string): string | undefined {
+  const words = name.split(" ");
+  const last = words.at(-1)!;
+  return words.length > 1 && last.length >= 4 && !isEnglishWord(normalize(last)) ? last : undefined;
+}
+
+function addSurname(e: Entry): void {
+  const last = surname(e.name);
+  if (last && !e.aliases.includes(last)) e.aliases.push(last);
+}
+
 /** A single plain English word. */
 const isWord = (s: string) => !normalize(s).includes(" ") && isEnglishWord(normalize(s));
 /** Pieces that aren't names: "of Brazil", "and Futuna" (lower case: "The Two Towers" is a name). */
@@ -928,9 +944,8 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       }
     }
     if (topic.people) {
-      // "Bryant", not "Park" (Linkin Park) or "Brown": a surname that is a plain word means other things.
-      const last = row.name.split(" ").at(-1)!;
-      if (last.length >= 4 && !isEnglishWord(normalize(last))) aliases.add(last);
+      const last = surname(row.name);
+      if (last) aliases.add(last);
     }
     // A tie below the top 10 shares its rank, as the source writes it ("T20"): Everland is #20 with Disney Adventure
     // World, not #21. Each top-10 slot keeps its own rank (a tie at #10/#11 is rejected above), and a table kept in
@@ -998,6 +1013,11 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     entries.push(e);
     take(e.name, e);
     own(e, [e.name, ARTICLE.get(e), LINK.get(e)]);
+  }
+  if (topic.people) {
+    // A near miss with a figure ("Tyson Fury: #3 in 2025") is typed by surname like the ranked: "prescott" is Dak
+    // Prescott, not a free "isn't an answer" (judge, cycle 5). Same rule as the ranked rows above.
+    for (const e of entries.slice(rows.length)) if (e.value) addSurname(e);
   }
 
   const junkList = [

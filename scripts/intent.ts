@@ -1365,4 +1365,8 @@ export const INTENT: Record<string, Intent> = {
       Moscow: ["Sheremetyevo International Airport", "Moscow Domodedovo Airport"],
     },
   },
+  "athletes-earnings": {
+    // The usual spelling of the name, and a typo of it (judge, cycle 5).
+    same: { "Jon Rahm": ["John Rahm", "Jhon Rahm"] },
+  },
 };
