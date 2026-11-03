@@ -12,8 +12,9 @@
   background: rgba(2, 4, 9, 0.7);
   animation: fade 0.18s ease-out both;
 }
+/* 439px: a 400px column, the widest Google draws its button, so the button and the keys line up. */
 .sheet {
-  width: min(460px, 100%);
+  width: min(439px, 100%);
   max-height: calc(100dvh - 32px);
   overflow: auto;
   overscroll-behavior: contain;
@@ -46,8 +47,46 @@
   justify-content: space-between;
   gap: 12px;
 }
+/* Focused when it opens (with Google's button first, nothing of ours to focus): the dialog itself, no ring. */
+.sheet:focus {
+  outline: none;
+}
 .sheet-wide {
   width: 100%;
+}
+/* Google's own button (Google Identity Services): Google draws it in its frame, 40px tall, at the column's width up
+   to 400px. Light color scheme in its box: a frame whose scheme differs from the page's (dark) gets an opaque
+   backdrop behind its rounded corners. Inert and dimmed while a sign-in runs, like a disabled key. */
+.gsi {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gsi[data-disabled="true"] {
+  opacity: 0.55;
+}
+.gsi-box {
+  min-height: 40px;
+  display: flex;
+  justify-content: center;
+  color-scheme: light;
+}
+.gsi-wait {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--hairline);
+  border-radius: var(--radius);
+  font-size: 18px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--faint);
+  pointer-events: none;
 }
 .sheet-or {
   display: flex;
