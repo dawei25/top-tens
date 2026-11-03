@@ -1,0 +1,93 @@
+// Play again on a past run: a finished game opened again (a list's results from Past runs, a Blitz run's view) leads
+// with Play again, a fresh free game on that same list. Not on results that just ended (Roll again is the way on
+// there), and never for a list held right now (today's list or Blitz, or a future day's): a quiet line instead.
+const { test, before, after } = require("node:test");
+const assert = require("node:assert/strict");
+const { chromium, VIEWPORTS, TODAY, open, go, hash, store, guess, puzzle, noHScroll } = require("./helpers.cjs");
+
+let browser;
+before(async () => (browser = await chromium.launch()));
+after(() => browser.close());
+
+/** Old dailies (Oct 22 and 27), open to free play on TODAY. */
+const LIST = "mountains";
+const BLITZ = "airports";
+
+async function giveUp(page) {
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("results").waitFor();
+}
+
+/** Past runs, then the row that opens `href`. */
+async function openRun(page, href) {
+  await go(page, "#history");
+  await page.locator(`[data-testid="history-row"][href="${href}"]`).first().click();
+}
+
+for (const vp of VIEWPORTS) {
+  test(`Play again on a past run (${vp.name})`, async () => {
+    const { ctx, page } = await open(browser, vp, `#p-${LIST}`);
+    const p = await puzzle(page, LIST);
+
+    // A free list, one found, given up: results that just ended roll on, no Play again.
+    await guess(page, p.answers[0].name);
+    await giveUp(page);
+    assert.equal(await page.getByTestId("replay").count(), 0);
+
+    // Opened again from Past runs: Play again starts a fresh game on the same list; the old run stays in the history.
+    await openRun(page, `#p-${LIST}`);
+    await page.getByTestId("replay").waitFor();
+    assert.equal(await page.getByTestId("replay-held").count(), 0);
+    assert.ok(await noHScroll(page));
+    await page.getByTestId("replay").click();
+    await page.getByTestId("give-up").waitFor();
+    assert.equal(await hash(page), `#p-${LIST}`);
+    assert.equal(await page.getByTestId("lives").getAttribute("data-lives"), "5");
+    assert.equal(await page.locator('[data-testid="slot"][data-state="found"]').count(), 0);
+    assert.equal((await store(page)).listRuns.filter((r) => r.id === LIST).length, 1);
+
+    // A free Blitz round, then its run from the screen's own past runs (the screen stays mounted): Play again is a
+    // fresh round on the same list, not the finished one still in memory.
+    await go(page, `#blitz-${BLITZ}`);
+    await page.getByTestId("blitz-clock").waitFor();
+    await guess(page, (await puzzle(page, BLITZ)).answers[0].name);
+    await page.clock.fastForward(91_000);
+    await page.getByTestId("blitz-results").waitFor();
+    await page.getByTestId("past-runs-toggle").click();
+    await page.getByTestId("past-run").first().click();
+    await page.getByTestId("run-view").waitFor();
+    assert.ok(await noHScroll(page));
+    await page.getByTestId("replay").click();
+    await page.getByTestId("blitz-clock").waitFor();
+    assert.equal(await hash(page), `#blitz-${BLITZ}`);
+    assert.equal(await page.getByTestId("run-view").count(), 0);
+    assert.equal(await page.getByTestId("blitz-results").count(), 0);
+    assert.equal(await page.getByTestId("blitz-clock").getAttribute("data-started"), "false", "a fresh round");
+    assert.equal(await page.getByTestId("blitz-hit").count(), 0);
+
+    // Today's list and Today's Blitz, finished: held, so their past runs have no Play again, just the quiet line.
+    await go(page, "");
+    await page.getByTestId("today-list").click();
+    await page.getByTestId("give-up").waitFor();
+    await giveUp(page);
+    await openRun(page, `#daily-${TODAY}`);
+    await page.getByTestId("replay-held").waitFor();
+    assert.equal(await page.getByTestId("replay").count(), 0);
+
+    await go(page, "");
+    await page.getByTestId("today-blitz").click();
+    const screen = page.getByTestId("blitz-screen");
+    await screen.waitFor();
+    const todays = await screen.getAttribute("data-list");
+    await guess(page, (await puzzle(page, todays)).answers[0].name);
+    await page.clock.fastForward(91_000);
+    await page.getByTestId("blitz-results").waitFor();
+    const round = (await store(page)).blitzRuns[todays][0];
+    await openRun(page, `#dailyblitz-${TODAY}/run-${round.startedAt}`);
+    await page.getByTestId("run-view").waitFor();
+    assert.equal(await page.getByTestId("replay").count(), 0);
+    assert.ok(await page.getByTestId("replay-held").isVisible());
+    await ctx.close();
+  });
+}
