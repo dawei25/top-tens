@@ -580,5 +580,11 @@
   "title": "Countries with the most McDonald's restaurants",
   "category": "Oddball",
   "blitz": true
+ },
+ {
+  "id": "dog-breeds",
+  "title": "Most popular dog breeds in the US (AKC registrations, 2025)",
+  "category": "Oddball",
+  "blitz": false
  }
 ]

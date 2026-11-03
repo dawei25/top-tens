@@ -631,10 +631,12 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
     for (const title of titles) {
       if (CATEGORY_SKIP.test(title) || topic.categorySkip?.test(title) || topic.skip?.includes(title)) continue;
       if (topic.categoryNames && !looksLikeName(baseTitle(title))) continue;
-      const name = cleanName(title);
+      const cleaned = cleanName(title);
+      const name = topic.categoryRename?.[title] ?? cleaned;
       if (!normalize(name) || skipName(name)) continue;
-      // The title's qualifier ("Ben Taylor (first baseman, born 1888)") is nothing a player types.
-      const entry: Entry = { rank: 0, name, aliases: name === baseTitle(title) ? [] : [baseTitle(title)] };
+      // The title's qualifier ("Ben Taylor (first baseman, born 1888)") is nothing a player types; a renamed
+      // member keeps its title as an alias, unless that is junk here ("Pointer" is a type of dog, not one breed).
+      const entry: Entry = { rank: 0, name, aliases: [baseTitle(title)].filter((a) => a !== name && !topic.junkAliases?.includes(a)) };
       ARTICLE.set(entry, title);
       out.push(entry);
     }
@@ -1001,17 +1003,28 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     const members = UNIVERSES[u]().filter((p) => !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
     extra.push(...members.map((p) => ({ rank: 0, ...p })));
   }
-  // Every form an entry so far is known by, and that entry: a later namesake is the same answer.
+  const junk = new Set(
+    [
+      ...(topic.junkAliases ?? []),
+      ...(hasCountries(topic) ? COUNTRY_JUNK : []),
+      ...(/\bcities\b/.test(topic.noun) ? CITY_JUNK : []),
+      ...(topic.webNames ? COMPANY_JUNK : []),
+      ...(topic.people || /\b(accounts|pages)\b/.test(topic.noun) ? CELEBRITY_JUNK : []),
+    ].map(normalize),
+  );
+  // Every form an entry so far is known by, and that entry: a later namesake is the same answer. A junk alias is
+  // no form of it: the redirect "Pointer" doesn't make the English Pointer the German Shorthaired Pointer.
   const taken = new Map<string, Entry>();
   const take = (form: string, e: Entry) => taken.has(normalize(form)) || taken.set(normalize(form), e);
-  for (const e of entries) for (const f of [e.name, ...e.aliases]) take(f, e);
+  const real = (e: Entry) => e.aliases.filter((a) => !junk.has(normalize(a)));
+  for (const e of entries) for (const f of [e.name, ...real(e)]) take(f, e);
   // The same thing written another way ("St. Lawrence River" for the ranked Saint Lawrence, the table's link
   // "Javary River" for Javari) is one entry: the other spelling becomes an alias instead of a second, unranked entry.
   const owner = new Map<string, Entry>();
   const own = (e: Entry, forms: (string | undefined)[]) => {
     for (const f of forms) if (f && sameKey(f) && !owner.has(sameKey(f))) owner.set(sameKey(f), e);
   };
-  for (const [i, e] of entries.entries()) own(e, [e.name, ...e.aliases, rows[i].redirectTarget, rows[i].link]);
+  for (const [i, e] of entries.entries()) own(e, [e.name, ...real(e), rows[i].redirectTarget, rows[i].link]);
   for (const e of extra) {
     const forms = ownForms(e).map(normalize).filter(Boolean);
     const known = forms.find((f) => taken.has(f));
@@ -1043,15 +1056,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     for (const e of entries.slice(rows.length)) if (e.value) addSurname(e);
   }
 
-  const junkList = [
-    ...(topic.junkAliases ?? []),
-    ...(hasCountries(topic) ? COUNTRY_JUNK : []),
-    ...(/\bcities\b/.test(topic.noun) ? CITY_JUNK : []),
-    ...(topic.webNames ? COMPANY_JUNK : []),
-    ...(topic.people || /\b(accounts|pages)\b/.test(topic.noun) ? CELEBRITY_JUNK : []),
-  ];
-  if (junkList.length) {
-    const junk = new Set(junkList.map(normalize));
+  if (junk.size) {
     for (const e of entries) {
       for (const a of e.aliases) if (junk.has(normalize(a))) logDrop(topic.id, e.rank, e.name, a, "listed in junkAliases");
       e.aliases = e.aliases.filter((a) => !junk.has(normalize(a)));

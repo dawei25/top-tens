@@ -1,0 +1,52 @@
+{
+  "French Bulldog": {
+    "text": "In 2003 it was only the AKC's 54th most popular breed. Ten years later it was 10th.",
+    "source": "https://en.wikipedia.org/wiki/French_Bulldog",
+    "evidence": "In 2013, the American Kennel Club (AKC) ranked the French Bulldog as the 10th most popular breed in the United States, enjoying a sharp rise in popularity from 54th place a decade before, in 2003."
+  },
+  "Labrador Retriever": {
+    "text": "Bred in Britain from Newfoundland's St. John's water dogs, and named after Labrador, a region of that colony.",
+    "source": "https://en.wikipedia.org/wiki/Labrador_Retriever",
+    "evidence": "It was developed in the United Kingdom from St. John's water dogs imported from the Colony of Newfoundland, and was named after the Labrador region in that colony."
+  },
+  "Golden Retriever": {
+    "text": "Bred on a Scottish estate from Nous, the only yellow pup in a litter of black Flat-coated Retrievers.",
+    "source": "https://en.wikipedia.org/wiki/Golden_Retriever",
+    "evidence": "The Golden Retriever was bred by Sir Dudley Marjoribanks at his Scottish estate Guisachan ... He started by acquiring a yellow-coloured Flat-coated Retriever dog named Nous; Nous had been whelped in June 1864 and was the only yellow pup in an otherwise all black-coloured litter."
+  },
+  "German Shepherd": {
+    "text": "After World War I the UK renamed it the Alsatian Wolf Dog to avoid the word German. Rin Tin Tin made it famous.",
+    "source": "https://en.wikipedia.org/wiki/German_Shepherd",
+    "evidence": "At the end of the First World War, it was thought that use of the word \"German\" would harm the breed's popularity ... The breed was officially renamed by the UK Kennel Club to \"Alsatian Wolf Dog\" ... animal actors Rin Tin Tin and Strongheart popularised the breed further."
+  },
+  "Dachshund": {
+    "text": "Its name is German for badger dog, and one named Waldi was the first official Olympic mascot, at Munich 1972.",
+    "source": "https://en.wikipedia.org/wiki/Dachshund",
+    "evidence": "The name Dachshund is of German origin, and means 'badger dog' ... the Dachshund was chosen as the first official mascot for the 1972 Summer Olympics in Munich, with the name Waldi."
+  },
+  "Poodle": {
+    "text": "Probably German, not French, and the AKC's most registered breed every year from 1960 to 1982.",
+    "source": "https://en.wikipedia.org/wiki/Poodle",
+    "evidence": "The Poodle likely originated in Germany ... Poodles were the AKC's most registered breed from 1960 to 1982."
+  },
+  "Beagle": {
+    "text": "Elizabeth I kept Pocket Beagles, small enough for a saddlebag, and let them play among the plates at dinner.",
+    "source": "https://en.wikipedia.org/wiki/Beagle",
+    "evidence": "Queen Elizabeth I kept a breed known as a Pocket Beagle ... Small enough to fit in a \"pocket\" or saddlebag ... Elizabeth I ... often entertained guests at her royal table by letting her Pocket Beagles cavort amid their plates and cups."
+  },
+  "Rottweiler": {
+    "text": "Named after Rottweil, a German town whose butchers used them to herd cattle and pull carts of meat to market.",
+    "source": "https://en.wikipedia.org/wiki/Rottweiler",
+    "evidence": "The dogs are known in German as Rottweiler Metzgerhund, meaning Rottweil butchers' dogs, because their main use was to herd livestock and pull carts laden with butchered meat to market. ... This breed acquired its name from the old free city of Rottweil."
+  },
+  "German Shorthaired Pointer": {
+    "text": "A do-everything gun dog: it points game, retrieves on land and in water, follows blood trails and fends off poachers.",
+    "source": "https://en.wikipedia.org/wiki/German_Shorthaired_Pointer",
+    "evidence": "It is capable of ... finding and pointing to game ... of retrieving gently both in water and on land; of following a blood trail to find wounded game; and of defending against poachers and predators."
+  },
+  "Bulldog": {
+    "text": "Named for bull-baiting, banned in 1835. Today's Bulldog couldn't do it: its muzzle is too short to grip a bull.",
+    "source": "https://en.wikipedia.org/wiki/Bulldog",
+    "evidence": "a now-extinct breed used for bull-baiting until the sport was outlawed under the Cruelty to Animals Act of 1835 ... they cannot perform the job they were originally bred for, as they cannot withstand the rigours of running after and being thrown by a bull, and also cannot grip with such a short muzzle."
+  }
+}

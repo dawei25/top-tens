@@ -1,0 +1,22 @@
+{
+  "id": "dog-breeds",
+  "by": "builder",
+  "judgedAt": "2026-11-03",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": ["animals", "dogs", "pets"],
+  "audience": "anyone",
+  "summary": "Written by the data agent at build time, pending a real judge. Nine of the AKC's 2025 top 10 are household names; the German Shorthaired Pointer is the stretch, and Husky, Pug and Chihuahua are the famous misses.",
+  "reasons": [
+    "Casual found Lab, Golden, German Shepherd, French Bulldog, Poodle, Beagle, Rottweiler and Dachshund, then lost lives on Husky, Chihuahua, Pug, Corgi (#10 in 2019) and Boxer (#6 in 2008).",
+    "The AKC's ranks past 10 aren't on Wikipedia, so most misses show no figure; breeds from its 2006-2008 and 2019-2024 top 10s show their last rank.",
+    "Every FCI and AKC breed costs a life; crossbreeds (labradoodle, goldendoodle) and pit bulls are free, and \"labradoodle\" is never read as Labrador. Ranked only, so not a Blitz."
+  ],
+  "fixes": []
+}
