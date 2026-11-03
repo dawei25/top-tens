@@ -90,9 +90,8 @@ export function ParBlock({ list, score, id }: { list: ListPar; score: number; id
         <ParHistogram counts={counts} par={avg} score={score} />
       </div>
       <p className="par-line">
-        <span>
-          {percentileLabel(p)} of {real ? `${formatCount(real.n)} players` : "players"}
-        </span>{" "}
+        {/* One text node, as before real players: split nodes shape the pixel font a little differently. */}
+        <span>{`${percentileLabel(p)} of ${real ? formatCount(real.n) + " " : ""}players`}</span>{" "}
         {!real && list.estimated && <span className="par-est">(estimated)</span>}
       </p>
     </div>
