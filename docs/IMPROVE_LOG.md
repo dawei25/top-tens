@@ -17,7 +17,8 @@ Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 - Data: placeholder rows never answers (validate.ts errors); Netflix free pool via `knownOnly` (its leak 145 -> 0);
   near misses with a figure typed by surname; concert-tours Styles, Elton, Elevation, Zoo TV; junk redirects never
   claim a namesake by article.
-- Leak rate: 1.5% before the merge; re-measure pending.
+- Leak rate: 1.6% -> 1.4% (1310 of 96,066, 98 lists); netflix-seasons 14% -> 0. Worst now theme-parks and stadiums
+  (8.9%), mostly words of pool names ("china", "town", "water").
 - New topics: dog-breeds ("Most popular dog breeds in the US (AKC registrations, 2025)"; casual 8, a possible daily;
   crossbreeds free). Parked: most valuable sports teams (Forbes 2025 ties at #10/#11).
 - Incident: a container restart killed the data agent mid-cycle. Its committed work survived in the worktree; a
