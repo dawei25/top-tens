@@ -46,6 +46,10 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
             </li>
             <li>Why: so the results can show how everyone does on a list, and where you stand.</li>
             <li>
+              When you rate a list ("Good list?"), the game sends the list, list or Blitz, up or down, the reason if you
+              picked one, and the random id. Why: to learn which lists are good.
+            </li>
+            <li>
               These scores don't say who you are, so they can't be picked out and deleted later. They stay in the
               totals.
             </li>
@@ -66,7 +70,7 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
             <li>
               Your save: the same games, streaks and bests this browser keeps, so they follow you to other devices.
             </li>
-            <li>The scores you send while signed in are linked to your account.</li>
+            <li>The scores and ratings you send while signed in are linked to your account.</li>
             <li>Why: signing in and syncing. Your email is never used for anything else.</li>
           </ul>
         </section>
@@ -102,7 +106,7 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
           {accountsOn && (
             <li>
               Signed in: <a href="#stats">Your knowledge</a>, Account, delete account. That removes your save, your linked
-              scores and your sign-in, right away.
+              scores and ratings, and your sign-in, right away.
             </li>
           )}
           <li>In this browser: reset all progress on Home, or clear this site's data in your browser's settings.</li>
