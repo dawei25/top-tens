@@ -449,3 +449,41 @@ describe("a word that fits a crowd", () => {
     expect(judgeGuess("vertigo", tours, new Set())).toMatchObject({ kind: "near", entry: { rank: 11 } });
   });
 });
+
+describe("cycle 5 readings", () => {
+  const seasons: Puzzle = {
+    ...puzzle,
+    id: "seasons5",
+    noun: "Netflix series",
+    answers: [e(1, "Squid Game (Season 1)", ["Squid Game"]), e(2, "Wednesday (Season 1)", ["Wednesday"]), e(3, "Squid Game (Season 2)"), e(4, "Squid Game (Season 3)"), ...puzzle.answers.slice(4)],
+    extras: [e(0, "Our Planet"), e(0, "The 1989 World Tour")],
+  };
+  it("a small number with the list's subject names no entry", () => {
+    expect(judgeGuess("season 3", seasons, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("season", seasons, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("squid game 3", seasons, new Set())).toMatchObject({ kind: "correct", entry: { rank: 4 } });
+  });
+  it("an obscure pool name takes a slip only in the middle; a name with a figure takes the usual ones", () => {
+    expect(judgeGuess("planes", seasons, new Set()).kind).toBe("unknown");
+    const films: Puzzle = { ...puzzle, id: "films6", extras: [{ rank: 0, name: "Titanic", aliases: [], value: "$200 million" }] };
+    expect(judgeGuess("titanik", films, new Set())).toMatchObject({ kind: "near", entry: { name: "Titanic" }, corrected: true });
+  });
+  it("a slip in a short first name beside the right surname is a slip", () => {
+    const athletes: Puzzle = { ...puzzle, id: "athletes5", answers: [e(1, "Jon Rahm"), ...puzzle.answers.slice(1)], extras: [] };
+    expect(judgeGuess("john rahm", athletes, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 1 } });
+  });
+  it("a short name with the rest naming its only entry, and category words for music", () => {
+    const tours: Puzzle = {
+      ...puzzle,
+      id: "tours6",
+      noun: "concert tours",
+      answers: [e(1, "Music of the Spheres World Tour", ["Coldplay"]), e(2, "Born in the U.S.A. Tour", ["E Street Band"]), ...puzzle.answers.slice(2)],
+      extras: [e(19, "Arirang World Tour", ["BTS"])],
+    };
+    expect(judgeGuess("bts arirang", tours, new Set())).toMatchObject({ kind: "near", entry: { rank: 19 } });
+    expect(judgeGuess("music", tours, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("band", tours, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("e street band", tours, new Set())).toMatchObject({ kind: "correct", entry: { rank: 2 } });
+    expect(judgeGuess("spheres", tours, new Set())).toMatchObject({ entry: { rank: 1 } });
+  });
+});

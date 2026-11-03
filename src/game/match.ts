@@ -112,6 +112,8 @@ interface Candidate {
   viaWord: boolean;
   /** The best form starts and ends with the same letters as the guess: a slip in the middle ("Hungray"). */
   ends: boolean;
+  /** Whole words were shared with the best form and the rest starts with the same letter: "john rahm" / "jon rahm". */
+  besideShared: boolean;
 }
 
 function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useWords = true): Candidate[] {
@@ -124,6 +126,7 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
     let fullName = false;
     let viaWord = false;
     let ends = false;
+    let besideShared = false;
     const forms = [entry.name, ...entry.aliases];
     const words = useWords ? nameWords(entry.name) : [];
     // Words of the name count as forms too, so a misspelled first name ("kareen") lands on its own entry.
@@ -153,9 +156,10 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
         fullName = dist === 0 && form === entry.name;
         viaWord = i >= forms.length;
         ends = g[0] === rest[0] && g[g.length - 1] === rest[rest.length - 1];
+        besideShared = g !== guess && g[0] === rest[0];
       }
     }
-    return { entry, inTop10, dist: best, len, fullName, viaWord, ends };
+    return { entry, inTop10, dist: best, len, fullName, viaWord, ends, besideShared };
   });
 }
 
@@ -278,12 +282,17 @@ export function judgeGuess(
     return natural(cs, MAX_CHOICES);
   };
 
-  // What the list is about ("tour" on concert tours, "museums", "names") or a plain category word ("islands") is never
-  // read as an answer that merely contains or resembles it. An answer named exactly that still counts: the Instagram
-  // account on Instagram accounts (above), "moon" on moons.
+  // What the list is about ("tour" on concert tours, "museums", "names"), maybe with a small number ("season 3" on
+  // Netflix seasons), or a plain category word ("islands") is never read as an answer that merely contains or
+  // resembles it. An answer named exactly that still counts: the Instagram account on Instagram accounts (above),
+  // "moon" on moons. A year or a longer number is a name's own ("1989 tour").
   const subject = subjectWords(puzzle.noun);
-  if (guess.split(" ").every((w) => GENERIC.has(w) || subject.has(w))) {
-    return strong.length ? fits(strong, false) : { kind: "unknown", junk: false };
+  const words = guess.split(" ");
+  const smallNumber = (w: string) => /^\d{1,2}$/.test(w);
+  if (words.every((w) => GENERIC.has(w) || subject.has(w) || smallNumber(w)) && !words.every(smallNumber)) {
+    if (strong.length) return fits(strong, false);
+    const fit = new Set([...allExact, ...wordMatches(guess, candidates)].map((c) => c.entry)).size;
+    return { kind: "unknown", junk: false, ...(fit > 1 ? { vague: fit } : {}) };
   }
 
   if (exact.length > 0) return fits(exact, !strong.length);
@@ -308,9 +317,15 @@ export function judgeGuess(
   // Six or seven letters get a third edit when the first and last letters agree: a slip in the middle ("hungray").
   // An ordinary word was typed on purpose: at most one slip, and only onto a ranked answer ("hungry" is Hungary; "barrel"
   // is not Brazil, "church" not Czechia, "rice" not the pool's Nice).
-  const close = candidates.filter((c) =>
-    plain ? c.dist <= 1 && c.entry.rank > 0 : c.dist <= typoBudget(len) + (c.ends && len >= 6 && len <= 7 ? 1 : 0),
-  );
+  // The wider pool's obscure names (no rank, no figure) only take a slip in the middle, with the first and last letters
+  // kept: "planes" is not Our Planet. Beside a whole word both share ("rahm"), one slip in a short word is still a
+  // slip: "john rahm" is Jon Rahm.
+  const close = candidates.filter((c) => {
+    if (plain) return c.dist <= 1 && c.entry.rank > 0;
+    const notable = c.entry.rank > 0 || c.entry.value !== undefined;
+    const budget = typoBudget(len) + (notable && c.ends && len >= 6 && len <= 7 ? 1 : 0);
+    return c.dist <= Math.max(budget, c.besideShared ? 1 : 0) && (notable || c.ends);
+  });
   if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
     const tied = close.filter((c) => c.dist === close[0].dist);
     // As with exact matches, a whole name or alias beats one word of another entry's name: "lotse" is Lhotse, not a
@@ -347,7 +362,7 @@ const GENERIC = new Set(
     "de la el le du international airport island islands isle lake river mount mountain mountains peak sea ocean bay " +
     "stadium arena park tower building centre center city state states county province republic kingdom united " +
     "national people federal democratic company corporation group bank holdings inc film movie game games series " +
-    "world cup league club team fc"
+    "world cup league club team fc music band bands season seasons part"
   ).split(" "),
 );
 
@@ -374,7 +389,8 @@ const QUALIFIERS = new Set(
 
 /**
  * The entry whose full name or alias makes up the first words of a longer guess ("perfect" in "perfect ed sheeran"),
- * the longest such name first. Names under four letters or made only of generic words don't count. When several
+ * the longest such name first. Names made only of generic words don't count, and a name under four letters ("u2",
+ * "bts") only when the rest names the entry ("bts arirang"). When several
  * entries share that name (an artist on each of their tours), the rest of the guess picks one: "ed sheeran divide" is
  * the Divide Tour, "coldplay a head full of dreams" not Coldplay's bigger tour. Otherwise the most prominent.
  */
@@ -391,11 +407,14 @@ function leadingName(guess: string, entries: Entry[]): Entry | undefined {
     const hits = entries.filter(
       (e) => forms(e).includes(head) && (!restDigits || forms(e).some((f) => digitsOf(numbersAsDigits(f)).includes(restDigits))),
     );
-    if (hits.length === 0 || (short && hits.length === 1)) continue;
-    if (hits.length === 1) return hits[0];
+    if (hits.length === 0) continue;
     const rest = words.slice(k).filter((w) => w.length >= 2 && !GENERIC.has(w));
     const named = hits.filter((e) => forms(e).some((f) => rest.every((w) => f.split(" ").includes(w))));
-    if (short) return rest.length ? mostProminent(named) : undefined;
+    if (short) {
+      if (rest.length && named.length) return mostProminent(named);
+      continue;
+    }
+    if (hits.length === 1) return hits[0];
     return mostProminent(rest.length && named.length ? named : hits);
   }
   return undefined;
