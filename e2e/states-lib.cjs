@@ -180,9 +180,9 @@ function pageLib() {
    * Elements of one kind (tag, classes, test id, state, and their container's classes: the nine empty rows of a
    * board, the archive's rows) share their styles: `perKind` of each are checked, not all of them.
    */
+  const classes = (el) => (el ? [...el.classList].sort().join(".") : "");
   const kind = (el) =>
-    [el.tagName, [...el.classList].sort().join("."), el.dataset.testid ?? "", el.dataset.state ?? "", el.getAttribute("type") ?? "",
-      el.parentElement ? [...el.parentElement.classList].sort().join(".") : ""].join("|");
+    [el.tagName, classes(el), el.dataset.testid, el.dataset.state, el.getAttribute("type"), classes(el.parentElement)].join("|");
   const take = (el) => {
     const k = kind(el);
     const n = kinds.get(k) ?? 0;
