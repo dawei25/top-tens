@@ -31,8 +31,8 @@ import { shownValue } from "../game/state";
 import { emitPlay } from "../game/events";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
-import { END_FOCUS_MS, ScreenHead, SwapLabel } from "./pixel";
-import { blitzPrompt, notOnList } from "./copy";
+import { END_FOCUS_MS, RerollKey, ScreenHead, SwapLabel } from "./pixel";
+import { blitzPrompt, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT } from "./copy";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
 import { BlitzCrowdLine } from "./account";
@@ -69,7 +69,7 @@ interface Props {
   onRoll?: () => void;
   /**
    * This round was rolled (Random Blitz, a category, Roll again) in this tab. Until the clock starts it offers Roll
-   * again in the clock card, to skip to another list; never once the round is on.
+   * again beside GUESS, to skip to another list; never once the round is on.
    */
   rolled?: boolean;
   /**
@@ -541,6 +541,8 @@ export function Blitz({
     );
     board = <RoundLists puzzle={puzzle} hits={viewRun.hits} byName={byName} waitFor={waitFor} />;
   } else if (!over) {
+    // A rolled round keeps a slot for Roll again right of GUESS; the key fades out of it when the clock starts.
+    const rerollSlot = !!rolled && !!onRoll && !dailyBlitz;
     control = (
       <div className="control-card" data-glass>
         <section className="panel blitz-meter lead" aria-label="Clock and score" data-glass>
@@ -549,13 +551,6 @@ export function Blitz({
             <Clock state={state} onExpire={expire} />
           </div>
           <div className="blitz-meter-cell right">
-            {/* Before the clock starts, a rolled round can be skipped for another list. It sits beside SCORE, out of
-                the flow, so nothing moves as it comes and goes. */}
-            {rolled && onRoll && !state.startedAt && (
-              <button type="button" className="key key-xs key-reroll" data-testid="reroll" onClick={onRoll}>
-                Roll again
-              </button>
-            )}
             <span className="label">Score</span>
             <span className="blitz-score" data-testid="blitz-score" data-motion="score" aria-live="polite">
               {score}
@@ -589,12 +584,12 @@ export function Blitz({
               <p className="feedback hint">{state.startedAt ? "keep going." : "the clock starts when you type."}</p>
             )}
           </div>
-          <div className="guess-row">
+          <div className={`guess-row ${rerollSlot ? "has-reroll" : ""}`}>
             <input
               ref={inputRef}
               value={input}
               onChange={(e) => onType(e.target.value)}
-              placeholder="type a guess..."
+              placeholder={rerollSlot ? PLACEHOLDER_SHORT : PLACEHOLDER}
               autoFocus
               autoComplete="off"
               autoCorrect="off"
@@ -606,6 +601,8 @@ export function Blitz({
             <button className="key key-gold" type="submit" disabled={!input.trim()}>
               Guess
             </button>
+            {/* Before the clock starts, a rolled round can be skipped for another list. */}
+            <RerollKey slot={rerollSlot} on={!state.startedAt} onRoll={onRoll} />
           </div>
         </form>
       </div>

@@ -44,6 +44,21 @@ export function sourceSite(name: string): string {
 export type Mode = "classic" | "blitz";
 
 /**
+ * Roll again before play (a rolled list before its first guess, a rolled Blitz before its clock starts): a navy key
+ * right of GUESS in the guess row, as tall as GUESS. Where it can show (`slot`) its slot stays for the whole game: when
+ * play starts (`on` goes false) it fades out in place, so the guess box and GUESS never move. Where it never shows
+ * (dailies, Today's Blitz, links, replays) there is no slot.
+ */
+export function RerollKey({ slot, on, onRoll }: { slot: boolean; on: boolean; onRoll?: () => void }) {
+  if (!slot) return null;
+  return (
+    <button type="button" className="key key-reroll" data-testid="reroll" data-gone={on ? undefined : ""} disabled={!on} onClick={onRoll}>
+      Roll again
+    </button>
+  );
+}
+
+/**
  * The keyboard hint on a home key, on its status line. Always laid out; CSS makes it visible only on the focused key,
  * and only with a fine pointer, so showing it never moves anything.
  */

@@ -22,8 +22,8 @@ import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { ClueIcon, END_FOCUS_MS, formatAsOf, InkSac, ordinal, reducedMotion, ScreenHead, sourceSite, SwapLabel, TypeIn } from "./pixel";
-import { CLUE_LABEL, confirmGuess, GUESS_HINT, GUESS_HINT_SHORT, NO_LIFE_LOST, notOnList, SO_CLOSE, STREAK_NOTE } from "./copy";
+import { ClueIcon, END_FOCUS_MS, formatAsOf, InkSac, ordinal, reducedMotion, RerollKey, ScreenHead, sourceSite, SwapLabel, TypeIn } from "./pixel";
+import { CLUE_LABEL, confirmGuess, GUESS_HINT, NO_LIFE_LOST, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT, SO_CLOSE, STREAK_NOTE } from "./copy";
 import { FloatNote } from "./Note";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
@@ -45,7 +45,7 @@ interface Props {
   onRoll: () => void;
   /**
    * This game was rolled (Random list, a category, Roll again) in this tab. Until the first guess it offers Roll again
-   * in the guess panel, to skip to another list; never once play starts, so a losing game can't be dodged.
+   * beside GUESS, to skip to another list; never once play starts, so a losing game can't be dodged.
    */
   rolled?: boolean;
   /** Today's Blitz, while it's unplayed (a finished daily offers it). */
@@ -312,9 +312,10 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const allFactsOpen = factRanks.length > 0 && factRanks.every((r) => openFacts.has(r));
 
   const hints = game.hints ?? [];
-  // Roll again before play: a rolled list nobody has touched yet (no guess, no clue, nothing said in the feedback line,
-  // which it shares with the key).
-  const reroll = !!rolled && !daily && game.status === "playing" && game.log.length === 0 && hints.length === 0 && !feedback;
+  // Roll again before play: a rolled list keeps a slot for it right of GUESS, and offers it until anything happens
+  // (no guess, no clue, nothing said in the feedback line). Then it fades out of its slot, so nothing moves.
+  const rerollSlot = !!rolled && !daily;
+  const reroll = rerollSlot && game.status === "playing" && game.log.length === 0 && hints.length === 0 && !feedback;
   const par = parFile?.[puzzle.id];
   // Count this game in before the save effect has run, so the results show the streak it just made.
   let dailyStreak: ReturnType<typeof streak> | null = null;
@@ -579,21 +580,15 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     ))}
                   </div>
                 ) : (
-                  <p className="feedback hint">{reroll ? GUESS_HINT_SHORT : GUESS_HINT}</p>
-                )}
-                {/* Positioned over the line's right end, so it never moves anything as it comes and goes. */}
-                {reroll && (
-                  <button type="button" className="key key-xs key-reroll" data-testid="reroll" onClick={onRoll}>
-                    Roll again
-                  </button>
+                  <p className="feedback hint">{GUESS_HINT}</p>
                 )}
               </div>
-              <div key={shake.n} className={`guess-row ${shake.n ? "shake" : ""} ${shake.hit ? "hit" : ""}`}>
+              <div key={shake.n} className={`guess-row ${rerollSlot ? "has-reroll" : ""} ${shake.n ? "shake" : ""} ${shake.hit ? "hit" : ""}`}>
                 <input
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="type a guess..."
+                  placeholder={rerollSlot ? PLACEHOLDER_SHORT : PLACEHOLDER}
                   autoFocus
                   autoComplete="off"
                   autoCorrect="off"
@@ -605,6 +600,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button className="key key-pink" type="submit" data-testid="guess-submit" disabled={!input.trim()}>
                   Guess
                 </button>
+                <RerollKey slot={rerollSlot} on={reroll} onRoll={onRoll} />
               </div>
             </form>
           </div>
