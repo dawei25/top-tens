@@ -1,6 +1,23 @@
+import * as cheerio from "cheerio";
 import { describe, expect, it } from "vitest";
-import { datedLabel, datedValue, labelYear, lastYear, lowerParts, matchFacts, mergeIndex, rangeText, rankOf, regionColumn, sameKey, scaledFigure, skipName } from "./build";
-import { inRegion, UNIVERSES } from "./gazetteer";
+import {
+  datedLabel,
+  datedValue,
+  labelYear,
+  lastYear,
+  lowerParts,
+  matchFacts,
+  mergeIndex,
+  qualifiedLink,
+  rangeText,
+  rankOf,
+  regionalNamesake,
+  regionColumn,
+  sameKey,
+  scaledFigure,
+  skipName,
+} from "./build";
+import { inRegion, UNIVERSES, whereIs } from "./gazetteer";
 import { COUNTRY_FORMS } from "./intent";
 
 describe("regional lists", () => {
@@ -29,17 +46,74 @@ describe("regional lists", () => {
     expect(europe.map((c) => c.name)).not.toContain("Ankara");
   });
 
-  it("take another page's rows by its country or its Country column, and fail a table that says neither", () => {
+  it("place another page's rows by its country or its Country column, and fail a table that says neither", () => {
     const topic = { id: "europe-cities", page: "Europe page", region: "Europe" };
     const header = ["City", "Country", "Population"];
     expect(regionColumn(topic, { page: "World page" }, header, 0)).toBe(1);
     expect(regionColumn(topic, { page: "EU page" }, ["City", "Member state"], 0)).toBe(1);
-    expect(regionColumn(topic, { page: "UK page", country: "United Kingdom" }, ["City"], 0)).toBe(-1);
-    expect(regionColumn(topic, { page: "US page", country: "United States" }, ["City"], 0)).toBeNull();
+    expect(regionColumn(topic, { page: "UK page", country: "United Kingdom" }, ["City"], 0)).toBe("inside");
+    // Every US city is elsewhere; a transcontinental country's table gives nothing (free).
+    expect(regionColumn(topic, { page: "US page", country: "United States" }, ["City"], 0)).toBe("outside");
+    expect(regionColumn(topic, { page: "Turkey page", country: "Turkey" }, ["City"], 0)).toBe("unsure");
     // The topic's own page is its scope; a list without a region takes everything.
-    expect(regionColumn(topic, {}, ["City"], 0)).toBe(-1);
-    expect(regionColumn({ ...topic, region: undefined }, { page: "World page" }, ["City"], 0)).toBe(-1);
+    expect(regionColumn(topic, {}, ["City"], 0)).toBe("inside");
+    expect(regionColumn({ ...topic, region: undefined }, { page: "World page" }, ["City"], 0)).toBe("inside");
     expect(() => regionColumn(topic, { page: "World page" }, ["City", "Population"], 0)).toThrow(/says no country/);
+  });
+
+  it("put a country inside, outside, or on the region's debatable edge", () => {
+    expect(whereIs("Japan", "Europe")).toBe("outside");
+    expect(whereIs("Portugal", "Europe")).toBe("inside");
+    // Egypt reaches Asia: free on the Asian list that leaves it out, a row where a page lists it, plainly not Europe.
+    expect(whereIs("Egypt", "Asia")).toBe("unsure");
+    expect(whereIs("Egypt", "Asia", new Set(["Egypt"]))).toBe("inside");
+    expect(whereIs("Egypt", "Europe")).toBe("outside");
+    expect(whereIs("Turkey", "Africa")).toBe("outside");
+    expect(whereIs("Atlantis", "Europe")).toBeUndefined();
+  });
+
+  it("look up the bare name of a place whose table links it with a qualifier", () => {
+    expect(qualifiedLink("Toledo", "Toledo, Ohio")).toBe(true);
+    expect(qualifiedLink("Kingston", "Kingston, Jamaica")).toBe(true);
+    expect(qualifiedLink("Valencia", "Valencia (Venezuela)")).toBe(true);
+    expect(qualifiedLink("Tokyo", "Tokyo")).toBe(false);
+    expect(qualifiedLink("Washington, D.C.", "Washington, D.C.")).toBe(false);
+    // The same name punctuated otherwise, another name, or a red link: nothing to look up.
+    expect(qualifiedLink("Washington D.C.", "Washington, D.C.")).toBe(false);
+    expect(qualifiedLink("Wanzhou District", "Wanzhou, Chongqing")).toBe(false);
+    expect(qualifiedLink("Bengaluru", "Bangalore")).toBe(false);
+    expect(qualifiedLink("Fuping", "Fuping Town (page does not exist)")).toBe(false);
+  });
+
+  it("leave free a place outside the region only when Wikipedia gives its name to a place inside it", () => {
+    const disambiguation = (body: string) =>
+      cheerio.load(`<div class="mw-parser-output"><div id="disambigbox"></div>${body}</div><div id="catlinks">Disambiguation pages</div>`);
+    const item = (title: string, line = title) => `<li><a title="${title}">${title}</a>${line.slice(title.length)}</li>`;
+    // Toledo, Ohio is free on European cities (Toledo, Spain); Phoenix, Arizona costs a life.
+    const toledo = disambiguation(`<ul>${item("Toledo, Spain", "Toledo, Spain, a city in Spain")}${item("Toledo, Ohio")}</ul>`);
+    expect(regionalNamesake(toledo, "Toledo", "Europe")).toBe(true);
+    expect(regionalNamesake(toledo, "Toledo", "Asia")).toBe(false);
+    const phoenix = disambiguation(
+      `<ul>${item("Phoenix, Arizona")}${item("Phoenix (mythology)")}<li><a title="The Phoenix (magazine)">The Phoenix</a>, Ireland</li>` +
+        `${item("Phoenix, Illinois", "Phoenix, Illinois, a village")}${item("Phoenix, Georgia")}</ul>`,
+    );
+    expect(regionalNamesake(phoenix, "Phoenix", "Europe")).toBe(false);
+    // A village of the name doesn't count; a place whose line or section names the country does.
+    expect(regionalNamesake(disambiguation(`<ul>${item("Arlington, Devon", "Arlington, Devon, a village in England")}</ul>`), "Arlington", "Europe")).toBe(
+      false,
+    );
+    const hamilton = disambiguation(
+      `<section><div class="mw-heading"><h2>Places</h2></div><section><div class="mw-heading"><h3>Scotland</h3></div>` +
+        `<ul>${item("Hamilton, South Lanarkshire")}</ul></section></section>`,
+    );
+    expect(regionalNamesake(hamilton, "Hamilton", "Europe")).toBe(true);
+    const aside = disambiguation(`<ul>${item("Hamilton, South Lanarkshire", "Hamilton, South Lanarkshire, Scotland (formerly Cadzow)")}</ul>`);
+    expect(regionalNamesake(aside, "Hamilton", "Europe")).toBe(true);
+    // An article of the name: by its infobox's country (Valencia is Spain's); not a disambiguation page, no list read.
+    const article = (country: string, body = "") =>
+      cheerio.load(`<div class="mw-parser-output"><table class="infobox"><tr><th>Country</th><td>${country}</td></tr></table>${body}</div>`);
+    expect(regionalNamesake(article("Spain"), "Valencia", "Europe")).toBe(true);
+    expect(regionalNamesake(article("China", `<ul>${item("Suzhou, Spain")}</ul>`), "Suzhou", "Europe")).toBe(false);
   });
 });
 

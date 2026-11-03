@@ -2,9 +2,19 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Entry, Puzzle } from "../src/game/types";
-import { UNIVERSES } from "./gazetteer";
+import { UNIVERSES, whereIs } from "./gazetteer";
 import { TOPICS, type Topic } from "./topics";
-import { checkPuzzle, FACTS_REQUIRED_FROM, factIssues, figureShare, missingNicknames, outsideRegion, undeclaredRegion } from "./validate";
+import {
+  checkPuzzle,
+  elsewhereErrors,
+  FACTS_REQUIRED_FROM,
+  factIssues,
+  figureShare,
+  missingNicknames,
+  REGION_REQUIRED_FROM,
+  regionGaps,
+  undeclaredRegion,
+} from "./validate";
 
 const fact = { text: "A plain fact.", source: "https://en.wikipedia.org/wiki/Example" };
 
@@ -171,32 +181,87 @@ describe("validate: team nicknames", () => {
 
 describe("validate: regional lists", () => {
   const unranked = (...names: string[]): Entry[] => names.map((name) => ({ rank: 0, name, aliases: [] }));
-
-  it("fails a regional country list whose pool holds another continent's countries (Japan on Europe)", () => {
+  const elsewhere = (...names: string[]): Entry[] => names.map((name) => ({ rank: 0, name, aliases: [], elsewhere: true }));
+  const europe = { region: "Europe", noun: "countries" };
+  /** A European country list as the build makes it: every country plainly outside Europe marked elsewhere. */
+  const europeList = () => {
     const p = puzzle({ unranked: 0 });
     p.noun = "countries";
-    p.extras.push(...unranked("Japan", "Brazil", "Vatican City", "Russia"), { rank: 11, name: "Armenia", aliases: [] });
-    // Vatican City is Europe's; Russia reaches Europe; a ranked row (Armenia) is the page's own scope.
-    expect(outsideRegion(p, { region: "Europe", noun: "countries" })).toEqual(['"Japan" (Asia)', '"Brazil" (South America)']);
-    expect(errors(p, { id: "test-list", noun: "countries", region: "Europe" })).toContain(
-      '2 unranked answer(s) outside Europe, where guessing them should be free: "Japan" (Asia), "Brazil" (South America)',
-    );
-    expect(outsideRegion(p, { noun: "countries" })).toEqual([]);
+    p.region = "Europe";
+    p.extras.push(...elsewhere(...UNIVERSES.countries().filter((c) => whereIs(c.name, "Europe") === "outside").map((c) => c.name)));
+    return p;
+  };
+  const without = (p: Puzzle, name: string) => ({ ...p, extras: p.extras.filter((e) => e.name !== name) });
+
+  it("passes a regional country list whose places outside the region are marked elsewhere", () => {
+    const p = europeList();
+    // Vatican City is Europe's; Russia reaches Europe (free where the page leaves it out); Armenia is the page's row.
+    p.extras.push(...unranked("Vatican City", "Russia"), { rank: 11, name: "Armenia", aliases: [] });
+    expect(elsewhereErrors(p, europe)).toEqual([]);
+    expect(regionGaps(p, europe)).toEqual([]);
   });
 
-  it("knows a country by its other names", () => {
-    const p = puzzle({ unranked: 0 });
-    p.extras.push({ rank: 0, name: "Holland", aliases: [] }, { rank: 0, name: "Burma", aliases: ["Myanmar"] });
-    expect(outsideRegion(p, { region: "Europe", noun: "countries" })).toEqual(['"Burma" (Asia)']);
+  it("fails a place outside the region that isn't marked elsewhere, or is missing (free)", () => {
+    const p = europeList();
+    const unmarked = without(p, "Japan");
+    unmarked.extras.push(...unranked("Japan"));
+    expect(regionGaps(unmarked, europe)).toEqual(['1 unranked place(s) outside Europe not marked elsewhere: "Japan" (Asia)']);
+    expect(regionGaps(without(p, "Brazil"), europe)).toEqual(["1 place(s) outside Europe missing, so free instead of elsewhere: Brazil"]);
+    expect(regionGaps({ ...p, region: undefined }, europe)).toEqual(['the puzzle says region nothing, the topic "Europe"']);
   });
 
-  it("fails a regional city list holding the world's capitals and big cities, not its own namesakes", () => {
+  it("fails an elsewhere entry inside the region, on its debatable edge, ranked or with a figure", () => {
+    const p = europeList();
+    p.extras.push(...elsewhere("Portugal", "Turkey"), { rank: 0, name: "Holland", aliases: [], elsewhere: true, value: "17 million" });
+    expect(elsewhereErrors(p, europe)).toEqual([
+      '"Portugal" is marked elsewhere but is in Europe (Portugal)',
+      '"Turkey" is marked elsewhere but is maybe in Europe (Türkiye)',
+      '"Holland" is marked elsewhere but has a rank or a figure',
+      '"Holland" is marked elsewhere but is in Europe (Netherlands)',
+    ]);
+    // Egypt is plainly outside Europe, but on Asia's debatable edge.
+    expect(elsewhereErrors({ ...p, extras: elsewhere("Egypt"), region: "Asia" }, { region: "Asia", noun: "countries" })).toEqual([
+      '"Egypt" is marked elsewhere but is maybe in Asia (Egypt)',
+    ]);
+  });
+
+  it("fails elsewhere entries or a region on a list without one", () => {
+    const p = puzzle();
+    p.extras.push(...elsewhere("Japan"));
+    p.region = "Europe";
+    expect(elsewhereErrors(p, { noun: "countries" })).toEqual([
+      'region "Europe" on a list whose topic has none',
+      '1 entries marked elsewhere on a list with no region, e.g. "Japan"',
+    ]);
+  });
+
+  it("checks a city list by the gazetteer's capitals and big cities, not its own namesakes", () => {
     const p = puzzle({ unranked: 0 });
-    p.extras.push(...unranked("Tokyo", "Mumbai", "Singapore", "Lisbon", "Luxembourg", "Leeds"));
+    p.noun = "cities";
+    p.region = "Europe";
+    p.extras.push(...unranked("Tokyo", "Singapore", "Lisbon", "Leeds"), ...elsewhere("Mumbai", "Paris"));
     // Plymouth, England (with its figure from the list's own table), not Montserrat's capital.
     p.extras.push({ rank: 0, name: "Plymouth", aliases: [], value: "267,888", n: 267888 });
-    expect(outsideRegion(p, { region: "Europe", noun: "cities" })).toEqual(['"Tokyo" (Japan)', '"Mumbai" (India)', '"Singapore" (Singapore)']);
-    expect(outsideRegion(p, { region: "Asia", noun: "cities" })).toEqual(['"Lisbon" (Portugal)', '"Luxembourg" (Luxembourg)']);
+    const topic = { region: "Europe", noun: "cities" };
+    expect(elsewhereErrors(p, topic)).toEqual(['"Paris" is marked elsewhere but is in Europe (France)']);
+    expect(regionGaps(p, topic)[0]).toBe('2 unranked place(s) outside Europe not marked elsewhere: "Tokyo" (Japan), "Singapore" (Singapore)');
+    expect(regionGaps(p, topic)[1]).toMatch(/^\d+ place\(s\) outside Europe missing, so free instead of elsewhere: Shanghai/);
+  });
+
+  it("only warns on a regional list built before the rule, until its rebuild", () => {
+    const p = puzzle({ asOf: "2026-11-01" });
+    p.noun = "countries";
+    const topic = { id: "test-list", category: "Oddball" as const, ...europe };
+    expect(errors(p, topic).filter((m) => /Europe/.test(m))).toEqual([]);
+    expect(warnings(p, topic)).toContainEqual(expect.stringContaining("missing, so free instead of elsewhere"));
+    p.source.asOf = REGION_REQUIRED_FROM;
+    expect(errors(p, topic)).toContainEqual(expect.stringContaining("missing, so free instead of elsewhere"));
+  });
+
+  it("fails a field outside the puzzle format", () => {
+    const p = puzzle();
+    Object.assign(p.extras[0], { country: "Luxembourg" });
+    expect(errors(p)).toEqual(['"Other 1": fields outside the puzzle format: country']);
   });
 
   it("fails a list of places whose title names a region it doesn't declare", () => {
@@ -217,7 +282,8 @@ describe("validate: regional lists", () => {
     expect(lists.map((t) => t.id)).toEqual(expect.arrayContaining(["africa-population", "asia-population", "europe-population", "europe-cities"]));
     for (const t of lists) {
       const built: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${t.id}.json`), "utf8"));
-      expect(outsideRegion(built, t), t.id).toEqual([]);
+      expect(elsewhereErrors(built, t), t.id).toEqual([]);
+      if (built.source.asOf >= REGION_REQUIRED_FROM) expect(regionGaps(built, t), t.id).toEqual([]);
     }
   });
 });

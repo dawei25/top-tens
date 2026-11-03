@@ -1,5 +1,6 @@
 // Shared by the backend specs (backend.e2e.cjs, backend-google.e2e.cjs): serve a copy built with fake backend env vars,
 // a mocked Supabase that records what the game sent, and the fake players and sessions it answers with.
+const assert = require("node:assert/strict");
 const { mkdtempSync, rmSync } = require("node:fs");
 const { tmpdir } = require("node:os");
 const path = require("node:path");
@@ -195,6 +196,30 @@ const until = async (fn, ms = 5000) => {
 };
 const settle = () => new Promise((r) => setTimeout(r, 400));
 
+/** Opens the menu (the account lives there) once it has slid in; returns it. */
+async function openMenu(page) {
+  await page.getByTestId("menu-key").click();
+  const menu = page.getByTestId("menu");
+  await menu.waitFor();
+  await menu.evaluate((d) => Promise.all(d.getAnimations().map((a) => a.finished)));
+  return menu;
+}
+/** The menu's Sign in tile: opens the sign-in sheet (the menu closes behind it). */
+async function openSignIn(page) {
+  await openMenu(page);
+  await page.getByTestId("menu-sign-in").click();
+  await page.getByTestId("sign-in-sheet").waitFor();
+}
+/** Signed in: the menu shows the account's address and Sign out (it closes again). */
+async function menuSignedIn(page, email) {
+  await openMenu(page);
+  await page.getByTestId("menu-sign-out").waitFor();
+  const shown = await page.getByTestId("menu-account-email").textContent();
+  await page.keyboard.press("Escape");
+  await page.getByTestId("menu").waitFor({ state: "detached" });
+  if (email) assert.equal(shown, email);
+}
+
 module.exports = {
   SUPA,
   serveBuild,
@@ -210,4 +235,7 @@ module.exports = {
   UUID,
   until,
   settle,
+  openMenu,
+  openSignIn,
+  menuSignedIn,
 };

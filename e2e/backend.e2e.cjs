@@ -1,8 +1,8 @@
 // The backend switched on: this spec builds its own copy with fake Supabase env vars, serves it on a free port, and
 // answers Supabase's endpoints itself. Checks: each finished game is sent once with the right payload; results use
-// real players' numbers once the stats say 50+; a list rating goes to rate_list (and waits while offline); the
-// sign-in key, sheet and privacy page; and a signed-in session syncing its save (merge both ways), with the account
-// panel, the comparison with players, and account deletion.
+// real players' numbers once the stats say 50+; a list rating goes to rate_list (and waits while offline); the menu's
+// account section (Sign in, Sign out) and Feedback, the sign-in sheet and privacy page; and a signed-in session
+// syncing its save (merge both ways), with the account panel, the comparison with players, and account deletion.
 // (Signing in itself ends at Google's or the email's door: the redirect and the email request are checked, not the
 // return trip. The merge and the session handling have unit tests in src/net.) This build has no Google client ID:
 // Google sign-in is Supabase's redirect, and Google's own script never loads. backend-google.e2e.cjs covers the build
@@ -11,7 +11,7 @@ const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { VIEWPORTS, NOW, TODAY, guess, noHScroll } = require("./helpers.cjs");
 const { BACKEND_ENV } = require("./backend-env.cjs");
-const { SUPA, serveBuild, opener, USER, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
+const { SUPA, serveBuild, opener, openMenu, openSignIn, USER, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
 
 const desktop = VIEWPORTS.find((v) => v.name === "desktop");
 const phone = VIEWPORTS.find((v) => v.name === "phone");
@@ -143,14 +143,25 @@ test("a rating goes to rate_list: the latest per list and mode, with this browse
   await ctx.close();
 });
 
-test("sign-in key, sheet and privacy page (desktop)", async () => {
+test("the menu's account and Feedback, the sign-in sheet and privacy page (desktop)", async () => {
   const { ctx, page, calls } = await open(desktop, "", FRESH);
-  const key = page.getByTestId("account-key");
-  await key.waitFor();
-  assert.equal(await key.getAttribute("data-signed-in"), null);
+  await page.getByTestId("today-list").waitFor();
+  // Home's Your games has no account key now: it's in the menu.
+  assert.equal(await page.getByTestId("account-key").count(), 0);
+  await openMenu(page);
+  await page.getByTestId("menu-account").waitFor();
+  assert.equal(await page.getByTestId("menu-sign-out").count(), 0);
+  // Feedback mails the contact address, with a subject.
+  const mail = new URL(await page.getByTestId("menu-feedback").getAttribute("href"));
+  assert.equal(mail.protocol, "mailto:");
+  assert.equal(mail.pathname, "privacy@example.com");
+  assert.equal(mail.searchParams.get("subject"), "TENtacle feedback");
+  await page.keyboard.press("Escape");
+  await page.getByTestId("menu").waitFor({ state: "detached" });
+  const key = page.getByTestId("menu-key");
 
   // The sheet: every method this build offers (google,email,password); the password form first, a link one press away.
-  await key.click();
+  await openSignIn(page);
   const sheet = page.getByRole("dialog", { name: "Sign in" });
   await sheet.waitFor();
   await page.getByTestId("sign-in-google").waitFor();
@@ -166,7 +177,7 @@ test("sign-in key, sheet and privacy page (desktop)", async () => {
   assert.ok(calls.otp[0].code_challenge, "the email link uses PKCE");
   await page.getByTestId("sign-in-code").waitFor();
 
-  // Escape closes it and gives focus back to the key.
+  // Escape closes it and gives focus back to the menu key.
   await page.keyboard.press("Escape");
   await sheet.waitFor({ state: "detached" });
   assert.equal(await key.evaluate((el) => el === document.activeElement), true);
@@ -181,7 +192,7 @@ test("sign-in key, sheet and privacy page (desktop)", async () => {
   // this page. Google's own script never loads.
   const google = [];
   page.on("request", (r) => new URL(r.url()).hostname === "accounts.google.com" && google.push(r.url()));
-  await page.getByTestId("account-key").click();
+  await openSignIn(page);
   assert.equal(await page.getByTestId("sign-in-google-gis").count(), 0);
   assert.equal(await page.locator('script[src*="accounts.google.com"]').count(), 0);
   await page.getByTestId("sign-in-google").click();
@@ -197,11 +208,12 @@ test("sign-in key, sheet and privacy page (desktop)", async () => {
 test("email and password: refusals in plain words, confirm-first, create an account and sync (phone)", async () => {
   const mine = { id: "islands", startedAt: NOW.getTime() - 3_600_000, finishedAt: NOW.getTime() - 3_300_000, status: "lost", found: [1, 2, 3], lives: 0, hints: 0 };
   const { ctx, page, calls } = await open(phone, "", { "top-tens:v1": { games: {}, daily: {}, seenHelp: true, listRuns: [mine] } });
-  const key = page.getByTestId("account-key");
-  await key.click();
+  await openSignIn(page);
   const form = page.getByTestId("sign-in-password-form");
   await form.waitFor();
   const sheet = page.getByTestId("sign-in-sheet");
+  /** Still signed out: the sheet stays open (it closes itself on signing in). */
+  const signedOut = async () => assert.ok(await sheet.isVisible(), "still signed out");
   const box = await sheet.boundingBox();
   assert.ok(box.x >= 0 && box.x + box.width <= phone.viewport.width + 0.5);
   assert.ok(await noHScroll(page));
@@ -221,7 +233,7 @@ test("email and password: refusals in plain words, confirm-first, create an acco
   await submit.click();
   await error.waitFor();
   assert.deepEqual(calls.password, [{ email: "fox@example.com", password: "wrong one", gotrue_meta_security: {} }]);
-  assert.equal(await key.getAttribute("data-signed-in"), null);
+  await signedOut();
 
   // Create an account: too short is caught here; a taken address and a confirm-first project are explained.
   await page.getByTestId("sign-in-mode").click();
@@ -241,15 +253,21 @@ test("email and password: refusals in plain words, confirm-first, create an acco
   await submit.click();
   await page.getByTestId("sign-in-confirm").waitFor();
   await page.locator('[data-testid="sign-in-password-form"][data-mode="in"]').waitFor();
-  assert.equal(await key.getAttribute("data-signed-in"), null);
+  await signedOut();
 
   // A new account: signed in at once, the sheet closes, and this device's games go to the account.
   await page.getByTestId("sign-in-mode").click();
   await email.fill("fox@example.com");
   await password.fill(PASSWORD);
   await submit.click();
-  await page.locator('[data-testid="account-key"][data-signed-in="true"]').waitFor();
   await sheet.waitFor({ state: "detached" });
+  // The menu shows the account now: its address and Sign out.
+  await openMenu(page);
+  assert.equal(await page.getByTestId("menu-account-email").textContent(), "fox@example.com");
+  await page.getByTestId("menu-sign-out").waitFor();
+  assert.equal(await page.getByTestId("menu-sign-in").count(), 0);
+  assert.ok(await noHScroll(page));
+  await page.keyboard.press("Escape");
   const sent = calls.signup.at(-1);
   assert.equal(sent.email, "fox@example.com");
   assert.equal(sent.password, PASSWORD);
@@ -296,8 +314,11 @@ test("a build without the env vars sends nothing anywhere and offers no sign-in"
   assert.equal(await page.getByTestId("rate").getAttribute("data-reason"), "boring");
   await page.goto(url);
   await page.getByTestId("stats-key").waitFor();
-  assert.equal(await page.getByTestId("account-key").count(), 0);
   assert.equal(await page.getByTestId("privacy-link").count(), 0);
+  // The menu has no account section and no Feedback (no contact address).
+  await openMenu(page);
+  assert.equal(await page.getByTestId("menu-account").count(), 0);
+  assert.equal(await page.getByTestId("menu-feedback").count(), 0);
   await page.goto(url + "#stats");
   await page.getByTestId("knowledge").waitFor();
   await settle();
@@ -308,11 +329,14 @@ test("a build without the env vars sends nothing anywhere and offers no sign-in"
   await ctx.close();
 });
 
-test("the account pieces fit a phone: Home's key, the sheet, the account panel", async () => {
+test("the account pieces fit a phone: the menu, the sheet, the account panel", async () => {
   const { ctx, page } = await open(phone, "", FRESH);
-  await page.getByTestId("account-key").waitFor();
+  await page.getByTestId("today-list").waitFor();
   assert.ok(await noHScroll(page));
-  await page.getByTestId("account-key").click();
+  await openMenu(page);
+  await page.getByTestId("menu-sign-in").waitFor();
+  assert.ok(await noHScroll(page));
+  await page.getByTestId("menu-sign-in").click();
   const sheet = page.getByTestId("sign-in-sheet");
   await sheet.waitFor();
   const box = await sheet.boundingBox();
@@ -324,6 +348,20 @@ test("the account pieces fit a phone: Home's key, the sheet, the account panel",
   await page.goto(base + "#stats");
   await page.locator('[data-testid="account-panel"][data-signed-in="false"]').waitFor();
   assert.ok(await noHScroll(page));
+  await ctx.close();
+});
+
+test("Sign out from the menu: the menu stays, Sign in takes its place and focus (phone)", async () => {
+  const { ctx, page } = await open(phone, "", { ...FRESH, "top-tens:auth": SESSION }, { save: { data: { games: {}, daily: {}, seenHelp: true }, version: 1 } });
+  await page.getByTestId("today-list").waitFor();
+  await openMenu(page);
+  assert.equal(await page.getByTestId("menu-account-email").textContent(), USER.email);
+  await page.getByTestId("menu-sign-out").click();
+  await page.getByTestId("menu-sign-in").waitFor();
+  await page.waitForFunction(() => document.activeElement?.dataset.testid === "menu-sign-in");
+  assert.equal(await page.getByTestId("menu-account-email").count(), 0);
+  assert.ok(await page.getByTestId("menu").isVisible());
+  assert.equal(await page.evaluate(() => localStorage.getItem("top-tens:auth")), null);
   await ctx.close();
 });
 
@@ -370,12 +408,12 @@ test("signed in: the save syncs both ways, the account panel, players' averages,
   assert.deepEqual(await page.getByTestId("crowd-row").evaluateAll((els) => els.map((e) => e.getAttribute("data-id"))), ["mountains"]);
   assert.ok(await noHScroll(page));
 
-  // Home's key shows the account.
+  // The menu shows the account (its address, Sign out); its Stats tile leads back to the panel.
   await page.getByTestId("nav-home").click();
-  const key = page.locator('[data-testid="account-key"][data-signed-in="true"]');
-  await key.waitFor();
-  assert.equal(await key.getByTestId("sync-status").getAttribute("data-sync"), "synced");
-  await key.click();
+  await openMenu(page);
+  assert.equal(await page.getByTestId("menu-account-email").textContent(), USER.email);
+  await page.getByTestId("menu-sign-out").waitFor();
+  await page.getByTestId("menu-stats").click();
   await panel.waitFor();
 
   // Delete account: an inline confirm, then the server function with this session's token.

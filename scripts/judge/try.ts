@@ -36,8 +36,10 @@ export function play(id: string, guesses: string[]): string[] {
         if (!r.corrected) lives--;
         text = r.corrected
           ? `corrected to ${r.entry.name} (rank ${r.entry.rank > 10 ? `#${r.entry.rank}` : "unranked"}); would cost a life if confirmed`
-          : `MISS, costs a life: ${r.entry.name} is ${r.entry.rank > 10 ? `#${r.entry.rank}` : "an accepted answer outside the ranking"}` +
-            (shownValue(r.entry) ? `; shows "${shownValue(r.entry)}"` : "; no figure");
+          : r.entry.elsewhere
+            ? `MISS, costs a life: ${r.entry.name} is outside the region (elsewhere); says "${r.entry.name} isn't in ${p.region}."`
+            : `MISS, costs a life: ${r.entry.name} is ${r.entry.rank > 10 ? `#${r.entry.rank}` : "an accepted answer outside the ranking"}` +
+              (shownValue(r.entry) ? `; shows "${shownValue(r.entry)}"` : "; no figure");
         break;
       case "typo":
         text = `ambiguous, the game offers: ${r.suggestions.join(" / ")} (free)`;

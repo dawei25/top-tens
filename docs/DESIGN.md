@@ -6,6 +6,8 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
 
 - 10 hidden slots, ordered by rank. A correct guess reveals its slot (rank, name, source value).
 - 5 lives. **Only an accepted answer outside the top 10 costs a life**, and the game shows where it ranks ("Austria is #113").
+  On a regional geography list, a place outside the region also costs a life and says so ("Tokyo isn't in Europe.");
+  places on two continents that the source leaves out are free (owner, Nov 3).
 - Free (no life lost):
   - **Misspellings.** The input is corrected in place ("cambimia" becomes "Cambodia") and nothing is submitted until
     the player presses Enter again.
@@ -61,6 +63,11 @@ until that list is finished (`blitzHold`). The judge's bars (docs/JUDGE.md): a t
 Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
 
 ## 4. Screens
+
+Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list and Blitz, Random list and
+Blitz; Yours: Archive, Past runs, Stats; Account: sign in, or the account and sign out; More: Settings, How to play,
+Feedback, Privacy), the current screen's tile marked. Sign-in lives there, not on Home. **Settings** (`#settings`):
+the sound switch and reset all progress.
 
 1. **Home:** Today's list and Blitz; Free play (Random list, Random Blitz, each with a floating by-category picker);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).

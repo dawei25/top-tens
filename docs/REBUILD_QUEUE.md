@@ -24,6 +24,9 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       because the leading article is dropped, so that alias also catches "rod". Only drop "a" when a word follows it
       with a space, or keep hyphenated forms whole.
 
+- [ ] **europe-population, from Nov 4:** rebuild so it gets `region` and the out-of-region penalty like the other
+      regional lists (it was today's daily on Nov 3, so it was only hand-patched then).
+
 - [ ] **Topic ideas parked:** most valuable sports teams (Forbes 2025 ties at #10/#11, Bears and Yankees at $8.2B;
       the 2024 table has no tie but is a year older). Retry when Wikipedia has the 2026 list. Best-selling book
       series (five series tie at #10 with 200 million each).
