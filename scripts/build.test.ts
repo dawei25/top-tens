@@ -133,6 +133,25 @@ describe("sameKey", () => {
   it("meets the ʻokina and the apostrophe", () => {
     expect(sameKey("Nukuʻalofa")).toBe(sameKey("Nuku'alofa"));
   });
+
+  it("keeps a numbered part apart from the thing's other parts", () => {
+    // Bridgerton's cited Season 3 merged into the ranked Season 1 (cycle 5).
+    expect(sameKey("Bridgerton (Season 3)")).not.toBe(sameKey("Bridgerton (Season 1)"));
+    expect(sameKey("Bridgerton (Season 3)")).not.toBe(sameKey("Bridgerton"));
+    expect(sameKey("Avatar (2009 film)")).toBe(sameKey("Avatar"));
+  });
+});
+
+describe("placeholder rows", () => {
+  it("are skipped", () => {
+    for (const s of ["Untitled Peaky Blinders sequel series", "Untitled Jonestown docuseries", "Awaiting release", "TBA", "To be announced"]) {
+      expect(skipName(s), s).toBe(true);
+    }
+  });
+
+  it("leave works named Untitled alone", () => {
+    for (const s of ["Untitled Goose Game", "Untitled", "Untitled Unmastered"]) expect(skipName(s), s).toBe(false);
+  });
 });
 
 describe("country demonyms", () => {

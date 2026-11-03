@@ -399,3 +399,16 @@ export function gluedAlias(alias: string, forms: string[]): boolean {
     return /^\p{Lu}/u.test(rest) && forms.some((g) => g !== f && g !== alias && g.length >= 2 && rest.startsWith(g));
   });
 }
+
+/**
+ * A table's stand-in for a title that doesn't exist yet: "Untitled Peaky Blinders sequel series", "Awaiting release",
+ * "TBA". Never an answer (on netflix-seasons, "peaky blinders" cost a life as one). Works named "Untitled" stay:
+ * "Untitled Goose Game", the album "Untitled".
+ */
+export function placeholderName(name: string): boolean {
+  const s = name.trim();
+  return (
+    /^untitled\b.*\b(series|docuseries|miniseries|film|movie|project|sequel|prequel|spin-?off|season|show|special|documentary|album|tour)$/i.test(s) ||
+    /^(awaiting release|to be (announced|determined|confirmed|released)|tba|tbd|tbc|n\/?a)$/i.test(s)
+  );
+}

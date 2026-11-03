@@ -17,7 +17,7 @@ const SHARED_FORMS = [
   "Congo",
   "Congolese",
 ];
-import { bareWord, blockedAlias, gluedAlias, junkRedirect } from "./aliases";
+import { bareWord, blockedAlias, gluedAlias, junkRedirect, placeholderName } from "./aliases";
 import { UNIVERSES } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
 import { TOPICS, type Topic } from "./topics";
@@ -156,7 +156,8 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   }
 
   const all: Entry[] = [...p.answers, ...p.extras];
-  if (all.length < MIN_ACCEPTED) warn(`only ${all.length} accepted answers (want ${MIN_ACCEPTED}+)`);
+  // A list whose other real names are free on purpose (`knownOnly`: no figure to show) is small by design.
+  if (all.length < MIN_ACCEPTED && !topic?.knownOnly) warn(`only ${all.length} accepted answers (want ${MIN_ACCEPTED}+)`);
 
   // Ranks 11+ follow their place in the ranking; a tie shares the first one's rank (#20, #20, #22).
   let place = 10;
@@ -175,6 +176,8 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
     const where = e.rank ? `#${e.rank}` : "unranked";
     const why = junkReason(e.name, numbers);
     if (why) (e.rank >= 1 && e.rank <= 10 ? err : warn)(`${where} "${e.name}": looks like junk (${why})`);
+    // A title not announced yet is never an answer: "peaky blinders" cost a life as "Untitled Peaky Blinders sequel series".
+    if (placeholderName(e.name)) err(`${where} "${e.name}": a placeholder, not a title`);
     const n = normalize(e.name);
     if (!n) err(`${where} "${e.name}": normalizes to nothing`);
     const prev = byName.get(n);
@@ -212,6 +215,7 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
       ...Object.values(INTENT[p.id]?.same ?? {}).flat(),
       ...Object.keys(INTENT[p.id]?.groups ?? {}),
       ...Object.values(topic?.aliases ?? {}).flat(),
+      ...Object.values(topic?.cited ?? {}).flatMap((c) => c.aliases),
       ...SHARED_FORMS,
     ].map(normalize),
   );
