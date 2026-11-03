@@ -11,6 +11,18 @@ export interface DailyBlitzResult {
   late?: boolean;
 }
 
+/** Why a list wasn't good, after a thumbs down: the game's fixed set (RATING_REASONS in src/net/ratings.ts). */
+export type RatingReason = "too-hard" | "too-easy" | "boring" | "unfair" | "wrong-data";
+
+/** The player's own rating of a list in a mode: 1 good, -1 not, 0 taken back (kept, so the latest wins in a sync). */
+export interface ListRating {
+  rating: -1 | 0 | 1;
+  /** Only with -1. */
+  reason?: RatingReason;
+  /** Epoch ms it was given. */
+  at: number;
+}
+
 const KEY ="top-tens:v1";
 
 export interface Saved {
@@ -41,6 +53,8 @@ export interface Saved {
    * them. Written when a list's first run is recorded; older saves get it from their oldest run on load.
    */
   firstTries?: { list?: Record<string, ListRun>; blitz?: Record<string, BlitzRun> };
+  /** "Good list?" on the results: `${mode}:${listId}` -> the player's latest rating (mode: list or blitz). */
+  ratings?: Record<string, ListRating>;
 }
 
 const empty = (): Saved => ({ games: {}, daily: {}, seenHelp: false });
