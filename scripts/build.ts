@@ -8,14 +8,14 @@ import { cleanText, splitHeader, statNumber, tableGrid, wikitables, type Cell } 
 import { TEST_SET, TOPICS, type Dated, type Topic } from "./topics";
 import { fetchCategory, fetchPage, fetchRedirects, pageUrl, requestCount } from "./wiki";
 import { addValues } from "./values";
-import { writeLexicon } from "./lexicon";
+import { KNOWN_DIR, writeLexicon } from "./lexicon";
 import { tableDataDate } from "./dates";
 import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./intent";
 
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
 import { UNIVERSES, US_STATE_CODES, type Place } from "./gazetteer";
-import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect } from "./aliases";
+import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, placeholderName } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
 /** Fewest entries with a stat (`n`) for a list to be playable in Blitz. */
@@ -42,7 +42,10 @@ const MOVABLE = new Set(["river", "lake", "loch", "lough", "mount", "isle", "isl
  */
 export function sameKey(name: string): string {
   // "Nukuʻalofa" and "Nuku'alofa": normalize() reads the ʻokina as a word break, the apostrophe as nothing.
-  const words = normalize(baseTitle(name).replace(/[ʻʼ`'’]/g, ""))
+  // A numbered part is a different thing: "Bridgerton (Season 3)" is not "Bridgerton (Season 1)".
+  const part = name.match(/\(([^()]+)\)\s*$/)?.[1];
+  const kept = part && NUMBERED_PART.test(part.trim()) ? `${baseTitle(name)} ${part}` : baseTitle(name);
+  const words = normalize(kept.replace(/[ʻʼ`'’]/g, ""))
     .split(" ")
     .map((w) => SPELLED_OUT[w] ?? w);
   if (words.length > 1 && MOVABLE.has(words[0])) words.push(words.shift()!);
@@ -172,6 +175,22 @@ function shortForms(name: string, strip?: RegExp | RegExp[]): string[] {
 }
 
 const GAP = "\u0002";
+
+/**
+ * A person's surname as a short form: "Bryant", not "Park" (Linkin Park) or "Brown": a surname that is a plain word
+ * means other things. Undefined for one-word names and short surnames.
+ */
+function surname(name: string): string | undefined {
+  const words = name.split(" ");
+  const last = words.at(-1)!;
+  return words.length > 1 && last.length >= 4 && !isEnglishWord(normalize(last)) ? last : undefined;
+}
+
+function addSurname(e: Entry): void {
+  const last = surname(e.name);
+  if (last && !e.aliases.includes(last)) e.aliases.push(last);
+}
+
 /** A single plain English word. */
 const isWord = (s: string) => !normalize(s).includes(" ") && isEnglishWord(normalize(s));
 /** Pieces that aren't names: "of Brazil", "and Futuna" (lower case: "The Two Towers" is a name). */
@@ -213,7 +232,8 @@ function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink"
 const SKIP_NAME =
   /^(as of\b|last updated\b|world( total)?$|others?$|various$|unknown$|[$€£]\d|(player|name|rank|country|team|title)$)/i;
 const TOTAL_ROW = /^(?:[Gg]rand [Tt]otal|GRAND TOTAL|[Ss]ubtotal|SUBTOTAL|[Tt]otals?|TOTALS?)\b(?!\s+(?!(?:US|U\.S\.|USA|World|EU|Europe|Global|All)\b)\p{Lu})/u;
-export const skipName = (name: string) => SKIP_NAME.test(name) || TOTAL_ROW.test(name);
+/** Also a stand-in for a title not announced yet ("Untitled ... series", "Awaiting release"). */
+export const skipName = (name: string) => SKIP_NAME.test(name) || TOTAL_ROW.test(name) || placeholderName(name);
 
 /**
  * Use the linked article for redirects only if it is about the thing itself ("Avatar (2009 film)", not
@@ -343,8 +363,9 @@ export async function readRows(topic: Topic): Promise<Row[]> {
         topic.nameStrip ? s.replace(topic.nameStrip, "").trim() : s,
       );
       if (name !== cellText) seeds.push(cellText);
-      // "Squid Game 2", as people say a season.
+      // "Squid Game 2", as people say a season, and "Squid Game S2", as people write one.
       if (numbered) seeds.push(`${base} ${partText.match(/\d+/)![0]}`);
+      if (numbered && /^(season|series)\b/i.test(partText)) seeds.push(`${base} S${partText.match(/\d+/)![0]}`);
       // The cell can say more than the name: "Mississippi–Missouri–Jefferson" names the Mississippi row.
       for (const line of lines) if (cleanName(line) !== name) seeds.push(...shortForms(cleanName(line)));
       for (const c of aliasCs) {
@@ -610,16 +631,36 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
     for (const title of titles) {
       if (CATEGORY_SKIP.test(title) || topic.categorySkip?.test(title) || topic.skip?.includes(title)) continue;
       if (topic.categoryNames && !looksLikeName(baseTitle(title))) continue;
-      const name = cleanName(title);
+      const cleaned = cleanName(title);
+      const name = topic.categoryRename?.[title] ?? cleaned;
       if (!normalize(name) || skipName(name)) continue;
-      // The title's qualifier ("Ben Taylor (first baseman, born 1888)") is nothing a player types.
-      const entry: Entry = { rank: 0, name, aliases: name === baseTitle(title) ? [] : [baseTitle(title)] };
+      // The title's qualifier ("Ben Taylor (first baseman, born 1888)") is nothing a player types; a renamed
+      // member keeps its title as an alias, unless that is junk here ("Pointer" is a type of dog, not one breed).
+      const entry: Entry = { rank: 0, name, aliases: [baseTitle(title)].filter((a) => a !== name && !topic.junkAliases?.includes(a)) };
       ARTICLE.set(entry, title);
       out.push(entry);
     }
   }
   for (const [name, aliases] of Object.entries(topic.more ?? {})) out.push({ rank: 0, name, aliases: [...aliases] });
+  for (const [name, c] of Object.entries(topic.cited ?? {})) {
+    if (!(c.n < limit)) throw new Error(`cited "${name}": ${c.n} is not below the last ranked row's ${limit}`);
+    console.log(`     ${topic.id}: ${name} ${c.value} (${c.source})`);
+    out.push({ rank: 0, name, aliases: [...c.aliases], value: c.value, n: statNumber(c.n) });
+  }
   return out;
+}
+
+/**
+ * The topic's `knownOnly` names (and their short forms), minus the answers' own, for the lexicon: real names that
+ * aren't answers. Written to scripts/known/<id>.json.
+ */
+async function writeKnown(topic: Topic, entries: Entry[]): Promise<void> {
+  const free = await readAlso({ ...topic, also: topic.knownOnly, more: undefined, cited: undefined, universeCategories: undefined }, Infinity);
+  const answers = new Set(entries.flatMap((e) => [e.name, ...e.aliases]).map(normalize));
+  const names = [...new Set(free.flatMap((e) => [e.name, ...e.aliases]))].filter((n) => normalize(n) && !answers.has(normalize(n)));
+  mkdirSync(KNOWN_DIR, { recursive: true });
+  writeFileSync(join(KNOWN_DIR, `${topic.id}.json`), JSON.stringify(names.sort((a, b) => a.localeCompare(b)), null, 0) + "\n");
+  console.log(`     ${topic.id}: ${names.length} known names that aren't answers (scripts/known)`);
 }
 
 /** Lowercase words a name can have in the middle ("Leaning Tower of Pisa", "Mont Blanc du Tacul"). */
@@ -928,9 +969,8 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       }
     }
     if (topic.people) {
-      // "Bryant", not "Park" (Linkin Park) or "Brown": a surname that is a plain word means other things.
-      const last = row.name.split(" ").at(-1)!;
-      if (last.length >= 4 && !isEnglishWord(normalize(last))) aliases.add(last);
+      const last = surname(row.name);
+      if (last) aliases.add(last);
     }
     // A tie below the top 10 shares its rank, as the source writes it ("T20"): Everland is #20 with Disney Adventure
     // World, not #21. Each top-10 slot keeps its own rank (a tie at #10/#11 is rejected above), and a table kept in
@@ -963,17 +1003,29 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     const members = UNIVERSES[u]().filter((p) => !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
     extra.push(...members.map((p) => ({ rank: 0, ...p })));
   }
+  const junk = new Set(
+    [
+      ...(topic.junkAliases ?? []),
+      ...(hasCountries(topic) ? COUNTRY_JUNK : []),
+      ...(/\bcities\b/.test(topic.noun) ? CITY_JUNK : []),
+      ...(topic.webNames ? COMPANY_JUNK : []),
+      ...(topic.people || /\b(accounts|pages)\b/.test(topic.noun) ? CELEBRITY_JUNK : []),
+    ].map(normalize),
+  );
   // Every form an entry so far is known by, and that entry: a later namesake is the same answer.
   const taken = new Map<string, Entry>();
   const take = (form: string, e: Entry) => taken.has(normalize(form)) || taken.set(normalize(form), e);
   for (const e of entries) for (const f of [e.name, ...e.aliases]) take(f, e);
   // The same thing written another way ("St. Lawrence River" for the ranked Saint Lawrence, the table's link
   // "Javary River" for Javari) is one entry: the other spelling becomes an alias instead of a second, unranked entry.
+  // A junk alias is no such spelling: the redirect "Pointer" doesn't make the article "Pointer (dog breed)" the
+  // German Shorthaired Pointer.
+  const real = (e: Entry) => e.aliases.filter((a) => !junk.has(normalize(a)));
   const owner = new Map<string, Entry>();
   const own = (e: Entry, forms: (string | undefined)[]) => {
     for (const f of forms) if (f && sameKey(f) && !owner.has(sameKey(f))) owner.set(sameKey(f), e);
   };
-  for (const [i, e] of entries.entries()) own(e, [e.name, ...e.aliases, rows[i].redirectTarget, rows[i].link]);
+  for (const [i, e] of entries.entries()) own(e, [e.name, ...real(e), rows[i].redirectTarget, rows[i].link]);
   for (const e of extra) {
     const forms = ownForms(e).map(normalize).filter(Boolean);
     const known = forms.find((f) => taken.has(f));
@@ -999,16 +1051,13 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     take(e.name, e);
     own(e, [e.name, ARTICLE.get(e), LINK.get(e)]);
   }
+  if (topic.people) {
+    // A near miss with a figure ("Tyson Fury: #3 in 2025") is typed by surname like the ranked: "prescott" is Dak
+    // Prescott, not a free "isn't an answer" (judge, cycle 5). Same rule as the ranked rows above.
+    for (const e of entries.slice(rows.length)) if (e.value) addSurname(e);
+  }
 
-  const junkList = [
-    ...(topic.junkAliases ?? []),
-    ...(hasCountries(topic) ? COUNTRY_JUNK : []),
-    ...(/\bcities\b/.test(topic.noun) ? CITY_JUNK : []),
-    ...(topic.webNames ? COMPANY_JUNK : []),
-    ...(topic.people || /\b(accounts|pages)\b/.test(topic.noun) ? CELEBRITY_JUNK : []),
-  ];
-  if (junkList.length) {
-    const junk = new Set(junkList.map(normalize));
+  if (junk.size) {
     for (const e of entries) {
       for (const a of e.aliases) if (junk.has(normalize(a))) logDrop(topic.id, e.rank, e.name, a, "listed in junkAliases");
       e.aliases = e.aliases.filter((a) => !junk.has(normalize(a)));
@@ -1020,6 +1069,11 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   }
   const lower = new Map<Entry, string>();
   for (const [i, r] of rows.entries()) if (r.part?.lower) lower.set(entries[i], normalize(r.part.base));
+  // An unranked part ("Bridgerton (Season 3)", cited) is lower than any ranked one: "bridgerton" stays Season 1's.
+  for (const e of entries.slice(rows.length)) {
+    const m = e.name.match(/^(.+?) \(([^()]+)\)$/);
+    if (m && NUMBERED_PART.test(m[2])) lower.set(e, normalize(m[1]));
+  }
   pruneAliases(entries, namesakes, lower);
   applyIntent(topic, entries);
   // Whatever the source (redirect, cell, universe), a slur never ships.
@@ -1029,6 +1083,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     console.log(`     ${topic.id}: values for ${found} of ${tried} likely unranked answers`);
   }
   const dataAsOf = await dataDate(topic);
+  if (topic.knownOnly) await writeKnown(topic, entries);
 
   return {
     id: topic.id,

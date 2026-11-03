@@ -88,6 +88,8 @@ export interface Topic {
    */
   universeCategories?: string[];
   categoryDepth?: number;
+  /** Display names for category members, by article title ("Dalmatian dog" is shown as "Dalmatian"); the title stays an alias. */
+  categoryRename?: Record<string, string>;
   /** Extra aliases by entry name, for well-known short forms Wikipedia has no redirect for. */
   aliases?: Record<string, string[]>;
   /**
@@ -136,6 +138,18 @@ export interface Topic {
   articles?: Record<string, string>;
   /** Unranked accepted answers no source lists, with their aliases (a famous name that only misses the cut). */
   more?: Record<string, string[]>;
+  /**
+   * Unranked accepted answers whose figure only an article's text gives, with where it says so: Netflix's ranking
+   * stops at 10, but Bridgerton's article gives Season 3's 106 million views. `value` is shown as written; `n` is the
+   * same number in the ranked rows' unit, below #10's.
+   */
+  cited?: Record<string, { value: string; n: number; aliases: string[]; source: string }>;
+  /**
+   * Names of the list's kind that are not answers, read like `also`: free to guess (no figure to learn from), but
+   * still real names to the game. The build records them in scripts/known/<id>.json and the lexicon learns them, so
+   * typed in full one is never junk nor corrected into an answer, and their words still count as plain words.
+   */
+  knownOnly?: Also[];
   /** Category members to leave out of the pool (titles that aren't the kind of thing the list is about). */
   categorySkip?: RegExp;
   /**
@@ -296,6 +310,17 @@ export const TEST_SET = [
   "us-states-population", // every-state pool
   "spotify-artists", // long metric label, data date
 ];
+
+/** The AKC tables' links and cells, by the breed's article name ("French Bulldogs" is the French Bulldog). */
+const DOG_NAMES: Record<string, string> = {
+  "French Bulldogs": "French Bulldog",
+  Poodles: "Poodle",
+  Bulldogs: "Bulldog",
+  "English Bulldog": "Bulldog",
+  Beagles: "Beagle",
+  Rottweilers: "Rottweiler",
+  "Laborador Retriever": "Labrador Retriever",
+};
 
 export const TOPICS: Topic[] = [
   // Geography
@@ -2575,15 +2600,16 @@ export const TOPICS: Topic[] = [
     junkAliases: [
       "One More Game", "Byeori binnaneun bame", "Stranger Things Experience", "Stranger Things Store",
       "Stranger Things popup", "The Duke and I", "Penelope Bridgerton", "Viscount Bridgerton", "Violet Bridgerton",
-      "Romancing Mister Bridgerton", "The One About Matthew Perry", "Spirit Riding Free: Riding Academy",
-      "Waffles + Mochi's Restaurant", "Blippi's Job Show",
+      "Romancing Mister Bridgerton", "The One About Matthew Perry",
     ],
-    // A spin-off docuseries whose cell links the show it follows: "manifest" is Manifest.
-    skip: ["Arrivals: A New Manifest Mystery"],
-    // Every Netflix original series, current and ended: scripted, docuseries, reality, continuations (Black Mirror,
-    // Cobra Kai) and co-productions. Not the one-off specials, nor the shows still in development. Named by the
-    // title as written: a docuseries' cell can link its subject ("Big Vape: The Rise and Fall of Juul").
-    also: (
+    // Only seasons with a figure are answers; every other show is free. The pool used to be all 2,372 Netflix
+    // originals, each costing a life with no figure to learn from (judge, cycle 5), and their words offered obscure
+    // shows (14.3% of the leak audit's wrong guesses: "cars" Comedians in Cars Getting Coffee). Netflix's ranking
+    // stops at 10; these two seasons' 91-day views are in their articles. The Queen's Gambit and the others just
+    // past the cut have no such figure on Wikipedia. The originals stay known names (`knownOnly`): every Netflix
+    // original series, current and ended (scripted, docuseries, reality, continuations, co-productions), named by the
+    // title as written.
+    knownOnly: (
       [
         ["List of Netflix original programming", range(0, 47)],
         ["List of ended Netflix original programming (2012–2015)", [...range(0, 7), ...range(9, 14)]],
@@ -2592,7 +2618,20 @@ export const TOPICS: Topic[] = [
         ["List of ended Netflix original programming (2026–present)", [...range(0, 6), ...range(8, 10)]],
       ] as const
     ).map(([page, tables]) => ({ page, tables: [...tables], name: "Title", nameFromText: true })),
-    noFigures: "Netflix publishes only its all-time top 10; no other season has a figure",
+    cited: {
+      "Money Heist (Part 4)": {
+        value: "106 million views",
+        n: 106,
+        aliases: ["Money Heist", "Money Heist 4", "Money Heist Part 4", "La Casa de Papel", "Casa de Papel", "La Casa de Papel 4"],
+        source: "Money Heist: part 4 had \"106 million views\" on Netflix's most popular non-English TV list (TheWrap, Feb 2024)",
+      },
+      "Bridgerton (Season 3)": {
+        value: "106 million views",
+        n: 106,
+        aliases: ["Bridgerton 3", "Bridgerton S3"],
+        source: "Bridgerton: Season 3 sixth on Netflix's all-time top 10, \"846.5 million hours viewed/106 million views\" (Jan 2025)",
+      },
+    },
   },
   {
     id: "mcdonalds-countries",
@@ -2618,6 +2657,107 @@ export const TOPICS: Topic[] = [
         dated: { perYear: { col: "Date of closure" }, label: "all closed in {year}" },
       },
     ],
+  },
+  // Cycle 5
+  {
+    id: "dog-breeds",
+    category: "Oddball",
+    // The AKC counts purebred registrations: doodles and pit bulls aren't in it, so the title names the measure.
+    title: "Most popular dog breeds in the US (AKC registrations, 2025)",
+    noun: "dog breeds",
+    prompt: "Name the 10 most popular dog breeds in the US by American Kennel Club registrations in 2025",
+    page: "List of most popular dog breeds",
+    // "Club registration figures for 2025": the AKC's top 10, ranks only.
+    tables: [17],
+    name: "Breed",
+    value: "Position",
+    metric: "AKC rank (registrations, 2025)",
+    dataAsOf: "2025",
+    prefix: "#",
+    keepOrder: true,
+    lowerIsBetter: true,
+    // The cells say "Laborador Retriever" once, so names come from the links, which say "French Bulldogs" and
+    // "Poodles" (redirects): the breeds go by their articles' names.
+    nameFromLink: true,
+    rename: DOG_NAMES,
+    also: [
+      // The AKC's earlier top 10s, newest first: a breed that left shows its last rank ("Pembroke Welsh Corgi: #10 in
+      // 2019", "Yorkshire Terrier: #2 in 2008"). The 2006-2008 tables sit under headings that also hold the UK's and
+      // Canada's, so they are named here.
+      ...[16, 15, 14, 13, 12, 11].map((t) => ({ tables: [t], name: "Breed", nameFromLink: true, rename: DOG_NAMES, dated: { rank: "Position" } })),
+      ...([[6, "2008"], [3, "2007"], [1, "2006"]] as const).map(([t, label]) => ({
+        tables: [t],
+        name: "Breed",
+        nameFromLink: true,
+        rename: DOG_NAMES,
+        dated: { rank: "Position", label },
+      })),
+    ],
+    // Other breeds and crosses among the redirects ("Shiloh Shepherd", "Labradog"), the breed type ("Retriever",
+    // "Pointer": the game asks which), a nickname of one dog and a lab's beagles. "Golden lab" stays the Labrador's
+    // (a yellow lab); "golden" alone is the Golden Retriever.
+    junkAliases: [
+      "Dudley", "Retriever", "Pointer", "Shiloh Shepherd dog", "Shiloh Shepherds", "Shiloh Shepherd", "King Shepherd",
+      "Panda Shepherd", "Czech Shepherd", "East German Shepherd Dog", "Schniebley", "German sheperds in war",
+      "Alsatian Wolf Dog", "Russian tracker", "Russian Retriever", "Red Retriever", "Liberty pups", "Laboratory beagle",
+      "Weily", "Vorsteh", "Vorsteher", "Lab Mix", "Labradog", "New English Bulldog",
+    ],
+    // Every breed the FCI recognizes (357), and the AKC's own breeds the FCI doesn't (`more`), so a real breed
+    // outside the top 10 costs a life; a crossbreed or a breed neither registry has (goldendoodle, pit bull) is free.
+    universeCategories: ["FCI breeds"],
+    // The names a US owner knows them by (the AKC's), where the article goes by another.
+    categoryRename: {
+      "Dalmatian dog": "Dalmatian",
+      "Havanese dog": "Havanese",
+      "Maltese dog": "Maltese",
+      "Newfoundland dog": "Newfoundland",
+      "Pomeranian dog": "Pomeranian",
+      "Puli dog": "Puli",
+      "Pumi dog": "Pumi",
+      "Samoyed dog": "Samoyed",
+      "Shikoku dog": "Shikoku",
+      Dobermann: "Doberman Pinscher",
+      "Continental Toy Spaniel": "Papillon",
+      "Pyrenean Mountain Dog": "Great Pyrenees",
+      "Griffon Bruxellois": "Brussels Griffon",
+      "Chinese Crested Dog": "Chinese Crested",
+      "Pointer (dog breed)": "English Pointer",
+      Xoloitzcuintle: "Xoloitzcuintli",
+    },
+    // AKC breeds the FCI category leaves out.
+    more: {
+      "Cardigan Welsh Corgi": ["Cardigan Corgi"],
+      "American Eskimo Dog": ["American Eskimo", "Eskie"],
+      "American Hairless Terrier": [],
+      "American English Coonhound": [],
+      "Anatolian Shepherd Dog": ["Anatolian Shepherd"],
+      "Biewer Terrier": [],
+      "Bluetick Coonhound": ["Bluetick"],
+      "Boerboel": [],
+      "Boykin Spaniel": [],
+      Chinook: [],
+      "Plott Hound": ["Plott"],
+      "Rat Terrier": [],
+      "Redbone Coonhound": ["Redbone"],
+      "Toy Fox Terrier": [],
+      "Treeing Walker Coonhound": ["Treeing Walker", "Walker Coonhound"],
+    },
+    // Crossbreeds are free, but real names: "labradoodle" is never read as a typo of Labrador.
+    knownOnly: [{ page: "List of dog crossbreeds", tables: [0], name: "Name" }],
+    noFigures: "the AKC's ranks past 10 aren't on Wikipedia; breeds from its earlier top 10s show their last rank",
+    // How owners say them.
+    aliases: {
+      "French Bulldog": ["Frenchie", "Frenchies", "French Bulldogs", "Frenchy"],
+      "Labrador Retriever": ["Lab", "Labs", "Labrador", "Labradors", "Labrador Retrievers", "Black Lab", "Black Labrador"],
+      "Golden Retriever": ["Golden", "Goldens", "Golden Retrievers", "Goldie"],
+      "German Shepherd": ["GSD", "German Shepherd Dog", "German Shepherds", "Alsatian"],
+      Dachshund: ["Doxie", "Wiener dog", "Weiner dog", "Sausage dog", "Dachshunds", "Daschund"],
+      Poodle: ["Poodles", "Standard Poodle", "Toy Poodle", "Miniature Poodle", "Mini Poodle"],
+      Beagle: ["Beagles"],
+      Rottweiler: ["Rottie", "Rottweilers"],
+      "German Shorthaired Pointer": ["GSP", "Shorthaired Pointer", "German Shorthair"],
+      Bulldog: ["English Bulldog", "British Bulldog", "Bulldogs"],
+    },
   },
 ];
 

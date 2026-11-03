@@ -805,6 +805,12 @@ export const INTENT: Record<string, Intent> = {
       "Not in This Lifetime... Tour": ["Guns and Roses", "GNR"],
       // Renaissance is a plain word, which the matcher doesn't read as part of a longer name.
       "Renaissance World Tour": ["Renaissance"],
+      // The artist's surname or first name alone ("styles" offered two Rolling Stones tours), and U2's tours with the
+      // band's name: "U2" itself already has its four owners (more would drop it from the 360° Tour).
+      "Love On Tour": ["Styles"],
+      "Farewell Yellow Brick Road": ["Elton"],
+      "Elevation Tour": ["Elevation", "U2 Elevation", "U2 Elevation Tour"],
+      "Zoo TV Tour": ["U2 Zoo TV", "U2 Zoo TV Tour", "Zoo TV"],
     },
     groups: {
       // Cher's has "The Farewell Tour" in its name, but Elton John's (#4) is the farewell tour most players mean: the
@@ -1364,5 +1370,55 @@ export const INTENT: Record<string, Intent> = {
       Chengdu: ["Chengdu Tianfu International Airport", "Chengdu Shuangliu International Airport"],
       Moscow: ["Sheremetyevo International Airport", "Moscow Domodedovo Airport"],
     },
+  },
+  "dog-breeds": {
+    // What owners call the breeds outside the top 10 (only ranked rows get redirects). Several are plain words
+    // ("husky", "maltese", "corgi", "collie") that the matcher wouldn't read as part of the longer name.
+    same: {
+      "Yorkshire Terrier": ["Yorkie", "Yorkies"],
+      "Siberian Husky": ["Husky", "Huskies", "Huskie"],
+      "Pembroke Welsh Corgi": ["Corgi", "Corgis", "Welsh Corgi"],
+      "Doberman Pinscher": ["Doberman", "Dobie"],
+      "Australian Shepherd": ["Aussie"],
+      "Shetland Sheepdog": ["Sheltie"],
+      "Bernese Mountain Dog": ["Berner", "Bernese"],
+      "Miniature Schnauzer": ["Mini Schnauzer"],
+      "Bichon Frisé": ["Bichon"],
+      "West Highland White Terrier": ["Westie", "West Highland Terrier"],
+      "Cavalier King Charles Spaniel": ["Cavalier", "Cavalier King Charles"],
+      Dalmatian: ["Dalmatians"],
+      Pomeranian: ["Pom"],
+      Newfoundland: ["Newfie"],
+      "St. Bernard": ["Saint Bernard"],
+      "Belgian Shepherd": ["Belgian Malinois", "Malinois", "Belgian Sheepdog", "Belgian Tervuren", "Tervuren"],
+      "Staffordshire Bull Terrier": ["Staffy", "Staffie"],
+      "Chow Chow": ["Chow"],
+      "Shiba Inu": ["Shiba"],
+      "Jack Russell Terrier": ["Jack Russell"],
+      "English Mastiff": ["Mastiff"],
+      "Rhodesian Ridgeback": ["Ridgeback"],
+      Pug: ["Pugs"],
+      Chihuahua: ["Chihuahuas"],
+      Boxer: ["Boxers"],
+      "Great Dane": ["Great Danes"],
+      // The AKC's names for them.
+      "American Cocker Spaniel": ["Cocker Spaniel"],
+      "Rough Collie": ["Collie"],
+      "King Charles Spaniel": ["English Toy Spaniel"],
+      "Brittany Spaniel": ["Brittany"],
+      Kooikerhondje: ["Nederlandse Kooikerhondje"],
+      "Shar Pei": ["Chinese Shar-Pei"],
+      Xoloitzcuintli: ["Xolo", "Mexican Hairless Dog"],
+      "Australian Cattle Dog": ["Blue Heeler", "Red Heeler", "Queensland Heeler"],
+      "Alaskan Malamute": ["Malamute"],
+    },
+    groups: {
+      Schnauzer: ["Miniature Schnauzer", "Standard Schnauzer", "Giant Schnauzer"],
+      "Fox Terrier": ["Wire Fox Terrier", "Smooth Fox Terrier"],
+    },
+  },
+  "athletes-earnings": {
+    // The usual spelling of the name, and a typo of it (judge, cycle 5).
+    same: { "Jon Rahm": ["John Rahm", "Jhon Rahm"] },
   },
 };

@@ -1,6 +1,6 @@
 // Trains the junk-guess model from an English word list plus every puzzle in public/puzzles.
 // Usage: npx tsx scripts/lexicon.ts
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fnv, trainLexicon } from "../src/game/junk";
@@ -46,6 +46,12 @@ const require = createRequire(import.meta.url);
 export const NOT_PUZZLES = new Set(["index.json", "lexicon.json", "daily.json", "par.json"]);
 
 /**
+ * Real names that are not answers, one file per list (`knownOnly` in topics.ts; build.ts writes them): every Netflix
+ * original, though only seasons with a figure are answers. Known names, and counted like pool names for plain words.
+ */
+export const KNOWN_DIR = join(import.meta.dirname, "known");
+
+/**
  * Every name and alias in the bank. `ranked` is the part from the source tables (ranked entries); the rest are
  * unranked pool members (universes, other tables, category members), thousands of them in some puzzles.
  */
@@ -68,6 +74,8 @@ export function bankNames(dir: string): Bank {
       if ((e.rank > 0 && e.rank <= 10) || (e.rank > 0 && peopleLists.has(f))) namesOfNote.push(e.name);
       if (e.rank > 0 || e.value) figured.push(e.name);
     }
+    const known = join(KNOWN_DIR, f);
+    if (existsSync(known)) all.push(...(JSON.parse(readFileSync(known, "utf8")) as string[]));
   }
   return { ranked, all, namesOfNote, figured };
 }

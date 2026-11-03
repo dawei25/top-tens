@@ -121,3 +121,15 @@ describe("validate: ranks past the top 10", () => {
     );
   });
 });
+
+describe("validate: placeholder rows", () => {
+  it("fails an answer that is a title not announced yet", () => {
+    const p = puzzle();
+    p.extras[0].name = "Untitled Peaky Blinders sequel series";
+    p.extras[1].name = "Awaiting release";
+    expect(errors(p)).toEqual([
+      expect.stringContaining('"Untitled Peaky Blinders sequel series": a placeholder'),
+      expect.stringContaining('"Awaiting release": a placeholder'),
+    ]);
+  });
+});
