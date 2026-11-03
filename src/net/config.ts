@@ -29,10 +29,21 @@ export function readBackend(url?: string, anonKey?: string, signIn?: string): Ba
 }
 
 /**
- * Both checks start with the raw env, which the build replaces with literals: in a build without a backend they fold
- * to `false`, and the bundler and minifier drop the code behind them.
+ * A Google OAuth web client ID (`<number>-<letters>.apps.googleusercontent.com`), or "" for anything else: an empty
+ * value, or a paste of the wrong field (the client secret, say), keeps the redirect sign-in instead of breaking it.
+ * Whitespace around it (a pasted trailing newline) is dropped.
  */
-const publicKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+export function readGoogleClientId(raw?: string): string {
+  const id = raw?.trim() ?? "";
+  return /^[\w-]+\.apps\.googleusercontent\.com$/.test(id) ? id : "";
+}
+
+/**
+ * Both checks start with the raw env, which the build replaces with literals: in a build without a backend they fold
+ * to `false`, and the bundler and minifier drop the code behind them. Values are trimmed (Vercel keeps a pasted
+ * trailing newline), so a blank publishable key doesn't hide the anon key.
+ */
+const publicKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() || import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 const configured = !!(import.meta.env.VITE_SUPABASE_URL && publicKey);
 
 export const BACKEND: Backend | null = configured
@@ -44,6 +55,15 @@ export const backendOn: boolean = configured && BACKEND !== null;
 
 /** Whether players can sign in (accounts and sync). */
 export const accountsOn: boolean = configured && !!BACKEND && BACKEND.signIn.length > 0;
+
+/**
+ * Google sign-in with Google's own button (Google Identity Services): the OAuth web client ID, when this build offers
+ * Google and has one (VITE_GOOGLE_CLIENT_ID). Without it, Google sign-in goes through Supabase's redirect.
+ */
+export const GOOGLE_CLIENT_ID: string =
+  configured && !!import.meta.env.VITE_GOOGLE_CLIENT_ID && !!BACKEND?.signIn.includes("google")
+    ? readGoogleClientId(import.meta.env.VITE_GOOGLE_CLIENT_ID)
+    : "";
 
 /** Where privacy questions go, if the owner set one. */
 export const PRIVACY_CONTACT = import.meta.env.VITE_PRIVACY_CONTACT?.trim() ?? "";
