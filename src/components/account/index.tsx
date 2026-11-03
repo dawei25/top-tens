@@ -1,0 +1,114 @@
+import { lazy, Suspense, useRef, useState } from "react";
+import { blitzPercentile, formatCount, MIN_PLAYERS } from "../../net/crowd";
+import { accountsOn, backendOn, useAccount, useListStats } from "../../net";
+import { percentileLabel } from "../../game/par";
+import type { PuzzleMeta } from "../../game/puzzles";
+import { syncLabel } from "./labels";
+
+/**
+ * The backend's pieces of the screens. Each renders nothing in a build without a backend (no env), and the bigger
+ * ones (the sign-in sheet, the account panel, the comparison with players, the privacy page) are separate chunks,
+ * downloaded only when shown.
+ */
+
+const SignInSheet = lazy(() => import("./SignInSheet"));
+const AccountPanel = lazy(() => import("./AccountPanel"));
+const CrowdPanel = lazy(() => import("./CrowdPanel"));
+const Privacy = lazy(() => import("./Privacy"));
+
+/**
+ * Home's account key, in Your games: Sign in (opens the sheet) when signed out; your name and the sync state when
+ * signed in (to the account panel on the knowledge page).
+ */
+export function AccountKey() {
+  const account = useAccount();
+  const [open, setOpen] = useState(false);
+  const opener = useRef<HTMLButtonElement>(null);
+  if (!accountsOn || account.status === "off") return null;
+  if (account.status === "in" && account.user) {
+    return (
+      <a className="key key-sm games-key account-key" href="#stats" data-testid="account-key" data-signed-in="true">
+        {/* Long names end in an ellipsis rather than stretch the key. */}
+        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{account.user.name}</span>
+        <span className="games-n" data-testid="sync-status" data-sync={account.sync}>
+          {syncLabel(account)}
+        </span>
+      </a>
+    );
+  }
+  return (
+    <>
+      <button
+        ref={opener}
+        type="button"
+        className="key key-sm games-key account-key"
+        data-testid="account-key"
+        disabled={account.status === "loading"}
+        onClick={() => setOpen(true)}
+      >
+        Sign in
+      </button>
+      {open && (
+        <Suspense fallback={null}>
+          <SignInSheet
+            onClose={() => {
+              setOpen(false);
+              opener.current?.focus();
+            }}
+          />
+        </Suspense>
+      )}
+    </>
+  );
+}
+
+/** The knowledge page's account section (sign in, or your name, sync, sign out, delete). */
+export function AccountSection() {
+  if (!accountsOn) return null;
+  return (
+    <Suspense fallback={null}>
+      <AccountPanel />
+    </Suspense>
+  );
+}
+
+/** The knowledge page's comparison with real players, on lists with enough of them. */
+export function CrowdSection({ index }: { index: PuzzleMeta[] }) {
+  if (!backendOn) return null;
+  return (
+    <Suspense fallback={null}>
+      <CrowdPanel index={index} />
+    </Suspense>
+  );
+}
+
+/** The #privacy screen. */
+export function PrivacyScreen({ onBack, onHome, fallback }: { onBack: () => void; onHome: () => void; fallback: React.ReactNode }) {
+  return (
+    <Suspense fallback={fallback}>
+      <Privacy onBack={onBack} onHome={onHome} />
+    </Suspense>
+  );
+}
+
+/** The footer's link to the privacy page (only in builds that send anything anywhere). */
+export function PrivacyLink() {
+  if (!backendOn) return null;
+  return (
+    <a className="text-btn" href="#privacy" data-testid="privacy-link">
+      privacy
+    </a>
+  );
+}
+
+/** A Blitz round's place among real players: a line on the results, only once MIN_PLAYERS have played the list. */
+export function BlitzCrowdLine({ id, score }: { id: string; score: number }) {
+  const stats = useListStats(backendOn ? id : undefined, "blitz");
+  const p = blitzPercentile(stats, score);
+  if (p === null || !stats || stats.n < MIN_PLAYERS) return null;
+  return (
+    <p data-testid="blitz-crowd" data-n={stats.n}>
+      {percentileLabel(p)} of {formatCount(stats.n)} players
+    </p>
+  );
+}

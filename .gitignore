@@ -24,3 +24,9 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .claude/worktrees/
+
+# Env files hold backend keys (see .env.example); only the example is committed.
+.env
+.env.*
+!.env.example
+.vercel

@@ -26,6 +26,8 @@ import {
   type DailyEntry,
 } from "./game/daily";
 import { load, save } from "./game/storage";
+import { useSaveVersion } from "./net";
+import { PrivacyScreen } from "./components/account";
 
 type Route =
   | { screen: "home" }
@@ -36,12 +38,14 @@ type Route =
   | { screen: "blitz"; id: string; runs: boolean; run?: number }
   | { screen: "history" }
   | { screen: "stats" }
+  | { screen: "privacy" }
   | { screen: "dailyblitz"; date: string; runs: boolean; run?: number };
 
 function readHash(): Route {
   const h = location.hash;
   if (h === "#archive") return { screen: "archive" };
   if (h === "#stats") return { screen: "stats" };
+  if (h === "#privacy") return { screen: "privacy" };
   // The Blitz-only runs screen became Past runs, which lists list games and Blitz rounds together.
   if (h === "#blitz-history") history.replaceState(null, "", "#history");
   if (h === "#history" || h === "#blitz-history") return { screen: "history" };
@@ -107,6 +111,8 @@ function Screens() {
   const [schedule, setSchedule] = useState<DailyEntry[] | null>(null);
   const [route, setRoute] = useState<Route>(readHash);
   const [lexicon, setLexicon] = useState<Lexicon>();
+  // Screens read the save as they draw: draw again when a sync brought in games from another device.
+  useSaveVersion();
   /** The player's local date; moves at their midnight so today's list changes without a reload. */
   const [today, setToday] = useState(localDate);
 
@@ -270,6 +276,8 @@ function Screens() {
       />
     );
   }
+
+  if (route.screen === "privacy") return <PrivacyScreen onBack={back} onHome={home} fallback={<Loading />} />;
 
   if (route.screen === "stats") {
     return <Knowledge index={index} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;

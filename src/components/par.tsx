@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { loadPar, percentile, percentileLabel, type ListPar, type ParFile } from "../game/par";
+import { useListStats } from "../net";
+import { formatCount, pickCounts } from "../net/crowd";
 
 // Players see this figure as the players' average ("avg"), and only once a game is over: the results, Past runs and
 // Stats. The code keeps the data's name for it, par (par.json).
@@ -52,7 +54,7 @@ export function ParHistogram({ counts, par, score }: { counts: number[]; par: nu
               className="histo-col"
               data-score={i}
               data-you={i === score || undefined}
-              data-par={i === par || undefined}
+              data-par={i === Math.round(par) || undefined}
             >
               <span className="histo-bar" style={{ height: h }} />
             </span>
@@ -70,22 +72,27 @@ export function ParHistogram({ counts, par, score }: { counts: number[]; par: nu
 /**
  * The results panel's average block: what players average on the list, the histogram, and where the score stands.
  * It reads at a glance, with nothing to hover: "PLAYERS AVG 6", "top 45% of players", and "(estimated)" in plain
- * words while the numbers come from simulated players rather than real ones.
+ * words while the numbers come from simulated players rather than real ones. With a backend (and the list's id), real
+ * players replace the estimate once enough of them have finished the list: their average, their spread, and "better
+ * than 12% of 1,203 players".
  */
-export function ParBlock({ list, score }: { list: ListPar; score: number }) {
-  const p = percentile(list.counts, score);
+export function ParBlock({ list, score, id }: { list: ListPar; score: number; id?: string }) {
+  const { counts, real } = pickCounts(list.counts, useListStats(id, "list"));
+  const p = percentile(counts, score);
+  const avg = real && real.avg !== null ? Math.round(real.avg * 10) / 10 : list.par;
   return (
-    <div className="par-block" data-testid="par" data-par={list.par}>
+    <div className="par-block" data-testid="par" data-par={avg} data-source={real ? "players" : "estimate"} data-n={real?.n}>
       <div className="par-row">
         <p className="par-stat">
           <span className="label">Players avg</span>
-          <b>{list.par}</b>
+          <b>{avg}</b>
         </p>
-        <ParHistogram counts={list.counts} par={list.par} score={score} />
+        <ParHistogram counts={counts} par={avg} score={score} />
       </div>
       <p className="par-line">
-        <span>{percentileLabel(p)} of players</span>{" "}
-        {list.estimated && <span className="par-est">(estimated)</span>}
+        {/* One text node, as before real players: split nodes shape the pixel font a little differently. */}
+        <span>{`${percentileLabel(p)} of ${real ? formatCount(real.n) + " " : ""}players`}</span>{" "}
+        {!real && list.estimated && <span className="par-est">(estimated)</span>}
       </p>
     </div>
   );
