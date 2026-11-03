@@ -1,6 +1,7 @@
 // Home's free play: each key rolls at once; its "by category" strip opens that mode's categories (one picker at a
 // time, both in one order), closes on Escape, an outside press or a pick, and a chip rolls a list (or a Blitz) in that
-// category. How to play floats over the page as a dialog; Your record is always there; reset keeps its size.
+// category. How to play floats over the page as a dialog; Your record is always there. (Reset all progress lives in
+// Settings now: menu.e2e.cjs.)
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, hash } = require("./helpers.cjs");
@@ -178,25 +179,6 @@ for (const vp of VIEWPORTS) {
     };
     assert.deepEqual(await edges("home-record"), await edges("today-group"));
     assert.deepEqual(await edges("home-foot"), await edges("today-group"));
-    await ctx.close();
-  });
-
-  test(`reset all progress keeps its size while it asks (${vp.name})`, async () => {
-    const { ctx, page } = await open(browser, vp, "#p-mountains");
-    await page.getByTestId("give-up").click();
-    await page.getByTestId("give-up").click();
-    await page.getByTestId("results").waitFor();
-    await page.getByTestId("nav-home").click();
-    assert.equal(await page.getByTestId("home-record").getAttribute("data-empty"), null);
-    const reset = page.getByTestId("reset-all");
-    await reset.scrollIntoViewIfNeeded();
-    const before = await place(reset);
-    await reset.click();
-    assert.equal(await reset.getAttribute("data-armed"), "true");
-    assert.deepEqual(await place(reset), before);
-    await reset.click();
-    await page.getByTestId("home-record").waitFor();
-    assert.equal(await page.getByTestId("home-record").getAttribute("data-empty"), "true");
     await ctx.close();
   });
 }

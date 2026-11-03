@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PuzzleMeta } from "../game/puzzles";
-import { dailyGame as dailyGameOf, streak, type DailyEntry } from "../game/daily";
-import { load, save, stats } from "../game/storage";
+import { streak, type DailyEntry } from "../game/daily";
+import { load, stats } from "../game/storage";
 import { recentPlays } from "../game/history";
 import { Countdown } from "./Countdown";
 import { HowToPlay } from "./HowToPlay";
@@ -9,8 +9,9 @@ import { EnterHint, type Mode } from "./pixel";
 import { STREAK_NOTE } from "./copy";
 import { FloatNote } from "./Note";
 import { SoundToggle } from "./sound/SoundToggle";
-import { AccountKey, PrivacyLink } from "./account";
-import { noteReset } from "../net";
+import { PrivacyLink } from "./account";
+import { MenuKey } from "./menu";
+import { todayStatus } from "./today";
 
 /**
  * A home key: its status on top (right), the action below. Today's keys carry their mode's accent while unplayed
@@ -129,9 +130,9 @@ export function Home({
   const helpKey = useRef<HTMLButtonElement>(null);
   const dailyRef = useRef<HTMLButtonElement>(null);
   const blitzRef = useRef<HTMLButtonElement>(null);
-  const dailyGame = entry && dailyGameOf(saved, entry);
-  const dailyDone = !!dailyGame && dailyGame.status !== "playing";
-  const dailyBlitzDone = saved.blitzDaily?.[today];
+  const status = todayStatus(saved, entry, today);
+  const dailyDone = status.list.done;
+  const dailyBlitzDone = status.blitz.done;
   // Keyboard-first: Enter starts today's list, or today's Blitz once the list is done. Focus without scrolling so
   // the title stays in view. The focused today key is the one loud element on the screen.
   // Touch screens have no Enter to press, so they get no auto focus (and no focus ring on a key nobody chose).
@@ -199,32 +200,7 @@ export function Home({
       document.removeEventListener("pointerdown", onDown);
     };
   }, [picker]);
-  // Inline confirm, like GIVE UP: the first click arms it for 3 s, the second clears everything but seenHelp.
-  const [confirmReset, setConfirmReset] = useState(false);
-  const [, setVersion] = useState(0);
-  useEffect(() => {
-    if (!confirmReset) return;
-    const t = setTimeout(() => setConfirmReset(false), 3000);
-    return () => clearTimeout(t);
-  }, [confirmReset]);
-  const blitzRuns = Object.values(saved.blitzRuns ?? {}).reduce((k, runs) => k + runs.length, 0);
   const plays = recentPlays(saved, 1000).length;
-  const hasProgress =
-    plays > 0 ||
-    Object.keys(saved.games).length > 0 ||
-    Object.keys(saved.daily).length > 0 ||
-    blitzRuns > 0 ||
-    Object.keys(saved.blitzDaily ?? {}).length > 0 ||
-    Object.keys(saved.blitzLive ?? {}).length > 0;
-  const resetAll = () => {
-    if (!confirmReset) return setConfirmReset(true);
-    setConfirmReset(false);
-    save({ games: {}, daily: {}, seenHelp: load().seenHelp });
-    // Signed in, the reset reaches the account and every device instead of syncing back.
-    noteReset();
-    setVersion((v) => v + 1);
-    focusDaily();
-  };
   const listCats = countByCategory(index, index);
   const blitzCats = countByCategory(index, blitzLists);
 
@@ -330,7 +306,11 @@ export function Home({
 
   return (
     <main className="screen home">
-      <SoundToggle className="home-sound" />
+      {/* The header keys, in the spot the other screens' headers keep them: sound, then the menu. */}
+      <div className="home-keys">
+        <SoundToggle />
+        <MenuKey />
+      </div>
       <header className="title">
         <h1 className="logo" aria-label="TENtacle">
           <span>TEN</span><span>tacle</span>
@@ -361,7 +341,7 @@ export function Home({
             btnRef={dailyRef}
             testId="today-list"
             title="Today's list"
-            status={!entry ? "none yet" : dailyDone ? `${dailyGame.found.length}/10` : dailyGame ? "playing" : "new"}
+            status={status.list.status}
             done={dailyDone}
             disabled={!entry}
             onClick={onDaily}
@@ -373,8 +353,8 @@ export function Home({
               btnRef={blitzRef}
               testId="today-blitz"
               title="Today's Blitz"
-              status={dailyBlitzDone ? `${dailyBlitzDone.score} pts` : "new"}
-              done={!!dailyBlitzDone}
+              status={status.blitz.status}
+              done={dailyBlitzDone}
               onClick={onDailyBlitz}
             />
           )}
@@ -442,7 +422,6 @@ export function Home({
             >
               Stats
             </button>
-            <AccountKey />
           </div>
         </section>
       </div>
@@ -494,21 +473,6 @@ export function Home({
         <span className="home-foot-end">
           <span className="caption">data from wikipedia</span>
           <PrivacyLink />
-          {hasProgress && (
-            // Both words are always laid out, one hidden, so the key keeps its width while it asks (a second tap
-            // lands on it).
-            <button
-              type="button"
-              className={`text-btn swap-btn ${confirmReset ? "danger" : ""}`}
-              data-testid="reset-all"
-              data-armed={confirmReset || undefined}
-              onClick={resetAll}
-              onBlur={() => setConfirmReset(false)}
-            >
-              <span data-off={confirmReset || undefined}>reset all progress</span>
-              <span data-off={!confirmReset || undefined}>sure?</span>
-            </button>
-          )}
         </span>
       </footer>
     </main>

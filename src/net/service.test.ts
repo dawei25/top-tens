@@ -222,6 +222,25 @@ describe("email and password", () => {
   });
 });
 
+describe("google's button", () => {
+  it("hands Supabase the ID token with the raw nonce, and explains a refusal", async () => {
+    const signInWithIdToken = vi.fn(async (_: unknown) => ({ data: { user: { id: "u" }, session: { access_token: "t" } }, error: null }));
+    Object.assign(fake.client.auth, { signInWithIdToken });
+    const svc = await import("./service");
+    expect(await svc.signInWithGoogleToken("header.claims.sig", "raw-nonce")).toBeNull();
+    expect(signInWithIdToken).toHaveBeenCalledWith({ provider: "google", token: "header.claims.sig", nonce: "raw-nonce" });
+
+    const refused = (status: number) => async () => ({ data: { user: null, session: null }, error: Object.assign(new Error("Nonces mismatch"), { status }) });
+    Object.assign(fake.client.auth, { signInWithIdToken: refused(400) });
+    expect(await svc.signInWithGoogleToken("t", "n")).toBe("google sign-in didn't work. try again.");
+    Object.assign(fake.client.auth, { signInWithIdToken: refused(429) });
+    expect(await svc.signInWithGoogleToken("t", "n")).toBe("too many tries. wait a minute and try again.");
+    // supabase-js answers a request that never got through with status 0.
+    Object.assign(fake.client.auth, { signInWithIdToken: refused(0) });
+    expect(await svc.signInWithGoogleToken("t", "n")).toBe("couldn't reach the server. check your connection.");
+  });
+});
+
 describe("sync through the service", () => {
   it("creates the account's save, then updates it by version", async () => {
     const svc = await import("./service");

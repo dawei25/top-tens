@@ -62,6 +62,11 @@ Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
 
 ## 4. Screens
 
+Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list and Blitz, Random list and
+Blitz; Yours: Archive, Past runs, Stats; Account: sign in, or the account and sign out; More: Settings, How to play,
+Feedback, Privacy), the current screen's tile marked. Sign-in lives there, not on Home. **Settings** (`#settings`):
+the sound switch and reset all progress.
+
 1. **Home:** Today's list and Blitz; Free play (Random list, Random Blitz, each with a floating by-category picker);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
 2. **Game:** title card with the prompt, score (no average during play: it's revealed on the results) and a Play

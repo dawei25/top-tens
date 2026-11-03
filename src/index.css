@@ -1022,6 +1022,35 @@ a {
     line-height: 1.15;
   }
 }
+/* Narrow phones (360px): four keys and the five ink-sac lives share the header, so the keys slim down a little; the
+   smallest phones (320px) also get smaller sacs (2px art pixels). The 390px phone keeps the full sizes. */
+@media (max-width: 380px) {
+  .game-head {
+    gap: 6px;
+    padding: 6px 4px;
+  }
+  .game-head-end {
+    gap: 6px;
+  }
+  .game-head .key-icon {
+    width: 40px;
+  }
+  .game-head .sound-toggle {
+    width: 36px;
+  }
+}
+@media (max-width: 340px) {
+  .game-head .key-icon {
+    width: 36px;
+  }
+  .game-head .sound-toggle {
+    width: 32px;
+  }
+  .game-head .lives .ink-sac {
+    width: 16px;
+    height: 18px;
+  }
+}
 .mode {
   font-size: 14px;
   letter-spacing: 0.25em;
@@ -2680,10 +2709,27 @@ a.arch-cell:active .arch-name {
 .home {
   position: relative;
 }
-.home-sound {
+/* Home's header keys (sound, menu) sit where the other screens' headers keep theirs: the right end, inset as a
+   header card insets them (its 1px edge and 8px padding; 6px on phones, where they stay above the logo). */
+.home-keys {
   position: absolute;
-  top: 16px;
-  right: max(var(--gutter), env(safe-area-inset-right));
+  top: 25px;
+  right: calc(max(var(--gutter), env(safe-area-inset-right)) + 9px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 480px) {
+  .home-keys {
+    top: 16px;
+    right: calc(max(var(--gutter), env(safe-area-inset-right)) + 7px);
+  }
+}
+/* Narrow phones: the header card's side padding is 4px there. */
+@media (max-width: 380px) {
+  .home-keys {
+    right: calc(max(var(--gutter), env(safe-area-inset-right)) + 5px);
+  }
 }
 
 /* ---------- Players' average (par.json) ---------- */

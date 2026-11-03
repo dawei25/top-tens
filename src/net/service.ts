@@ -213,6 +213,22 @@ export async function signInWithGoogle(): Promise<string | null> {
   }
 }
 
+/**
+ * Finish a sign-in from Google's own button (./google): its ID token, and the nonce it was asked with (unhashed;
+ * Supabase hashes it and compares with the token's). The session arrives through onAuthStateChange.
+ */
+export async function signInWithGoogleToken(token: string, nonce: string): Promise<string | null> {
+  try {
+    const { error } = await sb().auth.signInWithIdToken({ provider: "google", token, nonce });
+    if (!error) return null;
+    if (!error.status) return "couldn't reach the server. check your connection.";
+    if (error.status === 429) return "too many tries. wait a minute and try again.";
+    return "google sign-in didn't work. try again.";
+  } catch {
+    return "couldn't reach the server. check your connection.";
+  }
+}
+
 export async function sendEmailLink(email: string): Promise<string | null> {
   try {
     const { error } = await sb().auth.signInWithOtp({ email, options: { emailRedirectTo: returnTo(), shouldCreateUser: true } });
