@@ -1,26 +1,25 @@
 {
   "id": "netflix-seasons",
   "judgedAt": "2026-11-03",
-  "decision": "fix-first",
+  "decision": "daily-list",
   "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 3, "fun": 3, "blitzDepth": 0 },
-  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
-  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 8, "livesLost": 1, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
   "blitzCasual": null,
-  "difficulty": 3,
+  "difficulty": 2,
   "tags": ["entertainment", "tv", "netflix"],
   "audience": "anyone who streams",
-  "summary": "Everyone knows these shows, and the seasons twist is a good reveal: casual 6, fan 10. Hold it: typing \"season 3\", \"season 4\" or \"season 5\" alone hands over a top-10 answer, placeholder titles cost lives, and every famous miss shows no figure.",
+  "summary": "Shows everyone knows, with a seasons twist: the casual found 8 and lost one life, the fan swept it in 10 guesses. Only Money Heist and Bridgerton Season 3 cost a life, both with a near-miss figure. It leans easy.",
   "reasons": [
-    "The prompt is clear (seasons, first 91 days, a series can repeat), plain names give the best season and repeats are free. The casual found Squid Game, Stranger Things, Wednesday, Bridgerton, Dahmer and Adolescence, then lost all five lives on Money Heist, The Witcher, The Queen's Gambit, You and Ozark before reaching \"squid game 2\" (11 of 15 guesses played). The fan got 10/10 in 11 guesses, losing one life on The Queen's Gambit.",
-    "Fairness is the weak spot: the costly pool is all 2,372 Netflix originals, so every household-name Netflix show outside these six costs a life, and none shows a figure. The Queen's Gambit is the real #11, about half a million views short, and the game only says it is outside the top 10. Common words mostly stay free (\"cars\", \"planes\", \"water\" only offer choices).",
-    "The top 10 and its facts are clean and current, but the season word leaks answers, placeholder rows cost lives (\"peaky blinders\" costs a life as \"Untitled Peaky Blinders sequel series\"), and \"wednesday s2\" or \"squid game s3\" get \"isn't an answer for this list\"."
+    "Casual: the plain names gave Squid Game, Wednesday, Stranger Things and Bridgerton at once, then Adolescence, Dahmer and \"season 2\" of Squid Game and Wednesday: 8/10 in 15 guesses. The one life went on Money Heist, which shows \"106 million views\" against 113.3 at #10, a fair near miss. The Witcher, The Crown, Ozark, The Queen's Gambit, Emily in Paris and Stranger Things 3 were free. Fan: 10/10 in 10 guesses, no lives lost.",
+    "The fairness problem is fixed, but now the lives barely matter: only two answers in the whole pool cost a life, so nobody runs out. The score comes down to knowing six shows and trying season numbers. A casual with 4 lives left would try \"squid game 3\" and \"stranger things 5\" next, so persistent players will land at 9 or 10. There is no real stretch answer, so curve is 3.",
+    "The data matches the page today (Squid Game 3, Stranger Things 5 and Wednesday 2 are in), every fact is good, \"s2\" and \"season two\" forms work, \"season 3\" alone says \"be more specific\", and subject words, films and non-Netflix shows are free. The Queen's Gambit, the real #11 at about 112.8M, says \"isn't an answer\" because Wikipedia has no figure for it. That is harmless but a missed lesson."
   ],
   "fixes": [
-    "Answer-key leak (src/game/match.ts, coordinator): \"season 3\", \"season 4\" and \"season 5\" alone get \"did you mean\" Squid Game (Season 3), Stranger Things (Season 4) and Stranger Things (Season 5); \"season 2\" offers Squid Game (Season 2) / Wednesday (Season 2) as free choices. The topic's part word plus a number must read like the noun: \"be more specific\" or a free miss. Keep \"squid game season 2\", \"squid game: season 3\" and \"stranger things season five\" working. Guard: extend the real.test.ts noun test to \"<part> 1\" through \"<part> 10\" on every list with a part.",
-    "Placeholder rows in the costly pool (scripts/topics.ts, the also tables): 20 \"Untitled ...\" shows in development and an \"Awaiting release\" cell are accepted answers. \"peaky blinders\" (a BBC show) costs a life as \"Untitled Peaky Blinders sequel series\"; so do \"minecraft\", \"roald dahl\", \"clash of clans\", \"jonestown\", \"nick cannon\" and \"awaiting release\". Skip titles starting \"Untitled\" and the \"Awaiting release\" cell, and add a validate.ts check that no built puzzle has an answer named \"Untitled ...\", \"Awaiting release\" or \"TBA\".",
-    "Season short forms: \"squid game s2\", \"squid game s3\", \"wednesday s2\" and \"stranger things s5\" get \"isn't an answer for this list\" (free, but the player concludes that season is not in the top 10); \"stranger things s4\" and \"bridgerton s1\" only work by slipping onto the plain name. Read \"<series> s<n>\" as season n on lists with part \"Season\", or add those aliases to the numbered top-10 seasons.",
-    "Figures for misses: noFigures says Netflix publishes only its all-time top 10, but its Most Popular page keeps separate English and non-English TV top 10s, so about ten more seasons have published 91-day figures: The Queen's Gambit (about 112.8M, the real #11), Money Heist Part 4 and Bridgerton Season 3 (about 106M each), Fool Me Once, The Night Agent (verify the numbers). If a citable source in reach of the pipeline carries them (the page's refs [7][8] or the season articles), add them as ranks 11+ so these misses read \"#11\" instead of nothing. Without them, fairness stays at 2 and this list belongs in free play."
+    "Ordinal season forms (src/game/match.ts, coordinator): \"squid game second season\" gets \"did you mean Squid Game (Season 1)\" (or \"already found\" once S1 is in), \"stranger things final season\" and \"squid game final season\" fall back to S4 and S1 the same way, and \"wednesday 2nd season\" and \"second season of squid game\" get \"isn't an answer for this list\" for #8 and #3. Read first..fifth and 1st..5th next to the part word as the season number. \"final/last season\" should get \"be more specific\" or be free, never the plain-name season. Guard: a real.test.ts case on a list with a part.",
+    "Other Monster seasons are corrected into #9: \"monster menendez\", \"monster ed gein\" and \"monster the lyle and erik menendez story\" get \"did you mean Monster: The Jeffrey Dahmer Story\", while \"monster: the ed gein story\" and \"the menendez story\" are free. A different season named by its subject should be free, like \"stranger things 3\".",
+    "Generic word: \"story\" and \"the story\" alone get \"did you mean Monster: The Jeffrey Dahmer Story\" (\"toy story\" and \"true story\" are correctly free). A lone common word should not offer an answer. Check the partial match on the alias \"The Jeffrey Dahmer Story\"."
   ]
 }
