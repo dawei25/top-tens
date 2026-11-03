@@ -1040,6 +1040,35 @@ a {
     line-height: 1.15;
   }
 }
+/* Narrow phones (360px): four keys and the five ink-sac lives share the header, so the keys slim down a little; the
+   smallest phones (320px) also get smaller sacs (2px art pixels). The 390px phone keeps the full sizes. */
+@media (max-width: 380px) {
+  .game-head {
+    gap: 6px;
+    padding: 6px 4px;
+  }
+  .game-head-end {
+    gap: 6px;
+  }
+  .game-head .key-icon {
+    width: 40px;
+  }
+  .game-head .sound-toggle {
+    width: 36px;
+  }
+}
+@media (max-width: 340px) {
+  .game-head .key-icon {
+    width: 36px;
+  }
+  .game-head .sound-toggle {
+    width: 32px;
+  }
+  .game-head .lives .ink-sac {
+    width: 16px;
+    height: 18px;
+  }
+}
 .mode {
   font-size: 14px;
   letter-spacing: 0.25em;

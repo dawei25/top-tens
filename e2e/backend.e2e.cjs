@@ -183,11 +183,12 @@ const until = async (fn, ms = 5000) => {
 };
 const settle = () => new Promise((r) => setTimeout(r, 400));
 
-/** Opens the menu (the account lives there); returns it. */
+/** Opens the menu (the account lives there) once it has slid in; returns it. */
 async function openMenu(page) {
   await page.getByTestId("menu-key").click();
   const menu = page.getByTestId("menu");
   await menu.waitFor();
+  await menu.evaluate((d) => Promise.all(d.getAnimations().map((a) => a.finished)));
   return menu;
 }
 /** The menu's Sign in tile: opens the sign-in sheet (the menu closes behind it). */

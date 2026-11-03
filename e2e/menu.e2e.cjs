@@ -22,10 +22,12 @@ const place = (loc) =>
   });
 const tap = (page, vp, x, y) => (vp.hasTouch ? page.touchscreen.tap(x, y) : page.mouse.click(x, y));
 
+/** Opens the menu and waits for its slide in to end (a press during the slide could land beside a moving tile). */
 async function openMenu(page) {
   await page.getByTestId("menu-key").click();
   const menu = page.getByTestId("menu");
   await menu.waitFor();
+  await menu.evaluate((d) => Promise.all(d.getAnimations().map((a) => a.finished)));
   return menu;
 }
 /** Opens the menu and chooses a tile. */
@@ -211,6 +213,21 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 }
+
+test("narrow phones: the five lives fit between BACK and the header's three keys", async () => {
+  for (const width of [320, 360, 390]) {
+    const { ctx, page } = await open(browser, { viewport: { width, height: 700 }, isMobile: true, hasTouch: true }, "#p-mountains");
+    await page.getByTestId("lives").waitFor();
+    const [back, lives, sound, menu] = await Promise.all(
+      ["nav-back", "lives", "sound-toggle", "menu-key"].map((id) => page.getByTestId(id).boundingBox()),
+    );
+    assert.ok(lives.x >= back.x + back.width, `${width}: lives clear of BACK`);
+    assert.ok(lives.x + lives.width <= sound.x, `${width}: lives clear of the sound key (${lives.x + lives.width} > ${sound.x})`);
+    assert.ok(menu.x + menu.width <= width, `${width}: the menu key on screen`);
+    assert.ok(await noHScroll(page), `${width}`);
+    await ctx.close();
+  }
+});
 
 test("a short window: the menu scrolls inside itself, the page behind stays put", async () => {
   const { ctx, page } = await open(browser, { viewport: { width: 1000, height: 480 } }, "#archive");
