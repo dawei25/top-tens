@@ -24,13 +24,13 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   loads from accounts.google.com when the sign-in sheet opens (never before, never in a build without it), its popup
   opens from this site and hands back an ID token, and `signInWithIdToken` trades it for a Supabase session. Google
   gets the SHA-256 of a fresh nonce, Supabase the nonce itself, so a token can't be replayed. Without the variable, or
-  if Google's script can't load, the sheet keeps the old key: Supabase's redirect (`signInWithOAuth`). The save syncs on
-  sign-in, after every finished game and when the tab comes back (at most every 30 s): read the account's copy, merge
-  it with this device's (`src/net/sync/merge.ts`: nothing is lost, see its header), write the merge back only if the
-  copy is still the version that was read, else merge again. Never overwrite. Plays sent while signed in are linked to
-  the account. The first sign-in on a device takes that device's games along. Signing out syncs once more, then clears
-  the device (the games are in the account); if that sync can't happen (offline), the games stay and are set aside
-  for their account if someone else signs in. "Reset all progress" while signed in resets the account too.
+  if Google's script can't load, the sheet keeps the old key: Supabase's redirect (`signInWithOAuth`). The save syncs
+  on sign-in, after every finished game and when the tab comes back (at most every 30 s): read the account's copy,
+  merge it with this device's (`src/net/sync/merge.ts`: nothing is lost, see its header), write the merge back only if
+  the copy is still the version that was read, else merge again. Never overwrite. Plays sent while signed in are
+  linked to the account. The first sign-in on a device takes that device's games along. Signing out syncs once more,
+  then clears the device (the games are in the account); if that sync can't happen (offline), the games stay and are
+  set aside for their account if someone else signs in. "Reset all progress" while signed in resets the account too.
 - **Account deletion** is `api/delete-account.ts`, a Vercel function: deleting a sign-in needs the secret key, which
   must stay on a server. It asks Supabase Auth whether the caller's access token is valid, then deletes that user's
   plays, save and sign-in (Auth's Admin API, the supported way to remove a user).
