@@ -57,16 +57,37 @@ npm run build:puzzles        # rebuild every puzzle + lexicon.json (append topic
 npm run inspect -- "List of ..."   # print a Wikipedia page's tables, for writing new topics
 ```
 
-Before reporting done: `npm test`, the typecheck and `npx vite build` all pass.
+## Making a change (definition of done)
 
-## Browser checks (keep them lean)
+A change is done when `npm run verify` passes in your worktree. It runs, stopping at the first failure: unit tests,
+the typecheck, oxlint, the CSS state check (`npm run lint:css`), the build, and the whole browser suite (behavior,
+the interaction-state layout check, visual baselines). Data agents run `validate.ts` and `par.ts` before it.
 
-- The maintained browser suite lives in `e2e/` and runs with `npm run e2e` (once it exists). It selects elements by
-  `data-testid` and aria labels, never by visible text or layout, so design changes don't break it. If you change a
-  flow it covers, update the suite in the same change.
-- For a new feature: run the suite, plus a few targeted checks of the new behavior. Don't re-run or report old
-  throwaway scripts from earlier tasks; delete them.
-- Screenshots: only what the coordinator needs to review the change (typically 2 to 4: phone and desktop).
+**UI changes** (anything under `src/components/`, `src/*.css`, `index.html`) also:
+
+- Follow the UI rules in `docs/DESIGN.md` §5a: hover, focus and press never move or resize anything; nothing means
+  something only on hover; phone first.
+- Check every state you touched (rest, hover, keyboard focus, pressed, disabled, played) at phone 390 and desktop
+  1440, not only the rest state.
+- Visual baselines (`e2e/baselines/`) are the reference. A changed baseline is either a bug to fix or the change you
+  meant: re-baseline only the images your change was meant to alter (`UPDATE_BASELINES=1 npm run e2e`) and list each
+  in your report with the reason.
+- Screenshots for review: 2 to 4, phone and desktop, including the hover or focus state of what you changed.
+
+**Every bug gets a guard, written first:** a test, a check or a documented rule that fails on the bug, then the fix
+that makes it pass. Record it in the bug→guard table in `docs/IMPROVE.md`, so the class can't come back.
+
+**The coordinator** merges only after `npm run verify` passes on the merged main, looks at every changed baseline
+(before, after and diff), and then pushes. Vercel's build runs `npm run verify:deploy` (unit tests, typecheck, CSS
+check, build), so a failing check stops the deploy and the last good version stays live.
+
+## Browser checks
+
+- The browser suite lives in `e2e/` and runs with `npm run e2e`. It selects elements by `data-testid` and aria
+  labels, never by visible text or layout, so copy changes don't break it. If you change a flow it covers, update
+  the suite in the same change.
+- For a new feature: the suite, plus a few targeted checks of the new behavior. Don't re-run or report old throwaway
+  scripts from earlier tasks; delete them.
 - Report test results briefly: what passed, and any real failure with its cause. Not every check.
 
 ## Wikipedia etiquette

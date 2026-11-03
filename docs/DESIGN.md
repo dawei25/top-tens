@@ -112,6 +112,21 @@ Screenshots of Krillion, taken by an earlier agent, are in
 `d_009_p1_ready.png`, `d_030_p1_result.png`, `mu_008_p1_ready.png`, `d_126_summary_view.png`). Its stylesheet is in
 `.../krillion/css/`.
 
+## 5a. UI rules (checked by tests)
+
+- **Interaction states never move anything.** Hover, focus and press change color, background, shadow, opacity,
+  outline and transform only; never size, spacing, borders, font, display or position. Something that appears on
+  hover or focus reserves its space (visibility, opacity) or floats over the page (absolutely positioned).
+  `npm run lint:css` checks the stylesheets; `e2e/states.e2e.cjs` hovers, focuses and presses every control on every
+  screen at three widths and fails if any element moves or resizes. (Nov 3: the Today key grew 89 to 116px on hover
+  because a desktop size override lost to the hover rule's full size, and the ENTER cap widened the Blitz key.)
+- **A breakpoint override covers every state** of what it changes. Simplest: state rules carry no layout at all.
+- **Nothing means something only on hover.** Phones have no hover. Labels explain themselves ("average", not
+  "par"), and any extra explanation opens on tap as well as hover, floating over the page.
+- **Phone first:** every screen is designed at 390px, then widened.
+- **Visual baselines** (`e2e/baselines/`, fixed fixture data) are the reference look. A change to them is reviewed
+  image by image before it merges.
+
 ## 6. TENtacle: the glow squid (direction from October 2026)
 
 The game is now TENtacle, and it grows its own identity on top of the arcade table: **a squid has ten limbs (eight
