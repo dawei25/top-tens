@@ -6,7 +6,10 @@ import { createClient } from "@supabase/supabase-js";
  * browser, so it happens here. The caller proves who they are with their session's access token, which Supabase
  * checks; nobody can delete anyone but themselves.
  *
- * Env: SUPABASE_SERVICE_ROLE_KEY (secret) and SUPABASE_URL (or the public VITE_SUPABASE_URL).
+ * Env: SUPABASE_SERVICE_ROLE_KEY, the secret key (Supabase's `sb_secret_...`, or a legacy service_role key; also
+ * read as SUPABASE_SECRET_KEY), and SUPABASE_URL (or the public VITE_SUPABASE_URL). supabase-js sends either kind as
+ * the `apikey` header, and Supabase's gateway gives the request the service role (needed by auth.admin and to delete
+ * the rows).
  */
 
 export interface AccountAdmin {
@@ -41,7 +44,7 @@ export async function handleDelete(request: Request, admin: AccountAdmin | null)
 
 export function supabaseAdmin(env: Record<string, string | undefined> = process.env): AccountAdmin | null {
   const url = env.SUPABASE_URL || env.VITE_SUPABASE_URL;
-  const key = env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SECRET_KEY;
   if (!url || !key) return null;
   const sb = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
   return {

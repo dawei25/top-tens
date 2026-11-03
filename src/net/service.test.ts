@@ -188,6 +188,40 @@ describe("stats", () => {
   });
 });
 
+describe("email and password", () => {
+  const authError = (code: string, status = 400, message = "") => Object.assign(new Error(message), { code, status });
+  // A confirmation link (if the project sends one) comes back to this page.
+  beforeEach(() => vi.stubGlobal("location", { origin: "https://tentacle.example", pathname: "/" }));
+
+  it("signs up and is signed in at once when the project doesn't ask to confirm the email", async () => {
+    const signUp = vi.fn(async () => ({ data: { user: { id: "u" }, session: { access_token: "t" } }, error: null }));
+    Object.assign(fake.client.auth, { signUp });
+    const svc = await import("./service");
+    expect(await svc.signUpWithPassword("dana@example.com", "trustno1")).toEqual({ error: null, confirm: false });
+    expect(signUp).toHaveBeenCalledWith({ email: "dana@example.com", password: "trustno1", options: { emailRedirectTo: "https://tentacle.example/" } });
+  });
+
+  it("says to check the email when the project does ask to confirm it", async () => {
+    Object.assign(fake.client.auth, { signUp: async () => ({ data: { user: { id: "u" }, session: null }, error: null }) });
+    const svc = await import("./service");
+    expect(await svc.signUpWithPassword("dana@example.com", "trustno1")).toEqual({ error: null, confirm: true });
+  });
+
+  it("explains a refusal in plain words", async () => {
+    const svc = await import("./service");
+    expect(svc.passwordError(authError("invalid_credentials"), false)).toBe("wrong email or password.");
+    expect(svc.passwordError(authError("user_already_exists", 422), true)).toBe("that email already has an account. sign in instead.");
+    expect(svc.passwordError(authError("weak_password", 422, "Password should be at least 6 characters."), true)).toBe(
+      "password should be at least 6 characters.",
+    );
+    expect(svc.passwordError(authError("email_not_confirmed"), false)).toMatch(/^confirm your email first/);
+    expect(svc.passwordError(authError("whatever", 429), false)).toBe("too many tries. wait a minute and try again.");
+    expect(svc.passwordError(authError("unexpected_failure", 500), true)).toBe("couldn't create the account. try again.");
+    Object.assign(fake.client.auth, { signInWithPassword: async () => ({ data: {}, error: authError("invalid_credentials") }) });
+    expect(await svc.signInWithPassword("dana@example.com", "nope")).toBe("wrong email or password.");
+  });
+});
+
 describe("sync through the service", () => {
   it("creates the account's save, then updates it by version", async () => {
     const svc = await import("./service");

@@ -233,6 +233,59 @@ export async function verifyEmailCode(email: string, code: string): Promise<stri
   }
 }
 
+/** The error message for a password sign-in or sign-up the server refused (by its error code). */
+export function passwordError(error: { code?: string; status?: number; message?: string }, creating: boolean): string {
+  switch (error.code) {
+    case "invalid_credentials":
+      return "wrong email or password.";
+    case "email_not_confirmed":
+      return "confirm your email first: the link is in your inbox.";
+    case "user_already_exists":
+    case "email_exists":
+      return "that email already has an account. sign in instead.";
+    case "weak_password": {
+      // The server names its rule ("Password should be at least 6 characters.").
+      const rule = error.message?.trim().replace(/\.?$/, ".").toLowerCase();
+      return rule && rule.length < 120 ? rule : "pick a longer password.";
+    }
+    case "email_address_invalid":
+    case "validation_failed":
+      return "that doesn't look like an email address.";
+    case "signup_disabled":
+    case "email_provider_disabled":
+      return "new accounts are closed right now.";
+    case "over_request_rate_limit":
+    case "over_email_send_rate_limit":
+      return "too many tries. wait a minute and try again.";
+  }
+  if (error.status === 429) return "too many tries. wait a minute and try again.";
+  return creating ? "couldn't create the account. try again." : "couldn't sign in. try again.";
+}
+
+/** Sign in with an email and password. Null when signed in (the session arrives through onAuthStateChange). */
+export async function signInWithPassword(email: string, password: string): Promise<string | null> {
+  try {
+    const { error } = await sb().auth.signInWithPassword({ email, password });
+    return error ? passwordError(error, false) : null;
+  } catch {
+    return "couldn't reach the server. check your connection.";
+  }
+}
+
+/**
+ * Create an account with an email and password. With "Confirm email" off (docs/BACKEND.md) the server signs the
+ * player in at once; with it on, it emails a link first and `confirm` says so.
+ */
+export async function signUpWithPassword(email: string, password: string): Promise<{ error: string | null; confirm: boolean }> {
+  try {
+    const { data, error } = await sb().auth.signUp({ email, password, options: { emailRedirectTo: returnTo() } });
+    if (error) return { error: passwordError(error, true), confirm: false };
+    return { error: null, confirm: !data.session };
+  } catch {
+    return { error: "couldn't reach the server. check your connection.", confirm: false };
+  }
+}
+
 export async function rename(name: string): Promise<string | null> {
   try {
     const { data, error } = await sb().auth.updateUser({ data: { display_name: name } });

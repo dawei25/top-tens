@@ -42,10 +42,31 @@ describe("readBackend", () => {
     expect(readBackend(" https://x.supabase.co/ ", " key ")).toEqual({ url: "https://x.supabase.co", anonKey: "key", signIn: ["google", "email"] });
   });
 
-  it("offers the sign-in methods VITE_SIGN_IN names (both by default, none to switch accounts off)", () => {
+  it("offers the sign-in methods VITE_SIGN_IN names (google and email by default, none to switch accounts off)", () => {
     expect(readBackend("https://x.supabase.co", "k", "email")?.signIn).toEqual(["email"]);
     expect(readBackend("https://x.supabase.co", "k", "Google , email")?.signIn).toEqual(["google", "email"]);
     expect(readBackend("https://x.supabase.co", "k", "none")?.signIn).toEqual([]);
+    expect(readBackend("https://x.supabase.co", "k", "google,password")?.signIn).toEqual(["google", "password"]);
+    expect(readBackend("https://x.supabase.co", "k", "password, email ,google")?.signIn).toEqual(["google", "email", "password"]);
+  });
+
+  it("ignores sign-in methods it doesn't know", () => {
+    expect(readBackend("https://x.supabase.co", "k", "google,facebook,passwrd")?.signIn).toEqual(["google"]);
+    expect(readBackend("https://x.supabase.co", "k", "sms")?.signIn).toEqual([]);
+  });
+});
+
+describe("the public key", () => {
+  it("is read as VITE_SUPABASE_ANON_KEY, or VITE_SUPABASE_PUBLISHABLE_KEY (which wins)", async () => {
+    vi.stubEnv("VITE_SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "sb_publishable_old-name");
+    expect((await import("./config")).BACKEND?.anonKey).toBe("sb_publishable_old-name");
+    vi.resetModules();
+    vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_new-name");
+    expect((await import("./config")).BACKEND?.anonKey).toBe("sb_publishable_new-name");
+    vi.resetModules();
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "");
+    expect((await import("./config")).backendOn).toBe(true);
   });
 });
 
