@@ -18,7 +18,7 @@ const SHARED_FORMS = [
   "Congolese",
 ];
 import { bareWord, blockedAlias, gluedAlias, junkRedirect, placeholderName } from "./aliases";
-import { UNIVERSES } from "./gazetteer";
+import { citysCountries, countryOf, isContinent, UNIVERSES } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
 import { TOPICS, type Topic } from "./topics";
 
@@ -134,6 +134,66 @@ export function missingNicknames(p: Pick<Puzzle, "answers" | "extras">, topic?: 
       const forms = new Set([e.name, ...e.aliases].map(normalize));
       for (const a of m.aliases) if (!forms.has(normalize(a))) out.push(`${e.rank ? `#${e.rank} ` : ""}${e.name}: no "${a}"`);
     }
+  }
+  return out;
+}
+
+/** Continents a title or prompt can name. */
+const CONTINENT_WORDS =
+  /\b(Africa|African|Asia|Asian|Europe|European|North America|North American|South America|South American|Latin America|Latin American|Oceania)\b/;
+const PLACE_NOUN = /\b(countries|cities|capitals)\b/;
+
+/**
+ * The continent or country a list of places names in its title or prompt ("Most populous African countries",
+ * "Largest cities in mainland China") when it adds answers beyond its own table (a universe of countries or
+ * capitals, another page's table) and declares no `region`: the world would get in ("Japan" on European
+ * countries, cycle 7). Undefined when there is nothing to declare.
+ */
+export function undeclaredRegion(topic?: Pick<Topic, "title" | "prompt" | "noun" | "page" | "region" | "universe" | "universeNamesOnly" | "also">): string | undefined {
+  if (!topic || topic.region || !PLACE_NOUN.test(topic.noun)) return undefined;
+  const world = !topic.universeNamesOnly && [topic.universe ?? []].flat().some((u) => u === "countries" || u === "capitals");
+  const others = (topic.also ?? []).some((a) => a.page && a.page !== topic.page);
+  if (!world && !others) return undefined;
+  const continent = `${topic.title} ${topic.prompt}`.match(CONTINENT_WORDS)?.[0];
+  if (continent) return continent;
+  // A country by name in the title: "US", "mainland China", "United Kingdom" (capitalized words, up to three).
+  const words = topic.title.split(/\s+/);
+  for (let i = 0; i < words.length; i++) {
+    for (let n = 1; n <= 3 && i + n <= words.length; n++) {
+      const gram = words.slice(i, i + n);
+      if (gram.every((w) => /^\p{Lu}/u.test(w)) && countryOf(gram.join(" "))) return gram.join(" ");
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Unranked answers outside a regional list's `region`: a country of another continent, or a city whose country is
+ * (a capital, or one of the world's largest cities in gazetteer.ts). Each would cost a life the source never
+ * covers. A transcontinental country passes on either of its continents (the build lets the page decide). A city
+ * with a figure came from the list's own regional tables, so it is that region's namesake: Plymouth, England, not
+ * Montserrat's capital (the world's city tables bring names only).
+ */
+export function outsideRegion(p: Pick<Puzzle, "answers" | "extras" | "noun">, topic?: Pick<Topic, "region" | "noun">): string[] {
+  const region = topic?.region;
+  if (!region) return [];
+  const inside = (country: string) => {
+    const c = countryOf(country);
+    if (!c) return true;
+    return isContinent(region) ? c.continents.includes(region) : c.name === (countryOf(region)?.name ?? region);
+  };
+  const cities = /\b(cities|capitals)\b/.test(topic.noun ?? p.noun);
+  const out: string[] = [];
+  for (const e of [...p.answers, ...p.extras]) {
+    if (e.rank !== 0 || (cities && e.value)) continue;
+    // A city-state is a country by name ("Singapore", "Monaco"); other cities by the gazetteer.
+    const where = cities
+      ? [...new Set([...citysCountries(e.name), countryOf(e.name)?.name].filter((c): c is string => !!c))]
+      : [[e.name, ...e.aliases].map((f) => countryOf(f)).find(Boolean)?.name].filter((c): c is string => !!c);
+    if (!where.length || where.some(inside)) continue;
+    // "Tokyo" (Japan) on a city list, "Japan" (Asia) on a country list.
+    const shown = cities ? where : countryOf(where[0])!.continents;
+    out.push(`"${e.name}" (${shown.join(" or ")})`);
   }
   return out;
 }
@@ -271,6 +331,11 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
       err(`#${e.rank} ${e.name}: value "${e.value}" looks misread (a dot as thousands separator)`);
     }
   }
+  // One figure without the currency the rest show: "940,300,000" among "$871,014,978"s (an override written out).
+  const signed = shown.filter(([e]) => /^[$€£]/.test(e.value!));
+  if (signed.length > shown.length / 2) {
+    for (const [e] of shown) if (!/^[$€£]/.test(e.value!)) err(`#${e.rank} ${e.name}: value "${e.value}" lacks the currency sign the others show`);
+  }
   // A big jump between neighbours in the ranking suggests a misread or mixed units.
   const ranked = all.filter((e) => e.rank > 0 && e.n !== undefined && e.n > 0).sort((a, b) => a.rank - b.rank);
   if (!topic?.lowerIsBetter) {
@@ -284,6 +349,13 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   // Ulaanbaatar next to the capitals universe's "Ulan Bator" (a second life for one city, no figure).
   for (const e of sameAsUniverse(p, topic)) warn(e);
   for (const e of missingNicknames(p, topic)) err(`team nickname: ${e}`);
+
+  // A regional list takes only its region's answers: "Japan" on European countries is free (DESIGN §1).
+  const named = undeclaredRegion(topic);
+  if (named) err(`the title names ${named}, but the topic has no \`region\`: its universe or other pages add the whole world`);
+  if (topic?.region && !isContinent(topic.region) && !countryOf(topic.region)) err(`region "${topic.region}" is no continent or country`);
+  const outside = outsideRegion(p, topic);
+  if (outside.length) err(`${outside.length} unranked answer(s) outside ${topic!.region}, where guessing them should be free: ${outside.slice(0, 5).join(", ")}`);
 
   // Blitz scores `n`: it must be present on the top 10, follow the ranking, and share one unit across entries.
   for (const e of all) if (e.n !== undefined && !Number.isFinite(e.n)) err(`"${e.name}": n is not a finite number`);

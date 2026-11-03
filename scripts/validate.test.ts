@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { Entry, Puzzle } from "../src/game/types";
 import { UNIVERSES } from "./gazetteer";
 import { TOPICS, type Topic } from "./topics";
-import { checkPuzzle, FACTS_REQUIRED_FROM, factIssues, figureShare, missingNicknames } from "./validate";
+import { checkPuzzle, FACTS_REQUIRED_FROM, factIssues, figureShare, missingNicknames, outsideRegion, undeclaredRegion } from "./validate";
 
 const fact = { text: "A plain fact.", source: "https://en.wikipedia.org/wiki/Example" };
 
@@ -125,6 +125,16 @@ describe("validate: ranks past the top 10", () => {
   });
 });
 
+describe("validate: value formats", () => {
+  it("fails a ranked figure missing the currency sign the others show", () => {
+    const p = puzzle();
+    for (const e of [...p.answers, ...p.extras]) if (e.rank) e.value = `$${e.value}`;
+    expect(errors(p)).toEqual([]);
+    p.answers[6].value = "940,300,000";
+    expect(errors(p)).toEqual(['#7 Answer 7: value "940,300,000" lacks the currency sign the others show']);
+  });
+});
+
 describe("validate: placeholder rows", () => {
   it("fails an answer that is a title not announced yet", () => {
     const p = puzzle();
@@ -155,6 +165,59 @@ describe("validate: team nicknames", () => {
     for (const t of lists) {
       const built: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${t.id}.json`), "utf8"));
       expect(missingNicknames(built, t), t.id).toEqual([]);
+    }
+  });
+});
+
+describe("validate: regional lists", () => {
+  const unranked = (...names: string[]): Entry[] => names.map((name) => ({ rank: 0, name, aliases: [] }));
+
+  it("fails a regional country list whose pool holds another continent's countries (Japan on Europe)", () => {
+    const p = puzzle({ unranked: 0 });
+    p.noun = "countries";
+    p.extras.push(...unranked("Japan", "Brazil", "Vatican City", "Russia"), { rank: 11, name: "Armenia", aliases: [] });
+    // Vatican City is Europe's; Russia reaches Europe; a ranked row (Armenia) is the page's own scope.
+    expect(outsideRegion(p, { region: "Europe", noun: "countries" })).toEqual(['"Japan" (Asia)', '"Brazil" (South America)']);
+    expect(errors(p, { id: "test-list", noun: "countries", region: "Europe" })).toContain(
+      '2 unranked answer(s) outside Europe, where guessing them should be free: "Japan" (Asia), "Brazil" (South America)',
+    );
+    expect(outsideRegion(p, { noun: "countries" })).toEqual([]);
+  });
+
+  it("knows a country by its other names", () => {
+    const p = puzzle({ unranked: 0 });
+    p.extras.push({ rank: 0, name: "Holland", aliases: [] }, { rank: 0, name: "Burma", aliases: ["Myanmar"] });
+    expect(outsideRegion(p, { region: "Europe", noun: "countries" })).toEqual(['"Burma" (Asia)']);
+  });
+
+  it("fails a regional city list holding the world's capitals and big cities, not its own namesakes", () => {
+    const p = puzzle({ unranked: 0 });
+    p.extras.push(...unranked("Tokyo", "Mumbai", "Singapore", "Lisbon", "Luxembourg", "Leeds"));
+    // Plymouth, England (with its figure from the list's own table), not Montserrat's capital.
+    p.extras.push({ rank: 0, name: "Plymouth", aliases: [], value: "267,888", n: 267888 });
+    expect(outsideRegion(p, { region: "Europe", noun: "cities" })).toEqual(['"Tokyo" (Japan)', '"Mumbai" (India)', '"Singapore" (Singapore)']);
+    expect(outsideRegion(p, { region: "Asia", noun: "cities" })).toEqual(['"Lisbon" (Portugal)', '"Luxembourg" (Luxembourg)']);
+  });
+
+  it("fails a list of places whose title names a region it doesn't declare", () => {
+    const base = { title: "Most populous African countries", prompt: "Name the 10 most populous countries in Africa", noun: "countries", page: "P" };
+    expect(undeclaredRegion({ ...base, universe: "countries" })).toBe("African");
+    expect(undeclaredRegion({ ...base, universe: "countries", region: "Africa" })).toBeUndefined();
+    // Nothing beyond its own table: nothing can get in.
+    expect(undeclaredRegion(base)).toBeUndefined();
+    const china = { title: "Largest cities in mainland China", prompt: "Name the 10 most populous cities", noun: "cities", page: "P" };
+    expect(undeclaredRegion({ ...china, also: [{ page: "World cities", tables: [0], name: "City" }] })).toBe("China");
+    expect(undeclaredRegion({ ...china, also: [{ tables: [4], name: "City" }] })).toBeUndefined();
+    expect(undeclaredRegion({ ...base, title: "Most populous countries", prompt: "Name the 10 most populous countries", universe: "countries" })).toBeUndefined();
+  });
+
+  it("holds on every topic and every regional list as built", () => {
+    for (const t of TOPICS) expect(undeclaredRegion(t), t.id).toBeUndefined();
+    const lists = TOPICS.filter((t) => t.region);
+    expect(lists.map((t) => t.id)).toEqual(expect.arrayContaining(["africa-population", "asia-population", "europe-population", "europe-cities"]));
+    for (const t of lists) {
+      const built: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${t.id}.json`), "utf8"));
+      expect(outsideRegion(built, t), t.id).toEqual([]);
     }
   });
 });
