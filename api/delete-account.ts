@@ -1,10 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
 /**
- * POST /api/delete-account, a Vercel function. Deletes the signed-in player's account: their save, the games linked
- * to it, then the sign-in itself. Deleting a sign-in needs Supabase's service role key, which must never reach the
- * browser, so it happens here. The caller proves who they are with their session's access token, which Supabase
- * checks; nobody can delete anyone but themselves.
+ * POST /api/delete-account, a Vercel function. Deletes the signed-in player's account: their save, the games and
+ * list ratings linked to it, then the sign-in itself. Deleting a sign-in needs Supabase's service role key, which
+ * must never reach the browser, so it happens here. The caller proves who they are with their session's access token,
+ * which Supabase checks; nobody can delete anyone but themselves.
  *
  * Env: SUPABASE_SERVICE_ROLE_KEY, the secret key (Supabase's `sb_secret_...`, or a legacy service_role key; also
  * read as SUPABASE_SECRET_KEY), and SUPABASE_URL (or the public VITE_SUPABASE_URL). supabase-js sends either kind as

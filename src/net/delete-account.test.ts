@@ -60,12 +60,38 @@ describe("POST /api/delete-account", () => {
       // The secret key goes as the apikey; the player's token is what identifies them.
       expect(sent[0]).toEqual({ method: "GET", path: "/auth/v1/user", apikey: "sb_secret_abc", auth: "Bearer player-jwt" });
       expect(sent.slice(1).map((s) => [s.method, s.path, s.apikey])).toEqual([
+        ["DELETE", `/rest/v1/ratings?user_id=eq.${U}`, "sb_secret_abc"],
         ["DELETE", `/rest/v1/plays?user_id=eq.${U}`, "sb_secret_abc"],
         ["DELETE", `/rest/v1/saves?user_id=eq.${U}`, "sb_secret_abc"],
         ["DELETE", `/auth/v1/admin/users/${U}`, "sb_secret_abc"],
       ]);
       // SUPABASE_SERVICE_ROLE_KEY (the name the docs use) wins when both are set.
       expect(supabaseAdmin({ ...env, SUPABASE_SERVICE_ROLE_KEY: "sb_secret_def" })).not.toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("deletes the rest on a project without the ratings table yet, and stops on any other failure", async () => {
+    const sent: string[] = [];
+    let ratings: { status: number; code: string } = { status: 404, code: "PGRST205" };
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = new URL(input instanceof Request ? input.url : String(input));
+      sent.push(`${init?.method ?? "GET"} ${url.pathname}`);
+      if (url.pathname === "/rest/v1/ratings") {
+        return new Response(JSON.stringify({ code: ratings.code, message: "nope" }), { status: ratings.status, headers: { "content-type": "application/json" } });
+      }
+      return new Response(url.pathname.startsWith("/auth/") ? "{}" : null, { status: url.pathname.startsWith("/auth/") ? 200 : 204, headers: { "content-type": "application/json" } });
+    });
+    try {
+      const a = supabaseAdmin({ VITE_SUPABASE_URL: "https://x.supabase.co", SUPABASE_SECRET_KEY: "sb_secret_abc" })!;
+      await a.remove(U);
+      expect(sent).toEqual(["DELETE /rest/v1/ratings", "DELETE /rest/v1/plays", "DELETE /rest/v1/saves", `DELETE /auth/v1/admin/users/${U}`]);
+      // Not allowed to (the migration's grant is missing): the sign-in stays, so the player can try again later.
+      sent.length = 0;
+      ratings = { status: 403, code: "42501" };
+      await expect(a.remove(U)).rejects.toThrow(/ratings/);
+      expect(sent).toEqual(["DELETE /rest/v1/ratings"]);
     } finally {
       vi.unstubAllGlobals();
     }
