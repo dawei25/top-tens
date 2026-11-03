@@ -490,3 +490,47 @@ describe("cycle 5 readings", () => {
     expect(judgeGuess("spheres", tours, new Set())).toMatchObject({ entry: { rank: 1 } });
   });
 });
+
+describe("cycle 6 readings", () => {
+  const lex = {
+    alphabet: "",
+    table: "",
+    names: ["goldendoodle"].map((w) => fnv(w).toString(36)).join(" "),
+    words: ["steel", "swift", "story"].map((w) => fnv(w).toString(36)).join(" "),
+  };
+  it("a plain word stays readable on the list where a notable entry carries it", () => {
+    const parks: Puzzle = { ...puzzle, id: "parks6", extras: [e(0, "Steel Pier")] };
+    const artists: Puzzle = { ...puzzle, id: "artists6", answers: [e(1, "Taylor Swift"), ...puzzle.answers.slice(1)], extras: [e(0, "Steel Pulse")] };
+    expect(judgeGuess("steel", parks, new Set(), lex).kind).toBe("unknown");
+    expect(judgeGuess("swift", artists, new Set(), lex)).toMatchObject({ kind: "correct", entry: { name: "Taylor Swift" } });
+    expect(judgeGuess("steel", artists, new Set(), lex).kind).toBe("unknown");
+  });
+  it("a name of its own however it's spaced, and part of a name followed by someone else's", () => {
+    const dogs: Puzzle = { ...puzzle, id: "dogs6", answers: [e(1, "Golden Retriever", ["Golden"]), ...puzzle.answers.slice(1)], extras: [] };
+    expect(judgeGuess("golden doodle", dogs, new Set(), lex).kind).toBe("unknown");
+    expect(judgeGuess("golden", dogs, new Set(), lex)).toMatchObject({ kind: "correct", entry: { rank: 1 } });
+    const tiktok: Puzzle = { ...puzzle, id: "tiktok6", answers: [e(1, "Charli D'Amelio", ["Charli"]), ...puzzle.answers.slice(1)], extras: [] };
+    expect(judgeGuess("charli xcx", tiktok, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("charli", tiktok, new Set())).toMatchObject({ kind: "correct", entry: { rank: 1 } });
+  });
+  it("seasons by ordinal, and a show's other seasons or a plain word aren't its top season", () => {
+    const shows: Puzzle = {
+      ...puzzle,
+      id: "shows6",
+      noun: "Netflix series",
+      answers: [
+        e(1, "Squid Game (Season 1)", ["Squid Game"]),
+        e(2, "Squid Game (Season 2)", ["Squid Game 2"]),
+        e(3, "Stranger Things (Season 4)", ["Stranger Things", "Stranger Things 4"]),
+        e(4, "Monster: The Jeffrey Dahmer Story", ["Monster", "Dahmer"]),
+        ...puzzle.answers.slice(4),
+      ],
+      extras: [],
+    };
+    expect(judgeGuess("squid game second season", shows, new Set())).toMatchObject({ kind: "correct", entry: { rank: 2 } });
+    expect(judgeGuess("second season of squid game", shows, new Set())).toMatchObject({ kind: "correct", entry: { rank: 2 } });
+    expect(judgeGuess("stranger things final season", shows, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("monster menendez", shows, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("story", shows, new Set(), lex).kind).toBe("unknown");
+  });
+});

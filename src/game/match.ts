@@ -32,10 +32,16 @@ const NUMBER_WORDS: Record<string, string> = Object.fromEntries(
 );
 
 /** Number words as digits, so "frozen two" meets "Frozen II" (normalized "frozen 2"). */
+/** Ordinals count as their digits too: "squid game second season" is Season 2. */
+const ORDINALS: Record<string, string> = Object.fromEntries([
+  ..."first second third fourth fifth sixth seventh eighth ninth tenth".split(" ").map((w, i) => [w, String(i + 1)]),
+  ..."1st 2nd 3rd 4th 5th 6th 7th 8th 9th 10th".split(" ").map((w, i) => [w, String(i + 1)]),
+]);
+
 function numbersAsDigits(s: string): string {
   return s
     .split(" ")
-    .map((w) => NUMBER_WORDS[w] ?? w)
+    .map((w) => NUMBER_WORDS[w] ?? ORDINALS[w] ?? w)
     .join(" ");
 }
 
@@ -188,10 +194,16 @@ export function judgeGuess(
 ): GuessResult {
   const guess = normalize(raw);
   if (!guess) return { kind: "empty" };
+  // "squid game second season", "second season of squid game": read as "squid game 2" first.
+  const numbered = numberedForm(guess);
+  if (numbered && numbered !== guess) {
+    const r = judgeGuess(numbered, puzzle, found, lex, offered);
+    if (r.kind !== "unknown") return r;
+  }
 
   // An ordinary word typed alone ("humans", "water") is a word, not part of a name: names that merely contain it
   // aren't readings of it. Names and partial names ("jordan", "shenzhen", "kevin") still are.
-  const plain = isPlainWord(raw, lex);
+  const plain = isPlainWord(raw, lex) && !notableWords(puzzle).has(guess);
   const candidates = [
     ...closestPerEntry(guess, puzzle.answers, true, !plain),
     ...closestPerEntry(guess, puzzle.extras, false, !plain),
@@ -309,7 +321,9 @@ export function judgeGuess(
   // An answer's full name with more words after it, usually who made it ("perfect ed sheeran", "stay justin bieber"):
   // that answer, put in the box to confirm. The longest name that starts the guess wins. Not when the whole guess is a
   // name of its own: "saudi aramco" is the company, not Saudi Arabia; "mexico city" is not Mexico.
-  const lead = lex && isKnownName(raw, lex) ? undefined : leadingName(guess, [...puzzle.answers, ...puzzle.extras]);
+  // A name of its own, however it's spaced ("golden doodle" is the Goldendoodle, not Golden Retriever).
+  const ownName = !!lex && (isKnownName(raw, lex) || (guess.includes(" ") && isKnownName(guess.replace(/ /g, ""), lex)));
+  const lead = ownName ? undefined : leadingName(guess, [...puzzle.answers, ...puzzle.extras]);
   if (lead) {
     const c = candidates.find((x) => x.entry === lead);
     if (c) return resolve(c, true);
@@ -330,7 +344,7 @@ export function judgeGuess(
     const budget = typoBudget(len) + (notable && c.ends && len >= 6 && len <= 7 ? 1 : 0);
     return c.dist <= Math.max(budget, c.besideShared ? 1 : 0) && (notable || c.ends);
   });
-  if (close.length > 0 && !(lex && isKnownName(raw, lex))) {
+  if (close.length > 0 && !ownName) {
     const tied = close.filter((c) => c.dist === close[0].dist);
     // As with exact matches, a whole name or alias beats one word of another entry's name: "lotse" is Lhotse, not a
     // choice with Lhotse Middle and Lhotse Shar.
@@ -366,9 +380,41 @@ const GENERIC = new Set(
     "de la el le du international airport island islands isle lake river mount mountain mountains peak sea ocean bay " +
     "stadium arena park tower building centre center city state states county province republic kingdom united " +
     "national people federal democratic company corporation group bank holdings inc film movie game games series " +
-    "world cup league club team fc music band bands season seasons part"
+    "world cup league club team fc music band bands season seasons part story"
   ).split(" "),
 );
+
+/**
+ * Words of this list's notable entries (ranked, or with a figure), names and aliases: never plain here, so "swift" is
+ * Taylor Swift and "rainier" Mount Rainier where they rank. Elsewhere the lexicon's plain words stay plain: "steel" is
+ * not Steel Pier on theme parks just because a film list ranks Man of Steel.
+ */
+const notableCache = new Map<string, Set<string>>();
+function notableWords(puzzle: Puzzle): Set<string> {
+  let set = notableCache.get(puzzle.id);
+  if (!set) {
+    set = new Set();
+    for (const e of [...puzzle.answers, ...puzzle.extras]) {
+      if (e.rank === 0 && e.value === undefined) continue;
+      for (const f of [e.name, ...e.aliases]) for (const w of normalize(f).split(" ")) set.add(w);
+    }
+    notableCache.set(puzzle.id, set);
+  }
+  return set;
+}
+
+/** Words that only say which instalment a number counts: "season 2", "part 2", "the second season of". */
+const INSTALMENT = new Set(["season", "seasons", "series", "part", "chapter", "volume", "of", "the"]);
+
+/** A guess with a number and instalment words, as name plus number ("2 season of squid game" → "squid game 2"). */
+function numberedForm(guess: string): string | null {
+  const words = numbersAsDigits(guess).split(" ");
+  if (!words.some((w) => /^\d+$/.test(w)) || !words.some((w) => INSTALMENT.has(w))) return null;
+  const kept = words.filter((w) => !INSTALMENT.has(w));
+  const nums = kept.filter((w) => /^\d+$/.test(w));
+  const rest = kept.filter((w) => !/^\d+$/.test(w));
+  return rest.length && nums.length === 1 ? [...rest, nums[0]].join(" ") : null;
+}
 
 /** The words of a list's noun, singular and plural: "concert tours" → concert, tours, tour. */
 function subjectWords(noun?: string): Set<string> {
@@ -408,11 +454,20 @@ function leadingName(guess: string, entries: Entry[]): Entry | undefined {
     const short = head.replace(/ /g, "").length < 4;
     // A number after the name names a different one: "frozen 3" is not Frozen, "bridgerton 2" not its first season.
     const restDigits = digitsOf(numbersAsDigits(words.slice(k).join(" ")));
+    const rest = words.slice(k).filter((w) => w.length >= 2 && !GENERIC.has(w));
+    // Part of a name followed by something that isn't in it is someone or something else: "charli xcx" is not Charli
+    // D'Amelio, "stranger things final season" not Season 4. A whole name followed by who made it still reads.
+    const elsewhere = (e: Entry) => {
+      const name = normalize(e.name).split(" ");
+      return head !== normalize(e.name) && head.split(" ").every((w) => name.includes(w)) && rest.some((w) => !name.includes(w));
+    };
     const hits = entries.filter(
-      (e) => forms(e).includes(head) && (!restDigits || forms(e).some((f) => digitsOf(numbersAsDigits(f)).includes(restDigits))),
+      (e) =>
+        forms(e).includes(head) &&
+        !elsewhere(e) &&
+        (!restDigits || forms(e).some((f) => digitsOf(numbersAsDigits(f)).includes(restDigits))),
     );
     if (hits.length === 0) continue;
-    const rest = words.slice(k).filter((w) => w.length >= 2 && !GENERIC.has(w));
     const named = hits.filter((e) => forms(e).some((f) => rest.every((w) => f.split(" ").includes(w))));
     if (short) {
       if (rest.length && named.length) return mostProminent(named);

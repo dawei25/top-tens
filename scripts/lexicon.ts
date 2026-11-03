@@ -120,16 +120,14 @@ export function plainWords(names: string[], known: Set<string>, namesOfNote: str
  * aren't: thousands of them have articles, and an obscure one called "Humans" or "Music" is not what a player typing
  * the word means ("humans" no longer offers Destroy All Humans!).
  *
- * One exception keeps readings players use: a word that is some entry's exact name stays readable where it is also a
- * word of a name that shows a figure (ranked, or unranked with a value). "rainier" is Mount Rainier (#20 national
- * park), "sapiens" the book (#66), "gladiator" Gladiator II (#64 expensive film), "geneva" Lake Geneva. Without it,
- * 117 readings of ranks 11+ and 22 of unranked answers with a figure were lost (cycle 3), to stop 10 more leaks.
+ * Words of top-10 answers and of names with a figure are plain here too: the matcher keeps them readable on the list
+ * where such an entry is (`notableWords` in src/game/match.ts), so "swift" is Taylor Swift on Spotify artists and
+ * "rainier" Mount Rainier on national parks, while "steel" on theme parks is not Steel Pier just because a film list
+ * ranks Man of Steel (cycle 6: per list, not across the bank).
  */
 export function bankPlainWords(bank: Bank, regions: string[], dictionary: string[]): string[] {
   const names = new Set([...bank.ranked, ...regions].map(normalize).filter(Boolean));
-  const pool = new Set(bank.all.map(normalize));
-  const figured = new Set(bank.figured.flatMap((n) => normalize(n).split(" ")));
-  return plainWords(bank.all, names, bank.namesOfNote, dictionary).filter((w) => !(pool.has(w) && figured.has(w)));
+  return plainWords(bank.all, names, [], dictionary);
 }
 
 /** Writes public/puzzles/lexicon.json; says what it was trained on. */

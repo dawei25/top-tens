@@ -47,10 +47,9 @@ describe("bankPlainWords", () => {
     expect(words).not.toContain("minecraft");
   });
 
-  it("keeps a pool name's word readable where it is part of a name that shows a figure", () => {
-    // "rainier" is Mount Rainier (#20), "sapiens" the book (#66): those readings stay.
-    expect(words).not.toContain("rainier");
-    expect(words).not.toContain("sapiens");
+  it("lists words of names with a figure too: the matcher keeps them readable on their own list", () => {
+    // "rainier" stays Mount Rainier on national parks (match.test.ts, notable words), plain elsewhere.
+    expect(words).toEqual(expect.arrayContaining(["rainier", "sapiens"]));
   });
 
   it("still lists ordinary words of ranked names that name nothing themselves", () => {
