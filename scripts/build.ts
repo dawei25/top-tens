@@ -14,7 +14,7 @@ import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./int
 
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
-import { countryOf, inRegion, UNIVERSES, US_STATE_CODES, type Place } from "./gazetteer";
+import { countryOf, UNIVERSES, US_STATE_CODES, whereIs, type Place, type Where } from "./gazetteer";
 import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, placeholderName } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
@@ -558,6 +558,17 @@ function tableTitle($: Awaited<ReturnType<typeof fetchPage>>, table: Parameters<
 }
 
 /**
+ * A place outside the region met again inside it (a world table's city, then the same name in a European one):
+ * the region's reading wins on a regional list, so it is an answer, with the region's figure if it has one.
+ */
+function inRegionWins(owner: Entry, e: Entry): void {
+  if (!owner.elsewhere || e.elsewhere) return;
+  delete owner.elsewhere;
+  if (owner.n === undefined && e.n !== undefined) Object.assign(owner, { value: e.value, n: e.n });
+  else if (owner.value === undefined && e.value !== undefined) owner.value = e.value;
+}
+
+/**
  * Gives an answer a dated value from a namesake row of a later `dated` table (or another source's), when the
  * answer is unranked and has no figure of its own or only an older dated one. The first table listed wins a tie.
  */
@@ -574,21 +585,32 @@ function adoptDated(owner: Entry, e: Entry): void {
 const COUNTRY_COLUMN = /^(country|member state|sovereign state)\b/i;
 
 /**
- * How a regional topic (`region`) reads another page's table: -1 takes every row (no region, the topic's own page,
- * or a table of one country in the region), null none (one country outside it), else the column whose country
- * decides each row. A table that says neither is an error: it would let in the world.
+ * Where a regional topic (`region`) puts another page's table: a column whose country places each row, or one
+ * place for the whole table: "inside" (no region, the topic's own page, or one country in the region), "outside"
+ * (one country outside it: every row is `elsewhere`) or "unsure" (a transcontinental country: no row). A table that
+ * says neither is an error: it would take in the world as the region's.
  */
-export function regionColumn(topic: Pick<Topic, "id" | "page" | "region">, src: Pick<Also, "page" | "country">, header: string[], t: number): number | null {
-  if (!topic.region || (src.page ?? topic.page) === topic.page) return -1;
+export function regionColumn(topic: Pick<Topic, "id" | "page" | "region">, src: Pick<Also, "page" | "country">, header: string[], t: number): number | Where {
+  if (!topic.region || (src.page ?? topic.page) === topic.page) return "inside";
   if (src.country) {
-    const inside = inRegion(src.country, topic.region);
-    if (inside === undefined) throw new Error(`${topic.id}: country "${src.country}" of ${src.page} is no country`);
-    return inside ? -1 : null;
+    const where = whereIs(src.country, topic.region);
+    if (!where) throw new Error(`${topic.id}: country "${src.country}" of ${src.page} is no country`);
+    return where;
   }
   const cc = header.findIndex((h) => COUNTRY_COLUMN.test(h));
   if (cc < 0) throw new Error(`${topic.id}: ${src.page} table ${t} says no country (give it \`country\`), so it can't be kept to ${topic.region}`);
   return cc;
 }
+
+/**
+ * A place outside the region whose table links a qualified article ("Toledo, Ohio", "Kingston, Jamaica"): the bare
+ * name is another place's on Wikipedia (Toledo is Spain's), so it is no `elsewhere` entry; the guess stays free.
+ */
+export const qualifiedLink = (name: string, link?: string) => !!link && /[,(]/.test(link) && !/[,(]/.test(name);
+
+/** Names of places outside a topic's region left free for being another place's too (see qualifiedLink). */
+const SHARED_NAMES = new Map<string, Set<string>>();
+const sharedNames = (topic: Topic) => SHARED_NAMES.get(topic.id) ?? SHARED_NAMES.set(topic.id, new Set()).get(topic.id)!;
 
 /**
  * Unranked accepted answers from other tables (or pages): aliases from the cell and short forms, and the list's
@@ -597,7 +619,7 @@ export function regionColumn(topic: Pick<Topic, "id" | "page" | "region">, src: 
  */
 async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
   const out: Entry[] = [];
-  let outside = 0;
+  let unsure = 0;
   /** Country cells that name no known country (left out): give them their country in gazetteer.ts. */
   const unknown = new Set<string>();
   for (const src of topic.also ?? []) {
@@ -605,11 +627,12 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
     const tables = wikitables($);
     for (const t of src.tables) {
       const { header, body } = splitHeader(tableGrid($, tables[t]));
-      // A regional list takes another page's rows from its region only (the source page's own are its scope): a
-      // whole table by its `country`, else row by row by the table's Country column.
-      const cc = regionColumn(topic, src, header, t);
-      if (cc === null) {
-        outside += body.length;
+      // A regional list takes another page's rows as its region's answers or as `elsewhere` (the source page's own
+      // are its scope): a whole table by its `country`, else row by row by the table's Country column.
+      const placed = regionColumn(topic, src, header, t);
+      const cc = typeof placed === "number" ? placed : -1;
+      if (placed === "unsure") {
+        unsure += body.length;
         continue;
       }
       const nc = column(header, src.name);
@@ -626,12 +649,16 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const cell = r[nc];
         if (!cell || (cell.isHeader && !cell.text)) continue;
         if (src.where && !src.where.match.test(r[column(header, src.where.col)]?.text ?? "")) continue;
+        let where: Where | undefined = typeof placed === "number" ? undefined : placed;
         if (cc >= 0) {
           const country = cleanName(r[cc]?.text ?? "");
-          const inside = inRegion(country, topic.region!);
-          if (inside === undefined && country) unknown.add(country);
-          if (inside !== true) {
-            outside++;
+          where = whereIs(country, topic.region!);
+          if (!where) {
+            if (country) unknown.add(country);
+            continue;
+          }
+          if (where === "unsure") {
+            unsure++;
             continue;
           }
         }
@@ -644,15 +671,21 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         if (!name || !normalize(name) || skipName(name)) continue;
         if (topic.skip?.includes(name) || src.skip?.includes(name)) continue;
         if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue;
+        if (where === "outside" && qualifiedLink(name, cell.link)) {
+          sharedNames(topic).add(normalize(name));
+          continue;
+        }
         // A family row's text ("Karl and Theo Albrecht") names several people: not an alias of one of them.
         const family = raw !== named;
         const lines = family ? [] : (cell.lines.length > 1 ? cell.lines : [cell.text]).map(unglue);
         const others = aliasCs.flatMap((c) => (r[c] ? [r[c].linkText ?? "", ...r[c].lines.flatMap((l) => l.split("/")).map((p) => p.split(",")[0])] : []));
         const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords), ...others].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
-        const v = topic.lowerIsBetter ? null : glued ? parseValue(glued[1]) : vc >= 0 ? parseValue(r[vc]?.text ?? "") : null;
+        // A place outside the region: a costly miss that says so ("Tokyo isn't in Europe."), with no figure.
+        if (where === "outside") entry.elsewhere = true;
+        const v = entry.elsewhere || topic.lowerIsBetter ? null : glued ? parseValue(glued[1]) : vc >= 0 ? parseValue(r[vc]?.text ?? "") : null;
         const label = perYear ? datedLabel(src.dated!, [lastYear(r[yc]?.text ?? "")], "") : tableLabel;
-        if (src.dated && label) {
+        if (src.dated && label && !entry.elsewhere) {
           const d = src.dated;
           const sign = d.prefix ?? v?.display.match(/^[$€£]/)?.[0] ?? "";
           const digits = v && (d.scale ? scaledFigure(v.value, d.scale) : v.display.replace(/^[$€£]/, ""));
@@ -673,7 +706,8 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       }
     }
   }
-  if (outside) console.log(`     ${topic.id}: ${outside} rows of other pages outside ${topic.region} left out`);
+  if (unsure) console.log(`     ${topic.id}: ${unsure} rows of other pages in transcontinental countries left out (free)`);
+  if (sharedNames(topic).size) console.log(`     ${topic.id}: ${sharedNames(topic).size} places outside ${topic.region} named like another place left out (free)`);
   if (unknown.size) console.log(`warn ${topic.id}: rows in no known country left out (gazetteer.ts): ${[...unknown].join(", ")}`);
   for (const cat of topic.universeCategories ?? []) {
     const titles = await fetchCategory(cat, topic.categoryDepth ?? 0, CATEGORY_CAP);
@@ -1052,18 +1086,30 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   // `universeNamesOnly`: the universe names the rows, but adds no answers of its own.
   // Members of a universe whose other names are nicknames (teams): those names belong to the row they merge with.
   const nicknamed = new Set<Entry>();
-  // A regional list's universe is its region's members (a capital by its country); a transcontinental country
-  // only where the table lists it.
+  // A regional list's universe gives its region's members as answers and the rest as `elsewhere` (a capital by its
+  // country); a transcontinental country the table leaves out, and its capital, stay free.
   const listed = new Set(rows.map((r) => countryOf(r.name)?.name).filter((n): n is string => !!n));
-  const regional = (p: Place) => !topic.region || inRegion(p.country ?? p.name, topic.region, listed) === true;
+  const where = (p: Place) => (topic.region ? whereIs(p.country ?? p.name, topic.region, listed) : "inside");
   for (const u of topic.universeNamesOnly ? [] : [topic.universe ?? []].flat()) {
     // A free row's other names count too: the table's "Macau" is the universe's "Macao".
     const free = new Set(unrankedRows(topic));
     for (const forms of COUNTRY_FORMS) if (forms.some((f) => free.has(normalize(f)))) for (const f of forms) free.add(normalize(f));
-    const all = UNIVERSES[u]();
-    const members = all.filter((p) => regional(p) && !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
-    if (topic.region) console.log(`     ${topic.id}: ${all.filter((p) => !regional(p)).length} of ${all.length} ${u} outside ${topic.region} left out`);
-    const added = members.map((p) => ({ rank: 0, ...p, aliases: [...p.aliases] }));
+    // A place outside the region named like another place (Kingston, Jamaica) is left free, as in readAlso.
+    const placed = UNIVERSES[u]().filter(
+      (p) => where(p) === "inside" || (where(p) === "outside" && !sharedNames(topic).has(normalize(p.name))),
+    );
+    const members = placed.filter((p) => !topic.skip?.includes(p.name) && ![p.name, ...p.aliases].some((f) => free.has(normalize(f))));
+    if (topic.region) {
+      const out = members.filter((p) => where(p) === "outside").length;
+      console.log(`     ${topic.id}: ${members.length - out} ${u} in ${topic.region}, ${out} elsewhere, ${UNIVERSES[u]().length - placed.length} left free`);
+    }
+    // Named fields only: a capital's `country` is the build's, not the puzzle format's.
+    const added: Entry[] = members.map((p) => ({
+      rank: 0,
+      name: p.name,
+      aliases: [...p.aliases],
+      ...(where(p) === "outside" ? { elsewhere: true as const } : {}),
+    }));
     if (TEAM_UNIVERSE.test(u)) for (const m of added) nicknamed.add(m);
     extra.push(...added);
   }
@@ -1108,6 +1154,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       // The same answer in another dated table: the latest figure is the one to show (New York City keeps its
       // 2023 rank, not 2018's).
       adoptDated(into, e);
+      inRegionWins(into, e);
       continue;
     }
     // Add-ons of an entry already listed ("Skyrim – Dragonborn" next to Skyrim) only blur what its name means.
@@ -1118,6 +1165,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       if (!same.aliases.includes(e.name)) same.aliases.push(e.name);
       if (same.n === undefined && e.n !== undefined) Object.assign(same, { value: e.value, n: e.n });
       else adoptDated(same, e);
+      inRegionWins(same, e);
       take(e.name, same);
       console.log(`     ${topic.id}: "${e.name}" is ${same.rank ? `#${same.rank} ` : ""}"${same.name}"`);
       continue;
@@ -1163,6 +1211,12 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   }
   const dataAsOf = await dataDate(topic);
   if (topic.knownOnly || topic.knownNames) await writeKnown(topic, entries);
+  // A place outside the region shows no figure and never scores: the list's stat is the region's.
+  for (const e of entries) {
+    if (!e.elsewhere) continue;
+    delete e.value;
+    delete e.n;
+  }
 
   return {
     id: topic.id,
@@ -1170,6 +1224,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     prompt: topic.prompt,
     noun: topic.noun,
     category: topic.category,
+    ...(topic.region ? { region: topic.region } : {}),
     metric: topic.metric,
     ...(topic.lowerIsBetter ? { lowerIsBetter: true as const } : {}),
     ...(!topic.lowerIsBetter && entries.filter((e) => e.n !== undefined).length >= BLITZ_MIN ? { blitz: true } : {}),

@@ -23,7 +23,8 @@ export function packet(id: string): string {
   const schedule: DailyEntry[] = JSON.parse(readFileSync(join(DIR, "daily.json"), "utf8"));
   const ran = schedule.filter((e) => e.id === id || e.blitz === id).map((e) => `#${e.n} on ${e.date}${e.blitz === id ? " (as Today's Blitz)" : ""}`);
   const ranked = p.extras.filter((e) => e.rank > 10).sort((a, b) => a.rank - b.rank);
-  const unranked = p.extras.filter((e) => !(e.rank > 10));
+  const unranked = p.extras.filter((e) => !(e.rank > 10) && !e.elsewhere);
+  const elsewhere = p.extras.filter((e) => e.elsewhere);
   const scoring = [...p.answers, ...p.extras].filter((e) => e.n !== undefined).length;
   const out = [
     `ID: ${p.id}`,
@@ -46,6 +47,13 @@ export function packet(id: string): string {
       .slice(0, 30)
       .map((e) => e.name)
       .join(", ")}`,
+    ...(p.region
+      ? [
+          ``,
+          `REGION: ${p.region}. OUTSIDE IT (cost a life in classic, saying "X isn't in ${p.region}."; never score): ` +
+            `${elsewhere.length}. Sample: ${elsewhere.slice(0, 20).map((e) => e.name).join(", ")}`,
+        ]
+      : []),
   ];
   return out.join("\n");
 }

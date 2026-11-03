@@ -46,7 +46,7 @@ function capitalPlaces(): Place[] {
 export type Continent = "Africa" | "Antarctica" | "Asia" | "Europe" | "North America" | "Oceania" | "South America";
 /**
  * Where a regional list's answers are: a continent ("Europe") or one country ("China"). Its universe and its other
- * pages' tables only add answers from there (build.ts); anything else is free (DESIGN §1).
+ * pages' tables add answers from there; their places outside it are `elsewhere` entries (build.ts).
  */
 export type Region = Continent | (string & {});
 
@@ -111,17 +111,26 @@ const CONTINENTS = new Set<string>(["Africa", "Antarctica", "Asia", "Europe", "N
 export const isContinent = (region: Region): region is Continent => CONTINENTS.has(region);
 
 /**
- * Whether a country is in a region. A transcontinental country (Russia, Turkey, Egypt, Kazakhstan) follows the
- * source page's own scope: it is in only where the page lists it (`listed`, countries named by the table's rows),
- * so Egypt is free on the Asian list and Turkey's cities other than Istanbul are free on the European one.
- * Undefined for a name that is no known country.
+ * Where a country is, for a regional list: "inside" the region, "outside" it (Japan for Europe: a guess costs a
+ * life and says "Japan isn't in Europe."), or "unsure": a transcontinental country (Russia, Turkey, Egypt,
+ * Kazakhstan, Azerbaijan, Georgia) reaching the region that the source page leaves out (`listed`: the countries its
+ * table's rows name). Its region is debatable, so it and its cities stay free: Egypt on the Asian list, Ankara on
+ * the European one. Where the page lists it, it is inside. Undefined for a name that is no known country.
  */
-export function inRegion(country: string, region: Region, listed: ReadonlySet<string> = new Set()): boolean | undefined {
+export type Where = "inside" | "outside" | "unsure";
+
+export function whereIs(country: string, region: Region, listed: ReadonlySet<string> = new Set()): Where | undefined {
   const c = countryOf(country);
   if (!c) return undefined;
-  if (!isContinent(region)) return c.name === (countryOf(region)?.name ?? region);
-  if (c.continents.length > 1) return listed.has(c.name);
-  return c.continents[0] === region;
+  if (!isContinent(region)) return c.name === (countryOf(region)?.name ?? region) ? "inside" : "outside";
+  if (!c.continents.includes(region)) return "outside";
+  return c.continents.length === 1 || listed.has(c.name) ? "inside" : "unsure";
+}
+
+/** Whether a country is inside a region (see whereIs); undefined for a name that is no known country. */
+export function inRegion(country: string, region: Region, listed: ReadonlySet<string> = new Set()): boolean | undefined {
+  const w = whereIs(country, region, listed);
+  return w && w === "inside";
 }
 
 /**

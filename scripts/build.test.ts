@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { datedLabel, datedValue, labelYear, lastYear, lowerParts, matchFacts, mergeIndex, rangeText, rankOf, regionColumn, sameKey, scaledFigure, skipName } from "./build";
-import { inRegion, UNIVERSES } from "./gazetteer";
+import {
+  datedLabel,
+  datedValue,
+  labelYear,
+  lastYear,
+  lowerParts,
+  matchFacts,
+  mergeIndex,
+  qualifiedLink,
+  rangeText,
+  rankOf,
+  regionColumn,
+  sameKey,
+  scaledFigure,
+  skipName,
+} from "./build";
+import { inRegion, UNIVERSES, whereIs } from "./gazetteer";
 import { COUNTRY_FORMS } from "./intent";
 
 describe("regional lists", () => {
@@ -29,17 +44,40 @@ describe("regional lists", () => {
     expect(europe.map((c) => c.name)).not.toContain("Ankara");
   });
 
-  it("take another page's rows by its country or its Country column, and fail a table that says neither", () => {
+  it("place another page's rows by its country or its Country column, and fail a table that says neither", () => {
     const topic = { id: "europe-cities", page: "Europe page", region: "Europe" };
     const header = ["City", "Country", "Population"];
     expect(regionColumn(topic, { page: "World page" }, header, 0)).toBe(1);
     expect(regionColumn(topic, { page: "EU page" }, ["City", "Member state"], 0)).toBe(1);
-    expect(regionColumn(topic, { page: "UK page", country: "United Kingdom" }, ["City"], 0)).toBe(-1);
-    expect(regionColumn(topic, { page: "US page", country: "United States" }, ["City"], 0)).toBeNull();
+    expect(regionColumn(topic, { page: "UK page", country: "United Kingdom" }, ["City"], 0)).toBe("inside");
+    // Every US city is elsewhere; a transcontinental country's table gives nothing (free).
+    expect(regionColumn(topic, { page: "US page", country: "United States" }, ["City"], 0)).toBe("outside");
+    expect(regionColumn(topic, { page: "Turkey page", country: "Turkey" }, ["City"], 0)).toBe("unsure");
     // The topic's own page is its scope; a list without a region takes everything.
-    expect(regionColumn(topic, {}, ["City"], 0)).toBe(-1);
-    expect(regionColumn({ ...topic, region: undefined }, { page: "World page" }, ["City"], 0)).toBe(-1);
+    expect(regionColumn(topic, {}, ["City"], 0)).toBe("inside");
+    expect(regionColumn({ ...topic, region: undefined }, { page: "World page" }, ["City"], 0)).toBe("inside");
     expect(() => regionColumn(topic, { page: "World page" }, ["City", "Population"], 0)).toThrow(/says no country/);
+  });
+
+  it("put a country inside, outside, or on the region's debatable edge", () => {
+    expect(whereIs("Japan", "Europe")).toBe("outside");
+    expect(whereIs("Portugal", "Europe")).toBe("inside");
+    // Egypt reaches Asia: free on the Asian list that leaves it out, a row where a page lists it, plainly not Europe.
+    expect(whereIs("Egypt", "Asia")).toBe("unsure");
+    expect(whereIs("Egypt", "Asia", new Set(["Egypt"]))).toBe("inside");
+    expect(whereIs("Egypt", "Europe")).toBe("outside");
+    expect(whereIs("Turkey", "Africa")).toBe("outside");
+    expect(whereIs("Atlantis", "Europe")).toBeUndefined();
+  });
+
+  it("leave free a place outside the region whose table links another place's name", () => {
+    expect(qualifiedLink("Toledo", "Toledo, Ohio")).toBe(true);
+    expect(qualifiedLink("Kingston", "Kingston, Jamaica")).toBe(true);
+    expect(qualifiedLink("Valencia", "Valencia (Venezuela)")).toBe(true);
+    expect(qualifiedLink("Tokyo", "Tokyo")).toBe(false);
+    expect(qualifiedLink("Washington, D.C.", "Washington, D.C.")).toBe(false);
+    // A redirect is the same place: "Bengaluru" linking "Bangalore".
+    expect(qualifiedLink("Bengaluru", "Bangalore")).toBe(false);
   });
 });
 

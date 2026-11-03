@@ -72,11 +72,12 @@ export interface Topic {
   /** Also accept every member of these sets as a real (life-costing) answer, even ones missing from the table. */
   universe?: Universe | Universe[];
   /**
-   * The list covers one continent or country ("Europe", "China"): its universe and its other pages' tables only add
-   * answers from there, so "Japan" is free on European countries (DESIGN §1: what the source doesn't cover is free).
-   * A transcontinental country follows the source page: in where its table lists it (Turkey on Europe), else free
-   * (Egypt on Asia). Members of the region the table leaves out (Vatican City) stay answers. scripts/validate.ts
-   * fails a regional list without one, and any unranked answer outside it.
+   * The list covers one continent or country ("Europe", "China"), shown to the player by that name. Its universe and
+   * its other pages' tables add answers from there; their places outside it are `elsewhere` entries: "japan" costs
+   * a life on European countries and says "Japan isn't in Europe." (the owner: a guess from outside the region is on
+   * the player). A transcontinental country follows the source page: in where its table lists it (Turkey on
+   * Europe), else free, as are its cities (Egypt on Asia, Ankara on Europe): its region is debatable. Members of the
+   * region the table leaves out (Vatican City) stay answers. scripts/validate.ts checks all of this.
    */
   region?: Region;
   /**
@@ -200,7 +201,8 @@ export interface Also {
   rename?: Record<string, string>;
   /**
    * The country every row of these tables is in, for a regional topic (`region`): a table of another country's
-   * cities adds nothing there. Without it, another page's table needs a Country (or Member state) column.
+   * cities adds only `elsewhere` entries there. Without it, another page's table needs a Country (or Member state)
+   * column.
    */
   country?: string;
   /**
@@ -291,8 +293,8 @@ const MARKET_CAP_SKIP = [
 ];
 
 /**
- * Big city tables, so any sincere city guess on a city list is an accepted answer. A regional list takes only its
- * region's rows: by `country`, or by the table's Country column.
+ * Big city tables, so any sincere city guess on a city list is an accepted answer. A regional list takes its
+ * region's rows as answers and the rest as `elsewhere` entries: by `country`, or by the table's Country column.
  */
 const CITIES: Also[] = [
   { page: "List of largest cities", tables: [0], name: "City" },
@@ -1550,8 +1552,9 @@ export const TOPICS: Topic[] = [
       ...CITIES,
     ],
     universe: "capitals",
-    // Only Europe's cities and capitals: Tokyo or Mumbai is free, not "outside the top 38". Turkey's and Russia's
-    // cities count where the page lists them (Istanbul, Kazan), as the page counts Europe.
+    // Europe's cities and capitals are answers; Tokyo or Mumbai costs a life as "Tokyo isn't in Europe.", not
+    // "outside the top 38". Turkey's and Russia's cities count where the page lists them (Istanbul, Kazan), as the
+    // page counts Europe; the rest are free (Ankara).
     region: "Europe",
     junkAliases: [
       "Immigration to Madrid", "Madrilenian cuisine", "Paris culture", "Paris agglomeration", "Washington Place, Berlin",
