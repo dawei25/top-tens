@@ -181,3 +181,18 @@ describe("fresh Blitz start", () => {
     expect(blitzHistory(fresh, puzzle.id)).toHaveLength(1);
   });
 });
+
+describe("regional lists", () => {
+  it("a place outside the region scores nothing and says so", () => {
+    const p: Puzzle = {
+      id: "europe5",
+      title: "Most populous European countries",
+      prompt: "",
+      region: "Europe",
+      answers: Array.from({ length: 10 }, (_, i) => ({ rank: i + 1, name: `Country ${i + 1}`, aliases: [], n: 100 - i })),
+      extras: [{ rank: 0, name: "Japan", aliases: [], elsewhere: true }],
+    } as Puzzle;
+    const { result } = blitzGuess(newBlitz(p), p, "japan");
+    expect(result).toMatchObject({ kind: "none", elsewhere: "Japan" });
+  });
+});

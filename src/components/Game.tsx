@@ -79,7 +79,10 @@ function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
         tone: "bad",
         // Show the entry's own number when the data has it: "Gasherbrum IV is #17, 7,932 m."
         text: !r.entry.rank
-          ? shownValue(r.entry)
+          ? // A place outside a regional list's region: "Japan isn't in Europe."
+            r.entry.elsewhere && puzzle.region
+            ? `${r.entry.name} isn't in ${puzzle.region}.`
+            : shownValue(r.entry)
             ? `${r.entry.name}: ${shownValue(r.entry)}. Not in the top 10.`
             : rankedDepth(puzzle) > 10
               ? `${r.entry.name} is outside the top ${rankedDepth(puzzle)}.`

@@ -96,6 +96,7 @@ function describe(r: BlitzResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
       return { tone: "warn", text: "Did you mean", suggestions: r.suggestions };
     case "none":
       if (r.vague) return { tone: "warn", text: "More than one fits. Be more specific." };
+      if (r.elsewhere && puzzle.region) return { tone: "bad", text: `${r.elsewhere} isn't in ${puzzle.region}.` };
       if (r.unscored) return { tone: "warn", text: `${r.unscored} is on the list, but without a figure. No points.` };
       // Plain misses only: "Not one of the 258 countries here." (or "Not on this list." without a noun).
       return { tone: "bad", text: r.junk ? "Doesn't look like an answer." : notOnList(puzzle) };

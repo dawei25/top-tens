@@ -21,6 +21,11 @@ export interface Entry {
   article?: string;
   /** One short, sourced fun fact, shown on hover or tap once the row is revealed (top 10 only). */
   fact?: Fact;
+  /**
+   * On a regional geography list, a place outside the region ("Japan" on European countries): a real guess that
+   * costs a life like any miss, shown as "Japan isn't in Europe." (`Puzzle.region`). Never ranked, never scored.
+   */
+  elsewhere?: true;
 }
 
 export interface Puzzle {
@@ -38,6 +43,8 @@ export interface Puzzle {
    * guess could be the wrong kind of thing ("name as many countries as you can", "Not one of the 237 films here").
    */
   noun?: string;
+  /** The region a regional geography list covers, as players say it ("Europe", "Africa", "Asia"). */
+  region?: string;
   /** The ranking's #1 has the smallest number (a Similarweb rank); such lists never play in Blitz. */
   lowerIsBetter?: boolean;
   /**

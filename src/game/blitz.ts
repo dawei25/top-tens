@@ -86,7 +86,7 @@ export type BlitzResult =
    * Scores nothing, costs nothing: not on this list (`junk` if it doesn't look like an answer at all), part of
    * several names (`vague`: how many fit, see GuessResult), or on the list without a stat to score (`unscored`).
    */
-  | { kind: "none"; junk: boolean; vague?: number; unscored?: string }
+  | { kind: "none"; junk: boolean; vague?: number; unscored?: string; elsewhere?: string }
   | { kind: "over" };
 
 export function newBlitz(puzzle: Puzzle): BlitzState {
@@ -140,6 +140,8 @@ export function blitzGuess(
   if (r.kind === "duplicate" || r.kind === "correct" || r.kind === "near") {
     const entry: Entry = r.entry;
     if (state.hits.some((h) => h.name === entry.name)) return { state, result: { kind: "duplicate", name: entry.name } };
+    // A place outside a regional list's region scores nothing: "Japan isn't in Europe."
+    if (entry.elsewhere) return { state, result: { kind: "none", junk: false, elsewhere: entry.name } };
     if (entry.n === undefined) return { state, result: { kind: "none", junk: false, unscored: entry.name } };
     const hit: BlitzHit = { name: entry.name, rank: entry.rank, n: entry.n, points: entryPoints(puzzle, entry) };
     const corrected = r.kind === "duplicate" ? false : r.corrected;
