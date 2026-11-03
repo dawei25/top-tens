@@ -250,7 +250,7 @@ function Screens() {
   // roll from it never lands on the list or Blitz on screen.
   const blitzOnScreen = route.screen === "blitz" ? route.id : route.screen === "dailyblitz" ? dailyBlitzId(route.date) : undefined;
   const nav: MenuNav = {
-    current: menuScreen(route, today),
+    current: menuScreen(route, today, current?.date),
     today,
     entry: current,
     hasDailyBlitz: !!todaysBlitz,
@@ -390,11 +390,14 @@ function Screens() {
   return <MenuContext value={nav}>{screen()}</MenuContext>;
 }
 
-/** The menu's tile for the screen on show, if it has one (today's list and Blitz only on today's date). */
-function menuScreen(route: Route, today: string): MenuScreen | undefined {
+/**
+ * The menu's tile for the screen on show, if it has one: today's list is the daily its tile opens (`dailyDate`, the
+ * latest one up to today), today's Blitz only on today's date.
+ */
+function menuScreen(route: Route, today: string, dailyDate?: string): MenuScreen | undefined {
   switch (route.screen) {
     case "daily":
-      return route.date === today ? "today-list" : undefined;
+      return route.date === dailyDate ? "today-list" : undefined;
     case "dailyblitz":
       return route.date === today ? "today-blitz" : undefined;
     case "archive":
