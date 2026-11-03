@@ -12,7 +12,10 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
    - Judge 4 lists: verdicts judged longest ago first (`judgedAt`), then lists whose `fixes` a rebuild has since
      addressed. Skip today's and the next two days' dailies.
    - Topic ideas: 2 new candidates, verified on Wikipedia with `npm run inspect` (`NODE_USE_ENV_PROXY=1` for
-     uncached pages). Prefer mainstream lists that could meet the daily bar (docs/JUDGE.md); the daily bank is the
+     uncached pages). **Variety first** (owner): no new list on a pattern the bank already has twice or more
+     ("countries with the most <sport> wins", "most-followed <platform> accounts"); prefer new kinds of things
+     (food, brands, inventions, shows, places people visit, everyday "most common" lists) and what players rate up
+     once ratings exist. Prefer mainstream lists that could meet the daily bar (docs/JUDGE.md); the daily bank is the
      bottleneck. Oddball lists (free play, fun, guessable without specialist knowledge) otherwise.
 2. **Judge** with `list-judge` agents in triage mode, in parallel, in the main checkout. They write only their
    verdict file and name scratch files after their list.
