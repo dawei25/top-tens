@@ -146,7 +146,9 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     save(recordListRun(s, game, daily?.n));
   }, [game, puzzle, id, daily]);
 
-  // The hint confirm closes on Escape or a press anywhere outside its row.
+  // The hint confirm closes on Escape, or a click or tap anywhere outside its row. On the click, not the press: the
+  // confirm takes room on the board, so closing it on pointer down moved the board under the pointer and the press
+  // missed what it was aimed at (GIVE UP, a row lower down).
   useEffect(() => {
     if (hintAsk === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -156,17 +158,18 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
       setHintAsk(null);
       inputRef.current?.focus();
     };
-    const onDown = (e: PointerEvent) => {
+    const onClick = (e: MouseEvent) => {
       if (!(e.target as Element).closest?.(`[data-hint-rank="${hintAsk}"]`)) setHintAsk(null);
     };
-    // Capture phase, so it runs before the header's Escape-is-Back listener.
+    // Capture phase: the keydown before the header's Escape-is-Back listener, the click before React's own click
+    // handlers (so a click on another row's clue key still opens that row).
     document.addEventListener("keydown", onKey, true);
-    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("click", onClick, true);
     // Opened from the keyboard: take focus to YES. Opened by click or tap, focus stays in the guess box.
     if (document.activeElement?.classList.contains("blank-toggle")) yesRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", onKey, true);
-      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("click", onClick, true);
     };
   }, [hintAsk]);
 
@@ -540,6 +543,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button
                   type="button"
                   className="fact-all"
+                  data-testid="facts-toggle"
                   aria-pressed={allFactsOpen}
                   onClick={() => setOpenFacts(allFactsOpen ? new Set() : new Set(factRanks))}
                 >

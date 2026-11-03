@@ -46,13 +46,13 @@ function ModeKey({
       onPointerEnter={today ? (e) => e.pointerType === "mouse" && e.currentTarget.focus({ preventScroll: true }) : undefined}
     >
       <span className="mode-key-top">
+        <EnterHint />
         <span className="key-sub" data-testid={`${testId}-status`}>
           {status}
         </span>
       </span>
       <span className="mode-key-main">
         <span className="key-label">{title}</span>
-        <EnterHint />
       </span>
     </button>
   );
@@ -485,6 +485,7 @@ export function Home({
         {!help && (
           <button
             className="key key-sm"
+            data-testid="help-open"
             onClick={() => {
               setHelpAsked(true);
               setHelp(true);

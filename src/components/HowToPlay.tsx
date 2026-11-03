@@ -23,7 +23,7 @@ export function HowToPlay({ onClose, scroll }: { onClose: () => void; scroll?: b
         <h2 id="howto-title" className="label">
           How to play
         </h2>
-        <button className="key key-sm" onClick={close}>
+        <button className="key key-sm" data-testid="help-close" onClick={close}>
           Got it
         </button>
       </div>

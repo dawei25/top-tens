@@ -1,0 +1,146 @@
+[
+ {
+  "n": 1,
+  "date": "2026-10-20",
+  "id": "countries-population",
+  "blitz": "population-density"
+ },
+ {
+  "n": 2,
+  "date": "2026-10-21",
+  "id": "video-games",
+  "blitz": "africa-population"
+ },
+ {
+  "n": 3,
+  "date": "2026-10-22",
+  "id": "mountains",
+  "blitz": "consoles"
+ },
+ {
+  "n": 4,
+  "date": "2026-10-23",
+  "id": "nba-points",
+  "blitz": "nfl-passing-yards"
+ },
+ {
+  "n": 5,
+  "date": "2026-10-24",
+  "id": "films-gross",
+  "blitz": "deserts"
+ },
+ {
+  "n": 6,
+  "date": "2026-10-25",
+  "id": "islands",
+  "blitz": "co2-emissions"
+ },
+ {
+  "n": 7,
+  "date": "2026-10-26",
+  "id": "spotify-artists",
+  "blitz": "gdp-per-capita"
+ },
+ {
+  "n": 8,
+  "date": "2026-10-27",
+  "id": "airports",
+  "blitz": "mlb-home-runs"
+ },
+ {
+  "n": 9,
+  "date": "2026-10-28",
+  "id": "youtube-channels",
+  "blitz": "manga"
+ },
+ {
+  "n": 10,
+  "date": "2026-10-29",
+  "id": "us-states-population",
+  "blitz": "india-cities"
+ },
+ {
+  "n": 11,
+  "date": "2026-10-30",
+  "id": "oil-production",
+  "blitz": "films-gross"
+ },
+ {
+  "n": 12,
+  "date": "2026-10-31",
+  "id": "websites",
+  "blitz": "banks"
+ },
+ {
+  "n": 13,
+  "date": "2026-11-01",
+  "id": "countries-gdp",
+  "blitz": "rivers"
+ },
+ {
+  "n": 14,
+  "date": "2026-11-02",
+  "id": "broadway",
+  "blitz": "expensive-films"
+ },
+ {
+  "n": 15,
+  "date": "2026-11-03",
+  "id": "europe-population",
+  "blitz": "military-spending"
+ },
+ {
+  "n": 16,
+  "date": "2026-11-04",
+  "id": "national-parks",
+  "blitz": "beer-per-capita"
+ },
+ {
+  "n": 17,
+  "date": "2026-11-05",
+  "id": "lakes",
+  "blitz": "us-surnames"
+ },
+ {
+  "n": 18,
+  "date": "2026-11-06",
+  "id": "x-accounts",
+  "blitz": "world-cities"
+ },
+ {
+  "n": 19,
+  "date": "2026-11-07",
+  "id": "olympic-medals",
+  "blitz": "fast-food-chains"
+ },
+ {
+  "n": 20,
+  "date": "2026-11-08",
+  "id": "canada-cities",
+  "blitz": "languages"
+ },
+ {
+  "n": 21,
+  "date": "2026-11-09",
+  "id": "game-franchises",
+  "blitz": "us-states-gdp"
+ },
+ {
+  "n": 22,
+  "date": "2026-11-10",
+  "id": "europe-cities",
+  "blitz": "nobel-countries"
+ },
+ {
+  "n": 23,
+  "date": "2026-11-11",
+  "id": "us-box-office",
+  "blitz": "billionaire-countries"
+ },
+ {
+  "n": 24,
+  "date": "2026-11-12",
+  "id": "island-countries",
+  "blitz": "spotify-songs"
+ }
+]

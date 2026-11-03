@@ -1,4 +1,6 @@
 // Shared setup for the e2e specs. Specs select by data-testid and aria labels only, never by visible text.
+const fs = require("node:fs");
+const path = require("node:path");
 let chromium;
 try {
   ({ chromium } = require("playwright"));
@@ -7,6 +9,22 @@ try {
 }
 
 const URL = process.env.E2E_URL || "http://localhost:5101/";
+const FONTS = path.join(__dirname, "fixtures", "fonts");
+
+/**
+ * The page's web font (VT323 from Google Fonts) served from e2e/fixtures/fonts: every spec renders the real font,
+ * the same bytes each run, with or without the network. A file not there falls through to the network.
+ */
+async function offlineFonts(ctx) {
+  await ctx.route(/^https:\/\/fonts\.googleapis\.com\/css2\?family=VT323/, (route) =>
+    route.fulfill({ path: path.join(FONTS, "vt323.css"), contentType: "text/css", headers: { "access-control-allow-origin": "*" } }),
+  );
+  await ctx.route(/^https:\/\/fonts\.gstatic\.com\/s\/vt323\//, (route) => {
+    const file = path.join(FONTS, path.basename(new globalThis.URL(route.request().url()).pathname));
+    if (!fs.existsSync(file)) return route.continue();
+    return route.fulfill({ path: file, contentType: "font/woff2", headers: { "access-control-allow-origin": "*" } });
+  });
+}
 const VIEWPORTS = [
   { name: "desktop", viewport: { width: 1440, height: 900 } },
   { name: "phone", viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true },
@@ -26,7 +44,9 @@ async function open(browser, vp, hash = "", seed = FRESH, opts = {}) {
     isMobile: !!vp.isMobile,
     hasTouch: !!vp.hasTouch,
     timezoneId: "America/New_York",
+    ...(opts.reducedMotion && { reducedMotion: opts.reducedMotion }),
   });
+  await offlineFonts(ctx);
   if (opts.setup) await opts.setup(ctx);
   // Seed once per context (a flag in localStorage, so reloads and second tabs keep the progress).
   await ctx.addInitScript((s) => {
@@ -64,4 +84,36 @@ async function guess(page, text) {
   await box.press("Enter");
 }
 
-module.exports = { chromium, VIEWPORTS, NOW, TODAY, open, openTab, go, hash, puzzle, todaysDaily, store, noHScroll, guess };
+/**
+ * Stops the page's clock (timers, Date, animation frames) at `at`, or a second from now (the clock keeps running
+ * while the call travels): nothing ticks until a spec moves it on (clock.runFor, clock.fastForward).
+ */
+async function freeze(page, at) {
+  await page.clock.pauseAt(at ?? (await page.evaluate(() => Date.now())) + 1000);
+}
+
+/** Gives up the list game on screen (GIVE UP, then SURE?) and waits for the results. */
+async function giveUp(page) {
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("results").waitFor();
+}
+
+module.exports = {
+  chromium,
+  VIEWPORTS,
+  NOW,
+  TODAY,
+  FRESH,
+  open,
+  openTab,
+  go,
+  hash,
+  puzzle,
+  todaysDaily,
+  store,
+  noHScroll,
+  guess,
+  freeze,
+  giveUp,
+};
