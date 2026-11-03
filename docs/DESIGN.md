@@ -6,6 +6,8 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
 
 - 10 hidden slots, ordered by rank. A correct guess reveals its slot (rank, name, source value).
 - 5 lives. **Only an accepted answer outside the top 10 costs a life**, and the game shows where it ranks ("Austria is #113").
+  On a regional geography list, a place outside the region also costs a life and says so ("Tokyo isn't in Europe.");
+  places on two continents that the source leaves out are free (owner, Nov 3).
 - Free (no life lost):
   - **Misspellings.** The input is corrected in place ("cambimia" becomes "Cambodia") and nothing is submitted until
     the player presses Enter again.

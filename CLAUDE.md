@@ -106,6 +106,9 @@ use redirects already in the cache.
 
 - Every row of a topic's source table is an accepted answer. Only accepted answers outside the top 10 cost a life;
   anything else is free. So answer sets should be broad: country lists also include every country.
+- Regional geography lists (`region` in topics.ts: a continent or a country) take their answers from their region.
+  A place outside it costs a life and says so ("Tokyo isn't in Europe.": `elsewhere`, owner's call: it's on the
+  player); places on two continents that the source leaves out stay free. validate.ts enforces both.
 - A topic whose #10 and #11 tie is rejected.
 - Aliases come from Wikipedia redirects, short forms and `scripts/intent.ts`. An alias shared by 2-4 entries is kept
   on all of them; more owners than that, and it is dropped.
