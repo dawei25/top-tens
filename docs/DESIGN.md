@@ -70,9 +70,9 @@ Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
    Blitz's title card shows the prompt and "name as many <noun> as you can".
 3. **Results:** score, the average and histogram (where you stand), full list with values, source link, share, Roll
    again (a new random game).
-   A finished daily offers Today's Blitz and Random list instead. The archive lists each date as a pair: the list
-   row and directly under it the Blitz row (BLITZ tag, that list's title, score or not played), each opening its own
-   one-try game.
+   A finished daily offers Today's Blitz and Random list instead. The archive is a table, one row per date: number and
+   date, then a List cell and a Blitz cell (title, and score or "not played" under it), with "List" and "Blitz" named
+   once at the top; each cell opens its own one-try game.
 4. **How to play** on first visit.
 5. **Stats** (`#stats`, Your knowledge): list games against par, overall, by category and by topic; placeholders
    before the first game.
