@@ -15,7 +15,9 @@ Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 - Data: team universe nicknames reach the table rows they merge with (World Series and Super Bowl lists; validate.ts
   check); zero counts show "0"; `knownNames` for usual spellings of famous non-answers (crossbreeds, Monster
   seasons); brand-account junk shared across the social lists; Lisa and Lena's 2017 figure; French Poodle.
-- Leak rate: 1.4% before this cycle; re-measure pending.
+- Leak rate: 1.4% -> 1.3% (1287 of 98,054, 99 lists). What is left is mostly country names inside park,
+  stadium and building names ("china" to Bank of China Tower) and surnames ("king" to Zach King): near the floor
+  of what the audit can call wrong.
 - New topics: pixar-films ("Highest-grossing Pixar films"; casual 6, Blitz 19/20; every Pixar feature with its
   gross, other studios' films free). Parked: best-selling book series (five-way tie at #10).
 - Next: judge pixar-films and world-series-wins (fixed); oldest Oct 30 verdicts (us-metros, empires, museums).
