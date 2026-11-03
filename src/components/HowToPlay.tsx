@@ -3,7 +3,7 @@ import { BLITZ_SECONDS } from "../game/blitz";
 import { load, save } from "../game/storage";
 import { ClueIcon } from "./pixel";
 
-export function markHelpSeen() {
+function markHelpSeen() {
   const s = load();
   if (!s.seenHelp) save({ ...s, seenHelp: true });
 }
