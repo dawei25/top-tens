@@ -1,27 +1,26 @@
 {
   "id": "tiktok-accounts",
-  "judgedAt": "2026-10-30",
-  "decision": "fix-first",
+  "judgedAt": "2026-11-03",
+  "decision": "free-play",
   "alsoBlitz": true,
-  "priority": 6,
-  "scores": { "recognizability": 3, "curve": 3, "fairness": 2, "data": 3, "fun": 4, "blitzDepth": 4 },
-  "casual": { "found": 6, "livesLost": 5, "guesses": 12 },
+  "priority": 5,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 5, "livesLost": 5, "guesses": 14 },
   "fan": null,
-  "blitzCasual": { "scored": 18, "named": 21 },
+  "blitzCasual": { "scored": 17, "named": 27 },
   "difficulty": 3,
   "tags": ["internet", "social media", "tiktok"],
   "audience": "TikTok users",
-  "summary": "A fun Blitz for anyone on TikTok, with 50 ranked accounts, but it needs cleanup first: celebrity guesses like Taylor Swift cost a life with no rank, 'the rock' is not recognized, and several aliases point to the wrong person.",
+  "summary": "The old cleanup is done and it makes a good Blitz, with 50 ranked accounts. As Today's list it is too hard and too punishing: famous stars ranked 11 to 35 each cost a life.",
   "reasons": [
-    "Casual player found 6/10 (Khaby, Charli, MrBeast, Addison Rae, Bella Poarch, Zach King) and lost all 5 lives on Selena Gomez #26, Kylie Jenner #23, Dixie #35, plus Taylor Swift and Kim Kardashian, which are unranked and cost a life with nothing learned.",
-    "Willie Salim and Kimberly Loaiza are unknown to most English-speaking players, and the TikTok and FIFA World Cup accounts are a fun reveal but rarely guessed, so it is too hard for Today's list.",
-    "Good Blitz pool (50 ranked accounts, casual 90 s scored 18 of 21), so it suits Today's Blitz once the data is clean."
+    "Casual found 5/10 (Charli, Khaby, Addison Rae, MrBeast, Bella Poarch), then lost all 5 lives in a row on The Rock #12, Selena Gomez #26, Kylie Jenner #23, Dixie #35 and Will Smith #13. Each miss shows a figure, but they go fast. Willie Salim and Kimberly Loaiza are unknown to most English speakers.",
+    "Last verdict's fixes are done: Taylor Swift and Kim Kardashian are now free, 'the rock' works, IShowSpeed's name is clean and the other-person and junk aliases are gone.",
+    "Casual 90 s Blitz scored 17 of 27, mostly stars ranked 11 to 40, so it clears the Blitz bar."
   ],
   "fixes": [
-    "Make the CELEBRITIES extras (topic 'also') free or drop them for this topic: Taylor Swift, Kim Kardashian, Cristiano Ronaldo, Lionel Messi, Lisa etc. cost a life in classic and score nothing in Blitz, with no rank shown.",
-    "Fix the garbled name 'IShowSpeed (Darren Watkins Jr.' to 'IShowSpeed' (#33), and add 'Speed' as an alias.",
-    "Add 'The Rock' as an alias of Dwayne Johnson (#12); 'the rock' is currently not recognized.",
-    "Remove aliases that are other people: Chandler Hallow, Ava Kris Tyson, Chris Tyson, Nolan Hansen (MrBeast); Zaira Nucci (Khaby Lame); Heidi D'Amelio, Marc D'Amelio (Charli D'Amelio).",
-    "Remove junk aliases: 'MrBeast allegations', 'T-Series vs MrBeast', 'Would You Risk Dying for $500,000?' (MrBeast); 'Legal issues with TikTok', 'Project Texas', 'TikTok Star', 'TikToker', 'Tiktokers', 'TikTok dance', 'TikTok trend' (TikTok); 'Dolls', 'Dolls EP' (Bella Poarch); 'FIFA World Cup tiebreakers' (FIFA World Cup); 'Sports' (Barstool Sports), 'League' (Champions League)."
+    "'charli xcx' is offered as Charli D'Amelio (#2), and 'bella hadid', 'bella thorne' and 'bella ramsey' are offered as Bella Poarch (#5), because the leading-name rule takes the bare first-name aliases 'Charli' and 'Bella'. Make these other famous people free: add them to the shared celebrity names, or stop a first-name-only alias from leading a guess that has a different surname.",
+    "Lisa and Lena (unranked) costs a life with no figure, but the historical table gives 18.9 million on 27 April 2017. Show that dated figure.",
+    "'i show speed' is not recognized for IShowSpeed (#33). Add it as an alias.",
+    "Junk aliases on ranks 11+ that facebook-pages already drops: 'Carles Vilarrubí Carrió' and 'Johan Cruyff's Dream Team' (FC Barcelona), 'Cinematch' and 'Magic Quill Productions' (Netflix). Move them to the shared CELEBRITY_JUNK."
   ]
 }
