@@ -36,6 +36,11 @@ export interface Saved {
   listRuns?: ListRun[];
   /** A Blitz round in progress per list id, saved after every hit so leaving the page doesn't lose it. */
   blitzLive?: Record<string, BlitzState>;
+  /**
+   * The first finished try on each list, per mode, never pruned: what stats count, so replaying a list can't raise
+   * them. Written when a list's first run is recorded; older saves get it from their oldest run on load.
+   */
+  firstTries?: { list?: Record<string, ListRun>; blitz?: Record<string, BlitzRun> };
 }
 
 const empty = (): Saved => ({ games: {}, daily: {}, seenHelp: false });
@@ -45,7 +50,7 @@ export function load(): Saved {
     const s: Saved = { ...empty(), ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
     // Early builds keyed the daily by day number; those entries can't count toward date-based streaks.
     for (const k of Object.keys(s.daily)) if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) delete s.daily[k];
-    return s;
+    return withFirstTries(s);
   } catch {
     return empty();
   }
@@ -66,8 +71,41 @@ export interface Stats {
   dist: number[];
 }
 
+/**
+ * Fill in first tries a save doesn't have yet from what it remembers: the oldest finished game of each list (from the
+ * run history, the locked dailies and the list's own save) and the oldest Blitz round of each list. Existing first
+ * tries are never replaced.
+ */
+export function withFirstTries(s: Saved): Saved {
+  const list: Record<string, ListRun> = { ...s.firstTries?.list };
+  const blitz: Record<string, BlitzRun> = { ...s.firstTries?.blitz };
+  let added = false;
+  const games = [...Object.values(s.dailyGames ?? {}), ...Object.values(s.games)];
+  const candidates: ListRun[] = [...(s.listRuns ?? [])];
+  for (const g of games) {
+    if (g.status === "playing") continue;
+    // Games saved before timestamps existed count as the oldest try.
+    const startedAt = g.startedAt ?? 0;
+    candidates.push({ id: g.puzzleId, startedAt, finishedAt: g.finishedAt ?? startedAt, status: g.status, found: g.found, lives: g.lives, hints: g.hints?.length ?? 0 });
+  }
+  for (const r of candidates) {
+    if (s.firstTries?.list?.[r.id]) continue;
+    if (!list[r.id] || r.startedAt < list[r.id].startedAt) {
+      list[r.id] = r;
+      added = true;
+    }
+  }
+  for (const [id, runs] of Object.entries(s.blitzRuns ?? {})) {
+    if (s.firstTries?.blitz?.[id] || !runs.length) continue;
+    blitz[id] = runs.reduce((a, b) => (b.startedAt < a.startedAt ? b : a));
+    added = true;
+  }
+  return added ? { ...s, firstTries: { list, blitz } } : s;
+}
+
+/** Played, perfect games, average found and the 0-10 spread: first tries only, so replays can't inflate them. */
 export function stats(s: Saved): Stats {
-  const done = Object.values(s.games).filter((g) => g.status !== "playing");
+  const done = Object.values(withFirstTries(s).firstTries?.list ?? {});
   const dist = Array(11).fill(0);
   for (const g of done) dist[g.found.length]++;
   return {

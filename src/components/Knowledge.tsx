@@ -1,4 +1,5 @@
 import { dailyGame, type DailyEntry } from "../game/daily";
+import { firstListRuns } from "../game/history";
 import type { ParFile } from "../game/par";
 import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
@@ -45,7 +46,8 @@ function groupBy(games: { score: number; par: number }[], keys: string[][]): Map
 
 /** Finished list games with a par, by category and by tag. Blitz has no par yet, so it's left out. */
 function knowledge(index: PuzzleMeta[], par: ParFile) {
-  const runs = (load().listRuns ?? []).filter((r) => par[r.id]);
+  // First tries only: replaying a list can't raise the stats.
+  const runs = firstListRuns(load()).filter((r) => par[r.id]);
   const games = runs.map((r) => ({ score: r.found.length, par: par[r.id].par }));
   const meta = new Map(index.map((m) => [m.id, m]));
   const categories = [...groupBy(games, runs.map((r) => [meta.get(r.id)?.category ?? "Other"]))]

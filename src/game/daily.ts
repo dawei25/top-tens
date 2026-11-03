@@ -183,3 +183,18 @@ export function rollHoldouts(
 
 /** The holdouts for a free Blitz: the same as for any roll. */
 export const blitzHoldouts = rollHoldouts;
+
+/**
+ * Saves from before dailies were locked keep a date's result only in the list's own game. Lock each such result to
+ * its date (once), so replaying the list later never changes what the archive shows for that day.
+ */
+export function lockLegacyDailies(saved: Saved, schedule: DailyEntry[], today = localDate()): Saved {
+  let dailyGames = saved.dailyGames;
+  for (const e of schedule) {
+    if (e.date > today || dailyGames?.[e.date]) continue;
+    const g = saved.games[e.id];
+    if (!g || g.status === "playing") continue;
+    dailyGames = { ...dailyGames, [e.date]: g };
+  }
+  return dailyGames === saved.dailyGames ? saved : { ...saved, dailyGames };
+}

@@ -37,7 +37,15 @@ export function recordListRun(saved: Saved, game: GameState, daily?: number): Sa
     hints: game.hints?.length ?? 0,
     ...(daily ? { daily } : {}),
   };
-  return { ...saved, listRuns: [run, ...runs].slice(0, MAX_LIST_RUNS) };
+  const firstTries = saved.firstTries?.list?.[run.id]
+    ? saved.firstTries
+    : { ...saved.firstTries, list: { ...saved.firstTries?.list, [run.id]: run } };
+  return { ...saved, listRuns: [run, ...runs].slice(0, MAX_LIST_RUNS), firstTries };
+}
+
+/** Each list's first finished try (what stats count), oldest first. */
+export function firstListRuns(saved: Saved): ListRun[] {
+  return Object.values(saved.firstTries?.list ?? {}).sort((a, b) => a.startedAt - b.startedAt);
 }
 
 /**

@@ -8,6 +8,7 @@ import {
   dailyHoldouts,
   formatCountdown,
   lockDaily,
+  lockLegacyDailies,
   msUntilNextDaily,
   rollHoldouts,
   streak,
@@ -187,5 +188,25 @@ describe("Blitz spoiler holds", () => {
     expect([...rollHoldouts(sched, all, played, "2026-11-04")].sort()).toEqual(["b", "n"]);
     // Future Blitz topics are held even from the plain daily holdouts.
     expect(dailyHoldouts(sched, "2026-11-03").has("n")).toBe(true);
+  });
+});
+
+describe("legacy daily results", () => {
+  const g = (id: string, status: "lost" | "playing" = "lost") => ({ puzzleId: id, found: [1], lives: 0, log: [], status });
+  const sched: DailyEntry[] = [
+    { n: 1, date: "2026-10-20", id: "a", blitz: "m" },
+    { n: 2, date: "2026-10-21", id: "b", blitz: "n" },
+    { n: 3, date: "2026-10-22", id: "c", blitz: "o" },
+    { n: 4, date: "2026-11-09", id: "d", blitz: "p" },
+  ];
+  it("lock a date's result kept only in the list's game, once, so a replay can't change the archive", () => {
+    const s = { ...saved([]), games: { a: g("a"), b: g("b", "playing"), d: g("d") }, dailyGames: { "2026-10-22": g("c") } };
+    const locked = lockLegacyDailies(s, sched, "2026-11-03");
+    expect(Object.keys(locked.dailyGames ?? {}).sort()).toEqual(["2026-10-20", "2026-10-22"]);
+    // Replaying a afterwards changes its game, not the locked day.
+    const replayed = { ...locked, games: { ...locked.games, a: { ...g("a"), found: [1, 2, 3] } } };
+    expect(dailyGame(replayed, sched[0])?.found).toEqual([1]);
+    // Nothing to lock: the same save comes back.
+    expect(lockLegacyDailies(locked, sched, "2026-11-03")).toBe(locked);
   });
 });

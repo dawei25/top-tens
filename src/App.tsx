@@ -18,6 +18,7 @@ import {
   entryForDate,
   loadSchedule,
   localDate,
+  lockLegacyDailies,
   msUntilNextDaily,
   todayEntry,
   type DailyEntry,
@@ -113,7 +114,14 @@ function Screens() {
 
   useEffect(() => {
     loadIndex().then(setIndex);
-    loadSchedule().then(setSchedule);
+    loadSchedule().then((s) => {
+      // Older saves keep a date's daily result only in the list's game: lock it to its date before any replay can
+      // change what the archive shows.
+      const saved = load();
+      const locked = lockLegacyDailies(saved, s, localDate());
+      if (locked !== saved) save(locked);
+      setSchedule(s);
+    });
     loadLexicon().then(setLexicon);
     const onHash = () => {
       const h = location.hash;

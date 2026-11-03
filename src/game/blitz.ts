@@ -206,9 +206,14 @@ export function recordBlitz(
   }
   const best = previous === undefined || score > previous;
   const run: BlitzRun = { startedAt, endedAt: state.endedAt ?? Date.now(), score, hits: state.hits };
+  // The first round on a list stays its first try (what stats count), however many replays follow.
+  const firstTries = saved.firstTries?.blitz?.[puzzleId]
+    ? saved.firstTries
+    : { ...saved.firstTries, blitz: { ...saved.firstTries?.blitz, [puzzleId]: run } };
   return {
     saved: {
       ...saved,
+      firstTries,
       blitzBest: best ? { ...saved.blitzBest, [puzzleId]: score } : saved.blitzBest,
       blitzRuns: { ...saved.blitzRuns, [puzzleId]: [run, ...runs].slice(0, MAX_BLITZ_RUNS) },
       blitzLive: live,
@@ -243,6 +248,11 @@ export function freshBlitz(saved: Saved, puzzleId: string, now = Date.now()): Sa
   const live = saved.blitzLive?.[puzzleId];
   if (!live) return saved;
   return recordBlitz(saved, puzzleId, finishBlitz(live, now)).saved;
+}
+
+/** Each list's first finished Blitz round (what stats count), as [list id, round]. */
+export function firstBlitzRuns(saved: Saved): [string, BlitzRun][] {
+  return Object.entries(saved.firstTries?.blitz ?? {});
 }
 
 /** Finished rounds on a list, newest first. */
