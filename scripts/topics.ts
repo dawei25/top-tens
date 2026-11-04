@@ -338,6 +338,7 @@ const CITIES: Also[] = [
 const COASTLINE_NAMES: Record<string, string> = {
   "Congo, Democratic Republic of the": "Democratic Republic of the Congo",
   "Congo, Republic of the": "Republic of the Congo",
+  Swaziland: "Eswatini",
 };
 
 /** Famous accounts on the big social platforms, shared by the follower-count lists. */

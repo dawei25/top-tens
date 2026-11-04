@@ -6,6 +6,8 @@ import { UNIVERSES, whereIs } from "./gazetteer";
 import { TOPICS, type Topic } from "./topics";
 import {
   checkPuzzle,
+  COUNTRY_TWICE_FROM,
+  countryTwice,
   elsewhereErrors,
   FACTS_REQUIRED_FROM,
   factIssues,
@@ -178,6 +180,29 @@ describe("validate: inverted index names", () => {
     for (const name of ["Congo, Democratic Republic of the", "Micronesia, Federated States of", "Korea, South", "Gambia, The"]) {
       expect(invertedName(name), name).toBe(true);
     }
+  });
+});
+
+describe("validate: one country, two entries", () => {
+  it("fails a country under two of its names, in a list built under the rule", () => {
+    const p = puzzle({ asOf: COUNTRY_TWICE_FROM });
+    p.extras[0].name = "Cape Verde";
+    p.extras[1].name = "Cabo Verde";
+    p.extras[2].name = "Macau";
+    p.extras[3].name = "Macao";
+    expect(errors(p)).toEqual([
+      expect.stringContaining('one country, 2 entries: "Cape Verde", "Cabo Verde"'),
+      expect.stringContaining('one country, 2 entries: "Macau", "Macao"'),
+    ]);
+  });
+
+  it("leaves a football nation beside its country, and a region on the other side of it", () => {
+    const p = puzzle({ asOf: COUNTRY_TWICE_FROM });
+    p.extras[0].name = "England";
+    p.extras[1].name = "United Kingdom";
+    p.extras[2].name = "ROC";
+    p.extras[3].name = "Chinese Taipei";
+    expect(countryTwice(p)).toEqual([]);
   });
 });
 

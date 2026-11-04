@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import {
+  countryNames,
   datedLabel,
   datedValue,
   labelYear,
@@ -331,6 +332,16 @@ describe("country demonyms", () => {
         seen.set(f.toLowerCase(), forms[0]);
       }
     }
+  });
+
+  it("give a country's other full names, never a part's or a namesake's", () => {
+    expect(countryNames(["cabo verde"])).toContain("cape verde");
+    expect(countryNames(["macao"])).toContain("macau");
+    expect(countryNames(["czech republic"])).toContain("czechia");
+    // England is a football nation of its own beside the United Kingdom; the Olympics' ROC is no Taiwan.
+    expect(countryNames(["united kingdom"])).not.toContain("england");
+    expect(countryNames(["england"])).toEqual([]);
+    expect(countryNames(["roc"])).toEqual([]);
   });
 
   it("name a two-island state by its main island, and Saint as St (\"st kitts\" found nothing)", () => {

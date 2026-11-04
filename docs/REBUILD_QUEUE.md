@@ -38,7 +38,8 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 - [ ] **Nov 5 pipeline changes not yet on every list** (apply at each list's next rebuild): CITY_JUNK in
       scripts/aliases.ts now holds the city redirects judges found on one city list (schools, clubs, districts,
       demonyms), dropped on every city list; COUNTRY_FORMS gives "St Kitts", "St Vincent", "St Lucia", "Antigua" and
-      their other forms to every country list.
+      their other forms to every country list; a universe member merges into the entry its usual name already names
+      (tourism's second "Macao" goes; validate.ts only warns on it until then).
 
 - [ ] **Cycle 4 pipeline changes not yet on every list** (apply at each list's next rebuild): "Science in Aotearoa"
       in the shared country junk list (13 country lists); infobox values never replace a stat from a table (lists

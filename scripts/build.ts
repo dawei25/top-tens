@@ -944,6 +944,20 @@ function pruneAliases(entries: Entry[], namesakes = new Map<string, Set<Entry>>(
 
 const COUNTRY_NAMES = new Set(UNIVERSES.countries().map((c) => normalize(c.name)));
 
+/**
+ * The full names a country goes by, for normalized forms of it: its COUNTRY_FORMS line's usual name and the
+ * universe's names on that line ("cabo verde" → "cape verde", "macao" → "macau", "turkiye" → "turkey"). Not the
+ * line's other forms: England is a football nation of its own beside the United Kingdom, the Olympics' ROC no Taiwan.
+ */
+export function countryNames(forms: string[]): string[] {
+  const out: string[] = [];
+  for (const line of COUNTRY_FORMS) {
+    const names = [line[0], ...line.filter((f) => COUNTRY_NAMES.has(normalize(f)))].map(normalize);
+    if (names.some((n) => forms.includes(n))) out.push(...names.filter((n) => !forms.includes(n)));
+  }
+  return out;
+}
+
 interface Curated {
   alias: string;
   targets: Entry[];
@@ -1211,6 +1225,9 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   // `universeNamesOnly`: the universe names the rows, but adds no answers of its own.
   // Members of a universe whose other names are nicknames (teams): those names belong to the row they merge with.
   const nicknamed = new Set<Entry>();
+  // Members of the countries universe: one is the country another page's table names its usual way ("Cabo Verde" is
+  // the coastline table's "Cape Verde").
+  const countryMembers = new Set<Entry>();
   // A regional list's universe gives its region's members as answers and the rest as `elsewhere` (a capital by its
   // country); a transcontinental country the table leaves out, and its capital, stay free.
   const listed = new Set(rows.map((r) => countryOf(r.name)?.name).filter((n): n is string => !!n));
@@ -1235,6 +1252,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       ...(where(p) === "outside" ? { elsewhere: true as const } : {}),
     }));
     if (TEAM_UNIVERSE.test(u)) for (const m of added) nicknamed.add(m);
+    if (u === "countries") for (const m of added) countryMembers.add(m);
     extra.push(...added);
   }
   const junk = new Set(
@@ -1262,6 +1280,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   for (const [i, e] of entries.entries()) own(e, [e.name, ...real(e), rows[i].redirectTarget, rows[i].link]);
   for (const e of extra) {
     const forms = ownForms(e).map(normalize).filter(Boolean);
+    if (countryMembers.has(e)) forms.push(...countryNames(forms));
     const known = forms.find((f) => taken.has(f));
     if (known) {
       // A team row by the member's own name first: the Orioles' cell also names their 1901 self, "Milwaukee Brewers".
@@ -1299,7 +1318,8 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     own(e, [e.name, ARTICLE.get(e), LINK.get(e)]);
   }
   for (const [name, shown] of zeroRows(topic)) {
-    const e = taken.get(name);
+    // The table's "Czech Republic: 0" is the universe's Czechia.
+    const e = taken.get(name) ?? (countryMembers.size ? countryNames([name]).map((n) => taken.get(n)).find(Boolean) : undefined);
     if (e && e.rank === 0 && e.value === undefined) e.value = shown;
   }
   if (topic.people) {
