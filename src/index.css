@@ -123,8 +123,18 @@ a {
   color: var(--pink-ink);
 }
 
+/*
+ * Safe areas (index.html asks for viewport-fit=cover): the screens' sides keep clear of a notch through their padding
+ * (.screen), and everything starts below a top inset when there is one (a notch above the page, a cutout). The
+ * full-height screens subtract it, so they still fill exactly one screen. Fixed layers (the menu, sheets, the rules)
+ * keep clear on their own.
+ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+}
 #root {
   min-height: 100dvh;
+  padding-top: var(--safe-top);
 }
 
 .sr-only {
@@ -176,7 +186,7 @@ a {
 .loading {
   display: grid;
   place-items: center;
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--safe-top));
 }
 
 .panel {
@@ -400,7 +410,7 @@ a {
 
 /* ---------- Home ---------- */
 .home {
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--safe-top));
   gap: 28px;
   padding-top: max(32px, 6vh);
   max-width: calc(var(--col) + 2 * var(--gutter));
@@ -971,7 +981,7 @@ a {
 .howto {
   width: min(560px, calc(100% - 2 * var(--gutter)));
   max-width: none;
-  max-height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   margin: auto;
   padding: 0;
   /* Solid, unlike the glass cards: the keys behind it would read through the rules. */
@@ -1040,7 +1050,7 @@ a {
   gap: 14px;
   padding-bottom: var(--dock-gap);
   /* A short screen (a Blitz round just begun) still puts the box at the bottom edge, in thumb reach. */
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--safe-top));
 }
 @media (min-width: 700px) {
   .game {
