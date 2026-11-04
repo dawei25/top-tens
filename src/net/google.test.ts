@@ -1,178 +1,278 @@
 import { createHash } from "node:crypto";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { CredentialResponse, GoogleId } from "./google";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  ACK,
+  authUrl,
+  callbackUrl,
+  CLOSED_POLL_MS,
+  gameUrl,
+  GOOGLE_AUTH,
+  GOOGLE_FAILED,
+  makeNonce,
+  MESSAGE,
+  NO_MATCH,
+  outcomeOf,
+  parseCallback,
+  peekPending,
+  PENDING_KEY,
+  PENDING_TTL,
+  prepareGoogle,
+  readMessage,
+  RESULT_KEY,
+  saveResult,
+  savePending,
+  startGoogle,
+  takeGoogleReturn,
+  takePending,
+  WINDOW_NAME,
+  type GameWindow,
+  type GoogleOutcome,
+} from "./google";
+import { KEYS } from "./store";
 
 /**
- * Google's button (Google Identity Services) against a fake `google.accounts.id`: the script is added once and only on
- * demand, the nonce Google gets is the SHA-256 of the one Supabase gets, and every token goes out with its own nonce.
+ * Google sign-in from our own key (./google): the request Google gets, what comes back to the callback page, the try
+ * kept for the way back, and the popup or full-page trip, against fake windows and storage.
  */
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
-const b64url = (o: unknown) => Buffer.from(JSON.stringify(o)).toString("base64url");
-/** An ID token shaped like Google's (unsigned: only Supabase checks the signature). */
-const idToken = (claims: Record<string, unknown>) => `${b64url({ alg: "RS256", typ: "JWT" })}.${b64url(claims)}.sig`;
+const CLIENT = "1234-abc.apps.googleusercontent.com";
+const NOW = Date.UTC(2026, 10, 4, 12);
 
-type Script = { src: string; async: boolean; onload?: () => void; onerror?: () => void; remove: () => void };
-
-/** A page with a <head> that records the scripts added to it, and a window Google's script can fill in. */
-function fakePage() {
-  const scripts: Script[] = [];
-  const win: { google?: { accounts?: { id?: GoogleId } } } = {};
-  vi.stubGlobal("window", win);
-  vi.stubGlobal("document", {
-    createElement: (tag: string) => {
-      expect(tag).toBe("script");
-      const s: Script = { src: "", async: false, remove: () => scripts.splice(scripts.indexOf(s), 1) };
-      return s;
+/** Storage in memory (localStorage or sessionStorage). */
+function memory(): Storage & { data: Map<string, string> } {
+  const data = new Map<string, string>();
+  return {
+    data,
+    get length() {
+      return data.size;
     },
-    head: { append: (s: Script) => scripts.push(s) },
-  });
-  return { scripts, win };
-}
-
-/** A fake google.accounts.id: records initialize and renderButton. */
-function fakeGis() {
-  const inits: Parameters<GoogleId["initialize"]>[0][] = [];
-  const renders: { parent: unknown; options: Parameters<GoogleId["renderButton"]>[1] }[] = [];
-  const id: GoogleId = {
-    initialize: (c) => void inits.push(c),
-    renderButton: (parent, options) => void renders.push({ parent, options }),
+    key: (i: number) => [...data.keys()][i] ?? null,
+    getItem: (k: string) => data.get(k) ?? null,
+    setItem: (k: string, v: string) => void data.set(k, String(v)),
+    removeItem: (k: string) => void data.delete(k),
+    clear: () => data.clear(),
   };
-  /** Google's popup finished: the latest config's callback gets a token carrying that config's nonce. */
-  const signIn = (nonce = inits.at(-1)!.nonce) => {
-    const r: CredentialResponse = { credential: idToken({ sub: "1", aud: "client", nonce, name: "Zoë" }), select_by: "btn" };
-    inits.at(-1)!.callback(r);
-    return r.credential;
-  };
-  return { id, inits, renders, signIn };
 }
-
-beforeEach(() => {
-  vi.resetModules();
-});
 
 afterEach(() => {
-  vi.unstubAllGlobals();
   vi.useRealTimers();
 });
 
-describe("the nonce", () => {
-  it("is random, and Google gets its SHA-256 in hex (Supabase's check)", async () => {
-    const { makeNonce } = await import("./google");
+describe("the request", () => {
+  it("is Google's endpoint with exactly these parameters", () => {
+    const url = new URL(authUrl({ clientId: CLIENT, redirectUri: "https://toptentacle.vercel.app/auth/google.html", state: "s1", hashedNonce: "h1" }));
+    expect(`${url.origin}${url.pathname}`).toBe(GOOGLE_AUTH);
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      client_id: CLIENT,
+      redirect_uri: "https://toptentacle.vercel.app/auth/google.html",
+      response_type: "id_token",
+      scope: "openid email profile",
+      nonce: "h1",
+      state: "s1",
+      prompt: "select_account",
+    });
+  });
+
+  it("comes back to auth/google.html next to the game, whatever screen it was asked from", () => {
+    expect(callbackUrl("https://toptentacle.vercel.app/")).toBe("https://toptentacle.vercel.app/auth/google.html");
+    expect(callbackUrl("https://toptentacle.vercel.app/#stats")).toBe("https://toptentacle.vercel.app/auth/google.html");
+    expect(callbackUrl("https://toptentacle.vercel.app/index.html?x=1#p-mountains")).toBe("https://toptentacle.vercel.app/auth/google.html");
+    expect(callbackUrl("http://localhost:5100/")).toBe("http://localhost:5100/auth/google.html");
+    expect(gameUrl("https://toptentacle.vercel.app/index.html#stats")).toBe("https://toptentacle.vercel.app/");
+  });
+
+  it("has a random nonce whose SHA-256 (hex) Google gets, and a random state", async () => {
     const a = await makeNonce();
     const b = await makeNonce();
     expect(a.raw).toMatch(/^[0-9a-f]{64}$/);
     expect(a.hashed).toBe(sha256(a.raw));
     expect(b.raw).not.toBe(a.raw);
-  });
 
-  it("is read back from an ID token (base64url, any name in it)", async () => {
-    const { tokenNonce } = await import("./google");
-    expect(tokenNonce(idToken({ nonce: "abc123", name: "Zoë Ñúñez" }))).toBe("abc123");
-    expect(tokenNonce(idToken({ sub: "1" }))).toBeNull();
-    expect(tokenNonce("not a token")).toBeNull();
+    const one = await prepareGoogle(CLIENT, "https://toptentacle.vercel.app/#stats");
+    const two = await prepareGoogle(CLIENT, "https://toptentacle.vercel.app/#stats");
+    const q = new URL(one.url).searchParams;
+    expect(one.state).toMatch(/^[0-9a-f]{32}$/);
+    expect(q.get("state")).toBe(one.state);
+    expect(q.get("nonce")).toBe(sha256(one.nonce));
+    expect(q.get("redirect_uri")).toBe("https://toptentacle.vercel.app/auth/google.html");
+    expect(two.state).not.toBe(one.state);
+    expect(two.nonce).not.toBe(one.nonce);
   });
 });
 
-describe("Google's script", () => {
-  it("is added once, on demand, and a failed load can be tried again", async () => {
-    const { scripts, win } = fakePage();
-    const { loadGis, GIS_SRC } = await import("./google");
-    expect(scripts).toHaveLength(0);
-
-    const first = loadGis();
-    expect(loadGis()).toBe(first);
-    expect(scripts).toHaveLength(1);
-    expect(scripts[0]).toMatchObject({ src: GIS_SRC, async: true });
-    scripts[0].onerror!();
-    await expect(first).rejects.toThrow();
-    expect(scripts).toHaveLength(0);
-
-    const again = loadGis();
-    expect(scripts).toHaveLength(1);
-    const { id } = fakeGis();
-    win.google = { accounts: { id } };
-    scripts[0].onload!();
-    await expect(again).resolves.toBe(id);
-    // Already there: no second script.
-    await expect(loadGis()).resolves.toBe(id);
-    expect(scripts).toHaveLength(1);
+describe("what comes back", () => {
+  it("reads Google's fragment: a token and its state, or an error", () => {
+    expect(parseCallback("#state=s1&id_token=a.b.c&authuser=0&prompt=none")).toEqual({ state: "s1", token: "a.b.c" });
+    expect(parseCallback("#error=access_denied&state=s1")).toEqual({ state: "s1", error: "access_denied" });
+    expect(parseCallback("#error=interaction_required")).toEqual({ state: null, error: "interaction_required" });
+    // A token without a state can't be matched with a try.
+    expect(parseCallback("#id_token=a.b.c")).toEqual({ state: null, error: "no_state" });
+    expect(parseCallback("")).toBeNull();
+    expect(parseCallback("#stats")).toBeNull();
   });
 
-  it("gives up after a while (blocked, or a very slow network)", async () => {
+  it("takes only the callback page's own messages", () => {
+    expect(readMessage({ type: MESSAGE, state: "s1", token: "a.b.c" })).toEqual({ state: "s1", token: "a.b.c" });
+    expect(readMessage({ type: MESSAGE, state: "s1", error: "access_denied" })).toEqual({ state: "s1", error: "access_denied" });
+    expect(readMessage({ type: "other", state: "s1", token: "a.b.c" })).toBeNull();
+    expect(readMessage({ type: MESSAGE, token: "a.b.c" })).toBeNull();
+    expect(readMessage("tentacle:google")).toBeNull();
+    expect(readMessage(null)).toBeNull();
+  });
+
+  it("is a token with the try's own nonce only when the state matches; backing out is silent", () => {
+    const pending = { state: "s1", nonce: "raw1" };
+    expect(outcomeOf({ state: "s1", token: "t" }, pending)).toEqual({ kind: "token", token: "t", nonce: "raw1" });
+    expect(outcomeOf({ state: "forged", token: "t" }, pending)).toEqual({ kind: "error", message: NO_MATCH });
+    expect(outcomeOf({ state: "s1", token: "t" }, null)).toEqual({ kind: "error", message: NO_MATCH });
+    expect(outcomeOf({ state: "s1", error: "access_denied" }, pending)).toEqual({ kind: "cancel" });
+    expect(outcomeOf({ state: "s1", error: "server_error" }, pending)).toEqual({ kind: "error", message: GOOGLE_FAILED });
+  });
+});
+
+describe("the try kept for the way back", () => {
+  it("uses the same keys as the game's startup check", () => {
+    expect(PENDING_KEY).toBe(KEYS.googlePending);
+    expect(RESULT_KEY).toBe(KEYS.googleResult);
+  });
+
+  it("is used up once, by its own state, while it's fresh", () => {
+    const store = memory();
+    savePending(store, { state: "s1", nonce: "raw1", at: NOW, back: "#stats" });
+    expect(peekPending(store, NOW + 1000)).toEqual({ state: "s1", nonce: "raw1", at: NOW, back: "#stats" });
+    expect(takePending(store, "forged", NOW)).toBeNull();
+    expect(takePending(store, null, NOW)).toBeNull();
+    expect(takePending(store, "s1", NOW)).toMatchObject({ nonce: "raw1" });
+    expect(takePending(store, "s1", NOW)).toBeNull();
+
+    savePending(store, { state: "s2", nonce: "raw2", at: NOW, back: "" });
+    expect(takePending(store, "s2", NOW + PENDING_TTL + 1)).toBeNull();
+    store.setItem(PENDING_KEY, "{not json");
+    expect(peekPending(store, NOW)).toBeNull();
+  });
+
+  it("only ever goes back to one of the game's screens", () => {
+    const store = memory();
+    for (const back of ["https://evil.example/", "#x?y=1", "javascript:alert(1)", "#a b"]) {
+      savePending(store, { state: "s", nonce: "n", at: NOW, back });
+      expect(peekPending(store, NOW)?.back).toBe("");
+    }
+    savePending(store, { state: "s", nonce: "n", at: NOW, back: "#blitz-airports/run-123" });
+    expect(peekPending(store, NOW)?.back).toBe("#blitz-airports/run-123");
+  });
+
+  it("finishes a full-page trip on startup: the token with its nonce, once", () => {
+    const local = memory();
+    const session = memory();
+    savePending(local, { state: "s1", nonce: "raw1", at: NOW, back: "" });
+    saveResult(session, { state: "s1", token: "a.b.c" });
+    expect(takeGoogleReturn(session, local, NOW)).toEqual({ kind: "token", token: "a.b.c", nonce: "raw1" });
+    expect(takeGoogleReturn(session, local, NOW)).toBeNull();
+    expect(local.data.size + session.data.size).toBe(0);
+
+    // A token for a try this browser didn't make.
+    saveResult(session, { state: "s9", token: "a.b.c" });
+    expect(takeGoogleReturn(session, local, NOW)).toEqual({ kind: "error", message: NO_MATCH });
+  });
+});
+
+/** A game window: `open` gives a fake popup (or null: blocked), messages can be delivered to it. */
+function fakeGame({ blocked = false } = {}) {
+  const listeners = new Set<(e: MessageEvent) => void>();
+  const popup = { closed: false, focus: vi.fn(), postMessage: vi.fn() };
+  const opened: { url: string; target: string; features: string }[] = [];
+  const assigned: string[] = [];
+  const win: GameWindow = {
+    open: (url, target, features) => {
+      opened.push({ url, target, features });
+      return blocked ? null : (popup as unknown as Window);
+    },
+    location: { href: "https://toptentacle.vercel.app/#stats", hash: "#stats", origin: "https://toptentacle.vercel.app", assign: (u) => void assigned.push(u) },
+    localStorage: memory(),
+    addEventListener: (_t, fn) => void listeners.add(fn),
+    removeEventListener: (_t, fn) => void listeners.delete(fn),
+    screenX: 100,
+    screenY: 50,
+    outerWidth: 1400,
+    outerHeight: 900,
+  };
+  const deliver = (data: unknown, { origin = win.location.origin, source = popup as unknown }: { origin?: string; source?: unknown } = {}) => {
+    for (const fn of [...listeners]) fn({ data, origin, source } as MessageEvent);
+  };
+  return { win, popup, opened, assigned, listeners, deliver };
+}
+
+describe("a try from the game", () => {
+  it("opens Google in a named popup over the game, keeps the try, and takes the token from that popup only", async () => {
+    const req = await prepareGoogle(CLIENT, "https://toptentacle.vercel.app/#stats");
+    const g = fakeGame();
+    const done = vi.fn<(o: GoogleOutcome) => void>();
+    expect(startGoogle(req, done, g.win)).toBe("popup");
+    expect(g.opened).toEqual([{ url: req.url, target: WINDOW_NAME, features: "popup,width=500,height=640,left=550,top=180" }]);
+    expect(g.assigned).toEqual([]);
+    expect(peekPending(g.win.localStorage, Date.now())).toMatchObject({ state: req.state, nonce: req.nonce, back: "#stats" });
+
+    // Not from the popup, not from our origin, not ours: ignored.
+    g.deliver({ type: MESSAGE, state: req.state, token: "x.y.z" }, { source: {} });
+    g.deliver({ type: MESSAGE, state: req.state, token: "x.y.z" }, { origin: "https://evil.example" });
+    g.deliver({ type: "something-else", state: req.state, token: "x.y.z" });
+    expect(done).not.toHaveBeenCalled();
+
+    g.deliver({ type: MESSAGE, state: req.state, token: "a.b.c" });
+    expect(done).toHaveBeenCalledExactlyOnceWith({ kind: "token", token: "a.b.c", nonce: req.nonce });
+    // The popup hears it was received (so it can close), only on our origin; the try is used up.
+    expect(g.popup.postMessage).toHaveBeenCalledWith({ type: ACK, state: req.state }, "https://toptentacle.vercel.app");
+    expect(peekPending(g.win.localStorage, Date.now())).toBeNull();
+    expect(g.listeners.size).toBe(0);
+  });
+
+  it("refuses a token whose state isn't this try's", async () => {
+    const req = await prepareGoogle(CLIENT, "https://toptentacle.vercel.app/");
+    const g = fakeGame();
+    const done = vi.fn();
+    startGoogle(req, done, g.win);
+    g.deliver({ type: MESSAGE, state: "forged", token: "a.b.c" });
+    expect(done).toHaveBeenCalledExactlyOnceWith({ kind: "error", message: NO_MATCH });
+  });
+
+  it("closed without an answer is the player backing out", async () => {
     vi.useFakeTimers();
-    const { scripts } = fakePage();
-    const { loadGis } = await import("./google");
-    const loading = loadGis(5000);
-    const failed = expect(loading).rejects.toThrow();
-    vi.advanceTimersByTime(5001);
-    await failed;
-    expect(scripts).toHaveLength(0);
+    const req = await prepareGoogle(CLIENT, "https://toptentacle.vercel.app/");
+    const g = fakeGame();
+    const done = vi.fn();
+    startGoogle(req, done, g.win);
+    vi.advanceTimersByTime(CLOSED_POLL_MS * 3);
+    expect(done).not.toHaveBeenCalled();
+    g.popup.closed = true;
+    vi.advanceTimersByTime(CLOSED_POLL_MS);
+    expect(done).toHaveBeenCalledExactlyOnceWith({ kind: "cancel" });
+    // The stored try stays: a callback page cut off from the game window can still finish it.
+    expect(peekPending(g.win.localStorage, Date.now())).toMatchObject({ state: req.state });
   });
 
-  it("that loads without google.accounts.id counts as failed", async () => {
-    const { scripts } = fakePage();
-    const { loadGis } = await import("./google");
-    const loading = loadGis();
-    scripts[0].onload!();
-    await expect(loading).rejects.toThrow();
-  });
-});
-
-describe("Google's button", () => {
-  async function setup(width = 354) {
-    const { win } = fakePage();
-    const gis = fakeGis();
-    win.google = { accounts: { id: gis.id } };
-    const el = { clientWidth: width, replaceChildren: vi.fn() };
-    const credential = vi.fn();
-    const press = vi.fn();
-    const { googleButton } = await import("./google");
-    const button = await googleButton(el as unknown as HTMLElement, "1234-abc.apps.googleusercontent.com", { credential, press });
-    return { ...gis, el, credential, press, button };
-  }
-
-  it("asks Google with the hashed nonce, in a popup, and hands Supabase the token with the raw nonce", async () => {
-    const { inits, renders, signIn, credential } = await setup();
-    expect(inits).toHaveLength(1);
-    expect(inits[0]).toMatchObject({ client_id: "1234-abc.apps.googleusercontent.com", ux_mode: "popup", auto_select: false, use_fedcm_for_button: false });
-    expect(inits[0].nonce).toMatch(/^[0-9a-f]{64}$/);
-    expect(renders[0].options).toMatchObject({ type: "standard", text: "continue_with", size: "large", width: 354 });
-
-    const token = signIn();
-    expect(credential).toHaveBeenCalledTimes(1);
-    const [sent, raw] = credential.mock.calls[0];
-    expect(sent).toBe(token);
-    expect(sha256(raw)).toBe(inits[0].nonce);
+  it("with the popup blocked, takes the whole tab to Google instead", async () => {
+    const req = await prepareGoogle(CLIENT, "https://toptentacle.vercel.app/#stats");
+    const g = fakeGame({ blocked: true });
+    const done = vi.fn();
+    expect(startGoogle(req, done, g.win)).toBe("redirect");
+    expect(g.assigned).toEqual([req.url]);
+    expect(peekPending(g.win.localStorage, Date.now())).toMatchObject({ state: req.state, nonce: req.nonce, back: "#stats" });
+    expect(done).not.toHaveBeenCalled();
+    expect(g.listeners.size).toBe(0);
   });
 
-  it("asks with a new nonce after a try, and a late token still goes with its own nonce", async () => {
-    const { inits, renders, signIn, credential, button } = await setup();
-    const firstHash = inits[0].nonce!;
-    await button.renew();
-    expect(inits).toHaveLength(2);
-    expect(inits[1].nonce).not.toBe(firstHash);
-    expect(renders).toHaveLength(2);
-    // A popup opened before the renewal comes back with the first nonce in its token.
-    signIn(firstHash);
-    expect(sha256(credential.mock.calls[0][1])).toBe(firstHash);
-    signIn();
-    expect(sha256(credential.mock.calls[1][1])).toBe(inits[1].nonce);
-  });
-
-  it("passes on a press, and is drawn 200 to 400 px wide, again only when that changes", async () => {
-    const { renders, press, el, button } = await setup(600);
-    expect(renders[0].options.width).toBe(400);
-    renders[0].options.click_listener!();
-    expect(press).toHaveBeenCalled();
-    el.clientWidth = 560;
-    button.redraw();
-    expect(renders).toHaveLength(1);
-    el.clientWidth = 320;
-    button.redraw();
-    expect(renders.at(-1)!.options.width).toBe(320);
-    el.clientWidth = 150;
-    button.redraw();
-    expect(renders.at(-1)!.options.width).toBe(200);
+  it("a new try replaces one still open", async () => {
+    const first = await prepareGoogle(CLIENT, "https://toptentacle.vercel.app/");
+    const second = await prepareGoogle(CLIENT, "https://toptentacle.vercel.app/");
+    const g = fakeGame();
+    const done1 = vi.fn();
+    const done2 = vi.fn();
+    startGoogle(first, done1, g.win);
+    startGoogle(second, done2, g.win);
+    expect(g.listeners.size).toBe(1);
+    g.deliver({ type: MESSAGE, state: first.state, token: "old" });
+    expect(done1).not.toHaveBeenCalled();
+    expect(done2).toHaveBeenCalledExactlyOnceWith({ kind: "error", message: NO_MATCH });
   });
 });

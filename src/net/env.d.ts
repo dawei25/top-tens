@@ -10,7 +10,7 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_PUBLISHABLE_KEY?: string;
   /** Comma list of "google", "email", "password" (default "google,email"); "none" for stats without accounts. */
   readonly VITE_SIGN_IN?: string;
-  /** Google's OAuth web client ID (…apps.googleusercontent.com): Google sign-in with Google's own button. */
+  /** Google's OAuth web client ID (…apps.googleusercontent.com): Google sign-in from this site, not via Supabase. */
   readonly VITE_GOOGLE_CLIENT_ID?: string;
   /** An address for privacy questions, shown on the privacy page and next to "forgot your password?". */
   readonly VITE_PRIVACY_CONTACT?: string;

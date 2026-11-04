@@ -81,6 +81,10 @@ export const KEYS = {
   owner: "top-tens:sync-owner",
   /** A save set aside for its account (`${stash}${user id}`) when someone else signed in on this device. */
   stash: "top-tens:v1:",
+  /** Google sign-in: the try under way (state, nonce), and, in sessionStorage, Google's answer on its way back to
+   * this tab. The same as PENDING_KEY and RESULT_KEY in ./google, which the callback page uses without this module. */
+  googlePending: "top-tens:google-pending",
+  googleResult: "top-tens:google-result",
 } as const;
 
 /** What the screens show of a Supabase user: a display name (set by the player, else from Google, else the email). */

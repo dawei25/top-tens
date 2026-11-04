@@ -57,8 +57,8 @@ export const backendOn: boolean = configured && BACKEND !== null;
 export const accountsOn: boolean = configured && !!BACKEND && BACKEND.signIn.length > 0;
 
 /**
- * Google sign-in with Google's own button (Google Identity Services): the OAuth web client ID, when this build offers
- * Google and has one (VITE_GOOGLE_CLIENT_ID). Without it, Google sign-in goes through Supabase's redirect.
+ * Google sign-in from this site (./google, back through auth/google.html): the OAuth web client ID, when this build
+ * offers Google and has one (VITE_GOOGLE_CLIENT_ID). Without it, Google sign-in goes through Supabase's redirect.
  */
 export const GOOGLE_CLIENT_ID: string =
   configured && !!import.meta.env.VITE_GOOGLE_CLIENT_ID && !!BACKEND?.signIn.includes("google")
