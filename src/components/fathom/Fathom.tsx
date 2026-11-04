@@ -332,7 +332,17 @@ function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNex
         </a>
         {site && `, ${site}`}
       </p>
-      <button ref={nextKey} type="button" className="key key-pink fathom-next" data-testid="fathom-next" onClick={onNext}>
+      <button
+        ref={nextKey}
+        type="button"
+        className="key key-pink fathom-next"
+        data-testid="fathom-next"
+        onClick={onNext}
+        // An Enter held down since LOCK IN repeats: only a fresh press moves on.
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && e.repeat) e.preventDefault();
+        }}
+      >
         {last ? "Results" : "Next"}
       </button>
     </section>

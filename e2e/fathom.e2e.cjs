@@ -231,6 +231,24 @@ describe("Fathom", { concurrency: true }, () => {
     await ctx.close();
   });
 
+  test("an Enter held down from LOCK IN never skips the reveal (desktop)", async () => {
+    const vp = VIEWPORTS.find((v) => v.name === "desktop");
+    const { ctx, page } = await openFathom(vp);
+    await page.getByTestId("fathom-input").fill("42");
+    // Down and held: it locks in, then keeps repeating once NEXT has focus.
+    await page.keyboard.down("Enter");
+    await page.getByTestId("fathom-reveal").waitFor();
+    await page.waitForFunction(() => document.activeElement?.dataset.testid === "fathom-next");
+    await page.keyboard.down("Enter");
+    await page.keyboard.down("Enter");
+    await page.keyboard.up("Enter");
+    assert.equal(await page.getByTestId("fathom-reveal").count(), 1, "still on the reveal");
+    // A fresh press moves on.
+    await page.keyboard.press("Enter");
+    await page.getByTestId("fathom-input").waitFor();
+    await ctx.close();
+  });
+
   test("no horizontal scroll at 320px, and every control is 44px to the finger (phones)", async () => {
     // The longest unit and the biggest numbers in the bank, so the narrowest phone shows its worst.
     const ids = ["speed-of-light", "moon-distance", "everest-height", "un-members", "marathon-distance"];
