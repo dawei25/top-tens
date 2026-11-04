@@ -79,6 +79,8 @@ export function AddNote({ listId, mode, rating }: { listId: string; mode: Rating
   const onKey = (e: KeyboardEvent) => {
     // Nothing typed here reaches the screen's own keys (Escape-is-Back and the like).
     e.stopPropagation();
+    // Mid-composition (an input method for Chinese, Japanese...), Escape and Enter belong to it.
+    if (e.nativeEvent.isComposing) return;
     if (e.key === "Escape") {
       e.preventDefault();
       close();
