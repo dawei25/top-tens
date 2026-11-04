@@ -19,6 +19,7 @@ const { chromium, NOW, open, go, guess, freeze, giveUp } = require("./helpers.cj
 
 const BASELINES = path.join(__dirname, "baselines");
 const FIXTURES = path.join(__dirname, "fixtures", "visual", "puzzles");
+const FATHOM_BANK = path.join(__dirname, "fixtures", "fathom", "questions.json");
 const UPDATE = !!process.env.UPDATE_BASELINES;
 const LIST = "airports";
 /** Per pixel: how different two colors must be to count (pixelmatch's perceptual threshold, 0 to 1). */
@@ -210,6 +211,60 @@ describe("visual baselines", { concurrency: true }, () => {
 
       await ctx.close();
       assert.deepEqual([...missing], [], "every puzzle file the flow loads has a fixture in e2e/fixtures/visual/puzzles");
+      assert.equal(problems.length, 0, `\n${problems.join("\n")}\n`);
+    });
+  }
+
+  // Fathom (beta, #fathom), on its fixture bank with a fixed draw (seeded in its own save): a question with a number
+  // typed and MILLION on, a reveal (a close guess, the sonar), and the results of five set guesses.
+  for (const vp of VIEWPORTS) {
+    test(`Fathom looks as it did (${vp.name})`, async () => {
+      const draw = ["eiffel-tower-height", "moon-distance", "piano-keys", "speed-of-light", "africa-countries"];
+      const { ctx, page } = await open(browser, vp, "#fathom", undefined, {
+        reducedMotion: "reduce",
+        setup: async (c) => {
+          await c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: FATHOM_BANK, contentType: "application/json" }));
+          await c.addInitScript((save) => {
+            if (localStorage.getItem("e2e-fathom-seeded")) return;
+            localStorage.setItem("tentacle:fathom", save);
+            localStorage.setItem("e2e-fathom-seeded", "1");
+          }, JSON.stringify({ recent: [], game: { ids: draw, guesses: [], at: 0 } }));
+        },
+      });
+      await page.getByTestId("fathom-input").waitFor();
+      await freeze(page, NOW.getTime() + 30_000);
+      await page.addStyleTag({ content: CAPTURE });
+      const problems = [];
+      const shot = async (name) => {
+        await settle(page);
+        const png = await page.screenshot({ animations: "disabled", caret: "hide", scale: "css", fullPage: true });
+        const p = compare(`${name}-${vp.name}`, png);
+        if (p) problems.push(p);
+      };
+
+      await page.getByTestId("fathom-input").fill("2.5");
+      await page.getByTestId("fathom-million").click();
+      await shot("fathom-question");
+
+      await page.getByTestId("fathom-million").click();
+      await page.getByTestId("fathom-input").fill("290");
+      await page.getByTestId("fathom-lock").click();
+      await page.getByTestId("fathom-reveal").waitFor();
+      await page.clock.runFor(2000);
+      await shot("fathom-reveal");
+
+      for (const guess of ["400k", "60", "1m", "2000"]) {
+        await page.getByTestId("fathom-next").click();
+        await page.getByTestId("fathom-input").fill(guess);
+        await page.getByTestId("fathom-lock").click();
+        await page.getByTestId("fathom-reveal").waitFor();
+      }
+      await page.getByTestId("fathom-next").click();
+      await page.getByTestId("fathom-results").waitFor();
+      await page.clock.runFor(2000);
+      await shot("fathom-results");
+
+      await ctx.close();
       assert.equal(problems.length, 0, `\n${problems.join("\n")}\n`);
     });
   }

@@ -30,6 +30,7 @@ import {
 import { load, save } from "./game/storage";
 import { useSaveVersion } from "./net";
 import { PrivacyScreen } from "./components/account";
+import { FathomScreen } from "./components/fathom";
 
 type Route =
   | { screen: "home" }
@@ -42,6 +43,7 @@ type Route =
   | { screen: "stats" }
   | { screen: "privacy" }
   | { screen: "settings" }
+  | { screen: "fathom" }
   | { screen: "dailyblitz"; date: string; runs: boolean; run?: number };
 
 function readHash(): Route {
@@ -50,6 +52,8 @@ function readHash(): Route {
   if (h === "#stats") return { screen: "stats" };
   if (h === "#privacy") return { screen: "privacy" };
   if (h === "#settings") return { screen: "settings" };
+  // Fathom, the estimation beta: only by its link (no tile anywhere).
+  if (h === "#fathom") return { screen: "fathom" };
   // The Blitz-only runs screen became Past runs, which lists list games and Blitz rounds together.
   if (h === "#blitz-history") history.replaceState(null, "", "#history");
   if (h === "#history" || h === "#blitz-history") return { screen: "history" };
@@ -306,6 +310,8 @@ function Screens() {
     if (route.screen === "privacy") return <PrivacyScreen onBack={back} onHome={home} fallback={<Loading />} />;
 
     if (route.screen === "settings") return <Settings onBack={back} onHome={home} />;
+
+    if (route.screen === "fathom") return <FathomScreen onBack={back} onHome={home} />;
 
     if (route.screen === "stats") {
       return <Knowledge index={index} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;

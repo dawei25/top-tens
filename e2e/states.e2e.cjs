@@ -4,8 +4,8 @@
 // One player's walk through the screens (home, its How to play and category picker, a rolled list before its first
 // guess, a list game with its clue confirm, the list's end with and without its facts open and with the rating's
 // reasons open, a rolled Blitz before its clock, a Blitz round and its end, home with both dailies played, the
-// archive, past runs, stats, the menu open over it, settings) at three widths: desktop, a mid width just above the
-// 640px breakpoint, and a phone.
+// archive, past runs, stats, the menu open over it, settings, and the Fathom beta's question, reveal and results) at
+// three widths: desktop, a mid width just above the 640px breakpoint, and a phone.
 // On each screen every visible enabled interactive element is hovered (not on the phone), pressed (pointer down, then
 // moved away and released outside, so no click fires) and focused from the keyboard (Tab through the page, so
 // focus-visible and keyboard-modality styles apply), and every element's layout box is compared with the screen at
@@ -33,6 +33,7 @@ const WIDTHS = [
 ];
 const LIST = "mountains";
 const BLITZ = "airports";
+const FATHOM_BANK = require("node:path").join(__dirname, "fixtures", "fathom", "questions.json");
 
 /** Lets the frozen clock run its pending timers (a name typing in, the end reveal), then freezes it again. */
 const tick = (page, ms = 3000) => page.clock.runFor(ms);
@@ -208,6 +209,39 @@ const SCREENS = [
       await page.getByTestId("menu").waitFor({ state: "detached" });
       await go(page, "#settings");
       await page.getByTestId("settings").waitFor();
+    },
+  },
+  {
+    // Fathom (beta, #fathom), on the fixture bank: a number typed with MILLION on, its reveal, then the results.
+    name: "Fathom, a number typed",
+    setup: async (page) => {
+      await page.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: FATHOM_BANK, contentType: "application/json" }));
+      await go(page, "#fathom");
+      await lazyShown(page, "fathom-input");
+      await page.getByTestId("fathom-input").fill("2.5");
+      await page.getByTestId("fathom-million").click();
+    },
+  },
+  {
+    name: "Fathom, the reveal",
+    setup: async (page) => {
+      await page.getByTestId("fathom-lock").click();
+      await page.getByTestId("fathom-reveal").waitFor();
+      await tick(page);
+    },
+  },
+  {
+    name: "Fathom, results",
+    setup: async (page) => {
+      for (let i = 0; i < 4; i++) {
+        await page.getByTestId("fathom-next").click();
+        await page.getByTestId("fathom-input").fill("12");
+        await page.getByTestId("fathom-lock").click();
+        await page.getByTestId("fathom-reveal").waitFor();
+      }
+      await page.getByTestId("fathom-next").click();
+      await page.getByTestId("fathom-results").waitFor();
+      await tick(page);
     },
   },
 ];

@@ -1,0 +1,478 @@
+/* ---------- Fathom (beta, #fathom) ---------- */
+/*
+ * One column, phone first: the question card (index.css .prompt), then the ask card (the field with its unit, the
+ * echo, THOUSAND / MILLION / BILLION and LOCK IN) or, once locked in, the reveal card in its place. The results reuse
+ * the classic results card (.results, .score). Loaded with the screen's own chunk.
+ *
+ * Bands have one colour each, from the game's palette: dead on gold, close cyan, near periwinkle (the squid's limb
+ * ramp), far pink, lost at sea a deep slate. --band fills, --band-ink is text on a fill, --band-text is the band as
+ * text on glass.
+ */
+.fathom {
+  max-width: calc(640px + 2 * var(--gutter));
+}
+/* "FATHOM · BETA" on one line in the header: a little tighter on phones, where the label has about 130px (100px on
+   the narrowest). */
+.fathom .game-head-mid > .mode:only-child {
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .fathom .game-head-mid > .mode:only-child {
+    font-size: 15px;
+    letter-spacing: 0.18em;
+  }
+}
+@media (max-width: 380px) {
+  .fathom .game-head-mid > .mode:only-child {
+    font-size: 14px;
+    letter-spacing: 0.1em;
+  }
+}
+.fathom [data-band="dead-on"] {
+  --band: var(--gold);
+  --band-ink: var(--gold-ink);
+  --band-text: var(--gold);
+}
+.fathom [data-band="close"] {
+  --band: var(--cyan);
+  --band-ink: #03222b;
+  --band-text: var(--cyan);
+}
+.fathom [data-band="near"] {
+  --band: #8a9cff;
+  --band-ink: #0e1440;
+  --band-text: #8a9cff;
+}
+.fathom [data-band="far"] {
+  --band: var(--pink);
+  --band-ink: var(--pink-ink);
+  --band-text: var(--pink);
+}
+.fathom [data-band="lost"] {
+  --band: #3b4c6e;
+  --band-ink: var(--text);
+  --band-text: var(--label);
+}
+
+/* The question card: "Question 2 of 5" and the progress squares on one line, then the question and what it measures. */
+.fathom-q .prompt-top {
+  align-items: center;
+}
+.fathom-pips {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+.pip {
+  width: 14px;
+  height: 14px;
+  background: #1c2a45;
+}
+.pip[data-band] {
+  background: var(--band);
+}
+.pip.now {
+  box-shadow: 0 0 0 2px var(--text);
+}
+.fathom-q .prompt-top .label {
+  white-space: nowrap;
+}
+/* The narrowest phones: "QUESTION 1 OF 5" and the squares still share one line. */
+@media (max-width: 379px) {
+  .fathom-q .prompt-top .label {
+    letter-spacing: 0.18em;
+  }
+  .fathom-pips {
+    gap: 5px;
+  }
+  .pip {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* ---- The ask card ---- */
+.fathom-ask {
+  padding: 14px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* The field: the input and its unit in one box, with the guess box's constant cyan ring. */
+.fathom-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding-right: 14px;
+  border: 3px solid var(--cyan-edge);
+  border-radius: var(--radius);
+  background: var(--glass-well);
+  box-shadow: 0 0 0 3px var(--cyan-glow);
+  cursor: text;
+}
+.fathom-field:focus-within {
+  border-color: var(--cyan);
+  box-shadow:
+    0 0 0 3px var(--cyan-glow),
+    0 0 18px rgba(77, 227, 255, 0.18);
+}
+.fathom-field input {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 32px;
+  caret-color: var(--cyan);
+}
+/* The field's ring shows focus (above). */
+.fathom-field input:focus-visible {
+  outline: none;
+}
+.fathom-field input::placeholder {
+  color: var(--label);
+}
+/* The unit: as long as it needs, up to half the field, wrapping on to a second line before it crowds the number. */
+.fathom-unit {
+  flex: 0 1 auto;
+  max-width: 50%;
+  font-size: 20px;
+  line-height: 1.05;
+  letter-spacing: 0.06em;
+  text-align: right;
+  color: var(--label);
+}
+/* One line kept for it, so nothing under it moves as it changes. */
+.fathom-echo {
+  min-height: 24px;
+  padding-left: 2px;
+  font-size: 20px;
+  line-height: 1.2;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.fathom-echo[data-tone="value"] {
+  color: var(--cyan);
+}
+.fathom-echo[data-tone="error"] {
+  color: var(--pink);
+}
+
+/* THOUSAND, MILLION, BILLION in a row of three; LOCK IN under them on a phone, beside them from 560px. */
+.fathom-keys {
+  display: grid;
+  gap: 12px;
+}
+.fathom-mults {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.fathom-mult {
+  min-width: 0;
+  padding: 0 4px;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+}
+/* On: a lit cyan key (aria-pressed), the same size as off. */
+.fathom-mult.on {
+  background: var(--cyan);
+  color: #03222b;
+  box-shadow: 0 5px 0 #1b7f9a;
+}
+@media (hover: hover) {
+  .fathom-mult.on:hover:not(:disabled) {
+    background-color: #82ecff;
+  }
+}
+.fathom-mult.on:active:not(:disabled) {
+  box-shadow: 0 2px 0 #1b7f9a;
+}
+@media (min-width: 560px) {
+  .fathom-keys {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .fathom-lock {
+    min-width: 180px;
+  }
+}
+
+/* ---- The reveal ---- */
+.fathom-reveal {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fathom-reveal.enter {
+  animation: rise 0.35s ease-out both;
+}
+.reveal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.band-chip {
+  padding: 4px 12px 5px;
+  border-radius: 4px;
+  background: var(--band);
+  color: var(--band-ink);
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
+}
+.reveal-points {
+  font-size: 20px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.reveal-points b {
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--text);
+}
+/* The answer and the guess: stacked on a phone, side by side from 560px. */
+.reveal-figures {
+  display: grid;
+  gap: 10px 20px;
+}
+@media (min-width: 560px) {
+  .reveal-figures {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.figure .label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fathom-mark {
+  flex: none;
+  display: block;
+}
+/* The number, then its unit beside it, or whole on the next line when it doesn't fit ("kilometres per second"). */
+.figure-n {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin-top: 4px;
+  font-size: 40px;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+.figure-n > span {
+  min-width: 0;
+}
+.figure-unit {
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--muted);
+}
+.figure-off {
+  margin-top: 2px;
+  font-size: 20px;
+  color: var(--band-text);
+}
+.fathom-fact {
+  font-size: 20px;
+  line-height: 1.3;
+}
+.fathom-source {
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.fathom-source a {
+  color: var(--label);
+}
+@media (hover: hover) {
+  .fathom-source a:hover {
+    color: var(--cyan);
+  }
+}
+@media (min-width: 560px) {
+  .fathom-next {
+    align-self: flex-end;
+    min-width: 200px;
+  }
+}
+
+/* ---- The sonar (Gauge.tsx): 20 rows of art pixels (3px, 4px from 560px) and the scale's labels under them. Its
+   height is kept before it is measured and drawn. ---- */
+.fathom-gauge {
+  height: 78px;
+}
+@media (min-width: 560px) {
+  .fathom-gauge {
+    height: 98px;
+  }
+}
+.gauge-art {
+  position: relative;
+  margin: 0 auto;
+}
+.gauge-art svg {
+  display: block;
+}
+.gauge-ticks {
+  position: relative;
+  height: 18px;
+}
+.gauge-ticks span {
+  position: absolute;
+  top: 3px;
+  transform: translateX(-50%);
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.g-track {
+  fill: var(--faint);
+}
+.g-tick {
+  fill: var(--label);
+}
+.g-band {
+  fill: var(--band);
+  opacity: 0.4;
+}
+.g-band.hit {
+  opacity: 1;
+}
+.g-buoy {
+  fill: var(--gold);
+}
+.g-squid {
+  fill: var(--cyan);
+}
+.g-ping {
+  fill: var(--cyan);
+  opacity: 0.25;
+}
+/* The ping: two rings go out from the squid, twice, and settle faint. */
+@media (prefers-reduced-motion: no-preference) {
+  .g-ping {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: fathom-ping 1.2s steps(6, end) 0.35s 2 both;
+  }
+  .g-ping-far {
+    animation-delay: 0.55s;
+  }
+}
+@keyframes fathom-ping {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  40% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.25;
+    transform: none;
+  }
+}
+
+/* ---- Results ---- */
+.band-row {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+.band-sq {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 2px;
+  background: var(--band);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+}
+.fathom-recap {
+  padding: 4px 16px 6px;
+}
+.fathom-recap ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.fathom-recap li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  padding: 10px 0;
+}
+.fathom-recap li + li {
+  border-top: 1px dashed var(--hairline);
+}
+.fathom-recap .band-sq {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+}
+.recap-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.recap-q {
+  font-size: 20px;
+  line-height: 1.2;
+}
+.recap-nums {
+  font-size: 18px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.recap-nums b {
+  font-weight: 400;
+  color: var(--text);
+}
+.recap-nums b.gold {
+  color: var(--gold);
+}
+.recap-points {
+  font-size: 30px;
+  line-height: 1;
+  text-align: right;
+  color: var(--text);
+}
+
+/* Narrow phones: the field's number and the keys' words a step smaller, so all three keys keep their words whole. */
+@media (max-width: 379px) {
+  .fathom-field input {
+    font-size: 26px;
+    padding: 0 10px;
+  }
+  .fathom-mult {
+    font-size: 16px;
+    letter-spacing: 0.04em;
+  }
+}
+
+/* A phone with its keyboard up: the question card comes down to size, so the field and LOCK IN stay in view. */
+@media (max-height: 600px) and (max-width: 699px) {
+  .fathom {
+    gap: 10px;
+    padding-top: 8px;
+  }
+  .fathom .prompt {
+    padding: 8px 14px 10px;
+  }
+  .fathom .prompt h1 {
+    font-size: 26px;
+  }
+}
