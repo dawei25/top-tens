@@ -118,6 +118,7 @@ stronger.
 | Mobile audit: quick taps could zoom the page (no touch-action on rows, cells, links, fields) | double-tap zoom on controls | touch.e2e.cjs checks every control's touch-action and every field's size (16px+) |
 | Mobile audit: GIVE UP, Close, thumbs, strips, text keys 28-36px tall | tap targets under 44px | `--reach` hit areas in index.css; touch.e2e.cjs presses 22px around every control at 320 and 390 |
 | Mobile audit: "first letter? 1 l..." at 320/360px; "type a gues" in the guess box; Blitz names broken "INTERNATIO / NAL" | words that matter cut on the narrowest phones | touch.e2e.cjs at 320-430: the clue and its refusal whole, the placeholder measured against its box, no Blitz name broken inside a word |
+| Mobile audit: "RANDOM / BLITZ" wrapped beside a one-line "RANDOM LIST" at 700-730px (a 360 x 740 phone on its side) | a key title wrapping at in-between widths, out of line with its pair | touch.e2e.cjs checks every Home play key's title is one line at 700, 740, 844 and 1024 |
 | Mobile audit: no board row in view with the keyboard up on a 320px phone | the keyboard leaving no room for the game | touch.e2e.cjs at 320 x 318 and 375 x 387 |
 | Mobile audit: viewport-fit=cover, but the top inset and the home indicator went unheeded | content under a notch or the home indicator | touch.e2e.cjs fakes the insets (CDP `Emulation.setSafeAreaInsetsOverride`), portrait and landscape |
 

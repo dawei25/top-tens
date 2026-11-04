@@ -293,6 +293,24 @@ test("nothing a player reads or taps sits under a notch or the home indicator (f
   }
 });
 
+test("a phone on its side: Home's play keys keep their titles on one line", async () => {
+  // 740 x 360 is a 360 x 740 Android phone turned; 700 is where free play and your games sit side by side.
+  for (const [width, height] of [
+    [700, 900],
+    [740, 360],
+    [844, 390],
+    [1024, 768],
+  ]) {
+    const { ctx, page } = await open(browser, phone(width, height));
+    await page.getByTestId("today-list").waitFor();
+    const lines = await page.locator(".mode-key .key-label").evaluateAll((els) =>
+      els.map((el) => ({ title: el.textContent, lines: Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight)) })),
+    );
+    for (const l of lines) assert.equal(l.lines, 1, `${width}x${height}: "${l.title}" takes ${l.lines} lines`);
+    await ctx.close();
+  }
+});
+
 test("with the keyboard up on a small phone, the board still shows above the guess box", async () => {
   // A 375 x 667 phone (and the smallest, 320 x 568) with its keyboard up: Android shrinks the page to what's left.
   for (const [width, height] of [

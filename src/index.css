@@ -820,6 +820,13 @@ a {
   flex: 1 1 auto;
   gap: 10px;
 }
+/* Just past 700px each free-play key has about 160px for its title: a tighter title keeps "Random Blitz" on one line,
+   level with "Random list" (it wrapped at 700 to about 730px, a 360 x 740 phone on its side). */
+@media (min-width: 700px) and (max-width: 759px) {
+  .free-key .mode-key .key-label {
+    letter-spacing: 0.14em;
+  }
+}
 /* Wide screens: Home is one centred column inside the play screens' frame; the same 16px of ocean between cards as
    between the play screens' columns. */
 @media (min-width: 1100px) {
