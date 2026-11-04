@@ -2,6 +2,7 @@ import * as cheerio from "cheerio";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import {
   datedLabel,
@@ -330,6 +331,18 @@ describe("country demonyms", () => {
         seen.set(f.toLowerCase(), forms[0]);
       }
     }
+  });
+
+  it("name a two-island state by its main island, and Saint as St (\"st kitts\" found nothing)", () => {
+    const twoPart = ["Antigua and Barbuda", "Bosnia and Herzegovina", "Saint Kitts and Nevis", "Saint Vincent and the Grenadines", "São Tomé and Príncipe", "Trinidad and Tobago"];
+    for (const country of twoPart) {
+      const first = country.split(" and ")[0];
+      expect(line(country).some((f) => normalize(f) === normalize(first)), country).toBe(true);
+    }
+    for (const forms of COUNTRY_FORMS.filter((f) => /^Saint /.test(f[0]))) {
+      expect(forms, forms[0]).toContain(forms[0].replace(/^Saint /, "St "));
+    }
+    expect(line("Saint Kitts and Nevis")).toEqual(expect.arrayContaining(["St Kitts", "Saint Kitts"]));
   });
 });
 

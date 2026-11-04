@@ -29,9 +29,16 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 - [ ] **Topic ideas parked:** most valuable sports teams (Forbes 2025 ties at #10/#11, Bears and Yankees at $8.2B;
       the 2024 table has no tie but is a year older). Retry when Wikipedia has the 2026 list. Best-selling book
-      series (five series tie at #10 with 200 million each).
+      series (five series tie at #10 with 200 million each). Countries with the most Starbucks stores (owner's pick,
+      Nov 5): Wikipedia has no stores-by-country table (no "List of countries with Starbucks stores"; the Starbucks
+      article gives totals only).
 
 - [ ] **Junk alias:** "How Bout Dem Cowboys" on the Dallas Cowboys (super-bowl-wins).
+
+- [ ] **Nov 5 pipeline changes not yet on every list** (apply at each list's next rebuild): CITY_JUNK in
+      scripts/aliases.ts now holds the city redirects judges found on one city list (schools, clubs, districts,
+      demonyms), dropped on every city list; COUNTRY_FORMS gives "St Kitts", "St Vincent", "St Lucia", "Antigua" and
+      their other forms to every country list.
 
 - [ ] **Cycle 4 pipeline changes not yet on every list** (apply at each list's next rebuild): "Science in Aotearoa"
       in the shared country junk list (13 country lists); infobox values never replace a stat from a table (lists

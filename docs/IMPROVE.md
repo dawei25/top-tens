@@ -151,6 +151,8 @@ stronger.
 | Mobile audit: "RANDOM / BLITZ" wrapped beside a one-line "RANDOM LIST" at 700-730px (a 360 x 740 phone on its side) | a key title wrapping at in-between widths, out of line with its pair | touch.e2e.cjs checks every Home play key's title is one line at 700, 740, 844 and 1024 |
 | Mobile audit: no board row in view with the keyboard up on a 320px phone | the keyboard leaving no room for the game | touch.e2e.cjs at 320 x 318 and 375 x 387 |
 | Mobile audit: viewport-fit=cover, but the top inset and the home indicator went unheeded | content under a notch or the home indicator | touch.e2e.cjs fakes the insets (CDP `Emulation.setSafeAreaInsetsOverride`), portrait and landscape |
+| (builder, Nov 5) The CIA coastline table's "Congo, Republic of the" became an entry beside the universe's Republic of the Congo | names written the way an index sorts them: one country, two entries | validate.ts errors on an inverted index name at any rank (`invertedName`, validate.test.ts); `rename` such rows |
+| (builder, Nov 5) "st kitts" found nothing on the smallest countries | two-island states and "Saint" names without their everyday short forms | COUNTRY_FORMS lines for Saint Kitts and Nevis, Saint Vincent and the Grenadines, Saint Lucia, Antigua and Barbuda; build.test.ts checks every two-part state has its first part and every Saint its "St" |
 
 ## What good looks like
 

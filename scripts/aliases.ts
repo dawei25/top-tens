@@ -233,10 +233,36 @@ export function junkRedirect(raw: string, ctx: AliasContext): string | null {
  * list judges. Dropped on every list with the countries universe.
  */
 /**
- * Rare spellings among city redirects that only catch typos of ordinary words ("singer" became Xi'an through
- * "Singan", "market" Mecca through "Makkeh"). Dropped on every city list.
+ * City redirects that are no way of naming the city, dropped on every city list. The same big cities top every city
+ * list (population, visitors, skyscrapers, metro riders), so junk a judge finds on one is junk on all of them.
  */
-export const CITY_JUNK = ["Singan", "Siking", "Signan", "Makkeh", "Shouer", "Singy", "S'pore", "Dtown"];
+export const CITY_JUNK = [
+  // Rare spellings that only catch typos of ordinary words ("singer" became Xi'an through "Singan", "market" Mecca
+  // through "Makkeh").
+  "Singan", "Siking", "Signan", "Makkeh", "Shouer", "Singy", "S'pore", "Dtown",
+  // Lithuanian for Beijing: "petronas" was offered as Beijing on the skyscraper list.
+  "Pekinas",
+  // Schools, clubs, parks, buildings, companies, committees, a festival and a fair among the redirects.
+  "SJK Lai Meng", "Sekolah Kebangsaan Danau Kota", "Sekolah Jenis Kebangsaan Cina Jalan Davidson", "Rajhans Balvatika",
+  "Dadar Catering College", "Clube Náutico da Ilha de Luanda", "Clube Desportivo Nun’Alvares",
+  "Clube Desportivo Nun' Alvares", "Falomo garden", "Shenzhen Software Park", "K.L.C.C.", "Citi Hoppa",
+  "Chicago Finance Committee", "Chicago Transportation Committee", "Sister Cities Chicago", "Chicago theatre scene",
+  "São Paulo International Transport Industry Show", "Accra oil refineries", "Five Grand Palaces of Joseon-Dynasty Seoul",
+  "Five Grand Palaces", "Seoul castle town", "Seoul castle", "Joburg.org.za", "Paris.fr", "Wuhan.gov.cn",
+  "HUB in a Singapore context", "Sichuanese teahouse",
+  // Districts and parts of a city, its history and its people.
+  "Fishermen's Village", "Yumin Cun", "West Bund", "Al-Khawaneej", "Littleindia kuala lumpur", "Medan Pasar",
+  "Downtown Mumbai", "Western Moscow", "South Seoul", "North Seoul", "Fatehpur beri", "Abdeen", "Iganmu", "Luanda Sul",
+  "Deux Plateau", "Rural Abidjan", "Masaki, Tanzania", "Blue Haven, Gauteng", "Higienopolis",
+  "Paris, Banks of the Seine", "Paris agglomeration", "Ancient cairo", "Classical cairo", "Cairo in the middle ages",
+  "New york immigrants", "Immigration to New York", "Shanghai people", "Kakamuchee", "Galajunkja", "Land of smelly onions",
+  "Mumbaikars", "Mumbaikar", "Bombayite", "Eastindians", "Dubaian", "Dubaians", "KLites", "Delhiites", "Dilliwala",
+  "Seoulite", "Parisien", "Parisian", "Parisians", "Cairene", "Lagosian", "Kinois", "Kinshasan", "Kinshasans",
+  "Léopoldvillian", "Léopoldvillians", "Luandense", "Paulistano", "Paulista", "Beijinger", "Beijingers", "Pekinger",
+  "Pekingers", "Peipinger", "Londonise", "Londonize", "London's", "Non ducor, duco",
+  // Another place's name: Dili is East Timor's capital.
+  "Dili, India", "Delhi, Punjab",
+];
 
 /**
  * Redirects to famous people's articles that are relatives, songs, albums, tours, labels, fan names, scandals and

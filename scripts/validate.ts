@@ -145,6 +145,15 @@ export function junkReason(name: string, numbers = false): string | null {
   return null;
 }
 
+/**
+ * A name written the way an index sorts it, "Congo, Republic of the" or "Bahamas, The" (the CIA's style on the
+ * coastline table): nobody types it, and it misses the universe's "Republic of the Congo", so the country is two
+ * entries. Give such rows their usual name with `rename`.
+ */
+export function invertedName(name: string): boolean {
+  return /^[^,]+,\s*(?:the|a|an|[^,]*\bof(?: the)?|north|south)$/i.test(name.trim());
+}
+
 /** "Djibouti City", "City of San Marino": the words that make a city's name without changing which city. */
 const cityless = (s: string) => s.split(" ").filter((w) => !/^(city|of|town)$/.test(w)).join(" ");
 
@@ -375,6 +384,7 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
     if (why) (e.rank >= 1 && e.rank <= 10 ? err : warn)(`${where} "${e.name}": looks like junk (${why})`);
     // A title not announced yet is never an answer: "peaky blinders" cost a life as "Untitled Peaky Blinders sequel series".
     if (placeholderName(e.name)) err(`${where} "${e.name}": a placeholder, not a title`);
+    if (invertedName(e.name)) err(`${where} "${e.name}": an inverted index name; \`rename\` it to the usual one`);
     const n = normalize(e.name);
     if (!n) err(`${where} "${e.name}": normalizes to nothing`);
     const prev = byName.get(n);
