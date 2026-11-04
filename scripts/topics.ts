@@ -1211,43 +1211,6 @@ export const TOPICS: Topic[] = [
 
   // Batch 2: entertainment
   {
-    id: "x-accounts",
-    category: "Entertainment",
-    title: "Most-followed X accounts",
-    noun: "X accounts",
-    prompt: "Name the 10 most-followed accounts on X (Twitter)",
-    page: "List of most-followed X accounts",
-    tables: [0],
-    name: "Owner",
-    value: "Followers",
-    metric: "Followers (millions)",
-    aliasCols: ["Username"],
-    people: true,
-    also: CELEBRITIES,
-    // The table's footnote says when its numbers are from.
-    dataAsOf: "14 September 2026",
-    // Relatives, songs and scandals of the stars: CELEBRITY_JUNK in scripts/aliases.ts. These are this list's own.
-    junkAliases: [
-      "RIP Harambe", "Strider Sekhar", "Comet Azure", "Blastar", "Environmental policy of the Obama administration",
-      "Doe 174", "Trump investigations", "Biden's predecessor", "Incumbent POTUS", "Current POTUS", "NASA Personnel",
-      "NASA Grand Prize", "Aerospace Safety Advisory Panel", "Space Systems Center", "India", "F.C.", "Times", "X Money",
-      "XMoney",
-      // Polls, campaign slogans and NASA programmes among the redirects.
-      "Donald Trump popularity", "Trump popularity", "Trump popularity rating", "Donald Trump popularity rating",
-      "Trump opinion poll", "Donald Trump opinion poll", "Trump poll", "Trump polls", "Trump poll rating",
-      "Donald Trump poll", "Opinion pollings on the Trump presidencies", "Sabka saath, sabka vikas",
-      "Sabka saath, sabka vikaas", "Narendra Modi prime ministerial candidacy", "Don’t doubt yer vibe",
-      "Don’t Doubt ur Vibe", "Don't doubt yer vibe", "Don't Doubt ur Vibe", "NASA Advisory Council",
-      "NASA Center for Autonomous Control Engineering", "NASA Applied Sciences", "NASAcast", "NASA Edge",
-    ],
-    aliases: {
-      NASA: ["National Aeronautics and Space Administration"],
-      "Manchester United F.C.": ["Manchester United", "Man United", "Man Utd"],
-    },
-    // Famous through the other platforms' lists, but with no X account: naming him is free.
-    skip: ["Lionel Messi"],
-  },
-  {
     id: "tiktok-accounts",
     category: "Entertainment",
     title: "Most-followed TikTok accounts",

@@ -770,18 +770,6 @@ export const INTENT: Record<string, Intent> = {
       "Steve Yzerman": ["Stevie Y", "Yzerman"],
     },
   },
-  "x-accounts": {
-    same: {
-      X: ["Twitter", "@Twitter"],
-      "Elon Musk": ["Elon", "Musk"],
-      "Barack Obama": ["Obama", "Barack"],
-      "Cristiano Ronaldo": ["CR7", "Cristiano", "Ronaldo"],
-      "Donald Trump": ["Trump"],
-      "Narendra Modi": ["Modi"],
-      "Taylor Swift": ["Taylor", "T-Swift"],
-      Rihanna: ["RiRi"],
-    },
-  },
   "tiktok-accounts": {
     same: {
       "Charli D'Amelio": ["Charli", "Charli DAmelio"],
