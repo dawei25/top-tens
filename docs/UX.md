@@ -51,3 +51,5 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 
 17. **Keep the brand look unless asked.** Don't retune the palette or type (the pink and yellow were faded once,
     unasked). The visual baselines are the reference.
+18. **Third-party pieces come in our own language.** A widget drawn by someone else (Google's sign-in button, in its
+    own font and fill) looks out of place: build our own key and keep only what trust needs (Google's G, unaltered).

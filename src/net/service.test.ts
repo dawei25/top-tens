@@ -276,7 +276,7 @@ describe("email and password", () => {
   });
 });
 
-describe("google's button", () => {
+describe("google sign-in", () => {
   it("hands Supabase the ID token with the raw nonce, and explains a refusal", async () => {
     const signInWithIdToken = vi.fn(async (_: unknown) => ({ data: { user: { id: "u" }, session: { access_token: "t" } }, error: null }));
     Object.assign(fake.client.auth, { signInWithIdToken });
@@ -292,6 +292,48 @@ describe("google's button", () => {
     // supabase-js answers a request that never got through with status 0.
     Object.assign(fake.client.auth, { signInWithIdToken: refused(0) });
     expect(await svc.signInWithGoogleToken("t", "n")).toBe("couldn't reach the server. check your connection.");
+  });
+});
+
+describe("back from Google in this tab (a blocked popup, or one with no way back)", () => {
+  function returned(result: unknown, pending: unknown) {
+    const session = new Map<string, string>([["top-tens:google-result", JSON.stringify(result)]]);
+    vi.stubGlobal("sessionStorage", {
+      getItem: (k: string) => session.get(k) ?? null,
+      setItem: (k: string, v: string) => void session.set(k, v),
+      removeItem: (k: string) => void session.delete(k),
+    });
+    vi.stubGlobal("location", new URL("https://toptentacle.vercel.app/#stats"));
+    vi.stubGlobal("history", { state: null, replaceState: vi.fn() });
+    store.set("top-tens:google-pending", JSON.stringify(pending));
+    return session;
+  }
+
+  it("finishes the sign-in on startup with the try's own nonce, and uses both records up", async () => {
+    const session = returned({ state: "s1", token: "header.claims.sig" }, { state: "s1", nonce: "raw1", at: Date.now(), back: "#stats" });
+    const signInWithIdToken = vi.fn(async (_: unknown) => ({ data: {}, error: null }));
+    const user = { id: "u1", email: "dana@example.com", user_metadata: { full_name: "Dana Scully" }, app_metadata: { provider: "google" } };
+    const getSession = vi.fn().mockResolvedValueOnce({ data: { session: null } }).mockResolvedValue({ data: { session: { user } } });
+    Object.assign(fake.client.auth, { signInWithIdToken, getSession });
+    const svc = await import("./service");
+    const { getAccount } = await import("./store");
+    await svc.start();
+    expect(signInWithIdToken).toHaveBeenCalledExactlyOnceWith({ provider: "google", token: "header.claims.sig", nonce: "raw1" });
+    expect(getAccount()).toMatchObject({ status: "in", user: { id: "u1", google: true }, notice: undefined });
+    expect(session.size).toBe(0);
+    expect(store.has("top-tens:google-pending")).toBe(false);
+  });
+
+  it("refuses an answer to a try this browser didn't make, and says so in the sheet", async () => {
+    returned({ state: "forged", token: "header.claims.sig" }, { state: "s1", nonce: "raw1", at: Date.now(), back: "" });
+    const signInWithIdToken = vi.fn();
+    Object.assign(fake.client.auth, { signInWithIdToken });
+    const svc = await import("./service");
+    const { getAccount } = await import("./store");
+    const { NO_MATCH } = await import("./google");
+    await svc.start();
+    expect(signInWithIdToken).not.toHaveBeenCalled();
+    expect(getAccount()).toMatchObject({ status: "out", notice: NO_MATCH });
   });
 });
 

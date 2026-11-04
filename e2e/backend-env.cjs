@@ -7,7 +7,7 @@ exports.BACKEND_ENV = {
   VITE_PRIVACY_CONTACT: "privacy@example.com",
 };
 
-// The same with a Google client ID (backend-google.e2e.cjs): Google sign-in with Google's own button. Pasted with a
-// trailing newline, the way Vercel kept the owner's: the game trims it.
+// The same with a Google client ID (backend-google.e2e.cjs): Google sign-in from this site to Google and back. Pasted
+// with a trailing newline, the way Vercel kept the owner's: the game trims it.
 exports.GOOGLE_CLIENT_ID = "1234567890-e2etest.apps.googleusercontent.com";
 exports.GOOGLE_ENV = { ...exports.BACKEND_ENV, VITE_GOOGLE_CLIENT_ID: `${exports.GOOGLE_CLIENT_ID}\n` };

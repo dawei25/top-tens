@@ -12,8 +12,7 @@
   background: rgba(2, 4, 9, 0.7);
   animation: fade 0.18s ease-out both;
 }
-/* 440px: a 400px column (inside the padding and borders), the widest Google draws its button, so the button and
-   the keys line up. */
+/* 440px: a 400px column inside the padding and borders. */
 .sheet {
   width: min(440px, 100%);
   max-height: calc(100dvh - 32px);
@@ -48,46 +47,51 @@
   justify-content: space-between;
   gap: 12px;
 }
-/* Focused when it opens (with Google's button first, nothing of ours to focus): the dialog itself, no ring. */
+/* The dialog takes focus when its background is pressed: no ring for that. */
 .sheet:focus {
   outline: none;
 }
 .sheet-wide {
   width: 100%;
 }
-/* Google's own button (Google Identity Services): Google draws it in its frame, 40px tall, at the column's width up
-   to 400px. Light color scheme in its box: a frame whose scheme differs from the page's (dark) gets an opaque
-   backdrop behind its rounded corners. Inert and dimmed while a sign-in runs, like a disabled key. */
-.gsi {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/* The Google key: a keycap like the others (hover, press and focus come from .key), Google's G on its white tile at
+   the left and the label in the middle of the key. The tile is Google's own asset at its own 40px size, never
+   altered (Google's branding rules: the standard G, on white). The label's right padding matches the tile, so the
+   label is centered on the key, not on what's left of it. */
+.key.google-key {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0 6px;
 }
-.gsi[data-disabled="true"] {
-  opacity: 0.55;
-}
-.gsi-box {
-  min-height: 40px;
-  display: flex;
-  justify-content: center;
-  color-scheme: light;
-}
-.gsi-wait {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+.google-g {
+  flex: none;
+  display: block;
+  width: 40px;
   height: 40px;
-  display: grid;
-  place-items: center;
-  border: 1px dashed var(--hairline);
-  border-radius: var(--radius);
-  font-size: 18px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--faint);
-  pointer-events: none;
+}
+.google-key-label {
+  flex: 1;
+  min-width: 0;
+  padding-right: 40px;
+  text-align: center;
+}
+/* Phones: the label is centered in the room right of the tile, a little tighter, so it never runs into the tile. */
+@media (max-width: 440px) {
+  .google-key-label {
+    padding-right: 0;
+    letter-spacing: 0.18em;
+  }
+}
+@media (max-width: 380px) {
+  .google-key-label {
+    letter-spacing: 0.12em;
+  }
+}
+@media (max-width: 340px) {
+  .google-key-label {
+    letter-spacing: 0.05em;
+  }
 }
 .sheet-or {
   display: flex;

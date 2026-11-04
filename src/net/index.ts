@@ -55,9 +55,18 @@ const stored = (key: string): string | null => {
   }
 };
 
-/** A sign-in coming back to the page: a code to trade for a session, or an error. */
+/**
+ * A sign-in coming back to the page: a code to trade for a session, or an error; or Google's token, brought back to
+ * this tab by the callback page (./google).
+ */
 function authCallback(): boolean {
-  return /[?&](code|error_description)=/.test(location.search) || /(^#|&)(error_description|access_token)=/.test(location.hash);
+  let google = false;
+  try {
+    google = !!sessionStorage.getItem(KEYS.googleResult);
+  } catch {
+    // No sessionStorage: nothing came back through it.
+  }
+  return google || /[?&](code|error_description)=/.test(location.search) || /(^#|&)(error_description|access_token)=/.test(location.hash);
 }
 
 let throttleUntil = 0;

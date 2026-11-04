@@ -39,12 +39,17 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   reader key, whose SHA-256 (never the key) sits in a schema the Data API doesn't expose (`private.reader_keys`). The
   owner's own notes come first (`owners`). See Switch it on (2.5) and Running it.
 - **Accounts.** Sign-in methods come from `VITE_SIGN_IN`: Google, an email and password (`password`: nothing is
-  emailed), or a link by email (`email`, PKCE; the email also carries a code for another device). Google, with
-  `VITE_GOOGLE_CLIENT_ID` set, is Google's own button (Google Identity Services, `src/net/google.ts`): its script
-  loads from accounts.google.com when the sign-in sheet opens (never before, never in a build without it), its popup
-  opens from this site and hands back an ID token, and `signInWithIdToken` trades it for a Supabase session. Google
-  gets the SHA-256 of a fresh nonce, Supabase the nonce itself, so a token can't be replayed. Without the variable, or
-  if Google's script can't load, the sheet keeps the old key: Supabase's redirect (`signInWithOAuth`). The save syncs
+  emailed), or a link by email (`email`, PKCE; the email also carries a code for another device). Google is our own
+  key (our keycap, Google's G, "Continue with Google"). With `VITE_GOOGLE_CLIENT_ID` set (`src/net/google.ts`), it
+  opens Google's OpenID Connect endpoint (`https://accounts.google.com/o/oauth2/v2/auth`, `response_type=id_token`)
+  in a popup, with this site's `auth/google.html` as the redirect URI; Google sends the popup there with an ID token in
+  the address's fragment, that page (`src/net/google-callback.ts`) posts it to the game window (same origin only) and
+  closes, the game checks the `state` it asked with, and `signInWithIdToken` trades the token for a Supabase session.
+  Google gets the SHA-256 of a fresh nonce, Supabase the nonce itself, so a token can't be replayed. A blocked popup
+  takes the whole tab to Google and back to `auth/google.html`, which returns to the game on the screen the player
+  left, and the game finishes the sign-in as it starts; a popup that has no way back to the game window (some in-app
+  browsers) does the same in its own window. Nothing is loaded from Google before the press. Without the variable,
+  the key goes through Supabase's redirect (`signInWithOAuth`). The save syncs
   on sign-in, after every finished game and when the tab comes back (at most every 30 s): read the account's copy,
   merge it with this device's (`src/net/sync/merge.ts`: nothing is lost, see its header), write the merge back only if
   the copy is still the version that was read, else merge again. Never overwrite. Plays sent while signed in are
@@ -59,7 +64,7 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
 What's personal: only with an account, the email (plus name and picture with Google; a password only as Supabase's
 hash) and the save. `plays`, `ratings` and `feedback` hold a random per-browser id, never an IP address. A note is
 whatever the player typed, so only the owner reads notes, and the privacy page asks players to leave personal details
-out. With Google's button, opening the sign-in sheet loads it from Google. The in-game `#privacy` page says this.
+out. Nothing comes from Google until the player presses Continue with Google. The in-game `#privacy` page says this.
 
 ## Switch it on
 
@@ -126,20 +131,29 @@ out. With Google's button, opening the sign-in sheet loads it from Google. The i
      - **Data Access**: `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile`. Nothing else; these need no
        review by Google.
      - **Clients** > Create client > **Web application**. Authorized JavaScript origins: `https://<your-domain>` and
-       `http://localhost:5100` (Google's button only works on these origins). Authorized redirect URI:
-       `https://<ref>.supabase.co/auth/v1/callback` (Supabase's callback, for the redirect fallback).
+       `http://localhost:5100` (Google asks browser sign-ins to come from these). Authorized redirect URIs, each
+       exactly as written (scheme, path and `.html` included; Google compares them character for character):
+       - `https://<your-domain>/auth/google.html`: the game's own callback page. For the live game:
+         `https://toptentacle.vercel.app/auth/google.html`.
+       - `http://localhost:5100/auth/google.html`: the same, for local testing (any other local port needs its own).
+       - `https://<ref>.supabase.co/auth/v1/callback`: Supabase's callback, for builds without `VITE_GOOGLE_CLIENT_ID`
+         (previews).
+
+       Until the first one is there, pressing Continue with Google on the live game ends at Google's "Error 400:
+       redirect_uri_mismatch".
      - Copy the client ID and secret into Supabase: Authentication > Sign In / Providers > Google > enable. The
        **Client IDs** field must list this web client ID (Supabase checks the ID token's audience against it; it's
        the same client the redirect uses, so it already does). Leave **Skip nonce checks** off: the game sends a
        nonce.
      - Then set `VITE_GOOGLE_CLIENT_ID` (step 6) to the same client ID.
-     - **What players see.** With Google's button (`VITE_GOOGLE_CLIENT_ID` set), Google's account chooser says
-       "to continue to <your-domain>" (toptentacle.vercel.app): the popup runs on the game's origin and Google never
-       sees the Supabase domain. Without it, the redirect goes through Supabase's callback and the chooser names
-       `<ref>.supabase.co`. Google shows the app name "TENtacle" (and logo) instead of a domain only once the brand is
-       verified: Branding > Verify branding (needs the homepage and privacy policy links on a domain you've verified
-       in Search Console). If verification objects to `<ref>.supabase.co` (a domain you can't verify), removing it
-       and the Supabase redirect URI leaves Google's button working but ends the redirect fallback.
+     - **What players see.** Google's account chooser names the site its answer goes to (the redirect URI's
+       domain). With `VITE_GOOGLE_CLIENT_ID` set, that's the game's own callback page, so it says "to continue to
+       <your-domain>" (toptentacle.vercel.app) and Google never sees the Supabase domain. Without it, the redirect
+       goes through Supabase's callback and the chooser names `<ref>.supabase.co`. Google shows the app name
+       "TENtacle" (and logo) instead of a domain only once the brand is verified: Branding > Verify branding (needs
+       the homepage and privacy policy links on a domain you've verified in Search Console). If verification objects
+       to `<ref>.supabase.co` (a domain you can't verify), removing it and the Supabase redirect URI leaves the game's
+       Google sign-in working but ends the Supabase fallback (previews).
    - `email` (a link): Authentication > Emails > Templates > Magic Link: add `<p>Or type this code in the game:
      {{ .Token }}</p>`. Custom SMTP (Authentication > Emails > SMTP Settings) is **needed for real players**: the
      built-in sender only delivers to your team's addresses, a couple an hour.
@@ -157,10 +171,11 @@ out. With Google's button, opening the sign-in sheet loads it from Google. The i
    - `VITE_SIGN_IN`: for example `google,password`. Default `google,email`; `none` for stats without accounts.
      Unknown names are ignored.
    - `VITE_GOOGLE_CLIENT_ID`: the Google OAuth web client ID (`...apps.googleusercontent.com`, Google Auth Platform
-     > Clients; not the secret). **Public**, like the Supabase key. With it, Google sign-in is Google's own button and
-     the account chooser names the game's domain; without it, the redirect through Supabase. A value that isn't a
-     client ID is ignored (the redirect stays). **Production only**: Google's button works only on the client's
-     Authorized JavaScript origins, which take no wildcards, so preview URLs keep the redirect.
+     > Clients; not the secret). **Public**, like the Supabase key. With it, Google sign-in goes from the game to
+     Google and back to the game's `auth/google.html`, and the account chooser names the game's domain; without it,
+     the redirect through Supabase. A value that isn't a client ID is ignored (the Supabase redirect stays).
+     **Production only**: Authorized redirect URIs and JavaScript origins take no wildcards, so preview URLs keep the
+     Supabase redirect.
    - Pasted values are trimmed: a trailing newline or space doesn't matter.
    - `VITE_PRIVACY_CONTACT`: an address for privacy questions and forgotten passwords. Worth setting.
    - `.env.example` lists them all. Locally, copy it to `.env.local` (gitignored).
@@ -170,10 +185,13 @@ out. With Google's button, opening the sign-in sheet loads it from Google. The i
      answering `true`. `select list_stats('mountains', 'list');` returns `{"n": ..., "counts": [...]}`.
    - Home's Your games has a "Sign in" key. Create an account with a password in one browser, sign in with Google in
      another. `saves` gets a row; play on one, focus the other, and the game shows up there.
-   - Google's button: the sheet shows Google's "Continue with Google" button; its popup's account chooser names your
-     domain, not `<ref>.supabase.co`; the network tab shows `token?grant_type=id_token` answering 200. A 400
-     "Unacceptable audience" means the Client IDs field lacks this client; "Nonces mismatch" or "Passed nonce and
-     nonce in id_token should either both exist or not" means a stale build or a changed nonce setting.
+   - Google: Continue with Google opens a Google window whose account chooser names your domain, not
+     `<ref>.supabase.co`; after choosing, the window closes itself and the network tab shows
+     `token?grant_type=id_token` answering 200. "Error 400: redirect_uri_mismatch" in Google's window means the
+     client lacks this exact Authorized redirect URI (`https://<your-domain>/auth/google.html`); `origin_mismatch`,
+     the JavaScript origin. A 400 "Unacceptable audience" from Supabase means its Client IDs field lacks this client;
+     "Nonces mismatch" or "Passed nonce and nonce in id_token should either both exist or not" means a stale build or
+     a changed nonce setting. With pop-ups blocked, the whole tab goes to Google and comes back signed in.
    - Rate a list on its results: the network tab shows `rpc/rate_list` answering `true`, and
      `select * from list_ratings();` has a row for it.
    - Signed in, add a note on a list's results: the network tab shows `rpc/submit_feedback` answering `true`, and
@@ -253,19 +271,25 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   browser past 20 notes an hour; spam is cleaned up the same way in `feedback`. Notes are never shown to players, so
   junk only costs the loop a read.
 - **Local development**: `.env.local` with the URL and publishable key, `npx vite --port 5100`, and that URL in
-  Supabase's Redirect URLs. `/api/delete-account` only runs on Vercel (`npx vercel dev` locally). Google's button
-  needs the local origin (`http://localhost:5100`) among the client's Authorized JavaScript origins.
-- **Headers**: the site sends no Content-Security-Policy and no Cross-Origin-Opener-Policy, which is what Google's
-  popup needs. If you add them: COOP `same-origin-allow-popups` (plain `same-origin` breaks the popup: a blank
-  window), and CSP `script-src https://accounts.google.com/gsi/client`, `frame-src` and `connect-src
-  https://accounts.google.com/gsi/`, `style-src https://accounts.google.com/gsi/style`.
+  Supabase's Redirect URLs. `/api/delete-account` only runs on Vercel (`npx vercel dev` locally). Google sign-in
+  needs `http://localhost:5100` among the client's Authorized JavaScript origins and
+  `http://localhost:5100/auth/google.html` among its Authorized redirect URIs (the dev server serves that page too).
+- **Headers**: the site sends no Content-Security-Policy and no Cross-Origin-Opener-Policy, which is what the Google
+  popup needs to hand its token back to the game window. If you add them: no COOP at all on `/auth/google.html` (any
+  value there cuts the popup off from the game: it then signs in on its own and the game tab only follows through
+  Supabase), at most `same-origin-allow-popups` on the game (plain `same-origin` cuts it off too). Nothing is loaded
+  from Google, so CSP needs no Google sources; the callback page has one script file of its own (`script-src 'self'`)
+  and a small inline style.
 - **Tests**: `npm test` covers the client (`src/net/*.test.ts`), the merge and the database functions
   (`supabase/migrations.test.ts`, in PGlite, with and without new tables exposed, ratings and notes included: no
-  player reads a note, a wrong reader key raises, the owner's notes come first, the rate limit, deletion). `npm run
-  e2e` runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating on the results, and no note option), plus
-  `e2e/backend.e2e.cjs`, which builds a copy with fake env vars (`e2e/backend-env.cjs`, every sign-in method on) and
-  mocks Supabase (`rate_list` and `submit_feedback` included), `e2e/note.e2e.cjs` on the same copy ("add a note": the
-  exact arguments sent, offline waiting, Escape and Enter, the phone keyboard; `e2e/states.e2e.cjs` walks it too),
-  and `e2e/backend-google.e2e.cjs`, a copy with a Google client ID against a fake Google
-  script (`google.accounts.id`): the token and nonce reaching Supabase, a closed or blocked popup, a refused token, a
-  script that can't load. The live popup itself can only be tried on the real site.
+  player reads a note, a wrong reader key raises, the key by header, the owner's notes come first, the rate limit,
+  deletion). `npm run e2e` runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating on the results, and no
+  note option), plus `e2e/backend.e2e.cjs`, which builds a copy with fake env vars (`e2e/backend-env.cjs`, every
+  sign-in method on) and mocks Supabase (`rate_list` and `submit_feedback` included), `e2e/note.e2e.cjs` on the same
+  copy ("add a note": the exact arguments sent, offline waiting, Escape and Enter, the phone keyboard;
+  `e2e/states.e2e.cjs` walks it too), and `e2e/backend-google.e2e.cjs`, a copy with a Google client ID against a fake
+  Google endpoint (it answers with a redirect to the callback page, a token in the fragment): the exact request, the
+  token and nonce reaching Supabase, the state check, a closed window, Cancel, a refused token, a blocked popup (the
+  tab goes and comes back), a popup cut off from the game, and the key's states. `src/net/google.test.ts` and
+  `google-callback.test.ts` cover the request, the callback page and the way back. Google's real chooser can only be
+  tried on the real site.

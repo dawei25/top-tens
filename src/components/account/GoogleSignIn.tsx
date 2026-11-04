@@ -1,95 +1,96 @@
 import { useEffect, useRef, useState } from "react";
+import { loadService } from "../../net";
 import { GOOGLE_CLIENT_ID } from "../../net/config";
-import { googleButton, type GoogleButton } from "../../net/google";
-
-/** How long after a press with the page still in front we say the popup didn't open. */
-const NO_WINDOW_MS = 3000;
+import { GOOGLE_FAILED, prepareGoogle, startGoogle, type GoogleOutcome, type GoogleRequest } from "../../net/google";
+// Google's own "G" on its white tile, exactly as Google ships it (Sign in with Google branding assets: Android + Web,
+// Light, no text, square, @4x, shown at its 40px size). Never recolored, resized or redrawn.
+import gMark from "./google-g.png";
 
 /**
- * Google's own "Continue with Google" button (Google Identity Services), in a build with VITE_GOOGLE_CLIENT_ID. Its
- * popup opens from this site, so Google's account chooser names this site rather than the Supabase project. Google's
- * script loads when this mounts (the sign-in sheet opened). If it can't load (offline, blocked), `onUnavailable`, and
- * the sheet offers the redirect sign-in instead.
+ * The Google key: our keycap, Google's G, "Continue with Google".
  *
- * Google tells the page nothing when its popup is closed or blocked. Closing it is the player's choice: nothing to say.
- * A press that leaves the page in front for a few seconds (no window took over) gets a hint about pop-ups.
+ * With a client ID (VITE_GOOGLE_CLIENT_ID), pressing it opens Google's sign-in in a popup on this site's own
+ * redirect page (src/net/google.ts), so Google's account chooser names this site; a blocked popup takes the whole tab
+ * there and back instead. Each press asks with a fresh state and nonce, made ready before the press so the popup
+ * opens straight from it (browsers block a popup opened after waiting). Without a client ID (preview builds), the
+ * press goes through Supabase's redirect (`onSupabase`).
  */
 export default function GoogleSignIn({
   disabled,
-  onCredential,
-  onUnavailable,
+  signingIn,
+  onOutcome,
+  onSupabase,
 }: {
+  /** Another sign-in is running. */
   disabled: boolean;
-  onCredential: (token: string, nonce: string) => void;
-  onUnavailable: () => void;
+  /** Supabase is trading Google's token (or, without a client ID, its redirect is starting). */
+  signingIn: boolean;
+  onOutcome: (o: GoogleOutcome) => void;
+  onSupabase: () => void;
 }) {
-  const box = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
-  const [noWindow, setNoWindow] = useState(false);
-  const handlers = useRef({ onCredential, onUnavailable });
-  useEffect(() => {
-    handlers.current = { onCredential, onUnavailable };
-  }, [onCredential, onUnavailable]);
+  const ready = useRef<GoogleRequest | null>(null);
+  const [waiting, setWaiting] = useState(false);
+  const [leaving, setLeaving] = useState(false);
 
-  useEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    let live = true;
-    let button: GoogleButton | undefined;
-    let watch: ReturnType<typeof setInterval> | undefined;
-    // Pressed: Google's popup should take the front. If the page stays in front, it didn't open.
-    const press = () => {
-      clearInterval(watch);
-      setNoWindow(false);
-      const until = Date.now() + NO_WINDOW_MS;
-      watch = setInterval(() => {
-        if (!document.hasFocus() || document.visibilityState === "hidden") return clearInterval(watch);
-        if (Date.now() < until) return;
-        clearInterval(watch);
-        if (live) setNoWindow(true);
-      }, 200);
-    };
-    googleButton(el, GOOGLE_CLIENT_ID, {
-      press,
-      credential: (token, nonce) => {
-        clearInterval(watch);
-        setNoWindow(false);
-        handlers.current.onCredential(token, nonce);
-        // A next try (if this one is refused) asks with a new nonce.
-        void button?.renew();
-      },
-    }).then(
-      (b) => {
-        if (!live) return;
-        button = b;
-        setReady(true);
-      },
-      () => live && handlers.current.onUnavailable(),
+  const prepare = () => {
+    ready.current = null;
+    const next = prepareGoogle(GOOGLE_CLIENT_ID, location.href);
+    next.then(
+      (r) => (ready.current = r),
+      () => {},
     );
-    // Google draws its button at a fixed width: draw it again when the sheet changes width (a phone turned).
-    const resized = new ResizeObserver(() => button?.redraw());
-    resized.observe(el);
-    return () => {
-      live = false;
-      clearInterval(watch);
-      resized.disconnect();
-    };
+    return next;
+  };
+  useEffect(() => {
+    if (GOOGLE_CLIENT_ID) void prepare().catch(() => {});
+    // Back from Google's page with the browser's back button (the page restored as it was): the key works again.
+    const shown = (e: PageTransitionEvent) => e.persisted && setLeaving(false);
+    addEventListener("pageshow", shown);
+    return () => removeEventListener("pageshow", shown);
   }, []);
 
+  const go = (req: GoogleRequest) => {
+    const how = startGoogle(req, (o) => {
+      setWaiting(false);
+      onOutcome(o);
+    });
+    // The next press asks afresh.
+    void prepare().catch(() => {});
+    if (how === "redirect") return setLeaving(true);
+    setWaiting(true);
+    // Supabase's client, ready for the token. Started, it also hears a sign-in finished in another window of this
+    // site (a popup that had no way back here signs in on its own), and this tab signs in with it.
+    loadService()
+      ?.then((s) => s.start())
+      .catch(() => {});
+  };
+  const press = () => {
+    if (!GOOGLE_CLIENT_ID) return onSupabase();
+    if (ready.current) return go(ready.current);
+    // Pressed within a few milliseconds of the sheet opening: once it's ready (a popup may then be blocked, and the
+    // tab goes to Google instead).
+    prepareGoogle(GOOGLE_CLIENT_ID, location.href).then(go, () => onOutcome({ kind: "error", message: GOOGLE_FAILED }));
+  };
+
+  const label = leaving ? "Opening Google" : signingIn ? (GOOGLE_CLIENT_ID ? "Signing in" : "Opening Google") : "Continue with Google";
   return (
-    <div className="gsi" data-testid="sign-in-google-gis" data-ready={ready} data-disabled={disabled} inert={disabled}>
-      {/* Google's iframe goes in here (Google manages its content, React doesn't). */}
-      <div ref={box} className="gsi-box" />
-      {!ready && (
-        <span className="gsi-wait" aria-hidden="true">
-          loading google
-        </span>
-      )}
-      {noWindow && (
-        <p className="sheet-note" role="status" data-testid="sign-in-google-popup">
-          no google window? allow pop-ups for this site, then press it again.
+    <>
+      <button
+        type="button"
+        className="key google-key"
+        data-testid="sign-in-google"
+        data-flow={GOOGLE_CLIENT_ID ? "google" : "supabase"}
+        disabled={disabled || leaving}
+        onClick={press}
+      >
+        <img className="google-g" src={gMark} alt="" width={40} height={40} draggable={false} />
+        <span className="google-key-label">{label}</span>
+      </button>
+      {waiting && !signingIn && (
+        <p className="sheet-note" role="status" data-testid="sign-in-google-waiting">
+          finish in the google window.
         </p>
       )}
-    </div>
+    </>
   );
 }

@@ -1,0 +1,36 @@
+<!doctype html>
+<!-- Google sign-in comes back here (src/net/google-callback.ts). Its full address is an Authorized redirect URI of the
+     Google OAuth client (docs/BACKEND.md). It shows for a moment at most: it hands the token to the game and closes,
+     or goes back to the game. -->
+<html lang="en" data-page="google-callback">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#050a14" />
+    <meta name="color-scheme" content="dark" />
+    <title>TENtacle</title>
+    <style>
+      html {
+        background: #050a14;
+        color: #7d93b8;
+        font: 20px/1.35 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        letter-spacing: 0.08em;
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="status" role="status">signing in.</p>
+    <script type="module" src="../src/net/google-callback.ts"></script>
+  </body>
+</html>

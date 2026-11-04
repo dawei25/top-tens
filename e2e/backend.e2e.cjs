@@ -6,8 +6,8 @@
 // Notes ("add a note") have their own spec on the same build: note.e2e.cjs.
 // (Signing in itself ends at Google's or the email's door: the redirect and the email request are checked, not the
 // return trip. The merge and the session handling have unit tests in src/net.) This build has no Google client ID:
-// Google sign-in is Supabase's redirect, and Google's own script never loads. backend-google.e2e.cjs covers the build
-// with one.
+// Google sign-in is Supabase's redirect. backend-google.e2e.cjs covers the build with one (from this site to Google
+// and back).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { VIEWPORTS, NOW, TODAY, guess, noHScroll } = require("./helpers.cjs");
@@ -190,12 +190,12 @@ test("the menu's account and Feedback, the sign-in sheet and privacy page (deskt
   assert.ok(await noHScroll(page));
   await page.getByTestId("nav-back").click();
 
-  // Google, in a build without VITE_GOOGLE_CLIENT_ID: our key, off to Supabase's authorize endpoint, coming back to
-  // this page. Google's own script never loads.
+  // Google, in a build without VITE_GOOGLE_CLIENT_ID: the same key, off to Supabase's authorize endpoint, coming back
+  // to this page. Nothing goes to Google from this page.
   const google = [];
   page.on("request", (r) => new URL(r.url()).hostname === "accounts.google.com" && google.push(r.url()));
   await openSignIn(page);
-  assert.equal(await page.getByTestId("sign-in-google-gis").count(), 0);
+  assert.equal(await page.getByTestId("sign-in-google").getAttribute("data-flow"), "supabase");
   assert.equal(await page.locator('script[src*="accounts.google.com"]').count(), 0);
   await page.getByTestId("sign-in-google").click();
   await until(() => calls.authorize.length === 1);

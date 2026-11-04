@@ -5,6 +5,7 @@ import { load, save } from "../game/storage";
 import { accountsOn, BACKEND } from "./config";
 import { parseAverages, parseStats, type CrowdStats, type ListAverages } from "./crowd";
 import { FEEDBACK, feedbackArgs, type Feedback } from "./feedback";
+import { takeGoogleReturn, type GoogleOutcome } from "./google";
 import { localOutboxStore, Outbox, retryDelay, type SendResult } from "./outbox";
 import { blitzPlay, clientId, listPlay, rpcArgs, type Play } from "./plays";
 import { RATINGS, rateArgs, ratingKey, type Rating } from "./ratings";
@@ -270,9 +271,16 @@ export async function start(): Promise<void> {
       }, 0);
     });
     // Waits for Supabase to finish starting up, which includes trading a sign-in code in the URL for a session.
-    const { data } = await auth.getSession();
-    const notice = urlNotice(hadVerifier);
+    let { data } = await auth.getSession();
+    let notice = urlNotice(hadVerifier);
     cleanUrl();
+    // Back from Google in this tab (the popup was blocked, or had no way back to this window): finish that sign-in.
+    const google = googleReturn();
+    if (google && google.kind !== "cancel") {
+      const err = google.kind === "token" ? await signInWithGoogleToken(google.token, google.nonce) : google.message;
+      if (err) notice = err;
+      else ({ data } = await auth.getSession());
+    }
     // A stored session that no longer works (its refresh was refused) ends up signed out here.
     setAccount({ status: data.session ? "in" : "out", user: data.session ? userOf(data.session) : undefined, notice });
   } catch {
@@ -289,9 +297,18 @@ export async function signInWithGoogle(): Promise<string | null> {
   }
 }
 
+/** A Google sign-in the callback page brought back to this tab (./google), matched with its try; null if none. */
+function googleReturn(): GoogleOutcome | null {
+  try {
+    return takeGoogleReturn(sessionStorage, localStorage, Date.now());
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Finish a sign-in from Google's own button (./google): its ID token, and the nonce it was asked with (unhashed;
- * Supabase hashes it and compares with the token's). The session arrives through onAuthStateChange.
+ * Finish a Google sign-in (./google): Google's ID token, and the nonce it was asked with (unhashed; Supabase hashes
+ * it and compares with the token's). The session arrives through onAuthStateChange.
  */
 export async function signInWithGoogleToken(token: string, nonce: string): Promise<string | null> {
   try {
