@@ -58,7 +58,7 @@ const GLYPHS = {
   ]),
   stats: glyph(["......##", "......##", "...##.##", "...##.##", "##.##.##", "##.##.##", "........", "########"]),
   user: glyph(["...###...", "..#####..", "..#####..", "...###...", ".........", ".#######.", "#########", "#########"]),
-  /** The same player, hollow: nobody signed in (Home's account card). */
+  /** The same player, hollow: nobody signed in (Home's account key). */
   userOut: glyph(["...###...", "..#...#..", "..#...#..", "...###...", ".........", ".#######.", "#.......#", "#########"]),
   settings: glyph([
     "....#....",

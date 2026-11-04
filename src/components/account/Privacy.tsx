@@ -126,8 +126,8 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
         <ul>
           {accountsOn && (
             <li>
-              Signed in: <a href="#">Home</a>, Account, delete account. That removes your save, your linked scores, ratings
-              and notes, and your sign-in, right away.
+              Signed in: <a href="#">Home</a>, the player key at the top, delete account. That removes your save, your
+              linked scores, ratings and notes, and your sign-in, right away.
             </li>
           )}
           <li>

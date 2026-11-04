@@ -19,8 +19,9 @@ type Service = NonNullable<Awaited<ReturnType<typeof loadService>>>;
  * (./Sheet): Escape, the close key or a press outside closes it; focus stays inside while it's open; the first control
  * takes focus (the Google key when there is one: no keyboard pops up on a phone).
  *
- * `start`: Home's SIGN IN opens it to sign in, CREATE ACCOUNT to create an account (the password form's "up" mode).
- * Google and the email link make an account on first use, so for them the two differ only in the heading.
+ * `start`: Home's account key (signed out) opens it to sign in; "new here? create an account" switches the password
+ * form to its "up" mode (`start: "up"` opens it there). Google and the email link make an account on first use, so for
+ * them the two differ only in the heading.
  *
  * Google: our key (./GoogleSignIn). With a client ID (VITE_GOOGLE_CLIENT_ID) it opens Google from this site, so
  * Google's account chooser names this site; without one it goes through Supabase's redirect.

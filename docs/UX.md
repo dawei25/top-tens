@@ -56,9 +56,16 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 
 ## Status and touch
 
-19. **Show where the player stands where they land.** Whether you're signed in reads on Home at a glance (a lit or
-    hollow player, "signed in as Dana" or "not signed in"), not behind the menu ("this way you can easily tell if you
-    are logged in or not"). Home never shows an email address.
+19. **Show where the player stands, compactly: a small header key lit when signed in, never a row of its own.**
+    Whether you're signed in reads on Home at a glance, not behind the menu ("this way you can easily tell if you are
+    logged in or not"), and in the smallest space that says it: one keycap in Home's header, left of the sound key, a
+    pixel player hollow when signed out and lit cyan when signed in, a pink dot when the sync needs a look. Its name
+    and title say it in words ("Account: signed in as Dana"); the sheet it opens says the rest. A card under Today's
+    pair said the same in a whole row: "I hate how the sign-in thing takes up an entire row of space in the center
+    ... at the most, you should have a small icon next to the home button or the settings button, or something more
+    discreet that just shows, in a useful manner, whether or not you're signed in. This is just a terrible waste of
+    space." Status never spends prime space. Home never shows an email address. (`e2e/backend.e2e.cjs`: each state's
+    icon and name, and nothing between Today and Free play.)
 20. **A finger is not a mouse.** On a phone a tap leaves hover behind (hover looks live under `@media (hover:
     hover)`), every control is 44px to the finger (a key's base counts), quick taps never zoom, and the narrowest
     phone (320px) still shows every word that matters: the clue's cost, the guess box's placeholder, a long answer

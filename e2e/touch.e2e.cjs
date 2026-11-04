@@ -7,9 +7,13 @@
 //   words whole and Blitz names get the row's width.
 // - Nothing a player reads or taps sits under a notch or the home indicator (faked over CDP).
 // - With the keyboard up on a small phone, the board still shows above the guess box.
+// - Home's account key (a build with accounts, served here) takes quick taps, reaches 44px, keeps no hover look after
+//   a tap, and stays clear of a notch, from 320px up.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, open, go, puzzle, guess, giveUp } = require("./helpers.cjs");
+const { BACKEND_ENV } = require("./backend-env.cjs");
+const { serveBuild, opener, FRESH: BACKEND_FRESH } = require("./backend-lib.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -290,6 +294,54 @@ test("nothing a player reads or taps sits under a notch or the home indicator (f
     await page.getByLabel("Your guess").waitFor();
     await inside("a list game", ["nav-back", "nav-home", ".guess-row"], { top: false });
     await ctx.close();
+  }
+});
+
+test("Home's account key on a phone (a build with accounts): quick taps, 44px to the finger, no hover left behind, clear of a notch", async () => {
+  const served = await serveBuild(BACKEND_ENV, "E2E_BACKEND_DIST");
+  const openAccounts = opener(() => served);
+  try {
+    for (const width of WIDTHS) {
+      const { ctx, page } = await openAccounts({ ...phone(width), reducedMotion: "reduce" }, "", BACKEND_FRESH);
+      const key = page.locator('[data-testid="account-key"][data-state="out"]');
+      await key.waitFor();
+      assert.equal(await key.evaluate((el) => getComputedStyle(el).touchAction), "manipulation", `${width}px: quick taps don't zoom`);
+      // Its reach: the points 21.5px above, below and beside its middle press it, or the sound key next to it.
+      const misses = await key.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const [cx, cy] = [r.left + r.width / 2, r.top + r.height / 2];
+        return [[0, -21.5], [0, 21.5], [-21.5, 0], [21.5, 0]].flatMap(([dx, dy]) => {
+          const hit = document.elementFromPoint(cx + dx, cy + dy);
+          return hit && (el.contains(hit) || hit.closest('[data-testid="sound-toggle"]')) ? [] : [`${dx},${dy}`];
+        });
+      });
+      assert.deepEqual(misses, [], `${width}px: the account key is under 44px to the finger`);
+      // A tap opens the sign-in sheet; once it's closed, the key looks as it did (no hover look stuck on it).
+      const rest = await look(key);
+      await key.tap();
+      await page.getByTestId("sign-in-sheet").waitFor();
+      await page.keyboard.press("Escape");
+      await page.getByTestId("sign-in-sheet").waitFor({ state: "detached" });
+      await page.waitForTimeout(500);
+      assert.deepEqual(await look(key), rest, `${width}px: the account key looks tapped`);
+      await ctx.close();
+    }
+    // Clear of a notch and the home indicator, upright and on its side.
+    for (const [vp, insets] of [
+      [phone(390), { top: 47, left: 0, right: 0, bottom: 34 }],
+      [phone(844, 390), { top: 0, left: 47, right: 47, bottom: 21 }],
+    ]) {
+      const { ctx, page } = await openAccounts({ ...vp, reducedMotion: "reduce" }, "", BACKEND_FRESH);
+      const cdp = await ctx.newCDPSession(page);
+      await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets });
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+      const r = await page.getByTestId("account-key").evaluate((el) => el.getBoundingClientRect().toJSON());
+      const { width } = vp.viewport;
+      assert.ok(r.left >= insets.left - 0.5 && r.right <= width - insets.right + 0.5 && r.top >= insets.top - 0.5, `${width}px: the account key under an inset`);
+      await ctx.close();
+    }
+  } finally {
+    await served.close();
   }
 });
 

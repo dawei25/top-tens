@@ -70,11 +70,16 @@ Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
 
 Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list and Blitz, Random list and
 Blitz; Yours: Archive, Past runs, Stats; More: Settings, How to play, Feedback, Privacy), the current screen's tile
-marked. The account lives on Home, not in the menu (owner, Nov 5): a card under Today's pair says "not signed in"
-with SIGN IN and CREATE ACCOUNT, or "signed in as <name>" with ACCOUNT (UX.md 19). **Settings** (`#settings`):
-the sound switch and reset all progress.
+marked. The account lives in Home's header, not in the menu and not in a row of its own (owner, Nov 5 and 6): one
+**account key** left of the sound key, the same keycap, in builds with accounts only. Its pixel player is hollow when
+signed out, lit cyan when signed in, carries a pink dot for sync trouble (offline, couldn't sync) or a sign-in that
+didn't finish, and waits (hollow, tinted, disabled) while a sign-in comes back; its name and title say the state
+("Account: signed in as <name>", never an email). It opens the sign-in sheet (which also creates accounts) or the
+account sheet (name, sync state with try again, sign out, delete account, what we keep). Inner screens have no
+account key: their headers are full, and HOME is one press away (UX.md 19). **Settings** (`#settings`): the sound
+switch and reset all progress.
 
-1. **Home:** Today's list and Blitz; Free play (Random list, Random Blitz, each with a floating by-category picker);
+1. **Home:** Today's list and Blitz, then directly Free play (Random list, Random Blitz, each with a floating by-category picker);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
 2. **Game:** title card with the prompt, score (no average during play: it's revealed on the results) and a Play
    Blitz key; lives; 10 rank slots, each empty one with a

@@ -174,7 +174,13 @@ async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
 const opener = (served) =>
   async function open(vp, hash, seed, mocks, setup) {
     const { browser, base } = served();
-    const ctx = await browser.newContext({ viewport: vp.viewport, isMobile: !!vp.isMobile, hasTouch: !!vp.hasTouch, timezoneId: "America/New_York" });
+    const ctx = await browser.newContext({
+      viewport: vp.viewport,
+      isMobile: !!vp.isMobile,
+      hasTouch: !!vp.hasTouch,
+      timezoneId: "America/New_York",
+      ...(vp.reducedMotion && { reducedMotion: vp.reducedMotion }),
+    });
     // The same font bytes every run, so a layout measured once stays put.
     await offlineFonts(ctx);
     await ctx.addInitScript((items) => {
@@ -209,24 +215,56 @@ async function openMenu(page) {
   await menu.evaluate((d) => Promise.all(d.getAnimations().map((a) => a.finished)));
   return menu;
 }
-/** Home's SIGN IN key (or CREATE ACCOUNT, `mode` "up"): opens the sign-in sheet. Goes Home first if need be. */
+/**
+ * Home's account key, signed out: opens the sign-in sheet (to sign in; `mode` "up" then switches it to create an
+ * account, as "new here? create an account" does). Goes Home first if need be.
+ */
 async function openSignIn(page, mode = "in") {
   if (await page.evaluate(() => location.hash.length > 1)) await page.evaluate(() => (location.hash = ""));
-  await page.getByTestId(mode === "up" ? "home-create-account" : "home-sign-in").click();
+  await page.locator('[data-testid="account-key"][data-state="out"]').click();
   await page.getByTestId("sign-in-sheet").waitFor();
+  await page.locator('[data-testid="sign-in-password-form"][data-mode="in"]').waitFor();
+  if (mode === "up") {
+    await page.getByTestId("sign-in-mode").click();
+    await page.locator('[data-testid="sign-in-password-form"][data-mode="up"]').waitFor();
+  }
 }
+
 /**
- * Signed in: Home's account card says so, with the player's name (`name`, if given) and never an email address.
- * Goes Home first if need be.
+ * How Home's account key looks and reads: its state, name and title, whether it's pressable, its player's color and
+ * how many of its pixels are lit (the lit player is filled in, the hollow one an outline), and whether the pink dot
+ * shows.
+ */
+const accountKey = (page) =>
+  page.getByTestId("account-key").evaluate((el) => {
+    const icon = el.querySelector("svg");
+    return {
+      state: el.dataset.state,
+      sync: el.dataset.sync ?? null,
+      name: el.getAttribute("aria-label"),
+      title: el.getAttribute("title"),
+      disabled: el.disabled,
+      color: getComputedStyle(icon).color,
+      pixels: icon.querySelector("path").getAttribute("d").split("M").length - 1,
+      dot: !!el.querySelector('[data-testid="account-dot"]'),
+    };
+  });
+/** The player's colors: hollow and quiet (muted) signed out, lit (cyan) signed in, tinted (cyan-edge) signing in. */
+const KEY_COLORS = { out: "rgb(125, 147, 184)", in: "rgb(77, 227, 255)", loading: "rgb(47, 191, 232)" };
+
+/**
+ * Signed in: Home's account key says so, lit, named for the player (`name`, if given: "Account: signed in as <name>",
+ * the title too), and nothing on Home shows an email address. Goes Home first if need be.
  */
 async function homeSignedIn(page, name) {
   if (await page.evaluate(() => location.hash.length > 1)) await page.evaluate(() => (location.hash = ""));
-  const card = page.locator('[data-testid="home-account"][data-state="in"]');
-  await card.waitFor();
-  assert.doesNotMatch(await card.textContent(), /@/, "Home never shows an email address");
-  await page.getByTestId("home-account-key").waitFor();
-  assert.equal(await page.getByTestId("home-sign-in").count(), 0);
-  if (name) assert.equal(await page.getByTestId("home-account-name").textContent(), name);
+  await page.locator('[data-testid="account-key"][data-state="in"]').waitFor();
+  const key = await accountKey(page);
+  assert.equal(key.color, KEY_COLORS.in, "the player lit");
+  assert.equal(key.title, key.name, "the title says what the name says");
+  assert.doesNotMatch(key.name, /@/, "the key never says an email address");
+  assert.doesNotMatch(await page.locator("main").textContent(), /@/, "Home never shows an email address");
+  if (name) assert.match(key.name, new RegExp(`^Account: signed in as ${name}(,|$)`));
 }
 
 module.exports = {
@@ -246,5 +284,7 @@ module.exports = {
   settle,
   openMenu,
   openSignIn,
+  accountKey,
+  KEY_COLORS,
   homeSignedIn,
 };

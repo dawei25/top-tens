@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { ago, cleanName, homeName, homeNote, HOME_NAME_MAX, syncLabel } from "./labels";
+import { accountAlert, accountKeyLabel, ago, cleanName, homeName, HOME_NAME_MAX, syncLabel } from "./labels";
 
-describe("homeName (Home's 'signed in as')", () => {
+describe("homeName (the account key's 'signed in as')", () => {
   it("shows the display name, else the email's part before the @, and never a whole address", () => {
     expect(homeName({ name: "Dana Scully", email: "dana@example.com" })).toBe("Dana Scully");
     expect(homeName({ name: "", email: "fox.mulder@example.com" })).toBe("fox.mulder");
@@ -20,22 +20,38 @@ describe("homeName (Home's 'signed in as')", () => {
   });
 });
 
-describe("homeNote (the line under Home's account status)", () => {
-  const now = Date.parse("2026-11-04T12:00:00Z");
-  it("says where games are kept, and the sync state in plain words", () => {
-    expect(homeNote({ status: "out", sync: "idle" })).toBe("games are saved on this device only.");
-    expect(homeNote({ status: "out", sync: "idle", notice: "sign-in didn't finish. try again." })).toBe("sign-in didn't finish. try again.");
-    expect(homeNote({ status: "loading", sync: "idle" })).toBe("checking your sign-in.");
-    expect(homeNote({ status: "in", sync: "idle" })).toBe("your games sync to this account.");
-    expect(homeNote({ status: "in", sync: "syncing" })).toBe("syncing your games.");
-    expect(homeNote({ status: "in", sync: "synced", syncedAt: now - 4 * 60_000 }, now)).toBe("games synced 4 min ago.");
-    expect(homeNote({ status: "in", sync: "offline" })).toBe("offline. games sync when you're back online.");
-    expect(homeNote({ status: "in", sync: "error" })).toBe("couldn't sync. it tries again after your next game.");
+describe("Home's account key: its words (name and title) and its pink dot", () => {
+  const dana = { id: "u1", name: "Dana Scully", email: "dana@example.com" };
+  const SYNCS = ["idle", "syncing", "synced", "offline", "error"] as const;
+  it("says the state: not signed in, signing in, signed in as the player's name", () => {
+    expect(accountKeyLabel({ status: "out", sync: "idle" })).toBe("Account: not signed in");
+    expect(accountKeyLabel({ status: "loading", sync: "idle" })).toBe("Account: signing in");
+    for (const sync of ["idle", "syncing", "synced"] as const) {
+      expect(accountKeyLabel({ status: "in", user: dana, sync })).toBe("Account: signed in as Dana Scully");
+    }
+    expect(accountKeyLabel({ status: "in", user: { id: "u2", name: "", email: "fox@example.com" }, sync: "synced" })).toBe("Account: signed in as fox");
   });
-  it("uses no em dashes or emoji (UI copy rule)", () => {
+  it("says what the pink dot means, and shows it only when something needs a look", () => {
+    expect(accountKeyLabel({ status: "in", user: dana, sync: "offline" })).toBe("Account: signed in as Dana Scully, offline");
+    expect(accountKeyLabel({ status: "in", user: dana, sync: "error" })).toBe("Account: signed in as Dana Scully, couldn't sync");
+    expect(accountKeyLabel({ status: "out", sync: "idle", notice: "sign-in failed: some server words." })).toBe(
+      "Account: not signed in, sign-in didn't finish",
+    );
+    expect(SYNCS.filter((sync) => accountAlert({ status: "in", sync }))).toEqual(["offline", "error"]);
+    expect(accountAlert({ status: "out", sync: "idle" })).toBe(false);
+    expect(accountAlert({ status: "out", sync: "idle", notice: "sign-in didn't finish. try again." })).toBe(true);
+    expect(accountAlert({ status: "loading", sync: "idle", notice: "x" })).toBe(false);
+    expect(accountAlert({ status: "off", sync: "error" })).toBe(false);
+  });
+  it("never says an email address, uses no em dashes or emoji (UI copy rule)", () => {
+    const users = [dana, { id: "u3", name: "dana@example.com", email: "dana@example.com" }, { id: "u4", name: "", email: "a@b.c" }];
     for (const status of ["out", "loading", "in"] as const) {
-      for (const sync of ["idle", "syncing", "synced", "offline", "error"] as const) {
-        expect(homeNote({ status, sync, syncedAt: now }, now)).not.toMatch(/[—\u{1F300}-\u{1FAFF}]/u);
+      for (const sync of SYNCS) {
+        for (const user of users) {
+          const label = accountKeyLabel({ status, user: status === "in" ? user : undefined, sync, notice: "sent to dana@example.com" });
+          expect(label).not.toContain("@");
+          expect(label).not.toMatch(/[—\u{1F300}-\u{1FAFF}]/u);
+        }
       }
     }
   });

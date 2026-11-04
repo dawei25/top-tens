@@ -9,7 +9,7 @@ import { EnterHint, type Mode } from "./pixel";
 import { STREAK_NOTE } from "./copy";
 import { FloatNote } from "./Note";
 import { SoundToggle } from "./sound/SoundToggle";
-import { HomeAccountCard, PrivacyLink } from "./account";
+import { HomeAccountKey, PrivacyLink } from "./account";
 import { MenuKey } from "./menu";
 import { todayStatus } from "./today";
 
@@ -307,11 +307,13 @@ export function Home({
   return (
     <main className="screen home">
       {/* The header keys, in the spots the other screens' headers keep them: the menu at the left end, sound at the
-          right. */}
+          right. In a build with accounts, the account key (a pixel player, lit when signed in) comes before sound:
+          where the player stands, without a row of its own. */}
       <div className="home-keys home-keys-start">
         <MenuKey />
       </div>
-      <div className="home-keys">
+      <div className="home-keys home-keys-end" data-testid="home-keys-end">
+        <HomeAccountKey />
         <SoundToggle />
       </div>
       <header className="title">
@@ -363,9 +365,6 @@ export function Home({
           )}
         </div>
       </section>
-
-      {/* Signed in or not, at a glance (only in a build with accounts): right under Today, which it never pushes down. */}
-      <HomeAccountCard />
 
       {/* Side by side on wide screens: free play takes most of the row, your games the rest. */}
       <div className="home-pair">

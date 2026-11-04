@@ -4,9 +4,9 @@ import { ago, cleanName, syncLabel } from "./labels";
 import { Sheet } from "./Sheet";
 
 /**
- * Your account, a sheet over Home (from its ACCOUNT key): the name (editable), how it signed in, the sync state, sign
- * out, and delete account with an inline confirm (like reset all progress), and what we keep. Signing out closes it
- * (Home then says you're signed out); after a delete it stays to say so.
+ * Your account, a sheet over Home (from its account key, signed in): the name (editable), how it signed in, the sync
+ * state (with try again when it failed), sign out, and delete account with an inline confirm (like reset all progress),
+ * and what we keep. Signing out closes it (Home's key then goes hollow); after a delete it stays to say so.
  */
 export default function AccountSheet({ onClose }: { onClose: () => void }) {
   const account = useAccount();
