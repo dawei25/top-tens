@@ -286,6 +286,89 @@ a {
   white-space: nowrap;
 }
 
+/*
+ * Reach: every control is at least 44px under a finger (e2e/touch.e2e.cjs). A keycap's base (its shadow) is part of
+ * the key, and small keys and text keys reach past their edges with an invisible margin (--reach, an inset), no wider
+ * than half the gap to their neighbours, so nothing looks or lays out any differently.
+ */
+.key,
+.text-btn,
+.cat-strip,
+.chip,
+.note-key,
+.suggestion,
+.rate-reason {
+  position: relative;
+}
+.key::before,
+.text-btn::before,
+.cat-strip::before,
+.chip::before,
+.note-key::before,
+.suggestion::before,
+.rate-reason::before {
+  content: "";
+  position: absolute;
+  inset: var(--reach, 0);
+}
+.key {
+  --reach: 0 0 -5px;
+}
+.key-sm {
+  --reach: -1px 0 -5px;
+}
+/* The header's keys: a 3px reach to each side meets the next key's in the 6px between them. */
+.key-icon {
+  --reach: -1px -3px -5px;
+}
+.key-xs {
+  --reach: -6px 0;
+}
+.key-inrow {
+  --reach: -8px 0;
+}
+.rate-key {
+  --reach: -5px 0;
+}
+.text-btn {
+  --reach: -4px -2px;
+}
+.sheet-field-head .text-btn {
+  --reach: -10px -2px -6px;
+}
+.cat-strip {
+  --reach: -5px 0;
+}
+.chip {
+  --reach: -1px 0;
+}
+.cat-chip {
+  --reach: -3px 0;
+}
+.note-key {
+  --reach: -11px 0;
+}
+.suggestion {
+  --reach: -3px 0 -5px;
+}
+.rate-reason {
+  --reach: -4px 0;
+}
+/* The board's rows are its keys, edge to edge (38px on a phone): the first and last reach out past the board's edge
+   rows, so each is 44px to the finger. */
+.slot.hintable:first-child::after,
+.slot.has-fact:first-child::after,
+.slot.hintable:last-child::after,
+.slot.has-fact:last-child::after {
+  content: "";
+  position: absolute;
+  inset: -3px 0 0;
+}
+.slot.hintable:last-child::after,
+.slot.has-fact:last-child::after {
+  inset: 0 0 -3px;
+}
+
 /* Chips */
 .chips {
   display: flex;
@@ -677,7 +760,7 @@ a {
   justify-content: space-between;
   align-items: baseline;
   gap: 10px;
-  min-height: 36px;
+  min-height: 38px;
   padding: 4px 12px;
   font-size: 17px;
   letter-spacing: 0.15em;
