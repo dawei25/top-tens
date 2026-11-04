@@ -1,23 +1,28 @@
 # Improvement loop
 
-The coordinator session runs this once a week (Sundays, 10:21 Hong Kong time). Each cycle improves a few existing
+The coordinator session runs this once a week (Fridays, 10:21 Hong Kong time). Each cycle improves a few existing
 lists and the way lists are built, so quality compounds instead of being fixed one complaint at a time. Log every
 cycle in `docs/IMPROVE_LOG.md`.
 
-## Weekly slate (the owner picks)
+## Weekly lineup (the owner approves)
 
 Today's list is always fresh: a new topic is built as a `debut` list, runs first as Today's list, and joins free play
-the day after. The owner chooses which topics run (2026-11-05: "once a week it runs and compiles potential topics for
-the week and i choose ... you can learn from my choices"):
+the day after. Every Friday the coordinator sets the coming week (Monday to Sunday) and the owner approves it (owner,
+2026-11-05: "set the next week's daily list and daily blitz topics, and then you send me a concise report ... I will
+approve or disapprove ... I'll tell you which specific ones to swap out ... efficient and organized"):
 
-1. Compile 10 to 12 candidates for the coming week, each checked on Wikipedia (`npm run inspect`: the top 10, the
-   answer pool, the figure it ranks by), within the variety rule (step 1 below) and David's taste in
-   `docs/OWNER_PICKS.md`. For each, the judge's prediction (pick or pass) and one line why. Build nothing yet.
-2. Send him the slate (push notification, numbered list) and wait for his picks.
-3. Build the picks as `debut` lists (data agent), run a list-judge on each, and schedule them into the next days that
-   hold old free-play lists, never today or tomorrow. The replaced lists stay in free play.
-4. Log every candidate, his call and his reason, and whether the judge's prediction matched, in `docs/OWNER_PICKS.md`.
-   When the judge has matched him on almost every call for several weeks, propose letting the judge pick.
+1. **Pick the week:** 7 Today's lists and 7 Blitzes, within the variety rule (step 1 below), the schedule checks
+   (no category three days running, nothing twice) and his taste in `docs/OWNER_PICKS.md` (no two similar lists in
+   one week). Today's lists are new `debut` topics, or approved debut lists not yet run; a Blitz may be a new list or a
+   rerun of one that already ran. Keep 3 or 4 spares that are built and judged, ready for swaps.
+2. **Build and judge** every new list (data agent; a `list-judge` on each); drop any that fail and pick again.
+3. **Report** as one short Claude doc, "TENtacle lineup, week of <Monday>": a table with one row per day (date,
+   Today's list, Blitz, a one-line why, the judge's expected score for a casual player) and the spares. Send the link
+   with a push notification.
+4. **He approves or names swaps.** Swap from the spares (or build new ones), then schedule the week
+   (`public/puzzles/daily.json`), verify, push. Never change today or tomorrow.
+5. **Log** each day's pick and his call in `docs/OWNER_PICKS.md`. When he keeps nearly everything for several weeks
+   running, propose that the lineup no longer needs his approval.
 
 ## Each cycle
 

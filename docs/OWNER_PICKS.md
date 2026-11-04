@@ -1,7 +1,7 @@
 # The owner's topic picks
 
-Each week the loop offers a slate of candidate topics and the owner picks which run as Today's list
-(docs/IMPROVE.md, Weekly slate). Every pick and pass is logged here with his reason, and with what the judge
+Each week the coordinator sets the next week's Today's lists and Blitzes and sends the owner a short lineup to
+approve; he names any to swap (docs/IMPROVE.md, Weekly lineup). Every pick and pass is logged here with his reason, and with what the judge
 predicted, so the judge's taste can be measured against his and, once they agree reliably, the choice can be
 automated. Judges read this file before scoring a candidate (docs/JUDGE.md).
 
@@ -13,14 +13,18 @@ automated. Judges read this file before scoring a candidate (docs/JUDGE.md).
 | 2026-11-04 | national-parks | liked (rated well) | wanted each park's state in its fact |
 | 2026-11-05 | lakes | vetoed as a daily | not a great list; it had already been in free play; third Geography daily in a row |
 | 2026-11-05 | x-accounts | dropped | same problem as Facebook (follower counts) |
+| 2026-11-05 | football-club-revenue | Blitz: yes | fine as a Blitz (the judge agreed: too easy for Today's list) |
+| 2026-11-05 | longest-running-tv | later | fine, but not right after Pixar: wants something more different next |
+| 2026-11-05 | geography (cities, countries, states) | wants more | a set universe of answers, and lots of different ideas fit it |
 
-Patterns so far: no follower-count lists; no dull physical-geography lists; dailies must be fresh (never seen in free
-play); variety across days.
+Patterns so far: no follower-count lists; dailies must be fresh (never seen in free play); variety across days (no
+two similar lists close together, e.g. two film lists in one week). He likes lists whose answers come from a set
+universe (countries, cities, US states), but not dull physical geography (lakes).
 
-## Slates
+## Lineups
 
-Each slate: the date, every candidate with the judge's prediction (pick or pass, one line why), the owner's call
-and reason, and the agreement rate (judge prediction = owner call).
+Each week: every proposed list and Blitz, the owner's call (kept or swapped) and his reason. The share kept is the
+measure of how well the picks match his taste.
 
-| Week of | Candidate | Judge predicted | Owner | Why |
+| Week of | Day | List or Blitz | Owner | Why |
 |---|---|---|---|---|
