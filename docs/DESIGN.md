@@ -77,7 +77,8 @@ didn't finish, and waits (hollow, tinted, disabled) while a sign-in comes back; 
 ("Account: signed in as <name>", never an email). It opens the sign-in sheet (which also creates accounts) or the
 account sheet (name, sync state with try again, sign out, delete account, what we keep). Inner screens have no
 account key: their headers are full, and HOME is one press away (UX.md 19). **Settings** (`#settings`): the sound
-switch and reset all progress.
+switch and reset all progress. **Fathom (beta)** lives at `#fathom` only, with no Home or menu entry until the owner
+approves it: five estimation questions a game, scored against each question's typical miss (docs/FATHOM.md).
 
 1. **Home:** Today's list and Blitz, then directly Free play (Random list, Random Blitz, each with a floating by-category picker);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
