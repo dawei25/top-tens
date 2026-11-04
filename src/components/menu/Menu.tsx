@@ -30,8 +30,8 @@ const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home
 const guessBox = () => document.querySelector<HTMLInputElement>('main input[aria-label="Your guess"]:not(:disabled)');
 
 /**
- * The menu key, at the right end of every screen's header (on Home, next to the sound key). It opens the menu: a
- * panel of large tiles over the dimmed page, every destination one press away. The rules and the sign-in sheet open
+ * The menu key, at the left end of every screen's header (on Home, the top left corner). It opens the menu: a
+ * panel of large tiles from the left over the dimmed page, every destination one press away. The rules and the sign-in sheet open
  * from it over the page too. Whatever closes, focus comes back to this key, or to the guess box when a game is under
  * way on the screen (back to typing).
  */

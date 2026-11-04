@@ -163,9 +163,9 @@ describe("visual baselines", { concurrency: true }, () => {
       await page.getByTestId("hint-yes").click();
       await shot("list-playing");
 
-      // Its end: the full board with every fact open, and the results.
+      // Its end: the full board with a fact open (a tap on its row), and the results.
       await giveUp(page);
-      await page.getByTestId("facts-toggle").click();
+      await page.locator('[data-testid="slot"][data-rank="1"]').click();
       await page.locator(".slot.fact-open").first().waitFor();
       await shot("list-over");
 

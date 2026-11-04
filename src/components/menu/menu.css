@@ -1,4 +1,4 @@
-/* The menu: a panel of large tiles that slides in from the right over the dimmed page (a modal dialog). Same language
+/* The menu: a panel of large tiles that slides in from the left (the menu key's side) over the dimmed page (a modal dialog). Same language
    as the rest: a solid panel with scan lines, keycap tiles, pixel icons, pixel type. */
 
 /* The dialog box is the panel. It has no padding of its own (its body fills it), so a press whose target is the
@@ -6,7 +6,7 @@
    tap away); wider screens: 420px. */
 .menu {
   position: fixed;
-  inset: 0 0 0 auto;
+  inset: 0 auto 0 0;
   width: min(420px, calc(100% - 44px));
   max-width: none;
   height: auto;
@@ -14,11 +14,11 @@
   margin: 0;
   padding: 0;
   border: 0;
-  border-left: 3px solid var(--cyan);
+  border-right: 3px solid var(--cyan);
   /* Solid, like the rules: the keys behind would read through glass. */
   background: var(--panel) var(--scan);
   color: var(--text);
-  box-shadow: -6px 0 0 rgba(0, 0, 0, 0.35);
+  box-shadow: 6px 0 0 rgba(0, 0, 0, 0.35);
   overflow: hidden;
 }
 .menu[open] {
@@ -35,7 +35,7 @@
 }
 @keyframes menu-in {
   from {
-    transform: translateX(100%);
+    transform: translateX(-100%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -50,7 +50,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 16px 16px max(24px, env(safe-area-inset-bottom));
-  padding-right: max(16px, env(safe-area-inset-right));
+  padding-left: max(16px, env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
   gap: 18px;

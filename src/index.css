@@ -326,6 +326,13 @@ a {
 .title .caption {
   text-wrap: balance;
 }
+/* Phones and small tablets: the logo spans the width, so the menu key in the top left corner would sit over its
+   capital T; the logo starts below the keys instead (the sound key only ever met the short "e"). */
+@media (max-width: 640px) {
+  .home .title {
+    margin-top: 14px;
+  }
+}
 .logo {
   font-weight: 400;
   font-size: clamp(76px, 22vw, 128px);
@@ -972,10 +979,11 @@ a {
   }
 }
 
-/* The header is a glass card, like the panels: BACK, the screen's label (and the ink-sac lives), sound and HOME. */
+/* The header is a glass card, like the panels: the menu key and BACK, the screen's label (and the ink-sac lives),
+   sound and HOME. */
 .game-head {
   display: grid;
-  /* Equal side columns keep the middle centered although the right side holds two keys. */
+  /* Equal side columns keep the middle centered (each side holds two keys, of slightly different widths). */
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 12px;
@@ -985,11 +993,14 @@ a {
   border-radius: var(--radius);
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
 }
-.game-head > :first-child {
+.game-head-start {
   justify-self: start;
 }
 .game-head-end {
   justify-self: end;
+}
+.game-head-start,
+.game-head-end {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1010,6 +1021,7 @@ a {
 }
 /* Phones: the middle takes all the room between BACK and the sound key (equal side columns would squeeze the
    lives), and a long label wraps. */
+/* (The left group's gap follows the right one's at every width below.) */
 @media (max-width: 480px) {
   .game-head {
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1029,6 +1041,7 @@ a {
     gap: 6px;
     padding: 6px 4px;
   }
+  .game-head-start,
   .game-head-end {
     gap: 6px;
   }
@@ -1530,7 +1543,6 @@ a {
   padding: 6px 16px 2px;
   border-top: 1px dashed var(--hairline);
 }
-.fact-all,
 .text-btn {
   min-height: 36px;
   padding: 0 4px;
@@ -1543,7 +1555,6 @@ a {
   text-underline-offset: 3px;
   touch-action: manipulation;
 }
-.fact-all:hover,
 .text-btn:hover {
   color: var(--cyan);
 }
@@ -2709,8 +2720,8 @@ a.arch-cell:active .arch-name {
 .home {
   position: relative;
 }
-/* Home's header keys (sound, menu) sit where the other screens' headers keep theirs: the right end, inset as a
-   header card insets them (its 1px edge and 8px padding; 6px on phones, where they stay above the logo). */
+/* Home's header keys sit where the other screens' headers keep theirs: the menu at the left end, sound at the right,
+   inset as a header card insets them (its 1px edge and 8px padding; 6px on phones, where they stay above the logo). */
 .home-keys {
   position: absolute;
   top: 25px;
@@ -2719,16 +2730,28 @@ a.arch-cell:active .arch-name {
   align-items: center;
   gap: 8px;
 }
+.home-keys-start {
+  right: auto;
+  left: calc(max(var(--gutter), env(safe-area-inset-left)) + 9px);
+}
 @media (max-width: 480px) {
   .home-keys {
     top: 16px;
     right: calc(max(var(--gutter), env(safe-area-inset-right)) + 7px);
+  }
+  .home-keys-start {
+    right: auto;
+    left: calc(max(var(--gutter), env(safe-area-inset-left)) + 7px);
   }
 }
 /* Narrow phones: the header card's side padding is 4px there. */
 @media (max-width: 380px) {
   .home-keys {
     right: calc(max(var(--gutter), env(safe-area-inset-right)) + 5px);
+  }
+  .home-keys-start {
+    right: auto;
+    left: calc(max(var(--gutter), env(safe-area-inset-left)) + 5px);
   }
 }
 

@@ -1,5 +1,5 @@
-// The menu: one key at the right end of every screen's header (on Home, next to the sound key) opens a panel of tiles
-// over the dimmed page, a modal dialog. It opens without moving or scrolling the page; focus goes into it and stays
+// The menu: one key at the left end of every screen's header (on Home, the top left corner) opens a panel of tiles
+// from the left over the dimmed page, a modal dialog. It opens without moving or scrolling the page; focus goes into it and stays
 // there; Escape, the close key or a press on the dimmed page close it, and focus comes back to the key (or to the
 // guess box while a game is under way). Every tile reaches its screen, the screen on show is marked, rolls never land
 // on today's pair, and a build without a backend shows no account section and no Feedback.
@@ -38,32 +38,33 @@ async function choose(page, id) {
 }
 
 for (const vp of VIEWPORTS) {
-  test(`the menu key: same keycap, the right end of the header (${vp.name})`, async () => {
+  test(`the menu key: same keycap, the left end of the header (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp);
     await page.getByTestId("today-list").waitFor();
     const key = page.getByTestId("menu-key");
     assert.equal(await key.count(), 1);
     assert.equal(await key.getAttribute("aria-label"), "Menu");
     assert.equal(await key.getAttribute("aria-haspopup"), "dialog");
-    // Home: right of the sound key, on its line.
+    // Home: the top left corner (owner), level with the sound key at the top right.
     const sound = await place(page.getByTestId("sound-toggle"));
     const home = await place(key);
-    assert.ok(home.x > sound.x + sound.w, "right of the sound key");
+    assert.ok(home.x + home.w < vp.viewport.width / 2, "on the left");
+    assert.ok(sound.x > vp.viewport.width / 2, "the sound key stays on the right");
     assert.equal(home.y, sound.y);
     assert.equal(home.h, sound.h, "the same keycap height");
 
-    // Inner screens: the last key of the header, after sound and HOME, at the same right edge as on Home.
+    // Inner screens: the first key of the header, before BACK, at the same left edge as on Home.
     for (const h of ["#archive", "#stats", "#settings", "#p-mountains"]) {
       await go(page, h);
       await page.getByTestId("nav-home").waitFor();
       assert.equal(await key.count(), 1, h);
       assert.ok(
-        await key.evaluate((el) => el.parentElement.lastElementChild === el && el.previousElementSibling?.dataset.testid === "nav-home"),
-        `${h}: after HOME`,
+        await key.evaluate((el) => el.parentElement.firstElementChild === el && el.nextElementSibling?.dataset.testid === "nav-back"),
+        `${h}: before BACK`,
       );
       const inner = await place(key);
       assert.equal(inner.h, home.h, `${h}: the same height`);
-      if (h === "#archive" || vp.name === "phone") assert.ok(Math.abs(inner.x + inner.w - (home.x + home.w)) <= 1, `${h}: the same right edge as on Home`);
+      if (h === "#archive" || vp.name === "phone") assert.ok(Math.abs(inner.x - home.x) <= 1, `${h}: the same left edge as on Home`);
       assert.ok(await noHScroll(page), h);
     }
     await ctx.close();
@@ -87,10 +88,10 @@ for (const vp of VIEWPORTS) {
     assert.ok(await inMenu(page), "focus moved into the menu");
     assert.equal(await page.evaluate(() => scrollY), before.scroll);
     assert.deepEqual(await place(card), before.card);
-    // Full height at the right edge: 420px on desktop, all but a 44px strip of the page on a phone.
+    // Full height at the left edge, the menu key's side: 420px on desktop, all but a 44px strip of the page on a phone.
     const box = await menu.boundingBox();
     const { width, height } = vp.viewport;
-    assert.equal(Math.round(box.x + box.width), width);
+    assert.equal(Math.round(box.x), 0);
     assert.equal(Math.round(box.y), 0);
     assert.equal(Math.round(box.height), height);
     assert.equal(Math.round(box.width), vp.name === "phone" ? width - 44 : 420);
@@ -98,7 +99,7 @@ for (const vp of VIEWPORTS) {
     const close = await page.getByTestId("menu-close").boundingBox();
     assert.ok(close.width >= 44 && close.height >= 44, `close key ${close.width}x${close.height}`);
     // A wheel, a drag or a scroll key over the dimmed page or the menu scrolls nothing behind it.
-    for (const x of [10, width - 100]) {
+    for (const x of [width - 10, 100]) {
       if (vp.hasTouch) {
         const cdp = await ctx.newCDPSession(page);
         await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y: 600 }] });
@@ -135,7 +136,7 @@ for (const vp of VIEWPORTS) {
     // A press on the dimmed page.
     await openMenu(page);
     await page.clock.runFor(1000);
-    await tap(page, vp, 10, Math.round(height / 2));
+    await tap(page, vp, width - 10, Math.round(height / 2));
     await menu.waitFor({ state: "detached" });
     assert.equal(await focused(page), "menu-key");
     assert.equal(await page.evaluate(() => scrollY), before.scroll);
@@ -214,7 +215,24 @@ for (const vp of VIEWPORTS) {
   });
 }
 
-test("narrow phones: the five lives fit between BACK and the header's three keys; the menu key keeps Home's right edge", async () => {
+test("Home: the menu key in the top left corner clears the logo's capital T at every width", async () => {
+  for (const width of [320, 390, 481, 560, 640, 641, 1440]) {
+    const { ctx, page } = await open(browser, { viewport: { width, height: 800 } }, "", undefined, { reducedMotion: "reduce" });
+    await page.getByTestId("today-list").waitFor();
+    const { gap, under } = await page.evaluate(() => {
+      const key = document.querySelector('[data-testid="menu-key"]').getBoundingClientRect();
+      const t = document.querySelector(".logo span").getBoundingClientRect();
+      const em = parseFloat(getComputedStyle(document.querySelector(".logo")).fontSize);
+      // VT323 at the logo's line height: the T's ink starts about 0.245em below its box (measured), 0.04em in.
+      // The key's 4px shadow counts.
+      return { gap: t.top + 0.245 * em - (key.bottom + 4), under: key.right > t.left + 0.04 * em };
+    });
+    assert.ok(!under || gap >= 6, `${width}: the menu key over the logo (${Math.round(gap)}px clear)`);
+    await ctx.close();
+  }
+});
+
+test("narrow phones: the five lives fit between the menu key and BACK and the sound and HOME keys; the menu key keeps Home's left edge", async () => {
   for (const width of [320, 360, 390]) {
     const { ctx, page } = await open(browser, { viewport: { width, height: 700 }, isMobile: true, hasTouch: true });
     await page.getByTestId("today-list").waitFor();
@@ -226,8 +244,8 @@ test("narrow phones: the five lives fit between BACK and the header's three keys
     );
     assert.ok(lives.x >= back.x + back.width, `${width}: lives clear of BACK`);
     assert.ok(lives.x + lives.width <= sound.x, `${width}: lives clear of the sound key (${lives.x + lives.width} > ${sound.x})`);
-    assert.ok(menu.x + menu.width <= width, `${width}: the menu key on screen`);
-    assert.ok(Math.abs(menu.x + menu.width - (onHome.x + onHome.w)) <= 1, `${width}: the menu key's right edge as on Home`);
+    assert.ok(menu.x >= 0 && menu.x + menu.width <= back.x, `${width}: the menu key on screen, left of BACK`);
+    assert.ok(Math.abs(menu.x - onHome.x) <= 1, `${width}: the menu key's left edge as on Home`);
     assert.ok(await noHScroll(page), `${width}`);
     await ctx.close();
   }
@@ -239,7 +257,7 @@ test("a short window: the menu scrolls inside itself, the page behind stays put"
   const menu = await openMenu(page);
   const body = menu.locator(".menu-body");
   assert.ok(await body.evaluate((b) => b.scrollHeight > b.clientHeight), "taller than the window");
-  await page.mouse.move(900, 300);
+  await page.mouse.move(200, 300);
   await page.mouse.wheel(0, 2000);
   await page.waitForFunction(() => document.querySelector(".menu-body").scrollTop > 0);
   // At its end, a further wheel stops there.

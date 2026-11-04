@@ -76,8 +76,6 @@ export function ListRun({ id, meta, startedAt, onBack, onHome, onReplay }: Props
   const won = run.status === "won";
   const par = parFile?.[puzzle.id];
   const asOf = puzzle.source.dataAsOf ? `data as of ${puzzle.source.dataAsOf}` : `as of ${formatAsOf(puzzle.source.asOf)}`;
-  const factRanks = puzzle.answers.filter((a) => a.fact).map((a) => a.rank);
-  const allFactsOpen = factRanks.length > 0 && factRanks.every((r) => openFacts.has(r));
   const toggleFact = (rank: number) =>
     setOpenFacts((prev) => {
       const next = new Set(prev);
@@ -163,18 +161,6 @@ export function ListRun({ id, meta, startedAt, onBack, onHome, onReplay }: Props
               );
             })}
           </ol>
-          {factRanks.length > 0 && (
-            <div className="board-foot">
-              <button
-                type="button"
-                className="fact-all"
-                aria-pressed={allFactsOpen}
-                onClick={() => setOpenFacts(allFactsOpen ? new Set() : new Set(factRanks))}
-              >
-                {allFactsOpen ? "hide facts" : "show all facts"}
-              </button>
-            </div>
-          )}
         </section>
       </div>
 

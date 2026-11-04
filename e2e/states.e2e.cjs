@@ -94,9 +94,9 @@ const SCREENS = [
     },
   },
   {
-    name: "list game over, facts open",
+    name: "list game over, a fact open",
     setup: async (page) => {
-      await page.getByTestId("facts-toggle").click();
+      await page.locator('[data-testid="slot"][data-rank="1"]').click();
       await page.locator(".slot.fact-open").first().waitFor();
     },
   },

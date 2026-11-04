@@ -305,15 +305,12 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   // The source's own date for its numbers when it states one, otherwise the day we read it.
   const asOf = puzzle.source.dataAsOf ? `data as of ${puzzle.source.dataAsOf}` : `as of ${formatAsOf(puzzle.source.asOf)}`;
 
-  // Facts only ever belong to revealed rows: a hidden row's fact would be a hint.
-  const factRanks = puzzle.answers.filter((a) => a.fact && (over || game.found.includes(a.rank))).map((a) => a.rank);
   const toggleFact = (rank: number) =>
     setOpenFacts((prev) => {
       const next = new Set(prev);
       if (!next.delete(rank)) next.add(rank);
       return next;
     });
-  const allFactsOpen = factRanks.length > 0 && factRanks.every((r) => openFacts.has(r));
 
   const hints = game.hints ?? [];
   // Roll again before play: a rolled list keeps a slot for it right of GUESS, and offers it until anything happens
@@ -550,21 +547,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <SwapLabel off="Give up" on="Sure?" active={confirmQuit} />
               </button>
             </div>
-          ) : (
-            factRanks.length > 0 && (
-              <div className="board-foot">
-                <button
-                  type="button"
-                  className="fact-all"
-                  data-testid="facts-toggle"
-                  aria-pressed={allFactsOpen}
-                  onClick={() => setOpenFacts(allFactsOpen ? new Set() : new Set(factRanks))}
-                >
-                  {allFactsOpen ? "hide facts" : "show all facts"}
-                </button>
-              </div>
-            )
-          )}
+          ) : null}
         </section>
       </div>
 

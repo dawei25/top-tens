@@ -306,10 +306,13 @@ export function Home({
 
   return (
     <main className="screen home">
-      {/* The header keys, in the spot the other screens' headers keep them: sound, then the menu. */}
+      {/* The header keys, in the spots the other screens' headers keep them: the menu at the left end, sound at the
+          right. */}
+      <div className="home-keys home-keys-start">
+        <MenuKey />
+      </div>
       <div className="home-keys">
         <SoundToggle />
-        <MenuKey />
       </div>
       <header className="title">
         <h1 className="logo" aria-label="TENtacle">

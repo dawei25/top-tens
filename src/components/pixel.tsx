@@ -205,9 +205,13 @@ export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; o
   }, []);
   return (
     <header className="game-head" data-glass>
-      <button className="key key-icon" onClick={onBack} aria-label="Back" title="Back (Esc)" data-testid="nav-back">
-        <BackArrow />
-      </button>
+      {/* The menu key leads, at the left end (owner), as on Home. */}
+      <div className="game-head-start">
+        <MenuKey />
+        <button className="key key-icon" onClick={onBack} aria-label="Back" title="Back (Esc)" data-testid="nav-back">
+          <BackArrow />
+        </button>
+      </div>
       <div className="game-head-mid" data-testid="screen-title">
         {children}
       </div>
@@ -216,7 +220,6 @@ export function ScreenHead({ onBack, onHome, children }: { onBack: () => void; o
         <button className="key key-icon" onClick={onHome} aria-label="Home" title="Home" data-testid="nav-home">
           <HomeIcon />
         </button>
-        <MenuKey />
       </div>
     </header>
   );
