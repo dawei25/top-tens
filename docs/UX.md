@@ -53,3 +53,13 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
     unasked). The visual baselines are the reference.
 18. **Third-party pieces come in our own language.** A widget drawn by someone else (Google's sign-in button, in its
     own font and fill) looks out of place: build our own key and keep only what trust needs (Google's G, unaltered).
+
+## Status and touch
+
+19. **Show where the player stands where they land.** Whether you're signed in reads on Home at a glance (a lit or
+    hollow player, "signed in as Dana" or "not signed in"), not behind the menu ("this way you can easily tell if you
+    are logged in or not"). Home never shows an email address.
+20. **A finger is not a mouse.** On a phone a tap leaves hover behind (hover looks live under `@media (hover:
+    hover)`), every control is 44px to the finger (a key's base counts), quick taps never zoom, and the narrowest
+    phone (320px) still shows every word that matters: the clue's cost, the guess box's placeholder, a long answer
+    whole. ("some ui bugs on the mobile version"; `lint:css` and `e2e/touch.e2e.cjs` enforce it.)
