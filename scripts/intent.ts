@@ -19,7 +19,7 @@ export interface Intent {
  * left out ("Dominican" is the Dominican Republic, the far likelier reading), except Congolese (both Congos, see
  * build.ts).
  */
-const DEMONYMS: Record<string, string[]> = {
+export const DEMONYMS: Record<string, string[]> = {
   "United States": ["American", "Americans", "Team USA"],
   "United Kingdom": ["English", "Scottish", "Welsh", "Brits"],
   China: ["Chinese"],

@@ -178,6 +178,44 @@ const US_STATES: [string, string][] = [
  */
 export const US_STATE_CODES: [string, string][] = US_STATES.slice(0, 51);
 
+/**
+ * The states, provinces and territories of the countries a one-country list of places covers, as the lists' source
+ * tables name them: on such a list a fact says which one the place is in (scripts/validate.ts, Topic `placesIn`).
+ * China's table gives "municipality" for the four cities that are provinces of their own (Beijing, Shanghai,
+ * Tianjin, Chongqing). Diacritics don't matter ("Goias" is Goiás).
+ */
+export const DIVISIONS = {
+  "United States": US_STATES.map(([name]) => name),
+  Canada: [
+    "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", "Newfoundland",
+    "Labrador", "Nova Scotia", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", "Northwest Territories",
+    "Nunavut", "Yukon",
+  ],
+  Brazil: [
+    "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Federal District", "Espírito Santo",
+    "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba", "Paraná", "Pernambuco",
+    "Piauí", "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia", "Roraima", "Santa Catarina",
+    "São Paulo", "Sergipe", "Tocantins",
+  ],
+  India: [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana",
+    "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya",
+    "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+    "Uttar Pradesh", "Uttarakhand", "West Bengal",
+    // Union territories.
+    "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi",
+    "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry",
+  ],
+  China: [
+    "Anhui", "Fujian", "Gansu", "Guangdong", "Guizhou", "Hainan", "Hebei", "Heilongjiang", "Henan", "Hubei", "Hunan",
+    "Jiangsu", "Jiangxi", "Jilin", "Liaoning", "Qinghai", "Shaanxi", "Shandong", "Shanxi", "Sichuan", "Yunnan",
+    "Zhejiang", "Guangxi", "Inner Mongolia", "Ningxia", "Tibet", "Xinjiang", "Beijing", "Chongqing", "Shanghai",
+    "Tianjin", "Hong Kong", "Macau", "municipality",
+  ],
+} satisfies Record<string, string[]>;
+
+export type DivisionCountry = keyof typeof DIVISIONS;
+
 /** The 50 states, DC and the inhabited territories (postal codes are added by build.ts, see US_STATE_CODES). */
 export function usStates(): Place[] {
   return US_STATES.map(([name]) => ({
