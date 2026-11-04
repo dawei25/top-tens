@@ -182,10 +182,13 @@
   overflow-wrap: anywhere;
 }
 /* Under the mouse: a cyan edge (keyboard focus has the cyan ring), never the screen-on-show pink. */
-.menu-tile:hover:not(:disabled) {
-  box-shadow:
-    inset 0 0 0 2px var(--cyan-edge),
-    0 5px 0 var(--key-shadow);
+/* Hover looks only where there is a hover: a phone keeps :hover on whatever was last tapped (lint:css). */
+@media (hover: hover) {
+  .menu-tile:hover:not(:disabled) {
+    box-shadow:
+      inset 0 0 0 2px var(--cyan-edge),
+      0 5px 0 var(--key-shadow);
+  }
 }
 .menu-tile:active:not(:disabled) {
   box-shadow:

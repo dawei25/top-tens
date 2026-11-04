@@ -32,8 +32,11 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 1px 0 var(--key-shadow);
 }
-.rate-key:hover:not(:disabled) {
-  color: var(--text);
+/* Hover looks only where there is a hover: a phone keeps :hover on whatever was last tapped (lint:css). */
+@media (hover: hover) {
+  .rate-key:hover:not(:disabled) {
+    color: var(--text);
+  }
 }
 /* Two screen pixels per pixel of the thumb, so its edges stay crisp. */
 .rate-key .thumb {
@@ -47,9 +50,11 @@
   color: #04202a;
   box-shadow: 0 3px 0 var(--cyan-edge);
 }
-.rate-key.up[aria-pressed="true"]:hover:not(:disabled) {
-  background-color: #7aeaff;
-  color: #04202a;
+@media (hover: hover) {
+  .rate-key.up[aria-pressed="true"]:hover:not(:disabled) {
+    background-color: #7aeaff;
+    color: #04202a;
+  }
 }
 .rate-key.up[aria-pressed="true"]:active:not(:disabled) {
   box-shadow: 0 1px 0 var(--cyan-edge);
@@ -59,9 +64,11 @@
   color: var(--pink-ink);
   box-shadow: 0 3px 0 var(--pink-shadow);
 }
-.rate-key.down[aria-pressed="true"]:hover:not(:disabled) {
-  background-color: #ff7aa3;
-  color: var(--pink-ink);
+@media (hover: hover) {
+  .rate-key.down[aria-pressed="true"]:hover:not(:disabled) {
+    background-color: #ff7aa3;
+    color: var(--pink-ink);
+  }
 }
 .rate-key.down[aria-pressed="true"]:active:not(:disabled) {
   box-shadow: 0 1px 0 var(--pink-shadow);
@@ -132,8 +139,10 @@
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
-.rate-reason:hover {
-  color: var(--pink);
+@media (hover: hover) {
+  .rate-reason:hover {
+    color: var(--pink);
+  }
 }
 .rate-reason:active {
   transform: translateY(2px);

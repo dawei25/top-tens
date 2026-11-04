@@ -50,17 +50,33 @@ export function isStateSelector(selector) {
 }
 
 const EXCEPTION = /^\s*state-layout-ok\b\s*:?\s*([\s\S]*?)\s*$/;
+const HOVER_EXCEPTION = /^\s*hover-ok\b\s*:?\s*([\s\S]*?)\s*$/;
 
 /** The exception comment on a rule, if any: the comment right before it, or its first child. Returns the reason. */
-function exceptionOf(rule) {
+function exceptionOf(rule, pattern = EXCEPTION) {
   const prev = rule.prev();
   const first = rule.first;
   for (const node of [prev, first]) {
     if (node?.type !== "comment") continue;
-    const m = node.text.match(EXCEPTION);
+    const m = node.text.match(pattern);
     if (m) return { reason: m[1], node };
   }
   return null;
+}
+
+/** :hover itself (not a data-hover attribute, set from script for a mouse only). */
+const HOVER = /:hover(?![\w-])/;
+const hasHover = (selector) => HOVER.test(selector.replace(/\[[^\]]*\]/g, "[]").replace(/"[^"]*"|'[^']*'/g, '""'));
+/** Media where there is a real hover: the primary pointer hovers, or is a mouse. */
+const HOVER_MEDIA = /\(\s*hover\s*:\s*hover\s*\)|\(\s*pointer\s*:\s*fine\s*\)/;
+function inHoverMedia(rule) {
+  for (let n = rule.parent; n; n = n.parent) if (n.type === "atrule" && n.name === "media" && HOVER_MEDIA.test(n.params)) return true;
+  return false;
+}
+/** `.a:hover:not(:disabled)` listed beside `.a`: the hover only keeps the rest look, so nothing can stick. */
+function keepsRest(selector, list) {
+  const rest = selector.replace(/:hover(:not\(:disabled\))?(?![\w-])/g, "").trim();
+  return rest !== selector.trim() && list.some((s) => s.trim() === rest);
 }
 
 /** The selectors in force for a rule: its own list, combined with every rule it is nested in. */
@@ -119,12 +135,22 @@ export function checkCss(files) {
   const violations = [];
   const exceptions = [];
   const stale = [];
+  /** Hover looks outside a hover media query: on a phone they stick to whatever was last tapped. */
+  const stickyHover = [];
+  const hoverExceptions = [];
   let rules = 0;
   for (const { file, root } of roots) {
     root.walkRules((rule) => {
       // Keyframe selectors (from, to, 50%) are not rules about elements.
       if (rule.parent?.type === "atrule" && /keyframes$/i.test(rule.parent.name)) return;
       rules += 1;
+      const hovering = selectorChain(rule).some((list) => list.some((s) => hasHover(s) && !keepsRest(s, list)));
+      if (hovering && !inHoverMedia(rule)) {
+        const where = { file, line: rule.source?.start?.line ?? 0, selector: rule.selector.replace(/\s+/g, " ") };
+        const ok = exceptionOf(rule, HOVER_EXCEPTION);
+        if (ok?.reason) hoverExceptions.push({ ...where, reason: ok.reason });
+        else stickyHover.push(where);
+      }
       const chain = selectorChain(rule);
       const states = chain.flat().filter(isStateSelector);
       const exception = exceptionOf(rule);
@@ -148,7 +174,7 @@ export function checkCss(files) {
       else violations.push({ ...where, states, props, ...(exception && { note: "state-layout-ok needs a reason" }) });
     });
   }
-  return { violations, exceptions, stale, rules };
+  return { violations, exceptions, stale, rules, stickyHover, hoverExceptions };
 }
 
 function cssFiles(dir) {
@@ -164,7 +190,7 @@ function main() {
   const files = cssFiles(join(root, "src"))
     .sort()
     .map((path) => ({ file: relative(root, path), css: readFileSync(path, "utf8") }));
-  const { violations, exceptions, stale, rules } = checkCss(files);
+  const { violations, exceptions, stale, rules, stickyHover, hoverExceptions } = checkCss(files);
   const at = (x) => `${x.file}:${x.line}`;
 
   console.log(`lint:css: ${rules} rules in ${files.map((f) => f.file).join(", ")}.`);
@@ -189,9 +215,19 @@ function main() {
         "\npopover that floats over the page so nothing moves, annotate the rule: /* state-layout-ok: <reason> */",
     );
     process.exitCode = 1;
-  } else {
-    console.log("\nlint:css: passed.");
   }
+  console.log("\nRule: a hover look lives inside @media (hover: hover) (or (pointer: fine)), where there is a hover.");
+  if (hoverExceptions.length) {
+    console.log(`${hoverExceptions.length} annotated hover exception(s) (hover-ok):`);
+    for (const x of hoverExceptions) console.log(`  ${at(x)}  ${x.selector}\n    reason: ${x.reason}`);
+  }
+  if (stickyHover.length) {
+    console.log(`\nFAILED: ${stickyHover.length} hover rule(s) outside a hover media query (on a phone they stick after a tap):`);
+    for (const x of stickyHover) console.log(`  ${at(x)}  ${x.selector}`);
+    console.log("\nMove them into @media (hover: hover) { ... }, or annotate a rule that must stay: /* hover-ok: <reason> */");
+    process.exitCode = 1;
+  }
+  if (!process.exitCode) console.log("\nlint:css: passed.");
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main();
