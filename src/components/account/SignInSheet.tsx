@@ -247,7 +247,7 @@ export default function SignInSheet({ onClose, start = "in" }: { onClose: () => 
         <h2 id="sign-in-title" className="label cyan" data-testid="sign-in-title" data-mode={creating ? "up" : "in"}>
           {creating ? "Create account" : "Sign in"}
         </h2>
-        <button type="button" className="key key-xs sheet-close" data-close onClick={onClose} data-testid="sign-in-close">
+        <button type="button" className="key key-xs" data-close onClick={onClose} data-testid="sign-in-close">
           Close
         </button>
       </div>

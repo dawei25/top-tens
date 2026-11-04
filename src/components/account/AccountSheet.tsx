@@ -53,7 +53,7 @@ export default function AccountSheet({ onClose }: { onClose: () => void }) {
       <h2 id="account-title" className="label cyan">
         Account
       </h2>
-      <button type="button" className="key key-xs sheet-close" data-close onClick={onClose} data-testid="account-close">
+      <button type="button" className="key key-xs" data-close onClick={onClose} data-testid="account-close">
         Close
       </button>
     </div>
