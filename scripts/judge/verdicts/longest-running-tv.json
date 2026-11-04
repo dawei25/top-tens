@@ -1,22 +1,26 @@
 {
   "id": "longest-running-tv",
-  "by": "builder",
   "judgedAt": "2026-11-04",
   "decision": "daily-list",
   "alsoBlitz": true,
   "priority": 8,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 5, "blitzDepth": 5 },
-  "casual": { "found": 7, "livesLost": 4, "guesses": 15 },
-  "fan": { "found": 9, "livesLost": 2, "guesses": 16 },
-  "blitzCasual": { "scored": 31, "named": 33 },
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 13 },
+  "blitzCasual": { "scored": 30, "named": 37 },
   "difficulty": 2,
-  "tags": ["tv", "sitcoms", "usa"],
+  "tags": ["tv", "usa", "network tv"],
   "audience": "anyone",
-  "summary": "Shows everyone has seen: The Simpsons, Family Guy, Grey's Anatomy, NCIS and the Law & Orders are easy starts, Gunsmoke and Lassie the old surprises, and Friends (10 seasons) the trap.",
+  "summary": "Players will enjoy it: six shows everyone knows (The Simpsons, both Law & Orders, Family Guy, NCIS, Grey's Anatomy) come fast, and Gunsmoke and Lassie make a good reveal. The sting is that Friends, The Office and The Big Bang Theory each cost a life, so most games end at 7 or 8 found with no lives left.",
   "reasons": [
-    "Builder's own replay, pending a real judge. The casual found The Simpsons, Family Guy, Grey's Anatomy, Law & Order, SVU, NCIS and Criminal Minds, and lost lives on Friends, The Office, Supernatural (#12) and Bob's Burgers (#11), each with its seasons.",
-    "The title says network and scripted: South Park, SpongeBob, It's Always Sunny, SNL, Survivor and American Idol are free and never read as a list show. 'svu', 'greys', 'law and order' and 'csi' (offers the three CSIs) work.",
-    "185 network shows with 7+ seasons: a casual Blitz scored 31 of 33."
+    "Casual found 8 (the six gimmes, Criminal Minds, American Dad!) and lost lives on Friends (10 seasons), Supernatural (15), The Office (9), The Big Bang Theory (12) and Bob's Burgers (16); a second casual run found 7. The fan got 10/10, losing lives on ER and Supernatural.",
+    "Seasons reads clearly and every miss shows its count. Famous long shows that don't qualify are all free: South Park, SNL, SpongeBob, It's Always Sunny, Days of Our Lives, General Hospital, Survivor, Jeopardy, Doctor Who.",
+    "Wrinkle: the counts are total seasons wherever they aired, so American Dad! (TBS 2014-2025), Criminal Minds (4 seasons on Paramount+) and Lassie (2 in syndication) make the top 10 although the prompt says 'on US broadcast networks'. Someone who lost a life on Bob's Burgers (16, all on Fox) could object to Criminal Minds (15 on CBS) at #10."
   ],
-  "fixes": []
+  "fixes": [
+    "Prompt: say how seasons count, e.g. 'Name the 10 scripted primetime series that began on a US broadcast network (ABC, CBS, NBC, Fox, The CW) with the most seasons, wherever later seasons aired'. Reword rather than recount: broadcast-only counts would leave #10 a six-way tie at 15 seasons.",
+    "Lassie fact is off: the source says the FCC's Prime Time Access Rule took its 7 p.m. Sunday slot and the NFL games were a further reason, not that the games pushed it out of 7 p.m. Better: it ran 17 seasons on CBS, then its last two in syndication. American Dad!'s fact could say it spent 2014-2025 on TBS before returning to Fox, which explains its 22.",
+    "Spin-offs not on the list get 'did you mean' to the parent: Law & Order: Criminal Intent, Organized Crime, Trial by Jury, LA, True Crime, Toronto (to #3 Law & Order); NCIS: Hawai'i, Origins, Sydney, Tony & Ziva (to #5 NCIS); Criminal Minds: Suspect Behavior, Beyond Borders (to #10). Add them to knownNames so they are free. Keep Criminal Minds: Evolution going to Criminal Minds, since its seasons count.",
+    "'ncis la' gets 'did you mean NCIS' (#5) instead of #18 NCIS: Los Angeles: add 'NCIS LA' / 'NCIS: LA' to NCIS: Los Angeles. Add 'L&O' to #3 Law & Order and 'L&O SVU' to #2. For Blitz, these short forms aren't recognized: 'Parks and Rec' (Parks and Recreation), 'Brooklyn 99' (Brooklyn Nine-Nine), 'HIMYM' (How I Met Your Mother), 'TBBT' (The Big Bang Theory)."
+  ]
 }

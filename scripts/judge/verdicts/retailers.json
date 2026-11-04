@@ -1,25 +1,27 @@
 {
   "id": "retailers",
-  "by": "builder",
   "judgedAt": "2026-11-04",
   "decision": "daily-list",
   "alsoBlitz": true,
   "priority": 7,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 7, "livesLost": 5, "guesses": 15 },
-  "fan": { "found": 9, "livesLost": 2, "guesses": 14 },
-  "blitzCasual": { "scored": 25, "named": 34 },
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 25, "named": 33 },
   "difficulty": 2,
   "tags": ["business", "shopping", "retail"],
   "audience": "anyone",
-  "summary": "Stores everyone shops at: Walmart, Amazon, Costco, Home Depot, Kroger, CVS and Walgreens are gimmes, Lidl finds the Schwarz Group, and Target at #11 is the trap.",
+  "summary": "Players will like naming stores they actually shop at (Walmart, Amazon, Costco, Home Depot, CVS, Walgreens come fast), and Target missing at #11 is a real surprise. What they won't love: Schwarz Group and JD.com are unknown names, and every other famous store they try (Lowe's, Best Buy, IKEA, Tesco) costs a life, so most games end at zero lives with 6 or 7 found.",
   "reasons": [
-    "Builder's own replay, pending a real judge. A US casual found 8 (Walmart, Amazon, Costco, Home Depot, Kroger, CVS, Walgreens, Aldi) and lost lives on Target (#11), Lowe's (#14), Best Buy, IKEA and 7-Eleven, each with its revenue; a European player finds fewer (Tesco #15, Carrefour #13).",
-    "Groups are found by their stores: lidl and kaufland are the Schwarz Group, walgreens and boots its holding company, zara Inditex, uniqlo Fast Retailing. Whole Foods, Sam's Club, Trader Joe's, eBay and Temu are free.",
-    "100 ranked retailers: a casual Blitz scored 25 of 34 names."
+    "Casual replays: a US player found 7 and lost lives on Target #11, Lowe's #14, Best Buy, Macy's and IKEA, each showing its revenue; a UK player found 6 (Lidl and Boots score, Tesco, Asda and Sainsbury's cost lives); a mixed run found 9. A fan found all 10 with 2 lives lost.",
+    "Data matches Deloitte's FY2023 retail revenue and the prompt names the measure, so Amazon at #2 (retail sales only) is fair. All 10 have facts, and the Schwarz fact names Lidl.",
+    "Fairness is only 3: the 100-deep pool makes nearly every famous store a costed miss. That suits Blitz, where a casual run scored 25 of 33 names."
   ],
   "fixes": [
-    "Deloitte's figures are for fiscal 2023, the latest on the page; update when the page moves to the next Global Powers of Retailing.",
-    "'store' and 'supermarket' offer Ross Stores and Morrisons as a misspelling (a confirm, not a life): category words for the matcher if players stumble on it."
+    "\"tj maxx\", \"tjmaxx\", \"t.j. maxx\" and \"tk maxx\" get \"That doesn't look like an answer.\" (the junk detector): add TJ Maxx, T.J. Maxx, TK Maxx, Marshalls and HomeGoods as aliases of TJX Companies (#24), as Zara is on Inditex.",
+    "\"kmart\" offers Walmart as a misspelling (only before Walmart is found); Kmart is another chain and should be free.",
+    "Builder's flag confirmed: \"store\"/\"stores\" offer Ross Stores, \"supermarket(s)\" Wm Morrison Supermarkets, \"wholesale\" BJ's Wholesale Club, \"mart\" E-mart, all as a did-you-mean (a life only if confirmed). Treat these as category words.",
+    "\"morrisons\" only reaches Wm Morrison Supermarkets through did-you-mean, and \"m&s\" is not recognized: add Morrisons and M&S as aliases.",
+    "Figures are Deloitte FY2023; refresh when the Wikipedia page moves to the FY2024 Global Powers of Retailing."
   ]
 }

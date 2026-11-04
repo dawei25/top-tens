@@ -1,22 +1,23 @@
 {
   "id": "football-club-revenue",
-  "by": "builder",
   "judgedAt": "2026-11-04",
-  "decision": "daily-list",
+  "decision": "daily-blitz",
   "alsoBlitz": true,
-  "priority": 7,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 5, "fun": 4, "blitzDepth": 4 },
-  "casual": { "found": 8, "livesLost": 2, "guesses": 12 },
-  "fan": { "found": 10, "livesLost": 1, "guesses": 12 },
-  "blitzCasual": { "scored": 21, "named": 30 },
-  "difficulty": 2,
-  "tags": ["sports", "soccer", "clubs"],
-  "audience": "sports fans",
-  "summary": "The biggest clubs in the world, by Deloitte's 2026 Money League: Real Madrid, Barcelona and the English giants are gimmes, and Juventus (#16) and AC Milan (#15) are the traps. It leans easy.",
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 2, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 10, "livesLost": 2, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
+  "blitzCasual": { "scored": 19, "named": 24 },
+  "difficulty": 1,
+  "tags": ["sports", "soccer", "business"],
+  "audience": "anyone who follows soccer a little",
+  "summary": "Too easy for Today's list. The top 10 is just the ten most famous clubs, so a casual player finds 8 to 10 and a fan sweeps it. Only Juventus (#16) and AC Milan (#15) catch anyone out. It works well as a Blitz, where everyone can keep typing clubs that score.",
   "reasons": [
-    "Builder's own replay, pending a real judge. A casual who barely follows soccer finds Real Madrid, Barcelona, the Manchester clubs, Liverpool, Chelsea, Arsenal and Bayern, and loses lives on Juventus and AC Milan, each with its revenue; a soccer fan sweeps it.",
-    "Short forms work (barca, man utd, psg, spurs, bayern, juve, inter); 'manchester' offers both clubs. Every club from 29 earlier seasons is an answer with its last rank ('Ajax: #27 in 2021–22'); Inter Miami, LA Galaxy, Al Hilal and Boca Juniors are free.",
-    "32 clubs carry this season's revenue: a casual Blitz scored 21 of 30."
+    "Casual found 10/10 in 13 guesses and lost lives only on Juventus and AC Milan, which both show their revenue. A US player who barely follows soccer still found 8. The fan swept it in 10 guesses without losing a life, so there is no stretch answer.",
+    "Players will enjoy recognizing names, but there are few surprises: the only 'huh' moment is Juventus and Milan dropping out while Spurs and Chelsea stay in. The prompt is clear (soccer, 2024–25, Deloitte). Short forms work (barca, man utd, psg, spurs, bayern), and NFL, MLS and Saudi clubs are free.",
+    "Blitz: Premier League and big European clubs keep scoring (19 of 24). Ajax, Celtic, Napoli and Leeds don't score."
   ],
-  "fixes": []
+  "fixes": [
+    "This ranks one season, but every club from every Money League since 1996–97 costs a life and shows an old figure: 'celtic' shows '#17 in 2006–07', 'leverkusen' shows '#24 in 2004–05', and Parma shows no figure at all. In topics.ts `also`, keep only 2023–24 and 2022–23 (tables 4 and 6) as costly near misses. Make clubs last ranked before that (Ajax, Leicester, Porto, Celtic, Rangers, Bayer Leverkusen, Schalke and the rest) free knownNames."
+  ]
 }
