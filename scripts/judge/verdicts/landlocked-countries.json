@@ -1,0 +1,22 @@
+{
+  "id": "landlocked-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 5, "fun": 4, "blitzDepth": 2 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 9, "livesLost": 2, "guesses": 13 },
+  "blitzCasual": { "scored": 10, "named": 12 },
+  "difficulty": 3,
+  "tags": ["geography", "countries", "maps"],
+  "audience": "anyone",
+  "summary": "Mongolia, Kazakhstan, Afghanistan and Bolivia come first; Chad, Niger, Mali and Ethiopia reward a look at Africa's map, and Switzerland, Austria and Paraguay are the famous misses.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. A casual found 6 and lost lives on Switzerland (#31), Austria, Paraguay (#15), Nepal and Hungary, each with its area.",
+    "A country with a coast costs a life and shows why: \"Brazil: 7,491 km (coastline)\", \"drc\" is the Democratic Republic of the Congo, \"37 km (coastline)\" (CIA figures). Kazakhstan counts as landlocked: its only coast is on the Caspian.",
+    "47 landlocked countries and de facto states: a casual runs dry after about a dozen, so it is no Blitz."
+  ],
+  "fixes": []
+}

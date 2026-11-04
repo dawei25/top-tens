@@ -601,5 +601,59 @@
   "category": "Entertainment",
   "blitz": true,
   "debut": true
+ },
+ {
+  "id": "skyscraper-cities",
+  "title": "Cities with the most skyscrapers",
+  "category": "Geography",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "metro-cities",
+  "title": "Cities with the busiest metro systems",
+  "category": "Geography",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "landlocked-countries",
+  "title": "Largest landlocked countries",
+  "category": "Geography",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "coastline-countries",
+  "title": "Countries with the longest coastlines",
+  "category": "Geography",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "coffee-countries",
+  "title": "Countries that produce the most coffee",
+  "category": "Business",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "world-heritage-countries",
+  "title": "Countries with the most UNESCO World Heritage Sites",
+  "category": "Culture",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "smallest-countries",
+  "title": "Smallest countries by area",
+  "category": "Geography",
+  "blitz": false
+ },
+ {
+  "id": "africa-cities",
+  "title": "Largest cities in Africa",
+  "category": "Geography",
+  "blitz": true
  }
 ]

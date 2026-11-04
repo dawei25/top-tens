@@ -1,0 +1,52 @@
+{
+  "Vatican City": {
+    "text": "Ruled by the pope, it is an enclave in Rome with about 882 residents, the fewest of any country.",
+    "source": "https://en.wikipedia.org/wiki/Vatican_City",
+    "evidence": "Ruled by the pope, it is an enclave within the city of Rome, Italy ... With an area of 0.49 square kilometres (0.19 mi2) and population of about 882, Vatican City is both the smallest country by area and the least populous."
+  },
+  "Monaco": {
+    "text": "It has the shortest coastline of any country that has one: 3.83 km.",
+    "source": "https://en.wikipedia.org/wiki/Monaco",
+    "evidence": "It also has the world's shortest national coastline of any non-landlocked nation, at 3.83 km (2.38 mi)."
+  },
+  "Nauru": {
+    "text": "Most of its interior was strip-mined for phosphate for about a century from 1900.",
+    "source": "https://en.wikipedia.org/wiki/Nauru",
+    "evidence": "Nauru is a phosphate-rock island with rich deposits near the surface, as a result of which most of its interior was profitably but destructively strip-mined for about a century starting in 1900."
+  },
+  "Tuvalu": {
+    "text": "Its 2022 census counted 10,643 people, the second-fewest of any United Nations member.",
+    "source": "https://en.wikipedia.org/wiki/Tuvalu",
+    "evidence": "The 2022 census determined that Tuvalu had a population of 10,643, making it the 2nd least populated country in the United Nations"
+  },
+  "San Marino": {
+    "text": "It claims to date from AD 301, which would make it the oldest sovereign state still standing.",
+    "source": "https://en.wikipedia.org/wiki/San_Marino",
+    "evidence": "San Marino claims to have been founded in AD 301 and to be the oldest extant sovereign state, and the oldest constitutional republic."
+  },
+  "Liechtenstein": {
+    "text": "It is doubly landlocked, and the smallest country in the world to border two countries.",
+    "source": "https://en.wikipedia.org/wiki/Liechtenstein",
+    "evidence": "... is a doubly landlocked country in the Central European Alps. ... It is the world's smallest country to border two countries."
+  },
+  "Marshall Islands": {
+    "text": "European maps named it after British captain John Marshall, who explored the region in 1788.",
+    "source": "https://en.wikipedia.org/wiki/Marshall_Islands",
+    "evidence": "European maps and charts named the group for British captain John Marshall, who explored the region in 1788."
+  },
+  "Saint Kitts and Nevis": {
+    "text": "It is the smallest sovereign state in the Western Hemisphere, and the world's smallest federation.",
+    "source": "https://en.wikipedia.org/wiki/Saint_Kitts_and_Nevis",
+    "evidence": "With 261 square kilometres (101 sq mi) of territory, and roughly 48,000 inhabitants, it is the smallest sovereign state in the Western Hemisphere, in both area and population, as well as the world's smallest sovereign Federation."
+  },
+  "Maldives": {
+    "text": "Its 298 km² of land are spread over about 90,000 km² of sea.",
+    "source": "https://en.wikipedia.org/wiki/Maldives",
+    "evidence": "Its land area is only 298 square kilometres (115 sq mi), but this is spread over roughly 90,000 square kilometres (35,000 sq mi) of the sea, making it one of the world's most spatially dispersed sovereign states."
+  },
+  "Malta": {
+    "text": "Its Ġgantija temples on Gozo, from about 3500 BC, are among the world's oldest free-standing structures.",
+    "source": "https://en.wikipedia.org/wiki/Malta",
+    "evidence": "Around 3500 BC, these people built some of the world's oldest existing free-standing structures in the form of the Ġgantija temples on Gozo."
+  }
+}

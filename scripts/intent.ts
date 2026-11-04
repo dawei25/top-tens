@@ -227,6 +227,15 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["São Tomé and Príncipe", "Sao Tome and Principe", "Sao Tome"],
   ["Kyrgyzstan", "Kyrgyz Republic"],
   ["Ireland", "Republic of Ireland", "Eire"],
+  // Two-island states are named by their main island, and "Saint" is written "St" ("st kitts" found nothing on the
+  // smallest countries).
+  ["Saint Kitts and Nevis", "St Kitts and Nevis", "St. Kitts and Nevis", "Saint Kitts", "St Kitts", "St. Kitts"],
+  [
+    "Saint Vincent and the Grenadines", "St Vincent and the Grenadines", "St. Vincent and the Grenadines", "Saint Vincent",
+    "St Vincent", "St. Vincent",
+  ],
+  ["Saint Lucia", "St Lucia", "St. Lucia"],
+  ["Antigua and Barbuda", "Antigua"],
 ];
 
 export const COUNTRY_FORMS: string[][] = [
@@ -287,6 +296,8 @@ export const CITY_FORMS: string[][] = [
   ["Yangon", "Rangoon"],
   ["Mecca", "Makkah"],
   ["Macau", "Macao"],
+  ["Dar es Salaam", "Dar"],
+  ["Johannesburg", "Joburg", "Jozi", "Jo'burg"],
 ];
 
 /**

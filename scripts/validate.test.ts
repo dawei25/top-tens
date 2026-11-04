@@ -6,11 +6,14 @@ import { UNIVERSES, whereIs } from "./gazetteer";
 import { TOPICS, type Topic } from "./topics";
 import {
   checkPuzzle,
+  COUNTRY_TWICE_FROM,
+  countryTwice,
   elsewhereErrors,
   FACTS_REQUIRED_FROM,
   factIssues,
   factsWithoutPlace,
   figureShare,
+  invertedName,
   missingNicknames,
   PLACES_NOUN,
   REGION_REQUIRED_FROM,
@@ -156,6 +159,50 @@ describe("validate: placeholder rows", () => {
       expect.stringContaining('"Untitled Peaky Blinders sequel series": a placeholder'),
       expect.stringContaining('"Awaiting release": a placeholder'),
     ]);
+  });
+});
+
+describe("validate: inverted index names", () => {
+  it("fails a name written the way an index sorts it, ranked or not", () => {
+    const p = puzzle();
+    p.extras[0].name = "Congo, Republic of the";
+    p.extras[12].name = "Bahamas, The";
+    expect(errors(p)).toEqual([
+      expect.stringContaining('"Congo, Republic of the": an inverted index name'),
+      expect.stringContaining('"Bahamas, The": an inverted index name'),
+    ]);
+  });
+
+  it("leaves names with a comma that read the usual way", () => {
+    for (const name of ["Saint Helena, Ascension and Tristan da Cunha", "Washington, D.C.", "Bonaire, Sint Eustatius and Saba", "Toledo, Ohio"]) {
+      expect(invertedName(name), name).toBe(false);
+    }
+    for (const name of ["Congo, Democratic Republic of the", "Micronesia, Federated States of", "Korea, South", "Gambia, The"]) {
+      expect(invertedName(name), name).toBe(true);
+    }
+  });
+});
+
+describe("validate: one country, two entries", () => {
+  it("fails a country under two of its names, in a list built under the rule", () => {
+    const p = puzzle({ asOf: COUNTRY_TWICE_FROM });
+    p.extras[0].name = "Cape Verde";
+    p.extras[1].name = "Cabo Verde";
+    p.extras[2].name = "Macau";
+    p.extras[3].name = "Macao";
+    expect(errors(p)).toEqual([
+      expect.stringContaining('one country, 2 entries: "Cape Verde", "Cabo Verde"'),
+      expect.stringContaining('one country, 2 entries: "Macau", "Macao"'),
+    ]);
+  });
+
+  it("leaves a football nation beside its country, and a region on the other side of it", () => {
+    const p = puzzle({ asOf: COUNTRY_TWICE_FROM });
+    p.extras[0].name = "England";
+    p.extras[1].name = "United Kingdom";
+    p.extras[2].name = "ROC";
+    p.extras[3].name = "Chinese Taipei";
+    expect(countryTwice(p)).toEqual([]);
   });
 });
 

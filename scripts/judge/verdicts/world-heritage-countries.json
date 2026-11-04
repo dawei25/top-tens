@@ -1,0 +1,22 @@
+{
+  "id": "world-heritage-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 5, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 13 },
+  "blitzCasual": { "scored": 35, "named": 35 },
+  "difficulty": 2,
+  "tags": ["culture", "travel", "history"],
+  "audience": "anyone",
+  "summary": "Italy, France, Spain, China and Germany come fast; Russia and Iran are the stretch answers, and Greece (#16), Japan and the US (both #11) are the traps.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. A casual found 8 and lost lives on Greece, Egypt (#53), the US, Japan and Peru, each with its count.",
+    "UNESCO's 2026 counts from its five regional lists (Italy 62, China 61, France 56); a shared site counts for each country, as UNESCO counts them, and the prompt says so.",
+    "Every country with a site scores: a casual Blitz scored 35 of 35."
+  ],
+  "fixes": []
+}

@@ -145,6 +145,15 @@ export function junkReason(name: string, numbers = false): string | null {
   return null;
 }
 
+/**
+ * A name written the way an index sorts it, "Congo, Republic of the" or "Bahamas, The" (the CIA's style on the
+ * coastline table): nobody types it, and it misses the universe's "Republic of the Congo", so the country is two
+ * entries. Give such rows their usual name with `rename`.
+ */
+export function invertedName(name: string): boolean {
+  return /^[^,]+,\s*(?:the|a|an|[^,]*\bof(?: the)?|north|south)$/i.test(name.trim());
+}
+
 /** "Djibouti City", "City of San Marino": the words that make a city's name without changing which city. */
 const cityless = (s: string) => s.split(" ").filter((w) => !/^(city|of|town)$/.test(w)).join(" ");
 
@@ -170,6 +179,27 @@ export function sameAsUniverse(p: Pick<Puzzle, "answers" | "extras">, topic?: Pi
   }
   return out;
 }
+
+/**
+ * One country under two names, as two entries: "Cape Verde" from another page's table beside the universe's "Cabo
+ * Verde", "Macau" beside "Macao". A player could lose two lives on one country, the second with no figure. Only a
+ * COUNTRY_FORMS line's usual name and the universe's own names count: England and the United Kingdom are two
+ * football nations, the Olympics' "ROC" is no Taiwan. build.ts merges a universe member into such an entry.
+ */
+export function countryTwice(p: Pick<Puzzle, "answers" | "extras">): string[] {
+  const out: string[] = [];
+  const all = [...p.answers, ...p.extras];
+  const universe = new Set(UNIVERSES.countries().flatMap((c) => [c.name, ...c.aliases]).map(normalize));
+  for (const line of COUNTRY_FORMS) {
+    const names = new Set([line[0], ...line.filter((f) => universe.has(normalize(f)))].map(normalize));
+    const hits = all.filter((e) => !e.elsewhere && names.has(normalize(e.name)));
+    if (hits.length > 1) out.push(`one country, ${hits.length} entries: ${hits.map((e) => `"${e.name}"`).join(", ")}`);
+  }
+  return out;
+}
+
+/** Lists built from this day merge one country's two names (build.ts); older builds only warn until rebuilt. */
+export const COUNTRY_TWICE_FROM = "2026-11-04";
 
 /**
  * Teams of a team universe the list can't take by nickname: every member's other names ("Cubs", "Nats") must be
@@ -375,6 +405,7 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
     if (why) (e.rank >= 1 && e.rank <= 10 ? err : warn)(`${where} "${e.name}": looks like junk (${why})`);
     // A title not announced yet is never an answer: "peaky blinders" cost a life as "Untitled Peaky Blinders sequel series".
     if (placeholderName(e.name)) err(`${where} "${e.name}": a placeholder, not a title`);
+    if (invertedName(e.name)) err(`${where} "${e.name}": an inverted index name; \`rename\` it to the usual one`);
     const n = normalize(e.name);
     if (!n) err(`${where} "${e.name}": normalizes to nothing`);
     const prev = byName.get(n);
@@ -462,6 +493,7 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   // The same place twice: a ranked "Congo" without the aliases of the pool's "Republic of the Congo", the table's
   // Ulaanbaatar next to the capitals universe's "Ulan Bator" (a second life for one city, no figure).
   for (const e of sameAsUniverse(p, topic)) warn(e);
+  for (const e of countryTwice(p)) ((p.source?.asOf ?? "") >= COUNTRY_TWICE_FROM ? err : warn)(e);
   for (const e of missingNicknames(p, topic)) err(`team nickname: ${e}`);
 
   // A regional list's places outside its region cost a life and say so: "Japan isn't in Europe." (owner, cycle 7).

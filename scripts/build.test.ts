@@ -2,8 +2,10 @@ import * as cheerio from "cheerio";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import {
+  countryNames,
   datedLabel,
   datedValue,
   labelYear,
@@ -13,7 +15,9 @@ import {
   mergeIndex,
   qualifiedLink,
   rangeText,
+  rankedSources,
   rankOf,
+  rankRows,
   readFacts,
   regionalNamesake,
   regionColumn,
@@ -248,6 +252,29 @@ describe("dated values", () => {
   });
 });
 
+describe("ranking order", () => {
+  const rows = () => [{ value: 26 }, { value: 0.44 }, { value: 61, tiebreak: 1 }, { value: 61, tiebreak: 2 }, { value: 2 }];
+
+  it("puts the biggest first, the higher tiebreak first between equals", () => {
+    expect(rankRows({}, rows())).toEqual([{ value: 61, tiebreak: 2 }, { value: 61, tiebreak: 1 }, { value: 26 }, { value: 2 }, { value: 0.44 }]);
+  });
+
+  it("puts the smallest first on a lowerIsBetter list (the smallest countries), and keeps a table's own order", () => {
+    expect(rankRows({ lowerIsBetter: true }, rows()).map((r) => r.value)).toEqual([0.44, 2, 26, 61, 61]);
+    expect(rankRows({ lowerIsBetter: true }, rows())[3]).toEqual({ value: 61, tiebreak: 2 });
+    expect(rankRows({ keepOrder: true, lowerIsBetter: true }, rows())).toEqual(rows());
+  });
+
+  it("reads the page's tables first, then the other pages' (one ranking split by region)", () => {
+    expect(rankedSources({ page: "Index", tables: [], pages: [{ page: "Africa", tables: [0] }, { page: "Europe", tables: [0] }] })).toEqual([
+      { page: "Index", tables: [] },
+      { page: "Africa", tables: [0] },
+      { page: "Europe", tables: [0] },
+    ]);
+    expect(rankedSources({ page: "List", tables: [0, 1] })).toEqual([{ page: "List", tables: [0, 1] }]);
+  });
+});
+
 describe("skipName", () => {
   it("skips total rows", () => {
     for (const s of ["Total", "Totals", "Total:", "TOTAL", "Total (2023)", "Total world", "Total US and territories", "Grand total", "Subtotal"]) {
@@ -305,6 +332,28 @@ describe("country demonyms", () => {
         seen.set(f.toLowerCase(), forms[0]);
       }
     }
+  });
+
+  it("give a country's other full names, never a part's or a namesake's", () => {
+    expect(countryNames(["cabo verde"])).toContain("cape verde");
+    expect(countryNames(["macao"])).toContain("macau");
+    expect(countryNames(["czech republic"])).toContain("czechia");
+    // England is a football nation of its own beside the United Kingdom; the Olympics' ROC is no Taiwan.
+    expect(countryNames(["united kingdom"])).not.toContain("england");
+    expect(countryNames(["england"])).toEqual([]);
+    expect(countryNames(["roc"])).toEqual([]);
+  });
+
+  it("name a two-island state by its main island, and Saint as St (\"st kitts\" found nothing)", () => {
+    const twoPart = ["Antigua and Barbuda", "Bosnia and Herzegovina", "Saint Kitts and Nevis", "Saint Vincent and the Grenadines", "São Tomé and Príncipe", "Trinidad and Tobago"];
+    for (const country of twoPart) {
+      const first = country.split(" and ")[0];
+      expect(line(country).some((f) => normalize(f) === normalize(first)), country).toBe(true);
+    }
+    for (const forms of COUNTRY_FORMS.filter((f) => /^Saint /.test(f[0]))) {
+      expect(forms, forms[0]).toContain(forms[0].replace(/^Saint /, "St "));
+    }
+    expect(line("Saint Kitts and Nevis")).toEqual(expect.arrayContaining(["St Kitts", "Saint Kitts"]));
   });
 });
 
