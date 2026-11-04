@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "eiffel-tower-height",
+      "kind": "landmarks",
+      "question": "How tall is the Eiffel Tower?",
+      "unit": "metres",
+      "answer": 330,
+      "definition": "to the tip of its antenna",
+      "fact": "It grew by six metres in 2022, when a new radio antenna went up on top.",
+      "source": { "title": "Eiffel Tower", "url": "https://en.wikipedia.org/wiki/Eiffel_Tower" },
+      "typical": 1.5,
+      "easy": true
+    },
+    {
+      "id": "adult-bones",
+      "kind": "body",
+      "question": "How many bones are in the human body?",
+      "unit": "bones",
+      "answer": 206,
+      "definition": "in an adult",
+      "fact": "A newborn has more. Many of them fuse as it grows.",
+      "source": { "title": "Human skeleton", "url": "https://en.wikipedia.org/wiki/Human_skeleton" },
+      "typical": 2,
+      "easy": true
+    },
+    {
+      "id": "octopus-hearts",
+      "kind": "animals",
+      "question": "How many hearts does an octopus have?",
+      "unit": "hearts",
+      "answer": 3,
+      "fact": "Two pump blood through the gills, the third through the rest of the body.",
+      "source": { "title": "Octopus", "url": "https://en.wikipedia.org/wiki/Octopus" },
+      "typical": 1.5,
+      "easy": true
+    },
+    {
+      "id": "africa-countries",
+      "kind": "places",
+      "question": "How many countries are there in Africa?",
+      "unit": "countries",
+      "answer": 54,
+      "definition": "members of the United Nations",
+      "fact": "Algeria is the largest by area, the Seychelles the smallest.",
+      "source": { "title": "Africa", "url": "https://en.wikipedia.org/wiki/Africa" },
+      "typical": 1.5
+    },
+    {
+      "id": "moon-distance",
+      "kind": "space",
+      "question": "How far away is the Moon?",
+      "unit": "kilometres",
+      "answer": 384400,
+      "definition": "on average",
+      "fact": "Its light takes about 1.3 seconds to reach us.",
+      "source": { "title": "Moon", "url": "https://en.wikipedia.org/wiki/Moon" },
+      "typical": 3
+    },
+    {
+      "id": "fat-calories",
+      "kind": "food",
+      "question": "How many calories are in one gram of fat?",
+      "unit": "calories",
+      "answer": 9,
+      "definition": "food calories (kcal)",
+      "fact": "A gram of protein or carbohydrate has about four.",
+      "source": { "title": "Food energy", "url": "https://en.wikipedia.org/wiki/Food_energy" },
+      "typical": 2
+    },
+    {
+      "id": "seconds-in-a-day",
+      "kind": "everyday",
+      "question": "How many seconds are there in a day?",
+      "unit": "seconds",
+      "answer": 86400,
+      "fact": "Leap seconds have been added now and then to keep clocks in step with the Earth.",
+      "source": { "title": "Day", "url": "https://en.wikipedia.org/wiki/Day" },
+      "typical": 2,
+      "easy": true
+    },
+    {
+      "id": "everest-height",
+      "kind": "nature",
+      "question": "How high is Mount Everest?",
+      "unit": "metres",
+      "answer": 8848.86,
+      "definition": "above sea level",
+      "fact": "China and Nepal measured it together in 2020.",
+      "source": { "title": "Mount Everest", "url": "https://en.wikipedia.org/wiki/Mount_Everest" },
+      "typical": 1.5,
+      "easy": true
+    },
+    {
+      "id": "speed-of-light",
+      "kind": "science",
+      "question": "How fast does light travel?",
+      "unit": "kilometres per second",
+      "answer": 299792.458,
+      "definition": "in a vacuum",
+      "fact": "The metre is defined by it: the distance light travels in 1/299,792,458 of a second.",
+      "source": { "title": "Speed of light", "url": "https://en.wikipedia.org/wiki/Speed_of_light" },
+      "typical": 3
+    },
+    {
+      "id": "marathon-distance",
+      "kind": "sports",
+      "question": "How long is a marathon?",
+      "unit": "kilometres",
+      "answer": 42.195,
+      "fact": "The distance was fixed in 1921, after the course of the 1908 London Olympics.",
+      "source": { "title": "Marathon", "url": "https://en.wikipedia.org/wiki/Marathon" },
+      "typical": 1.3,
+      "easy": true
+    },
+    {
+      "id": "piano-keys",
+      "kind": "culture",
+      "question": "How many keys does a standard piano have?",
+      "unit": "keys",
+      "answer": 88,
+      "fact": "52 white and 36 black.",
+      "source": { "title": "Piano", "url": "https://en.wikipedia.org/wiki/Piano" },
+      "typical": 1.5,
+      "easy": true
+    },
+    {
+      "id": "un-members",
+      "kind": "lists",
+      "question": "How many countries are members of the United Nations?",
+      "unit": "countries",
+      "answer": 193,
+      "fact": "South Sudan was the last to join, in 2011.",
+      "source": { "title": "Member states of the United Nations", "url": "https://en.wikipedia.org/wiki/Member_states_of_the_United_Nations" },
+      "typical": 1.3
+    }
+  ]
+}

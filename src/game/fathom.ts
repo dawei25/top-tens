@@ -251,19 +251,24 @@ const WORDS: readonly [number, string][] = [
   [1e3, "thousand"],
 ];
 
-/** "2.5 million", "12.3 thousand", "330" (4 significant digits at most; plain digits under a thousand). */
+/**
+ * "2.5 million", "12.35 thousand", "330" (4 significant digits at most; plain digits under a thousand). Past a
+ * thousand trillion, the power of ten: "3e18".
+ */
 export function formatWords(n: number): string {
+  if (n >= 1e15) {
+    const e = Math.floor(Math.log10(n));
+    return `${+(n / 10 ** e).toPrecision(4)}e${e}`;
+  }
   for (const [size, word] of WORDS) {
-    if (n >= size * 0.99995) {
-      const x = n / size;
-      return `${x.toLocaleString("en-US", { maximumSignificantDigits: x >= 1000 ? 21 : 4 })} ${word}`;
-    }
+    if (n >= size * 0.99995) return `${(n / size).toLocaleString("en-US", { maximumSignificantDigits: 4 })} ${word}`;
   }
   return formatDigits(n);
 }
 
-/** The echo under the field: "2,500,000 · 2.5 million", or just "330" under a thousand. */
+/** The echo under the field: "2,500,000 · 2.5 million", or just "330" under a thousand (and "3e18" past 1e15). */
 export function echoText(n: number): string {
+  if (n >= 1e15) return formatWords(n);
   return n >= 1000 ? `${formatDigits(n)} · ${formatWords(n)}` : formatDigits(n);
 }
 

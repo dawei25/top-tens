@@ -209,6 +209,7 @@ describe("formatting", () => {
     expect(echoText(1_500_000_000)).toBe("1,500,000,000 · 1.5 billion");
     expect(echoText(330)).toBe("330");
     expect(echoText(0.1)).toBe("0.1");
+    expect(echoText(1e30)).toBe("1e30");
   });
   it("keeps digits clean of float noise", () => {
     expect(formatDigits(1.1 * 1000)).toBe("1,100");
@@ -219,7 +220,9 @@ describe("formatting", () => {
     expect(formatWords(149_597_870)).toBe("149.6 million");
     expect(formatWords(12_346)).toBe("12.35 thousand");
     expect(formatWords(999_999)).toBe("1 million");
-    expect(formatWords(5e15)).toBe("5,000 trillion");
+    expect(formatWords(999e12)).toBe("999 trillion");
+    expect(formatWords(5e15)).toBe("5e15");
+    expect(formatWords(3.14159e20)).toBe("3.142e20");
     expect(formatWords(42)).toBe("42");
   });
   it("shows amounts in digits up to a million, words from there", () => {
