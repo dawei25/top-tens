@@ -11,11 +11,14 @@
 // focus-visible and keyboard-modality styles apply), and every element's layout box is compared with the screen at
 // rest (e2e/states-lib.cjs). Two of each kind of element are checked (two of the nine empty rows, say);
 // STATES_ALL=1 npm run e2e -- states checks every one. Real puzzle data: a screen is only ever compared with itself.
-// The static half of the rule is npm run lint:css (e2e/css-states.mjs).
+// "add a note" (only in a build with a backend) gets a second, short walk on the backend copy: its key, and the box
+// open with focus in it. The static half of the rule is npm run lint:css (e2e/css-states.mjs).
 const { describe, test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, open, go, puzzle, guess, freeze, giveUp } = require("./helpers.cjs");
 const { checkScreen, formatFailures } = require("./states-lib.cjs");
+const { BACKEND_ENV } = require("./backend-env.cjs");
+const { serveBuild, opener, FRESH: BACKEND_FRESH } = require("./backend-lib.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -202,36 +205,86 @@ const SCREENS = [
   },
 ];
 
+/**
+ * "add a note" under "Good list?" exists only in a build with a backend, so it gets its own walk on the copy built with
+ * the fake backend (backend-lib.cjs): a list's end with the note's key, then with the box open, words in it (so SEND
+ * is enabled) and focus in it.
+ */
+const NOTE_SCREENS = [
+  {
+    name: "list game over, add a note (backend)",
+    scope: '[data-testid="note"]',
+    setup: async (page) => {
+      await page.getByLabel("Your guess").waitFor();
+      await giveUp(page);
+      await tick(page);
+    },
+  },
+  {
+    name: "list game over, note open (backend)",
+    scope: '[data-testid="note"]',
+    keepFocus: true,
+    setup: async (page) => {
+      await page.getByTestId("note-open").click();
+      await page.getByTestId("note-text").fill("which state is each park in?");
+    },
+  },
+];
+
+/** Walks `screens` in order on `page` (its clock frozen), then fails with every element that moved. */
+async function walk(page, width, screens) {
+  const started = Date.now();
+  // A frozen clock: nothing ticks (countdowns, the Blitz clock, the ocean) between a screen at rest and its states.
+  await freeze(page);
+  const failures = [];
+  const summary = [];
+  for (const screen of screens) {
+    const t = Date.now();
+    await screen.setup(page);
+    const r = await checkScreen(page, screen, { hover: width.hover });
+    failures.push(...r.failures);
+    const c = r.counts;
+    summary.push(
+      `${screen.name}: ${width.hover ? `${c.hover} hovered, ` : ""}${c.press} pressed, ${c.focus} focused` +
+        (c.same ? ` (+${c.same} more of the same kinds)` : "") +
+        (c.covered.length ? ` (${c.covered.length} covered, not hovered: ${c.covered.join(", ")})` : "") +
+        ` [${((Date.now() - t) / 1000).toFixed(1)} s]` +
+        (r.failures.length ? `: ${r.failures.length} FAILED` : ""),
+    );
+  }
+  console.log(
+    `states @ ${width.viewport.width}px (${((Date.now() - started) / 1000).toFixed(1)} s)\n` + summary.map((l) => `  ${l}`).join("\n"),
+  );
+  assert.equal(failures.length, 0, `\n${formatFailures(width.viewport.width, failures)}\n`);
+}
+
 // The widths run side by side, each in its own browser context.
 describe("interaction states", { concurrency: true }, () => {
   for (const width of WIDTHS) {
     test(`nothing moves on hover, focus or press (${width.name}, ${width.viewport.width}px)`, async () => {
-      const started = Date.now();
       const { ctx, page } = await open(browser, width);
-      // A frozen clock: nothing ticks (countdowns, the Blitz clock, the ocean) between a screen at rest and its states.
-      await freeze(page);
-      const failures = [];
-      const summary = [];
-      for (const screen of SCREENS) {
-        const t = Date.now();
-        await screen.setup(page);
-        const r = await checkScreen(page, screen, { hover: width.hover });
-        failures.push(...r.failures);
-        const c = r.counts;
-        summary.push(
-          `${screen.name}: ${width.hover ? `${c.hover} hovered, ` : ""}${c.press} pressed, ${c.focus} focused` +
-            (c.same ? ` (+${c.same} more of the same kinds)` : "") +
-            (c.covered.length ? ` (${c.covered.length} covered, not hovered: ${c.covered.join(", ")})` : "") +
-            ` [${((Date.now() - t) / 1000).toFixed(1)} s]` +
-            (r.failures.length ? `: ${r.failures.length} FAILED` : ""),
-        );
+      try {
+        await walk(page, width, SCREENS);
+      } finally {
+        await ctx.close();
       }
-      await ctx.close();
-      console.log(
-        `states @ ${width.viewport.width}px (${((Date.now() - started) / 1000).toFixed(1)} s)\n` +
-          summary.map((l) => `  ${l}`).join("\n"),
-      );
-      assert.equal(failures.length, 0, `\n${formatFailures(width.viewport.width, failures)}\n`);
+    });
+  }
+});
+
+describe("interaction states, with a backend (the note)", { concurrency: true }, () => {
+  let served;
+  before(async () => (served = await serveBuild(BACKEND_ENV, "E2E_BACKEND_DIST")));
+  after(() => served?.close());
+  const openBackend = opener(() => served);
+  for (const width of WIDTHS) {
+    test(`nothing moves on hover, focus or press: the note (${width.name}, ${width.viewport.width}px)`, async () => {
+      const { ctx, page } = await openBackend(width, `#p-${LIST}`, BACKEND_FRESH);
+      try {
+        await walk(page, width, NOTE_SCREENS);
+      } finally {
+        await ctx.close();
+      }
     });
   }
 });

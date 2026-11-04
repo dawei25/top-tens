@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const { mkdtempSync, rmSync } = require("node:fs");
 const { tmpdir } = require("node:os");
 const path = require("node:path");
-const { chromium, NOW } = require("./helpers.cjs");
+const { chromium, NOW, offlineFonts } = require("./helpers.cjs");
 const { BACKEND_ENV } = require("./backend-env.cjs");
 
 const SUPA = BACKEND_ENV.VITE_SUPABASE_URL;
@@ -73,7 +73,7 @@ const REFUSED_SUB = "refuse-me";
  * A Google ID token signs Dana in, unless its `sub` is REFUSED_SUB.
  */
 async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
-  const calls = { submit: [], rate: [], stats: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
+  const calls = { submit: [], rate: [], feedback: [], stats: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
   let row = save;
   const cors = {
     "access-control-allow-origin": "*",
@@ -92,6 +92,9 @@ async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
         return json(200, true);
       case "/rest/v1/rpc/rate_list":
         calls.rate.push(req.postDataJSON());
+        return json(200, true);
+      case "/rest/v1/rpc/submit_feedback":
+        calls.feedback.push(req.postDataJSON());
         return json(200, true);
       case "/rest/v1/rpc/list_stats":
         calls.stats.push([url.searchParams.get("p_list_id"), url.searchParams.get("p_mode")]);
@@ -172,6 +175,8 @@ const opener = (served) =>
   async function open(vp, hash, seed, mocks, setup) {
     const { browser, base } = served();
     const ctx = await browser.newContext({ viewport: vp.viewport, isMobile: !!vp.isMobile, hasTouch: !!vp.hasTouch, timezoneId: "America/New_York" });
+    // The same font bytes every run, so a layout measured once stays put.
+    await offlineFonts(ctx);
     await ctx.addInitScript((items) => {
       if (localStorage.getItem("e2e-seeded")) return;
       for (const [k, v] of Object.entries(items)) localStorage.setItem(k, JSON.stringify(v));
