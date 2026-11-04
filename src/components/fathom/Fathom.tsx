@@ -54,7 +54,11 @@ async function loadBank(): Promise<FathomQuestion[] | null> {
   try {
     const res = await fetch(BANK_URL);
     if (!res.ok) return null;
-    const bank = readBank(await res.json());
+    const json = await res.json();
+    const bank = readBank(json);
+    // Malformed questions are left out, not fatal; say so where whoever writes the file will look.
+    const dropped = (json?.questions?.length ?? 0) - (bank?.length ?? 0);
+    if (bank && dropped > 0) console.warn(`fathom: ${dropped} question(s) in the file left out (malformed or repeated ids)`);
     return bank && bank.length >= QUESTIONS_PER_GAME ? bank : null;
   } catch {
     return null;
@@ -137,40 +141,41 @@ export default function Fathom({ onBack, onHome }: Props) {
     focusGuess();
   };
 
-  if (phase === "results") {
-    return (
-      <main className="screen fathom" data-testid="fathom" data-phase="results">
-        {head}
-        <Results scored={scored} onAgain={again} />
-      </main>
-    );
-  }
-
   const question = questions[game.at];
   const shown = phase === "reveal" ? scored[game.at] : undefined;
+  // What a screen reader hears as each verdict and the total appear (the line is there before its words change).
+  const said = shown
+    ? `${bandLabel(shown.band)}, ${shown.points} points. The answer: ${formatAmount(shown.question.answer)} ${shown.question.unit}. ` +
+      `Yours was ${timesOff(shown.guess, shown.question.answer)}.`
+    : phase === "results"
+      ? `Your total: ${totalOf(scored)} out of ${MAX_TOTAL}.`
+      : "";
   return (
     <main className="screen fathom" data-testid="fathom" data-phase={phase}>
       {head}
-      {/* The verdict, read out as the reveal appears (a live region has to be there before its words change). */}
       <p className="sr-only" role="status">
-        {shown &&
-          `${bandLabel(shown.band)}, ${shown.points} points. The answer: ${formatAmount(shown.question.answer)} ${shown.question.unit}. ` +
-            `Yours was ${timesOff(shown.guess, shown.question.answer)}.`}
+        {said}
       </p>
-      <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id}>
-        <div className="prompt-top">
-          <span className="label cyan">
-            Question {game.at + 1} of {QUESTIONS_PER_GAME}
-          </span>
-          <Pips bands={scored.map((s) => s.band)} at={game.at} />
-        </div>
-        <h1>{question.question}</h1>
-        {question.definition && <p className="caption">{question.definition}</p>}
-      </section>
-      {phase === "question" ? (
-        <Ask key={question.id} question={question} onLock={(value) => update(lockIn(game, value))} />
+      {phase === "results" ? (
+        <Results scored={scored} onAgain={again} />
       ) : (
-        <Reveal key={question.id} scored={scored[game.at]} last={game.at === QUESTIONS_PER_GAME - 1} onNext={next} />
+        <>
+          <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id}>
+            <div className="prompt-top">
+              <span className="label cyan">
+                Question {game.at + 1} of {QUESTIONS_PER_GAME}
+              </span>
+              <Pips bands={scored.map((s) => s.band)} at={game.at} />
+            </div>
+            <h1>{question.question}</h1>
+            {question.definition && <p className="caption">{question.definition}</p>}
+          </section>
+          {phase === "question" ? (
+            <Ask key={question.id} question={question} onLock={(value) => update(lockIn(game, value))} />
+          ) : (
+            <Reveal key={question.id} scored={shown!} last={game.at === QUESTIONS_PER_GAME - 1} onNext={next} />
+          )}
+        </>
       )}
     </main>
   );
@@ -360,7 +365,7 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
   const bands = scored.map((s) => s.band);
   return (
     <>
-      <section className="panel results enter fathom-results" data-glass data-testid="fathom-results" aria-live="polite">
+      <section className="panel results enter fathom-results" data-glass data-testid="fathom-results">
         <p className="label cyan">Your total</p>
         <p className="score" data-testid="fathom-total" data-total={total} aria-label={`${total} out of ${MAX_TOTAL}`}>
           <span className="score-n">
