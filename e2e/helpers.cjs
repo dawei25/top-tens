@@ -101,6 +101,7 @@ async function giveUp(page) {
 
 module.exports = {
   chromium,
+  offlineFonts,
   VIEWPORTS,
   NOW,
   TODAY,

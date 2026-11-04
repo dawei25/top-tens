@@ -3,6 +3,7 @@
 // real players' numbers once the stats say 50+; a list rating goes to rate_list (and waits while offline); the menu's
 // account section (Sign in, Sign out) and Feedback, the sign-in sheet and privacy page; and a signed-in session
 // syncing its save (merge both ways), with the account panel, the comparison with players, and account deletion.
+// Notes ("add a note") have their own spec on the same build: note.e2e.cjs.
 // (Signing in itself ends at Google's or the email's door: the redirect and the email request are checked, not the
 // return trip. The merge and the session handling have unit tests in src/net.) This build has no Google client ID:
 // Google sign-in is Supabase's redirect, and Google's own script never loads. backend-google.e2e.cjs covers the build
@@ -182,9 +183,10 @@ test("the menu's account and Feedback, the sign-in sheet and privacy page (deskt
   await sheet.waitFor({ state: "detached" });
   assert.equal(await key.evaluate((el) => el === document.activeElement), true);
 
-  // The privacy page, from the footer.
+  // The privacy page, from the footer: notes have their own part (what's sent, who reads them).
   await page.getByTestId("privacy-link").click();
   await page.getByTestId("privacy").waitFor();
+  await page.getByTestId("privacy-notes").waitFor();
   assert.ok(await noHScroll(page));
   await page.getByTestId("nav-back").click();
 
@@ -308,10 +310,11 @@ test("a build without the env vars sends nothing anywhere and offers no sign-in"
   await page.getByTestId("give-up").click();
   await page.getByTestId("give-up").click();
   await page.locator('[data-testid="results"] [data-testid="par"][data-source="estimate"]').waitFor();
-  // A rating stays in the save.
+  // A rating stays in the save. No note option: nowhere to send one.
   await page.getByTestId("rate-down").click();
   await page.locator('[data-testid="rate-reason"][data-reason="boring"]').click();
   assert.equal(await page.getByTestId("rate").getAttribute("data-reason"), "boring");
+  assert.equal(await page.getByTestId("note").count(), 0);
   await page.goto(url);
   await page.getByTestId("stats-key").waitFor();
   assert.equal(await page.getByTestId("privacy-link").count(), 0);

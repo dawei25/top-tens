@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { load } from "../../game/storage";
-import { rateList, useSaveVersion } from "../../net";
+import { backendOn, rateList, useSaveVersion } from "../../net";
 import { RATING_REASONS, ratingOf, type RatingMode, type RatingReason } from "../../net/ratings";
 import { pixels } from "../pixel";
+import { AddNote } from "./AddNote";
 import "./rate.css";
 
 /** The reasons a thumbs down can give, as the picker says them. */
@@ -48,6 +49,8 @@ function Thumb({ down }: { down?: boolean }) {
  *
  * After a thumbs down, the reasons float over the card (nothing moves, DESIGN 5a): one tap picks one (again: none),
  * and the row names it; "why?" brings them back. Escape, a press elsewhere or "skip" closes them.
+ *
+ * Under the row, in a build with a backend: "add a note" (./AddNote), a few words on the list, before or after rating.
  */
 export function RateList({ listId, mode }: { listId: string; mode: RatingMode }) {
   const version = useSaveVersion();
@@ -128,80 +131,84 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
 
   const rating = mine?.rating ?? 0;
   return (
-    <div
-      ref={wrap}
-      className="rate"
-      role="group"
-      aria-labelledby={`rate-q-${mode}`}
-      data-testid="rate"
-      data-rating={rating}
-      data-reason={mine?.reason}
-      // Tabbing out of the open reasons closes them.
-      onBlur={(e) => {
-        const to = e.relatedTarget as Node | null;
-        if (asking && to && !e.currentTarget.contains(to)) setAsking(false);
-      }}
-    >
-      <span className="label rate-q" id={`rate-q-${mode}`}>
-        Good list?
-      </span>
-      <button type="button" className="key rate-key up" data-testid="rate-up" aria-label="good list" aria-pressed={rating === 1} onClick={up}>
-        <Thumb />
-      </button>
-      <button
-        ref={downKey}
-        type="button"
-        className="key rate-key down"
-        data-testid="rate-down"
-        aria-label="not a good list"
-        aria-pressed={rating === -1}
-        aria-expanded={asking}
-        aria-controls={`rate-reasons-${mode}`}
-        onClick={down}
+    <>
+      <div
+        ref={wrap}
+        className="rate"
+        role="group"
+        aria-labelledby={`rate-q-${mode}`}
+        data-testid="rate"
+        data-rating={rating}
+        data-reason={mine?.reason}
+        // Tabbing out of the open reasons closes them.
+        onBlur={(e) => {
+          const to = e.relatedTarget as Node | null;
+          if (asking && to && !e.currentTarget.contains(to)) setAsking(false);
+        }}
       >
-        <Thumb down />
-      </button>
-      {/* Always laid out, so the keys never shift: the picked reason, or "why?" to give one, after a thumbs down. */}
-      <span className="rate-note">
-        {rating === -1 && !asking && (
-          <button
-            type="button"
-            className="text-btn rate-why"
-            data-testid="rate-why"
-            onClick={() => {
-              focusReasons.current = true;
-              setAsking(true);
-            }}
-          >
-            {mine?.reason ? PICKED[mine.reason] : "why?"}
-          </button>
-        )}
-      </span>
-      {asking && (
-        <div ref={pop} className="rate-reasons" id={`rate-reasons-${mode}`} role="group" aria-label="Why not?" data-testid="rate-reasons">
-          <div className="rate-reasons-head">
-            <span className="label">Why not?</span>
-            <button type="button" className="text-btn" data-testid="rate-skip" onClick={() => close(true)}>
-              skip
+        <span className="label rate-q" id={`rate-q-${mode}`}>
+          Good list?
+        </span>
+        <button type="button" className="key rate-key up" data-testid="rate-up" aria-label="good list" aria-pressed={rating === 1} onClick={up}>
+          <Thumb />
+        </button>
+        <button
+          ref={downKey}
+          type="button"
+          className="key rate-key down"
+          data-testid="rate-down"
+          aria-label="not a good list"
+          aria-pressed={rating === -1}
+          aria-expanded={asking}
+          aria-controls={`rate-reasons-${mode}`}
+          onClick={down}
+        >
+          <Thumb down />
+        </button>
+        {/* Always laid out, so the keys never shift: the picked reason, or "why?" to give one, after a thumbs down. */}
+        <span className="rate-note">
+          {rating === -1 && !asking && (
+            <button
+              type="button"
+              className="text-btn rate-why"
+              data-testid="rate-why"
+              onClick={() => {
+                focusReasons.current = true;
+                setAsking(true);
+              }}
+            >
+              {mine?.reason ? PICKED[mine.reason] : "why?"}
             </button>
-          </div>
-          <div className="rate-reason-list">
-            {RATING_REASONS.map((r) => (
-              <button
-                key={r}
-                type="button"
-                className="rate-reason"
-                data-testid="rate-reason"
-                data-reason={r}
-                aria-pressed={mine?.reason === r}
-                onClick={() => pick(r)}
-              >
-                {REASONS[r]}
+          )}
+        </span>
+        {asking && (
+          <div ref={pop} className="rate-reasons" id={`rate-reasons-${mode}`} role="group" aria-label="Why not?" data-testid="rate-reasons">
+            <div className="rate-reasons-head">
+              <span className="label">Why not?</span>
+              <button type="button" className="text-btn" data-testid="rate-skip" onClick={() => close(true)}>
+                skip
               </button>
-            ))}
+            </div>
+            <div className="rate-reason-list">
+              {RATING_REASONS.map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  className="rate-reason"
+                  data-testid="rate-reason"
+                  data-reason={r}
+                  aria-pressed={mine?.reason === r}
+                  onClick={() => pick(r)}
+                >
+                  {REASONS[r]}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+      {/* Only with somewhere to send it; keyed, so another list or mode starts from its own note. */}
+      {backendOn && <AddNote key={`${mode}:${listId}`} listId={listId} mode={mode} rating={rating === 0 ? null : rating} />}
+    </>
   );
 }

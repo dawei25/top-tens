@@ -4,6 +4,7 @@ import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import { accountsOn, BACKEND } from "./config";
 import { parseAverages, parseStats, type CrowdStats, type ListAverages } from "./crowd";
+import { FEEDBACK, feedbackArgs, type Feedback } from "./feedback";
 import { localOutboxStore, Outbox, retryDelay, type SendResult } from "./outbox";
 import { blitzPlay, clientId, listPlay, rpcArgs, type Play } from "./plays";
 import { RATINGS, rateArgs, ratingKey, type Rating } from "./ratings";
@@ -12,9 +13,9 @@ import { syncSave, type SaveRemote } from "./sync/engine";
 import { mergeSaves, type SyncSave } from "./sync/merge";
 
 /**
- * Everything that talks to the backend: score stats, sign-in and save sync. Loaded with a dynamic import, and only in
- * builds with a backend (see ./index.ts), so players of a build without one never download it or Supabase's client.
- * Nothing here may break the game: every call catches its own failures.
+ * Everything that talks to the backend: score stats, ratings, notes, sign-in and save sync. Loaded with a dynamic
+ * import, and only in builds with a backend (see ./index.ts), so players of a build without one never download it or
+ * Supabase's client. Nothing here may break the game: every call catches its own failures.
  */
 
 let client: SupabaseClient | null = null;
@@ -118,6 +119,39 @@ export function rateList(r: Rating): void {
   if (getAccount().status === "in") syncSoon(1500);
 }
 
+// ---------- Notes ----------
+
+/**
+ * Notes waiting to be sent, every one, oldest first, retried like plays. The facade (./index.ts) queues them in this
+ * store before this code has even loaded; this only sends.
+ */
+const feedbackBox = new Outbox<Feedback>(
+  localOutboxStore<Feedback>(globalThis.localStorage, KEYS.feedbackOutbox),
+  async (f) => {
+    const { error, status } = await sb().rpc("submit_feedback", feedbackArgs(f, clientId()));
+    return sendResult(status, error);
+  },
+  Date.now,
+  FEEDBACK,
+);
+
+let feedbackRetries = 0;
+let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Send the notes waiting, with the same backoff as plays. */
+export async function flushFeedback(): Promise<void> {
+  clearTimeout(feedbackTimer);
+  try {
+    if ((await feedbackBox.flush()) === "retry") {
+      feedbackRetries++;
+      clearTimeout(feedbackTimer);
+      feedbackTimer = setTimeout(() => void flushFeedback(), retryDelay(feedbackRetries));
+    } else feedbackRetries = 0;
+  } catch {
+    // Never let notes get in the way.
+  }
+}
+
 // ---------- Stats ----------
 
 const STATS_TTL = 5 * 60_000;
@@ -219,6 +253,7 @@ export async function start(): Promise<void> {
   started = true;
   void flushPlays();
   void flushRatings();
+  void flushFeedback();
   if (!accountsOn) return;
   try {
     const hadVerifier = verifierWaiting();

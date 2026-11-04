@@ -1,13 +1,14 @@
-# Backend: score stats, list ratings and accounts
+# Backend: score stats, list ratings, notes and accounts
 
 TENtacle stays a static site. A backend is optional and off until you set two env vars; without them the game sends
 nothing, stores nothing beyond the browser, and never downloads the backend code (`e2e/backend.e2e.cjs` checks it).
 
 ## How it fits together
 
-- **Supabase** (Postgres + Auth, free plan) holds three tables: `plays` (one row per finished game, anonymous),
-  `ratings` (a thumbs up or down per player, list and mode, anonymous) and `saves` (one row per signed-in player:
-  their save). Schema and functions: `supabase/migrations/`.
+- **Supabase** (Postgres + Auth, free plan) holds four tables: `plays` (one row per finished game, anonymous),
+  `ratings` (a thumbs up or down per player, list and mode, anonymous), `feedback` (notes on lists, free text, read
+  only with a private key) and `saves` (one row per signed-in player: their save), plus `owners` (the owner's account,
+  so his notes come first). Schema and functions: `supabase/migrations/`.
 - **The client** is `src/net/`. The screens only touch a tiny facade (`src/net/index.ts`); the real work and
   `@supabase/supabase-js` (pinned) live in `src/net/service.ts`, loaded with a dynamic `import()` only in a build with
   the env vars, and only when there's work: a finished game, a stats view, a stored session, a sign-in.
@@ -28,6 +29,15 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   `rate_list`, retried like plays. The table keeps one row per browser, list and mode (the latest replaces the
   earlier one; 0 deletes it), linked to the account while signed in, and then one per player across devices.
   `list_ratings` gives the totals per list and mode, for the improvement loop (see Running it).
+- **Notes.** Under "Good list?", in a build with a backend only, "add a note" opens a box in place: up to 500
+  characters, sent with SEND (or Ctrl/Cmd+Enter) together with the player's rating of the list at that moment, then
+  "sent. thanks." in the key's place. Without a backend the key isn't there at all (nowhere to send a note). A note is
+  queued at once in its own outbox (`top-tens:feedback-outbox`, every note waits, oldest first) by the always-loaded
+  facade, so it survives the backend code failing to download offline, then goes to `submit_feedback`, retried like
+  plays. Notes never go in the save and don't sync. The table is append-only (a player may send several), linked to
+  the account while signed in, and nothing in it is readable with the public key: `list_feedback` answers only to the
+  reader key, whose SHA-256 (never the key) sits in a schema the Data API doesn't expose (`private.reader_keys`). The
+  owner's own notes come first (`owners`). See Switch it on (2.5) and Running it.
 - **Accounts.** Sign-in methods come from `VITE_SIGN_IN`: Google, an email and password (`password`: nothing is
   emailed), or a link by email (`email`, PKCE; the email also carries a code for another device). Google, with
   `VITE_GOOGLE_CLIENT_ID` set, is Google's own button (Google Identity Services, `src/net/google.ts`): its script
@@ -43,12 +53,13 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   set aside for their account if someone else signs in. "Reset all progress" while signed in resets the account too.
 - **Account deletion** is `api/delete-account.ts`, a Vercel function: deleting a sign-in needs the secret key, which
   must stay on a server. It asks Supabase Auth whether the caller's access token is valid, then deletes that user's
-  ratings, plays, save and sign-in (Auth's Admin API, the supported way to remove a user). A project without the
-  ratings table yet is fine (there's nothing to delete); any other failure stops before the sign-in goes.
+  notes, ratings, plays, save and sign-in (Auth's Admin API, the supported way to remove a user). A project without the
+  ratings or feedback table yet is fine (there's nothing to delete); any other failure stops before the sign-in goes.
 
 What's personal: only with an account, the email (plus name and picture with Google; a password only as Supabase's
-hash) and the save. `plays` and `ratings` hold a random per-browser id, never an IP address. With Google's button,
-opening the sign-in sheet loads it from Google. The in-game `#privacy` page says this.
+hash) and the save. `plays`, `ratings` and `feedback` hold a random per-browser id, never an IP address. A note is
+whatever the player typed, so only the owner reads notes, and the privacy page asks players to leave personal details
+out. With Google's button, opening the sign-in sheet loads it from Google. The in-game `#privacy` page says this.
 
 ## Switch it on
 
@@ -66,8 +77,36 @@ opening the sign-in sheet loads it from Google. The in-game `#privacy` page says
       `list_ratings`, and the grant account deletion needs; run once). Run it before deploying the game that rates:
       until it has run, `rate_list` answers 404 and the game drops those ratings (they stay in the players' saves;
       nothing breaks).
+   5. `supabase/migrations/20261104120000_feedback.sql` (notes: the `feedback` and `owners` tables, the `private`
+      schema with `reader_keys`, `submit_feedback`, `list_feedback`, `set_feedback_reader`, and the grant account
+      deletion needs; run once). Run it before deploying the game with "add a note": until it has run,
+      `submit_feedback` answers 404 and the game drops those notes. Then, once, in the SQL Editor:
+      - **Make yourself the owner**, so your notes come first. Sign in to the game once (so your account exists),
+        then run, with your account's address in place of the placeholder:
 
-   Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push`. Stats alone only need the first.
+        ```sql
+        insert into public.owners (user_id) select id from auth.users where email = '<your email>';
+        ```
+
+        Check it took: `select count(*) from public.owners;` says 1 (0 means no account has that address yet). Notes
+        count as yours when you send them signed in. To add someone else later, the same line with their address;
+        `delete from public.owners where user_id = ...` removes one.
+      - **Set the reader key**, the secret the improvement loop reads notes with. Make a long random one on your
+        machine (`openssl rand -hex 32`: hex is safe in JSON and in a shell), keep it in your password manager, and
+        run:
+
+        ```sql
+        select set_feedback_reader('<a long random string>');
+        ```
+
+        Only its SHA-256 is stored, so it can't be read back: lose it and you set a new one the same way (the old one
+        stops working). It takes 24 characters or more. Only the SQL Editor (or the secret key) can set it; the
+        public key can't. Don't save that query as a snippet (it holds the key). Give the loop the same key as the
+        environment secret `FEEDBACK_READER_KEY` (Running it). Never commit it, never give it a `VITE_` prefix: the
+        game itself never reads notes.
+
+   Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the two one-time steps above
+   still go in the SQL Editor). Stats alone only need the first.
 3. **Sign-in URLs**: Authentication > URL Configuration. Site URL: `https://<your-domain>`. Redirect URLs:
    `https://<your-domain>/**`, and for local testing `http://localhost:5100/**`. Vercel previews need their own
    pattern, for example `https://*-<your-team>.vercel.app/**`.
@@ -102,9 +141,11 @@ opening the sign-in sheet loads it from Google. The in-game `#privacy` page says
    - `email` (a link): Authentication > Emails > Templates > Magic Link: add `<p>Or type this code in the game:
      {{ .Token }}</p>`. Custom SMTP (Authentication > Emails > SMTP Settings) is **needed for real players**: the
      built-in sender only delivers to your team's addresses, a couple an hour.
-5. **Data API**: nothing to expose by hand. The game calls five functions (`submit_play`, `list_stats`,
-   `list_averages`, `rate_list`, `list_ratings`) and reads and writes only its own `saves` row; the migrations grant
-   exactly that (`ratings`, like `plays`, has no grants for players at all).
+5. **Data API**: nothing to expose by hand. The game calls six functions (`submit_play`, `list_stats`,
+   `list_averages`, `rate_list`, `list_ratings`, `submit_feedback`) and reads and writes only its own `saves` row; the
+   migrations grant exactly that (`ratings`, `feedback` and `owners`, like `plays`, have no grants for players at all,
+   and the `private` schema isn't in the API's exposed schemas: leave it out). `list_feedback` is for the loop and
+   refuses anyone without the reader key.
 6. **Env vars in Vercel** (Project > Settings > Environment Variables, Production and Preview):
    - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` = the publishable key (`VITE_SUPABASE_PUBLISHABLE_KEY` works
      too). **Public**: built into the JavaScript, which is what they're for; RLS and the functions decide what anyone
@@ -133,6 +174,9 @@ opening the sign-in sheet loads it from Google. The in-game `#privacy` page says
      nonce in id_token should either both exist or not" means a stale build or a changed nonce setting.
    - Rate a list on its results: the network tab shows `rpc/rate_list` answering `true`, and
      `select * from list_ratings();` has a row for it.
+   - Signed in, add a note on a list's results: the network tab shows `rpc/submit_feedback` answering `true`, and
+     `select * from list_feedback('<your reader key>');` lists it first, `from_owner` true. With the public key and a
+     wrong key, the curl in Running it answers 401 or 403 (`wrong reader key`), never notes.
    - Stats > Account > delete account: the `saves` row and the user (Authentication > Users) are gone.
    - A build without the env vars (`npx vite --port 5100`, no `.env.local`) makes no requests to Supabase and shows no
      Sign in key.
@@ -180,11 +224,29 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   ```
 
   In the SQL Editor: `select * from list_ratings() order by down - up desc;`.
+- **Notes for the improvement loop**: `list_feedback(p_reader text, p_since timestamptz default null)` returns every
+  note: `list_id`, `mode`, `rating` (the player's rating of the list when they wrote it: 1, -1 or null), `text`,
+  `from_owner` and `created_at`, the owner's notes first, then the newest first; no ids. `p_since` keeps only notes
+  written since then. It needs the reader key (2.5): without it, or with a wrong one, it raises (`wrong reader key`)
+  and returns nothing, so the public key alone can't read a single note. The loop keeps the key in the environment
+  secret `FEEDBACK_READER_KEY` and calls it with the public key:
+
+  ```bash
+  curl -s "$VITE_SUPABASE_URL/rest/v1/rpc/list_feedback" -H "apikey: $VITE_SUPABASE_ANON_KEY" \
+    -H "content-type: application/json" \
+    -d "{\"p_reader\": \"$FEEDBACK_READER_KEY\", \"p_since\": \"2026-11-01T00:00:00Z\"}"
+  ```
+
+  In the SQL Editor: `select * from list_feedback('<your reader key>');`. A new key (`set_feedback_reader` again)
+  replaces the old one at once; update `FEEDBACK_READER_KEY` with it.
 - **Abuse**: anyone can call `submit_play` with the public key. It checks shapes and ranges, counts each player once
   per list, and ignores a browser past 120 games an hour, but a determined script with fresh ids can still skew a
   quiet list. If that happens, find the ids (`select client_id, count(*) from plays group by 1 order by 2 desc`) and
   delete their rows. `rate_list` is the same: shapes checked, one rating per browser (and per account) per list and
-  mode, a browser past 120 rated lists an hour ignored; clean up the same way in `ratings`.
+  mode, a browser past 120 rated lists an hour ignored; clean up the same way in `ratings`. `submit_feedback` checks
+  the shape (1 to 500 characters after trimming), keeps an exact repeat from the same browser once, and ignores a
+  browser past 20 notes an hour; spam is cleaned up the same way in `feedback`. Notes are never shown to players, so
+  junk only costs the loop a read.
 - **Local development**: `.env.local` with the URL and publishable key, `npx vite --port 5100`, and that URL in
   Supabase's Redirect URLs. `/api/delete-account` only runs on Vercel (`npx vercel dev` locally). Google's button
   needs the local origin (`http://localhost:5100`) among the client's Authorized JavaScript origins.
@@ -193,9 +255,12 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   window), and CSP `script-src https://accounts.google.com/gsi/client`, `frame-src` and `connect-src
   https://accounts.google.com/gsi/`, `style-src https://accounts.google.com/gsi/style`.
 - **Tests**: `npm test` covers the client (`src/net/*.test.ts`), the merge and the database functions
-  (`supabase/migrations.test.ts`, in PGlite, with and without new tables exposed, ratings included). `npm run e2e`
-  runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating on the results), plus `e2e/backend.e2e.cjs`,
-  which builds a copy with fake env vars (`e2e/backend-env.cjs`, every sign-in method on) and mocks Supabase
-  (`rate_list` included), and `e2e/backend-google.e2e.cjs`, a copy with a Google client ID against a fake Google
+  (`supabase/migrations.test.ts`, in PGlite, with and without new tables exposed, ratings and notes included: no
+  player reads a note, a wrong reader key raises, the owner's notes come first, the rate limit, deletion). `npm run
+  e2e` runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating on the results, and no note option), plus
+  `e2e/backend.e2e.cjs`, which builds a copy with fake env vars (`e2e/backend-env.cjs`, every sign-in method on) and
+  mocks Supabase (`rate_list` and `submit_feedback` included), `e2e/note.e2e.cjs` on the same copy ("add a note": the
+  exact arguments sent, offline waiting, Escape and Enter, the phone keyboard; `e2e/states.e2e.cjs` walks it too),
+  and `e2e/backend-google.e2e.cjs`, a copy with a Google client ID against a fake Google
   script (`google.accounts.id`): the token and nonce reaching Supabase, a closed or blocked popup, a refused token, a
   script that can't load. The live popup itself can only be tried on the real site.

@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 
 /**
- * POST /api/delete-account, a Vercel function. Deletes the signed-in player's account: their save, the games and
- * list ratings linked to it, then the sign-in itself. Deleting a sign-in needs Supabase's service role key, which
+ * POST /api/delete-account, a Vercel function. Deletes the signed-in player's account: their save, the games, list
+ * ratings and notes linked to it, then the sign-in itself. Deleting a sign-in needs Supabase's service role key, which
  * must never reach the browser, so it happens here. The caller proves who they are with their session's access token,
  * which Supabase checks; nobody can delete anyone but themselves.
  *
@@ -44,6 +44,8 @@ export async function handleDelete(request: Request, admin: AccountAdmin | null)
 
 /** PostgREST's "no such table" (PGRST205: not in its schema cache; 42P01: Postgres itself). */
 const MISSING_TABLE = new Set(["PGRST205", "42P01"]);
+/** Tables a project may not have yet (their migrations came later): nothing to delete there. */
+const LATER_TABLES = new Set(["feedback", "ratings"]);
 
 export function supabaseAdmin(env: Record<string, string | undefined> = process.env): AccountAdmin | null {
   const url = env.SUPABASE_URL || env.VITE_SUPABASE_URL;
@@ -57,10 +59,10 @@ export function supabaseAdmin(env: Record<string, string | undefined> = process.
     },
     async remove(userId) {
       // The foreign keys would cascade too; deleting first keeps it explicit and survives a missing cascade.
-      for (const table of ["ratings", "plays", "saves"]) {
+      for (const table of ["feedback", "ratings", "plays", "saves"]) {
         const { error } = await sb.from(table).delete().eq("user_id", userId);
-        // A project that hasn't run the ratings migration yet has no ratings to delete.
-        if (error && !(table === "ratings" && MISSING_TABLE.has(error.code))) throw new Error(`${table}: ${error.message}`);
+        // A project that hasn't run the ratings or notes migration yet has none of those to delete.
+        if (error && !(LATER_TABLES.has(table) && MISSING_TABLE.has(error.code))) throw new Error(`${table}: ${error.message}`);
       }
       const { error } = await sb.auth.admin.deleteUser(userId);
       if (error) throw new Error(`auth: ${error.message}`);

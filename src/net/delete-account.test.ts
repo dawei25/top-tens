@@ -60,6 +60,7 @@ describe("POST /api/delete-account", () => {
       // The secret key goes as the apikey; the player's token is what identifies them.
       expect(sent[0]).toEqual({ method: "GET", path: "/auth/v1/user", apikey: "sb_secret_abc", auth: "Bearer player-jwt" });
       expect(sent.slice(1).map((s) => [s.method, s.path, s.apikey])).toEqual([
+        ["DELETE", `/rest/v1/feedback?user_id=eq.${U}`, "sb_secret_abc"],
         ["DELETE", `/rest/v1/ratings?user_id=eq.${U}`, "sb_secret_abc"],
         ["DELETE", `/rest/v1/plays?user_id=eq.${U}`, "sb_secret_abc"],
         ["DELETE", `/rest/v1/saves?user_id=eq.${U}`, "sb_secret_abc"],
@@ -72,26 +73,37 @@ describe("POST /api/delete-account", () => {
     }
   });
 
-  it("deletes the rest on a project without the ratings table yet, and stops on any other failure", async () => {
+  it("deletes the rest on a project without the ratings or notes table yet, and stops on any other failure", async () => {
     const sent: string[] = [];
-    let ratings: { status: number; code: string } = { status: 404, code: "PGRST205" };
+    const missing = { status: 404, code: "PGRST205" };
+    const refused: Record<string, { status: number; code: string }> = { "/rest/v1/feedback": missing, "/rest/v1/ratings": missing };
     vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = new URL(input instanceof Request ? input.url : String(input));
       sent.push(`${init?.method ?? "GET"} ${url.pathname}`);
-      if (url.pathname === "/rest/v1/ratings") {
-        return new Response(JSON.stringify({ code: ratings.code, message: "nope" }), { status: ratings.status, headers: { "content-type": "application/json" } });
-      }
+      const no = refused[url.pathname];
+      if (no) return new Response(JSON.stringify({ code: no.code, message: "nope" }), { status: no.status, headers: { "content-type": "application/json" } });
       return new Response(url.pathname.startsWith("/auth/") ? "{}" : null, { status: url.pathname.startsWith("/auth/") ? 200 : 204, headers: { "content-type": "application/json" } });
     });
     try {
       const a = supabaseAdmin({ VITE_SUPABASE_URL: "https://x.supabase.co", SUPABASE_SECRET_KEY: "sb_secret_abc" })!;
       await a.remove(U);
-      expect(sent).toEqual(["DELETE /rest/v1/ratings", "DELETE /rest/v1/plays", "DELETE /rest/v1/saves", `DELETE /auth/v1/admin/users/${U}`]);
+      const all = ["DELETE /rest/v1/feedback", "DELETE /rest/v1/ratings", "DELETE /rest/v1/plays", "DELETE /rest/v1/saves", `DELETE /auth/v1/admin/users/${U}`];
+      expect(sent).toEqual(all);
+      // Ratings there, notes not yet (the order the migrations came in): the same.
+      sent.length = 0;
+      delete refused["/rest/v1/ratings"];
+      await a.remove(U);
+      expect(sent).toEqual(all);
       // Not allowed to (the migration's grant is missing): the sign-in stays, so the player can try again later.
       sent.length = 0;
-      ratings = { status: 403, code: "42501" };
+      refused["/rest/v1/ratings"] = { status: 403, code: "42501" };
+      delete refused["/rest/v1/feedback"];
       await expect(a.remove(U)).rejects.toThrow(/ratings/);
-      expect(sent).toEqual(["DELETE /rest/v1/ratings"]);
+      expect(sent).toEqual(["DELETE /rest/v1/feedback", "DELETE /rest/v1/ratings"]);
+      sent.length = 0;
+      refused["/rest/v1/feedback"] = { status: 403, code: "42501" };
+      await expect(a.remove(U)).rejects.toThrow(/feedback/);
+      expect(sent).toEqual(["DELETE /rest/v1/feedback"]);
     } finally {
       vi.unstubAllGlobals();
     }

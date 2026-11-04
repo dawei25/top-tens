@@ -1,6 +1,7 @@
 // "Good list?" on the results (no backend): a thumbs up or down per list and mode, kept in the save, shown as chosen
 // again later (a reload, the run in Past runs), and the reasons after a thumbs down floating over the card so nothing
-// moves. Sending ratings to the backend is checked in backend.e2e.cjs.
+// moves. Sending ratings to the backend is checked in backend.e2e.cjs. This build has no backend, so no "add a note"
+// under the row (note.e2e.cjs checks it with one).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, go, puzzle, guess, giveUp, store, noHScroll } = require("./helpers.cjs");
@@ -38,6 +39,8 @@ for (const vp of [phone, desktop]) {
     await page.clock.runFor(3000);
     assert.deepEqual(await rating(page), { rating: "0", reason: null });
     assert.deepEqual(await pressed(page), ["false", "false"]);
+    // No backend, nowhere to send a note: no "add a note" (note.e2e.cjs has it with a backend).
+    assert.equal(await page.getByTestId("note").count(), 0);
 
     // One tap: rated and marked.
     await page.getByTestId("rate-up").click();
@@ -111,6 +114,7 @@ test("a Blitz round is rated on its own, and Past runs show both ratings (deskto
   await page.getByTestId("blitz-results").waitFor();
   await page.getByTestId("rate-up").click();
   assert.deepEqual(await rating(page), { rating: "1", reason: null });
+  assert.equal(await page.getByTestId("note").count(), 0);
 
   // The list game on the same list: its own rating.
   await go(page, "#p-airports");
@@ -133,6 +137,7 @@ test("a Blitz round is rated on its own, and Past runs show both ratings (deskto
   await page.locator('[data-testid="history-row"][data-kind="blitz"]').first().click();
   await page.getByTestId("run-view").waitFor();
   assert.deepEqual(await rating(page), { rating: "1", reason: null });
+  assert.equal(await page.getByTestId("note").count(), 0);
   // Changed from the run: the round's results say the same.
   await page.getByTestId("rate-down").click();
   await page.getByTestId("rate-skip").click();

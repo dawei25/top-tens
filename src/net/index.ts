@@ -4,6 +4,8 @@ import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import { accountsOn, backendOn } from "./config";
 import type { CrowdStats, ListAverages } from "./crowd";
+import { cleanNote, FEEDBACK, type Feedback } from "./feedback";
+import { enqueue, localOutboxStore } from "./outbox";
 import { invalidRating, ratingKey, withRating, type Rating, type RatingMode, type RatingReason } from "./ratings";
 import type { SyncSave } from "./sync/merge";
 import {
@@ -66,7 +68,7 @@ let throttleUntil = 0;
  */
 export function startNet(): void {
   if (!backendOn) return;
-  const pending = [KEYS.outbox, KEYS.ratingOutbox].some((k) => /"pending":\[\{/.test(stored(k) ?? ""));
+  const pending = [KEYS.outbox, KEYS.ratingOutbox, KEYS.feedbackOutbox].some((k) => /"pending":\[\{/.test(stored(k) ?? ""));
   const session = accountsOn && (!!stored(KEYS.auth) || authCallback());
   // A stored session names its player, so Home can show them at once; the backend code confirms it a moment later.
   let user: AccountUser | undefined;
@@ -90,6 +92,7 @@ export function startNet(): void {
     withService((s) => {
       void s.flushPlays();
       void s.flushRatings();
+      void s.flushFeedback();
     }),
   );
   // Coming back to the tab: catch up with other devices (at most every 30 s).
@@ -137,6 +140,33 @@ export function rateList(listId: string, mode: RatingMode, rating: -1 | 0 | 1, r
     s.start();
     s.rateList(r);
   });
+}
+
+let lastNoteAt = 0;
+
+/**
+ * "add a note": a few words on a list in a mode, with the player's rating of it now (1, -1 or null). Only with a
+ * backend: without one the note option isn't shown, and this sends and stores nothing. Queued in its own outbox at
+ * once, before the backend code loads (so a note survives that download failing offline, or a reload), then sent and
+ * retried while offline. Never kept in the save, never synced. False when there's nothing to send: no backend, or a
+ * note that's blank or too long.
+ */
+export function submitFeedback(listId: string, mode: RatingMode, text: string, rating: -1 | 1 | null): boolean {
+  if (!backendOn) return false;
+  // Each note its own name in the outbox, even two within one millisecond.
+  const at = (lastNoteAt = Math.max(Date.now(), lastNoteAt + 1));
+  const note: Feedback = { listId, mode, rating, text: cleanNote(text), at };
+  try {
+    if (!enqueue(localOutboxStore<Feedback>(globalThis.localStorage, KEYS.feedbackOutbox), FEEDBACK, note, at)) return false;
+  } catch {
+    // No storage at all (blocked): nothing can wait to be sent, as for plays and ratings.
+    return false;
+  }
+  withService((s) => {
+    s.start();
+    void s.flushFeedback();
+  });
+  return true;
 }
 
 /**
