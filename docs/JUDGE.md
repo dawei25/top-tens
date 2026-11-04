@@ -44,7 +44,8 @@ sports statistician.
    On a list of places, every fact says where the place is: its country, or its state or province on a one-country
    list (the owner, on national parks), the planet a moon orbits; and it is the right place, as the source table
    gives it. validate.ts only checks that a place is named.
-7. **Score and decide** (below), then write the verdict file.
+7. **Score and decide** (below), then write the verdict file. Keep an `ownerVeto` already in the file: it is the owner's call
+   and outranks the decision (the list never runs as Today's list).
 
 ## Scores (1 to 5)
 

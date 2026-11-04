@@ -8,6 +8,14 @@ import type { Puzzle } from "./types";
 
 const dir = join(import.meta.dirname, "../../public/puzzles");
 const read = <T,>(f: string): T => JSON.parse(readFileSync(join(dir, f), "utf8"));
+/** A list's judge verdict (scripts/judge/verdicts), if it has one. */
+const verdict = (id: string): { ownerVeto?: string } | undefined => {
+  try {
+    return JSON.parse(readFileSync(join(import.meta.dirname, "../../scripts/judge/verdicts", `${id}.json`), "utf8"));
+  } catch {
+    return undefined;
+  }
+};
 const lex = read<Lexicon>("lexicon.json");
 const judge = (id: string, guess: string) => judgeGuess(guess, read<Puzzle>(`${id}.json`), new Set(), lex);
 
@@ -142,6 +150,19 @@ describe("the daily schedule", () => {
   });
   it("gives every day its own Blitz", () => {
     for (const d of days) expect(d.blitz, d.date).toBeTruthy();
+  });
+  // Nov 3-5 ran three Geography lists in a row (populations, parks, lakes); the owner swapped Nov 5 out.
+  it("never runs Today's list from one category three days running, from Nov 3", () => {
+    const category = new Map(read<{ id: string; category: string }[]>("index.json").map((x) => [x.id, x.category]));
+    const recent = days.filter((d) => d.date >= "2026-11-03");
+    for (let i = 2; i < recent.length; i++) {
+      const [a, b, c] = recent.slice(i - 2, i + 1).map((d) => category.get(d.id));
+      expect(a === b && b === c, `${recent[i - 2].date} to ${recent[i].date}: three ${c} lists`).toBe(false);
+    }
+  });
+  it("never schedules a list the owner vetoed as a daily", () => {
+    const vetoed = days.filter((d) => d.date >= "2026-11-05" && verdict(d.id)?.ownerVeto).map((d) => `${d.date} ${d.id}`);
+    expect(vetoed).toEqual([]);
   });
 });
 

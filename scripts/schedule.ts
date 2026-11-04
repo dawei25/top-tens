@@ -33,6 +33,8 @@ export interface Verdict {
   judgedAt?: string;
   /** "builder": written by the data agent that built the list, pending a real judge. Never scheduled. */
   by?: "builder";
+  /** The owner's call that this list never runs as Today's list, with why. A re-judge keeps it. */
+  ownerVeto?: string;
 }
 
 const VERDICTS = join(import.meta.dirname, "judge", "verdicts");
@@ -51,7 +53,7 @@ export function readVerdicts(): Map<string, Verdict> {
 
 /** When the 5-to-6 average bar started (docs/JUDGE.md); older daily verdicts were judged against an easier one. */
 const DAILY_BAR = "2026-11-02";
-const listOk = (v?: Verdict) => v?.decision === "daily-list" && (v.judgedAt ?? "") >= DAILY_BAR;
+const listOk = (v?: Verdict) => v?.decision === "daily-list" && (v.judgedAt ?? "") >= DAILY_BAR && !v.ownerVeto;
 const blitzReady = (id: string) => JSON.parse(readFileSync(join(DIR, `${id}.json`), "utf8")).blitz === true;
 /**
  * Today's Blitz bar (docs/JUDGE.md): breadth, not the top 10. A deep pool a casual player keeps scoring in, broad

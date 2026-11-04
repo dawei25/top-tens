@@ -4,6 +4,7 @@
   "decision": "daily-list",
   "alsoBlitz": true,
   "priority": 7,
+  "ownerVeto": "not a daily: the owner found it a weak list, and it had run in free play (2026-11-05). Free play and Blitz only.",
   "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
   "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
   "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
