@@ -41,16 +41,23 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
    verdict file and name scratch files after their list.
 3. **Data agent** (its own worktree from main): apply the cycle's verdict `fixes` (junk aliases, missing short forms,
    demonyms, parse bugs, stale figures), and build new topics that passed the topic gate (title names the answer
-   type, broad answer set, a casual player finds 4+ before looking). Rebuild only the affected lists, then
+   type, broad answer set, a casual player finds 4+ before looking), each with `debut: true` (step 5). Rebuild only the affected lists, then
    `validate.ts` and `scripts/judge/par.ts`. Its own verdict on a new list carries `"by": "builder"`: par uses it,
    the scheduler doesn't, until a real judge has looked.
 4. **Coordinator:** matcher findings in `src/game/match.ts` with unit tests; the leak audit (wrong guesses that get
    an answer offered); review the data branch; copy its `.cache/wiki` newer-wins (`cp -ru`, so a refreshed page
    replaces the stale one); merge; `npm run verify` on the merged main; push main (it deploys).
    Never rebuild today's or tomorrow's daily list.
-5. **Schedule:** schedule every newly approved daily right away (`scripts/schedule.ts <n> --write`, then
-   `--blitz --write` for any day missing a Blitz), as far as there are Blitz picks for its days. A scheduled day is
-   held out of random play until it has run, so a new list debuts as a daily and joins random play the day after.
+5. **Schedule. New lists debut as dailies** (owner, Nov 4): a new list runs first as Today's list (or Today's Blitz),
+   and joins random play the day after. Every new topic is built with `debut: true` (scripts/topics.ts, written into
+   its index.json entry): random lists and Random Blitz never offer it until its first day has run, a date before
+   today in daily.json, scheduled or not (`heldDebuts` in src/game/daily.ts). Schedule every newly approved daily
+   right away (`scripts/schedule.ts <n> --write`): Today's list takes debut lists before lists already in random
+   play, never the day before's category when another will do. Every day gets its Blitz (`--blitz --write` fills any
+   day missing one): a list that never ran first; when none is approved, a rerun of a list that already ran (in
+   random play), not in the day's list's category, not a Blitz in the last 30 days, not on a later day. A day never
+   waits for a Blitz pick. The scheduler names new lists still waiting for a judge, and any a judge sent to free
+   play only: drop their `debut` (they would wait for good; real.test.ts fails on one).
 6. **Log** one entry in `docs/IMPROVE_LOG.md`: lists judged and decisions, fixes shipped, the leak rate, topic
    ideas (built, queued or dropped), and any method change.
 7. **Fix the method, not just the list.** When the same kind of problem shows up on two or more lists (a demonym
@@ -111,6 +118,8 @@ stronger.
 | "Most-followed Facebook pages" was a worse Instagram list, not fun to play | near-duplicate lists (same answers, weaker version) | removed; topic gate in step 1: no weaker copy of a list the bank has; judge brief: compare with the bank's closest list |
 | Lakes ran Nov 5 as the third Geography daily in a row; the owner found it weak and it had run in free play | category runs in the schedule; dailies the owner wouldn't pick | real.test.ts: no category three days running from Nov 3; `ownerVeto` in a verdict keeps a list out of Today's list (schedule.ts), and judges keep it |
 | The Google client ID was pasted into Vercel with a trailing newline | env values with stray whitespace | `src/net/config.ts` trims every public env value and ignores a client ID that isn't one; index.test.ts, and the e2e Google build uses a client ID ending in "\n" |
+| Dailies came from lists already in free play; a new list joined random play the moment it was built (owner) | new lists played before their debut as a daily | `debut` in topics.ts, written to index.json (validate.ts: the flags agree); `heldDebuts` (daily.ts) holds them from random lists and Blitz until their first day has run, daily.test.ts; real.test.ts: every debut list is waiting or has run, none waits for good; schedule.ts runs debut lists first, schedule.test.ts |
+| Nov 23 and 24 had no Today's Blitz: no new list was approved for one | a day waiting for a new Blitz pick | `assignBlitz` reruns a list in random play (another category than the day's list, 30 days after its last Blitz, never a later day's list), schedule.test.ts; real.test.ts checks reruns follow those rules |
 | National parks facts didn't say which state each park is in (owner) | facts on a list of places that don't say where the place is | `placesIn` on every place list (validate.ts warns when a list's noun is places without it); validate.ts warns on a top-10 fact naming no country, state or province (gazetteer.ts `DIVISIONS`) or planet, and validate.test.ts runs it on every built place list; facts files record the source table's location as `where`; judge brief step 6 (the right place); build.test.ts: built facts are what a rebuild gives, so a hand-patched daily keeps them |
 
 ## What good looks like

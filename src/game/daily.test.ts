@@ -7,6 +7,7 @@ import {
   dailyGame,
   dailyHoldouts,
   formatCountdown,
+  heldDebuts,
   lockDaily,
   lockLegacyDailies,
   msUntilNextDaily,
@@ -188,6 +189,57 @@ describe("Blitz spoiler holds", () => {
     expect([...rollHoldouts(sched, all, played, "2026-11-04")].sort()).toEqual(["b", "n"]);
     // Future Blitz topics are held even from the plain daily holdouts.
     expect(dailyHoldouts(sched, "2026-11-03").has("n")).toBe(true);
+  });
+});
+
+describe("new lists debut as dailies", () => {
+  // "new" debuts as Today's list on Nov 6, "fresh" as Today's Blitz on Nov 7; "later" has no day yet.
+  const sched: DailyEntry[] = [
+    { n: 1, date: "2026-11-05", id: "a", blitz: "b" },
+    { n: 2, date: "2026-11-06", id: "new", blitz: "c" },
+    { n: 3, date: "2026-11-07", id: "d", blitz: "fresh" },
+    { n: 4, date: "2026-11-08", id: "x", blitz: "y" },
+  ];
+  const lists = [
+    ...["a", "b", "c", "d", "old", "x", "y"].map((id) => ({ id, blitz: true })),
+    { id: "new", blitz: true, debut: true },
+    { id: "fresh", blitz: true, debut: true },
+    { id: "later", blitz: true, debut: true },
+  ];
+  const fresh = saved([]);
+  it("holds a new list out of random play, list and Blitz, before its day and on it", () => {
+    for (const day of ["2026-11-01", "2026-11-05", "2026-11-06"]) {
+      expect(heldDebuts(sched, lists, day).has("new"), day).toBe(true);
+      expect(rollHoldouts(sched, lists, fresh, day).has("new"), day).toBe(true);
+      expect(blitzHoldouts(sched, lists, fresh, day).has("new"), day).toBe(true);
+    }
+  });
+  it("releases it the day after its first day as Today's list or Today's Blitz", () => {
+    expect(heldDebuts(sched, lists, "2026-11-07").has("new")).toBe(false);
+    expect(rollHoldouts(sched, lists, fresh, "2026-11-07").has("new")).toBe(false);
+    expect(rollHoldouts(sched, lists, fresh, "2026-11-07").has("fresh")).toBe(true);
+    expect(heldDebuts(sched, lists, "2026-11-08").has("fresh")).toBe(false);
+    // Nov 8 holds only its own pair and the list still waiting for a day.
+    expect([...rollHoldouts(sched, lists, fresh, "2026-11-08")].sort()).toEqual(["later", "x", "y"]);
+  });
+  it("keeps a new list that was never scheduled held, however long the schedule runs", () => {
+    for (const day of ["2026-11-05", "2026-11-08", "2027-03-01"]) {
+      expect(rollHoldouts(sched, lists, fresh, day).has("later"), day).toBe(true);
+    }
+  });
+  it("never lets a held list stand in as a day's Blitz, and that day's pick stays put after the debut", () => {
+    // Dates past the schedule take a date-seeded Blitz: never a debut list still waiting on that date.
+    for (let d = 9; d <= 28; d++) {
+      const date = `2026-11-${String(d).padStart(2, "0")}`;
+      expect(blitzOfTheDay(sched, lists, date), date).not.toBe("later");
+    }
+    const before = blitzOfTheDay(sched, lists, "2026-11-20");
+    const debuted = [...sched, { n: 5, date: "2026-11-25", id: "later", blitz: "c" }];
+    expect(blitzOfTheDay(debuted, lists, "2026-11-20")).toBe(before);
+  });
+  it("lists without the flag are unaffected", () => {
+    expect(heldDebuts(sched, lists, "2026-11-01")).toEqual(new Set(["new", "fresh", "later"]));
+    expect(heldDebuts(sched, lists.map(({ id, blitz }) => ({ id, blitz })), "2026-11-01").size).toBe(0);
   });
 });
 

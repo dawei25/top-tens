@@ -3,13 +3,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Lexicon } from "./junk";
+import { heldDebuts, localDate, rollHoldouts, type DailyEntry, type ListMeta } from "./daily";
 import { judgeGuess } from "./match";
 import type { Puzzle } from "./types";
 
 const dir = join(import.meta.dirname, "../../public/puzzles");
 const read = <T,>(f: string): T => JSON.parse(readFileSync(join(dir, f), "utf8"));
 /** A list's judge verdict (scripts/judge/verdicts), if it has one. */
-const verdict = (id: string): { ownerVeto?: string } | undefined => {
+const verdict = (id: string): { ownerVeto?: string; decision?: string; by?: string } | undefined => {
   try {
     return JSON.parse(readFileSync(join(import.meta.dirname, "../../scripts/judge/verdicts", `${id}.json`), "utf8"));
   } catch {
@@ -137,15 +138,31 @@ describe("picking a choice", () => {
 describe("the daily schedule", () => {
   // Separate topics for Today's list and Today's Blitz started on Nov 2; earlier Blitz picks are frozen as they ran.
   const SEPARATE = "2026-11-02";
-  const days = read<{ date: string; id: string; blitz?: string }[]>("daily.json");
-  it("never runs a list twice, either way, from the day lists and Blitzes split", () => {
+  const days = read<DailyEntry[]>("daily.json");
+  const category = new Map(read<{ id: string; category: string }[]>("index.json").map((x) => [x.id, x.category]));
+  it("runs Today's list once, from the day lists and Blitzes split; a Blitz again only 30 days after its last Blitz", () => {
     const seen = new Map<string, string>();
+    const lastBlitz = new Map<string, string>();
+    const daysBetween = (a: string, b: string) => (Date.parse(b) - Date.parse(a)) / 86_400_000;
     for (const d of days) {
-      for (const id of [d.id, d.blitz]) {
-        if (!id) continue;
-        if (d.date >= SEPARATE) expect(seen.get(id), `${id} on ${d.date} already ran on ${seen.get(id)}`).toBeUndefined();
-        if (!seen.has(id)) seen.set(id, d.date);
+      if (d.date >= SEPARATE) {
+        expect(seen.get(d.id), `${d.id} on ${d.date} already ran on ${seen.get(d.id)}`).toBeUndefined();
+        expect(d.blitz, `${d.date}: the list is its own Blitz`).not.toBe(d.id);
+        // A day doesn't wait for a new Blitz (owner, Nov 4): it may rerun a list in random play, in another category.
+        const before = d.blitz && seen.get(d.blitz);
+        if (d.blitz && before) {
+          const last = lastBlitz.get(d.blitz);
+          expect(!last || daysBetween(last, d.date) >= 30, `${d.blitz} on ${d.date} ran as a Blitz on ${last}`).toBe(true);
+          expect(category.get(d.blitz), `${d.date}: Blitz rerun ${d.blitz} in the list's category`).not.toBe(category.get(d.id));
+        }
       }
+      for (const id of [d.id, d.blitz]) if (id && !seen.has(id)) seen.set(id, d.date);
+      if (d.blitz) lastBlitz.set(d.blitz, d.date);
+    }
+    // A Blitz never spoils a later day's list.
+    for (const d of days) {
+      const later = days.find((x) => x.date > d.date && x.id === d.blitz);
+      expect(later, `${d.blitz}: Blitz on ${d.date}, Today's list on ${later?.date}`).toBeUndefined();
     }
   });
   it("gives every day its own Blitz", () => {
@@ -153,7 +170,6 @@ describe("the daily schedule", () => {
   });
   // Nov 3-5 ran three Geography lists in a row (populations, parks, lakes); the owner swapped Nov 5 out.
   it("never runs Today's list from one category three days running, from Nov 3", () => {
-    const category = new Map(read<{ id: string; category: string }[]>("index.json").map((x) => [x.id, x.category]));
     const recent = days.filter((d) => d.date >= "2026-11-03");
     for (let i = 2; i < recent.length; i++) {
       const [a, b, c] = recent.slice(i - 2, i + 1).map((d) => category.get(d.id));
@@ -163,6 +179,29 @@ describe("the daily schedule", () => {
   it("never schedules a list the owner vetoed as a daily", () => {
     const vetoed = days.filter((d) => d.date >= "2026-11-05" && verdict(d.id)?.ownerVeto).map((d) => `${d.date} ${d.id}`);
     expect(vetoed).toEqual([]);
+  });
+});
+
+describe("new lists debut as dailies", () => {
+  // The owner's flow: a new list runs first as Today's list (or Blitz), and joins random play the day after.
+  const days = read<DailyEntry[]>("daily.json");
+  const index = read<ListMeta[]>("index.json");
+  const debuts = index.filter((m) => m.debut);
+  const first = (id: string) => days.filter((d) => d.id === id || d.blitz === id).map((d) => d.date).sort()[0];
+  it("each new list is unscheduled, scheduled from today on, or has run; random play follows", () => {
+    const today = localDate();
+    for (const { id } of debuts) {
+      const debut = first(id);
+      const held = rollHoldouts(days, index, undefined, today).has(id);
+      if (debut && debut < today) expect(heldDebuts(days, index, today).has(id), `${id} ran on ${debut}`).toBe(false);
+      else expect(held, `${id} ${debut ? `debuts on ${debut}` : "has no day yet"}: held from random play`).toBe(true);
+    }
+  });
+  it("no new list a judge sent to free play waits for a day that never comes", () => {
+    // Drop `debut` in topics.ts for a list no daily will take (scripts/schedule.ts lists them).
+    const judged = (id: string) => (verdict(id)?.by === "builder" ? undefined : verdict(id)?.decision);
+    const stuck = debuts.filter(({ id }) => !first(id) && ["free-play", "reject"].includes(judged(id) ?? "")).map((m) => m.id);
+    expect(stuck).toEqual([]);
   });
 });
 

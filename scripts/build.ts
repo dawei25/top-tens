@@ -1347,18 +1347,27 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   };
 }
 
-type IndexEntry = { id: string; title: string; category: string; blitz: boolean };
+/** A list's entry in public/puzzles/index.json (src/game/puzzles.ts `PuzzleMeta`). */
+type IndexEntry = { id: string; title: string; category: string; blitz: boolean; debut?: true };
+
+/** The index entry's `debut` flag, from topics.ts: present only on a new list that runs first as a daily. */
+export const debutFlag = (topic?: Pick<Topic, "debut">): { debut?: true } => (topic?.debut ? { debut: true } : {});
 
 /**
  * The index after building some lists: every list already indexed stays, the ones just built are updated or added,
- * all in topic order (lists topics.ts no longer has keep their place at the end).
+ * all in topic order (lists topics.ts no longer has keep their place at the end). Every entry's `debut` follows
+ * topics.ts, built now or not, so dropping the flag there takes effect on the next build of any list.
  */
-export function mergeIndex(old: IndexEntry[], built: IndexEntry[]): IndexEntry[] {
+export function mergeIndex(old: IndexEntry[], built: IndexEntry[], topics: Pick<Topic, "id" | "debut">[] = TOPICS): IndexEntry[] {
   const byId = new Map(old.map((e) => [e.id, e]));
   for (const e of built) byId.set(e.id, e);
-  const order = new Map(TOPICS.map((t, i) => [t.id, i]));
-  const at = (e: IndexEntry) => order.get(e.id) ?? TOPICS.length;
-  return [...byId.values()].sort((a, b) => at(a) - at(b));
+  const order = new Map(topics.map((t, i) => [t.id, i]));
+  const topic = new Map(topics.map((t) => [t.id, t]));
+  const at = (e: IndexEntry) => order.get(e.id) ?? topics.length;
+  return [...byId.values()].sort((a, b) => at(a) - at(b)).map((e) => {
+    const { debut, ...rest } = e;
+    return debut === debutFlag(topic.get(e.id)).debut ? e : { ...rest, ...debutFlag(topic.get(e.id)) };
+  });
 }
 
 // `--test` builds only the test set (fast iteration) and indexes just those lists; ids build only those ids (and
@@ -1378,7 +1387,7 @@ async function main(): Promise<void> {
     try {
       const p = await buildPuzzle(topic);
       writeFileSync(join(OUT_DIR, `${p.id}.json`), JSON.stringify(p));
-      index.push({ id: p.id, title: p.title, category: topic.category, blitz: !!p.blitz });
+      index.push({ id: p.id, title: p.title, category: topic.category, blitz: !!p.blitz, ...debutFlag(topic) });
       console.log(`ok   ${p.id.padEnd(24)} ${p.answers.map((a) => a.name).join(", ")}`);
     } catch (err) {
       console.log(`FAIL ${topic.id.padEnd(24)} ${(err as Error).message}`);

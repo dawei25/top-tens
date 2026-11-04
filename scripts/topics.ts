@@ -4,6 +4,14 @@ import type { ValueKind } from "./values";
 export interface Topic {
   /** When the table's numbers are from, if the page doesn't say in a way scripts/dates.ts can read. */
   dataAsOf?: string;
+  /**
+   * A new list that runs first as a daily (owner, Nov 4): its index entry says `debut`, and random play (list and
+   * Blitz) never offers it until its first day as Today's list or Today's Blitz has run (src/game/daily.ts
+   * `heldDebuts`). The day after, it is in random play like any other. Every new topic gets it. A list a judge sends
+   * to free play only would be held for good: drop the flag (any build refreshes the index's flags; validate.ts
+   * checks they agree).
+   */
+  debut?: boolean;
   id: string;
   category: "Geography" | "Entertainment" | "Sports" | "Business" | "Culture" | "Science" | "Oddball";
   /** Says what kind of thing the answers are: "Countries emitting the most CO2", not "Biggest CO2 emitters". */
