@@ -2,12 +2,14 @@
 // from the left over the dimmed page, a modal dialog. It opens without moving or scrolling the page; focus goes into it and stays
 // there; Escape, the close key or a press on the dimmed page close it, and focus comes back to the key (or to the
 // guess box while a game is under way). Every tile reaches its screen, the screen on show is marked, rolls never land
-// on today's pair, and there's no account section (the account lives on Home: backend.e2e.cjs) and, without a contact
-// address, no Feedback.
+// on today's pair, and there's no account section (the account is a key in Home's header: backend.e2e.cjs) and,
+// without a contact address, no Feedback. Home's header keys, the account key among them, clear the logo.
 // Settings (#settings, from the menu): the sound switch and reset all progress (moved from Home's footer).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, VIEWPORTS, TODAY, open, go, hash, puzzle, todaysDaily, guess, freeze, giveUp, noHScroll, store } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, TODAY, open, go, hash, puzzle, todaysDaily, guess, freeze, giveUp, noHScroll, store, logoClearance } = require("./helpers.cjs");
+const { BACKEND_ENV } = require("./backend-env.cjs");
+const { serveBuild, opener, FRESH: BACKEND_FRESH } = require("./backend-lib.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -216,20 +218,39 @@ for (const vp of VIEWPORTS) {
   });
 }
 
-test("Home: the menu key in the top left corner clears the logo's capital T at every width", async () => {
-  for (const width of [320, 390, 481, 560, 640, 641, 1440]) {
-    const { ctx, page } = await open(browser, { viewport: { width, height: 800 } }, "", undefined, { reducedMotion: "reduce" });
-    await page.getByTestId("today-list").waitFor();
-    const { gap, under } = await page.evaluate(() => {
-      const key = document.querySelector('[data-testid="menu-key"]').getBoundingClientRect();
-      const t = document.querySelector(".logo span").getBoundingClientRect();
-      const em = parseFloat(getComputedStyle(document.querySelector(".logo")).fontSize);
-      // VT323 at the logo's line height: the T's ink starts about 0.245em below its box (measured), 0.04em in.
-      // The key's 4px shadow counts.
-      return { gap: t.top + 0.245 * em - (key.bottom + 4), under: key.right > t.left + 0.04 * em };
-    });
-    assert.ok(!under || gap >= 6, `${width}: the menu key over the logo (${Math.round(gap)}px clear)`);
-    await ctx.close();
+test("Home: the header keys clear the logo at every width, the menu on the left and sound and the account key on the right", async () => {
+  // Both builds: the plain one (menu, sound) and one with accounts (menu, then the account key left of sound). Every
+  // key keeps 6px or more between its base and the ink of any letter under it (the menu key over the capital T, the
+  // account key over the tall "l" on phones).
+  const served = await serveBuild(BACKEND_ENV, "E2E_BACKEND_DIST");
+  const openAccounts = opener(() => served);
+  try {
+    for (const width of [320, 360, 390, 414, 481, 560, 640, 641, 700, 1024, 1440]) {
+      for (const accounts of [false, true]) {
+        const vp = { viewport: { width, height: 800 }, reducedMotion: "reduce" };
+        const { ctx, page } = accounts ? await openAccounts(vp, "", BACKEND_FRESH) : await open(browser, vp, "", undefined, { reducedMotion: "reduce" });
+        const tag = `${width}px${accounts ? ", with accounts" : ""}`;
+        await page.getByTestId(accounts ? "account-key" : "today-list").waitFor();
+        const under = await logoClearance(page);
+        for (const c of under) assert.ok(c.gap >= 6, `${tag}: ${c.key} over the logo's "${c.letter}" (${c.gap}px clear)`);
+        // Not a test of nothing: on a phone the logo spans the width, under both groups.
+        if (width === 390) {
+          const keys = new Set(under.map((c) => c.key));
+          for (const id of ["menu-key", "sound-toggle", ...(accounts ? ["account-key"] : [])]) assert.ok(keys.has(id), `${tag}: ${id} over the logo`);
+        }
+        if (accounts) {
+          // The account key: left of sound, the same keycap, level with it.
+          const [account, sound] = await Promise.all(["account-key", "sound-toggle"].map((id) => place(page.getByTestId(id))));
+          assert.ok(await page.getByTestId("account-key").evaluate((el) => el.nextElementSibling?.dataset.testid === "sound-toggle"), `${tag}: right before sound`);
+          assert.deepEqual([account.y, account.w, account.h], [sound.y, sound.w, sound.h], `${tag}: the sound key's size and line`);
+          assert.ok(account.x + account.w <= sound.x, `${tag}: clear of sound`);
+        }
+        assert.ok(await noHScroll(page), tag);
+        await ctx.close();
+      }
+    }
+  } finally {
+    await served.close();
   }
 });
 

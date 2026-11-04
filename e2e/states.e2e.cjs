@@ -11,9 +11,10 @@
 // focus-visible and keyboard-modality styles apply), and every element's layout box is compared with the screen at
 // rest (e2e/states-lib.cjs). Two of each kind of element are checked (two of the nine empty rows, say);
 // STATES_ALL=1 npm run e2e -- states checks every one. Real puzzle data: a screen is only ever compared with itself.
-// "add a note" and Home's account card (only in a build with a backend) get short walks of their own on the backend
-// copy: the note's key and its box open with focus in it; the card signed out with the create-account sheet, and
-// signed in with the account sheet. The static half of the rule is npm run lint:css (e2e/css-states.mjs).
+// "add a note" and Home's account key (only in a build with a backend) get short walks of their own on the backend
+// copy: the note's key and its box open with focus in it; the header's account and sound keys signed out with the
+// create-account sheet, and signed in with the account sheet. The static half of the rule is npm run lint:css
+// (e2e/css-states.mjs).
 const { describe, test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, open, go, puzzle, guess, freeze, giveUp } = require("./helpers.cjs");
@@ -238,36 +239,38 @@ const NOTE_SCREENS = [
 ];
 
 /**
- * Home's account card (only in a build with accounts), on the same backend copy: signed out, with the sheet CREATE
- * ACCOUNT opens; then, in a second tab signed in, the card with ACCOUNT and the account sheet it opens.
+ * Home's account key (only in a build with accounts), on the same backend copy: the header's right-hand keys signed
+ * out, and the sign-in sheet the key opens, switched to create an account; then, in a second tab signed in, the keys
+ * with the lit player and the account sheet it opens.
  */
 const ACCOUNT_OUT_SCREENS = [
   {
-    name: "home, account card signed out (backend)",
-    scope: '[data-testid="home-account"]',
-    setup: (page) => page.locator('[data-testid="home-account"][data-state="out"]').waitFor(),
+    name: "home, account key signed out (backend)",
+    scope: '[data-testid="home-keys-end"]',
+    setup: (page) => page.locator('[data-testid="account-key"][data-state="out"]').waitFor(),
   },
   {
     name: "home, create account sheet (backend)",
     scope: '[data-testid="sign-in-sheet"]',
     setup: async (page) => {
-      await page.getByTestId("home-create-account").click();
+      await page.getByTestId("account-key").click();
       await lazyShown(page, "sign-in-sheet");
+      await page.getByTestId("sign-in-mode").click();
       await page.locator('[data-testid="sign-in-password-form"][data-mode="up"]').waitFor();
     },
   },
 ];
 const ACCOUNT_IN_SCREENS = [
   {
-    name: "home, account card signed in (backend)",
-    scope: '[data-testid="home-account"]',
-    setup: (page) => page.locator('[data-testid="home-account"][data-state="in"]').waitFor(),
+    name: "home, account key signed in (backend)",
+    scope: '[data-testid="home-keys-end"]',
+    setup: (page) => page.locator('[data-testid="account-key"][data-state="in"]').waitFor(),
   },
   {
     name: "home, account sheet open (backend)",
     scope: '[data-testid="account-sheet"]',
     setup: async (page) => {
-      await page.getByTestId("home-account-key").click();
+      await page.getByTestId("account-key").click();
       await lazyShown(page, "account-sheet");
       await page.getByTestId("account-panel").waitFor();
     },

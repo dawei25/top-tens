@@ -99,6 +99,43 @@ async function giveUp(page) {
   await page.getByTestId("results").waitFor();
 }
 
+/**
+ * Home's header keys over the logo (left group: the menu; right group: the account key, when the build has accounts,
+ * and sound): for every key and every letter of the logo under it, how far the letter's ink starts below the key's
+ * base (its 5px shadow counted). Each letter's ink is read from the font itself (canvas metrics) at its place in the
+ * line, its 3px pink and cyan fringe included, so a tall "T" or "l" and a short "e" each count as drawn.
+ * Returns [{ key, letter, gap }] for the letters under a key; the logo must be at rest (reduced motion).
+ */
+async function logoClearance(page) {
+  await page.evaluate(() => document.fonts.ready);
+  return page.evaluate(() => {
+    const logo = document.querySelector(".home .logo");
+    const s = getComputedStyle(logo);
+    const ctx = document.createElement("canvas").getContext("2d");
+    ctx.font = `${s.fontSize} ${s.fontFamily}`;
+    const keys = [...document.querySelectorAll(".home-keys .key")].map((k) => ({ id: k.dataset.testid, r: k.getBoundingClientRect() }));
+    const out = [];
+    for (const span of logo.querySelectorAll("span")) {
+      const text = span.firstChild;
+      for (let i = 0; i < text.length; i++) {
+        const range = document.createRange();
+        range.setStart(text, i);
+        range.setEnd(text, i + 1);
+        // The letter's box runs from the font's ascent above its baseline; the ink starts lower, by the letter's own.
+        const box = range.getBoundingClientRect();
+        const m = ctx.measureText(text.data[i]);
+        const top = box.top + m.fontBoundingBoxAscent - m.actualBoundingBoxAscent;
+        const left = box.left - m.actualBoundingBoxLeft - 3;
+        const right = box.left + m.actualBoundingBoxRight + 3;
+        for (const k of keys) {
+          if (k.r.right > left && k.r.left < right) out.push({ key: k.id, letter: text.data[i], gap: Math.round(top - (k.r.bottom + 5)) });
+        }
+      }
+    }
+    return out;
+  });
+}
+
 module.exports = {
   chromium,
   offlineFonts,
@@ -117,4 +154,5 @@ module.exports = {
   guess,
   freeze,
   giveUp,
+  logoClearance,
 };
