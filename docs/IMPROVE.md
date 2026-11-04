@@ -22,7 +22,9 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
      addressed. Skip today's and the next two days' dailies.
    - Topic ideas: 2 new candidates, verified on Wikipedia with `npm run inspect` (`NODE_USE_ENV_PROXY=1` for
      uncached pages). **Variety first** (owner): no new list on a pattern the bank already has twice or more
-     ("countries with the most <sport> wins", "most-followed <platform> accounts"); prefer new kinds of things
+     ("countries with the most <sport> wins", "most-followed <platform> accounts"), and no list that is a weaker
+     copy of one the bank has (the same kind of answers, fewer of them famous: Facebook pages beside Instagram
+     accounts, dropped by the owner); prefer new kinds of things
      (food, brands, inventions, shows, places people visit, everyday "most common" lists) and what players rate up
      once ratings exist. Prefer mainstream lists that could meet the daily bar (docs/JUDGE.md); the daily bank is the
      bottleneck. Oddball lists (free play, fun, guessable without specialist knowledge) otherwise.
@@ -97,6 +99,7 @@ stronger.
 | "Japan" cost a life on Most populous European countries | a world universe on a regional list | regional universes in the pipeline; validate.ts error (cycle 7) |
 | Four header keys pushed the five lives under the sound key on 360px phones | header crowding on narrow phones | slimmer header keys under 380px; the narrow-phones test in e2e/menu.e2e.cjs (320/360/390) |
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
+| "Most-followed Facebook pages" was a worse Instagram list, not fun to play | near-duplicate lists (same answers, weaker version) | removed; topic gate in step 1: no weaker copy of a list the bank has; judge brief: compare with the bank's closest list |
 | The Google client ID was pasted into Vercel with a trailing newline | env values with stray whitespace | `src/net/config.ts` trims every public env value and ignores a client ID that isn't one; index.test.ts, and the e2e Google build uses a client ID ending in "\n" |
 
 ## What good looks like

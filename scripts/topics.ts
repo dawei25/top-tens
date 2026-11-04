@@ -2265,25 +2265,6 @@ export const TOPICS: Topic[] = [
     ],
   },
   {
-    id: "facebook-pages",
-    category: "Entertainment",
-    title: "Most-followed Facebook pages",
-    noun: "Facebook pages",
-    prompt: "Name the 10 most-followed Facebook pages",
-    page: "List of most-followed Facebook pages",
-    tables: [0],
-    name: "Page name",
-    value: "Followers",
-    metric: "Followers (millions)",
-    also: CELEBRITIES,
-    // Relatives, songs and scandals of the stars: CELEBRITY_JUNK in scripts/aliases.ts. These are this list's own.
-    junkAliases: [
-      "T-gay", "Irma Gobb", "Caryn Marooney", "Facebook conspiracy theories", "Conspiracy theories in Facebook groups",
-      "Facebook litigation", "10 year challenge", "10 Year Challenge", "Ten year challenge", "Predictions of Facebook's end",
-      "Move fast and break things", "The Parades", "Ecce homo qui est faba", "Killer Queen by Katy Perry", "Facebooking",
-    ],
-  },
-  {
     id: "ballon-dor-countries",
     category: "Sports",
     title: "Countries with the most Ballon d'Or wins",

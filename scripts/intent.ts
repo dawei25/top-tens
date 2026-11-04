@@ -1164,15 +1164,6 @@ export const INTENT: Record<string, Intent> = {
       "Bad Bunny": ["Benito"],
     },
   },
-  "facebook-pages": {
-    same: {
-      "Real Madrid C.F.": ["Real Madrid"],
-      "FC Barcelona": ["Barcelona", "Barca", "Barça"],
-      "5-Minute Crafts": ["5 Minute Crafts", "Five Minute Crafts"],
-      CGTN: ["China Global Television Network"],
-      "Cristiano Ronaldo": ["CR7", "Cristiano", "Ronaldo"],
-    },
-  },
   "car-makers": {
     same: {
       "Hyundai Motor Group": ["Kia", "Kia Motors", "Genesis", "Genesis Motor", "Hyundai Motor Company", "Hyundai", "Hyundai-Kia"],

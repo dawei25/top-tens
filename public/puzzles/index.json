@@ -486,12 +486,6 @@
   "blitz": true
  },
  {
-  "id": "facebook-pages",
-  "title": "Most-followed Facebook pages",
-  "category": "Entertainment",
-  "blitz": true
- },
- {
   "id": "ballon-dor-countries",
   "title": "Countries with the most Ballon d'Or wins",
   "category": "Sports",
