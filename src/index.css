@@ -2488,6 +2488,34 @@ a {
 .blitz-hit + .blitz-hit {
   border-top: 1px solid rgba(125, 147, 184, 0.08);
 }
+/* The name and figure: two cells of the row on wide screens. */
+.blitz-body {
+  display: contents;
+}
+/*
+ * Phones: a long name ("Hartsfield-Jackson Atlanta International Airport") gets the row's width, past a slimmer points
+ * column, and its figure moves under it on the right, as on the list board. Beside the figure the name had a third of
+ * the row and broke mid-word ("INTERNATIO / NAL") on a 320px phone.
+ */
+@media (max-width: 520px) {
+  .blitz-hit {
+    grid-template-columns: 2.6em minmax(0, 1fr);
+  }
+  .blitz-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 12px;
+    min-width: 0;
+  }
+  .blitz-body .blitz-name {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .blitz-body .value {
+    margin-left: auto;
+  }
+}
 .blitz-hits .blitz-hit:first-child {
   animation: rise 0.2s ease-out both;
 }
