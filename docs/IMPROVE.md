@@ -1,8 +1,23 @@
 # Improvement loop
 
-The coordinator session runs this on a schedule. Each cycle improves a few existing lists and the way lists are
-built, so quality compounds instead of being fixed one complaint at a time. Log every cycle in
-`docs/IMPROVE_LOG.md`.
+The coordinator session runs this once a week (Sundays, 10:21 Hong Kong time). Each cycle improves a few existing
+lists and the way lists are built, so quality compounds instead of being fixed one complaint at a time. Log every
+cycle in `docs/IMPROVE_LOG.md`.
+
+## Weekly slate (the owner picks)
+
+Today's list is always fresh: a new topic is built as a `debut` list, runs first as Today's list, and joins free play
+the day after. The owner chooses which topics run (2026-11-05: "once a week it runs and compiles potential topics for
+the week and i choose ... you can learn from my choices"):
+
+1. Compile 10 to 12 candidates for the coming week, each checked on Wikipedia (`npm run inspect`: the top 10, the
+   answer pool, the figure it ranks by), within the variety rule (step 1 below) and David's taste in
+   `docs/OWNER_PICKS.md`. For each, the judge's prediction (pick or pass) and one line why. Build nothing yet.
+2. Send him the slate (push notification, numbered list) and wait for his picks.
+3. Build the picks as `debut` lists (data agent), run a list-judge on each, and schedule them into the next days that
+   hold old free-play lists, never today or tomorrow. The replaced lists stay in free play.
+4. Log every candidate, his call and his reason, and whether the judge's prediction matched, in `docs/OWNER_PICKS.md`.
+   When the judge has matched him on almost every call for several weeks, propose letting the judge pick.
 
 ## Each cycle
 

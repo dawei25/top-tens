@@ -38,6 +38,7 @@ sports statistician.
    **Compare with the bank's closest list** (`public/puzzles/index.json`): a list of the same kind of answers that a
    player would find weaker (fewer famous names, the same people again) is `reject`, however clean its data. The
    owner dropped "Most-followed Facebook pages" as a worse Instagram list.
+   **Read `docs/OWNER_PICKS.md` first:** the owner's picks and passes, with his reasons, are the taste to judge by.
 6. **Check the reveal.** Every top-10 answer should show a fun fact, and your casual player's misses should show a
    rank or a figure. A miss that only says "isn't in the top 10" while the page has numbers for it is a `fixes` item.
    When players answer by something other than the entry's name (the artist of a tour), the fact names it.
