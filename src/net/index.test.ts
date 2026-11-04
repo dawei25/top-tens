@@ -152,6 +152,14 @@ describe("without a backend (no env)", () => {
     expect(listeners).toEqual([]);
     const { getAccount } = await import("./store");
     expect(getAccount().status).toBe("off");
+
+    // A note: nowhere to send it, so nothing is kept either (the build shows no note option).
+    expect(net.submitFeedback("mountains", "list", "which state each park is in", -1)).toBe(false);
+    await new Promise((r) => setTimeout(r, 10));
+    expect([...store.keys()]).toEqual(["top-tens:v1"]);
+    expect(JSON.parse(store.get("top-tens:v1")!)).not.toHaveProperty("feedback");
+    expect(imported).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
 
@@ -212,6 +220,55 @@ describe("with a backend", () => {
     const net = await import("./index");
     net.startNet();
     await vi.waitFor(() => expect(svc.start).toHaveBeenCalled());
+  });
+
+  it("queues a note in its own outbox before the backend code loads, then hands it over to send", async () => {
+    configure();
+    let release!: () => void;
+    const loaded = new Promise<void>((r) => (release = r));
+    const svc = { start: vi.fn(), flushFeedback: vi.fn() };
+    vi.doMock("./service", async () => (await loaded, svc));
+    const { store } = fakeBrowser();
+    const now = Date.UTC(2026, 10, 4, 12);
+    vi.useFakeTimers({ now, toFake: ["Date"] });
+    try {
+      const net = await import("./index");
+      expect(net.submitFeedback("national-parks", "list", "  great list.\r\nsay which state each park is in \n", 1)).toBe(true);
+      // The clock didn't move: a second note still gets a name of its own.
+      expect(net.submitFeedback("national-parks", "list", "and the year it opened", null)).toBe(true);
+      // Blank or too long: nothing to send.
+      expect(net.submitFeedback("national-parks", "list", " \n ", null)).toBe(false);
+      expect(net.submitFeedback("national-parks", "list", "x".repeat(501), null)).toBe(false);
+      // Waiting already, though the backend code hasn't arrived (offline, it may never).
+      const box = JSON.parse(store.get("top-tens:feedback-outbox")!);
+      expect(box.pending).toEqual([
+        { listId: "national-parks", mode: "list", rating: 1, text: "great list.\nsay which state each park is in", at: now },
+        { listId: "national-parks", mode: "list", rating: null, text: "and the year it opened", at: now + 1 },
+      ]);
+      expect(svc.flushFeedback).not.toHaveBeenCalled();
+      release();
+      await vi.waitFor(() => expect(svc.flushFeedback).toHaveBeenCalledTimes(2));
+      expect(svc.start).toHaveBeenCalled();
+      // Never in the save.
+      expect(store.get("top-tens:v1")).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("loads the backend code at startup when notes are waiting, and sends them when the browser comes online", async () => {
+    configure();
+    const svc = { start: vi.fn(), flushPlays: vi.fn(), flushRatings: vi.fn(), flushFeedback: vi.fn() };
+    vi.doMock("./service", () => svc);
+    const { store } = fakeBrowser();
+    const handlers = new Map<string, () => void>();
+    vi.stubGlobal("addEventListener", (type: string, fn: () => void) => handlers.set(type, fn));
+    store.set("top-tens:feedback-outbox", JSON.stringify({ pending: [{ listId: "mountains", text: "hi" }], sent: [] }));
+    const net = await import("./index");
+    net.startNet();
+    await vi.waitFor(() => expect(svc.start).toHaveBeenCalled());
+    handlers.get("online")!();
+    await vi.waitFor(() => expect(svc.flushFeedback).toHaveBeenCalled());
   });
 
   it("loads the backend code at startup when plays are waiting or a session is stored", async () => {

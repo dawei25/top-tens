@@ -3,8 +3,8 @@ import { KEYS } from "./store";
 
 /**
  * Things waiting to reach the server, kept in localStorage so something done offline (or a tab closed mid-request)
- * still arrives later: finished games for the stats, and list ratings. Each is sent once: the server ignores duplicate
- * plays anyway, and `sent` remembers the recent ones so a reload doesn't even ask.
+ * still arrives later: finished games for the stats, list ratings and notes. Each is sent once: the server ignores
+ * duplicate plays anyway, and `sent` remembers the recent ones so a reload doesn't even ask.
  */
 export interface OutboxData<T = Play> {
   pending: T[];
@@ -68,6 +68,23 @@ export function hasPending<T>(store: OutboxStore<T>): boolean {
   return store.read().pending.length > 0;
 }
 
+/**
+ * Put an item in an outbox's store, without the code that sends it (a note is queued before the backend code has
+ * loaded, so it survives that download failing). False (and nothing queued) if it's malformed, or already queued or
+ * sent. An item with a slot replaces whatever waits in that slot.
+ */
+export function enqueue<T>(store: OutboxStore<T>, kind: OutboxKind<T>, item: T, now: number): boolean {
+  const { key, invalid, slot } = kind;
+  if (invalid(item, now)) return false;
+  const data = store.read();
+  const k = key(item);
+  if (data.sent.includes(k) || data.pending.some((p) => key(p) === k)) return false;
+  const rest = slot ? data.pending.filter((p) => slot(p) !== slot(item)) : data.pending;
+  // Over the cap, the oldest waiting item goes first.
+  store.write({ ...data, pending: [...rest, item].slice(-MAX_PENDING) });
+  return true;
+}
+
 export class Outbox<T = Play> {
   private running: Promise<"done" | "retry"> | null = null;
   private again = false;
@@ -93,15 +110,7 @@ export class Outbox<T = Play> {
    * An item with a slot replaces whatever waits in that slot.
    */
   add(item: T): boolean {
-    const { key, invalid, slot } = this.kind;
-    if (invalid(item, this.now())) return false;
-    const data = this.store.read();
-    const k = key(item);
-    if (data.sent.includes(k) || data.pending.some((p) => key(p) === k)) return false;
-    const rest = slot ? data.pending.filter((p) => slot(p) !== slot(item)) : data.pending;
-    // Over the cap, the oldest waiting item goes first.
-    this.store.write({ ...data, pending: [...rest, item].slice(-MAX_PENDING) });
-    return true;
+    return enqueue(this.store, this.kind, item, this.now());
   }
 
   /**
