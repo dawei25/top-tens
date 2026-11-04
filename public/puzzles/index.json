@@ -586,5 +586,26 @@
   "title": "Highest-grossing Pixar films",
   "category": "Entertainment",
   "blitz": true
+ },
+ {
+  "id": "retailers",
+  "title": "Largest retailers",
+  "category": "Business",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "football-club-revenue",
+  "title": "Football clubs with the highest revenue",
+  "category": "Sports",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "longest-running-tv",
+  "title": "Longest-running US network TV series",
+  "category": "Entertainment",
+  "blitz": true,
+  "debut": true
  }
 ]

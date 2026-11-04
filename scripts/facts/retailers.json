@@ -1,0 +1,52 @@
+{
+  "Walmart": {
+    "text": "Its name was derived from FedMart, a discount chain founded in 1954 by Sol Price, who also inspired Sam Walton.",
+    "source": "https://en.wikipedia.org/wiki/Walmart",
+    "evidence": "The name was derived from FedMart, a chain of discount department stores founded by Sol Price in 1954, whom Walton was also inspired by."
+  },
+  "Amazon": {
+    "text": "Jeff Bezos founded it in 1994 as Cadabra, an online bookstore run from Bellevue, Washington.",
+    "source": "https://en.wikipedia.org/wiki/Amazon_(company)",
+    "evidence": "On July 5, 1994, Amazon was founded as \"Cadabra\" by Jeff Bezos, after he relocated from New York City to Bellevue, Washington, to operate an online bookstore."
+  },
+  "Costco": {
+    "text": "Its forerunner Price Club opened in San Diego in 1976, after Sol Price fell out with the new owners of his FedMart.",
+    "source": "https://en.wikipedia.org/wiki/Costco",
+    "evidence": "Costco's earliest predecessor, Price Club, opened its first store on July 12, 1976, on Morena Boulevard in San Diego, California. It was founded three months earlier by Sol Price and his son, Robert, after a dispute with the new owners of FedMart, Price's previous membership-only discount store."
+  },
+  "Schwarz Group": {
+    "text": "It runs Lidl and Kaufland; Lidl is named after Anton Lidl, whose fruit wholesaler Josef Schwarz joined in 1930.",
+    "source": "https://en.wikipedia.org/wiki/Lidl",
+    "evidence": "In 1930, Josef Schwarz became a partner in a Heilbronn-based company named Südfrüchte Großhandlung Lidl & Co. The company had been established by Anton Lidl since at least 1858 under the name A. Lidl & Cie, and specialised in the sale of exotic fruit."
+  },
+  "The Home Depot": {
+    "text": "It passed Lowe's in 1989 to become the largest home improvement store in the US, and it still is.",
+    "source": "https://en.wikipedia.org/wiki/The_Home_Depot",
+    "evidence": "In 1989, The Home Depot became the largest home improvement store in the United States, surpassing Lowe's. ... Home Depot is the largest home improvement specialty retailer in the United States."
+  },
+  "Kroger": {
+    "text": "Bernard Kroger opened it in Cincinnati in 1883, aged 23, with his life savings of $372.",
+    "source": "https://en.wikipedia.org/wiki/The_Kroger_Company",
+    "evidence": "In 1883, 23-year-old Bernard Kroger, the fifth of ten children born to German immigrants, invested his life savings of $372 (equivalent to $12,854 in 2025) to open a grocery store at 66 Pearl Street in downtown Cincinnati."
+  },
+  "Aldi": {
+    "text": "Brothers Karl and Theo Albrecht split it into Aldi Nord and Aldi Süd in 1960, reportedly over selling cigarettes.",
+    "source": "https://en.wikipedia.org/wiki/Aldi",
+    "evidence": "The brothers split the company in 1960, reportedly over a dispute about whether they should sell cigarettes."
+  },
+  "JD.com": {
+    "text": "Its Chinese name, Jingdong, joins the names of founder Liu Qiangdong and his then girlfriend, Gong Xiaojing.",
+    "source": "https://en.wikipedia.org/wiki/JD.com",
+    "evidence": "The company was founded in 1998 as Jingdong, which was named after Liu Qiangdong's then girlfriend Gong Xiaojing and himself."
+  },
+  "Walgreens Boots Alliance": {
+    "text": "Walgreens, its US half, claims it popularized the malted milkshake, made by employee Ivar \"Pop\" Coulson in 1922.",
+    "source": "https://en.wikipedia.org/wiki/Walgreens",
+    "evidence": "Walgreens has claimed credit for the popularization of the malted milkshake (or at least its version of it, invented by Ivar \"Pop\" Coulson in 1922)."
+  },
+  "CVS Health": {
+    "text": "CVS stands for Consumer Value Stores; in 2014 it stopped selling tobacco in all 7,700 of its stores.",
+    "source": "https://en.wikipedia.org/wiki/CVS_Health",
+    "evidence": "The name stood for Consumer Value Stores. ... CVS, as of midnight Tuesday September 2, 2014, would no longer sell tobacco products at all of its 7,700 locations nationwide"
+  }
+}

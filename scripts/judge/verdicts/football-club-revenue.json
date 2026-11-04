@@ -1,0 +1,22 @@
+{
+  "id": "football-club-revenue",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 5, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 2, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 12 },
+  "blitzCasual": { "scored": 21, "named": 30 },
+  "difficulty": 2,
+  "tags": ["sports", "soccer", "clubs"],
+  "audience": "sports fans",
+  "summary": "The biggest clubs in the world, by Deloitte's 2026 Money League: Real Madrid, Barcelona and the English giants are gimmes, and Juventus (#16) and AC Milan (#15) are the traps. It leans easy.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. A casual who barely follows soccer finds Real Madrid, Barcelona, the Manchester clubs, Liverpool, Chelsea, Arsenal and Bayern, and loses lives on Juventus and AC Milan, each with its revenue; a soccer fan sweeps it.",
+    "Short forms work (barca, man utd, psg, spurs, bayern, juve, inter); 'manchester' offers both clubs. Every club from 29 earlier seasons is an answer with its last rank ('Ajax: #27 in 2021–22'); Inter Miami, LA Galaxy, Al Hilal and Boca Juniors are free.",
+    "32 clubs carry this season's revenue: a casual Blitz scored 21 of 30."
+  ],
+  "fixes": []
+}

@@ -1,0 +1,22 @@
+{
+  "id": "longest-running-tv",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 5, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 4, "guesses": 15 },
+  "fan": { "found": 9, "livesLost": 2, "guesses": 16 },
+  "blitzCasual": { "scored": 31, "named": 33 },
+  "difficulty": 2,
+  "tags": ["tv", "sitcoms", "usa"],
+  "audience": "anyone",
+  "summary": "Shows everyone has seen: The Simpsons, Family Guy, Grey's Anatomy, NCIS and the Law & Orders are easy starts, Gunsmoke and Lassie the old surprises, and Friends (10 seasons) the trap.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. The casual found The Simpsons, Family Guy, Grey's Anatomy, Law & Order, SVU, NCIS and Criminal Minds, and lost lives on Friends, The Office, Supernatural (#12) and Bob's Burgers (#11), each with its seasons.",
+    "The title says network and scripted: South Park, SpongeBob, It's Always Sunny, SNL, Survivor and American Idol are free and never read as a list show. 'svu', 'greys', 'law and order' and 'csi' (offers the three CSIs) work.",
+    "185 network shows with 7+ seasons: a casual Blitz scored 31 of 33."
+  ],
+  "fixes": []
+}

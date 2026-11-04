@@ -1,0 +1,25 @@
+{
+  "id": "retailers",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 9, "livesLost": 2, "guesses": 14 },
+  "blitzCasual": { "scored": 25, "named": 34 },
+  "difficulty": 2,
+  "tags": ["business", "shopping", "retail"],
+  "audience": "anyone",
+  "summary": "Stores everyone shops at: Walmart, Amazon, Costco, Home Depot, Kroger, CVS and Walgreens are gimmes, Lidl finds the Schwarz Group, and Target at #11 is the trap.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. A US casual found 8 (Walmart, Amazon, Costco, Home Depot, Kroger, CVS, Walgreens, Aldi) and lost lives on Target (#11), Lowe's (#14), Best Buy, IKEA and 7-Eleven, each with its revenue; a European player finds fewer (Tesco #15, Carrefour #13).",
+    "Groups are found by their stores: lidl and kaufland are the Schwarz Group, walgreens and boots its holding company, zara Inditex, uniqlo Fast Retailing. Whole Foods, Sam's Club, Trader Joe's, eBay and Temu are free.",
+    "100 ranked retailers: a casual Blitz scored 25 of 34 names."
+  ],
+  "fixes": [
+    "Deloitte's figures are for fiscal 2023, the latest on the page; update when the page moves to the next Global Powers of Retailing.",
+    "'store' and 'supermarket' offer Ross Stores and Morrisons as a misspelling (a confirm, not a life): category words for the matcher if players stumble on it."
+  ]
+}

@@ -2897,6 +2897,179 @@ export const TOPICS: Topic[] = [
     // An announced sequel's name, character pages and a study named for the film.
     junkAliases: ["Inside Out 3", "Finding Nemo Characters", "Nemo effect"],
   },
+  // Nov 4: new lists debut as dailies (`debut`), held out of random play until their day has run.
+  {
+    id: "retailers",
+    debut: true,
+    category: "Business",
+    title: "Largest retailers",
+    noun: "retailers",
+    prompt: "Name the 10 largest retailers in the world by retail revenue (Deloitte, fiscal 2023)",
+    page: "List of largest retail companies",
+    // Deloitte's Global Powers of Retailing: 100 companies by revenue from retail operations.
+    tables: [0],
+    name: "Name",
+    value: "Retail revenue",
+    metric: "Retail revenue (US$)",
+    prefix: "$",
+    unit: " billion",
+    dataAsOf: "FY2023",
+    // The market cap and store count rankings: retailers the revenue table leaves out are answers too.
+    also: [{ tables: [1, 2], name: "Name" }],
+    webNames: true,
+    // Shown by the names people shop at.
+    rename: {
+      "Alibaba Group New Retail & Direct Sales": "Alibaba",
+      "Nike Direct": "Nike",
+      "HE Butt Grocery": "H-E-B",
+      "Schwarz Gruppe": "Schwarz Group",
+      "The Kroger Company": "Kroger",
+      "Target Corporation": "Target",
+    },
+    // Groups are named by their stores: Schwarz is Lidl and Kaufland, Inditex is Zara, Seven & I is 7-Eleven.
+    aliases: {
+      "Schwarz Group": ["Lidl", "Kaufland", "Schwarz Gruppe", "Schwarz"],
+      Aldi: ["Aldi Nord", "Aldi Süd", "Aldi Sud"],
+      Kroger: ["The Kroger Company", "Kroger Co"],
+      "Walgreens Boots Alliance": ["Walgreens", "Boots", "Walgreens Boots"],
+      "CVS Health": ["CVS", "CVS Pharmacy"],
+      "JD.com": ["JD", "Jingdong"],
+      Target: ["Target Corporation"],
+      Inditex: ["Zara"],
+      "Seven & I Holdings": ["7-Eleven", "Seven Eleven", "7 Eleven"],
+      "Fast Retailing": ["Uniqlo"],
+    },
+    // Programs, subsidiaries' products, imprints, short links, a map line and a saint among the redirects.
+    junkAliases: [
+      "Distribucion y Servicio", "Wal-Mart Café", "Wal-Mart Music", "Wal-Mart Family Moments", "Walmart Spark",
+      "Wal-Mart Tire & Lube Express", "Brilliance Audio", "Brilliance Publishing", "ACI Gift Cards",
+      "Amazon Software Download", "Amazon Live", "Amazon Devices", "A.co", "Amzn.to", "Amazon Logistics", "AMZL",
+      "AMZL US", "Amazon Affiliates", "AmazonWireless", "Amazon Local", "AmazonLocal", "St. Vitus", "Aldi equator",
+      "Aldi-Äquator", "3.cn", "CVS Lookbook",
+    ],
+  },
+  {
+    id: "football-club-revenue",
+    debut: true,
+    category: "Sports",
+    title: "Football clubs with the highest revenue",
+    noun: "football clubs",
+    prompt: "Name the 10 football (soccer) clubs with the highest revenue in the 2024–25 season (Deloitte Football Money League)",
+    page: "Deloitte Football Money League",
+    tables: [2],
+    name: "Club",
+    value: "Total",
+    metric: "Revenue 2024–25",
+    prefix: "€",
+    unit: " million",
+    rename: { Internazionale: "Inter Milan", Milan: "AC Milan" },
+    // How fans say them (the clubs past #10 only have redirects the cache already holds).
+    aliases: {
+      "Bayern Munich": ["Bayern"],
+      "Tottenham Hotspur": ["Tottenham", "Spurs"],
+      "Paris Saint-Germain": ["PSG", "Paris SG"],
+      "Manchester City": ["Man City"],
+      "Manchester United": ["Man United", "Man Utd"],
+      "Inter Milan": ["Inter", "Internazionale"],
+      "AC Milan": ["Milan"],
+      "Borussia Dortmund": ["Dortmund", "BVB"],
+      "Atlético Madrid": ["Atletico", "Atleti"],
+      Juventus: ["Juve"],
+      "Newcastle United": ["Newcastle"],
+      "Aston Villa": ["Villa"],
+      "West Ham United": ["West Ham"],
+      "Brighton & Hove Albion": ["Brighton"],
+      "Wolverhampton Wanderers": ["Wolves"],
+    },
+    // Fans, songs, mottos, kits, staff, squads, an older club ("Everton Athletic" was Liverpool, not Everton) and
+    // nicknames another club shares ("The Blues" is Chelsea's) among the redirects.
+    junkAliases: [
+      "Real Madrid Captains", "Real Madrid C.F. kits", "Real Madrid kit", "Real Madrid kits", "Real Madrid C.F. kit",
+      "Real Madrid The Game", "Ultras Sur", "Hala Madrid", "Madridista", "Madridistas", "Carles Vilarrubí Carrió",
+      "Johan Cruyff's Dream Team", "Més que un club", "More than a club", "Barcelonistes", "Farsalona",
+      "Allez Paris Saint-Germain", "Paris Football Team", "P$G", "Paris Saint-Germain F.C. kits",
+      "Everton F.C. and Athletic Grounds Ltd.", "Everton Athletic F.C.", "Everton Athletic", "Liverpool Collective",
+      "KOP Choir", "Liverpool F.C. Player of the Season", "John Wardle", "The Blues", "Cityitis", "Typical City",
+      "Victoria Concordia Crescit", "Arsenal appreciation", "Gunnersaurus Rex", "Gunnersaurus", "Come On You Gunners",
+      "COYG", "Manchester United Treble Reunion Match", "Sing Up for the Champions!", "Manchester United F.C. supporters",
+      "Manchester United Football Squad", "Manchester united squad", "Spurs manager", "Audere est facere",
+      "To Dare Is to Do", "Chelsea player of the year", "Chelsea FC Squad", "Full Chelsea FC Squad", "Chelsea's",
+    ],
+    // Famous clubs the Money League has never ranked are free, and still real names ("al hilal" was read as AC Milan).
+    knownNames: [
+      "Al Hilal", "Al-Hilal", "Al Nassr", "Al-Nassr", "Al Ittihad", "Al-Ittihad", "Al Ahli", "Inter Miami", "LA Galaxy",
+      "LAFC", "New York Red Bulls", "Boca Juniors", "River Plate", "Club América", "Chivas", "Santos", "Palmeiras",
+      "São Paulo", "Sporting CP", "Sporting Lisbon", "PSV Eindhoven", "PSV", "Feyenoord", "Monaco", "AS Monaco",
+      "Athletic Bilbao", "Real Sociedad", "Real Betis", "RB Leipzig", "Red Bull Salzburg", "Shakhtar Donetsk",
+      "Dynamo Kyiv", "Olympiacos", "Club Brugge", "Anderlecht", "Lille", "OGC Nice", "Nottingham Forest",
+    ],
+    // Every earlier season's Money League (1996–97 on): a club outside this season's shows its latest rank and
+    // revenue ("Ajax: #27 in 2021–22 (€187.2 million)"), latest season first.
+    also: (
+      [
+        [4, "2023–24"], [6, "2022–23"], [8, "2021–22"], [10, "2020–21"], [12, "2019–20"], [14, "2018–19"],
+        [16, "2017–18"], [18, "2016–17"], [20, "2015–16"], [22, "2014–15"], [24, "2013–14"], [26, "2012–13"],
+        [28, "2011–12"], [30, "2010–11"], [32, "2009–10"], [33, "2008–09"], [34, "2007–08"], [35, "2006–07"],
+        [36, "2005–06"], [37, "2004–05"], [38, "2003–04"], [39, "2002–03"], [40, "2001–02"], [41, "2000–01"],
+        [42, "1999–2000"], [43, "1998–99"], [44, "1997–98"], [45, "1996–97"],
+      ] as const
+    ).map(([table, season]) => ({
+      tables: [table],
+      name: "Club",
+      value: 2,
+      dated: { rank: 0, label: season, prefix: "€", unit: " million" },
+      rename: { Internazionale: "Inter Milan", Milan: "AC Milan" },
+    })),
+  },
+  {
+    id: "longest-running-tv",
+    debut: true,
+    category: "Entertainment",
+    title: "Longest-running US network TV series",
+    noun: "TV series",
+    prompt: "Name the 10 scripted primetime series on US broadcast networks (ABC, CBS, NBC, Fox, The CW) with the most seasons",
+    page: "List of longest-running scripted American primetime television series",
+    // Every scripted primetime series with 7+ seasons and 100+ episodes on a broadcast network, by seasons.
+    tables: [0],
+    name: "Series",
+    value: "Seasons",
+    metric: "Seasons",
+    unit: " seasons",
+    works: true,
+    // The table's asterisks read as footnote marks.
+    rename: { MASH: "M*A*S*H" },
+    aliases: {
+      "Law & Order: Special Victims Unit": ["SVU", "Law & Order SVU"],
+      "M*A*S*H": ["MASH"],
+    },
+    // Ads, jokes, coming seasons, characters, a lawsuit, a theme song and DVDs among the redirects; a spin-off's city
+    // ("los angeles", "miami") names no series.
+    junkAliases: [
+      "Simpsons TV ads", "Made up words simpsons", "The Simpsons Catch Phrases", "The Simpsons' impact on television",
+      "Simpsons neologism", "Simpsons words", "Simpsons jokes", "Simpsons World", "Simpsons prediction",
+      "Simpsons predictions", "Simpsonsmania", "The Simpsons season 39", "The Simpsons season 40",
+      "Law and order svu episodes", "Family Guy Movie", "Family Guy Case", "FG", "Family Guy season 26",
+      "Family Guy season 27", "NCIS theme song", "NCIS 3D", "Ellis Grey", "Thatcher Grey", "Molly Grey Thompson",
+      "Dr. Ellis Grey", "Intern Grey", "Grey Sloan Memorial Hospital", "Grey's Anatomy scrubs", "American Dad! DVDs",
+      "AD!", "Los Angeles", "Miami",
+    ],
+    // Cable shows (South Park, SpongeBob, It's Always Sunny) and unscripted or daytime network shows (Saturday Night
+    // Live, Survivor, Jeopardy!, the soaps) are free, and still real names: never read as a series here.
+    knownOnly: [
+      { page: "List of longest-running American cable television series", tables: [0, 1, 2, 3, 4], name: "Series" },
+      { page: "List of longest-running American broadcast network television series", tables: [0, 1, 2, 3, 4], name: "Series" },
+    ],
+    // The famous long runners those tables leave out: network reality and talent shows ("american idol" was read as
+    // American Dad!), streaming and premium dramas, British soaps.
+    knownNames: [
+      "American Idol", "The Voice", "Dancing with the Stars", "Survivor", "Big Brother", "The Bachelor",
+      "The Bachelorette", "The Amazing Race", "America's Got Talent", "Shark Tank", "Hell's Kitchen", "MasterChef",
+      "Top Chef", "Project Runway", "RuPaul's Drag Race", "Keeping Up with the Kardashians", "Game of Thrones",
+      "Breaking Bad", "Better Call Saul", "The Sopranos", "Stranger Things", "The Crown", "Yellowstone", "Euphoria",
+      "Doctor Who", "Coronation Street", "EastEnders", "Emmerdale", "Neighbours", "Home and Away", "Top Gear",
+      "Futurama", "Rick and Morty", "Archer", "BoJack Horseman",
+    ],
+  },
 ];
 
 /** Table indexes from..to, inclusive. */
