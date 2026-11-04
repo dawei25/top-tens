@@ -119,18 +119,21 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
         </ul>
       </section>
 
-      <section data-glass className="panel privacy-part" aria-labelledby="pv-delete">
+      <section data-glass className="panel privacy-part" aria-labelledby="pv-delete" data-testid="privacy-delete">
         <h2 id="pv-delete" className="label cyan">
           Deleting it
         </h2>
         <ul>
           {accountsOn && (
             <li>
-              Signed in: <a href="#stats">Your knowledge</a>, Account, delete account. That removes your save, your linked
-              scores, ratings and notes, and your sign-in, right away.
+              Signed in: <a href="#">Home</a>, Account, delete account. That removes your save, your linked scores, ratings
+              and notes, and your sign-in, right away.
             </li>
           )}
-          <li>In this browser: reset all progress on Home, or clear this site's data in your browser's settings.</li>
+          <li>
+            In this browser: <a href="#settings">Settings</a>, reset all progress, or clear this site's data in your browser's
+            settings.
+          </li>
           {PRIVACY_CONTACT && (
             <li>
               Anything else: <a href={`mailto:${PRIVACY_CONTACT}`}>{PRIVACY_CONTACT}</a>.
