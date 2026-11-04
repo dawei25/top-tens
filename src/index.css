@@ -1566,6 +1566,21 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Narrow phones: the question keeps its cost ("1 life"), on two short lines in the row's height if it must, never cut
+   to "first letter? 1 l..."; so does "no clues on your last life". */
+@media (max-width: 420px) {
+  .hint-ask {
+    font-size: 17px;
+    white-space: normal;
+  }
+  .hint-q {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1;
+    text-wrap: balance;
+  }
+}
 /* YES inside a row: a key-xs a size down, so it fits the row's height on a phone. */
 .key-inrow {
   flex: none;
