@@ -1,52 +1,62 @@
 {
   "Istanbul": {
-    "text": "Its population has increased tenfold since the 1950s as migrants arrived from across Anatolia.",
+    "text": "In Turkey, its population has increased tenfold since the 1950s as migrants arrived from across Anatolia.",
     "source": "https://en.wikipedia.org/wiki/Istanbul",
+    "where": "Turkey",
     "evidence": "The population of the city has increased tenfold since the 1950s, as migrants from across Anatolia have flocked to the metropolis and city limits have expanded to accommodate them."
   },
   "Moscow": {
-    "text": "Peter the Great moved the capital to Saint Petersburg in 1712; it only returned to Moscow in 1918.",
+    "text": "Peter the Great moved Russia's capital to Saint Petersburg in 1712; it only returned to Moscow in 1918.",
     "source": "https://en.wikipedia.org/wiki/Moscow",
+    "where": "Russia",
     "evidence": "During the reign of Peter the Great, the Russian capital was moved to the newly founded city of Saint Petersburg in 1712, ... the capital was moved back to Moscow in 1918."
   },
   "London": {
-    "text": "It grew rapidly in the 19th century, becoming the world's largest city at the time.",
+    "text": "The UK's capital grew rapidly in the 19th century, becoming the world's largest city at the time.",
     "source": "https://en.wikipedia.org/wiki/London",
+    "where": "United Kingdom",
     "evidence": "London grew rapidly in the 19th century, becoming the world's largest city at the time."
   },
   "Saint Petersburg": {
-    "text": "The world's northernmost city of more than 1 million residents.",
+    "text": "In Russia, it is the world's northernmost city of more than 1 million residents.",
     "source": "https://en.wikipedia.org/wiki/Saint_Petersburg",
+    "where": "Russia",
     "evidence": "Saint Petersburg is the fourth-most populous city in Europe, the most populous city on the Baltic Sea, and the world's northernmost city of more than 1 million residents."
   },
   "Berlin": {
-    "text": "In the 1920s it was the third-largest city in the world by population.",
+    "text": "In the 1920s Germany's capital was the third-largest city in the world by population.",
     "source": "https://en.wikipedia.org/wiki/Berlin",
+    "where": "Germany",
     "evidence": "Berlin in the 1920s was the third-largest city in the world by population."
   },
   "Madrid": {
-    "text": "Its core began as a walled military outpost under the Emirate of Córdoba in the late 9th century.",
+    "text": "Spain's capital began as a walled military outpost under the Emirate of Córdoba in the late 9th century.",
     "source": "https://en.wikipedia.org/wiki/Madrid",
+    "where": "Spain",
     "evidence": "The primitive core of Madrid, a walled military outpost, dates back to the late 9th century, under the Emirate of Córdoba."
   },
   "Kyiv": {
-    "text": "Its name is said to derive from Kyi, one of its four legendary founders.",
+    "text": "Ukraine's capital is said to take its name from Kyi, one of its four legendary founders.",
     "source": "https://en.wikipedia.org/wiki/Kyiv",
+    "where": "Ukraine",
     "evidence": "The city's name is said to derive from the name of Kyi, one of its four legendary founders."
   },
   "Rome": {
-    "text": "Vatican City lies within its boundaries, the only existing example of a country within a city.",
+    "text": "Italy's capital surrounds Vatican City, the only existing example of a country within a city.",
     "source": "https://en.wikipedia.org/wiki/Rome",
+    "where": "Italy",
     "evidence": "Vatican City—the smallest country in the world and headquarters of the worldwide Catholic Church under the governance of the Holy See—is an independent country within Rome's municipal boundaries, the only existing example of a country within a city."
   },
   "Baku": {
-    "text": "At 28 metres below sea level, it is the lowest-lying national capital in the world.",
+    "text": "Azerbaijan's capital sits 28 metres below sea level, the lowest-lying national capital in the world.",
     "source": "https://en.wikipedia.org/wiki/Baku",
+    "where": "Azerbaijan",
     "evidence": "Baku is 28 metres (92 ft) below sea level, which makes it the lowest lying national capital in the world and the largest city in the world below sea level."
   },
   "Paris": {
-    "text": "It has hosted the Summer Olympics three times: in 1900, 1924 and 2024.",
+    "text": "France's capital has hosted the Summer Olympics three times: in 1900, 1924 and 2024.",
     "source": "https://en.wikipedia.org/wiki/Paris",
+    "where": "France",
     "evidence": "Paris has also hosted the Summer Olympics three times, in 1900, 1924 and 2024."
   }
 }

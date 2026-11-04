@@ -1,57 +1,68 @@
 {
   "Beijing": {
-    "text": "In 2022 it became the first city to host both the Summer and Winter Olympics.",
+    "text": "In 2022 China's capital became the first city to host both the Summer and Winter Olympics.",
     "source": "https://en.wikipedia.org/wiki/Beijing",
+    "where": "China",
     "evidence": "In 2022, Beijing became the first city to host both the Summer and Winter Olympics, and also the Summer and Winter Paralympics."
   },
   "Tokyo": {
-    "text": "Originally Edo, it was renamed Tokyo ('Eastern Capital') when the imperial capital moved there from Kyoto.",
+    "text": "Originally Edo, Japan's capital was renamed Tokyo ('Eastern Capital') when the emperor moved there from Kyoto.",
     "source": "https://en.wikipedia.org/wiki/Tokyo",
+    "where": "Japan",
     "evidence": "After the Meiji Restoration (1868), the imperial capital in Kyoto was moved to Edo, and the city was renamed Tokyo (lit. 'Eastern Capital')."
   },
   "Moscow": {
-    "text": "The northernmost and coldest megacity in the world.",
+    "text": "Russia's capital is the northernmost and coldest megacity in the world.",
     "source": "https://en.wikipedia.org/wiki/Moscow",
+    "where": "Russia",
     "evidence": "The northernmost and coldest megacity in the world, Moscow is governed as a federal city,"
   },
   "Kinshasa": {
-    "text": "With Brazzaville across the Congo River, it forms the world's closest pair of capital cities.",
+    "text": "DR Congo's capital faces Brazzaville across the Congo River: the world's closest pair of capital cities.",
     "source": "https://en.wikipedia.org/wiki/Kinshasa",
+    "where": "DR Congo",
     "evidence": "Across the river sits Brazzaville, the smaller capital of the neighboring Republic of the Congo, forming the world's closest pair of capital cities despite being separated by a four-kilometer-wide unbridged span of the Congo River."
   },
   "Jakarta": {
-    "text": "The Dutch East India Company seized it in 1619 and rebuilt it as Batavia.",
+    "text": "The Dutch East India Company seized Indonesia's capital in 1619 and rebuilt it as Batavia.",
     "source": "https://en.wikipedia.org/wiki/Jakarta",
+    "where": "Indonesia",
     "evidence": "The Dutch East India Company (VOC) seized Jayakarta in 1619 and rebuilt it as Batavia, its main administrative centre in Asia and an important trading port."
   },
   "Dhaka": {
-    "text": "More than 1.5 million rickshaws run there each day, the most of any city, though only about 220,000 are licensed.",
+    "text": "Bangladesh's capital has more rickshaws than any city, over 1.5 million a day, though only about 220,000 are licensed.",
     "source": "https://en.wikipedia.org/wiki/Dhaka",
+    "where": "Bangladesh",
     "evidence": "Cycle rickshaws and CNG auto-rickshaws are the main modes of transport within the metro area, with more than 1.5 million rickshaws running each day: the highest number in any city in the world. However, only around 220 thousand rickshaws are licensed by the city government."
   },
   "Lima": {
     "text": "Around one-third of Peru's population lives in its metropolitan area.",
     "source": "https://en.wikipedia.org/wiki/Lima",
+    "where": "Peru",
     "evidence": "Around one-third of the national population now lives in its metropolitan area."
   },
   "Cairo": {
-    "text": "Known as \"the city of a thousand minarets\" for its wealth of Islamic architecture.",
+    "text": "Egypt's capital is known as \"the city of a thousand minarets\" for its wealth of Islamic architecture.",
     "source": "https://en.wikipedia.org/wiki/Cairo",
+    "where": "Egypt",
     "evidence": "Cairo has since become a longstanding centre of political and cultural life, and is titled \"the city of a thousand minarets\" for its preponderance of Islamic architecture."
   },
   "Seoul": {
-    "text": "During the Korean War the city changed hands four times.",
+    "text": "During the Korean War South Korea's capital changed hands four times.",
     "source": "https://en.wikipedia.org/wiki/Seoul",
+    "where": "South Korea",
     "evidence": "The Korean War brought fierce battles, with Seoul changing hands four times and leaving the city mostly in ruins."
   },
   "Mexico City": {
-    "text": "It began as Tenochtitlan, a Mexica city built around 1325 on islands in Lake Texcoco.",
+    "text": "Mexico's capital began as Tenochtitlan, a Mexica city built around 1325 on islands in Lake Texcoco.",
     "source": "https://en.wikipedia.org/wiki/Mexico_City",
+    "where": "Mexico",
     "evidence": "It began as Tenochtitlan, a Mexica city built around 1325 on islands in Lake Texcoco."
   },
   "London": {
-    "text": "The London Underground is the world's oldest rapid transit system.",
+    "text": "The UK's capital has the world's oldest rapid transit system, the London Underground.",
     "source": "https://en.wikipedia.org/wiki/London",
+    "where": "United Kingdom",
     "evidence": "The London Underground is the world's oldest rapid transit system."
   }
 }

@@ -9,8 +9,10 @@ import {
   elsewhereErrors,
   FACTS_REQUIRED_FROM,
   factIssues,
+  factsWithoutPlace,
   figureShare,
   missingNicknames,
+  PLACES_NOUN,
   REGION_REQUIRED_FROM,
   regionGaps,
   undeclaredRegion,
@@ -284,6 +286,76 @@ describe("validate: regional lists", () => {
       const built: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${t.id}.json`), "utf8"));
       expect(elsewhereErrors(built, t), t.id).toEqual([]);
       if (built.source.asOf >= REGION_REQUIRED_FROM) expect(regionGaps(built, t), t.id).toEqual([]);
+    }
+  });
+});
+
+describe("validate: facts on lists of places say where", () => {
+  const withFacts = (...texts: string[]) => {
+    const p = puzzle();
+    texts.forEach((text, i) => (p.answers[i].fact = { text, source: fact.source }));
+    p.answers = p.answers.slice(0, texts.length);
+    return p;
+  };
+
+  it("flags a fact on a one-country list that names no state (owner: say the national park's state)", () => {
+    const p = withFacts("Home to well over half of the world's geysers.", "In Utah, it was first protected in 1909.");
+    expect(factsWithoutPlace(p, { placesIn: "United States" })).toEqual(["#1 Answer 1"]);
+  });
+
+  it("takes states, provinces and their spellings on one-country lists", () => {
+    const us = withFacts(
+      "In Washington state, it became a park in 1938.",
+      "Spread over Wyoming, Montana and Idaho, it holds geysers.",
+      "In New York City, the building has 94 stories.",
+    );
+    expect(factsWithoutPlace(us, { placesIn: "United States" })).toEqual([]);
+    expect(factsWithoutPlace(withFacts("A planned city, capital of Goias state."), { placesIn: "Brazil" })).toEqual([]);
+    expect(factsWithoutPlace(withFacts("A municipality with the rank of a province, it has a port."), { placesIn: "China" })).toEqual([]);
+    // A country is not enough where the list is all one country.
+    expect(factsWithoutPlace(withFacts("Brazil's first planned modern city."), { placesIn: "Brazil" })).toEqual(["#1 Answer 1"]);
+  });
+
+  it("takes a country, its usual form, a continent or a US state on a world list, not an adjective", () => {
+    const ok = withFacts(
+      "In the United Arab Emirates, it opened in 1960.",
+      "Its control tower is shaped like a tulip, Turkey's national flower.",
+      "In Ann Arbor, Michigan, every home game draws 100,000.",
+      "In London, UK, it got 25,000 noise complaints.",
+      "In Antarctica, meteorites keep well.",
+      "On the Nepal–China border, it measured 29,000 ft.",
+    );
+    expect(factsWithoutPlace(ok, { placesIn: "world" })).toEqual([]);
+    const bad = withFacts(
+      "The Dutch Republic seized it in 1619.",
+      "Contains Manitoulin Island, the largest freshwater island on Earth.",
+      "During the Korean War the city changed hands four times.",
+    );
+    expect(factsWithoutPlace(bad, { placesIn: "world" })).toEqual(["#1 Answer 1", "#2 Answer 2", "#3 Answer 3"]);
+  });
+
+  it("takes the planet a moon orbits", () => {
+    const p = withFacts("A moon of Jupiter, its surface is heavily cratered.", "Named after the king of the fairies.");
+    expect(factsWithoutPlace(p, { placesIn: "planets" })).toEqual(["#2 Answer 2"]);
+  });
+
+  it("warns in checkPuzzle, and on a list of places that doesn't say placesIn", () => {
+    const p = puzzle();
+    p.noun = "lakes";
+    p.answers[0].fact = { text: "Named after a king.", source: fact.source };
+    const lakes = { id: "test-list", category: "Oddball" as const, noun: "lakes" };
+    expect(warnings(p, { ...lakes, placesIn: "world" })).toContainEqual(expect.stringContaining("don't say where the place is"));
+    expect(warnings(p, lakes)).toContainEqual(expect.stringContaining("set `placesIn`"));
+    expect(errors(p, { ...lakes, placesIn: "world" })).toEqual([]);
+  });
+
+  it("holds on every list of places as built", () => {
+    for (const t of TOPICS) if (PLACES_NOUN.test(t.noun)) expect(t.placesIn, `${t.id}: placesIn`).toBeDefined();
+    const lists = TOPICS.filter((t) => t.placesIn);
+    expect(lists.map((t) => t.id)).toEqual(expect.arrayContaining(["national-parks", "lakes", "us-cities", "moons", "stadiums"]));
+    for (const t of lists) {
+      const built: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${t.id}.json`), "utf8"));
+      expect(factsWithoutPlace(built, t), t.id).toEqual([]);
     }
   });
 });

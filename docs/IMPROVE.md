@@ -110,6 +110,7 @@ stronger.
 | "saudi aramco" filled Saudi Arabia | a name read as an answer plus who made it | `leadingName` is skipped when the whole guess is a known name; match.test.ts |
 | "Most-followed Facebook pages" was a worse Instagram list, not fun to play | near-duplicate lists (same answers, weaker version) | removed; topic gate in step 1: no weaker copy of a list the bank has; judge brief: compare with the bank's closest list |
 | The Google client ID was pasted into Vercel with a trailing newline | env values with stray whitespace | `src/net/config.ts` trims every public env value and ignores a client ID that isn't one; index.test.ts, and the e2e Google build uses a client ID ending in "\n" |
+| National parks facts didn't say which state each park is in (owner) | facts on a list of places that don't say where the place is | `placesIn` on every place list (validate.ts warns when a list's noun is places without it); validate.ts warns on a top-10 fact naming no country, state or province (gazetteer.ts `DIVISIONS`) or planet, and validate.test.ts runs it on every built place list; facts files record the source table's location as `where`; judge brief step 6 (the right place); build.test.ts: built facts are what a rebuild gives, so a hand-patched daily keeps them |
 
 ## What good looks like
 

@@ -1,52 +1,62 @@
 {
   "Nile": {
-    "text": "Geologically young, it has only followed its present course for about 15,000 years.",
+    "text": "Its basin spans 11 countries, including Egypt and Sudan; it has only followed its present course for about 15,000 years.",
     "source": "https://en.wikipedia.org/wiki/Nile",
+    "where": "Ethiopia, Eritrea, Sudan, Uganda, Tanzania, Kenya, Rwanda, Burundi, Egypt, Democratic Republic of the Congo, South Sudan",
     "evidence": "Geologically, the Nile is a young river, having followed its present course for about 15,000 years."
   },
   "Amazon": {
-    "text": "It discharges more water than the next seven largest independent rivers combined.",
+    "text": "Draining Brazil, Peru and Colombia, it discharges more water than the next seven largest independent rivers combined.",
     "source": "https://en.wikipedia.org/wiki/Amazon_River",
+    "where": "Brazil, Peru, Colombia",
     "evidence": "The Amazon River has an average discharge of about 215,000 to 230,000 cubic meters per second (7,600,000 to 8,100,000 cu ft/s)—approximately 6,591 to 7,570 cubic kilometers (1,581 to 1,816 cu mi) per year, greater than the next seven largest independent rivers combined."
   },
   "Yangtze": {
     "text": "Its basin covers a fifth of China's land and is home to nearly a third of the country's people.",
     "source": "https://en.wikipedia.org/wiki/Yangtze",
+    "where": "China",
     "evidence": "Its drainage basin comprises one-fifth of the land area of China, and is home to nearly one-third of the country's population."
   },
   "Mississippi": {
     "text": "Its watershed drains all or parts of 32 U.S. states and two Canadian provinces.",
     "source": "https://en.wikipedia.org/wiki/Mississippi_River",
+    "where": "United States (98.5%), Canada (1.5%)",
     "evidence": "With its many tributaries, the Mississippi's watershed drains all or parts of 32 U.S. states and two Canadian provinces between the Rocky and Appalachian mountains."
   },
   "Yenisey": {
-    "text": "Its basin takes in Lake Baikal, the world's deepest lake.",
+    "text": "Its basin, almost all in Russia with a slice of Mongolia, takes in Lake Baikal, the world's deepest lake.",
     "source": "https://en.wikipedia.org/wiki/Yenisey",
+    "where": "Russia (97%), Mongolia (2.9%)",
     "evidence": "Its basin includes Lake Baikal, the world's deepest lake."
   },
   "Yellow River": {
     "text": "One estimate counts 1,593 floods in 2,540 years, hence the nickname \"China's Sorrow\".",
     "source": "https://en.wikipedia.org/wiki/Yellow_River",
+    "where": "China",
     "evidence": "The river has provided fertile soil for agriculture, but since then has flooded and changed course frequently, with one estimate counting 1,593 floods in the 2,540 years between 595 BC and 1946 AD. As such, the Yellow River has been considered a blessing and a curse throughout history, and has been nicknamed both \"China's Pride\" and \"China's Sorrow\"."
   },
   "Ob": {
-    "text": "It ends in the Gulf of Ob, the world's longest estuary.",
+    "text": "Draining Russia, Kazakhstan, China and Mongolia, it ends in the Gulf of Ob, the world's longest estuary.",
     "source": "https://en.wikipedia.org/wiki/Ob_(river)",
+    "where": "Russia, Kazakhstan, China, Mongolia",
     "evidence": "The Gulf of Ob is the world's longest estuary."
   },
   "Río de la Plata": {
-    "text": "\"River of Silver\" comes from a myth of vast silver in the region, which is also how Argentina got its name.",
+    "text": "Its basin spans Brazil, Argentina, Paraguay, Bolivia and Uruguay; a myth of silver there named both it and Argentina.",
     "source": "https://en.wikipedia.org/wiki/R%C3%ADo_de_la_Plata",
+    "where": "Brazil (46.7%), Argentina (27.7%), Paraguay (13.5%), Bolivia (8.3%), Uruguay (3.8%)",
     "evidence": "The name Río de la Plata (\"River of Silver\") was adopted because of a myth that the region around the river basin contained vast amounts of silver. This is also why the country is named Argentina (meaning loosely \"silvery land\")."
   },
   "Congo": {
-    "text": "The only major river to cross the equator twice.",
+    "text": "Draining DR Congo and eight other countries, it is the only major river to cross the equator twice.",
     "source": "https://en.wikipedia.org/wiki/Congo_River",
+    "where": "Democratic Republic of the Congo, Central African Republic, Angola, Republic of the Congo, Tanzania, Cameroon, Zambia, Burundi, Rwanda",
     "evidence": "It is the only major river to cross the equator twice."
   },
   "Amur": {
-    "text": "Its largest fish, the kaluga sturgeon, can grow as long as 5.6 m.",
+    "text": "Draining Russia, China and Mongolia, it is home to the kaluga sturgeon, which can grow as long as 5.6 m.",
     "source": "https://en.wikipedia.org/wiki/Amur",
+    "where": "Russia, China, Mongolia",
     "evidence": "The largest fish species in the Amur is the kaluga, a sturgeon that is one of the largest freshwater fish in the world, attaining a length as great as 5.6 m (18 ft)."
   }
 }

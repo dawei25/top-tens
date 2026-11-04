@@ -1,5 +1,8 @@
 import * as cheerio from "cheerio";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import type { Puzzle } from "../src/game/types";
 import {
   datedLabel,
   datedValue,
@@ -11,6 +14,7 @@ import {
   qualifiedLink,
   rangeText,
   rankOf,
+  readFacts,
   regionalNamesake,
   regionColumn,
   sameKey,
@@ -147,6 +151,20 @@ describe("matchFacts", () => {
     expect(matchFacts(facts, top)).toEqual([undefined, undefined]);
     // An exact name wins over a fact sourced from the same article.
     expect(matchFacts({ Paris: fact("Paris"), "Paris, France": fact("Paris") }, [entry("Paris")])).toEqual(["Paris"]);
+  });
+
+  it("gives every built list the facts a rebuild would: a fact patched into a daily by hand is in scripts/facts too", () => {
+    const dir = join(import.meta.dirname, "..", "public", "puzzles");
+    let lists = 0;
+    for (const f of readdirSync(dir).filter((x) => x.endsWith(".json"))) {
+      const p: Partial<Puzzle> = JSON.parse(readFileSync(join(dir, f), "utf8"));
+      if (!p.id || !p.answers) continue;
+      lists++;
+      const facts = readFacts(p.id);
+      const keys = matchFacts(facts, p.answers);
+      expect(p.answers.map((e) => e.fact ?? null), p.id).toEqual(keys.map((k) => (k ? facts[k] : null)));
+    }
+    expect(lists).toBeGreaterThan(50);
   });
 });
 

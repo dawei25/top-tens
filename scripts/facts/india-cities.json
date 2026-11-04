@@ -1,52 +1,62 @@
 {
   "Mumbai": {
-    "text": "Once seven islands, it passed to the British Crown in 1661 as part of Catherine of Braganza's dowry.",
+    "text": "Once seven islands, Maharashtra's capital passed to the British Crown in 1661 in Catherine of Braganza's dowry.",
     "source": "https://en.wikipedia.org/wiki/Mumbai",
+    "where": "Maharashtra",
     "evidence": "Mumbai, originally an archipelago of seven islands, has evidence of human occupation dating back to the South Asian Stone Age. ... In 1535, the islands were ceded to the Portuguese, and in 1661, transferred to the British Crown as part of Catherine of Braganza's dowry, before being leased to the East India Company in 1668."
   },
   "Delhi": {
-    "text": "Capital of both the Delhi Sultanate and the Mughal Empire between the 13th and 19th centuries.",
+    "text": "A union territory of its own, it was capital of the Delhi Sultanate and the Mughal Empire from the 13th to 19th centuries.",
     "source": "https://en.wikipedia.org/wiki/Delhi",
+    "where": "Delhi",
     "evidence": "From the early 13th century until the mid-19th century, Delhi was the capital of two major empires, the Delhi Sultanate and the Mughal Empire, which covered large parts of South Asia."
   },
   "Bengaluru": {
-    "text": "The name first appears in an old Kannada stone inscription from 890 CE.",
+    "text": "The name of Karnataka's capital first appears in an old Kannada stone inscription from 890 CE.",
     "source": "https://en.wikipedia.org/wiki/Bengaluru",
+    "where": "Karnataka",
     "evidence": "The first mention of the name \"Bengaluru\" is from an old Kannada stone inscription from 890 CE found at the Nageshwara Temple in Begur."
   },
   "Hyderabad": {
-    "text": "Once nicknamed the \"City of Pearls\", it was the world's only trading centre for Golconda diamonds.",
+    "text": "Telangana's capital, once nicknamed the \"City of Pearls\", was the world's only trading centre for Golconda diamonds.",
     "source": "https://en.wikipedia.org/wiki/Hyderabad",
+    "where": "Telangana",
     "evidence": "Until the 19th century, Hyderabad was known for its pearl industry and was nicknamed the \"City of Pearls\", and was the only trading centre for Golconda diamonds in the world."
   },
   "Chennai": {
-    "text": "Its municipal corporation, set up in 1688, is the second oldest in the world after the City of London's.",
+    "text": "Tamil Nadu's capital has the second oldest municipal corporation in the world, set up in 1688, after the City of London's.",
     "source": "https://en.wikipedia.org/wiki/Chennai",
+    "where": "Tamil Nadu",
     "evidence": "It is administered by the Greater Chennai Corporation, which was incorporated in 1688, and is the second oldest municipal corporation in the world after the City of London Corporation."
   },
   "Ahmedabad": {
-    "text": "Home to the Narendra Modi Stadium, which holds 132,000 spectators and is the world's largest stadium.",
+    "text": "Gujarat's largest city has the Narendra Modi Stadium, the world's largest, which holds 132,000 spectators.",
     "source": "https://en.wikipedia.org/wiki/Ahmedabad",
+    "where": "Gujarat",
     "evidence": "Cricket is a popular sport in Ahmedabad; the Narendra Modi Stadium at Motera can accommodate 132,000 spectators, making it the largest stadium in the world."
   },
   "Kolkata": {
-    "text": "As Calcutta, it was once the second largest city in the British Empire, after London.",
+    "text": "As Calcutta, West Bengal's capital was once the second largest city in the British Empire, after London.",
     "source": "https://en.wikipedia.org/wiki/Kolkata",
+    "where": "West Bengal",
     "evidence": "Calcutta was the second largest city in the British Empire, after London, and was the centre of bureaucracy, politics, law, education, science and the arts in India."
   },
   "Surat": {
-    "text": "About 90% of the world's diamonds are cut and polished here.",
+    "text": "This city in Gujarat cuts and polishes about 90% of the world's diamonds.",
     "source": "https://en.wikipedia.org/wiki/Surat",
+    "where": "Gujarat",
     "evidence": "About 90% of the world's diamonds are cut and polished in Surat."
   },
   "Pune": {
-    "text": "Often called the \"Oxford of the East\" because of its educational institutions.",
+    "text": "In Maharashtra, it is often called the \"Oxford of the East\" because of its educational institutions.",
     "source": "https://en.wikipedia.org/wiki/Pune",
+    "where": "Maharashtra",
     "evidence": "Pune is often referred to as the \"Oxford of the East\" because of its educational institutions."
   },
   "Jaipur": {
-    "text": "The Pink City was painted pink in 1876 to welcome Albert Edward, Prince of Wales.",
+    "text": "Rajasthan's capital, the Pink City, was painted pink in 1876 to welcome Albert Edward, Prince of Wales.",
     "source": "https://en.wikipedia.org/wiki/Jaipur",
+    "where": "Rajasthan",
     "evidence": "During the rule of Sawai Ram Singh II, the city was painted pink to welcome Albert Edward, Prince of Wales in 1876."
   }
 }

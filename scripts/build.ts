@@ -1039,9 +1039,10 @@ const FACTS_DIR = join(import.meta.dirname, "facts");
 
 /**
  * Curated fun facts for a topic, keyed by entry name: scripts/facts/<topic id>.json. Each may also carry an
- * `evidence` quote from the article for review; only text and source ship.
+ * `evidence` quote from the article and, on a list of places, `where`: the location as the source table gives it
+ * (for review; the text says it). Only text and source ship.
  */
-function readFacts(id: string): Record<string, Fact> {
+export function readFacts(id: string): Record<string, Fact> {
   const file = join(FACTS_DIR, `${id}.json`);
   if (!existsSync(file)) return {};
   const raw: Record<string, Fact & { evidence?: string }> = JSON.parse(readFileSync(file, "utf8"));

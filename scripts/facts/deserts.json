@@ -1,52 +1,62 @@
 {
   "Antarctic Desert": {
-    "text": "It preserves meteorites so well that ones over a million years old turn up, a few of them from the Moon and Mars.",
+    "text": "In Antarctica, meteorites keep so well that ones over a million years old turn up, a few of them from the Moon and Mars.",
     "source": "https://en.wikipedia.org/wiki/Antarctica",
+    "where": "Antarctica",
     "evidence": "Antarctica provides a unique environment for the study of meteorites: the dry polar desert preserves them well, and meteorites older than a million years have been found. ... Most meteorites come from asteroids, but a few meteorites found in Antarctica came from the Moon and Mars."
   },
   "Arctic Desert": {
-    "text": "Arctic comes from the Greek for \"near the Bear\", after the Great Bear in the northern sky.",
+    "text": "It spans Canada, Alaska, Greenland, the Nordic countries and Russia; \"Arctic\" comes from the Greek for \"near the Bear\".",
     "source": "https://en.wikipedia.org/wiki/Arctic",
+    "where": "Canada, Finland, Greenland, Iceland, Norway, Russia, Sweden, United States (Alaska)",
     "evidence": "The word Arctic comes from the Greek word ἀρκτικός arktikos \"near the Bear, northern\" and from the word ἄρκτος arktos meaning \"bear,\" named for either the constellation known as Ursa Major, the \"Great Bear\""
   },
   "Sahara Desert": {
-    "text": "It is so large and bright that, in theory, it could be detected from other stars.",
+    "text": "Spanning 12 countries, from Morocco to Egypt, it is so large and bright it could in theory be detected from other stars.",
     "source": "https://en.wikipedia.org/wiki/Sahara_Desert",
+    "where": "Algeria, Chad, Egypt, Eritrea, Libya, Mali, Mauritania, Morocco, Niger, Sudan, Tunisia, Western Sahara",
     "evidence": "The Sahara is so large and bright that, in theory, it could be detected from other stars as a surface feature of Earth, with near-current technology."
   },
   "Arabian Desert": {
-    "text": "At its southern end lies the Empty Quarter, the largest continuous body of sand in the world.",
+    "text": "Spanning Saudi Arabia and ten other countries, it holds the Empty Quarter, the world's largest continuous body of sand.",
     "source": "https://en.wikipedia.org/wiki/Arabian_Desert",
+    "where": "Egypt (Sinai Peninsula), Iraq, Israel, Jordan, Kuwait, Oman, Palestine, Qatar, Saudi Arabia, United Arab Emirates, Yemen",
     "evidence": "At its southern end is Ar-Rub' al-Khali (The Empty Quarter), the largest continuous body of sand in the world."
   },
   "Great Australian Desert": {
-    "text": "It has the largest population of feral camels in the world.",
+    "text": "In Australia, it has the largest population of feral camels in the world.",
     "source": "https://en.wikipedia.org/wiki/Great_Australian_Desert",
+    "where": "Australia",
     "evidence": "The Australian desert has the largest population of feral camels in the world."
   },
   "Gobi Desert": {
-    "text": "Temperatures can change by as much as 35 °C within 24 hours.",
+    "text": "In China and Mongolia, its temperatures can change by as much as 35 °C within 24 hours.",
     "source": "https://en.wikipedia.org/wiki/Gobi_Desert",
+    "where": "China, Mongolia",
     "evidence": "However, the climate of the Gobi is one of great extremes, with rapid changes of temperature of as much as 35 °C (63 °F) in 24-hour spans."
   },
   "Kalahari Desert": {
-    "text": "The name comes from Tswana words meaning \"the great thirst\" or \"a waterless place\".",
+    "text": "In Botswana, Namibia and South Africa, its name comes from Tswana words meaning \"the great thirst\" or \"a waterless place\".",
     "source": "https://en.wikipedia.org/wiki/Kalahari_Desert",
+    "where": "Botswana, Namibia, South Africa",
     "evidence": "Kalahari is derived from the Tswana word Kgala, meaning \"the great thirst\", or Kgalagadi, meaning \"a waterless place\";"
   },
   "Patagonian Desert": {
-    "text": "The Andes block Pacific moisture, creating the rain shadow that formed it.",
+    "text": "In Argentina and Chile, it formed in the rain shadow of the Andes, which block moisture from the Pacific.",
     "source": "https://en.wikipedia.org/wiki/Patagonian_Desert",
+    "where": "Argentina, Chile",
     "evidence": "The Andes, to the desert's west, are the primary reason for the Patagonian desert status as they inhibit the westerly flow of moisture from the southern Pacific from reaching inland. This creates a rain shadow that accounts for the formation of the desert"
   },
   "Syrian Desert": {
-    "text": "The golden hamster comes from here.",
+    "text": "Spanning Syria, Jordan, Iraq and Saudi Arabia, it is where the golden hamster comes from.",
     "source": "https://en.wikipedia.org/wiki/Syrian_Desert",
+    "where": "Iraq, Jordan, Saudi Arabia, Syria",
     "evidence": "The Syrian Desert is the origin of the golden hamster."
   },
   "Great Basin Desert": {
-    "text": "More than 33 of its peaks rise above 9,800 feet (3,000 m).",
+    "text": "In Nevada, Utah, California and Idaho, it has more than 33 peaks above 9,800 feet (3,000 m).",
     "source": "https://en.wikipedia.org/wiki/Great_Basin_Desert",
+    "where": "United States (Nevada, Utah, California, Idaho)",
     "evidence": "There are more than 33 peaks within the desert with summits higher than 9,800 feet (3,000 m),"
   }
 }

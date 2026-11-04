@@ -41,6 +41,9 @@ sports statistician.
 6. **Check the reveal.** Every top-10 answer should show a fun fact, and your casual player's misses should show a
    rank or a figure. A miss that only says "isn't in the top 10" while the page has numbers for it is a `fixes` item.
    When players answer by something other than the entry's name (the artist of a tour), the fact names it.
+   On a list of places, every fact says where the place is: its country, or its state or province on a one-country
+   list (the owner, on national parks), the planet a moon orbits; and it is the right place, as the source table
+   gives it. validate.ts only checks that a place is named.
 7. **Score and decide** (below), then write the verdict file.
 
 ## Scores (1 to 5)

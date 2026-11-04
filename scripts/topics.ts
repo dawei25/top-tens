@@ -1,4 +1,4 @@
-import { UNIVERSES, type Region, type Universe } from "./gazetteer";
+import { UNIVERSES, type DivisionCountry, type Region, type Universe } from "./gazetteer";
 import type { ValueKind } from "./values";
 
 export interface Topic {
@@ -81,6 +81,14 @@ export interface Topic {
    * Members of the region the table leaves out (Vatican City) stay answers. scripts/validate.ts checks all of this.
    */
   region?: Region;
+  /**
+   * The answers are places, so every top-10 fact says where the place is (owner, national parks: "could improve by
+   * including what state each national park was in"). "world": its country (a US state or a continent will do; a
+   * place on a border names both sides); a country's name: its state or province, as scripts/gazetteer.ts
+   * DIVISIONS lists them; "planets": the planet a moon orbits. Take the location from the source table. scripts/
+   * validate.ts warns on a fact that names none, and on a list of places (by its noun) without `placesIn`.
+   */
+  placesIn?: "world" | "planets" | DivisionCountry;
   /**
    * The universe only names the rows (country forms, demonyms, the country junk list): members the tables leave out
    * are free, not answers. A country McDonald's never opened in costs nothing.
@@ -480,6 +488,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Most populous US cities",
     noun: "cities",
+    placesIn: "United States",
     prompt: "Name the 10 most populous cities in the United States (city proper)",
     page: "List of United States cities by population",
     tables: [1],
@@ -496,6 +505,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest cities in the world",
     noun: "cities",
+    placesIn: "world",
     prompt: "Name the 10 largest cities in the world (UN 2025 estimates)",
     page: "List of largest cities",
     tables: [0],
@@ -523,6 +533,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Highest mountains",
     noun: "mountains",
+    placesIn: "world",
     prompt: "Name the 10 highest mountains on Earth",
     page: "List of highest mountains on Earth",
     tables: [0],
@@ -551,6 +562,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Longest rivers",
     noun: "rivers",
+    placesIn: "world",
     prompt: "Name the 10 longest rivers in the world",
     page: "List of rivers by length",
     tables: [1],
@@ -591,6 +603,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest islands",
     noun: "islands",
+    placesIn: "world",
     prompt: "Name the 10 largest islands in the world",
     page: "List of islands by area",
     tables: [1],
@@ -615,6 +628,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest lakes",
     noun: "lakes",
+    placesIn: "world",
     prompt: "Name the 10 largest lakes in the world by area",
     page: "List of lakes by area",
     tables: [1],
@@ -897,6 +911,7 @@ export const TOPICS: Topic[] = [
     category: "Culture",
     title: "Tallest buildings",
     noun: "buildings",
+    placesIn: "world",
     prompt: "Name the 10 tallest completed buildings in the world",
     page: "List of tallest buildings",
     tables: [1],
@@ -965,6 +980,7 @@ export const TOPICS: Topic[] = [
     category: "Sports",
     title: "Largest stadiums",
     noun: "stadiums",
+    placesIn: "world",
     prompt: "Name the 10 largest stadiums in the world by capacity (any sport, college stadiums included)",
     page: "List of stadiums by capacity",
     tables: [0, 1, 2, 3, 4, 5, 6],
@@ -1007,6 +1023,7 @@ export const TOPICS: Topic[] = [
     category: "Business",
     title: "Busiest airports",
     noun: "airports",
+    placesIn: "world",
     prompt: "Name the 10 busiest airports in the world by passenger traffic (2025)",
     page: "List of busiest airports by passenger traffic",
     tables: [0],
@@ -1538,6 +1555,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest cities in Europe",
     noun: "cities",
+    placesIn: "world",
     prompt: "Name the 10 most populous cities in Europe (city limits)",
     page: "List of European cities by population within city limits",
     tables: [0],
@@ -1570,6 +1588,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest cities in India",
     noun: "cities",
+    placesIn: "India",
     prompt: "Name the 10 most populous cities in India (city proper, 2011 census)",
     page: "List of cities in India by population",
     tables: [0],
@@ -1596,6 +1615,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest cities in Canada",
     noun: "cities",
+    placesIn: "Canada",
     prompt: "Name the 10 most populous cities in Canada (municipalities, 2021 census)",
     page: "List of the 100 largest municipalities in Canada by population",
     tables: [0],
@@ -1618,6 +1638,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest cities in mainland China",
     noun: "cities",
+    placesIn: "China",
     prompt: "Name the 10 most populous cities in mainland China (2020 census)",
     page: "List of cities in China by population",
     // Cities over a million, then the 100,000 to 1 million table: one ranking by the same 2020 census.
@@ -1633,6 +1654,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest deserts",
     noun: "deserts",
+    placesIn: "world",
     prompt: "Name the 10 largest deserts in the world by area (polar deserts included)",
     page: "List of deserts by area",
     tables: [0],
@@ -1657,6 +1679,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Most visited cities",
     noun: "cities",
+    placesIn: "world",
     prompt: "Name the 10 cities with the most international visitors in 2025",
     page: "List of cities by international visitors",
     tables: [0],
@@ -1687,6 +1710,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Most visited US national parks",
     noun: "national parks",
+    placesIn: "United States",
     prompt: "Name the 10 most visited US national parks in 2025",
     page: "List of national parks of the United States",
     tables: [0],
@@ -1723,6 +1747,7 @@ export const TOPICS: Topic[] = [
     category: "Science",
     title: "Largest moons",
     noun: "moons",
+    placesIn: "planets",
     prompt: "Name the 10 largest moons in the Solar System by radius",
     page: "List of natural satellites",
     tables: [4],
@@ -1743,6 +1768,7 @@ export const TOPICS: Topic[] = [
     category: "Culture",
     title: "Most visited museums",
     noun: "museums",
+    placesIn: "world",
     prompt: "Name the 10 most visited museums in the world (latest annual figures)",
     page: "List of most-visited museums",
     tables: [0],
@@ -2110,6 +2136,7 @@ export const TOPICS: Topic[] = [
     category: "Entertainment",
     title: "Most visited theme parks",
     noun: "theme parks",
+    placesIn: "world",
     prompt: "Name the 10 most visited theme parks in the world (2024)",
     page: "List of amusement park rankings",
     tables: [1],
@@ -2157,6 +2184,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest US metro areas",
     noun: "metro areas",
+    placesIn: "United States",
     prompt: "Name the 10 most populous metropolitan areas in the United States (2025 estimates)",
     page: "Metropolitan statistical area",
     tables: [0],
@@ -2171,6 +2199,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Most populous capital cities",
     noun: "capital cities",
+    placesIn: "world",
     prompt: "Name the 10 most populous national capitals (city proper)",
     page: "List of national capitals by population",
     tables: [0],
@@ -2198,6 +2227,7 @@ export const TOPICS: Topic[] = [
     category: "Geography",
     title: "Largest cities in Brazil",
     noun: "cities",
+    placesIn: "Brazil",
     prompt: "Name the 10 most populous cities in Brazil (2025 estimates)",
     page: "List of cities in Brazil by population",
     tables: [1],

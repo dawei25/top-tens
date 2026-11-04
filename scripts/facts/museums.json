@@ -1,52 +1,62 @@
 {
   "Louvre": {
-    "text": "Remnants of the medieval Louvre fortress are visible in the museum's basement.",
+    "text": "In Paris, France, remnants of the medieval Louvre fortress are visible in the museum's basement.",
     "source": "https://en.wikipedia.org/wiki/Louvre",
+    "where": "Paris; France",
     "evidence": "Remnants of the Medieval Louvre fortress are visible in the basement of the museum."
   },
   "National Museum of China": {
-    "text": "The museum with the largest single building area in the world.",
+    "text": "In Beijing, China's capital, it has the largest single building area of any museum in the world.",
     "source": "https://en.wikipedia.org/wiki/National_Museum_of_China",
+    "where": "Beijing; China",
     "evidence": "It is the museum with the largest single building area in the world and the museum with the richest collection of Chinese cultural relics."
   },
   "Vatican Museums": {
-    "text": "They trace their origin to one marble sculpture, Laocoön and His Sons, found in a Roman vineyard in 1506.",
+    "text": "In Vatican City, they trace their origin to one marble sculpture, Laocoön and His Sons, found in a Roman vineyard in 1506.",
     "source": "https://en.wikipedia.org/wiki/Vatican_Museums",
+    "where": "Vatican City, Rome; Vatican",
     "evidence": "The Vatican Museums trace their origin to a single marble sculpture, purchased in the 16th century: Laocoön and His Sons was discovered on 14 January 1506, in a vineyard near the basilica of Santa Maria Maggiore in Rome."
   },
   "Shenzhen Museum": {
-    "text": "Its exhibits include the white Toyota van Deng Xiaoping toured the city in on his 1992 southern tour.",
+    "text": "In Shenzhen, China, its exhibits include the white Toyota van Deng Xiaoping toured the city in on his 1992 southern tour.",
     "source": "https://en.wikipedia.org/wiki/Shenzhen_Museum",
+    "where": "Shenzhen; China",
     "evidence": "Among the items on display in the exhibit are several from Deng Xiaoping's 1992 southern tour, including the Flying Sparrow spade he used to plant a tree in Shenzhen, the office goods and furniture from Deng Xiaoping's hotel room, and the white Toyota van in which he toured the city."
   },
   "National Museum of Korea": {
-    "text": "Stands on what used to be a golf course at the US Army's Yongsan Garrison.",
+    "text": "In Seoul, South Korea, it stands on a former golf course at the US Army's Yongsan Garrison.",
     "source": "https://en.wikipedia.org/wiki/National_Museum_of_Korea",
+    "where": "Seoul; South Korea",
     "evidence": "The museum is situated on what used to be a golf course that was part of the Yongsan Garrison, the central command of the United States Forces stationed in Korea."
   },
   "British Museum": {
-    "text": "Established in 1753, it was the world's first public national museum.",
+    "text": "In London, UK, it was established in 1753 as the world's first public national museum.",
     "source": "https://en.wikipedia.org/wiki/British_Museum",
+    "where": "London; United Kingdom",
     "evidence": "Established in 1753, the British Museum was the world's first public national museum."
   },
   "China Science and Technology Museum": {
-    "text": "Its current building, at the 2008 Beijing Olympic site, opened in September 2009.",
+    "text": "In Beijing, China, its current building, at the 2008 Olympic site, opened in September 2009.",
     "source": "https://en.wikipedia.org/wiki/China_Science_and_Technology_Museum",
+    "where": "Beijing; China",
     "evidence": "In preparation for Beijing's 2008 Summer Olympics, construction of new buildings for the museum began at the Olympic site in 2006. The new museum opened in September, 2009, having been expanded from its previous 40,000 square meters to 48,000 square meters."
   },
   "Natural History Museum, South Kensington": {
-    "text": "Its carvings put living species on the west wing and extinct ones on the east, a split seen as a rebuff to Darwin.",
+    "text": "In London, UK, its carvings put living species on the west wing and extinct ones on the east, seen as a rebuff to Darwin.",
     "source": "https://en.wikipedia.org/wiki/Natural_History_Museum%2C_London",
+    "where": "London; United Kingdom",
     "evidence": "The tiles and bricks feature many relief sculptures of flora and fauna, with living and extinct species featured within the west and east wings respectively. This explicit separation was at the request of Owen, and has been seen as a statement of his contemporary rebuttal of Darwin's attempt to link present species with the past through the theory of natural selection."
   },
   "Metropolitan Museum of Art": {
-    "text": "Its second site, The Cloisters in Upper Manhattan, holds art and architecture from medieval Europe.",
+    "text": "In New York City, its second site, The Cloisters in Upper Manhattan, holds art and architecture from medieval Europe.",
     "source": "https://en.wikipedia.org/wiki/Metropolitan_Museum_of_Art",
+    "where": "New York City; United States",
     "evidence": "A much smaller second location, The Cloisters at Fort Tryon Park in Upper Manhattan, contains an extensive collection of art, architecture, and artifacts from medieval Europe."
   },
   "Nanjing Museum": {
-    "text": "Part of its collection ended up at the National Palace Museum in Taipei after the Chinese Civil War.",
+    "text": "In Nanjing, China, part of its collection ended up in Taipei's National Palace Museum after the Chinese Civil War.",
     "source": "https://en.wikipedia.org/wiki/Nanjing_Museum",
+    "where": "Nanjing; China",
     "evidence": "During the Japanese invasion, part of its collections were transferred to Southwest China, and in the end moved to the National Palace Museum in Taipei when the Kuomintang lost the Chinese Civil War."
   }
 }

@@ -6,7 +6,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { normalize } from "../src/game/match";
 import type { Entry, Puzzle } from "../src/game/types";
-import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./intent";
+import { CITY_FORMS, COUNTRY_FORMS, DEMONYMS, INTENT, NICKNAMES, STATE_FORMS } from "./intent";
 
 /** Curated forms shared by many lists (countries, cities, states, athletes' nicknames). */
 const SHARED_FORMS = [
@@ -18,7 +18,7 @@ const SHARED_FORMS = [
   "Congolese",
 ];
 import { bareWord, blockedAlias, gluedAlias, junkRedirect, placeholderName } from "./aliases";
-import { citysCountries, countryOf, isContinent, MAJOR_CITIES, UNIVERSES, whereIs, type Where } from "./gazetteer";
+import { citysCountries, countryOf, DIVISIONS, isContinent, MAJOR_CITIES, UNIVERSES, whereIs, type Where } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
 import { TOPICS, type Topic } from "./topics";
 
@@ -74,6 +74,56 @@ export function factIssues(where: string, fact: { text?: string; source?: string
   if (fact.text?.includes("—")) out.push(`${where}: fact has an em dash`);
   if (!/^https?:\/\/\S+$/.test(fact.source ?? "")) out.push(`${where}: fact has no source URL`);
   return out;
+}
+
+/** A list's answers look like places by its noun (it should then say `placesIn`, so its facts say where). */
+export const PLACES_NOUN =
+  /\b(cities|capitals|capital cities|towns|metro areas|parks|lakes|mountains|peaks|volcanoes|deserts|rivers|islands|stadiums|arenas|airports|museums|buildings|towers|bridges|moons|beaches|waterfalls|zoos|landmarks|ports)$/;
+const PLANETS = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+/** Country forms that are adjectives: "the Dutch East India Company", "the British Empire" say nowhere. */
+const COUNTRY_ADJECTIVES = new Set([...Object.values(DEMONYMS).flat(), "British", "Swiss", "Aussie", "Aussies", "Soviet"]);
+const plain = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "");
+const wordsRegex = (names: string[]) => {
+  const alts = [...new Set(names.map(plain))].sort((a, b) => b.length - a.length).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return new RegExp(`(?<![\\p{L}\\p{N}])(?:${alts.join("|")})(?![\\p{L}\\p{N}])`, "u");
+};
+const PLACE_WORDS = new Map<string, RegExp>();
+
+/**
+ * What a fact on a list of places (`placesIn`) names to say where the place is, as a pattern over the fact's text
+ * (case as written in the names, diacritics ignored): "world", a country (its name or usual form, not its
+ * adjective), a continent, or a state or province of a DIVISIONS country (Michigan Stadium: "In Ann Arbor,
+ * Michigan"); a DIVISIONS country, its states or provinces; "planets", a planet.
+ */
+export function placeWords(placesIn: NonNullable<Topic["placesIn"]>): RegExp {
+  let re = PLACE_WORDS.get(placesIn);
+  if (re) return re;
+  let names: string[];
+  if (placesIn === "planets") names = PLANETS;
+  else if (placesIn !== "world") names = DIVISIONS[placesIn];
+  else {
+    names = [
+      // Not native names: Iceland's "Ísland" reads as "Island".
+      ...UNIVERSES.countries().map((c) => c.name),
+      ...COUNTRY_FORMS.flat().filter((f) => !COUNTRY_ADJECTIVES.has(f)),
+      ...["Africa", "Antarctica", "Asia", "Europe", "North America", "South America", "Oceania"],
+      ...Object.values(DIVISIONS).flat().filter((d) => d !== "municipality"),
+    ];
+  }
+  re = wordsRegex(names);
+  PLACE_WORDS.set(placesIn, re);
+  return re;
+}
+
+/**
+ * Top-10 answers of a list of places whose fact doesn't say where the place is (owner: "including what state each
+ * national park was in"): no country, state, province or planet named in its text, per `placesIn`. A fact naming
+ * some other place passes; the judge checks it's the right one (docs/JUDGE.md, step 6).
+ */
+export function factsWithoutPlace(p: Pick<Puzzle, "answers">, topic?: Pick<Topic, "placesIn">): string[] {
+  if (!topic?.placesIn) return [];
+  const re = placeWords(topic.placesIn);
+  return p.answers.filter((e) => e.fact && !re.test(plain(e.fact.text))).map((e) => `#${e.rank} ${e.name}`);
 }
 
 /**
@@ -286,6 +336,12 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
     (required ? err : warn)(`${noFact.length} top-10 answer(s) without a fact: ${noFact.join(", ")}`);
   }
   for (const e of [...p.answers, ...p.extras]) if (e.fact) for (const m of factIssues(`#${e.rank} ${e.name}`, e.fact)) err(m);
+  // On a list of places every fact says where the place is: its country, or its state on a one-country list.
+  const nowhere = factsWithoutPlace(p, topic);
+  if (nowhere.length) warn(`${nowhere.length} top-10 fact(s) don't say where the place is (\`placesIn: "${topic!.placesIn}"\`): ${nowhere.join(", ")}`);
+  if (!topic?.placesIn && PLACES_NOUN.test(topic?.noun ?? p.noun ?? "")) {
+    warn(`"${topic?.noun ?? p.noun}" are places: set \`placesIn\` in topics.ts, so the facts are checked for where each one is`);
+  }
 
   // A short ranking: most real guesses are unranked, and a miss with no figure tells the player nothing.
   const share = figureShare(p);
