@@ -69,8 +69,9 @@ Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
 ## 4. Screens
 
 Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list and Blitz, Random list and
-Blitz; Yours: Archive, Past runs, Stats; Account: sign in, or the account and sign out; More: Settings, How to play,
-Feedback, Privacy), the current screen's tile marked. Sign-in lives there, not on Home. **Settings** (`#settings`):
+Blitz; Yours: Archive, Past runs, Stats; More: Settings, How to play, Feedback, Privacy), the current screen's tile
+marked. The account lives on Home, not in the menu (owner, Nov 5): a card under Today's pair says "not signed in"
+with SIGN IN and CREATE ACCOUNT, or "signed in as <name>" with ACCOUNT (UX.md 19). **Settings** (`#settings`):
 the sound switch and reset all progress.
 
 1. **Home:** Today's list and Blitz; Free play (Random list, Random Blitz, each with a floating by-category picker);

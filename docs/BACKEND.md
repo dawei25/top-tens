@@ -183,7 +183,7 @@ out. Nothing comes from Google until the player presses Continue with Google. Th
 8. **Check it works:**
    - Finish a list game. Table Editor > `plays` shows a row; the browser's network tab shows `rpc/submit_play`
      answering `true`. `select list_stats('mountains', 'list');` returns `{"n": ..., "counts": [...]}`.
-   - Home's Your games has a "Sign in" key. Create an account with a password in one browser, sign in with Google in
+   - Home's account card says "not signed in" with SIGN IN and CREATE ACCOUNT. Create an account with a password in one browser, sign in with Google in
      another. `saves` gets a row; play on one, focus the other, and the game shows up there.
    - Google: Continue with Google opens a Google window whose account chooser names your domain, not
      `<ref>.supabase.co`; after choosing, the window closes itself and the network tab shows
@@ -197,9 +197,9 @@ out. Nothing comes from Google until the player presses Continue with Google. Th
    - Signed in, add a note on a list's results: the network tab shows `rpc/submit_feedback` answering `true`, and
      `select * from list_feedback('<your reader key>');` lists it first, `from_owner` true. With the public key and a
      wrong key, the curl in Running it answers 401 or 403 (`wrong reader key`), never notes.
-   - Stats > Account > delete account: the `saves` row and the user (Authentication > Users) are gone.
+   - Home > ACCOUNT > delete account: the `saves` row and the user (Authentication > Users) are gone.
    - A build without the env vars (`npx vite --port 5100`, no `.env.local`) makes no requests to Supabase and shows no
-     Sign in key.
+     account card.
 
 To ship stats first, set `VITE_SIGN_IN=none`: steps 3 and 4 and the secret key can wait.
 
