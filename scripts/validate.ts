@@ -502,7 +502,7 @@ function main(): number {
   const globalIssues: Issue[] = [];
 
   const indexPath = join(DIR, "index.json");
-  const index: { id: string; title: string; category: string }[] = existsSync(indexPath)
+  const index: { id: string; title: string; category: string; debut?: boolean }[] = existsSync(indexPath)
     ? JSON.parse(readFileSync(indexPath, "utf8"))
     : [];
   if (!index.length) globalIssues.push({ level: "error", msg: "index.json missing or empty" });
@@ -525,8 +525,13 @@ function main(): number {
   for (const id of fileIds) if (!topicIds.has(id)) globalIssues.push({ level: "warn", msg: `${id}.json has no topic in topics.ts (stale file?)` });
   for (const id of topicIds) if (!fileIds.has(id)) globalIssues.push({ level: "warn", msg: `topic "${id}" has no built puzzle (build failed?)` });
   if (indexIds.size !== index.length) globalIssues.push({ level: "error", msg: "index.json has duplicate ids" });
+  const debut = new Set(TOPICS.filter((t) => t.debut).map((t) => t.id));
   for (const m of index) {
     if (!m.title || !m.category) globalIssues.push({ level: "error", msg: `index.json entry "${m.id}" lacks title or category` });
+    // A new list waits out of random play for its first day as a daily; the flag comes from topics.ts.
+    if (!!m.debut !== debut.has(m.id)) {
+      globalIssues.push({ level: "error", msg: `index.json debut for "${m.id}" differs from topics.ts: build any list to refresh it` });
+    }
     const file = join(DIR, `${m.id}.json`);
     if (existsSync(file) && JSON.parse(readFileSync(file, "utf8")).title !== m.title) {
       globalIssues.push({ level: "error", msg: `index.json title for "${m.id}" differs from the puzzle's` });

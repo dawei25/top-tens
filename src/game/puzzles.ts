@@ -7,6 +7,8 @@ export interface PuzzleMeta {
   category: string;
   /** Mirrors Puzzle.blitz, so Blitz can pick a list without downloading each one. */
   blitz?: boolean;
+  /** A new list held out of random play until it has run as a daily (daily.ts `heldDebuts`). */
+  debut?: boolean;
 }
 
 const base = import.meta.env.BASE_URL;

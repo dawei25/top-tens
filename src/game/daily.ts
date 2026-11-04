@@ -51,6 +51,30 @@ export function entryForDate(schedule: DailyEntry[], date: string): DailyEntry |
   return schedule.find((e) => e.date === date);
 }
 
+/** A list as the index (public/puzzles/index.json) describes it, as far as the dailies need. */
+export interface ListMeta {
+  id: string;
+  /** Playable in Blitz. */
+  blitz?: boolean;
+  /** A new list that runs first as a daily (`debut` in scripts/topics.ts): see `heldDebuts`. */
+  debut?: boolean;
+}
+
+/** Lists that ran as a daily, Today's list or Today's Blitz, on a date before `date`. */
+function ranBefore(schedule: DailyEntry[], date: string): Set<string> {
+  return new Set(schedule.filter((e) => e.date < date).flatMap((e) => (e.blitz ? [e.id, e.blitz] : [e.id])));
+}
+
+/**
+ * New lists debut as dailies (owner): a list built with `debut` stays out of random play until its first day as
+ * Today's list or Today's Blitz has run, a date before `today` in daily.json. The day after, it is in random play like
+ * any other. A debut list that isn't scheduled yet, or is scheduled for today or later, is held.
+ */
+export function heldDebuts(schedule: DailyEntry[], lists: ListMeta[], today = localDate()): Set<string> {
+  const ran = ranBefore(schedule, today);
+  return new Set(lists.filter((l) => l.debut && !ran.has(l.id)).map((l) => l.id));
+}
+
 /**
  * Lists a random roll must not land on: today's daily (its save is today's result) and every future day's list and
  * Blitz (a roll shows the full list at the end, so it would spoil them).
@@ -135,17 +159,15 @@ function hash(s: string): number {
  * a good list (knowing the top 10 and its order) differs from what makes a good Blitz (lots of names that score).
  * - the schedule's own pick, if the entry names one (`scripts/schedule.ts` writes one for every day);
  * - otherwise (a day the schedule doesn't cover), a date-seeded pick among Blitz lists that isn't that date's daily
- *   (Blitz shows every answer, so it would spoil it) and isn't scheduled as a later daily.
+ *   (Blitz shows every answer, so it would spoil it), isn't scheduled as a later daily, and isn't a new list waiting
+ *   for its debut on that date (`heldDebuts`: the pick for a date never changes when it debuts later).
  */
-export function blitzOfTheDay(
-  schedule: DailyEntry[],
-  lists: { id: string; blitz?: boolean }[],
-  date = localDate(),
-): string | undefined {
+export function blitzOfTheDay(schedule: DailyEntry[], lists: ListMeta[], date = localDate()): string | undefined {
   const entry = todayEntry(schedule, date);
   if (entry?.blitz && entry.date === date) return entry.blitz;
   const blocked = new Set(schedule.filter((e) => e.date >= date).map((e) => e.id));
   if (entry) blocked.add(entry.id);
+  for (const id of heldDebuts(schedule, lists, date)) blocked.add(id);
   const pool = lists.filter((l) => l.blitz && !blocked.has(l.id)).sort((a, b) => a.id.localeCompare(b.id));
   if (!pool.length) return undefined;
   return pool[hash(`blitz:${date}`) % pool.length].id;
@@ -167,17 +189,14 @@ export function blitzHold(schedule: DailyEntry[], date: string, id: string, save
  * Lists a random roll (list or Blitz) never lands on: today's list and Today's Blitz, played or not, and every future
  * day's list and Blitz (`dailyHoldouts`). Before the Blitz, a random list on its topic would show the full top 10 and
  * a free Blitz on it would be a practice run (Nov 3: a random list rolled the day's Blitz topic); after it, a roll on
- * it would replay answers just seen. They come back to random play the next day.
+ * it would replay answers just seen. They come back to random play the next day. New lists wait for their debut as a
+ * daily (`heldDebuts`), scheduled or not.
  */
-export function rollHoldouts(
-  schedule: DailyEntry[],
-  lists: { id: string; blitz?: boolean }[],
-  _saved?: Saved,
-  today = localDate(),
-): Set<string> {
+export function rollHoldouts(schedule: DailyEntry[], lists: ListMeta[], _saved?: Saved, today = localDate()): Set<string> {
   const ids = dailyHoldouts(schedule, today);
   const todays = blitzOfTheDay(schedule, lists, today);
   if (todays) ids.add(todays);
+  for (const id of heldDebuts(schedule, lists, today)) ids.add(id);
   return ids;
 }
 

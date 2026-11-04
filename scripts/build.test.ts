@@ -315,4 +315,12 @@ describe("mergeIndex", () => {
     expect(merged.map((x) => x.id)).toEqual(["countries-population", "countries-area", "countries-gdp"]);
     expect(merged[2].blitz).toBe(true);
   });
+  it("gives every entry its debut flag from topics.ts, built now or not, and drops it once topics.ts does", () => {
+    const e = (id: string, debut?: true) => ({ id, title: id, category: "Food", blitz: true, ...(debut ? { debut } : {}) });
+    const topics = [{ id: "a" }, { id: "b", debut: true }, { id: "c", debut: true }, { id: "d" }];
+    // b was built before it had the flag; c is built now; d had the flag and lost it in topics.ts.
+    const merged = mergeIndex([e("a"), e("b"), e("d", true)], [e("c", true)], topics);
+    expect(merged).toEqual([e("a"), e("b", true), e("c", true), e("d")]);
+    expect("debut" in merged[0]).toBe(false);
+  });
 });

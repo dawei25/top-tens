@@ -142,8 +142,11 @@ them to each other in a verdict.
 
 ## How the schedule uses verdicts
 
-`scripts/schedule.ts` only schedules **judged** lists. Each day gets a `daily-list` verdict for Today's list
-(highest priority first, rotating categories) and a different list for Today's Blitz (the Blitz bar above, deepest
-first, varied by category and topic tag, keeping lists that could be a daily list for that pool). A list never runs
-twice, either way: a Blitz shows every answer. Every day's Blitz is an explicit `blitz` field in daily.json, so
+`scripts/schedule.ts` only schedules **judged** lists. Each day gets a `daily-list` verdict for Today's list (new
+lists first, which wait out of random play for their debut, then rotating categories and highest priority) and a
+different list for Today's Blitz (the Blitz bar above, deepest first, varied by category and topic tag, keeping lists
+that could be a daily list for that pool). Today's list runs only once. When no list that never ran is left for a
+Blitz, the day reruns one that already ran (another category than the day's list, 30 days after its last Blitz),
+so no day waits for a new pick. A judge who sends a new (`debut`) list to free play only says so in `fixes`: its flag
+must go, or it waits out of random play for good. Every day's Blitz is an explicit `blitz` field in daily.json, so
 adding days never changes a past one (`schedule.ts --blitz` fills any upcoming day missing one). Lists without a verdict, or judged `free-play`, stay in random play and the archive.

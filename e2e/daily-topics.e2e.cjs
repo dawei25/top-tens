@@ -1,6 +1,7 @@
 // Today's list and Today's Blitz are separate topics: a day's Blitz is the list daily.json names in its `blitz`. The
 // archive is a table, one row per date: its list and its Blitz side by side, under List and Blitz headers named once
-// (one try each). Random rolls never land on today's list or Blitz, played or not, or on a future day's list or Blitz.
+// (one try each). Random rolls never land on today's list or Blitz, played or not, on a future day's list or Blitz,
+// or on a new list waiting for its debut as a daily.
 // The Blitz title card and a miss say what the list is made of (the puzzle's noun). The spoiler hold still guards a
 // Blitz on its day's own list.
 const { test, before, after } = require("node:test");
@@ -135,7 +136,10 @@ test("free Blitz never lands on today's list or Blitz, or a future day's", async
   const entry = days.find((e) => e.date === DAY);
   const future = days.filter((e) => e.date > DAY).map((e) => e.id);
   const futureBlitz = days.filter((e) => e.date > DAY && e.blitz).map((e) => e.blitz);
-  const held = new Set([entry.id, ...future, ...futureBlitz, entry.blitz]);
+  // New lists (`debut`) wait out of random play until their first day as a daily has run.
+  const ran = new Set(days.filter((e) => e.date < DAY).flatMap((e) => [e.id, e.blitz]));
+  const debuts = index.filter((m) => m.debut && !ran.has(m.id)).map((m) => m.id);
+  const held = new Set([entry.id, ...future, ...futureBlitz, entry.blitz, ...debuts]);
   const openCount = (extra = held) => index.filter((m) => m.blitz && !extra.has(m.id)).length;
   const blitzCount = async () => parseInt(await page.getByTestId("random-blitz-status").textContent(), 10);
   assert.equal(await blitzCount(), openCount());

@@ -1,0 +1,52 @@
+{
+  "Real Madrid": {
+    "text": "King Alfonso XIII gave it the title \"Real\" (Royal) in 1920; it has won a record 15 European Cups.",
+    "source": "https://en.wikipedia.org/wiki/Real_Madrid_CF",
+    "evidence": "The honorific title 'Real' is Spanish for \"Royal\" and was bestowed by Alfonso XIII in 1920. ... a record 15 European Cup/UEFA Champions League titles"
+  },
+  "Barcelona": {
+    "text": "Its players have won a joint-record 12 Ballon d'Or awards, from Johan Cruyff to Lionel Messi.",
+    "source": "https://en.wikipedia.org/wiki/FC_Barcelona",
+    "evidence": "Barcelona players have won a joint record twelve Ballon d'Or awards, with recipients including Johan Cruyff, as well as a record six FIFA World Player of the Year awards, with winners including Romário, Ronaldo, Rivaldo, Ronaldinho and Lionel Messi."
+  },
+  "Bayern Munich": {
+    "text": "Eleven footballers walked out of a Munich gymnastics club in 1900 and founded it the same evening.",
+    "source": "https://en.wikipedia.org/wiki/FC_Bayern_Munich",
+    "evidence": "When a congregation of members of MTV 1879 decided on 27 February 1900 that the footballers of the club would not be allowed to join the German Football Association (DFB), eleven members of the football division left the congregation and on the same evening founded Fußball-Club Bayern München."
+  },
+  "Paris Saint-Germain": {
+    "text": "It was founded in 1970 by merging Paris FC and Stade Saint-Germain; Qatar's QSI has owned it since 2011.",
+    "source": "https://en.wikipedia.org/wiki/Paris_Saint-Germain_FC",
+    "evidence": "Founded in 1970 through the merger of Paris FC and Stade Saint-Germain ... In 2011, Qatar Sports Investments (QSI) acquired a majority stake in PSG and subsequently became the club's sole owner."
+  },
+  "Liverpool": {
+    "text": "It exists because Everton left Anfield in 1892: the landlord, John Houlding, founded a new club to play there.",
+    "source": "https://en.wikipedia.org/wiki/Liverpool_F.C.",
+    "evidence": "After eight years at the stadium, Everton relocated across Stanley Park to their new stadium of Goodison Park in 1892, and Houlding founded Liverpool F.C. to play at Anfield."
+  },
+  "Manchester City": {
+    "text": "Under Pep Guardiola it won the 2018 Premier League with a record 100 points, and four league titles in a row.",
+    "source": "https://en.wikipedia.org/wiki/Manchester_City_F.C.",
+    "evidence": "Under the stewardship of Pep Guardiola between 2016 and 2026, the club won 20 honours, including the Premier League in 2018 with a record 100 points ... four consecutive league titles between the 2020–21 and 2023–24 seasons – an English football record."
+  },
+  "Arsenal": {
+    "text": "Munitions workers at the Royal Arsenal in Woolwich founded it in 1886 as Dial Square, named after a workshop.",
+    "source": "https://en.wikipedia.org/wiki/Arsenal_F.C.",
+    "evidence": "Danskin and fifteen fellow munitions workers formed the Dial Square Football Club, named after a workshop at the heart of the Royal Arsenal complex."
+  },
+  "Manchester United": {
+    "text": "It was founded in 1878 as Newton Heath LYR and only became Manchester United in 1902.",
+    "source": "https://en.wikipedia.org/wiki/Manchester_United_F.C.",
+    "evidence": "Nicknamed the Red Devils, they were founded as Newton Heath LYR Football Club in 1878, but changed their name to Manchester United in 1902."
+  },
+  "Tottenham Hotspur": {
+    "text": "Schoolboys from the Hotspur Cricket Club founded it in 1882, naming it after Harry Hotspur of the Northumberland family.",
+    "source": "https://en.wikipedia.org/wiki/Tottenham_Hotspur_F.C.",
+    "evidence": "Originally named Hotspur Football Club, the club was formed on 5 September 1882 by a group of schoolboys led by Bobby Buckle. They were members of the Hotspur Cricket Club ... hence took its name from Harry Hotspur, a famous member of the Northumberland family."
+  },
+  "Chelsea": {
+    "text": "Fulham turned down a lease on Stamford Bridge in 1904, so its owner Gus Mears founded Chelsea to play there.",
+    "source": "https://en.wikipedia.org/wiki/Chelsea_F.C.",
+    "evidence": "In 1904, English businessman Gus Mears acquired the Stamford Bridge athletics stadium in Fulham with the aim of turning it into a football ground. An offer to lease it to nearby Fulham F.C. was turned down, so Mears opted to found his own club to use the stadium."
+  }
+}
