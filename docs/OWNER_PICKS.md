@@ -16,6 +16,16 @@ automated. Judges read this file before scoring a candidate (docs/JUDGE.md).
 | 2026-11-05 | football-club-revenue | Blitz: yes | fine as a Blitz (the judge agreed: too easy for Today's list) |
 | 2026-11-05 | longest-running-tv | later | fine, but not right after Pixar: wants something more different next |
 | 2026-11-05 | geography (cities, countries, states) | wants more | a set universe of answers, and lots of different ideas fit it |
+| 2026-11-05 | cities with the most skyscrapers | future daily | from a slate of 10 geography ideas |
+| 2026-11-05 | busiest metro systems (as cities) | future daily | |
+| 2026-11-05 | largest landlocked countries | future daily | |
+| 2026-11-05 | longest coastlines | future daily | |
+| 2026-11-05 | countries with the most Starbucks stores | future daily | |
+| 2026-11-05 | countries that grow the most coffee | future daily | |
+| 2026-11-05 | countries with the most UNESCO World Heritage Sites | future daily | |
+| 2026-11-05 | smallest countries | free play only | fun for the right players, not for everyone |
+| 2026-11-05 | largest cities in Africa | free play only | fun for the right players, not for everyone |
+| 2026-11-05 | US states with the highest peaks | no | |
 
 Patterns so far: no follower-count lists; dailies must be fresh (never seen in free play); variety across days (no
 two similar lists close together, e.g. two film lists in one week). He likes lists whose answers come from a set
