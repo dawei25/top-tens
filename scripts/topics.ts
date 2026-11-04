@@ -334,6 +334,12 @@ const CITIES: Also[] = [
   { page: "List of cities by international visitors", tables: [0, 1, 2, 3], name: "City" },
 ];
 
+/** The coastline table's names written the CIA's way, by the names the countries universe uses. */
+const COASTLINE_NAMES: Record<string, string> = {
+  "Congo, Democratic Republic of the": "Democratic Republic of the Congo",
+  "Congo, Republic of the": "Republic of the Congo",
+};
+
 /** Famous accounts on the big social platforms, shared by the follower-count lists. */
 const CELEBRITIES: Also[] = [
   { page: "List of most-followed X accounts", tables: [0, 1], name: "Owner" },
@@ -3041,6 +3047,209 @@ export const TOPICS: Topic[] = [
       "Doctor Who", "Coronation Street", "EastEnders", "Emmerdale", "Neighbours", "Home and Away", "Top Gear",
       "Futurama", "Rick and Morty", "Archer", "BoJack Horseman",
     ],
+  },
+  // Nov 5: the owner's geography picks (docs/OWNER_PICKS.md). Future dailies first, then two for free play only.
+  {
+    id: "skyscraper-cities",
+    debut: true,
+    category: "Geography",
+    title: "Cities with the most skyscrapers",
+    noun: "cities",
+    placesIn: "world",
+    prompt: "Name the 10 cities with the most skyscrapers (buildings 150 m and taller)",
+    page: "List of cities with the most skyscrapers",
+    // Cities proper: Metro Manila's 16 cities count apart (Makati is #34), as do Jersey City and Shenzhen's neighbours.
+    tables: [0],
+    name: "City",
+    value: "No. of skyscrapers",
+    metric: "Skyscrapers (150 m+)",
+    also: CITIES,
+    universe: "capitals",
+    // The source counts Manila's cities one by one, so "manila" names none of them: free, rather than a costly miss
+    // for a region whose 16 cities together have 215 (the page's height table).
+    skip: ["Manila", "Metro Manila"],
+    // The famous towers themselves are free, and still real names: "petronas" was offered as Pelotas.
+    knownNames: [
+      "Petronas Towers", "Petronas Twin Towers", "Petronas", "Burj Khalifa", "Burj Al Arab", "Empire State Building",
+      "Chrysler Building", "One World Trade Center", "World Trade Center", "Willis Tower", "Sears Tower", "CN Tower",
+      "Eiffel Tower", "The Shard", "Space Needle", "Merdeka 118", "Jeddah Tower", "Abraj Al Bait", "Lotte World Tower",
+    ],
+  },
+  {
+    id: "metro-cities",
+    debut: true,
+    category: "Geography",
+    title: "Cities with the busiest metro systems",
+    noun: "cities",
+    placesIn: "world",
+    prompt: "Name the 10 cities whose metro system carries the most passengers a year",
+    page: "List of metro systems",
+    // Systems by annual ridership, each answered by the city it serves. A city with several (Tokyo Metro and Toei)
+    // is its busiest one's.
+    tables: [0],
+    name: "City",
+    value: "Annual ridership",
+    metric: "Passengers a year",
+    unit: " million",
+    // Each system reports its own latest year.
+    dataAsOf: "2023–2025",
+    // The system's name: "tokyo metro", "beijing subway", "london underground".
+    aliasCols: ["Name"],
+    aliases: {
+      "Hong Kong": ["MTR"],
+      Tokyo: ["Toei", "Toei Subway"],
+      Seoul: ["Seoul Subway", "Seoul Metro"],
+      "New York City": ["NYC Subway", "New York Subway"],
+      Paris: ["Paris Metro", "Paris Métro"],
+      "Mexico City": ["Mexico City Metro"],
+    },
+    // Systems named by a kind of railway or a colour, not their city: "red line" or "skyline" names no city.
+    junkAliases: ["Mass Rapid Transit", "Metropolitan Rapid Transit", "Metro Rail", "Metrorail", "Red Line", "Skyline", "Federal District Metro"],
+    also: CITIES,
+    universe: "capitals",
+  },
+  {
+    id: "landlocked-countries",
+    debut: true,
+    category: "Geography",
+    title: "Largest landlocked countries",
+    noun: "countries",
+    prompt: "Name the 10 largest landlocked countries by area",
+    page: "Landlocked country",
+    // Landlocked countries and de facto states; the Caspian is a lake, so Kazakhstan counts.
+    tables: [0],
+    name: "Country",
+    value: "Area",
+    metric: "Area",
+    unit: " km²",
+    skip: ["Percentage of the world"],
+    universe: "countries",
+    // A country with a coast costs a life and shows why: "Brazil: 7,491 km (coastline)".
+    also: [
+      {
+        page: "List of countries by length of coastline",
+        tables: [0],
+        name: "Location",
+        value: "Coastline (km) / (CIA)",
+        dated: { label: "coastline", unit: " km" },
+        rename: COASTLINE_NAMES,
+      },
+    ],
+  },
+  {
+    id: "coastline-countries",
+    debut: true,
+    category: "Geography",
+    title: "Countries with the longest coastlines",
+    noun: "countries",
+    // The CIA World Factbook's figures, the ones usually quoted (Canada, Norway, Indonesia). The World Resources
+    // Institute measures at a finer scale and ranks the US #2, Chile #5 and Finland #10 instead.
+    prompt: "Name the 10 sovereign countries with the longest coastlines (CIA World Factbook)",
+    page: "List of countries by length of coastline",
+    tables: [0],
+    name: "Location",
+    value: "Coastline (km) / (CIA)",
+    metric: "Coastline (CIA World Factbook)",
+    unit: " km",
+    // Sovereign states only: a territory's cell says whose it is ("Greenland (Denmark)").
+    where: { col: "Location", match: /^[^(]*$/ },
+    rename: COASTLINE_NAMES,
+    also: [
+      {
+        tables: [0],
+        name: "Location",
+        value: "Coastline (km) / (CIA)",
+        where: { col: "Location", match: /\(/ },
+        dated: { label: "not a sovereign state", unit: " km" },
+      },
+    ],
+    // Greenland's 44,087 km would be #4: as a part of Denmark it is free, not a costly miss.
+    skip: ["World", "European Union", "Greenland"],
+    universe: "countries",
+  },
+  {
+    id: "coffee-countries",
+    debut: true,
+    category: "Business",
+    title: "Countries that produce the most coffee",
+    noun: "countries",
+    prompt: "Name the 10 countries that grow the most coffee (FAO, 2023)",
+    page: "List of countries by coffee production",
+    tables: [0],
+    name: "Country",
+    value: "Production",
+    metric: "Green coffee (2023)",
+    unit: " tonnes",
+    dataAsOf: "2023",
+    // FAO's 316,108 tonnes for the Central African Republic (#10 as printed) is an estimate dozens of times what the
+    // country exports, which no other source backs: left out, so naming it is free.
+    skip: ["World", "Other nations and territories", "Central African Republic"],
+    universe: "countries",
+    // Coffee words, not countries: "arabica" was offered as Saudi Arabia.
+    knownNames: ["Arabica", "Robusta", "Kopi luwak", "Blue Mountain", "Kona", "Espresso"],
+  },
+  {
+    id: "world-heritage-countries",
+    debut: true,
+    category: "Culture",
+    title: "Countries with the most UNESCO World Heritage Sites",
+    noun: "countries",
+    prompt: "Name the 10 countries with the most UNESCO World Heritage Sites (a shared site counts for each country)",
+    page: "Lists of World Heritage Sites",
+    // UNESCO's five regions, one page each, each with a table of its states parties' totals.
+    tables: [],
+    pages: [
+      { page: "List of World Heritage Sites in Africa", tables: [0] },
+      { page: "List of World Heritage Sites in the Arab States", tables: [0] },
+      { page: "List of World Heritage Sites in Asia and the Pacific", tables: [0] },
+      { page: "List of World Heritage Sites in Europe and North America", tables: [0] },
+      { page: "List of World Heritage Sites in Latin America and the Caribbean", tables: [0] },
+    ],
+    name: "State",
+    value: "Total",
+    metric: "World Heritage Sites",
+    dataAsOf: "2026",
+    rename: { "United States of America": "United States", Türkiye: "Turkey" },
+    universe: "countries",
+  },
+  {
+    id: "smallest-countries",
+    category: "Geography",
+    title: "Smallest countries by area",
+    noun: "countries",
+    prompt: "Name the 10 smallest sovereign countries by total area",
+    page: "List of countries and dependencies by area",
+    tables: [0],
+    name: "Country",
+    value: "Total",
+    metric: "Total area",
+    unit: " km²",
+    lowerIsBetter: true,
+    // Sovereign states have a rank; dependencies (Gibraltar, Macau, Bermuda) have none and are free.
+    rankedOnly: true,
+    unrankedRowsFree: true,
+    universe: "countries",
+  },
+  {
+    id: "africa-cities",
+    category: "Geography",
+    title: "Largest cities in Africa",
+    noun: "cities",
+    placesIn: "world",
+    prompt: "Name the 10 most populous cities in Africa (urban population)",
+    page: "List of cities in Africa by population",
+    tables: [0],
+    name: "City",
+    value: "Population",
+    metric: "Urban population",
+    // The table's "City of Tshwane (Pretoria)" is the city players know as Pretoria (the capitals' Pretoria too).
+    rename: { "City of Tshwane": "Pretoria" },
+    aliases: { Pretoria: ["Tshwane", "City of Tshwane"] },
+    also: CITIES,
+    universe: "capitals",
+    // Africa's cities and capitals are answers; Mumbai or Rio costs a life as "Mumbai isn't in Africa.". Egypt's
+    // cities beyond the page's 100 stay free (Egypt reaches Asia).
+    region: "Africa",
   },
 ];
 

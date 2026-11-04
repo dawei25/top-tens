@@ -1,0 +1,52 @@
+{
+  "Canada": {
+    "text": "Its provinces and territories reach three oceans: the Atlantic, the Pacific and the Arctic.",
+    "source": "https://en.wikipedia.org/wiki/Canada",
+    "evidence": "Its ten provinces and three territories extend from the Atlantic Ocean to the Pacific Ocean and northward into the Arctic Ocean, making it the second-largest country by total area, with the longest coastline of any country."
+  },
+  "Norway": {
+    "text": "Its English name comes from the Old English Norþweg, \"the way north\", the sailing route along its coast.",
+    "source": "https://en.wikipedia.org/wiki/Norway",
+    "evidence": "The English name Norway comes from the Old English word Norþweg ... meaning \"northern way\" or \"way leading to the north\", which is how the Anglo-Saxons referred to the coastline of Atlantic Norway. ... the full name was Norðr vegr, \"the way northwards\", referring to the sailing route along the Norwegian coast"
+  },
+  "Indonesia": {
+    "text": "Between 13,000 and 17,000 islands make it the world's largest archipelagic state.",
+    "source": "https://en.wikipedia.org/wiki/Indonesia",
+    "evidence": "Comprising between 13,000 and 17,000 islands ... it is the world's largest archipelagic state and the 14th-largest country by area."
+  },
+  "Russia": {
+    "text": "Its territory first reached the Black Sea coast in 1783, with the annexation of the Crimean Khanate.",
+    "source": "https://en.wikipedia.org/wiki/Russia",
+    "evidence": "Following the Russo-Turkish War of 1768–1774, Russian territory reached the coastline of the Black Sea, through its annexation of the Crimean Khanate in 1783."
+  },
+  "Philippines": {
+    "text": "It consists of about 7,641 islands, grouped as Luzon, the Visayas and Mindanao.",
+    "source": "https://en.wikipedia.org/wiki/Philippines",
+    "evidence": "Located in the western Pacific Ocean, it consists of about 7,641 islands ... The islands are broadly categorized into three main geographical divisions: from north to south, Luzon, Visayas, and Mindanao."
+  },
+  "Japan": {
+    "text": "Besides its four major islands, its archipelago has over 14,000 smaller ones.",
+    "source": "https://en.wikipedia.org/wiki/Japan",
+    "evidence": "The Japanese archipelago consists of four major islands alongside over 14,000 smaller islands."
+  },
+  "Australia": {
+    "text": "Its written history began with Dutch explorers charting most of its coastline in the 17th century.",
+    "source": "https://en.wikipedia.org/wiki/Australia",
+    "evidence": "Australia's written history commenced with Dutch exploration of most of the coastline in the 17th century."
+  },
+  "United States": {
+    "text": "Its first people came from Siberia at least 15,000 years ago, maybe along an Ice Age coast now under the sea.",
+    "source": "https://en.wikipedia.org/wiki/United_States",
+    "evidence": "The first inhabitants of North America migrated from Siberia at least 15,000 years ago, either across the Bering land bridge or along the now-submerged Ice Age coastline."
+  },
+  "New Zealand": {
+    "text": "Its islands were the last large habitable land on Earth to be settled by humans.",
+    "source": "https://en.wikipedia.org/wiki/New_Zealand",
+    "evidence": "The islands of New Zealand were the last large habitable land to be settled by humans."
+  },
+  "China": {
+    "text": "Its shoreline spans four seas: the Bohai, the Yellow, the East China and the South China seas.",
+    "source": "https://en.wikipedia.org/wiki/China",
+    "evidence": "China's shoreline spans the Bohai Sea, Yellow Sea, East China Sea, and South China Sea, all part of the Pacific Ocean."
+  }
+}

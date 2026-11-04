@@ -1,0 +1,62 @@
+{
+  "Hong Kong": {
+    "text": "More people in Hong Kong, China, live on the 15th floor or higher than in any other city in the world.",
+    "source": "https://en.wikipedia.org/wiki/List_of_tallest_buildings_in_Hong_Kong",
+    "where": "Hong Kong",
+    "evidence": "Furthermore, reflective of the city's high population densities, Hong Kong has more inhabitants living at the 15th floor or higher, and more buildings of at least 100 m (328 ft) and 150 m (492 ft) height, than any other city in the world."
+  },
+  "Shenzhen": {
+    "text": "When China's Shenzhen started building skyscrapers in 1978, its tallest building had five stories.",
+    "source": "https://en.wikipedia.org/wiki/List_of_tallest_buildings_in_Shenzhen",
+    "where": "China",
+    "evidence": "Skyscraper construction started in Shenzhen in 1978, at a time when the tallest building in the city was five stories tall."
+  },
+  "New York City": {
+    "text": "One World Trade Center, the tallest building in the United States, rises 1,776 feet here.",
+    "source": "https://en.wikipedia.org/wiki/List_of_tallest_buildings_in_New_York_City",
+    "where": "United States",
+    "evidence": "The tallest building in New York is One World Trade Center, which rises 1,776 feet (541 m). The 104-story skyscraper also stands as the tallest building in the United States, the tallest building in the Western Hemisphere, and the seventh-tallest building in the world."
+  },
+  "Dubai": {
+    "text": "In the United Arab Emirates, Dubai has 36 supertall towers of 300 m or more, more than any other city.",
+    "source": "https://en.wikipedia.org/wiki/List_of_tallest_buildings_in_Dubai",
+    "where": "United Arab Emirates",
+    "evidence": "Overall, Dubai has 36 completed and topped-out supertalls (buildings that rise at least 300 metres (984 ft) in height), which is more than any other city in the world."
+  },
+  "Mumbai": {
+    "text": "Its tallest, Lokhandwala Minerva, was India's first completed supertall skyscraper.",
+    "source": "https://en.wikipedia.org/wiki/List_of_tallest_buildings_in_Mumbai",
+    "where": "India",
+    "evidence": "The tallest completed building in Mumbai is Lokhandwala Minerva, making it India's first completed supertall skyscraper."
+  },
+  "Guangzhou": {
+    "text": "The capital of Guangdong, China's most populous province, built its first skyscrapers in the 1990s.",
+    "source": "https://en.wikipedia.org/wiki/List_of_tallest_buildings_in_Guangzhou",
+    "where": "China",
+    "evidence": "Guangzhou is the capital and largest city of Guangdong, China's most populous province, with a population of over 18.6 million. ... Guangzhou's first skyscrapers were built in the 1990s, and the rate of skyscraper construction increased in the 2000s."
+  },
+  "Wuhan": {
+    "text": "Central China's tallest building, the Wuhan Greenland Center, cost US$4.5 billion after years on hold.",
+    "source": "https://en.wikipedia.org/wiki/Wuhan_Greenland_Center",
+    "where": "China",
+    "evidence": "The Wuhan Greenland Center is Central China's tallest building with a cost of US$4.5 billion, mostly due to the number of times it had been put on-hold."
+  },
+  "Shanghai": {
+    "text": "The Shanghai Tower, China's tallest building, had the world's fastest elevators until 2017: 74 km/h.",
+    "source": "https://en.wikipedia.org/wiki/Shanghai_Tower",
+    "where": "China",
+    "evidence": "It is currently the tallest building in China ... The Shanghai Tower also had the world's fastest elevators at a top speed of 20.5 meters per second (74 kilometers per hour; 46 miles per hour) until 2017"
+  },
+  "Bangkok": {
+    "text": "Thailand's King Power Mahanakhon looks unfinished on purpose: a pixelated ribbon spirals up its glass.",
+    "source": "https://en.wikipedia.org/wiki/King_Power_Mahanakhon",
+    "where": "Thailand",
+    "evidence": "The building features a pixelated ribbon that swirls around the exterior, peeling back its surface layer to expose an inner layer, creating balconies with views of the city. The glass walls are divided horizontally and vertically, adding to the building's \"pixelated\" and \"unfinished\" appearance."
+  },
+  "Kuala Lumpur": {
+    "text": "From 1998 to 2004, Malaysia's Petronas Towers here were the tallest buildings in the world.",
+    "source": "https://en.wikipedia.org/wiki/Petronas_Towers",
+    "where": "Malaysia",
+    "evidence": "From 1998 to 2004, they were the tallest buildings in the world until they were surpassed by the Taipei 101 skyscraper in Taiwan."
+  }
+}

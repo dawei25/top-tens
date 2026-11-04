@@ -1,0 +1,25 @@
+{
+  "id": "metro-cities",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 9, "livesLost": 2, "guesses": 14 },
+  "blitzCasual": { "scored": 34, "named": 34 },
+  "difficulty": 2,
+  "tags": ["geography", "cities", "transport"],
+  "audience": "anyone",
+  "summary": "Tokyo, Beijing, Shanghai, Seoul, Moscow and Hong Kong come fast; New York (#17), London (#20) and Paris (#11) are the famous traps, and Guangzhou, Shenzhen and Chengdu are the surprises.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. A casual found 7 and lost lives on New York, London, Paris, Mexico City and Singapore, each showing its riders a year.",
+    "Answered as cities; system names work too (tokyo metro, toei, mtr, beijing subway, moscow metro). A city with two systems counts its busiest (Tokyo Metro, not Toei). Generic system names (red line, skyline) name nothing.",
+    "203 cities with a figure and every big city an answer: a casual Blitz scored 34 of 34."
+  ],
+  "fixes": [
+    "Figures are each system's latest year (2023 to 2025), as the page gives them.",
+    "\"skytrain\" costs a life as Vancouver's SkyTrain (#95); Bangkok's BTS Skytrain (#63) is typed \"bts skytrain\"."
+  ]
+}

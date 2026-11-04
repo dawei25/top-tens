@@ -1,0 +1,22 @@
+{
+  "id": "smallest-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 4,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 5, "fun": 4, "blitzDepth": 0 },
+  "casual": { "found": 8, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 12 },
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": ["geography", "countries", "microstates"],
+  "audience": "geography fans",
+  "summary": "Vatican City, Monaco, San Marino, Liechtenstein and Malta come first; Nauru, Tuvalu and the Marshall Islands reward Pacific knowledge, and Andorra (#17) and Singapore (#20) are the traps.",
+  "reasons": [
+    "Builder's own replay; free play only (owner). A casual found 8 and lost lives on Andorra, Luxembourg, Singapore and Bahrain, each with its area.",
+    "Sovereign states only, ranked smallest first: dependencies (Gibraltar, Macau, Bermuda, Hong Kong) have no rank in the table and are free.",
+    "A smaller number ranks higher, so it is never a Blitz."
+  ],
+  "fixes": []
+}

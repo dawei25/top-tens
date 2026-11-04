@@ -1,0 +1,22 @@
+{
+  "id": "africa-cities",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 4,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 9, "livesLost": 2, "guesses": 13 },
+  "blitzCasual": { "scored": 15, "named": 15 },
+  "difficulty": 3,
+  "tags": ["geography", "cities", "africa"],
+  "audience": "geography fans",
+  "summary": "Cairo, Lagos, Johannesburg, Nairobi and Kinshasa come first; Luanda, Khartoum and Abidjan are the stretch, and Cape Town (#15), Addis Ababa (#16) and Casablanca (#17) are the traps.",
+  "reasons": [
+    "Builder's own replay; free play only (owner). A casual found 6 and lost lives on Cape Town, Casablanca, Addis Ababa, Dakar and Marrakesh, each with its population.",
+    "Regional list: a city outside Africa costs a life and says so (\"Mumbai isn't in Africa.\"); Egypt reaches Asia, so Egyptian cities beyond the page's 100 (Luxor, Aswan) are free. Pretoria is the table's City of Tshwane (#22).",
+    "100 ranked cities plus Africa's capitals: every African city a casual names scores."
+  ],
+  "fixes": []
+}

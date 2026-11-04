@@ -1,0 +1,62 @@
+{
+  "Cairo": {
+    "text": "Egypt's capital was founded in 969 and became the seat of the Fatimid Caliphate in 973.",
+    "source": "https://en.wikipedia.org/wiki/Cairo",
+    "where": "Egypt",
+    "evidence": "Thereafter, Cairo was founded in 969, and became the official seat and capital of the Fatimid Caliphate in 973."
+  },
+  "Lagos": {
+    "text": "Nigeria's Lagos hosts the Dangote Refinery, set to be the world's largest oil refinery once expanded.",
+    "source": "https://en.wikipedia.org/wiki/Lagos",
+    "where": "Nigeria",
+    "evidence": "The employer with the most staff is the Dangote Refinery, which, once expanded, will be the world's largest oil refinery."
+  },
+  "Kinshasa": {
+    "text": "Called Léopoldville until 1966, the DR Congo's capital is the most populous city proper outside China.",
+    "source": "https://en.wikipedia.org/wiki/Kinshasa",
+    "where": "Democratic Republic of the Congo",
+    "evidence": "Kinshasa ..., formerly named Léopoldville (Dutch: Leopoldstad) from 1881 to 1966, is the capital and largest city of the Democratic Republic of the Congo. ... the world's seventh-most populous city proper (the most populous outside of China)"
+  },
+  "Nairobi": {
+    "text": "Kenya's capital is the only capital city in the world with a national park inside its boundaries.",
+    "source": "https://en.wikipedia.org/wiki/Nairobi",
+    "where": "Kenya",
+    "evidence": "Nicknamed the \"Green City under the Sun\", Nairobi is uniquely notable for being the only capital city in the world that hosts a national park within its boundaries."
+  },
+  "Johannesburg": {
+    "text": "South Africa's largest city was founded in 1886, after gold was found on what was farmland.",
+    "source": "https://en.wikipedia.org/wiki/Johannesburg",
+    "where": "South Africa",
+    "evidence": "Johannesburg was established in 1886, following the discovery of gold, on what was once farmland."
+  },
+  "Luanda": {
+    "text": "Angola's capital is the most populous Portuguese-speaking capital city in the world.",
+    "source": "https://en.wikipedia.org/wiki/Luanda",
+    "where": "Angola",
+    "evidence": "Luanda and its metropolitan area is the most populous Portuguese-speaking national capital in the world and the most populous Lusophone city outside Brazil."
+  },
+  "Khartoum": {
+    "text": "Sudan's capital sits where the White Nile and the Blue Nile meet.",
+    "source": "https://en.wikipedia.org/wiki/Khartoum",
+    "where": "Sudan",
+    "evidence": "Khartoum is located at the confluence of the White Nile – flowing north from Lake Victoria – and the Blue Nile, flowing west from Lake Tana in Ethiopia."
+  },
+  "Abidjan": {
+    "text": "Legend says Ivory Coast's Abidjan is named after a misheard cry: \"I just cut the leaves.\"",
+    "source": "https://en.wikipedia.org/wiki/Abidjan",
+    "where": "Ivory Coast",
+    "evidence": "Terrified by this unexpected meeting, he fled shouting \"min-chan m'bidjan\", which means in the Ebrié language: \"I just cut the leaves.\" The explorer, thinking that his question had been answered, recorded the name of the locale as Abidjan."
+  },
+  "Accra": {
+    "text": "Ghana's capital is named after soldier ants, a name Twi speakers gave the town and its people.",
+    "source": "https://en.wikipedia.org/wiki/Accra",
+    "where": "Ghana",
+    "evidence": "The name specifically refers to soldier ants, and was applied to the town and people by the Twi speakers."
+  },
+  "Dar es Salaam": {
+    "text": "Tanzania's largest city takes its name from the Arabic for \"Abode of Peace\".",
+    "source": "https://en.wikipedia.org/wiki/Dar_es_Salaam",
+    "where": "Tanzania",
+    "evidence": "Dar es Salaam (... from Arabic: دَار السَّلَام, romanised: Dār as-Salām, lit. 'Abode of Peace') is the largest city and financial hub of Tanzania"
+  }
+}

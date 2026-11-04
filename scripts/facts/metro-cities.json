@@ -1,0 +1,62 @@
+{
+  "Shanghai": {
+    "text": "China's Shanghai Metro set its one-day record of 13.39 million rides on 9 March 2024.",
+    "source": "https://en.wikipedia.org/wiki/Shanghai_Metro",
+    "where": "China",
+    "evidence": "The last daily ridership record was set on 9 March 2024, at 13.39 million rides."
+  },
+  "Beijing": {
+    "text": "Opened in 1971, the Beijing Subway is China's oldest metro, and since 2023 the world's longest.",
+    "source": "https://en.wikipedia.org/wiki/Beijing_Subway",
+    "where": "China",
+    "evidence": "In December 2023, Beijing Subway became the world's longest metro system by route length, surpassing the Shanghai Metro. ... The Beijing Subway opened in 1971 and is the oldest metro system in China and on the mainland of East Asia."
+  },
+  "Guangzhou": {
+    "text": "Its Guangfo Line, to neighbouring Foshan, was the first metro line in China to link two cities.",
+    "source": "https://en.wikipedia.org/wiki/Guangzhou_Metro",
+    "where": "China",
+    "evidence": "Guangfo Line connects Guangzhou and Foshan and is the first metro line between two cities in the country."
+  },
+  "Shenzhen": {
+    "text": "China's Shenzhen Metro only opened in 2004, yet it is already the world's 5th longest metro system.",
+    "source": "https://en.wikipedia.org/wiki/Shenzhen_Metro",
+    "where": "China",
+    "evidence": "Despite having only opened on 28 December 2004, the Shenzhen Metro is the 5th longest metro system in the world."
+  },
+  "Seoul": {
+    "text": "The world's first virtual supermarket for smartphones opened in 2011 at a Seoul Subway station, South Korea.",
+    "source": "https://en.wikipedia.org/wiki/Seoul_Metropolitan_Subway",
+    "where": "South Korea",
+    "evidence": "The world's first virtual mart for smartphone users opened at Seolleung station in 2011."
+  },
+  "Tokyo": {
+    "text": "Japan's Tokyo Metro opened in 1927 as the Tokyo Underground Railway, the first subway in Asia.",
+    "source": "https://en.wikipedia.org/wiki/Tokyo_Metro",
+    "where": "Japan",
+    "evidence": "The system opened in 1927 as the Tokyo Underground Railway, becoming the first subway system in Asia."
+  },
+  "Delhi": {
+    "text": "The Delhi Metro, India's largest and busiest, opened its first stretch on Christmas Day 2002.",
+    "source": "https://en.wikipedia.org/wiki/Delhi_Metro",
+    "where": "India",
+    "evidence": "It is India's largest and busiest metro rail system. ... Construction began in 1998, and the first elevated section (Shahdara to Tis Hazari) on the Red Line opened on 25 December 2002."
+  },
+  "Moscow": {
+    "text": "Russia's Moscow Metro is the only metro system in the world with three circle lines.",
+    "source": "https://en.wikipedia.org/wiki/Moscow_Metro",
+    "where": "Russia",
+    "evidence": "It is also the only system in the world with three circle lines."
+  },
+  "Chengdu": {
+    "text": "In China's Chengdu, about 4.6 million people live within 800 m of a metro station (2021).",
+    "source": "https://en.wikipedia.org/wiki/Chengdu_Metro",
+    "where": "China",
+    "evidence": "As of 2021, about 2.2 million and 4.6 million people live within 500 and 800 metres (1,640 and 2,625 ft) of a subway station in Chengdu, respectively."
+  },
+  "Hong Kong": {
+    "text": "Hong Kong's MTR handles over 5.5 million trips on an average weekday, 99.9% of them on time.",
+    "source": "https://en.wikipedia.org/wiki/MTR",
+    "where": "Hong Kong",
+    "evidence": "Under the government's rail-led transport policy, the MTR system is a common mode of public transport in Hong Kong, with over five and a half million trips made on an average weekday consistently achieving a 99.9% punctuality rate on its arrivals and departures."
+  }
+}

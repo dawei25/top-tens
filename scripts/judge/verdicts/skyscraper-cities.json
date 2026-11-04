@@ -1,0 +1,25 @@
+{
+  "id": "skyscraper-cities",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 9, "livesLost": 2, "guesses": 13 },
+  "blitzCasual": { "scored": 24, "named": 28 },
+  "difficulty": 2,
+  "tags": ["geography", "cities", "architecture"],
+  "audience": "anyone",
+  "summary": "Hong Kong, New York, Dubai and Shanghai come fast; Shenzhen, Wuhan and Guangzhou are the surprises, and Tokyo at #11 (200, one short of Kuala Lumpur) is the trap.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. A casual found 7 (Hong Kong, New York, Dubai, Shanghai, Kuala Lumpur, Shenzhen, Bangkok) and lost lives on Tokyo #11, Singapore #13, Chicago #14, Toronto #17 and London #44, each with its count.",
+    "Every city is an answer (the world's big-city tables), so one-tower cities cost a life: Paris, Taipei and Seattle show no figure, being under the page's 30-skyscraper floor. The towers themselves (Burj Khalifa, Petronas, Empire State) are free.",
+    "62 ranked cities: a casual Blitz scored 24 of 28 names."
+  ],
+  "fixes": [
+    "The page counts cities proper, so Metro Manila's 16 cities count apart (Makati #33) and \"manila\" is free; its height table gives the whole region 215, which would be #6.",
+    "Taipei is in the page's height table (39) but not its main ranking, so it shows no figure."
+  ]
+}

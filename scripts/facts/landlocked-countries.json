@@ -1,0 +1,52 @@
+{
+  "Kazakhstan": {
+    "text": "The world's ninth-largest country by land area has a coast, but only on the Caspian Sea.",
+    "source": "https://en.wikipedia.org/wiki/Kazakhstan",
+    "evidence": "It borders Russia to the north and west, China to the east, Kyrgyzstan to the southeast, Uzbekistan to the south, and Turkmenistan to the southwest, and it has a coastline along the Caspian Sea. Kazakhstan is the world's ninth-largest country by land area and the largest landlocked country."
+  },
+  "Mongolia": {
+    "text": "With 3.5 million people, it is the world's most sparsely populated sovereign state.",
+    "source": "https://en.wikipedia.org/wiki/Mongolia",
+    "evidence": "With a population of 3.5 million, Mongolia is the world's most sparsely populated sovereign state."
+  },
+  "Chad": {
+    "text": "Its capital is 1,060 km from the nearest seaport, so Chad is sometimes called the \"Dead Heart of Africa\".",
+    "source": "https://en.wikipedia.org/wiki/Chad",
+    "evidence": "The capital is 1,060 kilometres (660 mi) from the nearest seaport, Douala, Cameroon. Because of this distance from the sea and the largely desert climate, Chad is sometimes referred to as the \"Dead Heart of Africa\"."
+  },
+  "Niger": {
+    "text": "It is named after the Niger River, which flows through the west of the country.",
+    "source": "https://en.wikipedia.org/wiki/Niger",
+    "evidence": "The name comes from the Niger River which flows through the west of the country."
+  },
+  "Mali": {
+    "text": "With no coast of its own, it receives 95% of its fuel from Senegal or Ivory Coast.",
+    "source": "https://en.wikipedia.org/wiki/Mali",
+    "evidence": "Mali depends on foreign fuel imports, receiving 95% of its fuel from Senegal or Ivory Coast."
+  },
+  "Ethiopia": {
+    "text": "It has had no coast since Eritrea, on the Red Sea, voted for independence from it in April 1993.",
+    "source": "https://en.wikipedia.org/wiki/Ethiopia",
+    "evidence": "In April 1993, Eritrea gained independence from Ethiopia after a national referendum."
+  },
+  "Bolivia": {
+    "text": "It lost its Pacific coast to Chile in 1879, and is the largest landlocked country south of the equator.",
+    "source": "https://en.wikipedia.org/wiki/Bolivia",
+    "evidence": "It is the largest landlocked country in the Southern Hemisphere ... Bolivia lost control of several peripheral territories to neighboring countries, such as ... the Pacific coastal region which Chile seized in 1879."
+  },
+  "Zambia": {
+    "text": "Its name derives from the Zambezi river, which may mean \"the grand river\".",
+    "source": "https://en.wikipedia.org/wiki/Zambia",
+    "evidence": "The name \"Zambia\" derives from the Zambezi river (Zambezi may mean \"the grand river\")."
+  },
+  "Afghanistan": {
+    "text": "Marco Polo sheep live only in its Wakhan Corridor, one of the most remote places in the world.",
+    "source": "https://en.wikipedia.org/wiki/Afghanistan",
+    "evidence": "The Marco Polo sheep exclusively live in the Wakhan Corridor region of north-east Afghanistan. ... Smaller numbers visit and trek in regions such as the Wakhan Valley, which is also one of the world's most remote communities."
+  },
+  "South Sudan": {
+    "text": "It became independent on 9 July 2011, after 98.8% voted for it in a referendum.",
+    "source": "https://en.wikipedia.org/wiki/South_Sudan",
+    "evidence": "South Sudan became an independent state on 9 July 2011, following 98.8% support for independence in a January 2011 referendum."
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "coastline-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-04",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 13 },
+  "blitzCasual": { "scored": 35, "named": 35 },
+  "difficulty": 2,
+  "tags": ["geography", "countries", "oceans"],
+  "audience": "anyone",
+  "summary": "Canada, Russia, Australia, the US and Indonesia come fast; Norway at #2 and the Philippines are the surprises, and Brazil (#16), India and Chile are the traps.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. A casual found 7 and lost lives on Brazil, India, Chile, Mexico and the UK, each with its coastline.",
+    "The CIA World Factbook's figures (the ones usually quoted), named in the prompt. The World Resources Institute's finer measure ranks the US #2, Chile #5 and Finland #10 instead. Sovereign countries only: Greenland (44,087 km, Denmark's) is free; other territories cost a life with their figure, marked \"not a sovereign state\".",
+    "Every coastal country scores: a casual Blitz scored 35 of 35."
+  ],
+  "fixes": [
+    "\"coast\" alone is offered as Ivory Coast (a did-you-mean): a category word for the matcher if players stumble on it."
+  ]
+}
