@@ -466,6 +466,17 @@ a {
 .logo span:last-child {
   color: var(--gold);
 }
+/* Under 360px the 76px floor made the logo wider than the screen (-12 to 338 at 320), and a phone then widens the
+   whole page. Below that it scales with the width instead; the title also clips the power-on sweep, which reaches
+   6% past the logo's edges (motion.css). e2e/home.e2e.cjs checks 320 and 340. */
+@media (max-width: 359px) {
+  .logo {
+    font-size: 19.5vw;
+  }
+}
+.home .title {
+  overflow-x: clip;
+}
 
 /*
  * Home system.

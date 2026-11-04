@@ -189,3 +189,24 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 }
+
+// A 320px phone: the logo (and its power-on sweep) once ran 12px past each edge, so the phone widened the page to
+// 326-359px and everything floating (sheets, the menu) came out too wide. The page must stay the screen's width the
+// whole time, during the boot animation and after.
+test("320px phone: Home never widens the page, during the logo's power-on or after", async () => {
+  for (const width of [320, 340]) {
+    const { ctx, page } = await open(browser, { viewport: { width, height: 640 }, isMobile: true, hasTouch: true });
+    const widths = [];
+    for (const wait of [0, 150, 350, 600, 1200]) {
+      if (wait) await page.waitForTimeout(wait);
+      widths.push(await page.evaluate(() => [innerWidth, document.documentElement.scrollWidth]));
+    }
+    for (const [inner, scroll] of widths) {
+      assert.equal(inner, width, `${width}: the page widened to ${inner}`);
+      assert.ok(scroll <= width, `${width}: content ${scroll} wide`);
+    }
+    const logo = await page.locator(".logo").boundingBox();
+    assert.ok(logo.x >= 0 && logo.x + logo.width <= width, `${width}: the logo spans ${Math.round(logo.x)} to ${Math.round(logo.x + logo.width)}`);
+    await ctx.close();
+  }
+});
