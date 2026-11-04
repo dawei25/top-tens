@@ -90,7 +90,7 @@ export function bandEdge(min: number, typical: number): number {
   return Math.log10(typical) * Math.tan(((1 - min / POINTS_PER_QUESTION) * Math.PI) / 2);
 }
 
-/** A ratio for "N× too high": 1.05, 1.3, 2, 12, 1,500, 3 million. */
+/** A ratio for "Nx too high": 1.05, 1.3, 2, 12, 1,500, 3 million. */
 function ratioText(r: number): string {
   if (r < 1.095) return trimZeros(r.toFixed(2));
   if (r < 9.95) return trimZeros(r.toFixed(1));
@@ -99,10 +99,17 @@ function ratioText(r: number): string {
 }
 const trimZeros = (s: string) => (s.includes(".") ? s.replace(/\.?0+$/, "") : s);
 
-/** "1.3× too high", "2.4× too low", or "spot on" within 1%. */
+/**
+ * "1.3x too high", "2.4x too low", "3 million times too low", or "spot on" within 1%. A plain x, not the times sign:
+ * the pixel font has no "×", and a fallback glyph stood out.
+ */
 export function timesOff(guess: number, answer: number): string {
   if (Math.abs(guess - answer) <= Math.abs(answer) * 0.01) return "spot on";
-  return guess > answer ? `${ratioText(guess / answer)}× too high` : `${ratioText(answer / guess)}× too low`;
+  const times = (r: number) => {
+    const t = ratioText(r);
+    return /[a-z]$/.test(t) ? `${t} times` : `${t}x`;
+  };
+  return guess > answer ? `${times(guess / answer)} too high` : `${times(answer / guess)} too low`;
 }
 
 /* ---------- Reading numbers ---------- */
@@ -272,9 +279,13 @@ export function echoText(n: number): string {
   return n >= 1000 ? `${formatDigits(n)} · ${formatWords(n)}` : formatDigits(n);
 }
 
-/** A number as the reveal and the results show it: digits up to a million, words from there ("8.1 billion"). */
+/**
+ * A number as the reveal and the results show it: digits up to a million, words from there ("8.1 billion"). Past a
+ * thousand, whole units ("299,792", not "299,792.458").
+ */
 export function formatAmount(n: number): string {
-  return n >= 1e6 ? formatWords(n) : formatDigits(n);
+  if (n >= 1e6) return formatWords(n);
+  return formatDigits(n >= 1000 ? Math.round(n) : n);
 }
 
 /* ---------- The bank ---------- */

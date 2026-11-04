@@ -116,19 +116,19 @@ describe("bands", () => {
 
 describe("timesOff", () => {
   it("says how many times too high or too low", () => {
-    expect(timesOff(130, 100)).toBe("1.3× too high");
-    expect(timesOff(100, 240)).toBe("2.4× too low");
-    expect(timesOff(200, 100)).toBe("2× too high");
-    expect(timesOff(105, 100)).toBe("1.05× too high");
-    expect(timesOff(1200, 100)).toBe("12× too high");
-    expect(timesOff(150000, 100)).toBe("1,500× too high");
-    expect(timesOff(1, 3e6)).toBe("3 million× too low");
+    expect(timesOff(130, 100)).toBe("1.3x too high");
+    expect(timesOff(100, 240)).toBe("2.4x too low");
+    expect(timesOff(200, 100)).toBe("2x too high");
+    expect(timesOff(105, 100)).toBe("1.05x too high");
+    expect(timesOff(1200, 100)).toBe("12x too high");
+    expect(timesOff(150000, 100)).toBe("1,500x too high");
+    expect(timesOff(1, 3e6)).toBe("3 million times too low");
   });
   it("is spot on within 1%", () => {
     expect(timesOff(330, 330)).toBe("spot on");
     expect(timesOff(333, 330)).toBe("spot on");
     expect(timesOff(327, 330)).toBe("spot on");
-    expect(timesOff(334, 330)).toBe("1.01× too high");
+    expect(timesOff(334, 330)).toBe("1.01x too high");
   });
 });
 
@@ -227,6 +227,10 @@ describe("formatting", () => {
   });
   it("shows amounts in digits up to a million, words from there", () => {
     expect(formatAmount(384_400)).toBe("384,400");
+    // An answer past a thousand shows whole units: the speed of light is 299,792 km/s, not 299,792.458.
+    expect(formatAmount(299_792.458)).toBe("299,792");
+    expect(formatAmount(8848.86)).toBe("8,849");
+    expect(formatAmount(8.3)).toBe("8.3");
     expect(formatAmount(8.1e9)).toBe("8.1 billion");
   });
 });
