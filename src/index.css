@@ -93,6 +93,21 @@ button {
   cursor: pointer;
 }
 
+/* Phones: two quick taps (a thumb twice, a row and its fact) never zoom the page; pinch zoom still works. */
+html,
+a[href],
+button,
+input,
+textarea,
+select,
+summary,
+label,
+[role="button"],
+[role="switch"],
+.slot {
+  touch-action: manipulation;
+}
+
 a {
   color: var(--cyan);
   text-underline-offset: 3px;
