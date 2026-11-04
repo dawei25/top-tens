@@ -13,7 +13,9 @@ import {
   mergeIndex,
   qualifiedLink,
   rangeText,
+  rankedSources,
   rankOf,
+  rankRows,
   readFacts,
   regionalNamesake,
   regionColumn,
@@ -245,6 +247,29 @@ describe("dated values", () => {
     expect(rangeText("400 million", "600 million")).toBe("400–600 million");
     expect(rangeText("500 million", "1 billion")).toBe("500 million–1 billion");
     expect(rangeText("600 million", "600 million")).toBe("600 million");
+  });
+});
+
+describe("ranking order", () => {
+  const rows = () => [{ value: 26 }, { value: 0.44 }, { value: 61, tiebreak: 1 }, { value: 61, tiebreak: 2 }, { value: 2 }];
+
+  it("puts the biggest first, the higher tiebreak first between equals", () => {
+    expect(rankRows({}, rows())).toEqual([{ value: 61, tiebreak: 2 }, { value: 61, tiebreak: 1 }, { value: 26 }, { value: 2 }, { value: 0.44 }]);
+  });
+
+  it("puts the smallest first on a lowerIsBetter list (the smallest countries), and keeps a table's own order", () => {
+    expect(rankRows({ lowerIsBetter: true }, rows()).map((r) => r.value)).toEqual([0.44, 2, 26, 61, 61]);
+    expect(rankRows({ lowerIsBetter: true }, rows())[3]).toEqual({ value: 61, tiebreak: 2 });
+    expect(rankRows({ keepOrder: true, lowerIsBetter: true }, rows())).toEqual(rows());
+  });
+
+  it("reads the page's tables first, then the other pages' (one ranking split by region)", () => {
+    expect(rankedSources({ page: "Index", tables: [], pages: [{ page: "Africa", tables: [0] }, { page: "Europe", tables: [0] }] })).toEqual([
+      { page: "Index", tables: [] },
+      { page: "Africa", tables: [0] },
+      { page: "Europe", tables: [0] },
+    ]);
+    expect(rankedSources({ page: "List", tables: [0, 1] })).toEqual([{ page: "List", tables: [0, 1] }]);
   });
 });
 

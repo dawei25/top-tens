@@ -26,6 +26,12 @@ export interface Topic {
   page: string;
   /** Which wikitable(s) on the page, by index. Rows are concatenated. */
   tables: number[];
+  /**
+   * Other pages whose tables continue the same ranking, with the same columns: UNESCO's states parties are split by
+   * region, one page each. Their rows join the page's before ranking. The source link is `page`, which can be an
+   * index of those pages with no table of its own (`tables: []`, and a `dataAsOf`).
+   */
+  pages?: { page: string; tables: number[] }[];
   /** Header text (case-insensitive substring) or column index for the answer name. */
   name: string | number;
   /** Header text or column index for the ranked value. */
@@ -132,7 +138,10 @@ export interface Topic {
    * answers has a value (give them one with `also` and `dated`, or `values`).
    */
   noFigures?: string;
-  /** #1 has the smallest number (a rank such as Similarweb's). Such a list is never Blitz: a bigger n isn't better. */
+  /**
+   * #1 has the smallest number (a rank such as Similarweb's, the smallest country's area): rows rank smallest first
+   * (unless `keepOrder`). Such a list is never Blitz: a bigger n isn't better.
+   */
   lowerIsBetter?: boolean;
   /**
    * Another column that says the same in another unit: a `value` cell that disagrees with it × `factor` by more

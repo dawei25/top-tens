@@ -311,104 +311,120 @@ const unrankedRows = (topic: Topic) => UNRANKED_ROWS.get(topic.id) ?? UNRANKED_R
 const ZERO_ROWS = new Map<string, Map<string, string>>();
 const zeroRows = (topic: Topic) => ZERO_ROWS.get(topic.id) ?? ZERO_ROWS.set(topic.id, new Map()).get(topic.id)!;
 
+/** Where a topic's ranked rows come from: its page's tables, then its other `pages`' (one ranking split by region). */
+export const rankedSources = (topic: Pick<Topic, "page" | "tables" | "pages">) => [{ page: topic.page, tables: topic.tables }, ...(topic.pages ?? [])];
+
+/**
+ * Puts rows in ranking order: the biggest number first, or the smallest for a `lowerIsBetter` list (the smallest
+ * countries); the higher tiebreak first either way. A `keepOrder` table has ranked them already.
+ */
+export function rankRows<R extends Pick<Row, "value" | "tiebreak">>(topic: Pick<Topic, "keepOrder" | "lowerIsBetter">, rows: R[]): R[] {
+  if (topic.keepOrder) return rows;
+  const dir = topic.lowerIsBetter ? -1 : 1;
+  return rows.sort((a, b) => dir * (b.value - a.value) || (b.tiebreak ?? 0) - (a.tiebreak ?? 0));
+}
+
 export async function readRows(topic: Topic): Promise<Row[]> {
-  const $ = await fetchPage(topic.page);
-  const tables = wikitables($);
   const rows: Row[] = [];
   const members = topic.canonical ? [topic.universe ?? []].flat().flatMap((u) => UNIVERSES[u]()) : [];
-  for (const t of topic.tables) {
-    const { header, body } = splitHeader(tableGrid($, tables[t]));
-    const nc = column(header, topic.name);
-    const vc = column(header, topic.value);
-    const tc = topic.tiebreak === undefined ? -1 : column(header, topic.tiebreak);
-    const aliasCs = (topic.aliasCols ?? []).map((a) => column(header, a));
-    const fromCol = topic.fallback ? column(header, topic.fallback.from) : -1;
-    const yc = header.findIndex((h) => /^(year|released?|release date)\b/i.test(h));
-    const pc = topic.part === undefined ? -1 : column(header, topic.part);
-    if (!topic.fallback) checkNumbers(topic, header, body, vc);
-    for (const r of body) {
-      const nameCell = r[nc];
-      const valueCell = r[vc];
-      if (!nameCell || !valueCell || nameCell.isHeader && !nameCell.text) continue;
-      const cellText = (members.length && universeName(nameCell.text, members)) || cellName(nameCell, topic);
-      if (!cellText || !normalize(cellText) || topic.skip?.includes(cellText) || skipName(cellText)) continue;
-      // A row the ranking leaves out (no rank, no figure) is free where the topic says so: Monaco has no IMF figure.
-      const unranked = () => {
-        if (topic.unrankedRowsFree) unrankedRows(topic).add(normalize(cellText));
-      };
-      if (topic.rankedOnly && !/^\d/.test(r[0]?.text ?? "")) {
-        unranked();
-        continue;
-      }
-      // One season of a show: "Squid Game (Season 2)". A part that isn't numbered ("Limited Series") is the whole thing.
-      const partText = pc >= 0 ? cleanName(r[pc]?.text ?? "") : "";
-      const numbered = NUMBERED_PART.test(partText);
-      const base = topic.rename?.[cellText] ?? cellText;
-      const name = numbered ? (topic.rename?.[`${cellText} (${partText})`] ?? `${base} (${partText})`) : base;
-      if (topic.where && !topic.where.match.test(r[column(header, topic.where.col)]?.text ?? "")) continue;
-      if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
-      const override = topic.overrides?.[cellText];
-      if (override) console.log(`     ${topic.id}: ${cellText} ${valueCell.text} → ${override.value} (${override.source})`);
-      let v = parseValue(override?.value ?? valueCell.text);
-      if (topic.fallback && !override) {
-        // A cell that disagrees with the other column by more than 2% was misread on the page ("382.936").
-        const alt = convertedValue(r[fromCol], topic.fallback.factor);
-        if (alt && (!v || Math.abs(v.value / alt.value - 1) > 0.02)) {
-          console.log(`     ${topic.id}: ${name} ${valueCell.text} → ${alt.display} (from ${r[fromCol].text} × ${topic.fallback.factor})`);
-          v = alt;
+  for (const source of rankedSources(topic)) {
+    const $ = await fetchPage(source.page);
+    const tables = wikitables($);
+    for (const t of source.tables) {
+      if (!tables[t]) throw new Error(`${source.page} has no table ${t}`);
+      const { header, body } = splitHeader(tableGrid($, tables[t]));
+      const nc = column(header, topic.name);
+      const vc = column(header, topic.value);
+      const tc = topic.tiebreak === undefined ? -1 : column(header, topic.tiebreak);
+      const aliasCs = (topic.aliasCols ?? []).map((a) => column(header, a));
+      const fromCol = topic.fallback ? column(header, topic.fallback.from) : -1;
+      const yc = header.findIndex((h) => /^(year|released?|release date)\b/i.test(h));
+      const pc = topic.part === undefined ? -1 : column(header, topic.part);
+      if (!topic.fallback) checkNumbers(topic, header, body, vc);
+      for (const r of body) {
+        const nameCell = r[nc];
+        const valueCell = r[vc];
+        if (!nameCell || !valueCell || nameCell.isHeader && !nameCell.text) continue;
+        const cellText = (members.length && universeName(nameCell.text, members)) || cellName(nameCell, topic);
+        if (!cellText || !normalize(cellText) || topic.skip?.includes(cellText) || skipName(cellText)) continue;
+        // A row the ranking leaves out (no rank, no figure) is free where the topic says so: Monaco has no IMF figure.
+        const unranked = () => {
+          if (topic.unrankedRowsFree) unrankedRows(topic).add(normalize(cellText));
+        };
+        if (topic.rankedOnly && !/^\d/.test(r[0]?.text ?? "")) {
+          unranked();
+          continue;
         }
+        // One season of a show: "Squid Game (Season 2)". A part that isn't numbered ("Limited Series") is the whole thing.
+        const partText = pc >= 0 ? cleanName(r[pc]?.text ?? "") : "";
+        const numbered = NUMBERED_PART.test(partText);
+        const base = topic.rename?.[cellText] ?? cellText;
+        const name = numbered ? (topic.rename?.[`${cellText} (${partText})`] ?? `${base} (${partText})`) : base;
+        if (topic.where && !topic.where.match.test(r[column(header, topic.where.col)]?.text ?? "")) continue;
+        if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
+        const override = topic.overrides?.[cellText];
+        if (override) console.log(`     ${topic.id}: ${cellText} ${valueCell.text} → ${override.value} (${override.source})`);
+        let v = parseValue(override?.value ?? valueCell.text);
+        if (topic.fallback && !override) {
+          // A cell that disagrees with the other column by more than 2% was misread on the page ("382.936").
+          const alt = convertedValue(r[fromCol], topic.fallback.factor);
+          if (alt && (!v || Math.abs(v.value / alt.value - 1) > 0.02)) {
+            console.log(`     ${topic.id}: ${name} ${valueCell.text} → ${alt.display} (from ${r[fromCol].text} × ${topic.fallback.factor})`);
+            v = alt;
+          }
+        }
+        // A count of nothing (a team with no titles) ranks nothing; the universe still accepts the name.
+        if (!v || (v.value === 0 && !topic.lowerIsBetter)) {
+          if (!v) unranked();
+          // The Padres' "0": a guess shows it (judge, cycle 6), but a count of nothing never scores in Blitz. A "0.00"
+          // is a figure too small to print (the Faroe Islands' CO2), not a zero: no figure beats a wrong one.
+          else if (!/\.\d/.test(v.display)) zeroRows(topic).set(normalize(name), (topic.prefix ?? "") + v.display + (topic.unit ?? ""));
+          continue;
+        }
+        // One name per line of the cell: "Mount Everest / Sagarmatha / Chomolungma" are three aliases, not one glued string.
+        // A river system's cell ("Saint Lawrence–Niagara–Detroit–...") names other rivers after the first.
+        const lines = (nameCell.lines.length > 1 ? nameCell.lines : [nameCell.text]).filter((l) => !topic.noParts || !/[–-]/.test(l));
+        const seeds = [...lines, nameCell.linkText ?? "", ...shortForms(name, topic.stripWords)].map((s) =>
+          topic.nameStrip ? s.replace(topic.nameStrip, "").trim() : s,
+        );
+        if (name !== cellText) seeds.push(cellText);
+        // "Squid Game 2", as people say a season, and "Squid Game S2", as people write one.
+        if (numbered) seeds.push(`${base} ${partText.match(/\d+/)![0]}`);
+        if (numbered && /^(season|series)\b/i.test(partText)) seeds.push(`${base} S${partText.match(/\d+/)![0]}`);
+        // The cell can say more than the name: "Mississippi–Missouri–Jefferson" names the Mississippi row.
+        for (const line of lines) if (cleanName(line) !== name) seeds.push(...shortForms(cleanName(line)));
+        for (const c of aliasCs) {
+          const cell = r[c];
+          // "Atlanta, Georgia" names the row by "Atlanta", not by "Georgia": keep the first part of a place.
+          if (cell) seeds.push(cell.linkText ?? "", ...cell.lines.flatMap((l) => l.split("/")).map((part) => part.split(",")[0]));
+        }
+        // The article's own title is never among its redirects ("Acadia National Park" for "Acadia").
+        // A renamed row ("Disneyland Park" shown as "Disneyland Paris") keeps the article its table name links.
+        const viaCell = redirectTarget(cellText, nameCell, hasCountries(topic));
+        // A season's article is its show's (the name cell's link), else its own (the season cell's).
+        const partTarget = numbered ? (nameCell.link ? viaCell : r[pc]?.link) : undefined;
+        const target =
+          topic.articles?.[name] ?? partTarget ?? (viaCell !== cellText ? viaCell : redirectTarget(name, nameCell, hasCountries(topic)));
+        if (target !== name) seeds.push(target);
+        const t = tc >= 0 ? parseValue(r[tc]?.text ?? "") : null;
+        rows.push({
+          name,
+          value: v.value,
+          ...(t ? { tiebreak: t.value } : {}),
+          valueText: t && t.value >= v.value ? rangeText(v.display, t.display) : v.display,
+          aliasSeeds: seeds.map(cleanName).filter((s) => s && s.length > 1),
+          redirectTarget: target,
+          link: nameCell.link,
+          tag: rowTag(yc >= 0 ? r[yc] : undefined, nameCell.link),
+          ...(numbered ? { part: { base, link: r[pc]?.link } } : {}),
+        });
       }
-      // A count of nothing (a team with no titles) ranks nothing; the universe still accepts the name.
-      if (!v || (v.value === 0 && !topic.lowerIsBetter)) {
-        if (!v) unranked();
-        // The Padres' "0": a guess shows it (judge, cycle 6), but a count of nothing never scores in Blitz. A "0.00"
-        // is a figure too small to print (the Faroe Islands' CO2), not a zero: no figure beats a wrong one.
-        else if (!/\.\d/.test(v.display)) zeroRows(topic).set(normalize(name), (topic.prefix ?? "") + v.display + (topic.unit ?? ""));
-        continue;
-      }
-      // One name per line of the cell: "Mount Everest / Sagarmatha / Chomolungma" are three aliases, not one glued string.
-      // A river system's cell ("Saint Lawrence–Niagara–Detroit–...") names other rivers after the first.
-      const lines = (nameCell.lines.length > 1 ? nameCell.lines : [nameCell.text]).filter((l) => !topic.noParts || !/[–-]/.test(l));
-      const seeds = [...lines, nameCell.linkText ?? "", ...shortForms(name, topic.stripWords)].map((s) =>
-        topic.nameStrip ? s.replace(topic.nameStrip, "").trim() : s,
-      );
-      if (name !== cellText) seeds.push(cellText);
-      // "Squid Game 2", as people say a season, and "Squid Game S2", as people write one.
-      if (numbered) seeds.push(`${base} ${partText.match(/\d+/)![0]}`);
-      if (numbered && /^(season|series)\b/i.test(partText)) seeds.push(`${base} S${partText.match(/\d+/)![0]}`);
-      // The cell can say more than the name: "Mississippi–Missouri–Jefferson" names the Mississippi row.
-      for (const line of lines) if (cleanName(line) !== name) seeds.push(...shortForms(cleanName(line)));
-      for (const c of aliasCs) {
-        const cell = r[c];
-        // "Atlanta, Georgia" names the row by "Atlanta", not by "Georgia": keep the first part of a place.
-        if (cell) seeds.push(cell.linkText ?? "", ...cell.lines.flatMap((l) => l.split("/")).map((part) => part.split(",")[0]));
-      }
-      // The article's own title is never among its redirects ("Acadia National Park" for "Acadia").
-      // A renamed row ("Disneyland Park" shown as "Disneyland Paris") keeps the article its table name links.
-      const viaCell = redirectTarget(cellText, nameCell, hasCountries(topic));
-      // A season's article is its show's (the name cell's link), else its own (the season cell's).
-      const partTarget = numbered ? (nameCell.link ? viaCell : r[pc]?.link) : undefined;
-      const target =
-        topic.articles?.[name] ?? partTarget ?? (viaCell !== cellText ? viaCell : redirectTarget(name, nameCell, hasCountries(topic)));
-      if (target !== name) seeds.push(target);
-      const t = tc >= 0 ? parseValue(r[tc]?.text ?? "") : null;
-      rows.push({
-        name,
-        value: v.value,
-        ...(t ? { tiebreak: t.value } : {}),
-        valueText: t && t.value >= v.value ? rangeText(v.display, t.display) : v.display,
-        aliasSeeds: seeds.map(cleanName).filter((s) => s && s.length > 1),
-        redirectTarget: target,
-        link: nameCell.link,
-        tag: rowTag(yc >= 0 ? r[yc] : undefined, nameCell.link),
-        ...(numbered ? { part: { base, link: r[pc]?.link } } : {}),
-      });
     }
   }
   for (const name of Object.keys(topic.overrides ?? {})) {
     if (!rows.some((r) => r.name === (topic.rename?.[name] ?? name))) console.log(`warn ${topic.id}: override for "${name}", which is not a row`);
   }
-  if (!topic.keepOrder) rows.sort((a, b) => b.value - a.value || (b.tiebreak ?? 0) - (a.tiebreak ?? 0));
+  rankRows(topic, rows);
   lowerParts(rows);
   // "3.2 million" among "6,301,972"s reads as another unit: write it out like the rest, keeping its currency sign
   // ("$940.3 million" is "$940,300,000", not "940,300,000").
