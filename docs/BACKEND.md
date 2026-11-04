@@ -183,8 +183,10 @@ out. Nothing comes from Google until the player presses Continue with Google. Th
 8. **Check it works:**
    - Finish a list game. Table Editor > `plays` shows a row; the browser's network tab shows `rpc/submit_play`
      answering `true`. `select list_stats('mountains', 'list');` returns `{"n": ..., "counts": [...]}`.
-   - Home's account card says "not signed in" with SIGN IN and CREATE ACCOUNT. Create an account with a password in one browser, sign in with Google in
-     another. `saves` gets a row; play on one, focus the other, and the game shows up there.
+   - Home's account key (the pixel player left of the sound key) is hollow, named "Account: not signed in"; it opens
+     the sign-in sheet ("new here? create an account" inside). Create an account with a password in one browser, sign
+     in with Google in another: the key lights up cyan. `saves` gets a row; play on one, focus the other, and the game
+     shows up there. Offline, the key gets a pink dot and its sheet says offline.
    - Google: Continue with Google opens a Google window whose account chooser names your domain, not
      `<ref>.supabase.co`; after choosing, the window closes itself and the network tab shows
      `token?grant_type=id_token` answering 200. "Error 400: redirect_uri_mismatch" in Google's window means the
@@ -197,9 +199,9 @@ out. Nothing comes from Google until the player presses Continue with Google. Th
    - Signed in, add a note on a list's results: the network tab shows `rpc/submit_feedback` answering `true`, and
      `select * from list_feedback('<your reader key>');` lists it first, `from_owner` true. With the public key and a
      wrong key, the curl in Running it answers 401 or 403 (`wrong reader key`), never notes.
-   - Home > ACCOUNT > delete account: the `saves` row and the user (Authentication > Users) are gone.
+   - Home > the account key > delete account: the `saves` row and the user (Authentication > Users) are gone.
    - A build without the env vars (`npx vite --port 5100`, no `.env.local`) makes no requests to Supabase and shows no
-     account card.
+     account key.
 
 To ship stats first, set `VITE_SIGN_IN=none`: steps 3 and 4 and the secret key can wait.
 
