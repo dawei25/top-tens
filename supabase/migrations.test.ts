@@ -6,8 +6,9 @@ import { beforeAll, describe, expect, it } from "vitest";
 /**
  * The migrations, run in PGlite (Postgres in WebAssembly) against small stand-ins for what Supabase provides: the
  * anon, authenticated and service_role roles, auth.users and auth.uid(). Checks the contract the game relies on: who
- * can touch what, what submit_play and rate_list accept, what the stats and ratings functions return, the save's
- * version check, and what account deletion (api/delete-account.ts, as service_role) needs.
+ * can touch what, what submit_play, rate_list and submit_feedback accept, what the stats and ratings functions return,
+ * that notes are read only with the reader key (list_feedback), the save's version check, and what account deletion
+ * (api/delete-account.ts, as service_role) needs.
  *
  * Everything runs twice: once as older projects set up public (every new table and function handed to the API roles,
  * which the migrations must take back), once with "Automatically expose new tables" off (nothing handed out, as in
@@ -71,6 +72,15 @@ function suite(exposeNewTables: boolean) {
       args.mode ?? "list",
       args.rating === undefined ? 1 : args.rating,
       args.reason ?? null,
+      args.client === undefined ? client(1) : args.client,
+    ]);
+
+  const note = (args: { list?: string; mode?: string; rating?: number | null; text?: string | null; client?: string | null }) =>
+    db.query<{ ok: boolean }>("select public.submit_feedback($1, $2, $3, $4, $5) as ok", [
+      args.list ?? "mountains",
+      args.mode ?? "list",
+      args.rating === undefined ? null : args.rating,
+      args.text === undefined ? "a note" : args.text,
       args.client === undefined ? client(1) : args.client,
     ]);
 
@@ -325,6 +335,159 @@ function suite(exposeNewTables: boolean) {
     });
   });
 
+  describe("feedback (notes)", () => {
+    type Row = { list_id: string; mode: string; rating: number | null; text: string; user_id: string | null; client_id: string };
+    const rows = (list: string) =>
+      db.query<Row>("select list_id, mode, rating, text, user_id, client_id from public.feedback where list_id = $1 order by id", [list]);
+    type Read = { list_id: string; mode: string; rating: number | null; text: string; from_owner: boolean; created_at: Date };
+    const KEY = "a-long-random-reader-key-0123456789";
+    /** list_feedback as the game's public key would call it (anon). */
+    const read = (reader: string | null, since?: string) =>
+      as("anon", null, () =>
+        since === undefined
+          ? db.query<Read>("select * from public.list_feedback($1)", [reader])
+          : db.query<Read>("select * from public.list_feedback($1, $2)", [reader, since]),
+      );
+
+    it("takes notes from anyone, trimmed, with the rating at the time; a player may send more than one", async () => {
+      await as("anon", null, async () => {
+        expect((await note({ list: "f-parks", text: "  great list, could say which state\n\n", rating: 1, client: client(600) })).rows[0].ok).toBe(true);
+        expect((await note({ list: "f-parks", text: "second thought", client: client(600) })).rows[0].ok).toBe(true);
+        expect((await note({ list: "f-parks", mode: "blitz", text: "line one\nline two", rating: -1, client: client(600) })).rows[0].ok).toBe(true);
+        // A retry whose answer got lost: the same note from the same browser is kept once.
+        expect((await note({ list: "f-parks", text: "second thought", client: client(600) })).rows[0].ok).toBe(true);
+      });
+      // Signed in: linked to the account.
+      await as("authenticated", B, () => note({ list: "f-parks", text: "from b", rating: -1, client: client(601) }));
+      expect((await rows("f-parks")).rows).toEqual([
+        { list_id: "f-parks", mode: "list", rating: 1, text: "great list, could say which state", user_id: null, client_id: client(600) },
+        { list_id: "f-parks", mode: "list", rating: null, text: "second thought", user_id: null, client_id: client(600) },
+        { list_id: "f-parks", mode: "blitz", rating: -1, text: "line one\nline two", user_id: null, client_id: client(600) },
+        { list_id: "f-parks", mode: "list", rating: -1, text: "from b", user_id: B, client_id: client(601) },
+      ]);
+    });
+
+    it("refuses malformed notes with invalid_parameter_value (a 400 from the API)", async () => {
+      await as("anon", null, async () => {
+        const bad = [
+          { list: "Bad Id" },
+          { list: "x".repeat(65) },
+          { mode: "classic" },
+          { rating: 0 },
+          { rating: 2 },
+          { text: null },
+          { text: "" },
+          { text: " \n\t " },
+          { text: "x".repeat(501) },
+          { client: null },
+        ];
+        for (const args of bad) expect(await code(note({ list: "f-bad", client: client(602), ...args })), JSON.stringify(args)).toBe("22023");
+        // 500 characters is fine, counted after trimming (and in characters, not bytes).
+        expect((await note({ list: "f-bad", client: client(602), text: ` ${"é".repeat(500)}\n` })).rows[0].ok).toBe(true);
+      });
+      expect((await rows("f-bad")).rows.map((r) => r.text.length)).toEqual([500]);
+    });
+
+    it("gives players no access to the notes, the owners or the reader key", async () => {
+      for (const [role, user] of [["anon", null], ["authenticated", A]] as const) {
+        await as(role, user, async () => {
+          expect(await code(db.query("select * from public.feedback"))).toBe("42501");
+          expect(await code(db.query("insert into public.feedback (list_id, mode, text, client_id) values ('x', 'list', 'hi', $1)", [client(603)]))).toBe("42501");
+          expect(await code(db.query("update public.feedback set text = 'x'"))).toBe("42501");
+          expect(await code(db.query("delete from public.feedback"))).toBe("42501");
+          expect(await code(db.query("select * from public.owners"))).toBe("42501");
+          expect(await code(db.query("insert into public.owners (user_id) values ($1)", [user ?? A]))).toBe("42501");
+          expect(await code(db.query("select * from private.reader_keys"))).toBe("42501");
+          // Only the SQL editor (or the secret key) sets the reader key.
+          expect(await code(db.query("select public.set_feedback_reader($1)", ["a-key-anyone-would-like-to-set-1234"]))).toBe("42501");
+        });
+      }
+    });
+
+    it("keeps notes from the public key: list_feedback needs the reader key, stored only as its hash", async () => {
+      // No key set yet: nobody reads.
+      expect(await code(read("anything"))).toBe("42501");
+      expect(await code(read(KEY))).toBe("42501");
+      // The secret key (service_role) or the SQL editor sets it; a short one is refused.
+      await as("service_role", null, async () => {
+        expect(await code(db.query("select public.set_feedback_reader($1)", ["short"]))).toBe("22023");
+        expect(await code(db.query("select public.set_feedback_reader($1)", [null]))).toBe("22023");
+        await db.query("select public.set_feedback_reader($1)", ["an-older-key-replaced-below-0123456789"]);
+      });
+      await db.query("select public.set_feedback_reader($1)", [KEY]);
+      const stored = await db.query<{ name: string; hex: string; is_hash: boolean }>(
+        "select name, encode(key_hash, 'hex') as hex, key_hash = sha256(convert_to($1, 'UTF8')) as is_hash from private.reader_keys",
+        [KEY],
+      );
+      expect(stored.rows).toHaveLength(1);
+      expect(stored.rows[0]).toMatchObject({ name: "feedback", is_hash: true });
+      expect(stored.rows[0].hex).not.toContain(Buffer.from(KEY).toString("hex"));
+
+      // A wrong key, the replaced key, none at all: refused, for anon and signed-in players alike.
+      for (const wrong of ["anything", "an-older-key-replaced-below-0123456789", KEY.toUpperCase(), `${KEY} `, "", null]) {
+        expect(await code(read(wrong)), String(wrong)).toBe("42501");
+      }
+      await as("authenticated", A, async () => {
+        expect(await code(db.query("select * from public.list_feedback($1)", ["anything"]))).toBe("42501");
+      });
+      // The right key reads them, with no ids.
+      const got = await read(KEY);
+      expect(got.rows.length).toBeGreaterThan(0);
+      expect(Object.keys(got.rows[0])).toEqual(["list_id", "mode", "rating", "text", "from_owner", "created_at"]);
+      expect(got.rows.some((r) => r.text === "great list, could say which state")).toBe(true);
+    });
+
+    it("lists the owner's notes first, then the newest first; p_since keeps only newer ones", async () => {
+      await db.query("insert into public.owners (user_id) values ($1)", [A]);
+      await as("anon", null, async () => {
+        await note({ list: "f-order", text: "old anon", client: client(610) });
+        await note({ list: "f-order", text: "new anon", client: client(611) });
+      });
+      await as("authenticated", A, async () => {
+        await note({ list: "f-order", text: "owner old", client: client(612), rating: 1 });
+        await note({ list: "f-order", text: "owner new", client: client(612) });
+      });
+      await as("authenticated", B, () => note({ list: "f-order", text: "b, signed in", client: client(613) }));
+      const at = (text: string, hoursAgo: number) =>
+        db.query("update public.feedback set created_at = now() - make_interval(hours => $2) where list_id = 'f-order' and text = $1", [text, hoursAgo]);
+      await at("old anon", 50);
+      await at("new anon", 1);
+      await at("owner old", 30);
+      await at("owner new", 2);
+      await at("b, signed in", 3);
+
+      const order = (r: Read[]) => r.filter((x) => x.list_id === "f-order").map((x) => [x.text, x.from_owner]);
+      expect(order((await read(KEY)).rows)).toEqual([
+        ["owner new", true],
+        ["owner old", true],
+        ["new anon", false],
+        ["b, signed in", false],
+        ["old anon", false],
+      ]);
+      // Across lists too: the owner's come before everyone else's.
+      const all = (await read(KEY)).rows;
+      expect(all.findIndex((r) => !r.from_owner)).toBe(all.filter((r) => r.from_owner).length);
+      expect(order((await read(KEY, new Date(Date.now() - 24 * 3_600_000).toISOString())).rows)).toEqual([
+        ["owner new", true],
+        ["new anon", false],
+        ["b, signed in", false],
+      ]);
+    });
+
+    it("ignores a browser past 20 notes an hour", async () => {
+      await as("anon", null, async () => {
+        for (let i = 0; i < 20; i++) expect((await note({ list: `f-spam-${i}`, text: `spam ${i}`, client: client(620) })).rows[0].ok).toBe(true);
+        expect((await note({ list: "f-spam-x", text: "one more", client: client(620) })).rows[0].ok).toBe(false);
+        // Another browser is fine.
+        expect((await note({ list: "f-spam-x", text: "someone else", client: client(621) })).rows[0].ok).toBe(true);
+      });
+      expect((await rows("f-spam-x")).rows.map((r) => r.client_id)).toEqual([client(621)]);
+      // An hour on, the first browser may write again.
+      await db.query("update public.feedback set created_at = now() - interval '61 minutes' where client_id = $1", [client(620)]);
+      expect((await as("anon", null, () => note({ list: "f-spam-x", text: "later", client: client(620) }))).rows[0].ok).toBe(true);
+    });
+  });
+
   describe("saves", () => {
     const select = () => db.query<{ user_id: string; version: number; data: unknown }>("select user_id, version, data from public.saves order by user_id");
 
@@ -363,30 +526,39 @@ function suite(exposeNewTables: boolean) {
       });
     });
 
-    it("lets account deletion (the server, as service_role) clear a player's ratings, games and save", async () => {
+    it("lets account deletion (the server, as service_role) clear a player's notes, ratings, games and save", async () => {
       await as("authenticated", B, () => db.query("insert into public.saves (user_id, data) values ($1, '{}')", [B]));
       const others = await db.query<{ n: number }>("select count(*)::int as n from public.plays where user_id is distinct from $1", [B]);
       const otherRatings = await db.query<{ n: number }>("select count(*)::int as n from public.ratings where user_id is distinct from $1", [B]);
+      const otherNotes = await db.query<{ n: number }>("select count(*)::int as n from public.feedback where user_id is distinct from $1", [B]);
       await as("service_role", null, async () => {
         // What api/delete-account.ts sends through the API: a delete filtered on the user.
+        expect((await db.query("delete from public.feedback where user_id = $1", [B])).affectedRows).toBe(2);
         expect((await db.query("delete from public.ratings where user_id = $1", [B])).affectedRows).toBe(2);
         expect((await db.query("delete from public.plays where user_id = $1", [B])).affectedRows).toBe(2);
         expect((await db.query("delete from public.saves where user_id = $1", [B])).affectedRows).toBe(1);
       });
       expect((await db.query<{ n: number }>("select count(*)::int as n from public.plays")).rows[0].n).toBe(others.rows[0].n);
       expect((await db.query<{ n: number }>("select count(*)::int as n from public.ratings")).rows[0].n).toBe(otherRatings.rows[0].n);
+      expect((await db.query<{ n: number }>("select count(*)::int as n from public.feedback")).rows[0].n).toBe(otherNotes.rows[0].n);
     });
 
-    it("goes, with the account's linked games and ratings, when the sign-in is deleted", async () => {
+    it("goes, with the account's linked games, ratings and notes (and its place among the owners), when the sign-in is deleted", async () => {
       await as("authenticated", A, () => rate({ list: "deleted-with-a", client: client(900) }));
       expect((await db.query("select * from public.ratings where user_id = $1", [A])).rows).toHaveLength(1);
+      expect((await db.query("select * from public.feedback where user_id = $1", [A])).rows).toHaveLength(2);
+      expect((await db.query("select * from public.owners where user_id = $1", [A])).rows).toHaveLength(1);
+      const anonymousNotes = await db.query<{ n: number }>("select count(*)::int as n from public.feedback where user_id is null");
       const before = await db.query<{ n: number }>("select count(*)::int as n from public.plays where user_id is null");
       await db.query("delete from auth.users where id = $1", [A]);
       expect((await db.query("select * from public.saves where user_id = $1", [A])).rows).toEqual([]);
       expect((await db.query("select * from public.plays where user_id = $1", [A])).rows).toEqual([]);
       expect((await db.query("select * from public.ratings where user_id = $1", [A])).rows).toEqual([]);
-      // Anonymous games stay in the totals.
+      expect((await db.query("select * from public.feedback where user_id = $1", [A])).rows).toEqual([]);
+      expect((await db.query("select * from public.owners where user_id = $1", [A])).rows).toEqual([]);
+      // Anonymous games stay in the totals, and anonymous notes stay.
       expect((await db.query<{ n: number }>("select count(*)::int as n from public.plays where user_id is null")).rows[0].n).toBe(before.rows[0].n);
+      expect((await db.query<{ n: number }>("select count(*)::int as n from public.feedback where user_id is null")).rows[0].n).toBe(anonymousNotes.rows[0].n);
     });
   });
 }
