@@ -173,7 +173,7 @@
   color: var(--pink);
 }
 
-/* ---------- Your account (the sheet Home's ACCOUNT key opens) ---------- */
+/* ---------- Your account (the sheet Home's account key opens, signed in) ---------- */
 .account {
   display: flex;
   flex-direction: column;

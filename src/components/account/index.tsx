@@ -3,21 +3,21 @@ import { blitzPercentile, formatCount, MIN_PLAYERS } from "../../net/crowd";
 import { accountsOn, backendOn, useListStats } from "../../net";
 import { percentileLabel } from "../../game/par";
 import type { PuzzleMeta } from "../../game/puzzles";
-import HomeAccount from "./HomeAccount";
+import AccountKey from "./AccountKey";
 
 /**
  * The backend's pieces of the screens. Each renders nothing in a build without a backend (no env), and the bigger
  * ones (the sign-in and account sheets, the comparison with players, the privacy page) are separate chunks, downloaded
- * only when shown. The account lives on Home (./HomeAccount): its card opens both sheets.
+ * only when shown. The account lives on Home (./AccountKey): a key in its header opens both sheets.
  */
 
 const CrowdPanel = lazy(() => import("./CrowdPanel"));
 const Privacy = lazy(() => import("./Privacy"));
 
-/** Home's account card: signed in or not at a glance, and the way to sign in or to your account. */
-export function HomeAccountCard() {
+/** Home's account key: signed in or not at a glance, and the way to sign in or to your account. */
+export function HomeAccountKey() {
   if (!accountsOn) return null;
-  return <HomeAccount />;
+  return <AccountKey />;
 }
 
 /** The knowledge page's comparison with real players, on lists with enough of them. */

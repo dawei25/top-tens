@@ -32,13 +32,13 @@ export function ago(t: number, now = Date.now()): string {
   return new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-/** The most of a name Home shows; longer ones end in "...". */
+/** The most of a name Home's account key says; longer ones end in "...". */
 export const HOME_NAME_MAX = 24;
 
 /**
- * The name Home shows for a signed-in player: their display name (the Google name, or one they chose), else the part
- * of the email before the @. Never a whole email address: Home is always on show (and in screenshots), so anything
- * with an @ in it is cut there.
+ * The name Home's account key gives a signed-in player: their display name (the Google name, or one they chose), else
+ * the part of the email before the @. Never a whole email address: Home is always on show (in screenshots, read out by
+ * screen readers, in the key's tooltip), so anything with an @ in it is cut there.
  */
 export function homeName(user: Pick<AccountUser, "name" | "email">): string {
   const local = (s: string) => s.split("@")[0].replace(/\s+/g, " ").trim();
@@ -46,20 +46,23 @@ export function homeName(user: Pick<AccountUser, "name" | "email">): string {
   return name.length > HOME_NAME_MAX ? `${name.slice(0, HOME_NAME_MAX - 3).trimEnd()}...` : name;
 }
 
-/** The line under Home's account status: what being signed in or out means for the player's games right now. */
-export function homeNote(a: Pick<AccountState, "status" | "sync" | "syncedAt" | "notice">, now = Date.now()): string {
-  if (a.status === "loading") return "checking your sign-in.";
-  if (a.status !== "in") return a.notice ?? "games are saved on this device only.";
-  switch (a.sync) {
-    case "syncing":
-      return "syncing your games.";
-    case "synced":
-      return a.syncedAt ? `games synced ${ago(a.syncedAt, now)}.` : "games synced.";
-    case "offline":
-      return "offline. games sync when you're back online.";
-    case "error":
-      return "couldn't sync. it tries again after your next game.";
-    default:
-      return "your games sync to this account.";
-  }
+/**
+ * Whether Home's account key shows its pink dot: something the player should look at. Signed in, the games couldn't
+ * sync (offline, or the server refused); signed out, a sign-in came back and didn't finish (the sign-in sheet says why).
+ */
+export function accountAlert(a: Pick<AccountState, "status" | "sync" | "notice">): boolean {
+  if (a.status === "in") return a.sync === "offline" || a.sync === "error";
+  return a.status === "out" && !!a.notice;
+}
+
+/**
+ * Home's account key in words, its accessible name and its title: "Account: not signed in", "Account: signed in as
+ * Dana", and what its pink dot means when it shows. Never an email address (homeName), and never the notice itself
+ * (it can carry what a server said): the sheet the key opens says the rest.
+ */
+export function accountKeyLabel(a: Pick<AccountState, "status" | "user" | "sync" | "notice">): string {
+  if (a.status === "loading") return "Account: signing in";
+  if (a.status !== "in" || !a.user) return `Account: not signed in${a.notice ? ", sign-in didn't finish" : ""}`;
+  const trouble = a.sync === "offline" ? ", offline" : a.sync === "error" ? ", couldn't sync" : "";
+  return `Account: signed in as ${homeName(a.user)}${trouble}`;
 }
