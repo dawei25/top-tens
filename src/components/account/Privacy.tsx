@@ -57,6 +57,27 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
         </section>
       )}
 
+      {backendOn && (
+        <section data-glass className="panel privacy-part" aria-labelledby="pv-notes" data-testid="privacy-notes">
+          <h2 id="pv-notes" className="label cyan">
+            Notes
+          </h2>
+          <ul>
+            <li>
+              When you add a note to a list, the game sends what you wrote, the list, list or Blitz, your rating of it
+              then, and the random id. Nothing else.
+            </li>
+            <li>Why: to make the lists better. Only the game's owner reads notes. Nobody else sees them.</li>
+            <li>So leave personal details out of them.</li>
+            <li>
+              {accountsOn
+                ? "Notes sent while signed in are linked to your account and go when you delete it. Notes sent signed out aren't linked to anyone, so they stay."
+                : "Notes aren't linked to anyone, so they can't be picked out and deleted later."}
+            </li>
+          </ul>
+        </section>
+      )}
+
       {accountsOn && (
         <section data-glass className="panel privacy-part" aria-labelledby="pv-account">
           <h2 id="pv-account" className="label cyan">
@@ -70,7 +91,7 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
             <li>
               Your save: the same games, streaks and bests this browser keeps, so they follow you to other devices.
             </li>
-            <li>The scores and ratings you send while signed in are linked to your account.</li>
+            <li>The scores, ratings and notes you send while signed in are linked to your account.</li>
             <li>Why: signing in and syncing. Your email is never used for anything else.</li>
           </ul>
         </section>
@@ -81,7 +102,7 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
           Who handles it
         </h2>
         <ul>
-          {backendOn && <li>Supabase stores the scores{accountsOn ? ", saves and sign-ins" : ""}.</li>}
+          {backendOn && <li>Supabase stores the scores, ratings and notes{accountsOn ? ", saves and sign-ins" : ""}.</li>}
           <li>
             Vercel hosts the game.
             {backendOn
@@ -106,7 +127,7 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
           {accountsOn && (
             <li>
               Signed in: <a href="#stats">Your knowledge</a>, Account, delete account. That removes your save, your linked
-              scores and ratings, and your sign-in, right away.
+              scores, ratings and notes, and your sign-in, right away.
             </li>
           )}
           <li>In this browser: reset all progress on Home, or clear this site's data in your browser's settings.</li>

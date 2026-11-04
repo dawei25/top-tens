@@ -183,9 +183,10 @@ test("the menu's account and Feedback, the sign-in sheet and privacy page (deskt
   await sheet.waitFor({ state: "detached" });
   assert.equal(await key.evaluate((el) => el === document.activeElement), true);
 
-  // The privacy page, from the footer.
+  // The privacy page, from the footer: notes have their own part (what's sent, who reads them).
   await page.getByTestId("privacy-link").click();
   await page.getByTestId("privacy").waitFor();
+  await page.getByTestId("privacy-notes").waitFor();
   assert.ok(await noHScroll(page));
   await page.getByTestId("nav-back").click();
 
