@@ -147,9 +147,16 @@ export default function Fathom({ onBack, onHome }: Props) {
   }
 
   const question = questions[game.at];
+  const shown = phase === "reveal" ? scored[game.at] : undefined;
   return (
     <main className="screen fathom" data-testid="fathom" data-phase={phase}>
       {head}
+      {/* The verdict, read out as the reveal appears (a live region has to be there before its words change). */}
+      <p className="sr-only" role="status">
+        {shown &&
+          `${bandLabel(shown.band)}, ${shown.points} points. The answer: ${formatAmount(shown.question.answer)} ${shown.question.unit}. ` +
+            `Yours was ${timesOff(shown.guess, shown.question.answer)}.`}
+      </p>
       <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id}>
         <div className="prompt-top">
           <span className="label cyan">
@@ -205,6 +212,10 @@ function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: n
           onChange={(e) => {
             setText(e.target.value);
             setError(null);
+          }}
+          // LOCK IN is off while the field is empty, so Enter there submits nothing: say why instead.
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !text.trim()) setError("empty");
           }}
           inputMode="decimal"
           autoFocus
@@ -277,7 +288,7 @@ function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNex
   }, []);
   const site = siteOf(q.source.url);
   return (
-    <section ref={card} className="panel fathom-reveal enter" data-glass data-testid="fathom-reveal" data-band={band} data-points={points} aria-live="polite">
+    <section ref={card} className="panel fathom-reveal enter" data-glass data-testid="fathom-reveal" data-band={band} data-points={points}>
       <div className="reveal-head">
         <BandChip band={band} />
         <p className="reveal-points" data-testid="fathom-points" data-points={points}>
@@ -289,7 +300,7 @@ function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNex
           <p className="label gold">
             <Mark kind="buoy" /> The answer
           </p>
-          <p className="figure-n gold" data-testid="fathom-answer">
+          <p className="figure-n gold" data-testid="fathom-answer" data-value={q.answer}>
             <span>{formatAmount(q.answer)}</span> <span className="figure-unit">{q.unit}</span>
           </p>
         </div>
@@ -297,7 +308,7 @@ function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNex
           <p className="label cyan">
             <Mark kind="squid" /> Your guess
           </p>
-          <p className="figure-n" data-testid="fathom-guess">
+          <p className="figure-n" data-testid="fathom-guess" data-value={guess}>
             <span>{formatAmount(guess)}</span> <span className="figure-unit">{q.unit}</span>
           </p>
           <p className="figure-off" data-band={band} data-testid="fathom-off">
@@ -377,7 +388,14 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
       <section className="panel fathom-recap" data-glass aria-label="Your answers">
         <ol>
           {scored.map((s) => (
-            <li key={s.question.id} data-testid="fathom-row" data-question={s.question.id} data-points={s.points} data-band={s.band}>
+            <li
+              key={s.question.id}
+              data-testid="fathom-row"
+              data-question={s.question.id}
+              data-guess={s.guess}
+              data-points={s.points}
+              data-band={s.band}
+            >
               <span className="band-sq" data-band={s.band} aria-hidden="true" />
               <span className="recap-body">
                 <span className="recap-q">{s.question.question}</span>
