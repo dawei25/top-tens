@@ -171,9 +171,8 @@
   color: var(--pink);
 }
 
-/* ---------- The account panel (knowledge page) ---------- */
+/* ---------- Your account (the sheet Home's ACCOUNT key opens) ---------- */
 .account {
-  padding: 14px 18px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -216,6 +215,11 @@
   font-size: 16px;
   letter-spacing: 0.05em;
   color: var(--muted);
+}
+/* The address it signed in with: brighter than the line around it, broken anywhere rather than past the sheet's edge. */
+.account-email {
+  color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 /* ---------- Vs players (knowledge page) ---------- */

@@ -4,7 +4,7 @@ import { loadService, useAccount } from "../../net";
 import type { GoogleOutcome } from "../../net/google";
 import { setAccount } from "../../net/store";
 import GoogleSignIn from "./GoogleSignIn";
-import "./account.css";
+import { Sheet } from "./Sheet";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** Supabase's default minimum; a project set stricter says so itself. */
@@ -15,20 +15,24 @@ type Service = NonNullable<Awaited<ReturnType<typeof loadService>>>;
 
 /**
  * Sign in with the methods this build offers (VITE_SIGN_IN): Google; an email and password (sign in or create an
- * account, nothing emailed); a link (and a code, for opening it on another device) by email. A sheet over the screen:
- * Escape, the close key or a press outside closes it; focus stays inside while it's open.
+ * account, nothing emailed); a link (and a code, for opening it on another device) by email. A sheet over the screen
+ * (./Sheet): Escape, the close key or a press outside closes it; focus stays inside while it's open; the first control
+ * takes focus (the Google key when there is one: no keyboard pops up on a phone).
+ *
+ * `start`: Home's SIGN IN opens it to sign in, CREATE ACCOUNT to create an account (the password form's "up" mode).
+ * Google and the email link make an account on first use, so for them the two differ only in the heading.
  *
  * Google: our key (./GoogleSignIn). With a client ID (VITE_GOOGLE_CLIENT_ID) it opens Google from this site, so
  * Google's account chooser names this site; without one it goes through Supabase's redirect.
  */
-export default function SignInSheet({ onClose }: { onClose: () => void }) {
+export default function SignInSheet({ onClose, start = "in" }: { onClose: () => void; start?: "in" | "up" }) {
   const account = useAccount();
   const methods = BACKEND?.signIn ?? [];
   const hasPassword = methods.includes("password");
   const hasLink = methods.includes("email");
   const hasGoogle = methods.includes("google");
   const [view, setView] = useState<"password" | "link">(hasPassword ? "password" : "link");
-  const [mode, setMode] = useState<"in" | "up">("in");
+  const [mode, setMode] = useState<"in" | "up">(start);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
@@ -37,40 +41,11 @@ export default function SignInSheet({ onClose }: { onClose: () => void }) {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
-  const sheet = useRef<HTMLDivElement>(null);
   const close = useRef(onClose);
   const pwId = useId();
   useEffect(() => {
     close.current = onClose;
   }, [onClose]);
-
-  // Focus the first control (the Google key when there is one: no keyboard pops up on a phone). Escape closes (before
-  // any screen's Escape-is-Back); Tab stays in the sheet.
-  useEffect(() => {
-    const el = sheet.current;
-    el?.querySelector<HTMLElement>("input, button:not([data-close])")?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-        close.current();
-        return;
-      }
-      if (e.key !== "Tab" || !el) return;
-      const items = [...el.querySelectorAll<HTMLElement>("button:not(:disabled), input, a[href]")];
-      const first = items[0];
-      const last = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last?.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first?.focus();
-      }
-    };
-    document.addEventListener("keydown", onKey, true);
-    return () => document.removeEventListener("keydown", onKey, true);
-  }, []);
 
   // Signed in (a password, a code typed here, or another tab finished the link): done.
   useEffect(() => {
@@ -263,64 +238,50 @@ export default function SignInSheet({ onClose }: { onClose: () => void }) {
   const showPassword = hasPassword && (view === "password" || !hasLink);
   const showLink = hasLink && !showPassword;
 
+  // The heading follows the password form's mode; with no password form, what the sheet was opened for.
+  const creating = (hasPassword && showPassword ? mode : start) === "up";
+
   return (
-    <div
-      className="sheet-backdrop"
-      data-testid="sign-in-backdrop"
-      onPointerDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div
-        ref={sheet}
-        className="panel sheet"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="sign-in-title"
-        tabIndex={-1}
-        data-testid="sign-in-sheet"
-        data-glass
-      >
-        <div className="sheet-head">
-          <h2 id="sign-in-title" className="label cyan">
-            Sign in
-          </h2>
-          <button type="button" className="key key-xs" data-close onClick={onClose} data-testid="sign-in-close">
-            Close
-          </button>
-        </div>
-        <p className="caption">keep your games, streaks and bests on every device.{hasPassword ? "" : " no password."}</p>
-        {account.notice && (
-          <p className="sheet-error" role="alert">
-            {account.notice}
-          </p>
-        )}
-
-        {hasGoogle && <GoogleSignIn disabled={!!busy} signingIn={busy === "google"} onOutcome={googleDone} onSupabase={google} />}
-        {hasGoogle && (hasPassword || hasLink) && <p className="sheet-or">or</p>}
-
-        {showPassword && passwordForm}
-        {showLink && linkForm}
-        {hasPassword && hasLink && (
-          <button
-            type="button"
-            className="text-btn sheet-switch"
-            data-testid="sign-in-switch"
-            onClick={() => switchTo({ view: showPassword ? "link" : "password" })}
-          >
-            {showPassword ? "no password? email me a link" : "use a password instead"}
-          </button>
-        )}
-
-        {error && (
-          <p className="sheet-error" role="alert" data-testid="sign-in-error">
-            {error}
-          </p>
-        )}
-        <p className="sheet-note">
-          your games so far come with you. <a href="#privacy" onClick={onClose}>what we keep</a>
-        </p>
+    <Sheet labelledBy="sign-in-title" testId="sign-in-sheet" onClose={onClose}>
+      <div className="sheet-head">
+        <h2 id="sign-in-title" className="label cyan" data-testid="sign-in-title" data-mode={creating ? "up" : "in"}>
+          {creating ? "Create account" : "Sign in"}
+        </h2>
+        <button type="button" className="key key-xs sheet-close" data-close onClick={onClose} data-testid="sign-in-close">
+          Close
+        </button>
       </div>
-    </div>
+      <p className="caption">keep your games, streaks and bests on every device.{hasPassword ? "" : " no password."}</p>
+      {account.notice && (
+        <p className="sheet-error" role="alert">
+          {account.notice}
+        </p>
+      )}
+
+      {hasGoogle && <GoogleSignIn disabled={!!busy} signingIn={busy === "google"} onOutcome={googleDone} onSupabase={google} />}
+      {hasGoogle && (hasPassword || hasLink) && <p className="sheet-or">or</p>}
+
+      {showPassword && passwordForm}
+      {showLink && linkForm}
+      {hasPassword && hasLink && (
+        <button
+          type="button"
+          className="text-btn sheet-switch"
+          data-testid="sign-in-switch"
+          onClick={() => switchTo({ view: showPassword ? "link" : "password" })}
+        >
+          {showPassword ? "no password? email me a link" : "use a password instead"}
+        </button>
+      )}
+
+      {error && (
+        <p className="sheet-error" role="alert" data-testid="sign-in-error">
+          {error}
+        </p>
+      )}
+      <p className="sheet-note">
+        your games so far come with you. <a href="#privacy" onClick={onClose}>what we keep</a>
+      </p>
+    </Sheet>
   );
 }

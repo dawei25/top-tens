@@ -9,7 +9,7 @@ import { EnterHint, type Mode } from "./pixel";
 import { STREAK_NOTE } from "./copy";
 import { FloatNote } from "./Note";
 import { SoundToggle } from "./sound/SoundToggle";
-import { PrivacyLink } from "./account";
+import { HomeAccountCard, PrivacyLink } from "./account";
 import { MenuKey } from "./menu";
 import { todayStatus } from "./today";
 
@@ -363,6 +363,9 @@ export function Home({
           )}
         </div>
       </section>
+
+      {/* Signed in or not, at a glance (only in a build with accounts): right under Today, which it never pushes down. */}
+      <HomeAccountCard />
 
       {/* Side by side on wide screens: free play takes most of the row, your games the rest. */}
       <div className="home-pair">

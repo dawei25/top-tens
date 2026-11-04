@@ -739,6 +739,102 @@ a {
   color: var(--muted);
 }
 
+/*
+ * Home's account card (components/account/HomeAccount.tsx, only in a build with accounts), right under Today: a pixel
+ * player (hollow and faint signed out, lit cyan signed in), what that means in two lines, and its keys on the right.
+ * Signed out on a phone, SIGN IN and CREATE ACCOUNT share a row of their own under the words.
+ */
+.home-account {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "icon text keys";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 10px;
+}
+.home-account-icon {
+  grid-area: icon;
+  display: block;
+  margin-left: 4px;
+  color: var(--faint);
+}
+.home-account[data-state="in"] .home-account-icon {
+  color: var(--cyan);
+  filter: drop-shadow(0 0 6px var(--cyan-glow));
+}
+.home-account-text {
+  grid-area: text;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-account-status {
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+/* The name in the lit color, cut short with "..." if the line can't hold it (a long name moves under "signed in as"). */
+.home-account-name {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  font-weight: 400;
+  color: var(--cyan);
+}
+.home-account-note {
+  font-size: 17px;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+/* A sign-in that came back and failed: said here, in the miss color. */
+.home-account-note.notice {
+  color: var(--pink);
+}
+.home-account-keys {
+  grid-area: keys;
+  display: flex;
+  gap: 10px;
+}
+/* CREATE ACCOUNT: a navy key with a cyan edge, the suggested way in (quieter than Today's keys). */
+.key-account-new,
+.key-account-new:hover:not(:disabled) {
+  color: var(--cyan);
+  box-shadow:
+    inset 0 0 0 1px rgba(77, 227, 255, 0.55),
+    0 5px 0 var(--key-shadow);
+}
+.key-account-new:active:not(:disabled) {
+  box-shadow:
+    inset 0 0 0 1px rgba(77, 227, 255, 0.55),
+    0 2px 0 var(--key-shadow);
+}
+@media (max-width: 599px) {
+  .home-account:not([data-state="in"]) {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "icon text"
+      "keys keys";
+  }
+  .home-account:not([data-state="in"]) .home-account-keys > .key {
+    flex: 1 1 auto;
+  }
+}
+/* Narrow phones: the keys close up so SIGN IN and CREATE ACCOUNT keep one row. */
+@media (max-width: 380px) {
+  .home-account-keys > .key {
+    padding: 0 10px;
+    letter-spacing: 0.12em;
+  }
+}
+
 .home-foot {
   margin-top: auto;
   display: flex;

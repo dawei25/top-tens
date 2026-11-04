@@ -179,6 +179,8 @@ for (const vp of VIEWPORTS) {
     };
     assert.deepEqual(await edges("home-record"), await edges("today-group"));
     assert.deepEqual(await edges("home-foot"), await edges("today-group"));
+    // A build without accounts has no account card (backend.e2e.cjs covers the card itself).
+    assert.equal(await page.getByTestId("home-account").count(), 0);
     await ctx.close();
   });
 }

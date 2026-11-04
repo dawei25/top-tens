@@ -11,14 +11,15 @@
 // focus-visible and keyboard-modality styles apply), and every element's layout box is compared with the screen at
 // rest (e2e/states-lib.cjs). Two of each kind of element are checked (two of the nine empty rows, say);
 // STATES_ALL=1 npm run e2e -- states checks every one. Real puzzle data: a screen is only ever compared with itself.
-// "add a note" (only in a build with a backend) gets a second, short walk on the backend copy: its key, and the box
-// open with focus in it. The static half of the rule is npm run lint:css (e2e/css-states.mjs).
+// "add a note" and Home's account card (only in a build with a backend) get short walks of their own on the backend
+// copy: the note's key and its box open with focus in it; the card signed out with the create-account sheet, and
+// signed in with the account sheet. The static half of the rule is npm run lint:css (e2e/css-states.mjs).
 const { describe, test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, open, go, puzzle, guess, freeze, giveUp } = require("./helpers.cjs");
 const { checkScreen, formatFailures } = require("./states-lib.cjs");
 const { BACKEND_ENV } = require("./backend-env.cjs");
-const { serveBuild, opener, FRESH: BACKEND_FRESH } = require("./backend-lib.cjs");
+const { serveBuild, opener, FRESH: BACKEND_FRESH, SESSION } = require("./backend-lib.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -34,6 +35,11 @@ const BLITZ = "airports";
 
 /** Lets the frozen clock run its pending timers (a name typing in, the end reveal), then freezes it again. */
 const tick = (page, ms = 3000) => page.clock.runFor(ms);
+/** A sheet in its own chunk: once downloaded, React shows it on a timer, which the frozen clock holds; run it on. */
+async function lazyShown(page, testId) {
+  for (let i = 0; i < 40 && !(await page.getByTestId(testId).count()); i++) await tick(page, 250);
+  await page.getByTestId(testId).waitFor();
+}
 const row = (page, rank) => page.locator(`[data-testid="slot"][data-rank="${rank}"]`);
 
 /** In walking order: each screen starts where the one before left off. */
@@ -231,6 +237,43 @@ const NOTE_SCREENS = [
   },
 ];
 
+/**
+ * Home's account card (only in a build with accounts), on the same backend copy: signed out, with the sheet CREATE
+ * ACCOUNT opens; then, in a second tab signed in, the card with ACCOUNT and the account sheet it opens.
+ */
+const ACCOUNT_OUT_SCREENS = [
+  {
+    name: "home, account card signed out (backend)",
+    scope: '[data-testid="home-account"]',
+    setup: (page) => page.locator('[data-testid="home-account"][data-state="out"]').waitFor(),
+  },
+  {
+    name: "home, create account sheet (backend)",
+    scope: '[data-testid="sign-in-sheet"]',
+    setup: async (page) => {
+      await page.getByTestId("home-create-account").click();
+      await lazyShown(page, "sign-in-sheet");
+      await page.locator('[data-testid="sign-in-password-form"][data-mode="up"]').waitFor();
+    },
+  },
+];
+const ACCOUNT_IN_SCREENS = [
+  {
+    name: "home, account card signed in (backend)",
+    scope: '[data-testid="home-account"]',
+    setup: (page) => page.locator('[data-testid="home-account"][data-state="in"]').waitFor(),
+  },
+  {
+    name: "home, account sheet open (backend)",
+    scope: '[data-testid="account-sheet"]',
+    setup: async (page) => {
+      await page.getByTestId("home-account-key").click();
+      await lazyShown(page, "account-sheet");
+      await page.getByTestId("account-panel").waitFor();
+    },
+  },
+];
+
 /** Walks `screens` in order on `page` (its clock frozen), then fails with every element that moved. */
 async function walk(page, width, screens) {
   const started = Date.now();
@@ -272,7 +315,7 @@ describe("interaction states", { concurrency: true }, () => {
   }
 });
 
-describe("interaction states, with a backend (the note)", { concurrency: true }, () => {
+describe("interaction states, with a backend (the note, Home's account)", { concurrency: true }, () => {
   let served;
   before(async () => (served = await serveBuild(BACKEND_ENV, "E2E_BACKEND_DIST")));
   after(() => served?.close());
@@ -284,6 +327,20 @@ describe("interaction states, with a backend (the note)", { concurrency: true },
         await walk(page, width, NOTE_SCREENS);
       } finally {
         await ctx.close();
+      }
+    });
+    test(`nothing moves on hover, focus or press: Home's account (${width.name}, ${width.viewport.width}px)`, async () => {
+      const save = { save: { data: { games: {}, daily: {}, seenHelp: true }, version: 1 } };
+      for (const [seed, screens] of [
+        [BACKEND_FRESH, ACCOUNT_OUT_SCREENS],
+        [{ ...BACKEND_FRESH, "top-tens:auth": SESSION }, ACCOUNT_IN_SCREENS],
+      ]) {
+        const { ctx, page } = await openBackend(width, "", seed, save);
+        try {
+          await walk(page, width, screens);
+        } finally {
+          await ctx.close();
+        }
       }
     });
   }
