@@ -1,52 +1,62 @@
 {
   "Jakarta": {
-    "text": "The Dutch East India Company rebuilt it as Batavia in 1619; it was renamed Jakarta under Japanese occupation.",
+    "text": "The Dutch East India Company rebuilt Indonesia's capital as Batavia in 1619; it became Jakarta under Japanese occupation.",
     "source": "https://en.wikipedia.org/wiki/Jakarta",
+    "where": "Indonesia",
     "evidence": "The Dutch East India Company (VOC) seized Jayakarta in 1619 and rebuilt it as Batavia, its main administrative centre in Asia and an important trading port. During the Japanese occupation in World War II, the authorities renamed Batavia to Jakarta."
   },
   "Dhaka": {
-    "text": "A hub of the muslin trade under the Mughals, it was once called the Venice of the East.",
+    "text": "A hub of the muslin trade under the Mughals, Bangladesh's capital was once called the Venice of the East.",
     "source": "https://en.wikipedia.org/wiki/Dhaka",
+    "where": "Bangladesh",
     "evidence": "It was the hub of the muslin trade in Bengal and one of the most prosperous cities in the world. ... The city was once called the Venice of the East."
   },
   "Tokyo": {
-    "text": "Originally Edo, it was renamed Tokyo, \"Eastern Capital\", when the imperial capital moved there from Kyoto.",
+    "text": "Originally Edo, Japan's capital was renamed Tokyo, \"Eastern Capital\", when the emperor moved there from Kyoto.",
     "source": "https://en.wikipedia.org/wiki/Tokyo",
+    "where": "Japan",
     "evidence": "After the Meiji Restoration (1868), the imperial capital in Kyoto was moved to Edo, and the city was renamed Tokyo (lit. 'Eastern Capital')."
   },
   "Delhi": {
-    "text": "Its Khariboli dialect was part of the development that gave rise to Urdu literature and Modern Standard Hindi.",
+    "text": "In India, its Khariboli dialect helped give rise to Urdu literature and Modern Standard Hindi.",
     "source": "https://en.wikipedia.org/wiki/Delhi",
+    "where": "India",
     "evidence": "The Khariboli dialect of Delhi was part of a linguistic development that gave rise to the literature of Urdu and later Modern Standard Hindi."
   },
   "Shanghai": {
-    "text": "The Port of Shanghai is the world's busiest container port.",
+    "text": "In China, the Port of Shanghai is the world's busiest container port.",
     "source": "https://en.wikipedia.org/wiki/Shanghai",
+    "where": "China",
     "evidence": "The Port of Shanghai is the world's busiest container port."
   },
   "Guangzhou": {
-    "text": "For a long time it was the only Chinese port accessible to Europeans.",
+    "text": "For a long time it was the only port in China accessible to Europeans.",
     "source": "https://en.wikipedia.org/wiki/Guangzhou",
+    "where": "China",
     "evidence": "For a long time, it was the only Chinese port accessible to the Europeans."
   },
   "Cairo": {
-    "text": "Its wealth of Islamic architecture earned it the title \"the city of a thousand minarets\".",
+    "text": "In Egypt, its wealth of Islamic architecture earned it the title \"the city of a thousand minarets\".",
     "source": "https://en.wikipedia.org/wiki/Cairo",
+    "where": "Egypt",
     "evidence": "Cairo has since become a longstanding centre of political and cultural life, and is titled \"the city of a thousand minarets\" for its preponderance of Islamic architecture."
   },
   "Manila": {
-    "text": "Its galleon trade with the Spanish Americas created the first unbroken chain of trade routes circling the planet.",
+    "text": "In the Philippines, its galleon trade with Spanish America made the first unbroken chain of trade routes around the world.",
     "source": "https://en.wikipedia.org/wiki/Manila",
+    "where": "Philippines",
     "evidence": "Manila is considered to be part of the world's original set of global cities because its commercial networks were the first to extend across the Pacific Ocean and connect Asia with the Spanish Americas through the galleon trade. This marked the first time an uninterrupted chain of trade routes circling the planet had been established."
   },
   "Kolkata": {
-    "text": "As Calcutta, it was the second largest city in the British Empire, after London.",
+    "text": "As Calcutta, this city in India was the second largest in the British Empire, after London.",
     "source": "https://en.wikipedia.org/wiki/Kolkata",
+    "where": "India",
     "evidence": "Calcutta was the second largest city in the British Empire, after London, and was the centre of bureaucracy, politics, law, education, science and the arts in India."
   },
   "Seoul": {
-    "text": "During the Korean War the city changed hands four times and was left mostly in ruins.",
+    "text": "During the Korean War South Korea's capital changed hands four times and was left mostly in ruins.",
     "source": "https://en.wikipedia.org/wiki/Seoul",
+    "where": "South Korea",
     "evidence": "The Korean War brought fierce battles, with Seoul changing hands four times and leaving the city mostly in ruins."
   }
 }
