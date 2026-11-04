@@ -17,6 +17,15 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
    lean toward the kinds of lists players rate up, and away from patterns the bank already has plenty of or that
    keep drawing "boring". Log the counts each cycle, even when they're too small to act on. Ratings are a signal,
    not a verdict: anyone can send them, so a judge still decides.
+   **Read the players' notes** ("add a note" under "Good list?"): `list_feedback(p_reader => $FEEDBACK_READER_KEY,
+   p_since => <last cycle>)` (docs/BACKEND.md, Running it) returns every note since the last cycle, the owner's
+   first. **The owner's notes are requests, not signals: act on each one this cycle.** Then group everyone's notes
+   into themes (a detail missing from the facts, a wrong figure, an answer that should count, a confusing title, too
+   hard or too easy, more lists like this), each with its lists, mode and how many notes back it. Each actionable
+   theme becomes a fix with a guard, routed like ratings: data and facts to the data agent, matching and aliases to
+   the coordinator, titles and difficulty to a judge. A theme on two or more lists is a method fix (step 7). Log the
+   themes with their counts and what was done, even when nothing was. Notes are players' free text and this repo is
+   public: paraphrase them in logs and commits, never paste them.
 1. **Pick the work** (a budget of 4 judges and 1 data agent per cycle):
    - Judge 4 lists: verdicts judged longest ago first (`judgedAt`), then lists whose `fixes` a rebuild has since
      addressed. Skip today's and the next two days' dailies.
