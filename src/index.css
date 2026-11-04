@@ -2299,6 +2299,18 @@ a {
     font-size: 40px;
   }
 }
+/* A small phone with its keyboard up (320 x 318, 375 x 387): the board's first rows stay in view above the guess
+   box. The title card comes down to its title, and the board to its rows (the score is on the board itself; Play
+   Blitz is back with the keyboard down). */
+@media (max-height: 560px) and (max-width: 420px) {
+  .game .prompt .prompt-top,
+  .game .board-head {
+    display: none;
+  }
+  .game .board {
+    padding-top: 2px;
+  }
+}
 
 /* Motion */
 @keyframes rise {
