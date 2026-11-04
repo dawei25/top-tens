@@ -1,52 +1,62 @@
 {
   "Hartsfield–Jackson Atlanta International Airport": {
-    "text": "It began in 1925 on a rent-free lease of an abandoned auto racetrack, The Atlanta Speedway.",
+    "text": "In Atlanta, Georgia, it began in 1925 on a rent-free lease of an abandoned auto racetrack, The Atlanta Speedway.",
     "source": "https://en.wikipedia.org/wiki/Hartsfield%E2%80%93Jackson_Atlanta_International_Airport",
+    "where": "Atlanta, Georgia; United States",
     "evidence": "Hartsfield–Jackson began with a five-year, rent-free lease on 287 acres (116 ha) that was an abandoned auto racetrack named The Atlanta Speedway. The lease was signed on April 16, 1925, by Mayor Walter Sims, who committed the city to develop it into an airfield."
   },
   "Dubai International Airport": {
-    "text": "When it opened in 1960, its runway was made of compacted sand.",
+    "text": "In the United Arab Emirates, it opened in 1960 with a runway made of compacted sand.",
     "source": "https://en.wikipedia.org/wiki/Dubai_International_Airport",
+    "where": "Garhoud, Dubai; United Arab Emirates",
     "evidence": "It officially opened on 30 September 1960, at which time it was able to handle aircraft the size of a Douglas DC-3 on a 1,800-metre-long (5,900 ft) runway made of compacted sand."
   },
   "Tokyo Haneda Airport": {
-    "text": "The first flight out, in 1931, carried a load of insects to Dairen, in what is now China.",
+    "text": "In Tokyo, Japan, its first flight out, in 1931, carried a load of insects to Dairen, in what is now China.",
     "source": "https://en.wikipedia.org/wiki/Tokyo_Haneda_Airport",
+    "where": "Ōta, Tokyo; Japan",
     "evidence": "The first flight from the airport on 25 August 1931, carried a load of insects to Dairen in the Kwantung Leased Territory (now part of China)."
   },
   "Dallas Fort Worth International Airport": {
-    "text": "Fort Worth turned down a shared airport in 1927; the cities agreed only after a 1964 federal threat to pick the site.",
+    "text": "Fort Worth, Texas, turned down a shared airport in 1927; it took a 1964 federal threat to pick the site to settle it.",
     "source": "https://en.wikipedia.org/wiki/Dallas_Fort_Worth_International_Airport",
+    "where": "Dallas–Fort Worth, Texas; United States",
     "evidence": "As early as 1927, before the area had an airport, Dallas proposed a joint airport with Fort Worth. Fort Worth declined the offer ... Following an order from the federal government in 1964 that it would unilaterally choose a site if the cities could not come to an agreement, officials from the two cities finally agreed on a location for a new regional airport that was just north of the near-abandoned GSW and almost equidistant from the two city centers."
   },
   "Shanghai Pudong International Airport": {
-    "text": "In 2020 a cargo 777 burned out here before takeoff after chlorine dioxide pills in its hold caught fire by themselves.",
+    "text": "In Shanghai, China, a cargo 777 burned out in 2020 when chlorine dioxide pills in its hold caught fire on their own.",
     "source": "https://en.wikipedia.org/wiki/Shanghai_Pudong_International_Airport",
+    "where": "Pudong, Shanghai; China",
     "evidence": "On 22 July, 2020, Ethiopian Airlines Cargo Flight 3739, a Boeing 777-F60 operating a scheduled international cargo flight departing for Santiago, Chile with three stopovers, caught fire on the ground shortly before takeoff. All five crew members on board evacuated safely, but the aircraft was destroyed. The fire was caused by the spontaneous ignition of chlorine dioxide pills in the cargo hold."
   },
   "O'Hare International Airport": {
-    "text": "Its code, ORD, is a leftover from its 1940s name, Orchard Field.",
+    "text": "In Chicago, Illinois, it still goes by ORD, a leftover from its 1940s name, Orchard Field.",
     "source": "https://en.wikipedia.org/wiki/O'Hare_International_Airport",
+    "where": "Chicago, Illinois; United States",
     "evidence": "It was renamed Orchard Field Airport in the mid-1940s and assigned the IATA code ORD. ... However, its IATA code (ORD) remained unchanged, resulting in O'Hare being one of the few IATA codes bearing no connection to the airport's name or metropolitan area."
   },
   "Heathrow Airport": {
-    "text": "It got over 25,000 noise complaints in three months of 2016, but about half came from the same ten people.",
+    "text": "In London, UK, it got over 25,000 noise complaints in three months of 2016, but about half came from the same ten people.",
     "source": "https://en.wikipedia.org/wiki/Heathrow_Airport",
+    "where": "Hillingdon, London; United Kingdom",
     "evidence": "Heathrow received more than 25,000 noise complaints in just three months over the summer of 2016, but around half were made by the same ten people."
   },
   "Istanbul Airport": {
     "text": "Its control tower is shaped like a tulip, Turkey's national flower.",
     "source": "https://en.wikipedia.org/wiki/Istanbul_Airport",
+    "where": "Arnavutköy, Istanbul; Turkey",
     "evidence": "The control tower is in the shape of the Turkish national flower, the tulip."
   },
   "Guangzhou Baiyun International Airport": {
-    "text": "With COVID grounding flights in other countries, it was briefly the world's busiest airport in 2020.",
+    "text": "In Guangzhou, China, it was briefly the world's busiest airport in 2020, while COVID grounded flights in other countries.",
     "source": "https://en.wikipedia.org/wiki/Guangzhou_Baiyun_International_Airport",
+    "where": "Baiyun-Huadu, Guangzhou, Guangdong; China",
     "evidence": "In 2020, due to the impact of the COVID-19 pandemic on aviation in other countries, it was temporarily the world's busiest airport by passenger traffic, handling 43.8 million passengers."
   },
   "Denver International Airport": {
-    "text": "At a 1994 press test, its automated baggage system tossed luggage off the tracks, and the opening was called off.",
+    "text": "In Colorado, at a 1994 press test, its automated baggage system tossed luggage off the tracks; the opening was called off.",
     "source": "https://en.wikipedia.org/wiki/Denver_International_Airport",
+    "where": "Denver, Colorado; United States",
     "evidence": "In April 1994, the city invited reporters to observe the first test of the new automated baggage system. Reporters were treated to scenes of clothing and other personal effects scattered beneath the system's tracks and carts that would often toss the luggage right off the system. After the embarrassing preview, the mayor cancelled the planned May opening."
   }
 }
