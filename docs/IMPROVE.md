@@ -17,8 +17,8 @@ built, so quality compounds instead of being fixed one complaint at a time. Log 
    lean toward the kinds of lists players rate up, and away from patterns the bank already has plenty of or that
    keep drawing "boring". Log the counts each cycle, even when they're too small to act on. Ratings are a signal,
    not a verdict: anyone can send them, so a judge still decides.
-   **Read the players' notes** ("add a note" under "Good list?"): `list_feedback(p_reader => $FEEDBACK_READER_KEY,
-   p_since => <last cycle>)` (docs/BACKEND.md, Running it) returns every note since the last cycle, the owner's
+   **Read the players' notes** ("add a note" under "Good list?"): `list_feedback(p_reader => '', p_since => <last
+   cycle>)` with the public key; the environment's proxy adds the reader key as a header (docs/BACKEND.md, Running it) returns every note since the last cycle, the owner's
    first. **The owner's notes are requests, not signals: act on each one this cycle.** Then group everyone's notes
    into themes (a detail missing from the facts, a wrong figure, an answer that should count, a confusing title, too
    hard or too easy, more lists like this), each with its lists, mode and how many notes back it. Each actionable

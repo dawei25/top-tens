@@ -101,9 +101,11 @@ out. With Google's button, opening the sign-in sheet loads it from Google. The i
 
         Only its SHA-256 is stored, so it can't be read back: lose it and you set a new one the same way (the old one
         stops working). It takes 24 characters or more. Only the SQL Editor (or the secret key) can set it; the
-        public key can't. Don't save that query as a snippet (it holds the key). Give the loop the same key as the
-        environment secret `FEEDBACK_READER_KEY` (Running it). Never commit it, never give it a `VITE_` prefix: the
-        game itself never reads notes.
+        public key can't. Don't save that query as a snippet (it holds the key). Give the loop the same key as a
+        network secret of its cloud environment (Running it), so the agent never sees it. Never commit it, never
+        give it a `VITE_` prefix: the game itself never reads notes.
+   6. `supabase/migrations/20261104130000_feedback_reader_header.sql` (run once, after 5): `list_feedback` also takes
+      the reader key from an `X-Feedback-Reader` header, which is how the cloud environment's proxy hands it over.
 
    Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the two one-time steps above
    still go in the SQL Editor). Stats alone only need the first.
@@ -228,17 +230,20 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   note: `list_id`, `mode`, `rating` (the player's rating of the list when they wrote it: 1, -1 or null), `text`,
   `from_owner` and `created_at`, the owner's notes first, then the newest first; no ids. `p_since` keeps only notes
   written since then. It needs the reader key (2.5): without it, or with a wrong one, it raises (`wrong reader key`)
-  and returns nothing, so the public key alone can't read a single note. The loop keeps the key in the environment
-  secret `FEEDBACK_READER_KEY` and calls it with the public key:
+  and returns nothing, so the public key alone can't read a single note. The key comes either as `p_reader` or, when
+  that is empty, in an `X-Feedback-Reader` header (migration 6). The loop's cloud environment holds it as a network
+  secret (Add secret: allowed website `<ref>.supabase.co`, path prefix `/rest/v1/rpc/list_feedback`, custom header
+  `X-Feedback-Reader` with no prefix), so its proxy adds the header and the agent never sees the key. The loop calls
+  it with the public key and an empty `p_reader`:
 
   ```bash
   curl -s "$VITE_SUPABASE_URL/rest/v1/rpc/list_feedback" -H "apikey: $VITE_SUPABASE_ANON_KEY" \
-    -H "content-type: application/json" \
-    -d "{\"p_reader\": \"$FEEDBACK_READER_KEY\", \"p_since\": \"2026-11-01T00:00:00Z\"}"
+    -H "authorization: Bearer $VITE_SUPABASE_ANON_KEY" -H "content-type: application/json" \
+    -d '{"p_reader": "", "p_since": "2026-11-01T00:00:00Z"}'
   ```
 
-  In the SQL Editor: `select * from list_feedback('<your reader key>');`. A new key (`set_feedback_reader` again)
-  replaces the old one at once; update `FEEDBACK_READER_KEY` with it.
+  Elsewhere, pass the key as `p_reader` instead. In the SQL Editor: `select * from list_feedback('<your reader
+  key>');`. A new key (`set_feedback_reader` again) replaces the old one at once; update the network secret with it.
 - **Abuse**: anyone can call `submit_play` with the public key. It checks shapes and ranges, counts each player once
   per list, and ignores a browser past 120 games an hour, but a determined script with fresh ids can still skew a
   quiet list. If that happens, find the ids (`select client_id, count(*) from plays group by 1 order by 2 desc`) and

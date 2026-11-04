@@ -437,6 +437,33 @@ function suite(exposeNewTables: boolean) {
       expect(got.rows.some((r) => r.text === "great list, could say which state")).toBe(true);
     });
 
+    it("takes the reader key from an X-Feedback-Reader header too (the cloud environment's proxy adds it, unseen)", async () => {
+      // PostgREST hands the request's headers to the function as request.headers (names lowercased).
+      const viaHeader = async (header: string | null, reader: string | null = null) => {
+        await db.query("select set_config('request.headers', $1, false)", [header === null ? "" : JSON.stringify({ "x-feedback-reader": header })]);
+        try {
+          return await read(reader);
+        } finally {
+          await db.query("select set_config('request.headers', '', false)");
+        }
+      };
+      // KEY is set by the test above.
+      expect((await viaHeader(KEY)).rows.length).toBeGreaterThan(0);
+      // An empty p_reader still falls back to the header.
+      expect((await viaHeader(KEY, "")).rows.length).toBeGreaterThan(0);
+      for (const wrong of ["anything", "", `${KEY} `]) expect(await code(viaHeader(wrong)), wrong).toBe("42501");
+      // No header at all, or a wrong key in the body beside a right header: refused (the body wins when given).
+      expect(await code(viaHeader(null))).toBe("42501");
+      expect(await code(viaHeader(KEY, "anything"))).toBe("42501");
+      // Malformed headers never get past the check.
+      await db.query("select set_config('request.headers', 'not json', false)");
+      try {
+        expect(await code(read(null))).toBe("42501");
+      } finally {
+        await db.query("select set_config('request.headers', '', false)");
+      }
+    });
+
     it("lists the owner's notes first, then the newest first; p_since keeps only newer ones", async () => {
       await db.query("insert into public.owners (user_id) values ($1)", [A]);
       await as("anon", null, async () => {
