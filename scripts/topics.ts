@@ -3059,7 +3059,7 @@ export const TOPICS: Topic[] = [
     placesIn: "world",
     prompt: "Name the 10 cities with the most skyscrapers (buildings 150 m and taller)",
     page: "List of cities with the most skyscrapers",
-    // Cities proper: Metro Manila's 16 cities count apart (Makati is #34), as do Jersey City and Shenzhen's neighbours.
+    // Cities proper: Metro Manila's 16 cities count apart (Makati is #33), as does Jersey City from New York.
     tables: [0],
     name: "City",
     value: "No. of skyscrapers",
