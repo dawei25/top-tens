@@ -152,12 +152,15 @@ function Clock({ state, onExpire }: { state: BlitzState; onExpire: () => void })
   );
 }
 
+/** An answer's row: its points, then its name and figure (one body, so a phone can put the figure under a long name). */
 function HitRow({ points, name, value, testId = "blitz-hit" }: { points: string; name: string; value?: string; testId?: string }) {
   return (
     <li className="blitz-hit" data-testid={testId}>
       <span className="blitz-pts">{points}</span>
-      <span className="blitz-name">{name}</span>
-      {value && <span className="value">{value}</span>}
+      <span className="blitz-body">
+        <span className="blitz-name">{name}</span>
+        {value && <span className="value">{value}</span>}
+      </span>
     </li>
   );
 }
@@ -622,7 +625,9 @@ export function Blitz({
           {Array.from({ length: empty }, (_, i) => (
             <li key={`empty-${i}`} className="blitz-hit empty" aria-hidden="true">
               <span className="blitz-pts">+</span>
-              <span className="blitz-name">. . . . . . . .</span>
+              <span className="blitz-body">
+                <span className="blitz-name">. . . . . . . .</span>
+              </span>
             </li>
           ))}
         </ol>

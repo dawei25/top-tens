@@ -1,16 +1,13 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { resumeBlitz } from "../../game/blitz";
 import { load } from "../../game/storage";
-import { accountsOn, loadService, useAccount } from "../../net";
 import { PRIVACY_CONTACT } from "../../net/config";
 import { HowToPlay } from "../HowToPlay";
 import { todayStatus } from "../today";
 import { useMenuNav, type MenuNav, type MenuScreen } from "./context";
 import { Pixel, type GlyphName } from "./icons";
 import "./menu.css";
-
-const SignInSheet = lazy(() => import("../account/SignInSheet"));
 
 /**
  * A press on the backdrop or the close key this soon after opening is the second half of a double press on the menu
@@ -21,7 +18,7 @@ const OPEN_GRACE_MS = 500;
 /** Where feedback goes: the owner's contact address (VITE_PRIVACY_CONTACT); no Feedback tile without one. */
 const FEEDBACK = PRIVACY_CONTACT ? `mailto:${PRIVACY_CONTACT}?subject=${encodeURIComponent("TENtacle feedback")}` : "";
 
-type Layer = "sign-in" | "help";
+type Layer = "help";
 
 /** Keys that scroll what has focus, or the page when that can't scroll. */
 const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
@@ -31,9 +28,9 @@ const guessBox = () => document.querySelector<HTMLInputElement>('main input[aria
 
 /**
  * The menu key, at the left end of every screen's header (on Home, the top left corner). It opens the menu: a
- * panel of large tiles from the left over the dimmed page, every destination one press away. The rules and the sign-in sheet open
- * from it over the page too. Whatever closes, focus comes back to this key, or to the guess box when a game is under
- * way on the screen (back to typing).
+ * panel of large tiles from the left over the dimmed page, every destination one press away. The rules open from it over
+ * the page too. Whatever closes, focus comes back to this key, or to the guess box when a game is under way on the
+ * screen (back to typing). The account isn't here: it lives on Home (owner, Nov 4), one press away from every screen.
  */
 export function MenuKey() {
   const nav = useMenuNav();
@@ -80,18 +77,6 @@ export function MenuKey() {
           />,
           document.body,
         )}
-      {layer === "sign-in" &&
-        createPortal(
-          <Suspense fallback={null}>
-            <SignInSheet
-              onClose={() => {
-                setLayer(null);
-                refocus();
-              }}
-            />
-          </Suspense>,
-          document.body,
-        )}
     </>
   );
 }
@@ -124,8 +109,6 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
   const openedAt = useRef(0);
   const closed = useRef(false);
   const pressedBackdrop = useRef(false);
-  const account = useAccount();
-  const [signingOut, setSigningOut] = useState(false);
 
   /** Closes the menu (out of the top layer at once, so the menu key can take focus), then runs `then`. */
   const close = (then?: () => void) => {
@@ -249,28 +232,7 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
     { id: "privacy", label: "Privacy", icon: "lock", screen: "privacy", go: hash("#privacy") },
   ];
 
-  // Accounts: only in a build that has them. Signed out, Sign in opens the sign-in sheet; signed in, the account's
-  // address and Sign out (which clears this device; the games stay in the account).
-  const signedIn = account.status === "in" && !!account.user;
-  const signOut = async () => {
-    if (signingOut) return;
-    setSigningOut(true);
-    try {
-      await (await loadService())?.signOut();
-    } catch {
-      // Still signed in: the tile stays.
-    } finally {
-      setSigningOut(false);
-      // Sign in takes Sign out's place: focus goes to it.
-      requestAnimationFrame(() => ref.current?.querySelector<HTMLElement>('[data-testid="menu-sign-in"]')?.focus());
-    }
-  };
-  const accountTiles: Tile[] = signedIn
-    ? [{ id: "sign-out", label: signingOut ? "Signing out" : "Sign out", icon: "signOut" }]
-    : [{ id: "sign-in", label: "Sign in", icon: "user", disabled: account.status === "loading", go: () => onLayer("sign-in") }];
-
   const choose = (t: Tile) => {
-    if (t.id === "sign-out") return void signOut();
     if (t.screen && t.screen === nav.current) return close();
     close(t.go);
   };
@@ -305,7 +267,6 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
         className="key menu-tile"
         data-testid={`menu-${t.id}`}
         aria-current={current ? "page" : undefined}
-        aria-busy={t.id === "sign-out" && signingOut ? true : undefined}
         disabled={t.disabled}
         onClick={() => choose(t)}
       >
@@ -313,12 +274,11 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
       </button>
     );
   };
-  const group = (id: string, label: string, tiles: Tile[], extra?: React.ReactNode) => (
+  const group = (id: string, label: string, tiles: Tile[]) => (
     <section className="menu-group" aria-labelledby={`menu-${id}-label`} data-testid={`menu-${id}`}>
       <h3 id={`menu-${id}-label`} className="label">
         {label}
       </h3>
-      {extra}
       <div className="menu-grid">{tiles.map(tile)}</div>
     </section>
   );
@@ -368,18 +328,6 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
         )}
         {group("play", "Play", play)}
         {group("yours", "Yours", yours)}
-        {accountsOn &&
-          account.status !== "off" &&
-          group(
-            "account",
-            "Account",
-            accountTiles,
-            signedIn && (
-              <p className="menu-email" data-testid="menu-account-email">
-                {account.user?.email ?? account.user?.name}
-              </p>
-            ),
-          )}
         {group("more", "More", more)}
       </div>
     </dialog>

@@ -110,3 +110,35 @@ describe("lint:css state rules", () => {
     expect(check(`@keyframes pop { 0% { width: 0; } 100% { width: 10px; } }`).violations).toEqual([]);
   });
 });
+
+// A phone has no hover, but a tap leaves :hover on what was tapped (Chrome on Android, Safari on iOS) until the next
+// tap elsewhere: a hover look outside @media (hover: hover) sticks to the sound key, GIVE UP, a thumb, a suggestion...
+describe("lint:css hover only where there is hover", () => {
+  const sticky = (css) => check(css).stickyHover.map((v) => v.selector);
+
+  test("a hover look outside a hover media query fails (it sticks after a tap)", () => {
+    expect(sticky(`.key:hover:not(:disabled) { background-color: #123; }`)).toEqual([".key:hover:not(:disabled)"]);
+    expect(sticky(`.cat-strip:hover, .cat-strip[aria-expanded="true"] { color: pink; }`)).toEqual(['.cat-strip:hover, .cat-strip[aria-expanded="true"]']);
+    expect(sticky(`.card:hover .title { color: red; }`)).toHaveLength(1);
+    expect(sticky(`@media (max-width: 400px) { .chip:hover { color: red; } }`)).toHaveLength(1);
+  });
+
+  test("inside (hover: hover), or (pointer: fine), or with a mouse-only attribute, it passes", () => {
+    expect(sticky(`@media (hover: hover) { .key:hover { background: #123; } }`)).toEqual([]);
+    expect(sticky(`@media (hover:hover) and (pointer: fine) { .row:hover { color: red; } }`)).toEqual([]);
+    expect(sticky(`@media (pointer: fine) { .mode-key.today:hover { transform: scale(1.02); } }`)).toEqual([]);
+    expect(sticky(`@media (min-width: 640px) { @media (hover: hover) { .a:hover { color: red; } } }`)).toEqual([]);
+    // Other states don't stick: press ends with the finger, focus-visible needs a keyboard.
+    expect(sticky(`.key:active { transform: translateY(3px); } .key:focus-visible { outline: 3px solid; }`)).toEqual([]);
+  });
+
+  test("a hover that only keeps the rest look (listed with its rest selector) passes", () => {
+    expect(sticky(`.mode-key.today, .mode-key.today:hover:not(:disabled) { background: pink; }`)).toEqual([]);
+    expect(sticky(`.text-btn.danger, .text-btn.danger:hover { color: red; }`)).toEqual([]);
+  });
+
+  test("an annotated exception passes; without a reason it still fails", () => {
+    expect(sticky(`/* hover-ok: a link that leaves the page */ a.out:hover { color: red; }`)).toEqual([]);
+    expect(sticky(`/* hover-ok */ a.out:hover { color: red; }`)).toHaveLength(1);
+  });
+});

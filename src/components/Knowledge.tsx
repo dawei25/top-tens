@@ -5,7 +5,7 @@ import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
 import { signed, usePar } from "./par";
 import { ScreenHead } from "./pixel";
-import { AccountSection, CrowdSection } from "./account";
+import { CrowdSection } from "./account";
 
 interface Props {
   index: PuzzleMeta[];
@@ -207,7 +207,6 @@ export function Knowledge({ index, entry, onBack, onHome }: Props) {
           <CrowdSection index={index} />
         </>
       )}
-      <AccountSection />
     </main>
   );
 }

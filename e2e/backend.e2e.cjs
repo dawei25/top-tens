@@ -1,8 +1,10 @@
 // The backend switched on: this spec builds its own copy with fake Supabase env vars, serves it on a free port, and
 // answers Supabase's endpoints itself. Checks: each finished game is sent once with the right payload; results use
-// real players' numbers once the stats say 50+; a list rating goes to rate_list (and waits while offline); the menu's
-// account section (Sign in, Sign out) and Feedback, the sign-in sheet and privacy page; and a signed-in session
-// syncing its save (merge both ways), with the account panel, the comparison with players, and account deletion.
+// real players' numbers once the stats say 50+; a list rating goes to rate_list (and waits while offline); Home's
+// account card (signed out, signing in, signed in by name and never by address, the sync state; right under Today,
+// never pushing it down), the menu without an account section and its Feedback, the sign-in sheet in both modes and
+// privacy page; and a signed-in session syncing its save (merge both ways), with the account sheet, the comparison
+// with players, and account deletion.
 // Notes ("add a note") have their own spec on the same build: note.e2e.cjs.
 // (Signing in itself ends at Google's or the email's door: the redirect and the email request are checked, not the
 // return trip. The merge and the session handling have unit tests in src/net.) This build has no Google client ID:
@@ -12,7 +14,7 @@ const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { VIEWPORTS, NOW, TODAY, guess, noHScroll } = require("./helpers.cjs");
 const { BACKEND_ENV } = require("./backend-env.cjs");
-const { SUPA, serveBuild, opener, openMenu, openSignIn, USER, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
+const { SUPA, serveBuild, opener, openMenu, openSignIn, homeSignedIn, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
 
 const desktop = VIEWPORTS.find((v) => v.name === "desktop");
 const phone = VIEWPORTS.find((v) => v.name === "phone");
@@ -144,14 +146,17 @@ test("a rating goes to rate_list: the latest per list and mode, with this browse
   await ctx.close();
 });
 
-test("the menu's account and Feedback, the sign-in sheet and privacy page (desktop)", async () => {
+test("Home's account card signed out, the menu's Feedback, the sign-in sheet and privacy page (desktop)", async () => {
   const { ctx, page, calls } = await open(desktop, "", FRESH);
   await page.getByTestId("today-list").waitFor();
-  // Home's Your games has no account key now: it's in the menu.
-  assert.equal(await page.getByTestId("account-key").count(), 0);
+  // Signed out, said on Home (owner: you can tell at a glance), with both ways in.
+  const card = page.locator('[data-testid="home-account"][data-state="out"]');
+  await card.waitFor();
+  assert.equal(await page.getByTestId("home-account-key").count(), 0);
+  // The menu has no account section any more: the account lives on Home.
   await openMenu(page);
-  await page.getByTestId("menu-account").waitFor();
-  assert.equal(await page.getByTestId("menu-sign-out").count(), 0);
+  assert.equal(await page.getByTestId("menu-account").count(), 0);
+  assert.equal(await page.getByTestId("menu-sign-in").count(), 0);
   // Feedback mails the contact address, with a subject.
   const mail = new URL(await page.getByTestId("menu-feedback").getAttribute("href"));
   assert.equal(mail.protocol, "mailto:");
@@ -159,7 +164,7 @@ test("the menu's account and Feedback, the sign-in sheet and privacy page (deskt
   assert.equal(mail.searchParams.get("subject"), "TENtacle feedback");
   await page.keyboard.press("Escape");
   await page.getByTestId("menu").waitFor({ state: "detached" });
-  const key = page.getByTestId("menu-key");
+  const key = page.getByTestId("home-sign-in");
 
   // The sheet: every method this build offers (google,email,password); the password form first, a link one press away.
   await openSignIn(page);
@@ -178,16 +183,42 @@ test("the menu's account and Feedback, the sign-in sheet and privacy page (deskt
   assert.ok(calls.otp[0].code_challenge, "the email link uses PKCE");
   await page.getByTestId("sign-in-code").waitFor();
 
-  // Escape closes it and gives focus back to the menu key.
+  // Escape closes it and gives focus back to the key that opened it.
   await page.keyboard.press("Escape");
   await sheet.waitFor({ state: "detached" });
+  await page.waitForFunction(() => document.activeElement?.dataset.testid === "home-sign-in");
   assert.equal(await key.evaluate((el) => el === document.activeElement), true);
+
+  // CREATE ACCOUNT opens it to make one: the password form's create mode, under its own heading.
+  await openSignIn(page, "up");
+  await page.locator('[data-testid="sign-in-password-form"][data-mode="up"]').waitFor();
+  assert.equal(await page.getByTestId("sign-in-title").getAttribute("data-mode"), "up");
+  assert.equal(await page.getByTestId("sign-in-password").getAttribute("autocomplete"), "new-password");
+  // Switching to sign in there changes the heading with it.
+  await page.getByTestId("sign-in-mode").click();
+  assert.equal(await page.getByTestId("sign-in-title").getAttribute("data-mode"), "in");
+  await page.getByTestId("sign-in-close").click();
+  await page.getByTestId("sign-in-sheet").waitFor({ state: "detached" });
+  await page.waitForFunction(() => document.activeElement?.dataset.testid === "home-create-account");
 
   // The privacy page, from the footer: notes have their own part (what's sent, who reads them).
   await page.getByTestId("privacy-link").click();
   await page.getByTestId("privacy").waitFor();
   await page.getByTestId("privacy-notes").waitFor();
   assert.ok(await noHScroll(page));
+  // "Deleting it" sends you where those things are: the account on Home, reset all progress in Settings. (It once said
+  // Stats and Home after both had moved.)
+  const ways = page.getByTestId("privacy-delete").getByRole("link");
+  assert.deepEqual(await ways.evaluateAll((els) => els.map((a) => a.getAttribute("href")).filter((h) => h.startsWith("#"))), ["#", "#settings"]);
+  for (const [i, there] of [
+    [0, "home-account"],
+    [1, "reset-all"],
+  ]) {
+    await page.getByTestId("privacy-delete").getByRole("link").nth(i).click();
+    await page.getByTestId(there).waitFor();
+    await page.goBack();
+    await page.getByTestId("privacy").waitFor();
+  }
   await page.getByTestId("nav-back").click();
 
   // Google, in a build without VITE_GOOGLE_CLIENT_ID: the same key, off to Supabase's authorize endpoint, coming back
@@ -263,13 +294,10 @@ test("email and password: refusals in plain words, confirm-first, create an acco
   await password.fill(PASSWORD);
   await submit.click();
   await sheet.waitFor({ state: "detached" });
-  // The menu shows the account now: its address and Sign out.
-  await openMenu(page);
-  assert.equal(await page.getByTestId("menu-account-email").textContent(), "fox@example.com");
-  await page.getByTestId("menu-sign-out").waitFor();
-  assert.equal(await page.getByTestId("menu-sign-in").count(), 0);
+  // Home says so at once: signed in as the email's part before the @ (no name yet), never the address itself.
+  await homeSignedIn(page, "fox");
+  await page.waitForFunction(() => document.activeElement?.dataset.testid === "home-account-key");
   assert.ok(await noHScroll(page));
-  await page.keyboard.press("Escape");
   const sent = calls.signup.at(-1);
   assert.equal(sent.email, "fox@example.com");
   assert.equal(sent.password, PASSWORD);
@@ -279,15 +307,19 @@ test("email and password: refusals in plain words, confirm-first, create an acco
   await ctx.close();
 });
 
-test("email and password: sign in to an existing account (desktop)", async () => {
-  const { ctx, page, calls } = await open(desktop, "#stats", FRESH);
-  await page.locator('[data-testid="account-panel"][data-signed-in="false"]').waitFor();
-  await page.getByTestId("account-sign-in").click();
+test("email and password: sign in to an existing account; Home and the account say who (desktop)", async () => {
+  const { ctx, page, calls } = await open(desktop, "", FRESH);
+  await openSignIn(page);
   await page.getByTestId("sign-in-pw-email").fill("fox@example.com");
   await page.getByTestId("sign-in-password").fill(PASSWORD);
   await page.getByTestId("sign-in-password").press("Enter");
-  await page.locator('[data-testid="account-panel"][data-signed-in="true"]').waitFor();
+  await page.getByTestId("sign-in-sheet").waitFor({ state: "detached" });
+  await homeSignedIn(page, "fox");
+  // ACCOUNT: the account sheet, with the name and the address it signed in with.
+  await page.getByTestId("home-account-key").click();
+  await page.getByTestId("account-sheet").waitFor();
   assert.equal(await page.getByTestId("account-name").textContent(), "fox");
+  assert.match(await page.getByTestId("account-sheet").textContent(), /fox@example\.com/);
   assert.equal(calls.password.length, 1);
   assert.equal(calls.signup.length, 0);
   await ctx.close();
@@ -318,6 +350,8 @@ test("a build without the env vars sends nothing anywhere and offers no sign-in"
   await page.goto(url);
   await page.getByTestId("stats-key").waitFor();
   assert.equal(await page.getByTestId("privacy-link").count(), 0);
+  // No account card on Home: nothing to sign in to.
+  assert.equal(await page.getByTestId("home-account").count(), 0);
   // The menu has no account section and no Feedback (no contact address).
   await openMenu(page);
   assert.equal(await page.getByTestId("menu-account").count(), 0);
@@ -332,48 +366,147 @@ test("a build without the env vars sends nothing anywhere and offers no sign-in"
   await ctx.close();
 });
 
-test("the account pieces fit a phone: the menu, the sheet, the account panel", async () => {
+test("the account pieces fit a phone: Home's card, both sheets", async () => {
   const { ctx, page } = await open(phone, "", FRESH);
   await page.getByTestId("today-list").waitFor();
   assert.ok(await noHScroll(page));
-  await openMenu(page);
-  await page.getByTestId("menu-sign-in").waitFor();
-  assert.ok(await noHScroll(page));
-  await page.getByTestId("menu-sign-in").click();
-  const sheet = page.getByTestId("sign-in-sheet");
-  await sheet.waitFor();
-  const box = await sheet.boundingBox();
-  assert.ok(box.x >= 0 && box.x + box.width <= phone.viewport.width + 0.5);
-  assert.ok(await noHScroll(page));
-  await page.getByTestId("sign-in-close").click();
-  await sheet.waitFor({ state: "detached" });
-
-  await page.goto(base + "#stats");
-  await page.locator('[data-testid="account-panel"][data-signed-in="false"]').waitFor();
-  assert.ok(await noHScroll(page));
+  const inside = async (testId) => {
+    const box = await page.getByTestId(testId).boundingBox();
+    assert.ok(box.x >= 0 && box.x + box.width <= phone.viewport.width + 0.5, `${testId} fits the width`);
+  };
+  await inside("home-account");
+  for (const mode of ["in", "up"]) {
+    await openSignIn(page, mode);
+    await inside("sign-in-sheet");
+    assert.ok(await noHScroll(page));
+    await page.getByTestId("sign-in-close").click();
+    await page.getByTestId("sign-in-sheet").waitFor({ state: "detached" });
+  }
   await ctx.close();
 });
 
-test("Sign out from the menu: the menu stays, Sign in takes its place and focus (phone)", async () => {
+test("signed in: Home names the player, never the address; ACCOUNT opens the account; Sign out closes it and Home says so (phone)", async () => {
   const { ctx, page } = await open(phone, "", { ...FRESH, "top-tens:auth": SESSION }, { save: { data: { games: {}, daily: {}, seenHelp: true }, version: 1 } });
   await page.getByTestId("today-list").waitFor();
-  await openMenu(page);
-  assert.equal(await page.getByTestId("menu-account-email").textContent(), USER.email);
-  await page.getByTestId("menu-sign-out").click();
-  await page.getByTestId("menu-sign-in").waitFor();
-  await page.waitForFunction(() => document.activeElement?.dataset.testid === "menu-sign-in");
-  assert.equal(await page.getByTestId("menu-account-email").count(), 0);
-  assert.ok(await page.getByTestId("menu").isVisible());
+  // The Google name (Dana Scully), never dana@example.com.
+  await homeSignedIn(page, "Dana Scully");
+  assert.doesNotMatch(await page.locator("main").textContent(), /dana@example\.com/);
+  await page.locator('[data-testid="home-account-note"][data-sync="synced"]').waitFor();
+  assert.ok(await noHScroll(page));
+
+  // ACCOUNT opens the account over Home, focus on the sheet itself (a second press presses nothing in it).
+  await page.getByTestId("home-account-key").click();
+  const sheet = page.getByTestId("account-sheet");
+  await sheet.waitFor();
+  assert.equal(await page.evaluate(() => document.activeElement?.dataset.testid), "account-sheet");
+  const box = await sheet.boundingBox();
+  assert.ok(box.x >= 0 && box.x + box.width <= phone.viewport.width + 0.5);
+  assert.equal(await page.getByTestId("account-name").textContent(), "Dana Scully");
+  // Escape closes it, focus back on ACCOUNT.
+  await page.keyboard.press("Escape");
+  await sheet.waitFor({ state: "detached" });
+  await page.waitForFunction(() => document.activeElement?.dataset.testid === "home-account-key");
+
+  // Sign out: the sheet closes, Home says signed out, focus on SIGN IN, and the session is gone.
+  await page.getByTestId("home-account-key").click();
+  await page.getByTestId("account-sign-out").click();
+  await sheet.waitFor({ state: "detached" });
+  await page.locator('[data-testid="home-account"][data-state="out"]').waitFor();
+  await page.waitForFunction(() => document.activeElement?.dataset.testid === "home-sign-in");
   assert.equal(await page.evaluate(() => localStorage.getItem("top-tens:auth")), null);
   await ctx.close();
 });
 
-test("signed in: the save syncs both ways, the account panel, players' averages, delete (desktop)", async () => {
+test("Home's account card sits right under Today: in view on arrival, never pushing Today's keys down", async () => {
+  // Today's keys stand exactly where a build without accounts has them, at every phone size and on a desktop, and the
+  // card is in view without scrolling on a 390 x 844 phone (signed out and signed in).
+  const plain = process.env.E2E_URL;
+  const sizes = [
+    [320, 568],
+    [360, 740],
+    [375, 667],
+    [390, 844],
+    [430, 932],
+    [1440, 900],
+  ];
+  for (const signedIn of [false, true]) {
+    for (const [width, height] of sizes) {
+      const vp = { viewport: { width, height }, isMobile: width < 500, hasTouch: width < 500 };
+      const seed = signedIn ? { ...FRESH, "top-tens:auth": SESSION } : FRESH;
+      const { ctx, page } = await open(vp, "", seed, { save: { data: { games: {}, daily: {}, seenHelp: true }, version: 1 } });
+      await page.locator(`[data-testid="home-account"][data-state="${signedIn ? "in" : "out"}"]`).waitFor();
+      const at = (id) => page.getByTestId(id).evaluate((el) => el.getBoundingClientRect().toJSON());
+      const [today, blitz, card, free] = await Promise.all(["today-group", "today-blitz", "home-account", "free-play"].map(at));
+      const tag = `${width}x${height}${signedIn ? " signed in" : ""}`;
+      assert.ok(card.top > today.bottom && card.bottom < free.top, `${tag}: the card comes between Today and Free play`);
+      if (width === 390 && height === 844) assert.ok(card.bottom <= height, `${tag}: the card is in view without scrolling`);
+      if (width === 375 && height === 667) assert.ok(blitz.bottom + 5 <= height, `${tag}: Today's Blitz above the fold`);
+      assert.ok(await noHScroll(page), tag);
+      if (plain) {
+        // The same screen in the build without accounts: Today's keys haven't moved.
+        const other = await ctx.newPage();
+        await other.clock.install({ time: NOW });
+        await other.goto(plain);
+        await other.getByTestId("today-blitz").waitFor();
+        const plainBlitz = await other.getByTestId("today-blitz").evaluate((el) => el.getBoundingClientRect().toJSON());
+        assert.equal(Math.round(blitz.top), Math.round(plainBlitz.top), `${tag}: Today's Blitz where it was`);
+        await other.close();
+      }
+      await ctx.close();
+    }
+  }
+});
+
+test("Home reads the sync state: synced, offline and failed say so in plain words (desktop)", async () => {
+  const seed = { ...FRESH, "top-tens:auth": SESSION };
+  const save = { data: { games: {}, daily: {}, seenHelp: true }, version: 1 };
+  const note = (page, sync) => page.locator(`[data-testid="home-account-note"][data-sync="${sync}"]`).waitFor();
+  // The server can't be reached: offline, and the games wait on this device.
+  {
+    const offline = (ctx) => ctx.route(`${SUPA}/rest/v1/saves**`, (route) => route.abort("internetdisconnected"));
+    const { ctx, page } = await open(desktop, "", seed, { save }, offline);
+    await homeSignedIn(page, "Dana Scully");
+    await note(page, "offline");
+    await ctx.close();
+  }
+  // The server refuses: the sync failed, said plainly.
+  {
+    const refuse = (ctx) => ctx.route(`${SUPA}/rest/v1/saves**`, (route) => route.fulfill({ status: 500, contentType: "application/json", body: "{}" }));
+    const { ctx, page } = await open(desktop, "", seed, { save }, refuse);
+    await homeSignedIn(page, "Dana Scully");
+    await note(page, "error");
+    await ctx.close();
+  }
+});
+
+test("a sign-in coming back: Home says signing in with its keys waiting, then why it didn't work (phone)", async () => {
+  // The backend code held back for a moment: the card says it's finding out.
+  let release;
+  const held = new Promise((r) => (release = r));
+  const hold = (ctx) =>
+    ctx.route(/\/assets\/service-[\w-]+\.js$/, async (route) => {
+      await held;
+      return route.continue();
+    });
+  const { ctx, page } = await open(phone, "?code=not-a-real-code", FRESH, undefined, hold);
+  const card = page.locator('[data-testid="home-account"][data-state="loading"]');
+  await card.waitFor();
+  assert.ok(await page.getByTestId("home-sign-in").isDisabled());
+  assert.ok(await page.getByTestId("home-create-account").isDisabled());
+  release();
+  // The link was opened in a browser that didn't ask for it: signed out, and the card says why.
+  await page.locator('[data-testid="home-account"][data-state="out"]').waitFor();
+  await page.locator('[data-testid="home-account-note"].notice').waitFor();
+  assert.ok(await page.getByTestId("home-sign-in").isEnabled());
+  await ctx.close();
+});
+
+test("signed in: the save syncs both ways; Home, the account sheet, players' averages, delete (desktop)", async () => {
   const mine = { id: "islands", startedAt: NOW.getTime() - 3_600_000, finishedAt: NOW.getTime() - 3_300_000, status: "lost", found: [1, 2, 3, 4], lives: 0, hints: 0 };
   const theirs = { id: "mountains", startedAt: NOW.getTime() - 86_400_000, finishedAt: NOW.getTime() - 86_000_000, status: "won", found: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], lives: 2, hints: 0 };
   const { ctx, page, calls, row } = await open(
     desktop,
-    "#stats",
+    "",
     { "top-tens:v1": { games: {}, daily: {}, seenHelp: true, listRuns: [mine] }, "top-tens:auth": SESSION },
     {
       save: { data: { games: {}, daily: { "2026-10-28": "youtube-channels" }, seenHelp: true, listRuns: [theirs] }, version: 4 },
@@ -383,10 +516,9 @@ test("signed in: the save syncs both ways, the account panel, players' averages,
       ],
     },
   );
-  const panel = page.locator('[data-testid="account-panel"][data-signed-in="true"]');
-  await panel.waitFor();
-  assert.equal(await page.getByTestId("account-name").textContent(), "Dana Scully");
-  await page.locator('[data-testid="account-sync"][data-sync="synced"]').waitFor();
+  // Home: signed in as Dana Scully, synced.
+  await homeSignedIn(page, "Dana Scully");
+  await page.locator('[data-testid="home-account-note"][data-sync="synced"]').waitFor();
 
   // The server got the union, written over the version it read.
   const patch = calls.saves.find((c) => c.method === "PATCH");
@@ -399,25 +531,37 @@ test("signed in: the save syncs both ways, the account panel, players' averages,
   assert.deepEqual(local.listRuns.map((r) => r.id), ["islands", "mountains"]);
   assert.equal(local.daily["2026-10-28"], "youtube-channels");
 
-  // A new display name.
+  // The account sheet: the name, synced, and a new display name (Home follows).
+  await page.getByTestId("home-account-key").click();
+  await page.locator('[data-testid="account-sheet"] [data-testid="account-panel"]').waitFor();
+  assert.equal(await page.getByTestId("account-name").textContent(), "Dana Scully");
+  await page.locator('[data-testid="account-sync"][data-sync="synced"]').waitFor();
   await page.getByTestId("account-rename").click();
   await page.getByTestId("account-name-input").fill("  Agent   Scully ");
   await page.getByTestId("account-name-save").click();
   await page.getByTestId("account-name").filter({ hasText: "Agent Scully" }).waitFor();
   assert.equal(calls.renamed, "Agent Scully");
+  // Escape while renaming cancels the rename, not the sheet.
+  await page.getByTestId("account-rename").click();
+  await page.getByTestId("account-name-input").press("Escape");
+  await page.getByTestId("account-name").waitFor();
+  assert.ok(await page.getByTestId("account-sheet").isVisible());
+  await page.keyboard.press("Escape");
+  await page.getByTestId("account-sheet").waitFor({ state: "detached" });
+  assert.equal(await page.getByTestId("home-account-name").textContent(), "Agent Scully");
 
-  // Players' averages: only the list with 50+ players.
+  // Players' averages on Stats: only the list with 50+ players. Stats has no account section now (it's on Home).
+  await page.getByTestId("stats-key").click();
   await page.getByTestId("crowd-panel").waitFor();
   assert.deepEqual(await page.getByTestId("crowd-row").evaluateAll((els) => els.map((e) => e.getAttribute("data-id"))), ["mountains"]);
+  assert.equal(await page.getByTestId("account-panel").count(), 0);
   assert.ok(await noHScroll(page));
-
-  // The menu shows the account (its address, Sign out); its Stats tile leads back to the panel.
-  await page.getByTestId("nav-home").click();
+  // The menu has no account section: the account is one press on HOME away.
   await openMenu(page);
-  assert.equal(await page.getByTestId("menu-account-email").textContent(), USER.email);
-  await page.getByTestId("menu-sign-out").waitFor();
-  await page.getByTestId("menu-stats").click();
-  await panel.waitFor();
+  assert.equal(await page.getByTestId("menu-account").count(), 0);
+  await page.keyboard.press("Escape");
+  await page.getByTestId("menu").waitFor({ state: "detached" });
+  await page.getByTestId("nav-home").click();
 
   // Delete account: an inline confirm, then the server function with this session's token.
   let auth;
@@ -425,12 +569,17 @@ test("signed in: the save syncs both ways, the account panel, players' averages,
     auth = route.request().headers().authorization;
     return route.fulfill({ status: 200, contentType: "application/json", body: '{"deleted":true}' });
   });
+  await page.getByTestId("home-account-key").click();
   await page.getByTestId("account-delete").click();
   assert.equal(auth, undefined, "the first press only asks");
   await page.getByTestId("account-delete").click();
-  await page.locator('[data-testid="account-panel"][data-signed-in="false"]').waitFor();
+  // The sheet stays to say so; Home is signed out behind it.
+  await page.getByTestId("account-deleted").waitFor();
+  await page.locator('[data-testid="home-account"][data-state="out"]').waitFor();
   assert.equal(auth, `Bearer ${TOKEN}`);
   assert.equal(await page.evaluate(() => localStorage.getItem("top-tens:auth")), null);
+  await page.getByTestId("account-close").click();
+  await page.waitForFunction(() => document.activeElement?.dataset.testid === "home-sign-in");
   // This device keeps its games.
   assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("top-tens:v1")))).listRuns.length, 2);
   await ctx.close();

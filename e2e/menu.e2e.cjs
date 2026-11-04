@@ -2,7 +2,8 @@
 // from the left over the dimmed page, a modal dialog. It opens without moving or scrolling the page; focus goes into it and stays
 // there; Escape, the close key or a press on the dimmed page close it, and focus comes back to the key (or to the
 // guess box while a game is under way). Every tile reaches its screen, the screen on show is marked, rolls never land
-// on today's pair, and a build without a backend shows no account section and no Feedback.
+// on today's pair, and there's no account section (the account lives on Home: backend.e2e.cjs) and, without a contact
+// address, no Feedback.
 // Settings (#settings, from the menu): the sound switch and reset all progress (moved from Home's footer).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");

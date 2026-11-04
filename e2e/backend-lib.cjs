@@ -201,7 +201,7 @@ const until = async (fn, ms = 5000) => {
 };
 const settle = () => new Promise((r) => setTimeout(r, 400));
 
-/** Opens the menu (the account lives there) once it has slid in; returns it. */
+/** Opens the menu once it has slid in; returns it. */
 async function openMenu(page) {
   await page.getByTestId("menu-key").click();
   const menu = page.getByTestId("menu");
@@ -209,20 +209,24 @@ async function openMenu(page) {
   await menu.evaluate((d) => Promise.all(d.getAnimations().map((a) => a.finished)));
   return menu;
 }
-/** The menu's Sign in tile: opens the sign-in sheet (the menu closes behind it). */
-async function openSignIn(page) {
-  await openMenu(page);
-  await page.getByTestId("menu-sign-in").click();
+/** Home's SIGN IN key (or CREATE ACCOUNT, `mode` "up"): opens the sign-in sheet. Goes Home first if need be. */
+async function openSignIn(page, mode = "in") {
+  if (await page.evaluate(() => location.hash.length > 1)) await page.evaluate(() => (location.hash = ""));
+  await page.getByTestId(mode === "up" ? "home-create-account" : "home-sign-in").click();
   await page.getByTestId("sign-in-sheet").waitFor();
 }
-/** Signed in: the menu shows the account's address and Sign out (it closes again). */
-async function menuSignedIn(page, email) {
-  await openMenu(page);
-  await page.getByTestId("menu-sign-out").waitFor();
-  const shown = await page.getByTestId("menu-account-email").textContent();
-  await page.keyboard.press("Escape");
-  await page.getByTestId("menu").waitFor({ state: "detached" });
-  if (email) assert.equal(shown, email);
+/**
+ * Signed in: Home's account card says so, with the player's name (`name`, if given) and never an email address.
+ * Goes Home first if need be.
+ */
+async function homeSignedIn(page, name) {
+  if (await page.evaluate(() => location.hash.length > 1)) await page.evaluate(() => (location.hash = ""));
+  const card = page.locator('[data-testid="home-account"][data-state="in"]');
+  await card.waitFor();
+  assert.doesNotMatch(await card.textContent(), /@/, "Home never shows an email address");
+  await page.getByTestId("home-account-key").waitFor();
+  assert.equal(await page.getByTestId("home-sign-in").count(), 0);
+  if (name) assert.equal(await page.getByTestId("home-account-name").textContent(), name);
 }
 
 module.exports = {
@@ -242,5 +246,5 @@ module.exports = {
   settle,
   openMenu,
   openSignIn,
-  menuSignedIn,
+  homeSignedIn,
 };

@@ -8,14 +8,16 @@
   z-index: 70;
   display: grid;
   place-items: center;
-  padding: 16px;
+  /* Clear of a notch and the home indicator (a phone on its side). */
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
   background: rgba(2, 4, 9, 0.7);
   animation: fade 0.18s ease-out both;
 }
 /* 440px: a 400px column inside the padding and borders. */
 .sheet {
   width: min(440px, 100%);
-  max-height: calc(100dvh - 32px);
+  max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom)));
   overflow: auto;
   overscroll-behavior: contain;
   padding: 16px 18px 18px;
@@ -171,9 +173,8 @@
   color: var(--pink);
 }
 
-/* ---------- The account panel (knowledge page) ---------- */
+/* ---------- Your account (the sheet Home's ACCOUNT key opens) ---------- */
 .account {
-  padding: 14px 18px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -216,6 +217,11 @@
   font-size: 16px;
   letter-spacing: 0.05em;
   color: var(--muted);
+}
+/* The address it signed in with: brighter than the line around it, broken anywhere rather than past the sheet's edge. */
+.account-email {
+  color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 /* ---------- Vs players (knowledge page) ---------- */

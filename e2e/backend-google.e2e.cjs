@@ -13,7 +13,7 @@ const assert = require("node:assert/strict");
 const { createHash } = require("node:crypto");
 const { VIEWPORTS, NOW, noHScroll } = require("./helpers.cjs");
 const { GOOGLE_ENV, GOOGLE_CLIENT_ID } = require("./backend-env.cjs");
-const { serveBuild, opener, openSignIn, menuSignedIn, FRESH, REFUSED_SUB, until, settle } = require("./backend-lib.cjs");
+const { serveBuild, opener, openSignIn, homeSignedIn, FRESH, REFUSED_SUB, until, settle } = require("./backend-lib.cjs");
 const { checkScreen, formatFailures } = require("./states-lib.cjs");
 
 const desktop = VIEWPORTS.find((v) => v.name === "desktop");
@@ -113,7 +113,7 @@ test("the key opens Google in a popup with the exact request; the token and raw 
   // The callback page hands the token over and closes; the sheet closes itself on signing in.
   await popup.waitForEvent("close");
   await sheet.waitFor({ state: "detached" });
-  await menuSignedIn(page, "dana@example.com");
+  await homeSignedIn(page, "Dana Scully");
 
   // Exactly the request Google needs, coming back to this site.
   assert.equal(google.asks.length, 1);
@@ -208,7 +208,7 @@ test("closing Google's window or Cancel says nothing, a state the game didn't as
   popup = await pressForPopup(page);
   await popup.waitForEvent("close");
   await sheet.waitFor({ state: "detached" });
-  await menuSignedIn(page, "dana@example.com");
+  await homeSignedIn(page, "Dana Scully");
   assert.equal(calls.idToken.length, 2);
   const last = google.asks.at(-1);
   assert.equal(sha256(calls.idToken[1].nonce), last.nonce);
@@ -221,18 +221,20 @@ test("closing Google's window or Cancel says nothing, a state the game didn't as
 test("a blocked popup takes the tab to Google and back, and signs in on the screen it left (desktop)", async () => {
   const fake = {};
   const blockPopups = (ctx) => ctx.addInitScript(() => (window.open = () => null));
+  // Coming Home from another screen, as a player does to sign in (the account lives on Home).
   const { ctx, page, calls } = await open(desktop, "#stats", FRESH, undefined, withGoogle(fake, blockPopups));
   const { google } = fake;
   await page.getByTestId("knowledge").waitFor();
+  await page.getByTestId("nav-home").click();
   await openSignIn(page);
   const popups = [];
   ctx.on("page", (p) => popups.push(p));
   await page.getByTestId("sign-in-google").click();
-  // To Google (the fake answers at once), to the callback page, and back to the game on the same screen.
+  // To Google (the fake answers at once), to the callback page, and back to the game on the same screen: Home.
   await until(() => calls.idToken.length === 1, 10_000);
-  await page.waitForURL(`${served.base}#stats`);
-  await page.getByTestId("knowledge").waitFor();
-  await menuSignedIn(page, "dana@example.com");
+  await page.waitForURL(served.base);
+  await page.getByTestId("today-list").waitFor();
+  await homeSignedIn(page, "Dana Scully");
   assert.equal(popups.length, 0);
   assert.equal(google.asks.length, 1);
   assert.equal(google.asks[0].redirect_uri, `${served.base}auth/google.html`);
@@ -257,7 +259,7 @@ test("a popup with no way back to the game window signs in on its own, and the g
   assert.equal(sha256(calls.idToken[0].nonce), fake.google.asks[0].nonce);
   // This tab hears of it (Supabase's client tells the site's other tabs) and closes its sheet.
   await page.getByTestId("sign-in-sheet").waitFor({ state: "detached" });
-  await menuSignedIn(page, "dana@example.com");
+  await homeSignedIn(page, "Dana Scully");
   await ctx.close();
 });
 

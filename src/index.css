@@ -93,6 +93,21 @@ button {
   cursor: pointer;
 }
 
+/* Phones: two quick taps (a thumb twice, a row and its fact) never zoom the page; pinch zoom still works. */
+html,
+a[href],
+button,
+input,
+textarea,
+select,
+summary,
+label,
+[role="button"],
+[role="switch"],
+.slot {
+  touch-action: manipulation;
+}
+
 a {
   color: var(--cyan);
   text-underline-offset: 3px;
@@ -108,8 +123,18 @@ a {
   color: var(--pink-ink);
 }
 
+/*
+ * Safe areas (index.html asks for viewport-fit=cover): the screens' sides keep clear of a notch through their padding
+ * (.screen), and everything starts below a top inset when there is one (a notch above the page, a cutout). The
+ * full-height screens subtract it, so they still fill exactly one screen. Fixed layers (the menu, sheets, the rules)
+ * keep clear on their own.
+ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+}
 #root {
   min-height: 100dvh;
+  padding-top: var(--safe-top);
 }
 
 .sr-only {
@@ -161,7 +186,7 @@ a {
 .loading {
   display: grid;
   place-items: center;
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--safe-top));
 }
 
 .panel {
@@ -199,8 +224,11 @@ a {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
-.key:hover:not(:disabled) {
-  background-color: var(--key-hi);
+/* Hover looks only where there is a hover: a phone keeps :hover on whatever was last tapped (lint:css). */
+@media (hover: hover) {
+  .key:hover:not(:disabled) {
+    background-color: var(--key-hi);
+  }
 }
 .key:active:not(:disabled) {
   transform: translateY(3px);
@@ -217,8 +245,10 @@ a {
   color: var(--pink-ink);
   box-shadow: 0 5px 0 var(--pink-shadow);
 }
-.key-pink:hover:not(:disabled) {
-  background-color: #ff7aa3;
+@media (hover: hover) {
+  .key-pink:hover:not(:disabled) {
+    background-color: #ff7aa3;
+  }
 }
 .key-pink:active:not(:disabled) {
   box-shadow: 0 2px 0 var(--pink-shadow);
@@ -228,8 +258,10 @@ a {
   color: #2a0505;
   box-shadow: 0 5px 0 #9c2a2a;
 }
-.key-danger:hover:not(:disabled) {
-  background-color: #ff6b6b;
+@media (hover: hover) {
+  .key-danger:hover:not(:disabled) {
+    background-color: #ff6b6b;
+  }
 }
 .key-sm {
   min-height: 42px;
@@ -264,6 +296,89 @@ a {
   white-space: nowrap;
 }
 
+/*
+ * Reach: every control is at least 44px under a finger (e2e/touch.e2e.cjs). A keycap's base (its shadow) is part of
+ * the key, and small keys and text keys reach past their edges with an invisible margin (--reach, an inset), no wider
+ * than half the gap to their neighbours, so nothing looks or lays out any differently.
+ */
+.key,
+.text-btn,
+.cat-strip,
+.chip,
+.note-key,
+.suggestion,
+.rate-reason {
+  position: relative;
+}
+.key::before,
+.text-btn::before,
+.cat-strip::before,
+.chip::before,
+.note-key::before,
+.suggestion::before,
+.rate-reason::before {
+  content: "";
+  position: absolute;
+  inset: var(--reach, 0);
+}
+.key {
+  --reach: 0 0 -5px;
+}
+.key-sm {
+  --reach: -1px 0 -5px;
+}
+/* The header's keys: a 3px reach to each side meets the next key's in the 6px between them. */
+.key-icon {
+  --reach: -1px -3px -5px;
+}
+.key-xs {
+  --reach: -6px 0;
+}
+.key-inrow {
+  --reach: -8px 0;
+}
+.rate-key {
+  --reach: -5px 0;
+}
+.text-btn {
+  --reach: -4px -2px;
+}
+.sheet-field-head .text-btn {
+  --reach: -10px -2px -6px;
+}
+.cat-strip {
+  --reach: -5px 0;
+}
+.chip {
+  --reach: -1px 0;
+}
+.cat-chip {
+  --reach: -3px 0;
+}
+.note-key {
+  --reach: -11px 0;
+}
+.suggestion {
+  --reach: -3px 0 -5px;
+}
+.rate-reason {
+  --reach: -4px 0;
+}
+/* The board's rows are its keys, edge to edge (38px on a phone): the first and last reach out past the board's edge
+   rows, so each is 44px to the finger. */
+.slot.hintable:first-child::after,
+.slot.has-fact:first-child::after,
+.slot.hintable:last-child::after,
+.slot.has-fact:last-child::after {
+  content: "";
+  position: absolute;
+  inset: -3px 0 0;
+}
+.slot.hintable:last-child::after,
+.slot.has-fact:last-child::after {
+  inset: 0 0 -3px;
+}
+
 /* Chips */
 .chips {
   display: flex;
@@ -283,8 +398,10 @@ a {
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
   touch-action: manipulation;
 }
-.chip:hover {
-  color: var(--cyan);
+@media (hover: hover) {
+  .chip:hover {
+    color: var(--cyan);
+  }
 }
 .chip:active {
   transform: translateY(2px);
@@ -293,7 +410,7 @@ a {
 
 /* ---------- Home ---------- */
 .home {
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--safe-top));
   gap: 28px;
   padding-top: max(32px, 6vh);
   max-width: calc(var(--col) + 2 * var(--gutter));
@@ -612,10 +729,15 @@ a {
   border-top: 0;
   border-bottom: 6px solid currentColor;
 }
-.cat-strip:hover,
 .cat-strip[aria-expanded="true"] {
   color: var(--accent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+@media (hover: hover) {
+  .cat-strip:hover {
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
+  }
 }
 /* The chips: a tight menu of rows on its own glass, the count on the right; above the strip near the screen's
    bottom (data-up, set when it opens). */
@@ -648,14 +770,16 @@ a {
   justify-content: space-between;
   align-items: baseline;
   gap: 10px;
-  min-height: 36px;
+  min-height: 38px;
   padding: 4px 12px;
   font-size: 17px;
   letter-spacing: 0.15em;
   text-align: left;
 }
-.cat-chip:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  .cat-chip:hover {
+    color: var(--accent);
+  }
 }
 .cat-n {
   margin-left: 4px;
@@ -695,6 +819,13 @@ a {
 .games-key {
   flex: 1 1 auto;
   gap: 10px;
+}
+/* Just past 700px each free-play key has about 160px for its title: a tighter title keeps "Random Blitz" on one line,
+   level with "Random list" (it wrapped at 700 to about 730px, a 360 x 740 phone on its side). */
+@media (min-width: 700px) and (max-width: 759px) {
+  .free-key .mode-key .key-label {
+    letter-spacing: 0.14em;
+  }
 }
 /* Wide screens: Home is one centred column inside the play screens' frame; the same 16px of ocean between cards as
    between the play screens' columns. */
@@ -739,6 +870,102 @@ a {
   color: var(--muted);
 }
 
+/*
+ * Home's account card (components/account/HomeAccount.tsx, only in a build with accounts), right under Today: a pixel
+ * player (hollow and faint signed out, lit cyan signed in), what that means in two lines, and its keys on the right.
+ * Signed out on a phone, SIGN IN and CREATE ACCOUNT share a row of their own under the words.
+ */
+.home-account {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "icon text keys";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 10px;
+}
+.home-account-icon {
+  grid-area: icon;
+  display: block;
+  margin-left: 4px;
+  color: var(--faint);
+}
+.home-account[data-state="in"] .home-account-icon {
+  color: var(--cyan);
+  filter: drop-shadow(0 0 6px var(--cyan-glow));
+}
+.home-account-text {
+  grid-area: text;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-account-status {
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+/* The name in the lit color, cut short with "..." if the line can't hold it (a long name moves under "signed in as"). */
+.home-account-name {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  font-weight: 400;
+  color: var(--cyan);
+}
+.home-account-note {
+  font-size: 17px;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+/* A sign-in that came back and failed: said here, in the miss color. */
+.home-account-note.notice {
+  color: var(--pink);
+}
+.home-account-keys {
+  grid-area: keys;
+  display: flex;
+  gap: 10px;
+}
+/* CREATE ACCOUNT: a navy key with a cyan edge, the suggested way in (quieter than Today's keys). */
+.key-account-new,
+.key-account-new:hover:not(:disabled) {
+  color: var(--cyan);
+  box-shadow:
+    inset 0 0 0 1px rgba(77, 227, 255, 0.55),
+    0 5px 0 var(--key-shadow);
+}
+.key-account-new:active:not(:disabled) {
+  box-shadow:
+    inset 0 0 0 1px rgba(77, 227, 255, 0.55),
+    0 2px 0 var(--key-shadow);
+}
+@media (max-width: 599px) {
+  .home-account:not([data-state="in"]) {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "icon text"
+      "keys keys";
+  }
+  .home-account:not([data-state="in"]) .home-account-keys > .key {
+    flex: 1 1 auto;
+  }
+}
+/* Narrow phones: the keys close up so SIGN IN and CREATE ACCOUNT keep one row. */
+@media (max-width: 380px) {
+  .home-account-keys > .key {
+    padding: 0 10px;
+    letter-spacing: 0.12em;
+  }
+}
+
 .home-foot {
   margin-top: auto;
   display: flex;
@@ -761,7 +988,7 @@ a {
 .howto {
   width: min(560px, calc(100% - 2 * var(--gutter)));
   max-width: none;
-  max-height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   margin: auto;
   padding: 0;
   /* Solid, unlike the glass cards: the keys behind it would read through the rules. */
@@ -830,7 +1057,7 @@ a {
   gap: 14px;
   padding-bottom: var(--dock-gap);
   /* A short screen (a Blitz round just begun) still puts the box at the bottom edge, in thumb reach. */
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--safe-top));
 }
 @media (min-width: 700px) {
   .game {
@@ -1138,8 +1365,10 @@ a {
 .asof a {
   color: var(--label);
 }
-.asof a:hover {
-  color: var(--cyan);
+@media (hover: hover) {
+  .asof a:hover {
+    color: var(--cyan);
+  }
 }
 
 /* The high-score table */
@@ -1354,6 +1583,21 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Narrow phones: the question keeps its cost ("1 life"), on two short lines in the row's height if it must, never cut
+   to "first letter? 1 l..."; so does "no clues on your last life". */
+@media (max-width: 420px) {
+  .hint-ask {
+    font-size: 17px;
+    white-space: normal;
+  }
+  .hint-q {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1;
+    text-wrap: balance;
+  }
+}
 /* YES inside a row: a key-xs a size down, so it fits the row's height on a phone. */
 .key-inrow {
   flex: none;
@@ -1379,8 +1623,10 @@ a {
 .key-gold:active:not(:disabled):not(.key-xs) {
   box-shadow: 0 2px 0 #9c7a24;
 }
-.key-gold:hover:not(:disabled) {
-  background-color: #ffdc85;
+@media (hover: hover) {
+  .key-gold:hover:not(:disabled) {
+    background-color: #ffdc85;
+  }
 }
 .key-xs:active:not(:disabled) {
   transform: translateY(2px);
@@ -1555,8 +1801,10 @@ a {
   text-underline-offset: 3px;
   touch-action: manipulation;
 }
-.text-btn:hover {
-  color: var(--cyan);
+@media (hover: hover) {
+  .text-btn:hover {
+    color: var(--cyan);
+  }
 }
 .text-btn.danger,
 .text-btn.danger:hover {
@@ -1725,9 +1973,11 @@ a {
   letter-spacing: 0.1em;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
 }
-.suggestion:hover {
-  background: var(--gold);
-  color: var(--gold-ink);
+@media (hover: hover) {
+  .suggestion:hover {
+    background: var(--gold);
+    color: var(--gold-ink);
+  }
 }
 
 .guess-row {
@@ -2002,6 +2252,25 @@ a {
     letter-spacing: 0.05em;
   }
 }
+/* Narrow phones: the guess box's type a step smaller, so "type a guess..." and a name like "Dhaulagiri I" fit the
+   box whole (at 28px a 320px phone showed "type a gues"). Still well over 16px, so Safari doesn't zoom in. */
+@media (max-width: 379px) {
+  .guess .guess-row input {
+    padding: 0 14px;
+    font-size: 24px;
+  }
+}
+@media (max-width: 339px) {
+  .guess .guess-row input {
+    padding: 0 12px;
+    font-size: 22px;
+  }
+  /* Beside GUESS and Roll again, "your guess". */
+  .guess .guess-row.has-reroll input {
+    padding: 0 10px;
+    font-size: 20px;
+  }
+}
 @media (max-width: 379px) {
   .guess-row.has-reroll .key {
     padding: 0 10px;
@@ -2045,6 +2314,18 @@ a {
   }
   .blitz-score {
     font-size: 40px;
+  }
+}
+/* A small phone with its keyboard up (320 x 318, 375 x 387): the board's first rows stay in view above the guess
+   box. The title card comes down to its title, and the board to its rows (the score is on the board itself; Play
+   Blitz is back with the keyboard down). */
+@media (max-height: 560px) and (max-width: 420px) {
+  .game .prompt .prompt-top,
+  .game .board-head {
+    display: none;
+  }
+  .game .board {
+    padding-top: 2px;
   }
 }
 
@@ -2235,6 +2516,34 @@ a {
 }
 .blitz-hit + .blitz-hit {
   border-top: 1px solid rgba(125, 147, 184, 0.08);
+}
+/* The name and figure: two cells of the row on wide screens. */
+.blitz-body {
+  display: contents;
+}
+/*
+ * Phones: a long name ("Hartsfield-Jackson Atlanta International Airport") gets the row's width, past a slimmer points
+ * column, and its figure moves under it on the right, as on the list board. Beside the figure the name had a third of
+ * the row and broke mid-word ("INTERNATIO / NAL") on a 320px phone.
+ */
+@media (max-width: 520px) {
+  .blitz-hit {
+    grid-template-columns: 2.6em minmax(0, 1fr);
+  }
+  .blitz-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 12px;
+    min-width: 0;
+  }
+  .blitz-body .blitz-name {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .blitz-body .value {
+    margin-left: auto;
+  }
 }
 .blitz-hits .blitz-hit:first-child {
   animation: rise 0.2s ease-out both;
@@ -2708,8 +3017,10 @@ a.arch-cell:active .arch-name {
   width: 40px;
   color: var(--muted);
 }
-.sound-toggle:hover:not(:disabled) {
-  color: var(--text);
+@media (hover: hover) {
+  .sound-toggle:hover:not(:disabled) {
+    color: var(--text);
+  }
 }
 .sound-toggle.on {
   color: var(--cyan);
@@ -2875,9 +3186,13 @@ a.arch-cell:active .arch-name {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-.note-key:hover,
 .note-key[aria-expanded="true"] {
   color: var(--text);
+}
+@media (hover: hover) {
+  .note-key:hover {
+    color: var(--text);
+  }
 }
 .note-bubble {
   position: absolute;
