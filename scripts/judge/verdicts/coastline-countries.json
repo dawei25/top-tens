@@ -1,24 +1,25 @@
 {
   "id": "coastline-countries",
-  "by": "builder",
-  "judgedAt": "2026-11-04",
+  "judgedAt": "2026-11-05",
   "decision": "daily-list",
   "alsoBlitz": true,
-  "priority": 7,
+  "priority": 6,
   "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
   "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
   "fan": { "found": 10, "livesLost": 2, "guesses": 13 },
-  "blitzCasual": { "scored": 35, "named": 35 },
+  "blitzCasual": { "scored": 34, "named": 36 },
   "difficulty": 2,
-  "tags": ["geography", "countries", "oceans"],
+  "tags": ["geography", "countries", "coastlines"],
   "audience": "anyone",
-  "summary": "Canada, Russia, Australia, the US and Indonesia come fast; Norway at #2 and the Philippines are the surprises, and Brazil (#16), India and Chile are the traps.",
+  "summary": "Canada, Russia, Australia and the US come fast and the island nations follow; Norway at #2 is the surprise, and big coasts like Brazil (#16), India and Chile are the traps.",
   "reasons": [
-    "Builder's own replay, pending a real judge. A casual found 7 and lost lives on Brazil, India, Chile, Mexico and the UK, each with its coastline.",
-    "The CIA World Factbook's figures (the ones usually quoted), named in the prompt. The World Resources Institute's finer measure ranks the US #2, Chile #5 and Finland #10 instead. Sovereign countries only: Greenland (44,087 km, Denmark's) is free; other territories cost a life with their figure, marked \"not a sovereign state\".",
-    "Every coastal country scores: a casual Blitz scored 35 of 35."
+    "All ten are household names. A casual found 7 in 12 guesses, losing lives on Brazil, India, Chile, the UK and Mexico (#12 to #19, each with its figure): near misses that teach the trick, islands and fjords beat size. A fan found all 10.",
+    "CIA World Factbook figures, named in the prompt, match the Factbook. Sovereign states only: Greenland is free, territories cost a life marked \"not a sovereign state\", landlocked countries show 0 km. No tie at #10/#11.",
+    "Shares 7 of its 10 answers with island-countries (Today's list on Nov 12): run it weeks apart. Strong Blitz: 34 of 36 casual names scored."
   ],
   "fixes": [
-    "\"coast\" alone is offered as Ivory Coast (a did-you-mean): a category word for the matcher if players stumble on it."
+    "Antarctica costs a life showing 17,968 km (a top-10 figure, would be #9), while Greenland, also not a sovereign country, is free: add Antarctica to `skip` like Greenland.",
+    "Denmark's miss shows 7,314 km with no word that Greenland is counted apart, so players who reach Denmark through Greenland will think it wrong: label it \"7,314 km (without Greenland)\".",
+    "\"coast\" alone is offered as Ivory Coast (#94), a did-you-mean on the list's own word: block that correction."
   ]
 }

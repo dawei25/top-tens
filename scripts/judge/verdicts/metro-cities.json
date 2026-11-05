@@ -1,25 +1,24 @@
 {
   "id": "metro-cities",
-  "by": "builder",
-  "judgedAt": "2026-11-04",
+  "judgedAt": "2026-11-05",
   "decision": "daily-list",
   "alsoBlitz": true,
   "priority": 7,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
-  "fan": { "found": 9, "livesLost": 2, "guesses": 14 },
-  "blitzCasual": { "scored": 34, "named": 34 },
-  "difficulty": 2,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "blitzCasual": { "scored": 23, "named": 24 },
+  "difficulty": 3,
   "tags": ["geography", "cities", "transport"],
   "audience": "anyone",
-  "summary": "Tokyo, Beijing, Shanghai, Seoul, Moscow and Hong Kong come fast; New York (#17), London (#20) and Paris (#11) are the famous traps, and Guangzhou, Shenzhen and Chengdu are the surprises.",
+  "summary": "A fresh twist on cities: Tokyo, Beijing, Shanghai, Seoul, Moscow and Hong Kong come quickly, while New York (#17), London (#20) and Paris (#11) burn lives and Guangzhou, Shenzhen and Chengdu are the reveal.",
   "reasons": [
-    "Builder's own replay, pending a real judge. A casual found 7 and lost lives on New York, London, Paris, Mexico City and Singapore, each showing its riders a year.",
-    "Answered as cities; system names work too (tokyo metro, toei, mtr, beijing subway, moscow metro). A city with two systems counts its busiest (Tokyo Metro, not Toei). Generic system names (red line, skyline) name nothing.",
-    "203 cities with a figure and every big city an answer: a casual Blitz scored 34 of 34."
+    "Casual found 6 and spent all 5 lives on New York, London, Paris, Mexico City and Mumbai, each showing its riders a year. The trap is the fun, but it sits at the hard edge of a daily.",
+    "Clean matching: system names (tokyo metro, toei, mtr, nyc subway), misspellings (shenzen, dehli, hongkong) and old names (peking, canton, bombay) all work; countries, subway and tube are free.",
+    "Deep Blitz: 203 cities carry a figure, so nearly every metro city a casual names scores (23 of 24; Seattle has no metro)."
   ],
   "fixes": [
-    "Figures are each system's latest year (2023 to 2025), as the page gives them.",
-    "\"skytrain\" costs a life as Vancouver's SkyTrain (#95); Bangkok's BTS Skytrain (#63) is typed \"bts skytrain\"."
+    "Tokyo is Tokyo Metro alone (2,496.8 million, #6); the source lists Toei Subway separately (963.9 million), and together Tokyo would be #3. Say so in Tokyo's fact (e.g. \"Tokyo Metro alone; Toei adds another 964 million\"), so a player who expects Tokyo near the top sees why.",
+    "Matcher (city lists): \"france\" offers Fort-de-France and \"spain\" offers Port of Spain as \"did you mean\"; a country name on a cities list should be free, not corrected into a city."
   ]
 }

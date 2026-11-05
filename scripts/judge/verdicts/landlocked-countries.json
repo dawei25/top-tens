@@ -1,22 +1,26 @@
 {
   "id": "landlocked-countries",
-  "by": "builder",
-  "judgedAt": "2026-11-04",
+  "judgedAt": "2026-11-05",
   "decision": "daily-list",
-  "alsoBlitz": false,
+  "alsoBlitz": true,
   "priority": 7,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 5, "fun": 4, "blitzDepth": 2 },
-  "casual": { "found": 6, "livesLost": 5, "guesses": 12 },
-  "fan": { "found": 9, "livesLost": 2, "guesses": 13 },
-  "blitzCasual": { "scored": 10, "named": 12 },
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 19, "named": 20 },
   "difficulty": 3,
   "tags": ["geography", "countries", "maps"],
   "audience": "anyone",
-  "summary": "Mongolia, Kazakhstan, Afghanistan and Bolivia come first; Chad, Niger, Mali and Ethiopia reward a look at Africa's map, and Switzerland, Austria and Paraguay are the famous misses.",
+  "summary": "Mongolia, Kazakhstan, Bolivia and Afghanistan come easily, Chad, Niger, Mali and Ethiopia reward a look at Africa's map, and Switzerland, Austria and Paraguay burn lives fast. Coastal guesses cost a life and show their coastline, which feels fair.",
   "reasons": [
-    "Builder's own replay, pending a real judge. A casual found 6 and lost lives on Switzerland (#31), Austria, Paraguay (#15), Nepal and Hungary, each with its area.",
-    "A country with a coast costs a life and shows why: \"Brazil: 7,491 km (coastline)\", \"drc\" is the Democratic Republic of the Congo, \"37 km (coastline)\" (CIA figures). Kazakhstan counts as landlocked: its only coast is on the Caspian.",
-    "47 landlocked countries and de facto states: a casual runs dry after about a dozen, so it is no Blitz."
+    "Casual found 8 (a variant who knows less of Africa found 5), losing all 5 lives on Switzerland #31, Austria #28, Paraguay #15, Nepal and Hungary; each miss shows its area and \"largest\" in the prompt warns off the small famous ones. Fan found 10/10.",
+    "Coastal guesses cost a life and say why (\"drc\": 37 km coastline, Nigeria for Niger: 853 km), like the owner's out-of-region rule; \"sudan\" and \"congo\" offer a choice for free. Areas match the source and Kazakhstan's Caspian coast is explained in its fact.",
+    "Good Blitz too: 47 answers, and the microstates that cost lives in the list (Vatican, Liechtenstein, Luxembourg) all score."
   ],
-  "fixes": []
+  "fixes": [
+    "Central African Republic (#11) has no aliases: add CAR and C.A.R. Today \"car\" and \"c.a.r.\" are offered as Czech Republic (did-you-mean), the wrong country.",
+    "Palestine, West Bank and Western Sahara cost a life with no figure. Give Palestine (Gaza, 40 km) and Western Sahara (1,110 km) their CIA coastline; West Bank is landlocked and not a country, so make it free rather than a silent life.",
+    "European Union and Antarctica are accepted from the coastline table and cost a life as if they were countries: drop non-country rows from that also-table.",
+    "Afghanistan's fact is wrong: Marco Polo sheep live across the Pamirs (mostly Tajikistan, also China, Kyrgyzstan and Pakistan), not only in the Wakhan Corridor. Replace it with another sourced fact."
+  ]
 }

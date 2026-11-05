@@ -1,25 +1,24 @@
 {
   "id": "skyscraper-cities",
-  "by": "builder",
-  "judgedAt": "2026-11-04",
+  "judgedAt": "2026-11-05",
   "decision": "daily-list",
   "alsoBlitz": true,
   "priority": 7,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 4 },
-  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
-  "fan": { "found": 9, "livesLost": 2, "guesses": 13 },
-  "blitzCasual": { "scored": 24, "named": 28 },
-  "difficulty": 2,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "blitzCasual": { "scored": 21, "named": 24 },
+  "difficulty": 3,
   "tags": ["geography", "cities", "architecture"],
   "audience": "anyone",
-  "summary": "Hong Kong, New York, Dubai and Shanghai come fast; Shenzhen, Wuhan and Guangzhou are the surprises, and Tokyo at #11 (200, one short of Kuala Lumpur) is the trap.",
+  "summary": "Four gimmes (Hong Kong, New York, Dubai, Shanghai), Shenzhen, Kuala Lumpur and Bangkok with thought, Mumbai and Wuhan as the surprises. Famous skylines outside the top 10 (Tokyo by one tower, Chicago, Singapore, London) eat lives fast, so it plays a little hard.",
   "reasons": [
-    "Builder's own replay, pending a real judge. A casual found 7 (Hong Kong, New York, Dubai, Shanghai, Kuala Lumpur, Shenzhen, Bangkok) and lost lives on Tokyo #11, Singapore #13, Chicago #14, Toronto #17 and London #44, each with its count.",
-    "Every city is an answer (the world's big-city tables), so one-tower cities cost a life: Paris, Taipei and Seattle show no figure, being under the page's 30-skyscraper floor. The towers themselves (Burj Khalifa, Petronas, Empire State) are free.",
-    "62 ranked cities: a casual Blitz scored 24 of 28 names."
+    "Casual found 6 (New York, Dubai, Hong Kong, Shanghai, Kuala Lumpur, Shenzhen) and lost all 5 lives on Tokyo #11 (200), Chicago #14, Singapore #13, London #44 and Beijing #29, each with its count: learnable misses, but many of them. Fan found 9, missing only Mumbai.",
+    "Matching is clean: nyc, hk, kl, bombay, canton, shenzen, kuala lampur and bankok all score; towers, countries and \"skyscraper\" are free; Manila (split into its cities by the source) is free.",
+    "The page mixes sources: Mumbai's 247 includes topped-out towers and Bangkok's and Tokyo's counts come from Wikipedia lists, not the Skyscraper Center, so the #10/#11 cut is one building across two sources. The prompt states the measure and players won't see the seam."
   ],
   "fixes": [
-    "The page counts cities proper, so Metro Manila's 16 cities count apart (Makati #33) and \"manila\" is free; its height table gives the whole region 215, which would be #6.",
-    "Taipei is in the page's height table (39) but not its main ranking, so it shows no figure."
+    "Taipei (a likely guess, for Taipei 101), Tel Aviv, Jersey City, Sharjah, Taguig, Burnaby, Yokohama and Kawasaki cost a life with no figure, but the page's metro-area table lists each one's city count in its \"Cities included\" column (Taipei 16, Tel Aviv 24, Jersey City 22, Sharjah 26). Show those. Not 39 for Taipei: that figure adds New Taipei City.",
+    "Singapore shows 140 (#13) from the main table, but the page's metro-area and height tables both give 100 (about #21). Check which is current; it is one of the most common misses."
   ]
 }

@@ -1,24 +1,23 @@
 {
   "id": "coffee-countries",
-  "by": "builder",
-  "judgedAt": "2026-11-04",
+  "judgedAt": "2026-11-05",
   "decision": "daily-list",
   "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 3 },
-  "casual": { "found": 7, "livesLost": 4, "guesses": 11 },
-  "fan": { "found": 9, "livesLost": 3, "guesses": 13 },
-  "blitzCasual": { "scored": 10, "named": 13 },
-  "difficulty": 2,
-  "tags": ["food", "geography", "coffee"],
+  "priority": 8,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 3 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 12, "named": 14 },
+  "difficulty": 3,
+  "tags": ["geography", "food", "coffee"],
   "audience": "anyone",
-  "summary": "Brazil, Colombia and Ethiopia come first, Vietnam at #2 surprises, and Kenya, Jamaica and Costa Rica, famous coffee names, are the traps.",
+  "summary": "A good daily: Brazil and Colombia are gimmes, Vietnam at #2, Uganda and India surprise, and the famous coffee names (Kenya, Costa Rica, Jamaica) are the traps.",
   "reasons": [
-    "Builder's own replay, pending a real judge. A casual found 7 (Brazil, Colombia, Ethiopia, Vietnam, Guatemala, Indonesia, Honduras) and lost lives on Kenya (#22), Jamaica, Costa Rica (#17) and Mexico (#12).",
-    "FAO 2023 green coffee. Tea countries cost a life (China #15 with its tonnes; Sri Lanka and Japan show no figure, being under the page's 10,000-tonne floor); coffee words (arabica, robusta, kona) are free.",
-    "35 producers with a figure: a casual Blitz names about a dozen, so it is no Blitz."
+    "Casual found 7 (Brazil, Colombia, Ethiopia, Vietnam, Guatemala, Indonesia, Peru) and spent all 5 lives on Kenya (#22), Costa Rica (#17), Jamaica, Mexico (#12) and El Salvador (#24): famous origins cost lives, but each ranked one shows its figure, so the misses teach.",
+    "Leaving out the Central African Republic is right: FAO's 316,108 t is about 100 times StoneX's 2023 estimate (about 46,000 bags, 37th) and its 2023 coffee exports were worth about $18k. Kept, #10 would be an answer no one can name and the reveal would teach something false. Naming it is free.",
+    "Coffee words (arabica, java, sumatra, kona, mocha, starbucks) are free and spellings like columbia, vietman, guatamala work. A casual Blitz stalls at about a dozen, so it is a list, not a Blitz."
   ],
   "fixes": [
-    "FAO prints 316,108 tonnes for the Central African Republic (#10 as printed), an estimate dozens of times its exports that no other source backs: left out (free), so Guatemala is #10. A judge should confirm; with it back in, CAR is #10 and Guatemala #11."
+    "Matcher (src/game, every countries list): \"south america\" offers \"did you mean South Africa?\". Continent words are natural guesses on this list (\"South American coffee\") and should be free with no offer."
   ]
 }
