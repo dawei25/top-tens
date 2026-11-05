@@ -14,6 +14,7 @@ import {
   type Momentum,
 } from "./music";
 import { react, START, type Cue, type CueState } from "./cues";
+import { BAND_AT, fanfareLevel, fathomVoices, voiceEnd, type Voice } from "./fathom";
 import { createSoundPref, readSoundPref, SOUND_KEY, writeSoundPref, type PrefStorage } from "./pref";
 import type { PlayEvent } from "../../game/events";
 
@@ -148,6 +149,74 @@ describe("cues for play events", () => {
   it("blitz: an answer outside the top 10 is not big", () => {
     const [, cues] = react({ kind: "blitz-hit", rank: 40, points: 20, score: 20 }, START, 0);
     expect(cues).toEqual([{ kind: "hit", degree: blitzDegree(40), big: false }]);
+  });
+});
+
+describe("Fathom's sounds", () => {
+  const BANDS = ["dead-on", "close", "near", "far", "lost"] as const;
+  const end = (vs: Voice[]) => Math.max(...vs.map(voiceEnd));
+  const peak = (vs: Voice[]) => Math.max(...vs.map((v) => ("tone" in v ? v.tone.gain : v.noise.gain)));
+  const tones = (vs: Voice[]) => vs.flatMap((v) => ("tone" in v ? [v.tone] : []));
+  const start = (v: Voice) => ("tone" in v ? v.tone.at : v.noise.at) ?? 0;
+
+  it("clicks softly on LOCK IN", () => {
+    const click = fathomVoices({ kind: "lock" });
+    expect(end(click)).toBeLessThan(0.1);
+    expect(peak(click)).toBeLessThanOrEqual(0.06);
+  });
+
+  it("pings as the answer shows, then plays the band's own sound after it", () => {
+    for (const band of BANDS) {
+      const vs = fathomVoices({ kind: "reveal", band });
+      const [ping] = tones(vs);
+      expect(ping.at).toBeLessThan(BAND_AT);
+      expect(ping.freq).toBeCloseTo(note("E6"));
+      for (const v of vs.slice(2)) expect(start(v), band).toBeGreaterThanOrEqual(BAND_AT);
+    }
+    // Each band sounds different.
+    const shapes = BANDS.map((band) => JSON.stringify(fathomVoices({ kind: "reveal", band }).slice(2)));
+    expect(new Set(shapes).size).toBe(BANDS.length);
+  });
+
+  it("gives the closest guesses the richest sound: a rising chord for Dead on, two rising notes for Close, one for Near", () => {
+    const band = (b: (typeof BANDS)[number]) => tones(fathomVoices({ kind: "reveal", band: b }).slice(2));
+    const dead = band("dead-on");
+    expect(dead.length).toBeGreaterThan(band("close").length);
+    // The run rises, and a sparkle tops it.
+    const run = dead.slice(0, 4).map((x) => x.freq);
+    expect(run).toEqual([...run].sort((a, b) => a - b));
+    expect(Math.max(...dead.map((x) => x.freq))).toBeGreaterThan(note("C7") - 1);
+    const close = band("close");
+    expect(close).toHaveLength(2);
+    expect(close[1].freq).toBeGreaterThan(close[0].freq);
+    expect(band("near")).toHaveLength(1);
+    // Far: a low thud. Lost at sea: sinking.
+    expect(band("far")[0].freq).toBeLessThan(200);
+    for (const x of band("lost")) expect(x.slideTo!).toBeLessThan(x.freq);
+  });
+
+  it("keeps every sound short and quiet", () => {
+    for (const band of BANDS) {
+      const vs = fathomVoices({ kind: "reveal", band });
+      expect(end(vs), band).toBeLessThan(1.5);
+      expect(peak(vs), band).toBeLessThanOrEqual(0.45);
+    }
+    for (const total of [0, 250, 500]) {
+      const vs = fathomVoices({ kind: "results", total });
+      expect(end(vs)).toBeLessThan(1.3);
+      expect(peak(vs)).toBeLessThanOrEqual(0.45);
+    }
+  });
+
+  it("plays a results fanfare that grows with the total", () => {
+    expect([0, 99, 100, 250, 499, 500].map(fanfareLevel)).toEqual([0, 0, 1, 2, 4, 5]);
+    let last = 0;
+    for (let total = 0; total <= 500; total += 25) {
+      const n = fathomVoices({ kind: "results", total }).length;
+      expect(n).toBeGreaterThanOrEqual(last);
+      last = n;
+    }
+    expect(fathomVoices({ kind: "results", total: 500 }).length).toBeGreaterThan(fathomVoices({ kind: "results", total: 0 }).length + 4);
   });
 });
 

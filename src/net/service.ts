@@ -4,6 +4,7 @@ import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import { accountsOn, BACKEND } from "./config";
 import { parseAverages, parseStats, type CrowdStats, type ListAverages } from "./crowd";
+import { compareArgs, FATHOM_GUESSES, guessArgs, parseCompare, type FathomCrowd, type FathomGuess } from "./fathom";
 import { FEEDBACK, feedbackArgs, type Feedback } from "./feedback";
 import { takeGoogleReturn, type GoogleOutcome } from "./google";
 import { localOutboxStore, Outbox, retryDelay, type SendResult } from "./outbox";
@@ -14,7 +15,7 @@ import { syncSave, type SaveRemote } from "./sync/engine";
 import { mergeSaves, type SyncSave } from "./sync/merge";
 
 /**
- * Everything that talks to the backend: score stats, ratings, notes, sign-in and save sync. Loaded with a dynamic
+ * Everything that talks to the backend: score stats, ratings, notes, Fathom guesses, sign-in and save sync. Loaded with a dynamic
  * import, and only in builds with a backend (see ./index.ts), so players of a build without one never download it or
  * Supabase's client. Nothing here may break the game: every call catches its own failures.
  */
@@ -153,6 +154,39 @@ export async function flushFeedback(): Promise<void> {
   }
 }
 
+// ---------- Fathom guesses ----------
+
+/**
+ * Fathom guesses waiting to be sent, one per question, retried like plays. The facade (./index.ts) queues them in this
+ * store before this code has even loaded; this only sends.
+ */
+const fathomBox = new Outbox<FathomGuess>(
+  localOutboxStore<FathomGuess>(globalThis.localStorage, KEYS.fathomOutbox),
+  async (g) => {
+    const { error, status } = await sb().rpc("submit_fathom_guess", guessArgs(g, clientId()));
+    return sendResult(status, error);
+  },
+  Date.now,
+  FATHOM_GUESSES,
+);
+
+let fathomRetries = 0;
+let fathomTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Send the Fathom guesses waiting, with the same backoff as plays. */
+export async function flushFathom(): Promise<void> {
+  clearTimeout(fathomTimer);
+  try {
+    if ((await fathomBox.flush()) === "retry") {
+      fathomRetries++;
+      clearTimeout(fathomTimer);
+      fathomTimer = setTimeout(() => void flushFathom(), retryDelay(fathomRetries));
+    } else fathomRetries = 0;
+  } catch {
+    // Never let Fathom get in the way.
+  }
+}
+
 // ---------- Stats ----------
 
 const STATS_TTL = 5 * 60_000;
@@ -189,6 +223,14 @@ export function listAverages(): Promise<ListAverages | null> {
   return cached("averages:list", AVERAGES_TTL, async () => {
     const { data, error } = await sb().rpc("list_averages", { p_mode: "list" }, { get: true });
     return error ? null : parseAverages(data);
+  });
+}
+
+/** How real players guessed on a Fathom question, against this guess and the answer shown (this browser left out). */
+export function fathomCompare(questionId: string, guess: number, answer: number): Promise<FathomCrowd | null> {
+  return cached(`fathom:${questionId}:${guess}:${answer}`, STATS_TTL, async () => {
+    const { data, error } = await sb().rpc("fathom_compare", compareArgs(questionId, guess, answer, clientId()), { get: true });
+    return error ? null : parseCompare(data);
   });
 }
 
@@ -255,6 +297,7 @@ export async function start(): Promise<void> {
   void flushPlays();
   void flushRatings();
   void flushFeedback();
+  void flushFathom();
   if (!accountsOn) return;
   try {
     const hadVerifier = verifierWaiting();

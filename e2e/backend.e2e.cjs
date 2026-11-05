@@ -1,7 +1,8 @@
 // The backend switched on: this spec builds its own copy with fake Supabase env vars, serves it on a free port, and
 // answers Supabase's endpoints itself. Checks: each finished game is sent once with the right payload; results blend
 // real players into the estimate (named from 30 players, "(estimated)" below); a list rating goes to rate_list (and
-// waits while offline); Home's
+// waits while offline); a Fathom guess goes to submit_fathom_guess once (and waits while offline), and its reveal says
+// how real players guessed from 20 of them; Home's
 // account key in its header (signed out, signing in, signed in by name and never by address, the pink dot for sync
 // trouble, each in its icon, name and title; nothing between Today and Free play), the menu without an account
 // section and its Feedback, the sign-in sheet in both modes and privacy page; and a signed-in session syncing its save
@@ -13,6 +14,7 @@
 // and back).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
+const path = require("node:path");
 const { VIEWPORTS, NOW, TODAY, guess, noHScroll } = require("./helpers.cjs");
 const { BACKEND_ENV } = require("./backend-env.cjs");
 const { SUPA, STATS, serveBuild, opener, openMenu, openSignIn, accountKey, KEY_COLORS, homeSignedIn, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
@@ -183,6 +185,74 @@ test("a rating goes to rate_list: the latest per list and mode, with this browse
   await page.getByTestId("rate-down").click();
   await until(() => calls.rate.at(-1)?.p_mode === "blitz");
   assert.deepEqual(calls.rate.at(-1), { p_list_id: "airports", p_mode: "blitz", p_rating: -1, p_reason: null, p_client_id: id });
+  await ctx.close();
+});
+
+// Fathom (the estimation beta) on its fixture bank: each locked-in guess goes to submit_fathom_guess once (offline it
+// waits), and a reveal says how real players guessed once 20 of them have answered that question; below 20, nothing.
+test("Fathom: each guess is sent once, and a reveal says how players guessed from 20 of them (phone)", async () => {
+  const bank = path.join(__dirname, "fixtures", "fathom", "questions.json");
+  const ids = ["eiffel-tower-height", "adult-bones", "octopus-hearts", "moon-distance", "everest-height"];
+  const { ctx, page, calls } = await open(phone, "#fathom", { ...FRESH, "tentacle:fathom": { recent: [], game: { ids, guesses: [], at: 0 } } }, undefined, (c) =>
+    c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: bank, contentType: "application/json" })),
+  );
+  const lockIn = async (text) => {
+    await page.getByTestId("fathom-input").fill(text);
+    await page.getByTestId("fathom-lock").click();
+    await page.getByTestId("fathom-reveal").waitFor();
+  };
+  const next = async () => {
+    await page.getByTestId("fathom-next").click();
+    await page.getByTestId("fathom-input").waitFor();
+  };
+
+  // 37 players on the Eiffel Tower: the line, from what fathom_compare said about this guess and the answer shown.
+  await page.getByTestId("fathom-input").waitFor();
+  await lockIn("300");
+  await until(() => calls.fathom.length === 1);
+  const id = calls.fathom[0].p_client_id;
+  assert.match(id, UUID);
+  assert.deepEqual(calls.fathom[0], { p_question_id: "eiffel-tower-height", p_guess: 300, p_client_id: id });
+  const players = page.getByTestId("fathom-players");
+  await players.waitFor();
+  assert.deepEqual(
+    await players.evaluate((el) => ({ n: el.dataset.n, median: el.dataset.median, further: el.dataset.further })),
+    { n: "37", median: "300", further: "0.7297" },
+  );
+  assert.deepEqual(calls.compare[0], { p_question_id: "eiffel-tower-height", p_guess: "300", p_answer: "330", p_client_id: id });
+  assert.ok(await noHScroll(page));
+
+  // 12 players on the bones: nothing about them.
+  await next();
+  await lockIn("150");
+  await until(() => calls.fathom.length === 2 && calls.compare.length === 2);
+  await settle();
+  assert.equal(calls.fathom[1].p_question_id, "adult-bones");
+  assert.equal(await page.getByTestId("fathom-players").count(), 0);
+
+  // Offline, a guess waits in the outbox and goes when the connection is back.
+  const rpc = `${SUPA}/rest/v1/rpc/submit_fathom_guess`;
+  await page.route(rpc, (route) => route.abort("internetdisconnected"));
+  await next();
+  await lockIn("8");
+  await settle();
+  assert.equal(calls.fathom.length, 2);
+  const waiting = (await page.evaluate(() => JSON.parse(localStorage.getItem("top-tens:fathom-outbox")))).pending;
+  assert.deepEqual(waiting.map((g) => [g.questionId, g.guess]), [["octopus-hearts", 8]]);
+  await page.unroute(rpc);
+  await page.evaluate(() => dispatchEvent(new Event("online")));
+  await until(() => calls.fathom.length === 3);
+  assert.deepEqual(calls.fathom[2], { p_question_id: "octopus-hearts", p_guess: 8, p_client_id: id });
+
+  // A reload on the reveal sends nothing again.
+  await page.reload();
+  await page.getByTestId("fathom-reveal").waitFor();
+  await settle();
+  assert.equal(calls.fathom.length, 3);
+
+  // The privacy page says what a guess sends.
+  await page.goto(base + "#privacy");
+  await page.getByTestId("privacy-fathom").waitFor();
   await ctx.close();
 });
 

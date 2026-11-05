@@ -49,6 +49,10 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
               When you rate a list ("Good list?"), the game sends the list, list or Blitz, up or down, the reason if you
               picked one, and the random id. Why: to learn which lists are good.
             </li>
+            <li data-testid="privacy-fathom">
+              When you lock in a guess in Fathom (the estimation beta), the game sends the question, your number and the
+              random id. Why: to show how other players guessed.
+            </li>
             <li>
               These scores don't say who you are, so they can't be picked out and deleted later. They stay in the
               totals.

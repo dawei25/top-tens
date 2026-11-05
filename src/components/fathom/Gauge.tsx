@@ -1,12 +1,13 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { bandOf, type Band } from "../../game/fathom";
+import { timesOff, type Band } from "../../game/fathom";
 import { BUOY, placed, SQUID } from "./sprites";
 
 /**
- * The reveal's sonar: a pixel strip that places the guess and the answer on a log scale. The answer is the gold buoy
- * in the middle; the squid marks where the guess landed, with a sonar ping around it. Under the track, the bands of
- * the score (dead on in the middle, then close, near, far, lost at sea, mirrored), each in a dark shade of its
- * colour, and the one run the squid is over lit (not its mirror across the answer).
+ * The reveal's sonar: the answer is the gold buoy in the middle, and the squid sits left of it (too low) or right of it
+ * (too high) by how far off the guess was, on a log scale clamped at 10x (the edges), with the miss written under it
+ * ("30% low"). The stretch of track from the buoy to the squid is lit in the band's colour. No bands, no numbers on
+ * the scale: just where you landed. A Dead on or Close guess makes the squid hop among sparkles (not with reduced
+ * motion; fathom.css).
  *
  * Drawn on a grid of P x P pixel cells as wide as the card allows (an odd number, so the buoy has a middle column),
  * so the art stays crisp at any width. Decoration: the reveal's text already says how far off the guess is.
@@ -14,19 +15,17 @@ import { BUOY, placed, SQUID } from "./sprites";
 
 /** CSS px per art pixel: 3 on a phone, 4 from 560px (fathom.css keeps the gauge's height in step). */
 const pixelSize = () => (typeof matchMedia === "function" && matchMedia("(min-width: 560px)").matches ? 4 : 3);
-const ROWS = 20;
-/** The track's row; the band strip (three rows) sits two rows under it. */
+const ROWS = 17;
+/** The track's row. */
 const TRACK = 14;
-const STRIP = TRACK + 3;
-const STRIP_ROWS = 3;
-
 /** The squid's top row: under the buoy's diamond, so a guess dead on still shows the buoy above it. */
 const SQUID_TOP = 5;
+/** Cells between the squid's middle and the grid's edge at 10x off. */
+const EDGE = 4;
 
 interface Props {
   guess: number;
   answer: number;
-  typical: number;
   band: Band;
 }
 
@@ -48,29 +47,34 @@ export function Gauge(props: Props) {
     return () => ro.disconnect();
   }, []);
   const art = cols >= 31 ? draw(cols, props) : null;
+  const miss = timesOff(props.guess, props.answer);
   return (
-    <div ref={ref} className="fathom-gauge" aria-hidden="true" data-testid="fathom-gauge">
+    <div ref={ref} className="fathom-gauge" aria-hidden="true" data-testid="fathom-gauge" data-band={props.band}>
       {art && (
         <div className="gauge-art" style={{ width: cols * P }}>
           <svg width={cols * P} height={ROWS * P} viewBox={`0 0 ${cols} ${ROWS}`} shapeRendering="crispEdges">
-            {art.bands.map((b, i) => (
-              <rect key={b.x} className={`g-band ${i === art.lit ? "hit" : ""}`} data-band={b.band} x={b.x} y={STRIP} width={b.w} height={STRIP_ROWS} />
-            ))}
             <rect className="g-track" x={0} y={TRACK} width={cols} height={1} />
-            {art.ticks.map((t) => (
-              <rect key={t.x} className="g-tick" x={t.x} y={TRACK + 1} width={1} height={2} />
-            ))}
+            <rect className="g-cap" x={0} y={TRACK - 1} width={1} height={3} />
+            <rect className="g-cap" x={cols - 1} y={TRACK - 1} width={1} height={3} />
+            {art.reach.w > 0 && <rect className="g-reach" x={art.reach.x} y={TRACK} width={art.reach.w} height={1} />}
             <path className="g-buoy" d={art.buoy} />
             <path className="g-ping g-ping-far" d={art.pingFar} />
             <path className="g-ping g-ping-near" d={art.pingNear} />
+            <g className="g-sparks">
+              {art.sparks.map((d, i) => (
+                <path key={i} className="g-spark" style={{ animationDelay: `${0.45 + i * 0.09}s` }} d={d} />
+              ))}
+            </g>
             <path className="g-squid" data-x={art.gx} d={art.squid} />
           </svg>
-          <div className="gauge-ticks">
-            {art.ticks.map((t) => (
-              <span key={t.x} style={{ left: (t.x + 0.5) * P }}>
-                {t.label}
-              </span>
-            ))}
+          <div className="gauge-label">
+            <span
+              data-testid="fathom-off"
+              data-x={art.gx}
+              style={{ left: (art.gx + 0.5) * P, transform: `translateX(${(-100 * (art.gx + 0.5)) / cols}%)` }}
+            >
+              {miss}
+            </span>
           </div>
         </div>
       )}
@@ -78,7 +82,7 @@ export function Gauge(props: Props) {
   );
 }
 
-/** The cells on a pixel circle of radius r around (cx, cy), inside rows 0..TRACK-1 and the grid's columns. */
+/** The cells on a pixel circle of radius r around (cx, cy), above the track and inside the grid's columns. */
 function ring(cx: number, cy: number, r: number, cols: number): string {
   let d = "";
   for (let y = 0; y < TRACK - 1; y++) {
@@ -89,78 +93,24 @@ function ring(cx: number, cy: number, r: number, cols: number): string {
   return d;
 }
 
-/** Tick values on the scale, in log10: 1-2-5 steps on a short scale, powers of ten (every few) on a long one. */
-function tickValues(lo: number, hi: number): number[] {
-  const span = hi - lo;
-  const steps = span < 1.2 ? [1, 2, 5] : [1];
-  const every = span > 8 ? Math.ceil(span / 6) : 1;
-  const out: number[] = [];
-  for (let k = Math.floor(lo) - 1; k <= Math.ceil(hi); k++) {
-    if (k % every !== 0) continue;
-    for (const s of steps) {
-      const v = s * 10 ** k;
-      if (Math.log10(v) >= lo && Math.log10(v) <= hi) out.push(v);
-    }
-  }
-  return out;
-}
+/** A small pixel sparkle (a plus) centred on (x, y). */
+const spark = (x: number, y: number) => `M${x} ${y - 1}h1v3h-1zM${x - 1} ${y}h3v1h-3z`;
 
-/**
- * "200", "0.5", "5K", "2M", "1B", "3T"; null past the trillions or under a thousandth, where it would take a power of
- * ten ("1e15", "1e-7"): that tick is left out.
- */
-function tickLabel(v: number): string | null {
-  const short = (x: number) => String(+x.toPrecision(3));
-  if (v >= 1e15 || v < 1e-3) return null;
-  if (v >= 1e12) return `${short(v / 1e12)}T`;
-  if (v >= 1e9) return `${short(v / 1e9)}B`;
-  if (v >= 1e6) return `${short(v / 1e6)}M`;
-  if (v >= 1e3) return `${short(v / 1e3)}K`;
-  return short(v);
-}
-
-function draw(cols: number, { guess, answer, typical, band }: Props) {
-  const c = Math.log10(answer);
-  const d = Math.log10(guess / answer);
-  const m = Math.log10(typical);
-  // Half the scale, in log10: room for the guess (with a margin), and never so tight the bands crowd the middle.
-  const half = Math.max(Math.abs(d) * 1.25, m * 2.2, 0.3);
+function draw(cols: number, { guess, answer }: Props) {
+  // How far off, in powers of ten (negative: too low), clamped at 10x either way.
+  const d = Math.max(-1, Math.min(1, Math.log10(guess / answer)));
   const mid = (cols - 1) / 2;
-  const xOf = (lv: number) => Math.round(mid + ((lv - c) / half) * mid);
-
-  // The bands, one run of cells each, mirrored around the answer.
-  const bands: { x: number; w: number; band: Band }[] = [];
-  for (let x = 0; x < cols; x++) {
-    const dist = (Math.abs(x - mid) / mid) * half;
-    const band = bandOf(Math.round(100 * (1 - (2 / Math.PI) * Math.atan(dist / m))));
-    const last = bands[bands.length - 1];
-    if (last && last.band === band) last.w += 1;
-    else bands.push({ x, w: 1, band });
-  }
-
-  // Ticks with room for their labels (14 cells, 42px, apart), clear of the ends, each in plain numbers.
-  const ticks: { x: number; label: string }[] = [];
-  for (const v of tickValues(c - half, c + half)) {
-    const x = xOf(Math.log10(v));
-    const label = tickLabel(v);
-    if (label === null || x < 4 || x > cols - 5) continue;
-    if (ticks.length && x - ticks[ticks.length - 1].x < 14) continue;
-    ticks.push({ x, label });
-  }
-
   const ax = Math.round(mid);
+  const gx = Math.round(mid + d * (mid - EDGE));
+
   const pole = Array.from({ length: TRACK + 3 - BUOY.length }, () => "..#..");
   const buoy = placed([...BUOY, ...pole], ax - 2, 0);
-
-  const gx = Math.min(cols - 4, Math.max(3, xOf(c + d)));
   const squid = placed(SQUID, gx - 3, SQUID_TOP);
   const cy = SQUID_TOP + SQUID.length / 2;
-  // The run lit: the guess's band under the squid (or, where rounding puts the squid's column just past that band's
-  // edge, its nearest run of that band).
-  const gap = (b: (typeof bands)[number]) => (gx < b.x ? b.x - gx : gx >= b.x + b.w ? gx - (b.x + b.w - 1) : 0);
-  let lit = -1;
-  bands.forEach((b, i) => {
-    if (b.band === band && (lit < 0 || gap(b) < gap(bands[lit]))) lit = i;
-  });
-  return { bands, lit, gx, ticks, buoy, squid, pingNear: ring(gx + 0.5, cy, 6, cols), pingFar: ring(gx + 0.5, cy, 9, cols) };
+  // The track from the buoy to the squid, lit.
+  const reach = { x: Math.min(ax, gx), w: Math.abs(gx - ax) };
+  // Sparkles around the squid (a hop for Dead on and Close), kept inside the grid.
+  const sx = (dx: number) => Math.max(1, Math.min(cols - 2, gx + dx));
+  const sparks = [spark(sx(-6), 3), spark(sx(6), 2), spark(sx(-4), 11), spark(sx(7), 9), spark(sx(1), 1)];
+  return { gx, buoy, squid, reach, sparks, pingNear: ring(gx + 0.5, cy, 6, cols), pingFar: ring(gx + 0.5, cy, 9, cols) };
 }

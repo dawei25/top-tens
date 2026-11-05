@@ -5,9 +5,7 @@
  * the classic results card (.results, .score). Loaded with the screen's own chunk.
  *
  * Bands have one colour each, from the game's palette: dead on gold, close cyan, near periwinkle (the squid's limb
- * ramp), far pink, lost at sea a deep slate. --band fills, --band-ink is text on a fill, --band-text is the band as
- * text on glass, --band-dim the band unlit on the sonar: a darker shade of its own hue, never the colour faded (gold
- * faded over navy reads olive, cyan teal, and the palette has no green).
+ * ramp), far pink, lost at sea a deep slate. --band fills and lights, --band-text is the band as text on glass.
  */
 .fathom {
   max-width: calc(640px + 2 * var(--gutter));
@@ -31,33 +29,23 @@
 }
 .fathom [data-band="dead-on"] {
   --band: var(--gold);
-  --band-ink: var(--gold-ink);
   --band-text: var(--gold);
-  --band-dim: #715514;
 }
 .fathom [data-band="close"] {
   --band: var(--cyan);
-  --band-ink: #03222b;
   --band-text: var(--cyan);
-  --band-dim: #1d4f6e;
 }
 .fathom [data-band="near"] {
   --band: #8a9cff;
-  --band-ink: #0e1440;
   --band-text: #8a9cff;
-  --band-dim: #2d3876;
 }
 .fathom [data-band="far"] {
   --band: var(--pink);
-  --band-ink: var(--pink-ink);
   --band-text: var(--pink);
-  --band-dim: #77223c;
 }
 .fathom [data-band="lost"] {
   --band: #3b4c6e;
-  --band-ink: var(--text);
   --band-text: var(--label);
-  --band-dim: #222c40;
 }
 
 /* The question card: "Question 2 of 5" and the progress squares on one line, then the question and what it measures. */
@@ -126,6 +114,18 @@
   .pip[data-band="lost"]::after {
     inset: 1px;
   }
+}
+
+/* The scoring rule under the first question (and on the results): one plain line, set apart from what the question
+   measures by a dashed rule. */
+.fathom-rule {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px dashed var(--hairline);
+  font-size: 18px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  color: var(--label);
 }
 
 /* ---- The ask card ---- */
@@ -236,34 +236,71 @@
 .fathom-reveal.enter {
   animation: rise 0.35s ease-out both;
 }
+/* The verdict in big type on the left ("DEAD ON!"), the points on the right with the running total under them; the
+   points go under the word when both don't fit ("LOST AT SEA" on the narrowest phone). */
 .reveal-head {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
+  gap: 6px 12px;
 }
-.band-chip {
-  padding: 4px 12px 5px;
-  border-radius: 4px;
-  background: var(--band);
-  color: var(--band-ink);
-  font-size: 20px;
-  line-height: 1;
-  letter-spacing: 0.25em;
+.band-word {
+  font-size: 46px;
+  line-height: 0.85;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
+  color: var(--band-text);
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
+  transform-origin: left bottom;
+}
+/* Dead on and Close glow in their colour. */
+.band-word[data-band="dead-on"],
+.band-word[data-band="close"] {
+  text-shadow:
+    0 0 16px var(--band),
+    0 4px 0 rgba(0, 0, 0, 0.5);
+}
+@media (min-width: 560px) {
+  .band-word {
+    font-size: 60px;
+  }
+}
+@media (max-width: 359px) {
+  .band-word {
+    font-size: 40px;
+    letter-spacing: 0.03em;
+  }
+}
+.reveal-score {
+  margin-left: auto;
+  text-align: right;
 }
 .reveal-points {
   font-size: 20px;
+  line-height: 1;
   color: var(--muted);
   white-space: nowrap;
 }
 .reveal-points b {
   font-weight: 400;
   font-size: 40px;
-  line-height: 1;
+  line-height: 0.85;
   color: var(--text);
+}
+/* The running total, from the second question. */
+.reveal-total {
+  margin-top: 4px;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.reveal-total b {
+  font-weight: 400;
+  color: var(--cyan);
 }
 /* The answer and the guess: stacked on a phone, side by side from 560px. */
 .reveal-figures {
@@ -303,16 +340,12 @@
   line-height: 1.1;
   color: var(--muted);
 }
-.figure-off {
-  margin-top: 2px;
-  font-size: 20px;
-  color: var(--band-text);
-}
-/* The yardstick under it: how far off most people are on this question (a miss that size scores 50). */
-.figure-typical {
-  font-size: 18px;
-  line-height: 1.2;
-  color: var(--muted);
+/* How real players guessed (with a backend, from 20 of them). */
+.fathom-players {
+  font-size: 19px;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  color: var(--label);
 }
 .fathom-fact {
   font-size: 20px;
@@ -338,14 +371,14 @@
   }
 }
 
-/* ---- The sonar (Gauge.tsx): 20 rows of art pixels (3px, 4px from 560px) and the scale's labels under them. Its
-   height is kept before it is measured and drawn. ---- */
+/* ---- The sonar (Gauge.tsx): 17 rows of art pixels (3px, 4px from 560px), then the miss written under the squid.
+   Its height is kept before it is measured and drawn. ---- */
 .fathom-gauge {
-  height: 78px;
+  height: 75px;
 }
 @media (min-width: 560px) {
   .fathom-gauge {
-    height: 98px;
+    height: 92px;
   }
 }
 .gauge-art {
@@ -355,31 +388,26 @@
 .gauge-art svg {
   display: block;
 }
-.gauge-ticks {
+/* The miss ("30% low"), under the squid, in the band's colour; Gauge.tsx shifts it so it never runs off either edge. */
+.gauge-label {
   position: relative;
-  height: 18px;
+  height: 24px;
 }
-.gauge-ticks span {
+.gauge-label span {
   position: absolute;
-  top: 3px;
-  transform: translateX(-50%);
-  font-size: 15px;
+  top: 4px;
+  font-size: 20px;
   line-height: 1;
   letter-spacing: 0.04em;
   white-space: nowrap;
-  color: var(--muted);
+  color: var(--band-text);
 }
-.g-track {
+.g-track,
+.g-cap {
   fill: var(--faint);
 }
-.g-tick {
-  fill: var(--label);
-}
-/* The bands unlit, in a darker shade of their own colour; the one run the squid is in, lit. */
-.g-band {
-  fill: var(--band-dim);
-}
-.g-band.hit {
+/* The track from the buoy to the squid: how far off, lit in the band's colour. */
+.g-reach {
   fill: var(--band);
 }
 .g-buoy {
@@ -391,6 +419,11 @@
 .g-ping {
   fill: var(--cyan);
   opacity: 0.25;
+}
+/* Sparkles: only seen in the celebration (below). */
+.g-spark {
+  fill: var(--band);
+  opacity: 0;
 }
 /* The ping: two rings go out from the squid, twice, and settle faint. */
 @media (prefers-reduced-motion: no-preference) {
@@ -417,11 +450,73 @@
   }
 }
 
+/*
+ * Dead on and Close feel good: the word pops in, the squid hops twice among sparkles of the band's colour. A second
+ * and a half, then still. Decoration only (nothing waits for it), and none of it with reduced motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .fathom-reveal[data-band="dead-on"] .band-word,
+  .fathom-reveal[data-band="close"] .band-word {
+    animation: fathom-pop 0.4s steps(5, end) 0.15s both;
+  }
+  .fathom-reveal[data-band="dead-on"] .g-squid,
+  .fathom-reveal[data-band="close"] .g-squid {
+    transform-box: fill-box;
+    animation: fathom-hop 0.36s steps(3, end) 0.45s 2 both;
+  }
+  .fathom-reveal[data-band="dead-on"] .g-spark,
+  .fathom-reveal[data-band="close"] .g-spark {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: fathom-spark 0.5s steps(4, end) both;
+  }
+}
+@keyframes fathom-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes fathom-hop {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes fathom-spark {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  40% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 /* ---- Results ---- */
 .band-row {
   display: flex;
   gap: 8px;
   margin: 12px 0 6px;
+}
+/* The scoring rule again, under the five squares. */
+.fathom-rule-end {
+  font-size: 18px;
+  line-height: 1.25;
 }
 .band-sq {
   position: relative;
@@ -525,6 +620,11 @@
 }
 .fathom[data-short] .prompt .caption {
   margin-top: 2px;
+}
+.fathom[data-short] .fathom-rule {
+  margin-top: 5px;
+  padding-top: 4px;
+  font-size: 16px;
 }
 .fathom[data-short] .fathom-ask {
   padding: 10px 12px 12px;

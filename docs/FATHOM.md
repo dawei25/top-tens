@@ -1,7 +1,8 @@
 # Fathom
 
-An estimation mini-game: each game shows 5 questions, the player types a number, and the score compares their miss
-with how far off people typically are. The questions live in `public/fathom/questions.json`.
+An estimation mini-game: each game shows 5 questions, the player types a number, and the score is plain closeness,
+one rule for every question (`fathomScore`, `src/game/fathom.ts`): half or double the answer scores about 50, ten
+times off scores 0, spot on (within 1%) 100. The questions live in `public/fathom/questions.json`.
 
 ## Writing questions
 
@@ -53,7 +54,8 @@ Write our own questions from facts. Never copy one from another estimation game.
 - **`source`**: the page you actually opened and took the answer from (its canonical title and https URL).
 - **`typical`**: the typical miss, as a ratio: half of casual 18-35 players would land within this many times of the
   answer. One of 1.3, 1.5, 2, 3, 5, 10, 30. Be honest: a giraffe's height is about 1.3 to 1.5, blood in a body 2, the
-  number of trees on Earth 30.
+  number of trees on Earth 30. A writer's estimate of difficulty: the game no longer reads it or scores by it (the
+  owner, Nov 5: one rule for every question), and players never see it.
 - **`easy`**: true for a good opener, where most people have a rough anchor (the Eiffel Tower, a marathon).
 
 **What makes a good question:** surprising but fair ("the answer is bigger than you'd think" is good), with an answer

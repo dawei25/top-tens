@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import {
   askFor,
   BAND_CHARS,
-  bandEdge,
   bandLabel,
   bandOf,
   drawQuestions,
@@ -18,22 +17,22 @@ import {
   loadFathom,
   lockIn,
   MAX_TOTAL,
-  missText,
+  MIN_PLAYERS,
   newGame,
   nextQuestion,
   parseNumber,
   phaseOf,
+  playersLine,
   readBank,
   readNumber,
   resumable,
+  RULE,
   saveFathom,
   scoreGame,
   shareText,
   startGame,
   timesOff,
   totalOf,
-  TYPICAL_POINTS,
-  TYPICAL_TOTAL,
   type FathomKind,
   type FathomQuestion,
 } from "./fathom";
@@ -58,58 +57,78 @@ const q = (id: string, kind: FathomKind, extra: Partial<FathomQuestion> = {}): F
   answer: 100,
   fact: "a fact",
   source: { title: id, url: `https://en.wikipedia.org/wiki/${id}` },
-  typical: 2,
   ...extra,
 });
 
-describe("scoring", () => {
+// The owner, after playing the beta: scores against a judge's "typical miss" were confusing ("most people miss by about
+// x feels made up", and 10x off still scored well where that was usual). One plain rule for every question now.
+describe("scoring: plain closeness, the same rule for every question", () => {
   it("is 100 for an exact guess", () => {
-    expect(fathomScore(330, 330, 2)).toBe(100);
-    expect(fathomScore(0.1, 0.1, 30)).toBe(100);
+    expect(fathomScore(330, 330)).toBe(100);
+    expect(fathomScore(0.1, 0.1)).toBe(100);
   });
-  it("is 50 for a miss as big as the typical one, either way", () => {
-    expect(fathomScore(660, 330, 2)).toBe(50);
-    expect(fathomScore(165, 330, 2)).toBe(50);
-    expect(fathomScore(3300, 330, 10)).toBe(50);
-    expect(fathomScore(330 * 1.3, 330, 1.3)).toBe(50);
+  it("is round(100 x (1 - d)^2), d the distance in powers of ten, either way", () => {
+    for (const r of [1.02, 1.1, 1.3, 1.7, 2, 3, 5, 9.9]) {
+      const want = Math.round(100 * (1 - Math.log10(r)) ** 2);
+      expect(fathomScore(100 * r, 100), `${r}x too high`).toBe(want);
+      expect(fathomScore(100 / r, 100), `${r}x too low`).toBe(want);
+    }
   });
-  it("is about 30 for twice the typical miss", () => {
-    expect(fathomScore(330 * 4, 330, 2)).toBe(30);
-    expect(fathomScore(330 / 100, 330, 10)).toBe(30);
+  it("scores the rule's landmarks: 10% off 92, 25% off 82, half or double 49, 3x 27, 10x and beyond 0", () => {
+    expect(fathomScore(110, 100)).toBe(92);
+    expect(fathomScore(125, 100)).toBe(82);
+    expect(fathomScore(200, 100)).toBe(49);
+    expect(fathomScore(50, 100)).toBe(49);
+    expect(fathomScore(300, 100)).toBe(27);
+    expect(fathomScore(1000, 100)).toBe(0);
+    expect(fathomScore(10, 100)).toBe(0);
+    expect(fathomScore(1e30, 1)).toBe(0);
   });
-  it("follows the formula and never goes below zero", () => {
-    const d = Math.log10(5);
-    const m = Math.log10(3);
-    expect(fathomScore(500, 100, 3)).toBe(Math.round(100 * (1 - (2 / Math.PI) * Math.atan(d / m))));
-    expect(fathomScore(1e30, 1, 1.3)).toBe(0);
+  it("never goes up as the guess gets further off", () => {
+    let last = 101;
+    for (let r = 1; r <= 12; r *= 1.01) {
+      const p = fathomScore(100 * r, 100);
+      expect(p).toBeLessThanOrEqual(last);
+      last = p;
+    }
   });
-  it("is symmetric on the log scale", () => {
-    expect(fathomScore(300, 100, 2)).toBe(fathomScore(100 / 3, 100, 2));
+  // The judge's estimate stays in the file, but it no longer moves a score: the same miss scores the same everywhere.
+  it("ignores the question's typical miss", () => {
+    const bank = [q("a", "body", { typical: 1.3 }), q("b", "food", { typical: 30 })];
+    const g = nextQuestion(lockIn(nextQuestion(lockIn(newGame(["a", "b"]), 200)), 200));
+    expect(scoreGame(g, bank).map((s) => s.points)).toEqual([49, 49]);
   });
   // A reveal said "spot on" beside 99 points (Nov 5 review): whatever reads as spot on scores full marks.
-  it("is 100 whenever the reveal says spot on", () => {
-    expect(fathomScore(333, 330, 1.3)).toBe(100);
-    expect(fathomScore(327, 330, 1.3)).toBe(100);
-    for (const typical of [1.3, 1.5, 2, 3, 5, 10, 30]) {
-      for (let guess = 95; guess <= 105; guess += 0.25) {
-        if (timesOff(guess, 100) === "spot on") expect(fathomScore(guess, 100, typical), `${guess} on ${typical}`).toBe(100);
-        else expect(fathomScore(guess, 100, typical)).toBeLessThan(100);
-      }
+  it("is 100 whenever the reveal says spot on, and only then", () => {
+    expect(fathomScore(333, 330)).toBe(100);
+    expect(fathomScore(327, 330)).toBe(100);
+    for (let guess = 95; guess <= 105; guess += 0.25) {
+      if (timesOff(guess, 100) === "spot on") expect(fathomScore(guess, 100), `${guess}`).toBe(100);
+      else expect(fathomScore(guess, 100), `${guess}`).toBeLessThan(100);
     }
   });
 });
 
-describe("the yardstick", () => {
-  // "1.2x too low · NEAR · 64" beside "1.4x too low · DEAD ON · 90" looked arbitrary: the points are relative to each
-  // question's typical miss, so the reveal says what that is, and the results what a typical game scores.
-  it("says how far off people usually are", () => {
-    expect(missText(1.3)).toBe("most people miss by about 1.3x");
-    expect(missText(2)).toBe("most people miss by about 2x");
-    expect(missText(30)).toBe("most people miss by about 30x");
+describe("the rule on screen", () => {
+  // Stated where the player looks before the first answer, and on the results, in words that agree with the numbers.
+  it("says what a miss scores, and the numbers agree", () => {
+    expect(RULE).toBe("Half or double the answer scores about 50. Ten times off scores 0.");
+    for (const guess of [50, 200]) expect(Math.abs(fathomScore(guess, 100) - 50)).toBeLessThanOrEqual(1);
+    for (const guess of [10, 1000]) expect(fathomScore(guess, 100)).toBe(0);
   });
-  it("a typical miss on every question adds up to the typical total", () => {
-    expect(TYPICAL_POINTS).toBe(fathomScore(200, 100, 2));
-    expect(TYPICAL_TOTAL).toBe(250);
+});
+
+describe("real players on the reveal", () => {
+  // The owner: real players instead of a judge's estimate, once there are enough of them; below that, nothing.
+  it(`says how they guessed from ${MIN_PLAYERS} players on, and nothing below`, () => {
+    expect(MIN_PLAYERS).toBe(20);
+    expect(playersLine({ n: 20, median: 4, furtherOff: 0.72 }, "litres")).toBe("Players' typical guess: 4 litres · you were closer than 72%");
+    expect(playersLine({ n: 1203, median: 2.5e6, furtherOff: 0.29 }, "people")).toBe("Players' typical guess: 2.5 million people · you were closer than 29%");
+    // Rounded down: 100% is everyone.
+    expect(playersLine({ n: 40, median: 330, furtherOff: 0.996 }, "metres")).toBe("Players' typical guess: 330 metres · you were closer than 99%");
+    expect(playersLine({ n: 19, median: 4, furtherOff: 0.72 }, "litres")).toBeNull();
+    expect(playersLine({ n: 30, median: null, furtherOff: null }, "litres")).toBeNull();
+    expect(playersLine(null, "litres")).toBeNull();
   });
 });
 
@@ -137,22 +156,26 @@ describe("bands", () => {
       "Lost at sea",
     ]);
   });
-  it("edges invert the score", () => {
-    for (const min of [90, 70, 40, 15]) {
-      const d = bandEdge(min, 2);
-      expect(fathomScore(100 * 10 ** d, 100, 2)).toBe(min);
-    }
-    expect(bandEdge(50, 3)).toBeCloseTo(Math.log10(3));
-    expect(bandEdge(0, 2)).toBe(Infinity);
-  });
 });
 
-describe("timesOff", () => {
-  it("says how many times too high or too low", () => {
-    expect(timesOff(130, 100)).toBe("1.3x too high");
-    expect(timesOff(100, 240)).toBe("2.4x too low");
+// The owner: plain words for the miss. A percent within 2x ("30% low"), times beyond it ("3x too high").
+describe("the miss in plain words", () => {
+  it("says how many percent low or high within 2x", () => {
+    expect(timesOff(70, 100)).toBe("30% low");
+    expect(timesOff(120, 100)).toBe("20% high");
+    expect(timesOff(130, 100)).toBe("30% high");
+    expect(timesOff(334, 330)).toBe("1% high");
+    expect(timesOff(51, 100)).toBe("49% low");
+    expect(timesOff(199, 100)).toBe("99% high");
+  });
+  it("says how many times too high or too low from 2x", () => {
     expect(timesOff(200, 100)).toBe("2x too high");
-    expect(timesOff(105, 100)).toBe("1.05x too high");
+    expect(timesOff(50, 100)).toBe("2x too low");
+    // Not "100% high": a percent that rounds to 100 is twice the answer.
+    expect(timesOff(199.6, 100)).toBe("2x too high");
+    expect(timesOff(300, 100)).toBe("3x too high");
+    expect(timesOff(25, 100)).toBe("4x too low");
+    expect(timesOff(100, 240)).toBe("2.4x too low");
     expect(timesOff(1200, 100)).toBe("12x too high");
     expect(timesOff(150000, 100)).toBe("1,500x too high");
     expect(timesOff(1, 3e6)).toBe("3 million times too low");
@@ -161,7 +184,6 @@ describe("timesOff", () => {
     expect(timesOff(330, 330)).toBe("spot on");
     expect(timesOff(333, 330)).toBe("spot on");
     expect(timesOff(327, 330)).toBe("spot on");
-    expect(timesOff(334, 330)).toBe("1.01x too high");
   });
 });
 
@@ -429,7 +451,6 @@ describe("the bank", () => {
         good,
         { ...q("b", "food"), kind: "weather" },
         { ...q("c", "food"), answer: 0 },
-        { ...q("d", "food"), typical: 1 },
         { ...q("e", "food"), source: { title: "x" } },
         { ...q("f", "food"), unit: "" },
         q("a", "animals"),
@@ -437,6 +458,11 @@ describe("the bank", () => {
       ],
     });
     expect(bank).toEqual([good]);
+  });
+  // The judge's typical miss stays in the file for the writers; the game no longer reads it, or needs it.
+  it("keeps a question with or without a typical miss, and leaves that out of what it reads", () => {
+    const bank = readBank({ version: 1, questions: [{ ...q("a", "body"), typical: 2 }, q("b", "food"), { ...q("c", "food"), typical: "?" }] });
+    expect(bank).toEqual([q("a", "body"), q("b", "food"), q("c", "food")]);
   });
   it("is null when the file isn't a bank", () => {
     expect(readBank(null)).toBeNull();
@@ -511,15 +537,15 @@ describe("a game", () => {
     for (const guess of [100, 400, 1e9, 98]) g = nextQuestion(lockIn(g, guess));
     expect(phaseOf(g)).toBe("results");
     const scored = scoreGame(g, bank);
-    expect(scored.map((s) => s.points)).toEqual([50, 100, 30, 3, 98]);
-    expect(totalOf(scored)).toBe(281);
+    expect(scored.map((s) => s.points)).toEqual([49, 100, 16, 0, 98]);
+    expect(totalOf(scored)).toBe(263);
     expect(scored.map((s) => s.band)).toEqual(["near", "dead-on", "far", "lost", "dead-on"]);
   });
   it("shares the total and five plain characters, no emoji", () => {
     let g = newGame(bank.slice(0, 5).map((x) => x.id));
     for (const guess of [200, 100, 400, 1e9, 130]) g = nextQuestion(lockIn(g, guess));
     const text = shareText(scoreGame(g, bank));
-    expect(text).toBe(`Fathom beta 260/${MAX_TOTAL}\n▒ █ ░ × ▓`);
+    expect(text).toBe(`Fathom beta 244/${MAX_TOTAL}\n▒ █ ░ × ▓`);
     expect(text).not.toMatch(/\p{Extended_Pictographic}/u);
   });
   // Nov 5 review: lost at sea shared as "□", which reads as a question not played. Every band has its own mark, and

@@ -1,9 +1,10 @@
 /**
  * Fathom (beta, #fathom): five questions that each ask for a number, about two minutes, no timer, no lives. A guess
- * scores by how far off it is on a log scale, against how far off people typically are on that question.
+ * scores by how close it is, on a log scale, by one plain rule for every question (RULE).
  *
  * Pure functions only: reading numbers, scoring, the draw, the share text, and the save (its own localStorage key,
- * never the game's save: Fathom touches no record, stat, streak or backend).
+ * never the game's save: Fathom touches no record, stat or streak; with a backend, each guess is also sent, see
+ * src/net/fathom.ts).
  */
 
 export const FATHOM_KINDS = [
@@ -22,7 +23,7 @@ export const FATHOM_KINDS = [
 ] as const;
 export type FathomKind = (typeof FATHOM_KINDS)[number];
 
-/** The typical miss on a question, as a ratio (2: people are usually about 2x off). */
+/** The typical miss on a question, as a ratio (2: people are usually about 2x off): the writers' estimate. */
 export const TYPICALS = [1.3, 1.5, 2, 3, 5, 10, 30] as const;
 
 export interface FathomQuestion {
@@ -39,7 +40,11 @@ export interface FathomQuestion {
   definition?: string;
   fact: string;
   source: { title: string; url: string };
-  typical: number;
+  /**
+   * The writers' estimate of the typical miss (docs/FATHOM.md). In the file, checked by scripts/fathom/check.ts, but
+   * the game doesn't read it: it no longer moves a score (one rule for every question).
+   */
+  typical?: number;
   /** The first question of a game is always an easy one. */
   easy?: boolean;
 }
@@ -59,22 +64,19 @@ export const MAX_TOTAL = QUESTIONS_PER_GAME * POINTS_PER_QUESTION;
 export const spotOn = (guess: number, answer: number): boolean => Math.abs(guess - answer) <= Math.abs(answer) * 0.01;
 
 /**
- * Points for a guess, 0 to 100. With d = |log10(guess / answer)| and m = log10(typical):
- * 100 x (1 - (2/pi) atan(d / m)), rounded. Spot on (within 1%) is 100 and only spot on is (anything else tops out at
- * 99), a miss as big as the typical one is 50, twice that about 30, and it never quite reaches 0.
+ * Points for a guess, 0 to 100, the same rule for every question (the owner: plain closeness). With d =
+ * |log10(guess / answer)|, how many powers of ten off it is: 100 x max(0, 1 - d)^2, rounded. Spot on (within 1%) is 100
+ * and only spot on is; within 10% about 92, 25% off 82, half or double 49, 3x 27, and 10x off or more 0.
  */
-export function fathomScore(guess: number, answer: number, typical: number): number {
+export function fathomScore(guess: number, answer: number): number {
   if (spotOn(guess, answer)) return POINTS_PER_QUESTION;
   const d = Math.abs(Math.log10(guess / answer));
-  const m = Math.log10(typical);
-  if (!Number.isFinite(d) || !(m > 0)) return 0;
-  return Math.min(POINTS_PER_QUESTION - 1, Math.round(POINTS_PER_QUESTION * (1 - (2 / Math.PI) * Math.atan(d / m))));
+  if (!Number.isFinite(d)) return 0;
+  return Math.min(POINTS_PER_QUESTION - 1, Math.round(POINTS_PER_QUESTION * Math.max(0, 1 - d) ** 2));
 }
 
-/** What a miss as big as the question's typical one scores, whatever the question: the yardstick. */
-export const TYPICAL_POINTS = 50;
-/** A typical guesser's total: a typical miss on every question. */
-export const TYPICAL_TOTAL = QUESTIONS_PER_GAME * TYPICAL_POINTS;
+/** The scoring rule in one plain line: on the first question, where the player looks before answering, and the results. */
+export const RULE = "Half or double the answer scores about 50. Ten times off scores 0.";
 
 export type Band = "dead-on" | "close" | "near" | "far" | "lost";
 
@@ -93,42 +95,46 @@ export function bandOf(score: number): Band {
 
 export const bandLabel = (band: Band): string => BANDS.find((b) => b.band === band)?.label ?? band;
 
-/**
- * How far the guess is from the answer on the log scale (d = |log10(guess / answer)|) where a score crosses `min`:
- * the inverse of fathomScore, for drawing the bands. Infinity for 0 (the score never gets there).
- */
-export function bandEdge(min: number, typical: number): number {
-  if (min <= 0) return Infinity;
-  return Math.log10(typical) * Math.tan(((1 - min / POINTS_PER_QUESTION) * Math.PI) / 2);
-}
-
-/** A ratio for "Nx too high": 1.05, 1.3, 2, 12, 1,500, 3 million. */
+/** A ratio for "Nx too high", from 2: 2, 2.4, 12, 1,500, 3 million. */
 function ratioText(r: number): string {
-  if (r < 1.095) return trimZeros(r.toFixed(2));
   if (r < 9.95) return trimZeros(r.toFixed(1));
   if (r < 1e6) return Math.round(r).toLocaleString("en-US");
   return formatWords(r);
 }
 const trimZeros = (s: string) => (s.includes(".") ? s.replace(/\.?0+$/, "") : s);
 
-/** "1.3x", "12x", "3 million times". A plain x, not the times sign: the pixel font has no "×", and a fallback glyph stood out. */
+/** "2.4x", "12x", "3 million times". A plain x, not the times sign: the pixel font has no "×", and a fallback glyph stood out. */
 function times(r: number): string {
   const t = ratioText(r);
   return /[a-z]$/.test(t) ? `${t} times` : `${t}x`;
 }
 
-/** "1.3x too high", "2.4x too low", "3 million times too low", or "spot on" within 1%. */
+/**
+ * The miss in plain words: "spot on" within 1%, a percent within 2x ("30% low", "20% high"), and times from there
+ * ("3x too high", "4x too low", "3 million times too low"). A percent that would round to 100 is "2x too high".
+ */
 export function timesOff(guess: number, answer: number): string {
   if (spotOn(guess, answer)) return "spot on";
-  return guess > answer ? `${times(guess / answer)} too high` : `${times(answer / guess)} too low`;
+  const high = guess > answer;
+  const ratio = high ? guess / answer : answer / guess;
+  const percent = Math.round((Math.abs(guess - answer) / answer) * 100);
+  if (ratio < 2 && percent < 100) return `${percent}% ${high ? "high" : "low"}`;
+  return `${times(Math.max(2, ratio))} too ${high ? "high" : "low"}`;
 }
 
+/** Players needed on a question before its reveal says how they guessed. */
+export const MIN_PLAYERS = 20;
+
 /**
- * The yardstick under "1.3x too low" on the reveal: the question's typical miss, which scores 50 ("most people miss by
- * about 2x"). Points are relative to it, so without it a near miss on one question and a farther one on another look
- * arbitrary.
+ * The reveal's line about real players (fathom_compare, through src/net): "Players' typical guess: 4 litres · you were
+ * closer than 72%", from MIN_PLAYERS players on; null below that (the reveal shows nothing) or without numbers. The
+ * share is rounded down, so 100% is everyone.
  */
-export const missText = (typical: number): string => `most people miss by about ${times(typical)}`;
+export function playersLine(crowd: { n: number; median: number | null; furtherOff: number | null } | null, unit: string): string | null {
+  if (!crowd || crowd.n < MIN_PLAYERS || crowd.median === null || crowd.furtherOff === null) return null;
+  const share = Math.floor(crowd.furtherOff * 100 + 1e-9);
+  return `Players' typical guess: ${formatAmount(crowd.median)} ${unit} · you were closer than ${share}%`;
+}
 
 /* ---------- Reading numbers ---------- */
 
@@ -455,8 +461,8 @@ function readQuestion(q: unknown): FathomQuestion | null {
   if (!isText(o.id) || !isText(o.question) || !isText(o.unit) || !isText(o.fact)) return null;
   if (!(FATHOM_KINDS as readonly unknown[]).includes(o.kind)) return null;
   if (typeof o.answer !== "number" || !Number.isFinite(o.answer) || o.answer <= 0) return null;
-  if (typeof o.typical !== "number" || !Number.isFinite(o.typical) || o.typical <= 1) return null;
   if (!src || !isText(src.title) || !isText(src.url)) return null;
+  // `typical` is the writers' (scripts/fathom/check.ts checks it); the game leaves it out.
   return {
     id: o.id,
     kind: o.kind as FathomKind,
@@ -466,7 +472,6 @@ function readQuestion(q: unknown): FathomQuestion | null {
     ...(isText(o.definition) && { definition: o.definition }),
     fact: o.fact,
     source: { title: src.title, url: src.url },
-    typical: o.typical,
     ...(o.easy === true && { easy: true }),
   };
 }
@@ -569,7 +574,7 @@ export function scoreGame(game: FathomGame, bank: readonly FathomQuestion[]): Sc
   return game.guesses.flatMap((guess, i) => {
     const question = byId.get(game.ids[i]);
     if (!question) return [];
-    const points = fathomScore(guess, question.answer, question.typical);
+    const points = fathomScore(guess, question.answer);
     return [{ question, guess, points, band: bandOf(points) }];
   });
 }

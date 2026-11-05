@@ -6,9 +6,9 @@ import { beforeAll, describe, expect, it } from "vitest";
 /**
  * The migrations, run in PGlite (Postgres in WebAssembly) against small stand-ins for what Supabase provides: the
  * anon, authenticated and service_role roles, auth.users and auth.uid(). Checks the contract the game relies on: who
- * can touch what, what submit_play, rate_list and submit_feedback accept, what the stats and ratings functions return
- * (the owners and stats_excluded left out of the stats), that notes are read only with the reader key (list_feedback),
- * the save's version check, and what account deletion
+ * can touch what, what submit_play, rate_list, submit_feedback and submit_fathom_guess accept, what the stats, ratings
+ * and Fathom comparison functions return (the owners and stats_excluded left out of the stats and the comparison), that
+ * notes are read only with the reader key (list_feedback), the save's version check, and what account deletion
  * (api/delete-account.ts, as service_role) needs.
  *
  * Everything runs twice: once as older projects set up public (every new table and function handed to the API roles,
@@ -82,6 +82,13 @@ function suite(exposeNewTables: boolean) {
       args.mode ?? "list",
       args.rating === undefined ? null : args.rating,
       args.text === undefined ? "a note" : args.text,
+      args.client === undefined ? client(1) : args.client,
+    ]);
+
+  const fathomGuess = (args: { question?: string | null; guess?: number | string | null; client?: string | null }) =>
+    db.query<{ ok: boolean }>("select public.submit_fathom_guess($1, $2, $3) as ok", [
+      args.question === undefined ? "eiffel-tower-height" : args.question,
+      args.guess === undefined ? 300 : args.guess,
       args.client === undefined ? client(1) : args.client,
     ]);
 
@@ -609,6 +616,152 @@ function suite(exposeNewTables: boolean) {
       // An hour on, the first browser may write again.
       await db.query("update public.feedback set created_at = now() - interval '61 minutes' where client_id = $1", [client(620)]);
       expect((await as("anon", null, () => note({ list: "f-spam-x", text: "later", client: client(620) }))).rows[0].ok).toBe(true);
+    });
+  });
+
+  describe("Fathom guesses", () => {
+    // F signs in on two browsers, G is an owner, H a tester in stats_excluded.
+    const F = "ffffffff-ffff-4fff-8fff-ffffffffffff";
+    const G = "12121212-1212-4121-8121-121212121212";
+    const H = "34343434-3434-4343-8343-343434343434";
+    /** The browser asking, on the comparison question: its own guess is never part of the crowd. */
+    const ASKER = client(1401);
+    type Row = { question_id: string; guess: number; user_id: string | null; client_id: string };
+    const rows = (question: string) =>
+      db.query<Row>("select question_id, guess, user_id, client_id from public.fathom_guesses where question_id = $1 order by id", [question]);
+    type Compare = { n: number; median: number | null; further_off: number | null };
+    const compare = async (question: string, guess: number, answer: number, asker: string | null = ASKER, user: string | null = null) =>
+      (
+        await as(user ? "authenticated" : "anon", user, () =>
+          db.query<{ c: Compare }>("select public.fathom_compare($1, $2, $3, $4) as c", [question, guess, answer, asker]),
+        )
+      ).rows[0].c;
+
+    beforeAll(async () => {
+      await db.query("insert into auth.users (id, email) values ($1, 'f@example.com'), ($2, 'g@example.com'), ($3, 'h@example.com')", [F, G, H]);
+      // "How much is 100?": 25 players, ten guess 50, ten 200 and five 1000; the asker guessed 100.
+      await as("anon", null, async () => {
+        for (let i = 0; i < 25; i++) await fathomGuess({ question: "fq-cmp", guess: i < 10 ? 50 : i < 20 ? 200 : 1000, client: client(1001 + i) });
+        await fathomGuess({ question: "fq-cmp", guess: 100, client: ASKER });
+      });
+      // F: 1000 on one browser, then 50 on another, later. One player: the first guess counts.
+      await as("authenticated", F, () => fathomGuess({ question: "fq-cmp", guess: 1000, client: client(1101) }));
+      await db.query("update public.fathom_guesses set created_at = now() - interval '10 minutes' where client_id = $1", [client(1101)]);
+      await as("authenticated", F, () => fathomGuess({ question: "fq-cmp", guess: 50, client: client(1102) }));
+      // G (an owner, once added) spot on, signed in; and signed out on a browser G has used signed in.
+      await as("authenticated", G, async () => {
+        await fathomGuess({ question: "fq-cmp", guess: 100, client: client(1201) });
+        await fathomGuess({ question: "fq-other", guess: 7, client: client(1202) });
+      });
+      await as("anon", null, () => fathomGuess({ question: "fq-cmp", guess: 100, client: client(1202) }));
+      // H (a tester, once excluded) spot on too.
+      await as("authenticated", H, () => fathomGuess({ question: "fq-cmp", guess: 100, client: client(1301) }));
+    });
+
+    it("keeps a browser's first guess on a question, linked to the account while signed in", async () => {
+      await as("anon", null, async () => {
+        expect((await fathomGuess({ question: "fq-once", guess: 300, client: client(1501) })).rows[0].ok).toBe(true);
+        // The same question in a later game: the first guess stays.
+        expect((await fathomGuess({ question: "fq-once", guess: 350, client: client(1501) })).rows[0].ok).toBe(false);
+        expect((await fathomGuess({ question: "fq-once", guess: 0.0025, client: client(1502) })).rows[0].ok).toBe(true);
+      });
+      await as("authenticated", F, () => fathomGuess({ question: "fq-once", guess: 2.5e9, client: client(1503) }));
+      expect((await rows("fq-once")).rows).toEqual([
+        { question_id: "fq-once", guess: 300, user_id: null, client_id: client(1501) },
+        { question_id: "fq-once", guess: 0.0025, user_id: null, client_id: client(1502) },
+        { question_id: "fq-once", guess: 2.5e9, user_id: F, client_id: client(1503) },
+      ]);
+    });
+
+    it("refuses malformed guesses with invalid_parameter_value (a 400 from the API)", async () => {
+      await as("anon", null, async () => {
+        const bad = [
+          { question: "Bad Id" },
+          { question: "x".repeat(65) },
+          { question: null },
+          { guess: 0 },
+          { guess: -5 },
+          { guess: null },
+          { guess: "NaN" },
+          { guess: "Infinity" },
+          { guess: "-Infinity" },
+          { guess: 1e301 },
+          { client: null },
+        ];
+        for (const args of bad) expect(await code(fathomGuess({ question: "fq-bad", client: client(1504), ...args })), JSON.stringify(args)).toBe("22023");
+      });
+      expect((await rows("fq-bad")).rows).toEqual([]);
+    });
+
+    it("gives players no direct access to the table", async () => {
+      for (const [role, user] of [["anon", null], ["authenticated", F]] as const) {
+        await as(role, user, async () => {
+          expect(await code(db.query("select * from public.fathom_guesses"))).toBe("42501");
+          expect(await code(db.query("insert into public.fathom_guesses (question_id, guess, client_id) values ('x', 1, $1)", [client(1505)]))).toBe("42501");
+          expect(await code(db.query("update public.fathom_guesses set guess = 1"))).toBe("42501");
+          expect(await code(db.query("delete from public.fathom_guesses"))).toBe("42501");
+        });
+      }
+    });
+
+    it("ignores a browser past 120 guesses an hour", async () => {
+      await as("anon", null, async () => {
+        for (let i = 0; i < 120; i++) expect((await fathomGuess({ question: `fq-spam-${i}`, client: client(1601) })).rows[0].ok).toBe(true);
+        expect((await fathomGuess({ question: "fq-spam-x", client: client(1601) })).rows[0].ok).toBe(false);
+        // Another browser is fine.
+        expect((await fathomGuess({ question: "fq-spam-x", client: client(1602) })).rows[0].ok).toBe(true);
+      });
+      // An hour on, the first browser may guess again.
+      await db.query("update public.fathom_guesses set created_at = now() - interval '61 minutes' where client_id = $1", [client(1601)]);
+      expect((await as("anon", null, () => fathomGuess({ question: "fq-spam-x", client: client(1601) }))).rows[0].ok).toBe(true);
+    });
+
+    it("compares a guess with real players: how many, their median guess, and the share further off", async () => {
+      // 25 players, F once (1000, the first), G twice (signed in, and signed out on a browser of theirs) and H; not the
+      // asker. Nobody is an owner or excluded yet.
+      expect((await compare("fq-cmp", 120, 100)).n).toBe(29);
+      await db.query("insert into public.owners (user_id) values ($1)", [G]);
+      await db.query("insert into public.stats_excluded (user_id) values ($1)", [H]);
+      // 10 at 50, 10 at 200, 6 at 1000: the middle guess is 200. 120 is closer than everyone.
+      expect(await compare("fq-cmp", 120, 100)).toEqual({ n: 26, median: 200, further_off: 1 });
+      // Half or double: as far off as 20 of them (not further), closer than the six at 1000.
+      expect(await compare("fq-cmp", 200, 100)).toEqual({ n: 26, median: 200, further_off: 0.2308 });
+      expect(await compare("fq-cmp", 50, 100)).toEqual({ n: 26, median: 200, further_off: 0.2308 });
+      expect(await compare("fq-cmp", 1000, 100)).toEqual({ n: 26, median: 200, further_off: 0 });
+      // Measured against the answer the game shows (a corrected answer applies to every guess at once): at 1000, the
+      // six who said 1000 tie, the other 20 are further off.
+      expect((await compare("fq-cmp", 1000, 1000)).further_off).toBe(0.7692);
+    });
+
+    it("leaves the player asking out: their browser, and their account on every device", async () => {
+      // Without a browser to leave out, the asker's own 100 is in the crowd.
+      expect((await compare("fq-cmp", 120, 100, null)).n).toBe(27);
+      // F signed in on a third browser: neither of F's guesses counts (and the other asker's 100 does).
+      expect((await compare("fq-cmp", 120, 100, client(1103), F)).n).toBe(26);
+    });
+
+    it("answers the public key, with nothing for a question nobody answered, and keeps its signature", async () => {
+      expect(await compare("fq-none", 10, 100)).toEqual({ n: 0, median: null, further_off: null });
+      const short = await as("anon", null, () => db.query<{ c: Compare }>("select public.fathom_compare('fq-cmp', 120, 100) as c"));
+      expect(short.rows[0].c.n).toBe(27);
+      const sig = await db.query<{ name: string; args: string; result: string }>(
+        `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
+         from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('fathom_compare', 'submit_fathom_guess') order by 1`,
+      );
+      expect(sig.rows).toEqual([
+        { name: "fathom_compare", args: "p_question_id text, p_guess double precision, p_answer double precision, p_client_id uuid", result: "json" },
+        { name: "submit_fathom_guess", args: "p_question_id text, p_guess double precision, p_client_id uuid", result: "boolean" },
+      ]);
+    });
+
+    it("goes with the account when it is deleted, and account deletion (service_role) may clear it", async () => {
+      await as("service_role", null, async () => {
+        expect((await db.query("delete from public.fathom_guesses where user_id = $1", [H])).affectedRows).toBe(1);
+      });
+      const anonymous = await db.query<{ n: number }>("select count(*)::int as n from public.fathom_guesses where user_id is null");
+      await db.query("delete from auth.users where id = $1", [F]);
+      expect((await db.query("select * from public.fathom_guesses where user_id = $1", [F])).rows).toEqual([]);
+      expect((await db.query<{ n: number }>("select count(*)::int as n from public.fathom_guesses where user_id is null")).rows[0].n).toBe(anonymous.rows[0].n);
     });
   });
 

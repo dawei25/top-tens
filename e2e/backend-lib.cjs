@@ -65,6 +65,15 @@ function stats(id, mode) {
   return id === "airports" ? STATS.few : STATS.list;
 }
 
+/**
+ * How real players guessed on Fathom's fixture questions (fathom_compare): 37 on the Eiffel Tower, past the 20 the
+ * reveal waits for; 12 on the bones, under it; nobody on the rest.
+ */
+const FATHOM_CROWD = {
+  "eiffel-tower-height": { n: 37, median: 300, further_off: 0.7297 },
+  "adult-bones": { n: 12, median: 200, further_off: 0.5 },
+};
+
 /** Someone who signs up with an email and password. */
 const PW_USER = { ...USER, id: "22222222-2222-4222-8222-222222222222", email: "fox@example.com", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: {} };
 const PW_SESSION = { ...SESSION, user: PW_USER };
@@ -81,7 +90,7 @@ const REFUSED_SUB = "refuse-me";
  * A Google ID token signs Dana in, unless its `sub` is REFUSED_SUB.
  */
 async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
-  const calls = { submit: [], rate: [], feedback: [], stats: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
+  const calls = { submit: [], rate: [], feedback: [], stats: [], fathom: [], compare: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
   let row = save;
   const cors = {
     "access-control-allow-origin": "*",
@@ -109,6 +118,14 @@ async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
         return json(200, stats(url.searchParams.get("p_list_id"), url.searchParams.get("p_mode")));
       case "/rest/v1/rpc/list_averages":
         return json(200, averages);
+      case "/rest/v1/rpc/submit_fathom_guess":
+        calls.fathom.push(req.postDataJSON());
+        return json(200, true);
+      case "/rest/v1/rpc/fathom_compare": {
+        const args = Object.fromEntries(url.searchParams);
+        calls.compare.push(args);
+        return json(200, FATHOM_CROWD[args.p_question_id] ?? { n: 0, median: null, further_off: null });
+      }
       case "/rest/v1/saves": {
         const method = req.method();
         const body = method === "GET" ? null : req.postDataJSON();
@@ -278,6 +295,7 @@ async function homeSignedIn(page, name) {
 module.exports = {
   SUPA,
   STATS,
+  FATHOM_CROWD,
   serveBuild,
   USER,
   TOKEN,

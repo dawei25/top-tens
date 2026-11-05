@@ -79,6 +79,8 @@ export const KEYS = {
   ratingOutbox: "top-tens:rating-outbox",
   /** Notes on lists waiting to be sent (every one). */
   feedbackOutbox: "top-tens:feedback-outbox",
+  /** Fathom guesses waiting to be sent (one per question). */
+  fathomOutbox: "top-tens:fathom-outbox",
   /** The account this device's save was last synced with. */
   owner: "top-tens:sync-owner",
   /** A save set aside for its account (`${stash}${user id}`) when someone else signed in on this device. */
