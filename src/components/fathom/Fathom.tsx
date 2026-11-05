@@ -370,7 +370,8 @@ function siteOf(url: string): string {
  */
 function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: number; last: boolean; onNext: () => void }) {
   const { question: q, guess, points, band } = scored;
-  const players = playersLine(useFathomCrowd(q.id, guess, q.answer), q.unit);
+  const crowd = useFathomCrowd(q.id, guess, q.answer);
+  const players = playersLine(crowd, q.unit);
   const card = useRef<HTMLElement>(null);
   const nextKey = useRef<HTMLButtonElement>(null);
   // Into view at once; NEXT takes focus a beat later, so an Enter still held from LOCK IN presses nothing.
@@ -413,8 +414,8 @@ function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: numbe
           </p>
         </div>
       </div>
-      {players && (
-        <p className="fathom-players" data-testid="fathom-players">
+      {players && crowd && (
+        <p className="fathom-players" data-testid="fathom-players" data-n={crowd.n} data-median={crowd.median ?? undefined} data-further={crowd.furtherOff ?? undefined}>
           {players}
         </p>
       )}
