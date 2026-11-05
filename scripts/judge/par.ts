@@ -33,8 +33,8 @@ function rng(seed: string) {
  * judge's runs do: almost everyone gets the three or four obvious answers on any list, and few get everything. So
  * the typical player is a compressed version of the judge's casual score (1.5 + 0.45 x casual: 4 found → about 3.3,
  * 8 → about 5.1), with a group a bit above and a few fans. Calibrated on players' feedback (Nov 2026): par read too
- * high on easy lists (a uniform shift then made hard lists absurd: city visitors at par 1). Real scores replace this
- * once a list has 50 players. Scores are whole answers, 0 to 10.
+ * high on easy lists (a uniform shift then made hard lists absurd: city visitors at par 1). The game blends this with
+ * real first tries, counting the estimate as 30 players (src/net/crowd.ts). Scores are whole answers, 0 to 10.
  */
 export function crowd(v: Verdict): number[] {
   const casual = v.casual?.found ?? 5;

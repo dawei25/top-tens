@@ -1,6 +1,7 @@
 /**
- * Par and score distributions per list (public/puzzles/par.json, from scripts/judge/par.ts). Until real players'
- * scores are collected the distributions are estimates from the list judge's simulated players, and say so.
+ * Par and score distributions per list (public/puzzles/par.json, from scripts/judge/par.ts): estimates from the list
+ * judge's simulated players. The results screens blend them with real first tries, the estimate counting as 30
+ * players (ESTIMATE_WEIGHT in src/net/crowd.ts), so real players take over gradually.
  */
 export interface ListPar {
   /** The median score out of 10: what a typical player gets. */
