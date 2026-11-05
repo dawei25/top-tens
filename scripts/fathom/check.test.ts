@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkBank, checkQuestion, KINDS, loadBank, type Question } from "./check";
+import { checkBank, checkQuestion, KINDS, loadBank, MIN_QUESTIONS, type Question } from "./check";
 
 const question = (over: Partial<Question> & Record<string, unknown> = {}): Question =>
   ({
@@ -136,10 +136,10 @@ describe("checkBank", () => {
     expect(checkBank(b)).toEqual(["question-7: fact gives away the answer to question-6 (1306)"]);
   });
 
-  it("wants 50 questions, 8 kinds, no kind over 9, 12 easy openers and a spread of magnitudes", () => {
+  it("wants enough questions, 8 kinds, no kind over 9, 12 easy openers and a spread of magnitudes", () => {
     const short = bank();
-    short.questions.pop();
-    expect(checkBank(short)).toEqual(["49 questions; the bank needs at least 50"]);
+    short.questions.length = MIN_QUESTIONS - 1;
+    expect(checkBank(short)).toEqual([`${MIN_QUESTIONS - 1} questions; the bank needs at least ${MIN_QUESTIONS}`]);
 
     const narrow = bank();
     narrow.questions.forEach((q, i) => (q.kind = KINDS[i % 7]));
