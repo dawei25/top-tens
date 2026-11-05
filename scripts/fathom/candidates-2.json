@@ -7,7 +7,7 @@
       "question": "How many hairs are on a typical brown-haired person's head?",
       "unit": "hairs",
       "answer": 110000,
-      "fact": "It depends on colour: blond heads have the most, and red heads the fewest, about 90,000.",
+      "fact": "It depends on colour: blond heads have the most, and redheads the fewest, about 90,000.",
       "source": { "title": "Human hair growth", "url": "https://en.wikipedia.org/wiki/Human_hair_growth" },
       "typical": 5,
       "easy": false
@@ -18,7 +18,7 @@
       "question": "How long is the record for holding your breath?",
       "unit": "minutes",
       "answer": 11.58,
-      "definition": "AIDA static apnea record, breathing only air first",
+      "definition": "official freediving record, breathing only air first",
       "fact": "Breathe pure oxygen beforehand and the record is over 29 minutes.",
       "source": { "title": "Static apnea", "url": "https://en.wikipedia.org/wiki/Static_apnea" },
       "typical": 3,
@@ -41,10 +41,10 @@
       "question": "How much does an adult human liver weigh?",
       "unit": "kilograms",
       "answer": 1.5,
-      "fact": "It is the largest internal organ, though healthy adult livers range from about 0.6 to 1.9 kg.",
+      "fact": "It is the heaviest internal organ, and healthy adult livers range from about 0.6 to 1.9 kg.",
       "source": { "title": "Liver", "url": "https://en.wikipedia.org/wiki/Liver" },
       "typical": 2,
-      "easy": true
+      "easy": false
     },
     {
       "id": "ostrich-egg-weight",
@@ -106,18 +106,6 @@
       "easy": true
     },
     {
-      "id": "burj-khalifa-height",
-      "kind": "landmarks",
-      "question": "How tall is the Burj Khalifa in Dubai?",
-      "unit": "metres",
-      "answer": 828,
-      "definition": "to the top of its spire",
-      "fact": "From its upper floors you can watch the sun set again, minutes after it has set at ground level.",
-      "source": { "title": "Burj Khalifa", "url": "https://en.wikipedia.org/wiki/Burj_Khalifa" },
-      "typical": 1.5,
-      "easy": true
-    },
-    {
       "id": "great-pyramid-height",
       "kind": "landmarks",
       "question": "How tall was the Great Pyramid of Giza when it was built?",
@@ -150,18 +138,6 @@
       "definition": "the whole crossing, link roads included",
       "fact": "It is the longest sea crossing in the world; the main bridge alone runs 29.6 km.",
       "source": { "title": "Hong Kong–Zhuhai–Macau Bridge", "url": "https://en.wikipedia.org/wiki/Hong_Kong%E2%80%93Zhuhai%E2%80%93Macau_Bridge" },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "mid-levels-escalator-climb",
-      "kind": "landmarks",
-      "question": "How high does Hong Kong's Central–Mid-Levels escalator climb?",
-      "unit": "metres",
-      "answer": 135,
-      "definition": "bottom to top",
-      "fact": "It covers 800 m of hillside, and riding it end to end takes twenty minutes.",
-      "source": { "title": "Central–Mid-Levels escalator", "url": "https://en.wikipedia.org/wiki/Central%E2%80%93Mid-Levels_escalator" },
       "typical": 3,
       "easy": false
     },
@@ -385,7 +361,7 @@
       "question": "How much can the fastest-growing bamboo grow in one day?",
       "unit": "centimetres",
       "answer": 91,
-      "definition": "fastest reported, in 24 hours",
+      "definition": "Guinness record, in 24 hours",
       "fact": "Most garden bamboos grow a more modest 3 to 10 cm a day in their growing season.",
       "source": { "title": "Bamboo", "url": "https://en.wikipedia.org/wiki/Bamboo" },
       "typical": 5,
@@ -407,9 +383,9 @@
       "kind": "science",
       "question": "How much does one litre of mercury weigh?",
       "unit": "kilograms",
-      "answer": 13.5,
+      "answer": 13.546,
       "definition": "liquid, at room temperature",
-      "fact": "Old lighthouse lenses floated on a bath of mercury, which worked as a bearing.",
+      "fact": "Mercury is so dense that old lighthouse lenses floated on a bath of it, which worked as a bearing.",
       "source": { "title": "Mercury (element)", "url": "https://en.wikipedia.org/wiki/Mercury_(element)" },
       "typical": 5,
       "easy": false
@@ -419,7 +395,7 @@
       "kind": "science",
       "question": "How fast does Earth spin at the equator?",
       "unit": "kilometres per hour",
-      "answer": 1674,
+      "answer": 1674.7,
       "definition": "the speed of the ground",
       "fact": "It slows away from the equator: about 1,184 km/h at 45° latitude, and zero at the poles.",
       "source": { "title": "Earth's rotation", "url": "https://en.wikipedia.org/wiki/Earth%27s_rotation" },
@@ -578,7 +554,7 @@
       "kind": "lists",
       "question": "How many trips are taken on the Shanghai Metro each year?",
       "unit": "billion trips",
-      "answer": 3.77,
+      "answer": 3.7738,
       "definition": "2024",
       "fact": "No metro system in the world carries more passengers.",
       "source": { "title": "List of metro systems", "url": "https://en.wikipedia.org/wiki/List_of_metro_systems" },
