@@ -1,6 +1,7 @@
 // The backend switched on: this spec builds its own copy with fake Supabase env vars, serves it on a free port, and
-// answers Supabase's endpoints itself. Checks: each finished game is sent once with the right payload; results use
-// real players' numbers once the stats say 50+; a list rating goes to rate_list (and waits while offline); Home's
+// answers Supabase's endpoints itself. Checks: each finished game is sent once with the right payload; results blend
+// real players into the estimate (named from 30 players, "(estimated)" below); a list rating goes to rate_list (and
+// waits while offline); Home's
 // account key in its header (signed out, signing in, signed in by name and never by address, the pink dot for sync
 // trouble, each in its icon, name and title; nothing between Today and Free play), the menu without an account
 // section and its Feedback, the sign-in sheet in both modes and privacy page; and a signed-in session syncing its save
@@ -14,7 +15,7 @@ const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { VIEWPORTS, NOW, TODAY, guess, noHScroll } = require("./helpers.cjs");
 const { BACKEND_ENV } = require("./backend-env.cjs");
-const { SUPA, serveBuild, opener, openMenu, openSignIn, accountKey, KEY_COLORS, homeSignedIn, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
+const { SUPA, STATS, serveBuild, opener, openMenu, openSignIn, accountKey, KEY_COLORS, homeSignedIn, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
 
 const desktop = VIEWPORTS.find((v) => v.name === "desktop");
 const phone = VIEWPORTS.find((v) => v.name === "phone");
@@ -33,19 +34,39 @@ after(async () => {
   await served?.close();
 });
 
-test("finished games are sent once, and results use real players from 50 (desktop)", async () => {
+/**
+ * What the results should show with `real` players (list_stats) on a list whose estimate is `est` (par.json): the
+ * estimate counts as 30 players (ESTIMATE_WEIGHT, src/net/crowd.ts), real players join it.
+ */
+function blended(est, real, score) {
+  const total = est.counts.reduce((a, b) => a + b, 0);
+  const counts = est.counts.map((c, i) => (c * 30) / total + real.counts[i]);
+  const all = counts.reduce((a, b) => a + b, 0);
+  const below = counts.slice(0, score).reduce((a, b) => a + b, 0);
+  return {
+    avg: Math.round(((30 * est.par + real.n * real.avg) / (30 + real.n)) * 10) / 10,
+    p: Math.round((100 * (below + counts[score] / 2)) / all),
+  };
+}
+
+test("finished games are sent once, and results blend in real players (desktop)", async () => {
   const { ctx, page, calls } = await open(desktop, "#p-mountains", FRESH);
   const p = await page.evaluate(async () => (await fetch("puzzles/mountains.json")).json());
+  const pars = await page.evaluate(async () => (await fetch("puzzles/par.json")).json());
   for (const r of [1, 3]) await guess(page, p.answers.find((a) => a.rank === r).name);
   await page.getByTestId("give-up").click();
   await page.getByTestId("give-up").click();
 
-  // Real numbers: 120 players averaging 5.2, their spread, and no "(estimated)".
+  // 120 real players averaging 5.2 (STATS in backend-lib), blended with the estimate's 30: their number named, and no
+  // "(estimated)".
+  const want = blended(pars.mountains, STATS.list, 2);
   const block = page.locator('[data-testid="results"] [data-testid="par"][data-source="players"]');
   await block.waitFor();
   assert.equal(await block.getAttribute("data-n"), "120");
-  assert.equal(await block.getAttribute("data-par"), "5.2");
-  assert.equal(await block.getByTestId("histogram").locator("[data-par]").getAttribute("data-score"), "5");
+  assert.equal(Number(await block.getAttribute("data-par")), want.avg);
+  assert.equal(Number(await block.getAttribute("data-p")), want.p);
+  assert.equal(await block.getByTestId("par-est").count(), 0);
+  assert.equal(await block.getByTestId("histogram").locator("[data-par]").getAttribute("data-score"), String(Math.round(want.avg)));
   assert.equal(await block.getByTestId("histogram").locator("[data-you]").getAttribute("data-score"), "2");
 
   await until(() => calls.submit.length > 0);
@@ -91,6 +112,25 @@ test("finished games are sent once, and results use real players from 50 (deskto
   assert.ok(round.p_score > 0);
   await page.getByTestId("blitz-crowd").waitFor();
   assert.equal(await page.getByTestId("blitz-crowd").getAttribute("data-n"), "80");
+  await ctx.close();
+});
+
+test("a few real players move the estimate a little, and it still says (estimated) (phone)", async () => {
+  const { ctx, page } = await open(phone, "#p-airports", FRESH);
+  const pars = await page.evaluate(async () => (await fetch("puzzles/par.json")).json());
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("give-up").click();
+
+  // 10 players averaging 7.7 against the estimate's 30: the average moves a quarter of the way, unnamed.
+  const want = blended(pars.airports, STATS.few, 0);
+  const block = page.locator('[data-testid="results"] [data-testid="par"][data-n="10"]');
+  await block.waitFor();
+  assert.equal(await block.getAttribute("data-source"), "estimate");
+  assert.equal(Number(await block.getAttribute("data-par")), want.avg);
+  assert.ok(want.avg > pars.airports.par && want.avg < STATS.few.avg);
+  assert.equal(Number(await block.getAttribute("data-p")), want.p);
+  assert.ok(await block.getByTestId("par-est").isVisible());
+  assert.ok(await noHScroll(page));
   await ctx.close();
 });
 

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { blitzPercentile, formatCount, MIN_PLAYERS } from "../../net/crowd";
+import { blitzStanding, formatCount } from "../../net/crowd";
 import { accountsOn, backendOn, useListStats } from "../../net";
 import { percentileLabel } from "../../game/par";
 import type { PuzzleMeta } from "../../game/puzzles";
@@ -49,14 +49,16 @@ export function PrivacyLink() {
   );
 }
 
-/** A Blitz round's place among real players: a line on the results, only once MIN_PLAYERS have played the list. */
+/**
+ * A Blitz round's place among real players: a line on the results. Blitz has no estimate to blend with, so the line
+ * waits for ESTIMATE_WEIGHT players (net/crowd), where a list's line stops saying "(estimated)".
+ */
 export function BlitzCrowdLine({ id, score }: { id: string; score: number }) {
-  const stats = useListStats(backendOn ? id : undefined, "blitz");
-  const p = blitzPercentile(stats, score);
-  if (p === null || !stats || stats.n < MIN_PLAYERS) return null;
+  const s = blitzStanding(useListStats(backendOn ? id : undefined, "blitz"), score);
+  if (!s) return null;
   return (
-    <p data-testid="blitz-crowd" data-n={stats.n}>
-      {percentileLabel(p)} of {formatCount(stats.n)} players
+    <p data-testid="blitz-crowd" data-n={s.n}>
+      {percentileLabel(s.p)} of {formatCount(s.n)} players
     </p>
   );
 }

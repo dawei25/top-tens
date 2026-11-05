@@ -13,28 +13,85 @@ export interface CrowdStats {
   avg: number | null;
 }
 
-/** A list's real numbers replace the estimate once this many players have finished it. */
+/**
+ * W: how many players the estimate counts as. A list's estimate (par.json: a synthetic crowd from the list judges'
+ * simulated players) is never switched off at some player count; it stands for W virtual players, spread like the
+ * estimate, and each real player's first try joins them. The counts drawn are W x the estimate's share of each score
+ * plus the real counts, and "better than X%" ranks the score among them. The first real players (often the owner's
+ * testers, who know the lists) move the curve 1/31 each; 30 weigh as much as the estimate; 300 make it about 91% real.
+ * Small enough that real players take over within a few hundred games, big enough that a handful can't swing a list.
+ * While real players number fewer than W the estimate outweighs them, and the results say "(estimated)".
+ */
+export const ESTIMATE_WEIGHT = 30;
+/**
+ * Stats' "Vs players" compares your average with real players' alone (list_averages: nothing to blend there), on
+ * lists at least this many players have finished.
+ */
 export const MIN_PLAYERS = 50;
 /** Blitz scores are counted in buckets this many points wide. */
 export const BLITZ_BUCKET = 50;
 const MAX_BLITZ_BUCKET = 100;
 
-export function realEnough(s: CrowdStats | null | undefined): s is CrowdStats {
-  return !!s && s.n >= MIN_PLAYERS;
+const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+
+/**
+ * The players to draw and rank against: the estimate as ESTIMATE_WEIGHT virtual players (its share of each score
+ * times W) plus the real players' counts. With no real players it is the estimate itself, the same array, so a list
+ * nobody has played reads exactly as before; with no estimate (Blitz, a list missing from par.json) the real counts
+ * alone. Lists have 11 scores; Blitz buckets run as far as either side reaches (a missing bucket counts 0).
+ */
+export function blendCounts(estimate: number[] | undefined, real: CrowdStats | null | undefined): number[] {
+  const total = estimate ? sum(estimate) : 0;
+  if (!estimate || !total) return real?.counts ?? [];
+  if (!real || !real.n) return estimate;
+  return Array.from(
+    { length: Math.max(estimate.length, real.counts.length) },
+    (_, i) => ((estimate[i] ?? 0) * ESTIMATE_WEIGHT) / total + (real.counts[i] ?? 0),
+  );
 }
 
-/** The distribution to draw: the real one once enough players have finished the list, otherwise the estimate. */
-export function pickCounts(estimate: number[], real: CrowdStats | null | undefined): { counts: number[]; real: CrowdStats | null } {
-  return realEnough(real) ? { counts: real.counts, real } : { counts: estimate, real: null };
+/**
+ * The players' average, weighed the same way: the estimate's figure (par.json's par, what the results showed before
+ * anyone played) as ESTIMATE_WEIGHT players, the real players' mean as n. No real players: the estimate's figure
+ * exactly; no estimate: the real mean alone; neither: null.
+ */
+export function blendAverage(estimate: number | undefined, real: CrowdStats | null | undefined): number | null {
+  const n = real?.n ?? 0;
+  const mean = n && real?.avg != null ? real.avg : null;
+  if (estimate === undefined) return mean;
+  if (mean === null) return estimate;
+  return (ESTIMATE_WEIGHT * estimate + n * mean) / (ESTIMATE_WEIGHT + n);
+}
+
+/** Where a score stands on the results. */
+export interface Standing {
+  /** The share of the blended players the score beats, 0-100 (game/par's percentile). */
+  p: number;
+  /** Real players counted. */
+  n: number;
+  /** True while the estimate outweighs the real players (n < ESTIMATE_WEIGHT): the line says "(estimated)". */
+  estimated: boolean;
+}
+
+/**
+ * Where a score (lists) or a 50-point bucket (Blitz) stands among the blended players, for the results line: "better
+ * than 19% of players (estimated)" while n < ESTIMATE_WEIGHT, then "better than 12% of 1,203 players". Null when
+ * there's nothing to stand on: no estimate and fewer than ESTIMATE_WEIGHT real players (Blitz has no estimate, so
+ * its line starts at W players).
+ */
+export function standing(estimate: number[] | undefined, real: CrowdStats | null | undefined, bucket: number): Standing | null {
+  const n = real?.n ?? 0;
+  if (!(estimate && sum(estimate)) && n < ESTIMATE_WEIGHT) return null;
+  return { p: percentile(blendCounts(estimate, real), bucket), n, estimated: n < ESTIMATE_WEIGHT };
 }
 
 export function blitzBucket(score: number): number {
   return Math.max(0, Math.min(MAX_BLITZ_BUCKET, Math.floor(score / BLITZ_BUCKET)));
 }
 
-/** Where a Blitz score stands among real players (0-100), or null below MIN_PLAYERS. */
-export function blitzPercentile(real: CrowdStats | null | undefined, score: number): number | null {
-  return realEnough(real) ? percentile(real.counts, blitzBucket(score)) : null;
+/** Where a Blitz score stands. Blitz has no estimate: real players alone, from ESTIMATE_WEIGHT of them. */
+export function blitzStanding(real: CrowdStats | null | undefined, score: number): Standing | null {
+  return standing(undefined, real, blitzBucket(score));
 }
 
 /** "1,203" */
