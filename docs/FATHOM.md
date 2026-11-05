@@ -38,8 +38,8 @@ Write our own questions from facts. Never copy one from another estimation game.
   has **at most 6 digits before the decimal point**: kilometres, not metres, for long distances (the Moon); tonnes,
   not kilograms, for a festival's tomatoes; and for big counts a scale word in front of the unit: `million people`
   for a city of 8.8 million (8.80419), `billion chickens` (26.5), `million litres` for a pool (2.5). The scale words are
-  `million`, `billion` and `trillion`; prefer the one people use for that size (`billion trees`, 3,040, over
-  `trillion trees`), and never one the answer is under 1 of. A player who types the whole amount anyway ("8,800,000",
+  `million`, `billion` and `trillion`; use the largest that keeps the answer at 1 or more (`trillion trees`, 3.04,
+  not `billion trees`, 3,040), and never one the answer is under 1 of. A player who types the whole amount anyway ("8,800,000",
   "8.8 million") gets it read back in the unit. `scripts/fathom/check.ts` enforces the 6 digits.
 - **`answer`**: a positive number in that unit, as the source states it, converted exactly (145,000 kg is 145 tonnes;
   no new rounding). No ranges: take the source's central or official figure, and say which in `definition` when it
@@ -62,7 +62,7 @@ dropped: the big panels or the single tiles?). No year questions ("In what year.
 nothing that changes month to month, nothing gory or political. A dated figure is fine when the date is in the
 `definition` ("2023").
 
-**The bank's mix:** at least 50 questions over at least 8 kinds, no kind more than 9 in 50, at least 12 easy
+**The bank's mix:** at least 40 questions (judging drops weak ones) over at least 8 kinds, no kind more than 9 in 50, at least 12 easy
 openers, and a spread of magnitudes from under 1 to billions (counting the unit's scale word: 86 billion neurons is in
 the billions).
 
