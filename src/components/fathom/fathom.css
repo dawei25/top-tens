@@ -581,20 +581,23 @@
   padding: 10px 12px 12px;
   gap: 8px;
 }
-.fathom[data-short] .fathom-keys {
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-}
-.fathom[data-short] .fathom-mults {
-  gap: 6px;
-}
-.fathom[data-short] .fathom-mult {
-  padding: 0 2px;
-  font-size: 14px;
-  letter-spacing: 0.04em;
-}
-.fathom[data-short] .fathom-lock {
-  padding: 0 14px;
-  font-size: 20px;
-  letter-spacing: 0.15em;
+/* From 560px LOCK IN is beside the multipliers anyway (above); narrower, the row's keys come down a size to share it. */
+@media (max-width: 559px) {
+  .fathom[data-short] .fathom-keys {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .fathom[data-short] .fathom-mults {
+    gap: 6px;
+  }
+  .fathom[data-short] .fathom-mult {
+    padding: 0 2px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+  .fathom[data-short] .fathom-lock {
+    padding: 0 14px;
+    font-size: 20px;
+    letter-spacing: 0.15em;
+  }
 }
