@@ -230,7 +230,7 @@ const NOT_SUBJECT = new Set(
     "how what which who many much long tall high deep wide far fast big large heavy hot cold old weigh weighs " +
     "take takes last lasts hold holds can could would there each every one once all ever most known world worlds " +
     "typical average standard modern adult person people record largest biggest longest tallest fastest deepest " +
-    "heaviest highest oldest smallest"
+    "heaviest highest oldest smallest human live lives"
   ).split(" "),
 );
 
@@ -240,8 +240,8 @@ export function subjectWords(question: string): Set<string> {
     .toLowerCase()
     .replace(/[’']s\b/g, "")
     .split(/[^\p{L}\p{N}]+/u)
-    .map((w) => (w.length > 3 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w))
-    .filter((w) => w.length > 1 && !NOT_SUBJECT.has(w));
+    .filter((w) => w.length > 1 && !NOT_SUBJECT.has(w))
+    .map((w) => (w.length > 3 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w));
   return new Set(words);
 }
 
