@@ -99,7 +99,8 @@ What a good question has, in the order the judge checks it:
    is a drop. The fact relates to the number and never gives away another question's answer.
 5. **Stable and dated.** It won't change from month to month; a yearly figure says its year.
 6. **Fair, short wording.** Plain, dry English, about 12 words or fewer (two lines on a phone), no trick or gotcha
-   definitions.
+   definitions. Question and definition together stay within 100 characters, so LOCK IN stays above a phone keyboard
+   (`check.ts` enforces it).
 7. **Safe and fresh.** Nothing gory, political or about a private person, and not a near-copy of another question in
    the bank (same subject and measure).
 

@@ -28,6 +28,8 @@ export const TYPICALS = [1.3, 1.5, 2, 3, 5, 10, 30] as const;
 
 /** Nov 5: 40, after the judge dropped questions nobody could reason to (a dull or trick question is worse than none). */
 export const MIN_QUESTIONS = 40;
+/** Question plus definition, in characters: what fits above a phone keyboard with LOCK IN in view. */
+export const MAX_SHOWN = 100;
 export const MIN_KINDS = 8;
 /** No kind takes more than 9 in 50 (18%) of the bank. */
 export const maxPerKind = (total: number) => Math.max(9, Math.floor((total * 9) / 50));
@@ -128,6 +130,9 @@ export function checkQuestion(q: unknown, i: number): string[] {
     if (!question.endsWith("?")) bad("question must end with ?");
     if (question.split("?").length > 2) bad("question must ask one thing (one ?)");
     if (question !== question.trim() || /\s{2}/.test(question)) bad("question has stray spaces");
+    // With the phone keyboard up (375x400), longer text pushed LOCK IN off the screen (longest-flight-distance, 109).
+    const shown = question.length + text("definition").length;
+    if (shown > MAX_SHOWN) bad(`question and definition run ${shown} characters; keep them to ${MAX_SHOWN} so LOCK IN stays above a phone keyboard`);
   }
 
   const unit = text("unit");

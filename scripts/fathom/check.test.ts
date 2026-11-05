@@ -218,3 +218,12 @@ describe("candidates for the bank", () => {
     expect(candidates({ ...ball, unit: "people", answer: 8804190 }).some((e) => e.startsWith("bowling-ball: answer 8804190 has more than 6 digits"))).toBe(true);
   });
 });
+
+describe("question length", () => {
+  it("keeps question and definition short enough for LOCK IN to stay above a phone keyboard", () => {
+    const long = question({ question: `How far does the world's longest non-stop passenger flight go?`, definition: "Singapore Airlines, New York to Singapore, 2026" });
+    expect(checkQuestion(long, 0).some((e) => e.includes("characters"))).toBe(true);
+    const short = question({ question: "How far does the world's longest non-stop flight go?", definition: "New York to Singapore, 2026" });
+    expect(checkQuestion(short, 0).some((e) => e.includes("characters"))).toBe(false);
+  });
+});

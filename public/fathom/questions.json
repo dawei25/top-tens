@@ -812,7 +812,7 @@
       "question": "How tall was the Great Pyramid of Giza when it was built?",
       "unit": "metres",
       "answer": 146.6,
-      "definition": "as built, before its outer casing was stripped",
+      "definition": "before its outer casing was stripped",
       "fact": "It was the tallest human-made structure in the world for more than 3,700 years.",
       "source": {
         "title": "Great Pyramid of Giza",
@@ -1048,10 +1048,10 @@
     {
       "id": "longest-flight-distance",
       "kind": "everyday",
-      "question": "How far does the world's longest non-stop passenger flight go?",
+      "question": "How far does the world's longest non-stop flight go?",
       "unit": "kilometres",
       "answer": 15349,
-      "definition": "Singapore Airlines, New York to Singapore, 2026",
+      "definition": "New York to Singapore, 2026",
       "fact": "It is scheduled to take nearly 19 hours.",
       "source": {
         "title": "Longest flights",
