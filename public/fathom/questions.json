@@ -37,9 +37,10 @@
     {
       "id": "breath-volume",
       "kind": "body",
-      "question": "How much air does an adult take in with each ordinary breath at rest?",
+      "question": "How much air does an adult take in with one breath?",
       "unit": "litres",
       "answer": 0.5,
+      "definition": "an ordinary breath at rest",
       "fact": "British rower Pete Reed is reported to have the largest lung capacity on record, 11.68 litres.",
       "source": { "title": "Lung volumes and capacities", "url": "https://en.wikipedia.org/wiki/Lung_volumes_and_capacities" },
       "typical": 3,
@@ -62,7 +63,7 @@
       "question": "How long is a giraffe's tongue?",
       "unit": "centimetres",
       "answer": 45,
-      "fact": "It is black, perhaps to protect it from sunburn, and can grip foliage to pick off leaves.",
+      "fact": "It's black, perhaps against sunburn, and grabs food from branches straight above when the giraffe tips its head back.",
       "source": { "title": "Giraffe", "url": "https://en.wikipedia.org/wiki/Giraffe" },
       "typical": 2,
       "easy": false
@@ -96,7 +97,7 @@
       "question": "How many legs does the leggiest millipede on record have?",
       "unit": "legs",
       "answer": 1306,
-      "fact": "Eumillipes persephone was found 60 metres underground, in holes drilled by mining companies in Western Australia.",
+      "fact": "It was the first millipede found with over 1,000 legs, and its name, Eumillipes, means 'true thousand feet'.",
       "source": { "title": "Eumillipes", "url": "https://en.wikipedia.org/wiki/Eumillipes" },
       "typical": 5,
       "easy": false
@@ -144,7 +145,7 @@
       "unit": "metres",
       "answer": 93,
       "definition": "ground to torch tip, pedestal included",
-      "fact": "Its copper skin is only 2.4 mm thick, hung on a metal framework built by Gustave Eiffel.",
+      "fact": "The copper statue itself is 46 metres to the torch; the pedestal and foundation make up the other half.",
       "source": { "title": "Statue of Liberty", "url": "https://en.wikipedia.org/wiki/Statue_of_Liberty" },
       "typical": 2,
       "easy": true
@@ -159,17 +160,6 @@
       "fact": "The wall built under the Ming dynasty accounts for 8,850 km of it.",
       "source": { "title": "Great Wall of China", "url": "https://en.wikipedia.org/wiki/Great_Wall_of_China" },
       "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "big-buddha-height",
-      "kind": "landmarks",
-      "question": "How tall is the Big Buddha on Lantau Island, Hong Kong?",
-      "unit": "metres",
-      "answer": 34,
-      "fact": "It weighs over 250 tonnes and was built from 202 bronze pieces.",
-      "source": { "title": "The Big Buddha (Hong Kong)", "url": "https://en.wikipedia.org/wiki/The_Big_Buddha_(Hong_Kong)" },
-      "typical": 2,
       "easy": false
     },
     {
@@ -197,37 +187,13 @@
       "easy": true
     },
     {
-      "id": "finland-lakes",
-      "kind": "places",
-      "question": "How many lakes does Finland have?",
-      "unit": "lakes",
-      "answer": 187888,
-      "definition": "larger than 500 square metres",
-      "fact": "Only 309 of them are bigger than 10 square kilometres.",
-      "source": { "title": "List of lakes of Finland", "url": "https://en.wikipedia.org/wiki/List_of_lakes_of_Finland" },
-      "typical": 30,
-      "easy": false
-    },
-    {
       "id": "vatican-city-area",
       "kind": "places",
       "question": "What is the area of Vatican City?",
       "unit": "square kilometres",
       "answer": 0.49,
-      "fact": "With about 882 residents, it is also the world's least populous country.",
+      "fact": "That makes it the world's smallest country, and with about 882 residents, the least populous too.",
       "source": { "title": "Vatican City", "url": "https://en.wikipedia.org/wiki/Vatican_City" },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "hong-kong-islands",
-      "kind": "places",
-      "question": "How many islands belong to Hong Kong?",
-      "unit": "islands",
-      "answer": 263,
-      "definition": "larger than 500 square metres",
-      "fact": "The largest is Lantau; Hong Kong Island itself only comes second.",
-      "source": { "title": "List of islands and peninsulas of Hong Kong", "url": "https://en.wikipedia.org/wiki/List_of_islands_and_peninsulas_of_Hong_Kong" },
       "typical": 5,
       "easy": false
     },
@@ -263,18 +229,6 @@
       "fact": "It travels at about 27,600 km/h, a little over 400 km up.",
       "source": { "title": "International Space Station", "url": "https://en.wikipedia.org/wiki/International_Space_Station" },
       "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "venus-rotation",
-      "kind": "space",
-      "question": "How long does Venus take to spin once on its axis?",
-      "unit": "days",
-      "answer": 243,
-      "definition": "Earth days",
-      "fact": "That is longer than its year: Venus goes round the Sun in under 225 days, and it spins backwards.",
-      "source": { "title": "Venus", "url": "https://en.wikipedia.org/wiki/Venus" },
-      "typical": 10,
       "easy": false
     },
     {
@@ -315,11 +269,11 @@
     {
       "id": "lightning-per-second",
       "kind": "nature",
-      "question": "How many times does lightning flash somewhere on Earth every second?",
+      "question": "How many flashes of lightning happen on Earth every second?",
       "unit": "flashes",
       "answer": 44,
       "definition": "global average",
-      "fact": "Each flash heats the air around it to about 30,000 °C.",
+      "fact": "That adds up to nearly 1.4 billion flashes a year.",
       "source": { "title": "Lightning", "url": "https://en.wikipedia.org/wiki/Lightning" },
       "typical": 10,
       "easy": false
@@ -328,8 +282,8 @@
       "id": "trees-on-earth",
       "kind": "nature",
       "question": "How many trees are there on Earth?",
-      "unit": "billion trees",
-      "answer": 3040,
+      "unit": "trillion trees",
+      "answer": 3.04,
       "definition": "2015 estimate",
       "fact": "That's 46% fewer than when farming began, 12,000 years ago.",
       "source": { "title": "Tree", "url": "https://en.wikipedia.org/wiki/Tree" },
@@ -390,7 +344,7 @@
       "question": "How much does a typical wheel of Parmigiano Reggiano weigh?",
       "unit": "kilograms",
       "answer": 38,
-      "fact": "Italy makes about 3.6 million wheels a year, using 18% of all its milk.",
+      "fact": "It takes a lot of milk: each 1,100-litre vat makes just two wheels.",
       "source": { "title": "Parmesan", "url": "https://en.wikipedia.org/wiki/Parmesan" },
       "typical": 2,
       "easy": false
@@ -409,10 +363,11 @@
     {
       "id": "la-tomatina-tomatoes",
       "kind": "food",
-      "question": "What weight of tomatoes was thrown at Spain's La Tomatina festival in 2015?",
+      "question": "What weight of tomatoes was thrown at Spain's La Tomatina festival?",
       "unit": "tonnes",
       "answer": 145,
-      "fact": "The citric acid in the tomatoes leaves some of the town's surfaces cleaner than they were before.",
+      "definition": "2015",
+      "fact": "It's thrown by up to 20,000 ticket holders, in a town of about 9,000 people.",
       "source": { "title": "La Tomatina", "url": "https://en.wikipedia.org/wiki/La_Tomatina" },
       "typical": 10,
       "easy": false
@@ -471,7 +426,7 @@
       "unit": "metres",
       "answer": 3.05,
       "definition": "to the top of the rim",
-      "fact": "Until 1906 the baskets were actual peach baskets.",
+      "fact": "The first baskets were peach baskets nailed to a gym balcony; metal hoops replaced them in 1906.",
       "source": { "title": "Basketball", "url": "https://en.wikipedia.org/wiki/Basketball" },
       "typical": 1.3,
       "easy": true
@@ -506,7 +461,7 @@
       "question": "How many keys does a modern piano have?",
       "unit": "keys",
       "answer": 88,
-      "fact": "Some old Viennese pianos had black naturals and white sharps, the reverse of today.",
+      "fact": "In Mozart's day pianos had five octaves; today's 88 keys span more than seven.",
       "source": { "title": "Piano", "url": "https://en.wikipedia.org/wiki/Piano" },
       "typical": 1.3,
       "easy": true
@@ -518,7 +473,7 @@
       "unit": "centimetres",
       "answer": 77,
       "definition": "the painting, without its frame",
-      "fact": "In 1977 an insect infestation was found in the back of its wooden panel.",
+      "fact": "It's painted on wood, not canvas: a poplar panel 77 by 53 cm.",
       "source": { "title": "Mona Lisa", "url": "https://en.wikipedia.org/wiki/Mona_Lisa" },
       "typical": 2,
       "easy": false
@@ -526,11 +481,11 @@
     {
       "id": "phantom-performances",
       "kind": "culture",
-      "question": "How many times was The Phantom of the Opera performed on Broadway?",
+      "question": "How many performances did The Phantom of the Opera give on Broadway?",
       "unit": "performances",
       "answer": 13981,
       "definition": "original production",
-      "fact": "It closed in 2023 as the longest-running show in Broadway history.",
+      "fact": "It closed in 2023 as Broadway's longest-running show, by over 3,500 performances.",
       "source": { "title": "The Phantom of the Opera (1986 musical)", "url": "https://en.wikipedia.org/wiki/The_Phantom_of_the_Opera_(1986_musical)" },
       "typical": 5,
       "easy": false
@@ -562,9 +517,10 @@
     {
       "id": "biggest-stadium",
       "kind": "lists",
-      "question": "How many people can the world's biggest stadium, India's Narendra Modi Stadium, hold?",
+      "question": "How many people can the world's biggest stadium hold?",
       "unit": "people",
       "answer": 132000,
+      "definition": "India's Narendra Modi Stadium",
       "fact": "North Korea's Rungrado 1st of May Stadium is next, at 113,281.",
       "source": { "title": "List of stadiums by capacity", "url": "https://en.wikipedia.org/wiki/List_of_stadiums_by_capacity" },
       "typical": 1.5,
@@ -576,7 +532,7 @@
       "question": "What is the area of the Caspian Sea, the world's largest lake?",
       "unit": "square kilometres",
       "answer": 389000,
-      "fact": "It sits on a fragment of an ancient ocean basin, not on continental crust like other lakes.",
+      "fact": "Lake Superior, the next largest, is only about a fifth of its size.",
       "source": { "title": "List of lakes by area", "url": "https://en.wikipedia.org/wiki/List_of_lakes_by_area" },
       "typical": 5,
       "easy": false

@@ -24,7 +24,8 @@ export const KINDS = [
 /** Allowed typical misses: half of casual players land within this many times of the answer. */
 export const TYPICALS = [1.3, 1.5, 2, 3, 5, 10, 30] as const;
 
-export const MIN_QUESTIONS = 50;
+/** Nov 5: 40, after the judge dropped questions nobody could reason to (a dull or trick question is worse than none). */
+export const MIN_QUESTIONS = 40;
 export const MIN_KINDS = 8;
 /** No kind takes more than 9 in 50 (18%) of the bank. */
 export const maxPerKind = (total: number) => Math.max(9, Math.floor((total * 9) / 50));
