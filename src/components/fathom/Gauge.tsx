@@ -5,7 +5,8 @@ import { BUOY, placed, SQUID } from "./sprites";
 /**
  * The reveal's sonar: a pixel strip that places the guess and the answer on a log scale. The answer is the gold buoy
  * in the middle; the squid marks where the guess landed, with a sonar ping around it. Under the track, the bands of
- * the score (dead on in the middle, then close, near, far, lost at sea) in their colours, the guess's band lit.
+ * the score (dead on in the middle, then close, near, far, lost at sea, mirrored), each in a dark shade of its
+ * colour, and the one run the squid is over lit (not its mirror across the answer).
  *
  * Drawn on a grid of P x P pixel cells as wide as the card allows (an odd number, so the buoy has a middle column),
  * so the art stays crisp at any width. Decoration: the reveal's text already says how far off the guess is.
@@ -52,8 +53,8 @@ export function Gauge(props: Props) {
       {art && (
         <div className="gauge-art" style={{ width: cols * P }}>
           <svg width={cols * P} height={ROWS * P} viewBox={`0 0 ${cols} ${ROWS}`} shapeRendering="crispEdges">
-            {art.bands.map((b) => (
-              <rect key={b.x} className={`g-band ${b.band === props.band ? "hit" : ""}`} data-band={b.band} x={b.x} y={STRIP} width={b.w} height={STRIP_ROWS} />
+            {art.bands.map((b, i) => (
+              <rect key={b.x} className={`g-band ${i === art.lit ? "hit" : ""}`} data-band={b.band} x={b.x} y={STRIP} width={b.w} height={STRIP_ROWS} />
             ))}
             <rect className="g-track" x={0} y={TRACK} width={cols} height={1} />
             {art.ticks.map((t) => (
@@ -62,7 +63,7 @@ export function Gauge(props: Props) {
             <path className="g-buoy" d={art.buoy} />
             <path className="g-ping g-ping-far" d={art.pingFar} />
             <path className="g-ping g-ping-near" d={art.pingNear} />
-            <path className="g-squid" d={art.squid} />
+            <path className="g-squid" data-x={art.gx} d={art.squid} />
           </svg>
           <div className="gauge-ticks">
             {art.ticks.map((t) => (
@@ -104,10 +105,13 @@ function tickValues(lo: number, hi: number): number[] {
   return out;
 }
 
-/** "200", "0.5", "5K", "2M", "1B", "3T", "1e18". */
-function tickLabel(v: number): string {
+/**
+ * "200", "0.5", "5K", "2M", "1B", "3T"; null past the trillions or under a thousandth, where it would take a power of
+ * ten ("1e15", "1e-7"): that tick is left out.
+ */
+function tickLabel(v: number): string | null {
   const short = (x: number) => String(+x.toPrecision(3));
-  if (v >= 1e15) return `1e${Math.round(Math.log10(v))}`;
+  if (v >= 1e15 || v < 1e-3) return null;
   if (v >= 1e12) return `${short(v / 1e12)}T`;
   if (v >= 1e9) return `${short(v / 1e9)}B`;
   if (v >= 1e6) return `${short(v / 1e6)}M`;
@@ -115,7 +119,7 @@ function tickLabel(v: number): string {
   return short(v);
 }
 
-function draw(cols: number, { guess, answer, typical }: Props) {
+function draw(cols: number, { guess, answer, typical, band }: Props) {
   const c = Math.log10(answer);
   const d = Math.log10(guess / answer);
   const m = Math.log10(typical);
@@ -134,13 +138,14 @@ function draw(cols: number, { guess, answer, typical }: Props) {
     else bands.push({ x, w: 1, band });
   }
 
-  // Ticks with room for their labels (14 cells, 42px, apart), clear of the ends.
+  // Ticks with room for their labels (14 cells, 42px, apart), clear of the ends, each in plain numbers.
   const ticks: { x: number; label: string }[] = [];
   for (const v of tickValues(c - half, c + half)) {
     const x = xOf(Math.log10(v));
-    if (x < 4 || x > cols - 5) continue;
+    const label = tickLabel(v);
+    if (label === null || x < 4 || x > cols - 5) continue;
     if (ticks.length && x - ticks[ticks.length - 1].x < 14) continue;
-    ticks.push({ x, label: tickLabel(v) });
+    ticks.push({ x, label });
   }
 
   const ax = Math.round(mid);
@@ -150,5 +155,12 @@ function draw(cols: number, { guess, answer, typical }: Props) {
   const gx = Math.min(cols - 4, Math.max(3, xOf(c + d)));
   const squid = placed(SQUID, gx - 3, SQUID_TOP);
   const cy = SQUID_TOP + SQUID.length / 2;
-  return { bands, ticks, buoy, squid, pingNear: ring(gx + 0.5, cy, 6, cols), pingFar: ring(gx + 0.5, cy, 9, cols) };
+  // The run lit: the guess's band under the squid (or, where rounding puts the squid's column just past that band's
+  // edge, its nearest run of that band).
+  const gap = (b: (typeof bands)[number]) => (gx < b.x ? b.x - gx : gx >= b.x + b.w ? gx - (b.x + b.w - 1) : 0);
+  let lit = -1;
+  bands.forEach((b, i) => {
+    if (b.band === band && (lit < 0 || gap(b) < gap(bands[lit]))) lit = i;
+  });
+  return { bands, lit, gx, ticks, buoy, squid, pingNear: ring(gx + 0.5, cy, 6, cols), pingFar: ring(gx + 0.5, cy, 9, cols) };
 }

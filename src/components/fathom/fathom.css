@@ -6,7 +6,8 @@
  *
  * Bands have one colour each, from the game's palette: dead on gold, close cyan, near periwinkle (the squid's limb
  * ramp), far pink, lost at sea a deep slate. --band fills, --band-ink is text on a fill, --band-text is the band as
- * text on glass.
+ * text on glass, --band-dim the band unlit on the sonar: a darker shade of its own hue, never the colour faded (gold
+ * faded over navy reads olive, cyan teal, and the palette has no green).
  */
 .fathom {
   max-width: calc(640px + 2 * var(--gutter));
@@ -32,26 +33,31 @@
   --band: var(--gold);
   --band-ink: var(--gold-ink);
   --band-text: var(--gold);
+  --band-dim: #715514;
 }
 .fathom [data-band="close"] {
   --band: var(--cyan);
   --band-ink: #03222b;
   --band-text: var(--cyan);
+  --band-dim: #1d4f6e;
 }
 .fathom [data-band="near"] {
   --band: #8a9cff;
   --band-ink: #0e1440;
   --band-text: #8a9cff;
+  --band-dim: #2d3876;
 }
 .fathom [data-band="far"] {
   --band: var(--pink);
   --band-ink: var(--pink-ink);
   --band-text: var(--pink);
+  --band-dim: #77223c;
 }
 .fathom [data-band="lost"] {
   --band: #3b4c6e;
   --band-ink: var(--text);
   --band-text: var(--label);
+  --band-dim: #222c40;
 }
 
 /* The question card: "Question 2 of 5" and the progress squares on one line, then the question and what it measures. */
@@ -64,6 +70,7 @@
   flex: none;
 }
 .pip {
+  position: relative;
   width: 14px;
   height: 14px;
   background: #1c2a45;
@@ -73,6 +80,33 @@
 }
 .pip.now {
   box-shadow: 0 0 0 2px var(--text);
+}
+/*
+ * Lost at sea, wherever its square shows (the progress, the results' row, the recap): a crossed outline in the label
+ * colour, not a fill, so it reads as played and missed. Its slate fill was barely darker than a square still to play.
+ */
+.pip[data-band="lost"],
+.band-sq[data-band="lost"] {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--label);
+}
+.pip.now[data-band="lost"] {
+  box-shadow:
+    inset 0 0 0 2px var(--label),
+    0 0 0 2px var(--text);
+}
+.pip[data-band="lost"]::after,
+.band-sq[data-band="lost"]::after {
+  content: "";
+  position: absolute;
+  /* The cross is 5 art pixels square: 10px here, 2px each. */
+  inset: 2px;
+  background: var(--label);
+  -webkit-mask: var(--cross) center / 100% 100% no-repeat;
+  mask: var(--cross) center / 100% 100% no-repeat;
+}
+.fathom {
+  --cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1H0zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM4 4h1v1H4zM4 0h1v1H4zM3 1h1v1H3zM1 3h1v1H1zM0 4h1v1H0z'/%3E%3C/svg%3E");
 }
 .fathom-q .prompt-top .label {
   white-space: nowrap;
@@ -88,6 +122,9 @@
   .pip {
     width: 12px;
     height: 12px;
+  }
+  .pip[data-band="lost"]::after {
+    inset: 1px;
   }
 }
 
@@ -145,14 +182,24 @@
   text-align: right;
   color: var(--label);
 }
-/* One line kept for it, so nothing under it moves as it changes. */
+/*
+ * One line kept for it, and never more, so nothing under it moves as it changes (a second line pushed the keys down at
+ * 320px). Every message and number fits whole at 320px (fathom.e2e.cjs); the ellipsis is only a backstop.
+ */
 .fathom-echo {
   min-height: 24px;
   padding-left: 2px;
   font-size: 20px;
   line-height: 1.2;
   color: var(--muted);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 359px) {
+  .fathom-echo {
+    font-size: 17px;
+  }
 }
 .fathom-echo[data-tone="value"] {
   color: var(--cyan);
@@ -282,6 +329,12 @@
   font-size: 20px;
   color: var(--band-text);
 }
+/* The yardstick under it: how far off most people are on this question (a miss that size scores 50). */
+.figure-typical {
+  font-size: 18px;
+  line-height: 1.2;
+  color: var(--muted);
+}
 .fathom-fact {
   font-size: 20px;
   line-height: 1.3;
@@ -343,12 +396,12 @@
 .g-tick {
   fill: var(--label);
 }
+/* The bands unlit, in a darker shade of their own colour; the one run the squid is in, lit. */
 .g-band {
-  fill: var(--band);
-  opacity: 0.4;
+  fill: var(--band-dim);
 }
 .g-band.hit {
-  opacity: 1;
+  fill: var(--band);
 }
 .g-buoy {
   fill: var(--gold);
@@ -392,12 +445,21 @@
   margin: 12px 0 6px;
 }
 .band-sq {
+  position: relative;
   flex: none;
   width: 36px;
   height: 36px;
   border-radius: 2px;
   background: var(--band);
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+}
+.band-row .band-sq[data-band="lost"] {
+  box-shadow:
+    inset 0 0 0 3px var(--label),
+    0 4px 0 rgba(0, 0, 0, 0.45);
+}
+.band-row .band-sq[data-band="lost"]::after {
+  inset: 8px;
 }
 .fathom-recap {
   padding: 4px 16px 6px;
@@ -422,6 +484,14 @@
   height: 18px;
   margin-top: 3px;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+}
+.fathom-recap .band-sq[data-band="lost"] {
+  box-shadow:
+    inset 0 0 0 2px var(--label),
+    0 2px 0 rgba(0, 0, 0, 0.45);
+}
+.fathom-recap .band-sq[data-band="lost"]::after {
+  inset: 4px;
 }
 .recap-body {
   display: flex;
@@ -463,16 +533,43 @@
   }
 }
 
-/* A phone with its keyboard up: the question card comes down to size, so the field and LOCK IN stay in view. */
-@media (max-height: 600px) and (max-width: 699px) {
-  .fathom {
-    gap: 10px;
-    padding-top: 8px;
-  }
-  .fathom .prompt {
-    padding: 8px 14px 10px;
-  }
-  .fathom .prompt h1 {
-    font-size: 26px;
-  }
+/*
+ * A phone showing 600px of height or less: a small phone, or one with its keyboard up (Fathom.tsx sets data-short from
+ * the visual viewport, since iOS lays its keyboard over the page instead of shrinking it). The decimal keypad has no
+ * Return key, so the question card comes down to size and LOCK IN joins the multipliers' row: the question, the field
+ * and LOCK IN all stay in view.
+ */
+.fathom[data-short] {
+  gap: 10px;
+  padding-top: 8px;
+}
+.fathom[data-short] .prompt {
+  padding: 8px 14px 10px;
+}
+.fathom[data-short] .prompt h1 {
+  font-size: 24px;
+}
+.fathom[data-short] .prompt .caption {
+  margin-top: 2px;
+}
+.fathom[data-short] .fathom-ask {
+  padding: 10px 12px 12px;
+  gap: 8px;
+}
+.fathom[data-short] .fathom-keys {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.fathom[data-short] .fathom-mults {
+  gap: 6px;
+}
+.fathom[data-short] .fathom-mult {
+  padding: 0 2px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.fathom[data-short] .fathom-lock {
+  padding: 0 14px;
+  font-size: 20px;
+  letter-spacing: 0.15em;
 }

@@ -52,17 +52,26 @@ export const MAX_TOTAL = QUESTIONS_PER_GAME * POINTS_PER_QUESTION;
 
 /* ---------- Scoring ---------- */
 
+/** Within 1% of the answer: the reveal says "spot on", and it scores full marks. */
+export const spotOn = (guess: number, answer: number): boolean => Math.abs(guess - answer) <= Math.abs(answer) * 0.01;
+
 /**
  * Points for a guess, 0 to 100. With d = |log10(guess / answer)| and m = log10(typical):
- * 100 x (1 - (2/pi) atan(d / m)), rounded. Exact is 100, a miss as big as the typical one is 50, twice that about 30,
- * and it never quite reaches 0.
+ * 100 x (1 - (2/pi) atan(d / m)), rounded. Spot on (within 1%) is 100 and only spot on is (anything else tops out at
+ * 99), a miss as big as the typical one is 50, twice that about 30, and it never quite reaches 0.
  */
 export function fathomScore(guess: number, answer: number, typical: number): number {
+  if (spotOn(guess, answer)) return POINTS_PER_QUESTION;
   const d = Math.abs(Math.log10(guess / answer));
   const m = Math.log10(typical);
   if (!Number.isFinite(d) || !(m > 0)) return 0;
-  return Math.round(POINTS_PER_QUESTION * (1 - (2 / Math.PI) * Math.atan(d / m)));
+  return Math.min(POINTS_PER_QUESTION - 1, Math.round(POINTS_PER_QUESTION * (1 - (2 / Math.PI) * Math.atan(d / m))));
 }
+
+/** What a miss as big as the question's typical one scores, whatever the question: the yardstick. */
+export const TYPICAL_POINTS = 50;
+/** A typical guesser's total: a typical miss on every question. */
+export const TYPICAL_TOTAL = QUESTIONS_PER_GAME * TYPICAL_POINTS;
 
 export type Band = "dead-on" | "close" | "near" | "far" | "lost";
 
@@ -99,18 +108,24 @@ function ratioText(r: number): string {
 }
 const trimZeros = (s: string) => (s.includes(".") ? s.replace(/\.?0+$/, "") : s);
 
-/**
- * "1.3x too high", "2.4x too low", "3 million times too low", or "spot on" within 1%. A plain x, not the times sign:
- * the pixel font has no "×", and a fallback glyph stood out.
- */
+/** "1.3x", "12x", "3 million times". A plain x, not the times sign: the pixel font has no "×", and a fallback glyph stood out. */
+function times(r: number): string {
+  const t = ratioText(r);
+  return /[a-z]$/.test(t) ? `${t} times` : `${t}x`;
+}
+
+/** "1.3x too high", "2.4x too low", "3 million times too low", or "spot on" within 1%. */
 export function timesOff(guess: number, answer: number): string {
-  if (Math.abs(guess - answer) <= Math.abs(answer) * 0.01) return "spot on";
-  const times = (r: number) => {
-    const t = ratioText(r);
-    return /[a-z]$/.test(t) ? `${t} times` : `${t}x`;
-  };
+  if (spotOn(guess, answer)) return "spot on";
   return guess > answer ? `${times(guess / answer)} too high` : `${times(answer / guess)} too low`;
 }
+
+/**
+ * The yardstick under "1.3x too low" on the reveal: the question's typical miss, which scores 50 ("most people miss by
+ * about 2x"). Points are relative to it, so without it a near miss on one question and a farther one on another look
+ * arbitrary.
+ */
+export const missText = (typical: number): string => `most people miss by about ${times(typical)}`;
 
 /* ---------- Reading numbers ---------- */
 
@@ -137,56 +152,148 @@ const SCALES: Record<string, number> = {
 };
 
 /**
- * Units that mean the same thing, so a unit typed after the number is read as the unit ("330m" on a question in
- * metres is 330 metres, not 330 million). Lowercase.
+ * A unit a player may type after the number. Units of one kind convert into each other by their sizes; one without a
+ * size is recognized but not converted (feet, pounds, Fahrenheit: the game is metric), so the player is asked for the
+ * question's unit instead. Names are lowercase; a name may stand for units of several kinds ("m": metres, minutes,
+ * months), and the question's kind decides.
  */
-const UNIT_GROUPS: readonly string[][] = [
-  ["m", "metre", "metres", "meter", "meters"],
-  ["km", "kms", "kilometre", "kilometres", "kilometer", "kilometers"],
-  ["cm", "centimetre", "centimetres", "centimeter", "centimeters"],
-  ["mm", "millimetre", "millimetres", "millimeter", "millimeters"],
-  ["kg", "kgs", "kilo", "kilos", "kilogram", "kilograms", "kilogramme", "kilogrammes"],
-  ["g", "gram", "grams", "gramme", "grammes"],
-  ["t", "tonne", "tonnes", "ton", "tons"],
-  ["l", "litre", "litres", "liter", "liters"],
-  ["ml", "millilitre", "millilitres", "milliliter", "milliliters"],
-  ["s", "sec", "secs", "second", "seconds"],
-  ["min", "mins", "minute", "minutes"],
-  ["h", "hr", "hrs", "hour", "hours"],
-  ["d", "day", "days"],
-  ["y", "yr", "yrs", "year", "years"],
-  ["mi", "mile", "miles"],
-  ["ft", "foot", "feet"],
-  ["in", "inch", "inches"],
-  ["km/h", "kmh", "kph", "kilometres per hour", "kilometers per hour"],
-  ["km/s", "kilometres per second", "kilometers per second"],
-  ["mph", "miles per hour"],
-  ["°c", "c", "degrees celsius", "celsius", "degrees", "deg"],
-  ["°f", "f", "degrees fahrenheit", "fahrenheit"],
-  ["%", "percent", "per cent"],
-  ["kcal", "cal", "calorie", "calories", "kilocalories"],
-  ["people", "persons", "person"],
-  ["bpm", "beats per minute"],
-  ["kwh", "kilowatt hours", "kilowatt-hours"],
-  ["w", "watt", "watts"],
-  ["hz", "hertz"],
-];
-
-/** Everything that counts as the unit typed after a number, longest first. */
-export function unitTokens(unit: string | undefined): string[] {
-  const u = (unit ?? "").trim().toLowerCase();
-  if (!u) return [];
-  const first = u.split(/\s+/)[0];
-  const out = new Set<string>([u, u.replace(/s$/, ""), first]);
-  for (const group of UNIT_GROUPS) if (group.includes(u) || group.includes(first)) group.forEach((t) => out.add(t));
-  out.delete("");
-  return [...out].sort((a, b) => b.length - a.length);
+interface Unit {
+  kind: string;
+  /** In the kind's smallest unit here, so sizes are whole numbers. */
+  size?: number;
+  names: readonly string[];
 }
 
-const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+const UNITS: readonly Unit[] = [
+  // Length, in millimetres.
+  { kind: "length", size: 1, names: ["mm", "millimetre", "millimetres", "millimeter", "millimeters"] },
+  { kind: "length", size: 10, names: ["cm", "cms", "centimetre", "centimetres", "centimeter", "centimeters"] },
+  { kind: "length", size: 1e3, names: ["m", "metre", "metres", "meter", "meters"] },
+  { kind: "length", size: 1e6, names: ["km", "kms", "kilometre", "kilometres", "kilometer", "kilometers"] },
+  { kind: "length", names: ["in", "inch", "inches", "ft", "foot", "feet", "yd", "yard", "yards", "mi", "mile", "miles"] },
+  // Area, in square metres.
+  { kind: "area", size: 1, names: ["m2", "m²", "sq m", "sqm", "square metre", "square metres", "square meter", "square meters"] },
+  { kind: "area", size: 1e4, names: ["ha", "hectare", "hectares"] },
+  {
+    kind: "area",
+    size: 1e6,
+    names: ["km2", "km²", "sq km", "sqkm", "square kilometre", "square kilometres", "square kilometer", "square kilometers"],
+  },
+  { kind: "area", names: ["acre", "acres", "sq mi", "square mile", "square miles", "sq ft", "square foot", "square feet"] },
+  // Volume, in millilitres.
+  { kind: "volume", size: 1, names: ["ml", "millilitre", "millilitres", "milliliter", "milliliters"] },
+  { kind: "volume", size: 10, names: ["cl", "centilitre", "centilitres", "centiliter", "centiliters"] },
+  { kind: "volume", size: 1e3, names: ["l", "ltr", "litre", "litres", "liter", "liters"] },
+  { kind: "volume", size: 1e6, names: ["m3", "m³", "cubic metre", "cubic metres", "cubic meter", "cubic meters"] },
+  { kind: "volume", names: ["gal", "gallon", "gallons", "pint", "pints", "fl oz", "cup", "cups"] },
+  // Mass, in milligrams.
+  { kind: "mass", size: 1, names: ["mg", "milligram", "milligrams"] },
+  { kind: "mass", size: 1e3, names: ["g", "gram", "grams", "gramme", "grammes"] },
+  { kind: "mass", size: 1e6, names: ["kg", "kgs", "kilo", "kilos", "kilogram", "kilograms", "kilogramme", "kilogrammes"] },
+  { kind: "mass", size: 1e9, names: ["t", "tonne", "tonnes", "ton", "tons", "metric ton", "metric tons"] },
+  { kind: "mass", names: ["lb", "lbs", "pound", "pounds", "oz", "ounce", "ounces"] },
+  // Time, in seconds, up to a week.
+  { kind: "time", size: 1, names: ["s", "sec", "secs", "second", "seconds"] },
+  { kind: "time", size: 60, names: ["m", "min", "mins", "minute", "minutes"] },
+  { kind: "time", size: 3600, names: ["h", "hr", "hrs", "hour", "hours"] },
+  { kind: "time", size: 86400, names: ["d", "day", "days"] },
+  { kind: "time", size: 604800, names: ["wk", "wks", "week", "weeks"] },
+  // Months and years: twelve to a year, but no fixed number of days, so they don't convert into the units above.
+  { kind: "calendar", size: 1, names: ["m", "mo", "mos", "month", "months"] },
+  { kind: "calendar", size: 12, names: ["y", "yr", "yrs", "year", "years"] },
+  // Speed, in metres per hour.
+  {
+    kind: "speed",
+    size: 3600,
+    names: ["m/s", "mps", "metre per second", "metres per second", "meter per second", "meters per second"],
+  },
+  {
+    kind: "speed",
+    size: 1e3,
+    names: ["km/h", "km/hr", "kmh", "kph", "kmph", "kilometre per hour", "kilometres per hour", "kilometer per hour", "kilometers per hour"],
+  },
+  {
+    kind: "speed",
+    size: 3.6e6,
+    names: ["km/s", "kilometre per second", "kilometres per second", "kilometer per second", "kilometers per second"],
+  },
+  { kind: "speed", names: ["mph", "mile per hour", "miles per hour", "knot", "knots"] },
+  // Temperature: Celsius (the others don't convert by a factor).
+  { kind: "temperature", size: 1, names: ["°c", "c", "deg c", "degree", "degrees", "deg", "celsius", "degree celsius", "degrees celsius"] },
+  { kind: "temperature", names: ["°f", "f", "deg f", "fahrenheit", "degree fahrenheit", "degrees fahrenheit", "kelvin"] },
+  // Food energy, and a few no question asks in but a player might type.
+  { kind: "energy", size: 1, names: ["kcal", "cal", "calorie", "calories", "kilocalorie", "kilocalories"] },
+  { kind: "percent", size: 1, names: ["%", "percent", "per cent"] },
+  { kind: "rate", size: 1, names: ["bpm", "beats per minute"] },
+  { kind: "power", size: 1, names: ["w", "watt", "watts"] },
+];
 
-export type NumberError = "empty" | "zero" | "negative" | "text";
-export type NumberReading = { value: number } | { error: NumberError };
+/** Words that mean the same count ("8 billion persons" on a question in people). */
+const COUNT_NAMES: readonly string[][] = [["people", "persons", "person"]];
+
+/** The unit of measure a question is in, if it is one ("metres per second"); a count ("bones") isn't. */
+const measureOf = (unit: string): Unit | undefined => {
+  const u = unit.trim().toLowerCase();
+  return UNITS.find((x) => x.names.includes(u));
+};
+
+/** The question's own unit as a player may type it: a unit of measure, or a count by its plural and singular. */
+function ownUnit(unit: string | undefined): Unit | undefined {
+  const u = (unit ?? "").trim().toLowerCase();
+  if (!u) return undefined;
+  const measure = measureOf(u);
+  if (measure) return measure;
+  const names = new Set([u, u.replace(/s$/, ""), u.replace(/(?<=sh|ch|x|ss)es$/, "")]);
+  for (const group of COUNT_NAMES) if (group.includes(u)) group.forEach((n) => names.add(n));
+  return { kind: `count:${u}`, size: 1, names: [...names] };
+}
+
+/** The unit a name stands for on this question: its own unit first, then one of its kind, then any. */
+function unitCalled(name: string, own: Unit | undefined): Unit | undefined {
+  if (own?.names.includes(name)) return own;
+  const all = UNITS.filter((u) => u.names.includes(name));
+  return all.find((u) => u.kind === own?.kind) ?? all[0];
+}
+
+/**
+ * What follows the digits: a scale word, a unit, or a scale word and then a unit ("k km"). A unit of the question's
+ * kind beats a scale word ("0.5m" in centimetres is half a metre, "150t" in kilograms 150 tonnes), and a scale word
+ * beats a unit of another kind ("330m" in people is 330 million). Null when it's neither.
+ */
+function readWords(rest: string, own: Unit | undefined): { scale: number; unit?: Unit } | null {
+  if (!rest) return { scale: 1 };
+  const sameKind = (u: Unit | undefined): u is Unit => !!u && (u === own || u.kind === own?.kind);
+  const whole = unitCalled(rest, own);
+  if (sameKind(whole)) return { scale: 1, unit: whole };
+  if (SCALES[rest]) return { scale: SCALES[rest] };
+  // A scale word, then a unit: "384k km", "2.5 million m", "390kkm2".
+  const splits: { scale: number; unit: Unit }[] = [];
+  for (let i = 1; i < rest.length; i++) {
+    const scale = SCALES[rest.slice(0, i).trim()];
+    const unit = scale ? unitCalled(rest.slice(i).trim(), own) : undefined;
+    if (scale && unit) splits.push({ scale, unit });
+  }
+  const split = splits.find((s) => sameKind(s.unit));
+  if (split) return split;
+  // A unit of another kind: read, so the player can be asked for the question's own.
+  if (whole) return { scale: 1, unit: whole };
+  return splits[0] ?? null;
+}
+
+/** Float noise off a converted number: 498 s in minutes is 8.3, not 8.299999999999999. */
+const clean = (n: number) => Number(n.toPrecision(12));
+
+/**
+ * What to say when a guess is in a unit the question isn't in: "In centimetres, please.", or for a count "Just the
+ * number of bones."
+ */
+export function askFor(unit: string): string {
+  return measureOf(unit) ? `In ${unit}, please.` : `Just the number of ${unit}.`;
+}
+
+export type NumberError = "empty" | "zero" | "negative" | "text" | "unit";
+/** A number read, `converted` when it was typed in another unit of the question's kind ("0.5m" in centimetres). */
+export type NumberReading = { value: number; converted?: true } | { error: NumberError };
 
 /** The digits part: "2,500,000", "2 500 000", "2.500.000", "1,5" (a decimal comma), "330", ".5", "2.5e6". */
 function readDigits(s: string): number | null {
@@ -204,8 +311,9 @@ function readDigits(s: string): number | null {
 
 /**
  * Reads what a player typed as a number: "330", "2,500,000", "2.5m", "2.5 million", "1.5bn", "3k", "0.1", " 12 ".
- * `unit` is the question's unit: typed after the number it's just the unit ("330 metres", "330m" in metres).
- * Says why when it can't: nothing typed, zero, a negative, or not a number at all.
+ * `unit` is the question's unit: typed after the number it's just the unit ("330 metres", "330m" in metres, "343 m/s"),
+ * and another unit of its kind is converted exactly ("1.5 km" in metres is 1,500). Says why when it can't: nothing
+ * typed, zero, a negative, a unit the question isn't in (feet in metres, kilograms in bones), or not a number at all.
  */
 export function readNumber(text: string, unit?: string): NumberReading {
   let s = text
@@ -216,20 +324,24 @@ export function readNumber(text: string, unit?: string): NumberReading {
   if (!s) return { error: "empty" };
   // "about 300", "~300": the number is what counts.
   s = s.replace(/^(?:~|about|around|roughly|approx\.?|approximately|circa|c\.)\s*/, "");
-  const tokens = unitTokens(unit);
-  // Only a whole word at the end: "2.5mm" in metres is not "2.5m" with its "m" taken off.
-  if (tokens.length) s = s.replace(new RegExp(`(?<=[\\d.\\s])(?:${tokens.map(escape).join("|")})\\.?$`), "").trim();
-  const m = s.match(/^([+-]?)\s*([\d.,\s]*\d(?:e[+-]?\d+)?|\.\d+(?:e[+-]?\d+)?|[\d.]+)\s*([a-z]*)\.?$/);
+  const m = s.match(/^([+-]?)\s*([\d.,\s]*\d(?:e[+-]?\d+)?|\.\d+(?:e[+-]?\d+)?|[\d.]+)(.*)$/);
   if (!m) return { error: "text" };
-  const [, sign, digits, word] = m;
+  const [, sign, digits, after] = m;
   const n = readDigits(digits.trim());
-  const scale = word ? SCALES[word] : 1;
-  if (n === null || scale === undefined) return { error: "text" };
-  const value = n * scale;
+  const own = ownUnit(unit);
+  // What follows, tidied: one space between words, "° c" as "°c", an abbreviation's full stop off ("330 m.").
+  const rest = after.trim().replace(/\s+/g, " ").replace(/°\s/, "°").replace(/\.$/, "");
+  const words = readWords(rest, own);
+  if (n === null || !words) return { error: "text" };
+  let value = n * words.scale;
   if (!Number.isFinite(value)) return { error: "text" };
   if (value === 0) return { error: "zero" };
   if (sign === "-") return { error: "negative" };
-  return { value };
+  const typed = words.unit;
+  if (!typed || typed === own) return { value };
+  if (typed.kind !== own?.kind || !typed.size || !own.size) return { error: "unit" };
+  value = clean((value * typed.size) / own.size);
+  return { value, converted: true };
 }
 
 /** The number in what was typed, or null when there isn't a positive one. */
@@ -273,9 +385,12 @@ export function formatWords(n: number): string {
   return formatDigits(n);
 }
 
-/** The echo under the field: "2,500,000 · 2.5 million", or just "330" under a thousand (and "3e18" past 1e15). */
+/**
+ * The echo under the field: "2,500,000 · 2.5 million", just "330" under a thousand, and just the words from a
+ * trillion ("3.04 trillion", "3e18"), whose digits would run past a narrow phone's line.
+ */
 export function echoText(n: number): string {
-  if (n >= 1e15) return formatWords(n);
+  if (n >= 1e12 * 0.99995) return formatWords(n);
   return n >= 1000 ? `${formatDigits(n)} · ${formatWords(n)}` : formatDigits(n);
 }
 
@@ -427,7 +542,8 @@ export const BAND_CHARS: Record<Band, string> = {
   close: "▓",
   near: "▒",
   far: "░",
-  lost: "□",
+  // A cross, not an empty box: an empty box read as a question not played.
+  lost: "×",
 };
 
 /** COPY RESULT: "Fathom beta 312/500" and the five bands as plain characters. */
@@ -488,10 +604,13 @@ export function startGame(save: FathomSave, bank: readonly FathomQuestion[], ran
   return { recent: [ids, ...save.recent].slice(0, HOLD_GAMES), game: newGame(ids) };
 }
 
-/** The saved game, if it can go on with this bank (an unfinished game whose questions are all still there). */
+/**
+ * The saved game, if it can be shown with this bank (its questions all still there): an unfinished one goes on, and a
+ * finished one reopens on its results, so a reload never loses a score. Only NEW QUESTIONS draws again.
+ */
 export function resumable(save: FathomSave, bank: readonly FathomQuestion[]): FathomGame | undefined {
   const g = save.game;
-  if (!g || phaseOf(g) === "results" || g.guesses.length > g.ids.length) return undefined;
+  if (!g || g.guesses.length > g.ids.length) return undefined;
   const ids = new Set(bank.map((q) => q.id));
   return g.ids.length === QUESTIONS_PER_GAME && g.ids.every((id) => ids.has(id)) && g.at <= g.guesses.length ? g : undefined;
 }
