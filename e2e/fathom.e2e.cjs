@@ -106,9 +106,10 @@ describe("Fathom", { concurrency: true }, () => {
       assert.ok((await page.getByTestId("fathom-unit").textContent()).trim().length > 0, "the unit shows beside the field");
       assert.equal(await noHScroll(page), true);
 
-      // 2.5m is 2.5 million (or 2.5 metres on a question in metres).
+      // 2.5m is 2.5 million, unless "m" is a unit of the question's kind: 2.5 metres (in kilometres too), 2.5 minutes.
       await field.fill("2.5m");
-      assert.equal(await echoValue(page), first.unit === "metres" ? 2.5 : 2_500_000);
+      const m = { metres: 2.5, kilometres: 0.0025, seconds: 150, minutes: 2.5 }[first.unit] ?? 2_500_000;
+      assert.equal(await echoValue(page), m);
       assert.equal(await attr(page, "fathom-echo", "role"), "status", "the echo is read out politely");
       // The keys multiply what's typed, one at a time, and toggle off.
       await field.fill("2.5");
@@ -116,12 +117,21 @@ describe("Fathom", { concurrency: true }, () => {
       await page.getByTestId("fathom-million").click();
       assert.equal(await attr(page, "fathom-million", "aria-pressed"), "true");
       assert.equal(await echoValue(page), 2_500_000);
+      // The field reads "2.5 million": the lit key's word right after the number, whole.
+      const scale = await page.getByTestId("fathom-scale").evaluate((el) => {
+        const word = el.lastChild.textContent.trim();
+        const typed = el.querySelector(".fathom-scale-typed").getBoundingClientRect();
+        const box = el.getBoundingClientRect();
+        return { word, shown: getComputedStyle(el).visibility === "visible", whole: el.scrollWidth <= el.clientWidth + 1, after: typed.right <= box.right };
+      });
+      assert.deepEqual(scale, { word: "million", shown: true, whole: true, after: true });
       await page.getByTestId("fathom-billion").click();
       assert.equal(await attr(page, "fathom-million", "aria-pressed"), "false");
       assert.equal(await echoValue(page), 2_500_000_000);
       await page.getByTestId("fathom-billion").click();
       assert.equal(await attr(page, "fathom-billion", "aria-pressed"), "false");
       assert.equal(await echoValue(page), 2.5);
+      assert.equal(await page.getByTestId("fathom-scale").count(), 0, "no word with no key lit");
       if (vp.name === "desktop") assert.equal(await field.evaluate((el) => el === document.activeElement), true, "the keys leave focus in the field");
 
       // Invalid input says what's wrong and locks nothing in.

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { flushSync } from "react-dom";
 import {
   askFor,
@@ -247,32 +247,47 @@ function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: n
         ? { tone: "hint", text: "can't read that yet." }
         : { tone: "hint", text: mult ? `type the number of ${mult}s.` : "type a number." };
 
+  // The lit multiplier's word right after what's typed ("8.8 million"), unless the field is too full to show it whole.
+  const scale = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const el = scale.current;
+    if (el) el.style.visibility = el.scrollWidth > el.clientWidth + 1 ? "hidden" : "";
+  }, [text, mult]);
+
   return (
     <form className="panel fathom-ask" data-glass onSubmit={submit} data-testid="fathom-ask">
       <label className="fathom-field">
-        <input
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            setError(null);
-          }}
-          // LOCK IN is off while the field is empty, so Enter there submits nothing: say why instead.
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !text.trim()) setError("empty");
-          }}
-          inputMode="decimal"
-          autoFocus
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          enterKeyHint="done"
-          placeholder="your guess"
-          aria-label="Your guess"
-          aria-describedby="fathom-unit fathom-echo"
-          aria-invalid={error ? true : undefined}
-          data-testid="fathom-input"
-        />
+        <span className="fathom-entry">
+          <input
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              setError(null);
+            }}
+            // LOCK IN is off while the field is empty, so Enter there submits nothing: say why instead.
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !text.trim()) setError("empty");
+            }}
+            inputMode="decimal"
+            autoFocus
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            enterKeyHint="done"
+            placeholder="your guess"
+            aria-label="Your guess"
+            aria-describedby="fathom-unit fathom-echo"
+            aria-invalid={error ? true : undefined}
+            data-testid="fathom-input"
+          />
+          {mult && text.trim() && (
+            // Drawn over the field in its own type: what's typed, invisible, then the word.
+            <span ref={scale} className="fathom-scale" aria-hidden="true" data-testid="fathom-scale">
+              <span className="fathom-scale-typed">{text}</span> {mult}
+            </span>
+          )}
+        </span>
         <span className="fathom-unit" id="fathom-unit" data-testid="fathom-unit">
           {question.unit}
         </span>

@@ -154,6 +154,12 @@
     0 0 0 3px var(--cyan-glow),
     0 0 18px rgba(77, 227, 255, 0.18);
 }
+.fathom-entry {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
 .fathom-field input {
   flex: 1;
   min-width: 0;
@@ -164,6 +170,24 @@
   color: var(--text);
   font-size: 32px;
   caret-color: var(--cyan);
+}
+/*
+ * The lit multiplier's word after the number ("8.8 million"), over the field in the field's own type and padding: the
+ * typed part is there but invisible, so the word lands right after it. Hidden (Fathom.tsx) when it wouldn't fit whole.
+ */
+.fathom-scale {
+  position: absolute;
+  inset: 0;
+  padding: 0 14px;
+  font-size: 32px;
+  line-height: 52px;
+  white-space: pre;
+  overflow: hidden;
+  color: var(--cyan);
+  pointer-events: none;
+}
+.fathom-scale-typed {
+  color: transparent;
 }
 /* The field's ring shows focus (above). */
 .fathom-field input:focus-visible {
@@ -523,7 +547,8 @@
 
 /* Narrow phones: the field's number and the keys' words a step smaller, so all three keys keep their words whole. */
 @media (max-width: 379px) {
-  .fathom-field input {
+  .fathom-field input,
+  .fathom-scale {
     font-size: 26px;
     padding: 0 10px;
   }
