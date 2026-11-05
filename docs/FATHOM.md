@@ -78,6 +78,11 @@ What a good question has, in the order the judge checks it:
    feet), scaled so the answer has at most 6 digits before the decimal point ("million people").
 3. **Something to reason from.** A curious person can get within about 3× by thinking (a body, a building, a trip
    they can picture). Pure trivia nobody could approach (an atom's width, an obscure count) is a drop, however true.
+   The thing measured must be clear to someone who has never seen it: counting the parts of something (tiles,
+   panels, bricks, windows) is a drop unless anyone would picture the same part at the same size. The owner on "How
+   many tiles cover the roof shells of the Sydney Opera House?" (answer 1,056,006; he guessed 350): "I didn't know
+   what it meant, the large tiles or the individual ones; it requires too many assumptions and background knowledge
+   and isn't satisfying."
 4. **A reveal worth reading.** The answer surprises or teaches ("more than you'd think"); a dull administrative number
    is a drop. The fact relates to the number and never gives away another question's answer.
 5. **Stable and dated.** It won't change from month to month; a yearly figure says its year.
