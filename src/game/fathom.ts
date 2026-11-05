@@ -30,7 +30,10 @@ export interface FathomQuestion {
   id: string;
   kind: FathomKind;
   question: string;
-  /** Shown beside the input and with the answer: "metres". */
+  /**
+   * Shown beside the input and with the answer: "metres", or with a scale word for big counts ("million people",
+   * "billion trees"), so every answer has at most 6 digits before the decimal point and the player just types it.
+   */
   unit: string;
   answer: number;
   /** What exactly is measured: "to the tip of its antenna". */
@@ -243,6 +246,15 @@ const measureOf = (unit: string): Unit | undefined => {
   return UNITS.find((x) => x.names.includes(u));
 };
 
+/** Scale words a question's unit may start with, for big counts: "million people", "billion trees". */
+const UNIT_SCALES: Record<string, number> = { million: 1e6, billion: 1e9, trillion: 1e12 };
+
+/** A question's unit as its scale word and the unit after it: "billion trees" is 1e9 of "trees", "metres" 1 of itself. */
+function splitScale(unit: string | undefined): { scale: number; base: string | undefined } {
+  const m = (unit ?? "").trim().match(/^(million|billion|trillion)\s+(\S.*)$/i);
+  return m ? { scale: UNIT_SCALES[m[1].toLowerCase()], base: m[2] } : { scale: 1, base: unit };
+}
+
 /** The question's own unit as a player may type it: a unit of measure, or a count by its plural and singular. */
 function ownUnit(unit: string | undefined): Unit | undefined {
   const u = (unit ?? "").trim().toLowerCase();
@@ -290,15 +302,19 @@ function readWords(rest: string, own: Unit | undefined): { scale: number; unit?:
 const clean = (n: number) => Number(n.toPrecision(12));
 
 /**
- * What to say when a guess is in a unit the question isn't in: "In centimetres, please.", or for a count "Just the
- * number of bones."
+ * What to say when a guess is in a unit the question isn't in: "In centimetres, please.", "In million people,
+ * please.", or for a count "Just the number of bones."
  */
 export function askFor(unit: string): string {
-  return measureOf(unit) ? `In ${unit}, please.` : `Just the number of ${unit}.`;
+  const { scale, base } = splitScale(unit);
+  return scale > 1 || measureOf(base ?? "") ? `In ${unit}, please.` : `Just the number of ${unit}.`;
 }
 
 export type NumberError = "empty" | "zero" | "negative" | "text" | "unit";
-/** A number read, `converted` when it was typed in another unit of the question's kind ("0.5m" in centimetres). */
+/**
+ * A number read, `converted` when what was typed wasn't in the question's unit: another unit of its kind ("0.5m" in
+ * centimetres), or the whole amount on a question in a scaled unit ("8,800,000" in million people).
+ */
 export type NumberReading = { value: number; converted?: true } | { error: NumberError };
 
 /** The digits part: "2,500,000", "2 500 000", "2.500.000", "1,5" (a decimal comma), "330", ".5", "2.5e6". */
@@ -318,8 +334,11 @@ function readDigits(s: string): number | null {
 /**
  * Reads what a player typed as a number: "330", "2,500,000", "2.5m", "2.5 million", "1.5bn", "3k", "0.1", " 12 ".
  * `unit` is the question's unit: typed after the number it's just the unit ("330 metres", "330m" in metres, "343 m/s"),
- * and another unit of its kind is converted exactly ("1.5 km" in metres is 1,500). Says why when it can't: nothing
- * typed, zero, a negative, a unit the question isn't in (feet in metres, kilograms in bones), or not a number at all.
+ * and another unit of its kind is converted exactly ("1.5 km" in metres is 1,500). On a unit with a scale word
+ * ("million people"), a number typed with a scale word or a unit, or one at least that big, is the whole amount and is
+ * taken back to the unit's scale ("8.8 million", "8,800,000" and "8,800,000 people" are all 8.8). Says why when it
+ * can't: nothing typed, zero, a negative, a unit the question isn't in (feet in metres, kilograms in bones), or not a
+ * number at all.
  */
 export function readNumber(text: string, unit?: string): NumberReading {
   let s = text
@@ -334,7 +353,8 @@ export function readNumber(text: string, unit?: string): NumberReading {
   if (!m) return { error: "text" };
   const [, sign, digits, after] = m;
   const n = readDigits(digits.trim());
-  const own = ownUnit(unit);
+  const { scale, base } = splitScale(unit);
+  const own = ownUnit(base);
   // What follows, tidied: one space between words, "° c" as "°c", an abbreviation's full stop off ("330 m.").
   const rest = after.trim().replace(/\s+/g, " ").replace(/°\s/, "°").replace(/\.$/, "");
   const words = readWords(rest, own);
@@ -344,10 +364,11 @@ export function readNumber(text: string, unit?: string): NumberReading {
   if (value === 0) return { error: "zero" };
   if (sign === "-") return { error: "negative" };
   const typed = words.unit;
-  if (!typed || typed === own) return { value };
-  if (typed.kind !== own?.kind || !typed.size || !own.size) return { error: "unit" };
-  value = clean((value * typed.size) / own.size);
-  return { value, converted: true };
+  const other = !!typed && typed !== own;
+  if (other && (typed.kind !== own?.kind || !typed.size || !own.size)) return { error: "unit" };
+  if (other) value = (value * typed.size!) / own!.size!;
+  if (scale > 1 && (words.scale > 1 || typed || value >= scale)) return { value: clean(value / scale), converted: true };
+  return other ? { value: clean(value), converted: true } : { value };
 }
 
 /** The number in what was typed, or null when there isn't a positive one. */
@@ -356,13 +377,41 @@ export function parseNumber(text: string, unit?: string): number | null {
   return "value" in r ? r.value : null;
 }
 
-/** What a multiplier key multiplies by. */
-export const MULTIPLIERS = [
-  { id: "thousand", label: "Thousand", factor: 1e3 },
-  { id: "million", label: "Million", factor: 1e6 },
-  { id: "billion", label: "Billion", factor: 1e9 },
-] as const;
-export type MultiplierId = (typeof MULTIPLIERS)[number]["id"];
+/* ---------- The field ---------- */
+
+/** "8800000" as "8,800,000", "1234.5" as "1,234.5": the leading digits in groups of three, anything after as typed. */
+export function groupDigits(text: string): string {
+  const m = text.match(/^(\d+)([^]*)$/);
+  // Not "2.5e6": an exponent's digits aren't the number's.
+  if (!m || /^(?:\.\d*)?e/i.test(m[2])) return text;
+  return m[1].replace(/\B(?=(?:\d{3})+$)/g, ",") + m[2];
+}
+
+/** What an edit put in: the part of `next` that isn't the start or the end it shares with `prev`. */
+function inserted(prev: string, next: string): string {
+  let a = 0;
+  while (a < prev.length && a < next.length && prev[a] === next[a]) a++;
+  let b = 0;
+  while (b < prev.length - a && b < next.length - a && prev[prev.length - 1 - b] === next[next.length - 1 - b]) b++;
+  return next.slice(a, next.length - b);
+}
+
+/**
+ * The guess field after an edit, grouped as it's typed: `prev` is what it showed, `next` what the edit made of it, and
+ * `caret` where the caret is in `next`. The field's own commas come off and the digits are grouped again, the caret
+ * kept after the same digit ("8,800,00|" and a 0 is "8,800,000|"). A comma the player types is theirs: the field
+ * then shows what they type as typed until it's gone, since it may be a decimal comma ("2,5" from a keypad whose only
+ * separator is a comma), which readNumber reads.
+ */
+export function editField(prev: string, next: string, caret: number): { text: string; caret: number } {
+  const ours = !prev.includes(",") || groupDigits(prev.replace(/,/g, "")) === prev;
+  if (!ours || inserted(prev, next).includes(",")) return { text: next, caret };
+  const text = groupDigits(next.replace(/,/g, ""));
+  const before = next.slice(0, caret).replace(/,/g, "").length;
+  let at = 0;
+  for (let seen = 0; at < text.length && seen < before; at++) if (text[at] !== ",") seen++;
+  return { text, caret: at };
+}
 
 /** "2,500,000", "0.1", "8,848.86" (up to 10 significant digits, so 1.1 x 1000 reads 1,100). */
 export function formatDigits(n: number): string {
@@ -389,15 +438,6 @@ export function formatWords(n: number): string {
     if (n >= size * 0.99995) return `${(n / size).toLocaleString("en-US", { maximumSignificantDigits: 4 })} ${word}`;
   }
   return formatDigits(n);
-}
-
-/**
- * The echo under the field: "2,500,000 · 2.5 million", just "330" under a thousand, and just the words from a
- * trillion ("3.04 trillion", "3e18"), whose digits would run past a narrow phone's line.
- */
-export function echoText(n: number): string {
-  if (n >= 1e12 * 0.99995) return formatWords(n);
-  return n >= 1000 ? `${formatDigits(n)} · ${formatWords(n)}` : formatDigits(n);
 }
 
 /**

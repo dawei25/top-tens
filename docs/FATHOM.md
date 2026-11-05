@@ -34,8 +34,17 @@ Write our own questions from facts. Never copy one from another estimation game.
   must be one the game reads (`UNITS` in `src/game/fathom.ts`): players may type it after the number in any form
   ("343 m/s", "390000 km2"), and other units of its kind are converted exactly ("1.5 km" in metres); anything else
   counts things. `src/game/fathom.test.ts` reads every answer back typed with its unit.
-- **`answer`**: a positive number in that unit, as the source states it. No ranges: take the source's central or
-  official figure, and say which in `definition` when it matters.
+- **The unit a person would answer in, so the answer is short.** The player just types the number (there are no
+  thousand/million/billion keys), so pick the unit someone would naturally say the answer in, scaled so the answer
+  has **at most 6 digits before the decimal point**: kilometres, not metres, for long distances (the Moon); tonnes,
+  not kilograms, for a festival's tomatoes; and for big counts a scale word in front of the unit: `million people`
+  for a city of 8.8 million (8.80419), `billion chickens` (26.5), `million litres` for a pool (2.5). The scale words are
+  `million`, `billion` and `trillion`; use the largest that keeps the answer at 1 or more (`trillion trees`, 3.04,
+  not `billion trees`, 3,040), and never one the answer is under 1 of. A player who types the whole amount anyway ("8,800,000",
+  "8.8 million") gets it read back in the unit. `scripts/fathom/check.ts` enforces the 6 digits.
+- **`answer`**: a positive number in that unit, as the source states it, converted exactly (145,000 kg is 145 tonnes;
+  no new rounding). No ranges: take the source's central or official figure, and say which in `definition` when it
+  matters.
 - **`definition`** (optional): one short phrase, no full stop, only when the answer depends on it: "city proper, 2020
   census", "to the tip", "average distance".
 - **`fact`**: one true sentence the player reads after guessing, from the same source, about the number they just
@@ -50,19 +59,22 @@ Write our own questions from facts. Never copy one from another estimation game.
 - **`easy`**: true for a good opener, where most people have a rough anchor (the Eiffel Tower, a marathon).
 
 **What makes a good question:** surprising but fair ("the answer is bigger than you'd think" is good), with an answer
-that stays put. No year questions ("In what year..."), no percentages, no live counts (followers, streams, net worth),
+that stays put, and plain about what's counted without background knowledge (the Sydney Opera House's roof tiles were
+dropped: the big panels or the single tiles?). No year questions ("In what year..."), no percentages, no live counts (followers, streams, net worth),
 nothing that changes month to month, nothing gory or political. A dated figure is fine when the date is in the
 `definition` ("2023").
 
-**The bank's mix:** at least 50 questions over at least 8 kinds, no kind more than 9 in 50, at least 12 easy
-openers, and a spread of magnitudes from under 1 to billions.
+**The bank's mix:** at least 40 questions (judging drops weak ones) over at least 8 kinds, no kind more than 9 in 50, at least 12 easy
+openers, and a spread of magnitudes from under 1 to billions (counting the unit's scale word: 86 billion neurons is in
+the billions).
 
 **Fetching:** Wikipedia's normal page HTML through `scripts/wiki.ts` (1.5 s between requests, one at a time, cached
 in `.cache/wiki`), or another reputable page, fetched one at a time.
 
 **Check:** `NODE_NO_WARNINGS=1 npx tsx scripts/fathom/check.ts` checks all of the above that a script can (shape,
-unique ids, kinds, typical values, positive finite answers, https sources, one question ending in "?", the unit kept
-out of it, answers not given away, the mix), and `npm test` runs it on the real file
+unique ids, kinds, typical values, positive finite answers of at most 6 digits before the point, https sources, one
+question ending in "?", the unit kept out of it, answers not given away, the mix), and `npm test` runs it on the real
+file
 (`scripts/fathom/check.test.ts`). Truth, fairness and the typical miss are on the writer.
 
 ## Judging questions
@@ -89,7 +101,8 @@ What a good question has, in the order the judge checks it:
    is a drop. The fact relates to the number and never gives away another question's answer.
 5. **Stable and dated.** It won't change from month to month; a yearly figure says its year.
 6. **Fair, short wording.** Plain, dry English, about 12 words or fewer (two lines on a phone), no trick or gotcha
-   definitions.
+   definitions. Question and definition together stay within 100 characters, so LOCK IN stays above a phone keyboard
+   (`check.ts` enforces it).
 7. **Safe and fresh.** Nothing gory, political or about a private person, and not a near-copy of another question in
    the bank (same subject and measure).
 

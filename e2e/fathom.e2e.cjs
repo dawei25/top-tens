@@ -1,10 +1,12 @@
 // Fathom, the estimation beta (#fathom): five questions that ask for a number. The questions come from
 // e2e/fixtures/fathom/questions.json (twelve real facts, one per kind), served in place of public/fathom/questions.json.
 // - A full game on phone and desktop: the draw (five kinds, the first easy), the scoring rule in view on the first
-//   question before answering (and on the results), the field (2.5m, the MILLION key, the echo), invalid input, the
-//   reveal (plain closeness, the same for every question; no "most people miss by" line), the running total from the
-//   second question, the results (the total is the sum), COPY RESULT, NEW QUESTIONS draws new questions, the game's
-//   own save is left alone, and a build without a backend sends and queues nothing.
+//   question before answering (and on the results), the field (no scale keys or words, the number grouped with commas
+//   as it's typed and the caret after the same digit, "2.5m" still read), invalid input, the reveal (plain closeness,
+//   the same for every question; no "most people miss by" line), the running total from the second question, the
+//   results (the total is the sum), COPY RESULT, NEW QUESTIONS draws new questions, the game's own save is left alone,
+//   and a build without a backend sends and queues nothing.
+// - A unit with a scale word ("million people"): the short number typed, and the whole amount read back in the unit.
 // - A reload picks the game up where it was, the results included.
 // - The sonar: the answer in the middle, the squid left for too low and right for too high by how far off (clamped at
 //   10x), the miss under it, no bands and no numbers on the scale.
@@ -122,33 +124,33 @@ describe("Fathom", { concurrency: true }, () => {
       assert.ok(rule && rule.y >= 0 && rule.y + rule.height <= vp.viewport.height, "the rule is in view on the first question");
       assert.ok(rule.y < (await page.getByTestId("fathom-input").boundingBox()).y, "the rule comes before the field");
 
-      // 2.5m is 2.5 million, unless "m" is a unit of the question's kind: 2.5 metres (in kilometres too), 2.5 minutes.
+      // Nov 5 (owner): no thousand, million or billion option; the player types the number. Nothing on the ask card
+      // offers a scale: LOCK IN is its only key, and no scale word shows.
+      const ask = page.getByTestId("fathom-ask");
+      assert.deepEqual(await ask.locator("button").evaluateAll((els) => els.map((el) => el.dataset.testid)), ["fathom-lock"]);
+      assert.doesNotMatch(await ask.innerText(), /thousand|million|billion/i);
+      // The number is grouped with commas as it's typed, the caret after the digit just typed.
+      await field.focus();
+      await page.keyboard.type("8800000");
+      assert.equal(await field.inputValue(), "8,800,000");
+      assert.equal(await field.evaluate((el) => el.selectionStart), 9);
+      assert.equal(await echoValue(page), 8_800_000);
+      assert.equal((await page.getByTestId("fathom-echo").textContent()).trim(), "", "the echo doesn't repeat the field");
+      // Typed in the middle ("8|,800,000"): the caret stays after that digit, before the comma.
+      await field.evaluate((el) => el.setSelectionRange(1, 1));
+      await page.keyboard.type("9");
+      assert.equal(await field.inputValue(), "89,800,000");
+      assert.equal(await field.evaluate((el) => el.selectionStart), 2);
+      await page.keyboard.press("End");
+      for (let i = 0; i < 3; i++) await page.keyboard.press("Backspace");
+      assert.equal(await field.inputValue(), "89,800");
+      assert.doesNotMatch(await ask.innerText(), /thousand|million|billion/i, "no scale word for a big number either");
+      // A short form still reads, silently: 2.5m is 2.5 million, unless "m" is a unit of the question's kind (2.5
+      // metres, in kilometres too; 2.5 minutes), and the echo says what it read.
       await field.fill("2.5m");
       const m = { metres: 2.5, kilometres: 0.0025, seconds: 150, minutes: 2.5 }[first.unit] ?? 2_500_000;
       assert.equal(await echoValue(page), m);
       assert.equal(await attr(page, "fathom-echo", "role"), "status", "the echo is read out politely");
-      // The keys multiply what's typed, one at a time, and toggle off.
-      await field.fill("2.5");
-      assert.equal(await echoValue(page), 2.5);
-      await page.getByTestId("fathom-million").click();
-      assert.equal(await attr(page, "fathom-million", "aria-pressed"), "true");
-      assert.equal(await echoValue(page), 2_500_000);
-      // The field reads "2.5 million": the lit key's word right after the number, whole.
-      const scale = await page.getByTestId("fathom-scale").evaluate((el) => {
-        const word = el.lastChild.textContent.trim();
-        const typed = el.querySelector(".fathom-scale-typed").getBoundingClientRect();
-        const box = el.getBoundingClientRect();
-        return { word, shown: getComputedStyle(el).visibility === "visible", whole: el.scrollWidth <= el.clientWidth + 1, after: typed.right <= box.right };
-      });
-      assert.deepEqual(scale, { word: "million", shown: true, whole: true, after: true });
-      await page.getByTestId("fathom-billion").click();
-      assert.equal(await attr(page, "fathom-million", "aria-pressed"), "false");
-      assert.equal(await echoValue(page), 2_500_000_000);
-      await page.getByTestId("fathom-billion").click();
-      assert.equal(await attr(page, "fathom-billion", "aria-pressed"), "false");
-      assert.equal(await echoValue(page), 2.5);
-      assert.equal(await page.getByTestId("fathom-scale").count(), 0, "no word with no key lit");
-      if (vp.name === "desktop") assert.equal(await field.evaluate((el) => el === document.activeElement), true, "the keys leave focus in the field");
 
       // Invalid input says what's wrong and locks nothing in.
       for (const bad of ["abc", "0", "-5"]) {
@@ -164,7 +166,9 @@ describe("Fathom", { concurrency: true }, () => {
       assert.equal(await page.getByTestId("fathom-reveal").count(), 0);
       // Typing again clears the complaint.
       await field.fill("3");
-      assert.equal(await attr(page, "fathom-echo", "data-tone"), "value");
+      assert.notEqual(await attr(page, "fathom-echo", "data-tone"), "error");
+      assert.equal((await page.getByTestId("fathom-echo").textContent()).trim(), "");
+      assert.equal(await echoValue(page), 3);
 
       // Dead on: the exact answer, locked in with Enter.
       const played = [first];
@@ -191,11 +195,12 @@ describe("Fathom", { concurrency: true }, () => {
       // NEXT takes focus a beat after the reveal (so a held Enter presses nothing), then Enter moves on.
       await page.waitForFunction(() => document.activeElement?.dataset.testid === "fathom-next");
 
-      // Four more: typed with separators, a short form, the THOUSAND key, and far off.
+      // Four more: typed with separators, a third of the answer, plain digits (grouped as typed), and far off (a short
+      // form, read silently).
       const guesses = [
         (q) => ({ text: Math.round(q.answer * 2).toLocaleString("en-US"), value: Math.round(q.answer * 2) }),
         (q) => ({ text: `${q.answer / 3}`, value: q.answer / 3 }),
-        () => ({ text: "4", key: "fathom-thousand", value: 4000 }),
+        () => ({ text: "4000", shown: "4,000", value: 4000 }),
         () => ({ text: "1.5bn", value: 1.5e9 }),
       ];
       for (const make of guesses) {
@@ -206,7 +211,7 @@ describe("Fathom", { concurrency: true }, () => {
         played.push(q);
         const g = make(q);
         await page.getByTestId("fathom-input").fill(g.text);
-        if (g.key) await page.getByTestId(g.key).click();
+        if (g.shown) assert.equal(await page.getByTestId("fathom-input").inputValue(), g.shown);
         await page.getByTestId("fathom-lock").click();
         await page.getByTestId("fathom-reveal").waitFor();
         assert.equal(Number(await attr(page, "fathom-guess", "data-value")), g.value);
@@ -268,6 +273,49 @@ describe("Fathom", { concurrency: true }, () => {
       await ctx.close();
     });
   }
+
+  // Nov 5 (owner): big counts are asked in a unit with a scale word ("million people"), so the player types a short
+  // number. One who types every digit anyway gets the amount read back in the unit, not millions of millions.
+  test("a unit with a scale word: the short number, and the whole amount read back in the unit (phone)", async () => {
+    const vp = VIEWPORTS.find((v) => v.name === "phone");
+    const city = {
+      id: "new-york-city-population",
+      kind: "places",
+      question: "What is the population of New York City?",
+      unit: "million people",
+      answer: 8.80419,
+      definition: "city proper, 2020 census",
+      fact: "An estimated 800 languages are spoken there.",
+      source: { title: "New York City", url: "https://en.wikipedia.org/wiki/New_York_City" },
+      typical: 2,
+      easy: true,
+    };
+    const ids = [city.id, "adult-bones", "octopus-hearts", "moon-distance", "piano-keys"];
+    const { ctx, page } = await openFathom(vp, {
+      serve: bank({ status: 200, contentType: "application/json", body: JSON.stringify({ version: 1, questions: [...BANK, city] }) }),
+      save: { recent: [], game: { ids, guesses: [], at: 0 } },
+      reducedMotion: "reduce",
+    });
+    const field = page.getByTestId("fathom-input");
+    await field.waitFor();
+    assert.equal((await page.getByTestId("fathom-unit").textContent()).trim(), "million people");
+    await field.fill("8.8");
+    assert.equal(await echoValue(page), 8.8);
+    assert.equal((await page.getByTestId("fathom-echo").textContent()).trim(), "", "the field says it");
+    for (const text of ["8800000", "8.8 million", "8.8m"]) {
+      await field.fill(text);
+      assert.equal(await echoValue(page), 8.8, `"${text}"`);
+      assert.equal(await attr(page, "fathom-echo", "data-tone"), "value");
+      assert.equal((await page.getByTestId("fathom-echo").textContent()).trim(), "8.8 million people", `"${text}": the echo says what it read`);
+    }
+    await field.fill("8800000");
+    assert.equal(await field.inputValue(), "8,800,000");
+    await page.getByTestId("fathom-lock").click();
+    await page.getByTestId("fathom-reveal").waitFor();
+    assert.equal(Number(await attr(page, "fathom-guess", "data-value")), 8.8);
+    assert.equal(await attr(page, "fathom-band", "data-band"), "dead-on");
+    await ctx.close();
+  });
 
   test("a reload picks the game up where it was (phone)", async () => {
     const vp = VIEWPORTS.find((v) => v.name === "phone");
@@ -462,6 +510,39 @@ describe("Fathom", { concurrency: true }, () => {
     await ctx.close();
   });
 
+  // Every question in the bank, not just the longest by characters: wrapping decides the height, and a 99-character
+  // question (bering-strait-width) pushed LOCK IN under the keyboard while longer ones fit.
+  test("with the keyboard up on a small phone, LOCK IN stays in view for every question in the bank", async () => {
+    const real = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "public", "fathom", "questions.json"), "utf8")).questions;
+    const all = real.map((q) => q.id);
+    const fails = [];
+    for (let g = 0; g < all.length; g += QUESTIONS) {
+      const ids = all.slice(g, g + QUESTIONS);
+      while (ids.length < QUESTIONS) ids.push(all[ids.length]);
+      const { ctx, page } = await openFathom({ viewport: { width: 375, height: 400 }, isMobile: true, hasTouch: true }, {
+        serve: async () => {},
+        save: { recent: [], game: { ids, guesses: [], at: 0 } },
+        reducedMotion: "reduce",
+      });
+      for (let i = 0; i < QUESTIONS; i++) {
+        const field = page.getByTestId("fathom-input");
+        await field.waitFor();
+        await field.focus();
+        await field.fill("42");
+        const ok = await page.evaluate(() => {
+          const r = (s) => document.querySelector(s).getBoundingClientRect();
+          return ['[data-testid="fathom-question"] h1', '[data-testid="fathom-input"]', '[data-testid="fathom-lock"]'].every((s) => r(s).top >= 0 && r(s).bottom <= innerHeight + 0.5);
+        });
+        if (!ok) fails.push(await attr(page, "fathom-question", "data-question"));
+        await page.getByTestId("fathom-lock").click();
+        await page.getByTestId("fathom-reveal").waitFor();
+        await next(page);
+      }
+      await ctx.close();
+    }
+    assert.deepEqual([...new Set(fails)], [], "questions whose LOCK IN goes under the keyboard at 375x400");
+  });
+
   // Nov 5 review: the decimal keypad (iOS) has no Return key, and with it up LOCK IN was under the keyboard. A phone
   // with its keyboard up shows the question, the field and LOCK IN: the page shrinks (Android), or the keyboard covers
   // its lower part and only the visual viewport says so (iOS, faked here). The real bank's longest questions.
@@ -585,8 +666,7 @@ describe("Fathom", { concurrency: true }, () => {
         );
         assert.deepEqual(clipped, [], `${where} at ${width}px: keys cut short`);
       };
-      await page.getByTestId("fathom-input").fill("299792");
-      await page.getByTestId("fathom-thousand").click();
+      await page.getByTestId("fathom-input").fill("299792458");
       await check("the question");
       await page.getByTestId("fathom-lock").click();
       await page.getByTestId("fathom-reveal").waitFor();

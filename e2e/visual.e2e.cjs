@@ -216,7 +216,7 @@ describe("visual baselines", { concurrency: true }, () => {
   }
 
   // Fathom (beta, #fathom), on its fixture bank with a fixed draw (seeded in its own save): a question with a number
-  // typed and MILLION on, a reveal (a close guess, the sonar), and the results of five set guesses.
+  // typed (grouped with a comma), a reveal (a close guess, the sonar), and the results of five set guesses.
   for (const vp of VIEWPORTS) {
     test(`Fathom looks as it did (${vp.name})`, async () => {
       const draw = ["eiffel-tower-height", "moon-distance", "piano-keys", "speed-of-light", "africa-countries"];
@@ -242,11 +242,9 @@ describe("visual baselines", { concurrency: true }, () => {
         if (p) problems.push(p);
       };
 
-      await page.getByTestId("fathom-input").fill("2.5");
-      await page.getByTestId("fathom-million").click();
+      await page.getByTestId("fathom-input").fill("2500");
       await shot("fathom-question");
 
-      await page.getByTestId("fathom-million").click();
       await page.getByTestId("fathom-input").fill("290");
       await page.getByTestId("fathom-lock").click();
       await page.getByTestId("fathom-reveal").waitFor();

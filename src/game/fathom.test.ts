@@ -7,12 +7,13 @@ import {
   bandLabel,
   bandOf,
   drawQuestions,
-  echoText,
+  editField,
   FATHOM_KEY,
   fathomScore,
   formatAmount,
   formatDigits,
   formatWords,
+  groupDigits,
   loadFathom,
   lockIn,
   MAX_TOTAL,
@@ -290,6 +291,33 @@ describe("reading numbers", () => {
     expect(readNumber("0.5m", "centimetres")).toEqual({ value: 50, converted: true });
     expect(readNumber("50 cm", "centimetres")).toEqual({ value: 50 });
   });
+  // Nov 5 (owner): the scale keys went, and big counts are asked in a unit with a scale word, so the player types a
+  // short number ("8.8" million people). One typed as the whole amount, with a scale word, a unit or just all its
+  // digits, is taken back to the unit's scale, not read as millions of millions.
+  it("reads a unit with a scale word", () => {
+    expect(readNumber("8.8", "million people")).toEqual({ value: 8.8 });
+    expect(readNumber("8,800,000", "million people")).toEqual({ value: 8.8, converted: true });
+    expect(parseNumber("8.8 million", "million people")).toBe(8.8);
+    expect(parseNumber("8.8m", "million people")).toBe(8.8);
+    expect(parseNumber("8.8 million people", "million people")).toBe(8.8);
+    expect(parseNumber("8,804,190 people", "million people")).toBe(8.80419);
+    expect(parseNumber("8800 thousand", "million people")).toBe(8.8);
+    expect(parseNumber("26.5", "billion chickens")).toBe(26.5);
+    expect(parseNumber("26.5 billion", "billion chickens")).toBe(26.5);
+    expect(parseNumber("26.5bn", "billion chickens")).toBe(26.5);
+    expect(parseNumber("26,500,000,000", "billion chickens")).toBe(26.5);
+    expect(parseNumber("3040", "billion trees")).toBe(3040);
+    expect(parseNumber("3 trillion", "billion trees")).toBe(3000);
+    expect(parseNumber("2.5", "million litres")).toBe(2.5);
+    expect(parseNumber("2.5m", "million litres")).toBe(2.5);
+    expect(parseNumber("2500 m3", "million litres")).toBe(2.5);
+    expect(parseNumber("2,500,000 litres", "million litres")).toBe(2.5);
+    // Under the scale and nothing typed after it: in the unit, whatever its size.
+    expect(parseNumber("950000", "million people")).toBe(950_000);
+    expect(readNumber("5 kg", "million people")).toEqual({ error: "unit" });
+    expect(askFor("million people")).toBe("In million people, please.");
+    expect(askFor("million litres")).toBe("In million litres, please.");
+  });
   // A new question in a unit the table doesn't know would be refused when typed with its unit: every question in the
   // bank reads its own answer back, typed with its unit.
   it("reads every question's answer typed with its own unit", () => {
@@ -339,19 +367,57 @@ describe("reading numbers", () => {
   });
 });
 
-describe("formatting", () => {
-  it("echoes digits and words", () => {
-    expect(echoText(2_500_000)).toBe("2,500,000 · 2.5 million");
-    expect(echoText(3000)).toBe("3,000 · 3 thousand");
-    expect(echoText(1_500_000_000)).toBe("1,500,000,000 · 1.5 billion");
-    expect(echoText(330)).toBe("330");
-    expect(echoText(0.1)).toBe("0.1");
-    expect(echoText(1e30)).toBe("1e30");
-    // From a trillion, the words alone: the digits ran the line past a 320px phone's width.
-    expect(echoText(999.9e9)).toBe("999,900,000,000 · 999.9 billion");
-    expect(echoText(3.04e12)).toBe("3.04 trillion");
-    expect(echoText(999e12)).toBe("999 trillion");
+/** Types `keys` into the field one at a time at the caret (Backspace deletes before it), as editField sees it. */
+function type(keys: string[], start = { text: "", caret: 0 }) {
+  let f = start;
+  for (const k of keys) {
+    const next = k === "Backspace" ? f.text.slice(0, f.caret - 1) + f.text.slice(f.caret) : f.text.slice(0, f.caret) + k + f.text.slice(f.caret);
+    f = editField(f.text, next, k === "Backspace" ? f.caret - 1 : f.caret + k.length);
+  }
+  return f;
+}
+
+// Nov 5 (owner): no scale keys, "just have them type the number": the field groups it as it's typed.
+describe("the field", () => {
+  it("groups the digits before the point", () => {
+    expect(groupDigits("8800000")).toBe("8,800,000");
+    expect(groupDigits("1234.5678")).toBe("1,234.5678");
+    expect(groupDigits("999")).toBe("999");
+    expect(groupDigits("2500000 km")).toBe("2,500,000 km");
+    expect(groupDigits("")).toBe("");
+    expect(groupDigits("about 3000")).toBe("about 3000");
+    expect(groupDigits("2.5e6")).toBe("2.5e6");
+    expect(groupDigits("12345e3")).toBe("12345e3");
   });
+  it("groups as each digit is typed, the caret after it", () => {
+    expect(type([..."8800000"])).toEqual({ text: "8,800,000", caret: 9 });
+    expect(type([..."384400.5"])).toEqual({ text: "384,400.5", caret: 9 });
+    // Pasted whole.
+    expect(editField("", "8800000", 7)).toEqual({ text: "8,800,000", caret: 9 });
+  });
+  it("keeps the caret after the same digit in the middle", () => {
+    // "1,|234" and a 9: "19,|234" (after the 9, before the comma).
+    expect(type(["9"], { text: "1,234", caret: 2 })).toEqual({ text: "19,234", caret: 2 });
+    // "12,|345" and a 9: "129|,345".
+    expect(type(["9"], { text: "12,345", caret: 3 })).toEqual({ text: "129,345", caret: 3 });
+    // Deleting at the end: "1,234|" to "123|".
+    expect(type(["Backspace"], { text: "1,234", caret: 5 })).toEqual({ text: "123", caret: 3 });
+    // Deleting the field's own comma deletes nothing: the caret steps back over it.
+    expect(type(["Backspace"], { text: "1,234", caret: 2 })).toEqual({ text: "1,234", caret: 1 });
+  });
+  it("leaves a comma the player typed as typed, so a decimal comma reads", () => {
+    const comma = type([..."2,5"]);
+    expect(comma.text).toBe("2,5");
+    expect(parseNumber(comma.text)).toBe(2.5);
+    // Habit: "8,800,000" typed with its commas.
+    expect(type([..."8,800,000"]).text).toBe("8,800,000");
+    expect(parseNumber(type([..."8,800,000"]).text)).toBe(8_800_000);
+    // The player's comma gone, the field groups again.
+    expect(type(["Backspace", "Backspace", ..."5000"], comma)).toEqual({ text: "25,000", caret: 6 });
+  });
+});
+
+describe("formatting", () => {
   it("keeps digits clean of float noise", () => {
     expect(formatDigits(1.1 * 1000)).toBe("1,100");
     expect(formatDigits(8848.86)).toBe("8,848.86");
