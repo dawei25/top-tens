@@ -18,14 +18,15 @@ const question = (over: Partial<Question> & Record<string, unknown> = {}): Quest
 
 const errors = (over: Partial<Question> & Record<string, unknown>) => checkQuestion(question(over), 0);
 
-/** A bank that passes: 50 questions over every kind, 12 easy, answers from under 1 to billions. */
+/** A bank that passes: 50 questions over every kind, 12 easy, answers from under 1 to billions (2 billion metres). */
 function bank(): { version: 1; questions: Question[] } {
   const questions = Array.from({ length: 50 }, (_, i) =>
     question({
       id: `question-${i + 1}`,
       kind: KINDS[i % KINDS.length],
       question: `How tall is landmark number ${String.fromCharCode(97 + (i % 26))}${i}?`,
-      answer: i === 0 ? 0.5 : i === 1 ? 2e9 : 20 + i,
+      answer: i === 0 ? 0.5 : i === 1 ? 2 : 20 + i,
+      ...(i === 1 && { unit: "billion metres" }),
       definition: undefined,
       easy: i < 12,
     }),
@@ -84,6 +85,22 @@ describe("checkQuestion", () => {
     expect(errors({ unit: "degrees Celsius" })).toEqual([]);
   });
 
+  // Nov 5 (owner): the THOUSAND / MILLION / BILLION keys went; the player just types the number, so every answer is
+  // short in its unit: at most 6 digits before the decimal point, a scale word in the unit for big counts.
+  it("wants at most 6 digits before the decimal point, in a unit with a scale word when it's big", () => {
+    expect(errors({ answer: 999_999.5 })).toEqual([]);
+    expect(errors({ answer: 1_000_000 })[0]).toMatch(/answer 1000000 has more than 6 digits before the decimal point/);
+    expect(errors({ question: "How many trees are there on Earth?", unit: "trees", answer: 3.04e12 })[0]).toMatch(/more than 6 digits/);
+    expect(errors({ question: "How many trees are there on Earth?", unit: "billion trees", answer: 3040 })).toEqual([]);
+    expect(errors({ question: "What is the population of New York City?", unit: "million people", answer: 8.80419 })).toEqual([]);
+    expect(errors({ question: "How much water does an Olympic pool hold?", unit: "million litres", answer: 2.5 })).toEqual([]);
+    // The unit after the scale word follows the same rules: kept out of the question, except a count's after How many.
+    expect(errors({ question: "How many people live in New York City?", unit: "million people", answer: 8.8 })).toEqual([]);
+    expect(errors({ question: "How tall is the Eiffel Tower in metres?", unit: "million metres", answer: 3 })[0]).toMatch(/repeats the unit "metres"/);
+    // No scale word for an answer under 1 of it.
+    expect(errors({ unit: "million people", answer: 0.012, question: "How big is the crowd?" })[0]).toMatch(/under 1 million people/);
+  });
+
   it("wants a short definition phrase and a one-sentence fact", () => {
     expect(errors({ definition: "To the tip." })[0]).toMatch(/definition is a phrase/);
     expect(errors({ definition: "x".repeat(61) })[0]).toMatch(/definition is longer than/);
@@ -139,10 +156,15 @@ describe("checkBank", () => {
     const flat = bank();
     flat.questions[0].answer = 3;
     flat.questions[1].answer = 4;
+    flat.questions[1].unit = "metres";
     expect(checkBank(flat)).toEqual([
       "no answer under 1: the bank needs a spread of magnitudes",
       "no answer in the billions: the bank needs a spread of magnitudes",
     ]);
+    // The billions are counted with the unit's scale word: 2 billion metres is, 2 metres isn't.
+    const small = bank();
+    small.questions[1].unit = "metres";
+    expect(checkBank(small)).toEqual(["no answer in the billions: the bank needs a spread of magnitudes"]);
   });
 
   it("wants version 1 and a questions array", () => {
