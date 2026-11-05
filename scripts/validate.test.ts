@@ -325,6 +325,7 @@ describe("validate: regional lists", () => {
     expect(undeclaredRegion({ ...base, title: "Most populous countries", prompt: "Name the 10 most populous countries", universe: "countries" })).toBeUndefined();
   });
 
+  // Reads every built regional list: slow when another verify runs alongside (it timed out at 5 s twice).
   it("holds on every topic and every regional list as built", () => {
     for (const t of TOPICS) expect(undeclaredRegion(t), t.id).toBeUndefined();
     const lists = TOPICS.filter((t) => t.region);
@@ -334,7 +335,7 @@ describe("validate: regional lists", () => {
       expect(elsewhereErrors(built, t), t.id).toEqual([]);
       if (built.source.asOf >= REGION_REQUIRED_FROM) expect(regionGaps(built, t), t.id).toEqual([]);
     }
-  });
+  }, 30_000);
 });
 
 describe("validate: facts on lists of places say where", () => {
