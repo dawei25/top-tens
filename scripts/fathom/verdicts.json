@@ -1,53 +1,507 @@
 {
-  "adult-blood-volume": { "verdict": "keep", "why": "Source states about 5 litres; anyone can picture a body; owner liked it.", "judgedAt": "2026-11-05" },
-  "adult-bones": { "verdict": "keep", "why": "206 as stated (not counting accessory bones); a fair opener, and the 270-at-birth fact turns the known number into a surprise.", "judgedAt": "2026-11-05" },
-  "brain-neurons": { "verdict": "keep", "why": "86 billion as stated; the popular 100 billion is an anchor within 3x; billion neurons is the natural unit.", "judgedAt": "2026-11-05" },
-  "breath-volume": { "verdict": "fix", "why": "14 words with 'ordinary' and 'at rest' doubled up: now 'How much air does an adult take in with one breath?', definition 'an ordinary breath at rest' (source: a half litre ordinary tidal breath).", "judgedAt": "2026-11-05" },
-  "tallest-person": { "verdict": "keep", "why": "2.72 m as stated; everyone can reason from tall people they know; weight fact speaks to his size.", "judgedAt": "2026-11-05" },
-  "giraffe-tongue-length": { "verdict": "fix", "why": "Fact was about the tongue's colour, not its length: now also says what the length is for (grabbing food from branches straight above), from the source.", "judgedAt": "2026-11-05" },
-  "blue-whale-length": { "verdict": "keep", "why": "29.9 m snout to tail, the longest scientifically measured, as stated; a whale is easy to picture; the heart fact speaks to its size.", "judgedAt": "2026-11-05" },
-  "elephant-pregnancy": { "verdict": "keep", "why": "22 months, the longest of any mammal, as stated; reasoned from a human's 9 months, and nearly two years is a good surprise.", "judgedAt": "2026-11-05" },
-  "millipede-legs": { "verdict": "fix", "why": "Fact was about where it was found, not the legs: now the first millipede with over 1,000 legs, named 'true thousand feet' (source).", "judgedAt": "2026-11-05" },
-  "chicken-population": { "verdict": "keep", "why": "26.5 billion (2023) as stated; reasoned from 8 billion people; 50 billion raised a year is a fact about the number.", "judgedAt": "2026-11-05" },
-  "greenland-shark-age": { "verdict": "keep", "why": "392 is the source's central estimate (392 +/- 120) and the definition says so; maturity at 150 makes the number land.", "judgedAt": "2026-11-05" },
-  "eiffel-tower-height": { "verdict": "keep", "why": "330 m to the tip as stated; the model opener; owner liked it.", "judgedAt": "2026-11-05" },
-  "statue-of-liberty-height": { "verdict": "fix", "why": "Fact (2.4 mm copper skin) said nothing about the height: now the copper statue is 46 m and the pedestal and foundation the other half (source's dimensions table).", "judgedAt": "2026-11-05" },
-  "great-wall-length": { "verdict": "keep", "why": "21,196 km, walls and trenches, 2012 survey, as stated; the definition pins it, and it beats the popular figure; Ming 8,850 km fact compares.", "judgedAt": "2026-11-05" },
-  "big-buddha-height": { "verdict": "drop", "why": "A statue most players have never heard of, 34 m is no surprise and teaches nothing, and it's a fourth landmark height after the Eiffel Tower, Statue of Liberty and Burj Khalifa.", "judgedAt": "2026-11-05" },
-  "burj-khalifa-height": { "verdict": "keep", "why": "829.8 m to the tip as stated; a good opener; the 585 m-without-spire fact speaks to the number.", "judgedAt": "2026-11-05" },
-  "new-york-city-population": { "verdict": "keep", "why": "8,804,190 (2020 census, city proper) as stated, in million people; owner liked it.", "judgedAt": "2026-11-05" },
-  "finland-lakes": { "verdict": "drop", "why": "Nobody can reason to it: the count hangs on a 500 square metre threshold (ponds count as lakes), and 'land of a thousand lakes' points 188x the wrong way.", "judgedAt": "2026-11-05" },
-  "vatican-city-area": { "verdict": "fix", "why": "Fact was about population, not area: now ties the 0.49 km2 to being the smallest country (source), keeping the 882 residents.", "judgedAt": "2026-11-05" },
-  "hong-kong-islands": { "verdict": "drop", "why": "An obscure count hanging on a 500 square metre threshold (rocks count as islands): nothing to reason from without knowing Hong Kong's coast.", "judgedAt": "2026-11-05" },
-  "moon-distance": { "verdict": "keep", "why": "384,399 km average as stated; reasoned from Earth's size or the known figure; the 3.8 cm a year fact speaks to the distance.", "judgedAt": "2026-11-05" },
-  "sunlight-travel-time": { "verdict": "keep", "why": "8.3 minutes as stated; good opener, and the 10,000 to 170,000 years from the core is a great reveal.", "judgedAt": "2026-11-05" },
-  "iss-orbit-time": { "verdict": "keep", "why": "92.9 minutes as stated; reasoned from speed and Earth's size, which the fact then gives.", "judgedAt": "2026-11-05" },
-  "venus-rotation": { "verdict": "drop", "why": "Pure trivia: nothing to reason from (a guess near Earth's 1 day is 243x off); you either know the factoid or you don't.", "judgedAt": "2026-11-05" },
-  "moonwalkers": { "verdict": "keep", "why": "Twelve, as stated; six landings of two; fact (none went back) is about the twelve.", "judgedAt": "2026-11-05" },
-  "challenger-deep-depth": { "verdict": "keep", "why": "10,935 m (2021 study) as stated; reasoned from Everest; surveys agree within 1%.", "judgedAt": "2026-11-05" },
-  "angel-falls-height": { "verdict": "keep", "why": "979 m total height as stated, and the 807 m plunge fact explains what the total counts.", "judgedAt": "2026-11-05" },
-  "lightning-per-second": { "verdict": "fix", "why": "Counted 'times' with the unit flashes: now 'How many flashes of lightning happen on Earth every second?'; fact (30,000 C) wasn't about the count: now nearly 1.4 billion a year (source).", "judgedAt": "2026-11-05" },
-  "trees-on-earth": { "verdict": "fix", "why": "Read '3,040 billion trees': now 3.04 trillion trees, as the source states it (2015 estimate); a Fermi question from forest area, with the 46% fact.", "judgedAt": "2026-11-05" },
-  "speed-of-sound": { "verdict": "keep", "why": "343 m/s at 20 C as stated; reasoned from counting seconds after lightning; iron 15x faster compares.", "judgedAt": "2026-11-05" },
-  "air-weight": { "verdict": "keep", "why": "1.225 kg/m3 (ISA, 15 C) as stated; heavier than people think, and 800x lighter than water gives a way in.", "judgedAt": "2026-11-05" },
-  "known-elements": { "verdict": "keep", "why": "118 as stated; a fair opener; only 94 natural is a fact about the number.", "judgedAt": "2026-11-05" },
-  "saffron-flowers": { "verdict": "keep", "why": "150,000 flowers per kg as stated; the question says saffron comes from flowers, so a few tiny threads each is reasonable; 40 hours of picking explains the price.", "judgedAt": "2026-11-05" },
-  "parmesan-wheel": { "verdict": "fix", "why": "Fact was about yearly output, not the weight: now each 1,100-litre vat of milk makes two wheels (source).", "judgedAt": "2026-11-05" },
-  "neapolitan-pizza-oven": { "verdict": "keep", "why": "485 C as the rules state; reasoned from a home oven's 250 C; 60 to 90 seconds is about the heat.", "judgedAt": "2026-11-05" },
-  "la-tomatina-tomatoes": { "verdict": "fix", "why": "Year moved to the definition (13 words to 11); citric-acid fact wasn't about the tonnage: now up to 20,000 throwers in a town of 9,000 (source).", "judgedAt": "2026-11-05" },
-  "bank-card-width": { "verdict": "keep", "why": "85.60 mm (ID-1) as stated; one is in every wallet.", "judgedAt": "2026-11-05" },
-  "a380-capacity": { "verdict": "keep", "why": "853, the maximum certified, as stated; the evacuation test is how that number was earned.", "judgedAt": "2026-11-05" },
-  "olympic-pool-volume": { "verdict": "keep", "why": "2.5 million litres at the 2 m Olympic minimum depth, as stated; a model Fermi question (50 x 25 x 2).", "judgedAt": "2026-11-05" },
-  "marathon-distance": { "verdict": "keep", "why": "42.195 km as stated; the opener everyone has an anchor for; the 1908 London fact explains the odd number.", "judgedAt": "2026-11-05" },
-  "basketball-hoop-height": { "verdict": "fix", "why": "Fact (peach baskets until 1906) said nothing about the height: now says they were nailed to a gym balcony (source).", "judgedAt": "2026-11-05" },
-  "gold-medal-gold": { "verdict": "keep", "why": "6 g of gold plating as stated; less than you'd think but fair (medals are known to be plated), and the silver fact explains it.", "judgedAt": "2026-11-05" },
-  "longest-tennis-match": { "verdict": "keep", "why": "11 hours 5 minutes as stated (11 is within 1%); 70-68 over three days is a great reveal.", "judgedAt": "2026-11-05" },
-  "piano-keys": { "verdict": "fix", "why": "Fact (Viennese colours reversed) wasn't about the count: now five octaves in Mozart's day, more than seven on today's 88 keys (source).", "judgedAt": "2026-11-05" },
-  "mona-lisa-height": { "verdict": "fix", "why": "Fact (1977 insects) wasn't about the size: now a poplar panel 77 by 53 cm, painted on wood, not canvas (source).", "judgedAt": "2026-11-05" },
-  "phantom-performances": { "verdict": "fix", "why": "Counted 'times' with the unit performances: now 'How many performances did The Phantom of the Opera give on Broadway?'; fact adds by how much it leads (over 3,500).", "judgedAt": "2026-11-05" },
-  "czech-beer": { "verdict": "keep", "why": "126.0 litres (2024) as listed; reasoned from a pint a day; Austria second compares.", "judgedAt": "2026-11-05" },
-  "turkey-tea": { "verdict": "keep", "why": "3.16 kg of dry tea (2016) as listed; reasoned from a teabag a cup; Ireland second is a good surprise.", "judgedAt": "2026-11-05" },
-  "biggest-stadium": { "verdict": "fix", "why": "13 words: the stadium's name moved to the definition ('How many people can the world's biggest stadium hold?'); 132,000 as listed.", "judgedAt": "2026-11-05" },
-  "caspian-sea-area": { "verdict": "fix", "why": "Fact (ocean-basin geology) wasn't about the area: now Lake Superior, the next largest, is about a fifth of its size (82,100 km2 in the same list).", "judgedAt": "2026-11-05" },
-  "sydney-opera-house-tiles": { "verdict": "drop", "why": "Owner: unclear what's counted (the big panels or the single tiles), needs background knowledge; dropped before this review, kept here so it isn't written again.", "judgedAt": "2026-11-05" }
+  "adult-blood-volume": {
+    "verdict": "keep",
+    "why": "Source states about 5 litres; anyone can picture a body; owner liked it.",
+    "judgedAt": "2026-11-05"
+  },
+  "adult-bones": {
+    "verdict": "keep",
+    "why": "206 as stated (not counting accessory bones); a fair opener, and the 270-at-birth fact turns the known number into a surprise.",
+    "judgedAt": "2026-11-05"
+  },
+  "brain-neurons": {
+    "verdict": "keep",
+    "why": "86 billion as stated; the popular 100 billion is an anchor within 3x; billion neurons is the natural unit.",
+    "judgedAt": "2026-11-05"
+  },
+  "breath-volume": {
+    "verdict": "fix",
+    "why": "14 words with 'ordinary' and 'at rest' doubled up: now 'How much air does an adult take in with one breath?', definition 'an ordinary breath at rest' (source: a half litre ordinary tidal breath).",
+    "judgedAt": "2026-11-05"
+  },
+  "tallest-person": {
+    "verdict": "keep",
+    "why": "2.72 m as stated; everyone can reason from tall people they know; weight fact speaks to his size.",
+    "judgedAt": "2026-11-05"
+  },
+  "giraffe-tongue-length": {
+    "verdict": "fix",
+    "why": "Fact was about the tongue's colour, not its length: now also says what the length is for (grabbing food from branches straight above), from the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "blue-whale-length": {
+    "verdict": "keep",
+    "why": "29.9 m snout to tail, the longest scientifically measured, as stated; a whale is easy to picture; the heart fact speaks to its size.",
+    "judgedAt": "2026-11-05"
+  },
+  "elephant-pregnancy": {
+    "verdict": "keep",
+    "why": "22 months, the longest of any mammal, as stated; reasoned from a human's 9 months, and nearly two years is a good surprise.",
+    "judgedAt": "2026-11-05"
+  },
+  "millipede-legs": {
+    "verdict": "fix",
+    "why": "Fact was about where it was found, not the legs: now the first millipede with over 1,000 legs, named 'true thousand feet' (source).",
+    "judgedAt": "2026-11-05"
+  },
+  "chicken-population": {
+    "verdict": "keep",
+    "why": "26.5 billion (2023) as stated; reasoned from 8 billion people; 50 billion raised a year is a fact about the number.",
+    "judgedAt": "2026-11-05"
+  },
+  "greenland-shark-age": {
+    "verdict": "keep",
+    "why": "392 is the source's central estimate (392 +/- 120) and the definition says so; maturity at 150 makes the number land.",
+    "judgedAt": "2026-11-05"
+  },
+  "eiffel-tower-height": {
+    "verdict": "keep",
+    "why": "330 m to the tip as stated; the model opener; owner liked it.",
+    "judgedAt": "2026-11-05"
+  },
+  "statue-of-liberty-height": {
+    "verdict": "fix",
+    "why": "Fact (2.4 mm copper skin) said nothing about the height: now the copper statue is 46 m and the pedestal and foundation the other half (source's dimensions table).",
+    "judgedAt": "2026-11-05"
+  },
+  "great-wall-length": {
+    "verdict": "keep",
+    "why": "21,196 km, walls and trenches, 2012 survey, as stated; the definition pins it, and it beats the popular figure; Ming 8,850 km fact compares.",
+    "judgedAt": "2026-11-05"
+  },
+  "big-buddha-height": {
+    "verdict": "drop",
+    "why": "A statue most players have never heard of, 34 m is no surprise and teaches nothing, and it's a fourth landmark height after the Eiffel Tower, Statue of Liberty and Burj Khalifa.",
+    "judgedAt": "2026-11-05"
+  },
+  "burj-khalifa-height": {
+    "verdict": "keep",
+    "why": "829.8 m to the tip as stated; a good opener; the 585 m-without-spire fact speaks to the number.",
+    "judgedAt": "2026-11-05"
+  },
+  "new-york-city-population": {
+    "verdict": "keep",
+    "why": "8,804,190 (2020 census, city proper) as stated, in million people; owner liked it.",
+    "judgedAt": "2026-11-05"
+  },
+  "finland-lakes": {
+    "verdict": "drop",
+    "why": "Nobody can reason to it: the count hangs on a 500 square metre threshold (ponds count as lakes), and 'land of a thousand lakes' points 188x the wrong way.",
+    "judgedAt": "2026-11-05"
+  },
+  "vatican-city-area": {
+    "verdict": "fix",
+    "why": "Fact was about population, not area: now ties the 0.49 km2 to being the smallest country (source), keeping the 882 residents.",
+    "judgedAt": "2026-11-05"
+  },
+  "hong-kong-islands": {
+    "verdict": "drop",
+    "why": "An obscure count hanging on a 500 square metre threshold (rocks count as islands): nothing to reason from without knowing Hong Kong's coast.",
+    "judgedAt": "2026-11-05"
+  },
+  "moon-distance": {
+    "verdict": "keep",
+    "why": "384,399 km average as stated; reasoned from Earth's size or the known figure; the 3.8 cm a year fact speaks to the distance.",
+    "judgedAt": "2026-11-05"
+  },
+  "sunlight-travel-time": {
+    "verdict": "keep",
+    "why": "8.3 minutes as stated; good opener, and the 10,000 to 170,000 years from the core is a great reveal.",
+    "judgedAt": "2026-11-05"
+  },
+  "iss-orbit-time": {
+    "verdict": "keep",
+    "why": "92.9 minutes as stated; reasoned from speed and Earth's size, which the fact then gives.",
+    "judgedAt": "2026-11-05"
+  },
+  "venus-rotation": {
+    "verdict": "drop",
+    "why": "Pure trivia: nothing to reason from (a guess near Earth's 1 day is 243x off); you either know the factoid or you don't.",
+    "judgedAt": "2026-11-05"
+  },
+  "moonwalkers": {
+    "verdict": "keep",
+    "why": "Twelve, as stated; six landings of two; fact (none went back) is about the twelve.",
+    "judgedAt": "2026-11-05"
+  },
+  "challenger-deep-depth": {
+    "verdict": "keep",
+    "why": "10,935 m (2021 study) as stated; reasoned from Everest; surveys agree within 1%.",
+    "judgedAt": "2026-11-05"
+  },
+  "angel-falls-height": {
+    "verdict": "keep",
+    "why": "979 m total height as stated, and the 807 m plunge fact explains what the total counts.",
+    "judgedAt": "2026-11-05"
+  },
+  "lightning-per-second": {
+    "verdict": "fix",
+    "why": "Counted 'times' with the unit flashes: now 'How many flashes of lightning happen on Earth every second?'; fact (30,000 C) wasn't about the count: now nearly 1.4 billion a year (source).",
+    "judgedAt": "2026-11-05"
+  },
+  "trees-on-earth": {
+    "verdict": "fix",
+    "why": "Read '3,040 billion trees': now 3.04 trillion trees, as the source states it (2015 estimate); a Fermi question from forest area, with the 46% fact.",
+    "judgedAt": "2026-11-05"
+  },
+  "speed-of-sound": {
+    "verdict": "keep",
+    "why": "343 m/s at 20 C as stated; reasoned from counting seconds after lightning; iron 15x faster compares.",
+    "judgedAt": "2026-11-05"
+  },
+  "air-weight": {
+    "verdict": "keep",
+    "why": "1.225 kg/m3 (ISA, 15 C) as stated; heavier than people think, and 800x lighter than water gives a way in.",
+    "judgedAt": "2026-11-05"
+  },
+  "known-elements": {
+    "verdict": "keep",
+    "why": "118 as stated; a fair opener; only 94 natural is a fact about the number.",
+    "judgedAt": "2026-11-05"
+  },
+  "saffron-flowers": {
+    "verdict": "keep",
+    "why": "150,000 flowers per kg as stated; the question says saffron comes from flowers, so a few tiny threads each is reasonable; 40 hours of picking explains the price.",
+    "judgedAt": "2026-11-05"
+  },
+  "parmesan-wheel": {
+    "verdict": "fix",
+    "why": "Fact was about yearly output, not the weight: now each 1,100-litre vat of milk makes two wheels (source).",
+    "judgedAt": "2026-11-05"
+  },
+  "neapolitan-pizza-oven": {
+    "verdict": "keep",
+    "why": "485 C as the rules state; reasoned from a home oven's 250 C; 60 to 90 seconds is about the heat.",
+    "judgedAt": "2026-11-05"
+  },
+  "la-tomatina-tomatoes": {
+    "verdict": "fix",
+    "why": "Year moved to the definition (13 words to 11); citric-acid fact wasn't about the tonnage: now up to 20,000 throwers in a town of 9,000 (source).",
+    "judgedAt": "2026-11-05"
+  },
+  "bank-card-width": {
+    "verdict": "keep",
+    "why": "85.60 mm (ID-1) as stated; one is in every wallet.",
+    "judgedAt": "2026-11-05"
+  },
+  "a380-capacity": {
+    "verdict": "keep",
+    "why": "853, the maximum certified, as stated; the evacuation test is how that number was earned.",
+    "judgedAt": "2026-11-05"
+  },
+  "olympic-pool-volume": {
+    "verdict": "keep",
+    "why": "2.5 million litres at the 2 m Olympic minimum depth, as stated; a model Fermi question (50 x 25 x 2).",
+    "judgedAt": "2026-11-05"
+  },
+  "marathon-distance": {
+    "verdict": "keep",
+    "why": "42.195 km as stated; the opener everyone has an anchor for; the 1908 London fact explains the odd number.",
+    "judgedAt": "2026-11-05"
+  },
+  "basketball-hoop-height": {
+    "verdict": "fix",
+    "why": "Fact (peach baskets until 1906) said nothing about the height: now says they were nailed to a gym balcony (source).",
+    "judgedAt": "2026-11-05"
+  },
+  "gold-medal-gold": {
+    "verdict": "keep",
+    "why": "6 g of gold plating as stated; less than you'd think but fair (medals are known to be plated), and the silver fact explains it.",
+    "judgedAt": "2026-11-05"
+  },
+  "longest-tennis-match": {
+    "verdict": "keep",
+    "why": "11 hours 5 minutes as stated (11 is within 1%); 70-68 over three days is a great reveal.",
+    "judgedAt": "2026-11-05"
+  },
+  "piano-keys": {
+    "verdict": "fix",
+    "why": "Fact (Viennese colours reversed) wasn't about the count: now five octaves in Mozart's day, more than seven on today's 88 keys (source).",
+    "judgedAt": "2026-11-05"
+  },
+  "mona-lisa-height": {
+    "verdict": "fix",
+    "why": "Fact (1977 insects) wasn't about the size: now a poplar panel 77 by 53 cm, painted on wood, not canvas (source).",
+    "judgedAt": "2026-11-05"
+  },
+  "phantom-performances": {
+    "verdict": "fix",
+    "why": "Counted 'times' with the unit performances: now 'How many performances did The Phantom of the Opera give on Broadway?'; fact adds by how much it leads (over 3,500).",
+    "judgedAt": "2026-11-05"
+  },
+  "czech-beer": {
+    "verdict": "keep",
+    "why": "126.0 litres (2024) as listed; reasoned from a pint a day; Austria second compares.",
+    "judgedAt": "2026-11-05"
+  },
+  "turkey-tea": {
+    "verdict": "keep",
+    "why": "3.16 kg of dry tea (2016) as listed; reasoned from a teabag a cup; Ireland second is a good surprise.",
+    "judgedAt": "2026-11-05"
+  },
+  "biggest-stadium": {
+    "verdict": "fix",
+    "why": "13 words: the stadium's name moved to the definition ('How many people can the world's biggest stadium hold?'); 132,000 as listed.",
+    "judgedAt": "2026-11-05"
+  },
+  "caspian-sea-area": {
+    "verdict": "fix",
+    "why": "Fact (ocean-basin geology) wasn't about the area: now Lake Superior, the next largest, is about a fifth of its size (82,100 km2 in the same list).",
+    "judgedAt": "2026-11-05"
+  },
+  "sydney-opera-house-tiles": {
+    "verdict": "drop",
+    "why": "Owner: unclear what's counted (the big panels or the single tiles), needs background knowledge; dropped before this review, kept here so it isn't written again.",
+    "judgedAt": "2026-11-05"
+  },
+  "hairs-on-head": {
+    "verdict": "fix",
+    "why": "Source gives 110,000 for brown hair; a hair is a part everyone pictures the same, and colour changing the count is a real reveal. Fact: 'red heads' -> 'redheads'.",
+    "judgedAt": "2026-11-05"
+  },
+  "breath-hold-record": {
+    "verdict": "fix",
+    "why": "AIDA 11:35 (2009) is the official record, and the oxygen record makes a good reveal; definition jargon 'AIDA static apnea' -> 'official freediving record'.",
+    "judgedAt": "2026-11-05"
+  },
+  "eyeball-width": {
+    "verdict": "keep",
+    "why": "Source: width 24.2 mm, typical adult 24 mm; something everyone can picture, and the fact (16-17 mm at birth) teaches.",
+    "judgedAt": "2026-11-05"
+  },
+  "liver-weight": {
+    "verdict": "fix",
+    "why": "Source states about 1.5 kg; easy -> false (few people have an anchor for organ weights); fact now says 'heaviest internal organ', as the source does, without the odd 'though'.",
+    "judgedAt": "2026-11-05"
+  },
+  "ostrich-egg-weight": {
+    "verdict": "keep",
+    "why": "Source: average 1.4 kg; easy to picture, and 'smallest egg relative to the mother' is a good twist.",
+    "judgedAt": "2026-11-05"
+  },
+  "arctic-tern-migration": {
+    "verdict": "keep",
+    "why": "70,900 km average for Greenland/Iceland birds, pinned by the definition; reasonable from pole-to-pole and back, and bigger than you'd think.",
+    "judgedAt": "2026-11-05"
+  },
+  "emperor-penguin-dive": {
+    "verdict": "keep",
+    "why": "Lead says 535 m, body says 564 m deepest (1994): 1.05x apart, and 'deepest dive recorded' pins 564; a surprising depth.",
+    "judgedAt": "2026-11-05"
+  },
+  "hummingbird-heart-rate": {
+    "verdict": "keep",
+    "why": "Source: 1,260 bpm in a blue-throated hummingbird; reasoned from a human's 70, and the torpor contrast is in the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "cheetah-top-speed": {
+    "verdict": "keep",
+    "why": "104 km/h is the source's highest reliable figure (lead range 93-104), and the definition says so; acceleration fact checks out.",
+    "judgedAt": "2026-11-05"
+  },
+  "burj-khalifa-height-candidate": {
+    "verdict": "drop",
+    "why": "Duplicate: the live bank already has burj-khalifa-height (829.8 m to the tip).",
+    "judgedAt": "2026-11-05"
+  },
+  "great-pyramid-height": {
+    "verdict": "keep",
+    "why": "Source: 146.6 m as built (138.5 m today), definition says which; 3,700 years as the tallest is a great reveal.",
+    "judgedAt": "2026-11-05"
+  },
+  "pisa-tower-height": {
+    "verdict": "keep",
+    "why": "Source: 55.86 m low side, 56.67 m high side, definition pins it; the 3.9 m lean is a good reveal.",
+    "judgedAt": "2026-11-05"
+  },
+  "hong-kong-zhuhai-macau-bridge": {
+    "verdict": "keep",
+    "why": "Source: 55 km whole crossing (main bridge 29.6 km), definition pins it; 'longest sea crossing' rewards a guess.",
+    "judgedAt": "2026-11-05"
+  },
+  "mid-levels-escalator-climb": {
+    "verdict": "drop",
+    "why": "Obscure outside Hong Kong: the vertical climb of an 18-escalator system is unclear to anyone who hasn't seen it, and the source only says 'over 135 m'.",
+    "judgedAt": "2026-11-05"
+  },
+  "bering-strait-width": {
+    "verdict": "keep",
+    "why": "Source: about 82 km mainland to mainland, definition rules out the Diomede islands, which the fact then reveals (3.8 km).",
+    "judgedAt": "2026-11-05"
+  },
+  "greenland-population": {
+    "verdict": "keep",
+    "why": "Source: 56,542 in 2025, dated; a huge island with a small town's population is a good surprise.",
+    "judgedAt": "2026-11-05"
+  },
+  "trans-siberian-length": {
+    "verdict": "keep",
+    "why": "Source: 9,289 km Moscow-Vladivostok; reasoned from Russia's width, and the eight time zones fact is in the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "antarctica-winter-population": {
+    "verdict": "keep",
+    "why": "Source: about 1,000 in winter, 4,000 in summer; definition says who is counted; few people on a whole continent surprises.",
+    "judgedAt": "2026-11-05"
+  },
+  "sun-width-in-earths": {
+    "verdict": "keep",
+    "why": "Source: diameter about 109 times Earth's, definition says diameters; a fair ratio to reason about.",
+    "judgedAt": "2026-11-05"
+  },
+  "olympus-mons-height": {
+    "verdict": "keep",
+    "why": "Figures run 21.3 to 26 km (1.2x); 'above the Martian surface' matches the source's 'nearly 22 km'; Italy-sized base fact is true.",
+    "judgedAt": "2026-11-05"
+  },
+  "saturn-v-height": {
+    "verdict": "keep",
+    "why": "Source: 111 m with the Apollo spacecraft, definition pins it; first-stage fact checks out.",
+    "judgedAt": "2026-11-05"
+  },
+  "mars-year": {
+    "verdict": "keep",
+    "why": "Source: 687 Earth days, definition says Earth days; a fair classic, seasons fact in the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "giant-pumpkin-record": {
+    "verdict": "keep",
+    "why": "Source table: 1,431.5 kg (Oct 2026); the record moves yearly but the definition dates it; 23 kg a day fact checks out.",
+    "judgedAt": "2026-11-05"
+  },
+  "jackfruit-weight": {
+    "verdict": "keep",
+    "why": "Source says up to 50 kg twice; the question asks the maximum and the definition says so; largest tree fruit is a good reveal.",
+    "judgedAt": "2026-11-05"
+  },
+  "hot-dog-eating-record": {
+    "verdict": "keep",
+    "why": "Source: 76 HDB in 10 min (2021), the contest record, definition pins it; Kobayashi doubling 25.5 is a great fact.",
+    "judgedAt": "2026-11-05"
+  },
+  "baguette-length": {
+    "verdict": "keep",
+    "why": "Source: usual length about 65 cm; a good opener everyone has held, and the 1.8 m loaves fact teaches.",
+    "judgedAt": "2026-11-05"
+  },
+  "gold-bar-weight": {
+    "verdict": "keep",
+    "why": "Source: 400 oz Good Delivery bar is 12.4 kg; heavier than the movie bar people picture, definition pins which bar.",
+    "judgedAt": "2026-11-05"
+  },
+  "longest-flight-distance": {
+    "verdict": "keep",
+    "why": "Source table: SQ 23 JFK-Singapore 15,349 km; dated 2026 so it stays true when Project Sunrise starts; route lets a player reason.",
+    "judgedAt": "2026-11-05"
+  },
+  "ever-given-length": {
+    "verdict": "keep",
+    "why": "Source: 399.94 m length overall; everyone pictures the ship in the canal, fact on the six-day blockage checks out.",
+    "judgedAt": "2026-11-05"
+  },
+  "everest-height": {
+    "verdict": "keep",
+    "why": "Source: 8,848.86 m (2020 survey), dated; classic opener, and the snow-cap argument is in the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "tallest-tree-height": {
+    "verdict": "keep",
+    "why": "Source: Hyperion 116.22 m in 2026, dated; 67 cm of growth since 2006 matches 115.55 m then.",
+    "judgedAt": "2026-11-05"
+  },
+  "lake-baikal-depth": {
+    "verdict": "keep",
+    "why": "Source: 1,642 m maximum depth; more water than the Great Lakes combined is in the source and explains the depth.",
+    "judgedAt": "2026-11-05"
+  },
+  "bamboo-growth": {
+    "verdict": "fix",
+    "why": "Source gives 91 cm (Guinness) and also 120 cm observed, so 'fastest reported' pointed at the wrong figure; definition now 'Guinness record, in 24 hours'.",
+    "judgedAt": "2026-11-05"
+  },
+  "great-barrier-reef-length": {
+    "verdict": "keep",
+    "why": "Source: over 2,300 km; reasoned from Australia's coast, 2,900 reefs and 900 islands teaches.",
+    "judgedAt": "2026-11-05"
+  },
+  "mercury-litre-weight": {
+    "verdict": "fix",
+    "why": "Density 13.546 g/cm3 near room temperature is exactly 13.546 kg a litre (answer was rounded to 13.5); fact now ties the lighthouse lenses to the density.",
+    "judgedAt": "2026-11-05"
+  },
+  "earth-spin-speed": {
+    "verdict": "fix",
+    "why": "Source states 1,674.7 km/h (answer was cut to 1674); a player can work it out from 40,000 km in a day, and the 45 degree fact is in the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "inner-core-temperature": {
+    "verdict": "keep",
+    "why": "Source: about 5,430 C, estimates 5,100-5,960 (1.2x); 'as hot as the Sun's surface' is the source's own comparison.",
+    "judgedAt": "2026-11-05"
+  },
+  "candle-flame-temperature": {
+    "verdict": "keep",
+    "why": "Source: about 1,400 C in the hottest zone; hotter than people think, and the yellow-is-cooler fact is in the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "bolt-top-speed": {
+    "verdict": "keep",
+    "why": "Source: 44.72 km/h from his 60-80 m split in the 9.58 run, average 37.58; a good opener to reason about.",
+    "judgedAt": "2026-11-05"
+  },
+  "high-jump-record": {
+    "verdict": "keep",
+    "why": "Source: 2.45 m, Sotomayor 1993, never beaten; easy to picture against a person.",
+    "judgedAt": "2026-11-05"
+  },
+  "badminton-smash-speed": {
+    "verdict": "keep",
+    "why": "Source: 426 km/h in a match vs the 263 km/h tennis serve; 'in a match' excludes lab records.",
+    "judgedAt": "2026-11-05"
+  },
+  "world-cup-trophy-weight": {
+    "verdict": "keep",
+    "why": "Source: 6.175 kg; the hollow vs 70-80 kg solid-gold fact is a great reveal.",
+    "judgedAt": "2026-11-05"
+  },
+  "table-tennis-ball-weight": {
+    "verdict": "keep",
+    "why": "Source: rules say 2.7 g; an object everyone has held, fair opener, bounce rule is in the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "terracotta-army-size": {
+    "verdict": "keep",
+    "why": "Source: more than 8,000 soldiers (2007 estimate), definition dates it; a soldier is a part anyone pictures the same.",
+    "judgedAt": "2026-11-05"
+  },
+  "david-statue-height": {
+    "verdict": "keep",
+    "why": "Source: 5.17 m, measured exactly only in 1998-99; much bigger than people picture.",
+    "judgedAt": "2026-11-05"
+  },
+  "bayeux-tapestry-length": {
+    "verdict": "keep",
+    "why": "Source: 68.38 m long, about 50 cm tall; a strip far longer than the word 'tapestry' suggests, and the fact explains why.",
+    "judgedAt": "2026-11-05"
+  },
+  "hollywood-sign-letters": {
+    "verdict": "keep",
+    "why": "Source lead: 45 ft (13.7 m), body 44 ft (13.4 m), 1.02x apart; HOLLYWOODLAND fact checks out.",
+    "judgedAt": "2026-11-05"
+  },
+  "woodstock-crowd": {
+    "verdict": "keep",
+    "why": "Source: 460,000 to 500,000 (1.09x); 'high estimate' says which end, and half a million is how it's remembered; 50,000 expected is in the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "nile-length": {
+    "verdict": "keep",
+    "why": "Source: about 6,650 km, same as TENtacle's rivers list; the Amazon dispute fact is in the source.",
+    "judgedAt": "2026-11-05"
+  },
+  "shanghai-metro-trips": {
+    "verdict": "fix",
+    "why": "Source: 3,773.8 million rides (2024), exactly 3.7738 billion (answer was rounded to 3.77); top of TENtacle's metro list.",
+    "judgedAt": "2026-11-05"
+  }
 }
