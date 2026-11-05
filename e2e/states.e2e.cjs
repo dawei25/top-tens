@@ -212,14 +212,14 @@ const SCREENS = [
     },
   },
   {
-    // Fathom (beta, #fathom), on the fixture bank: a number typed with MILLION on, its reveal, then the results.
+    // Fathom (beta, #fathom), on the fixture bank: a long number typed (grouped as it's typed), its reveal, then the
+    // results.
     name: "Fathom, a number typed",
     setup: async (page) => {
       await page.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: FATHOM_BANK, contentType: "application/json" }));
       await go(page, "#fathom");
       await lazyShown(page, "fathom-input");
-      await page.getByTestId("fathom-input").fill("2.5");
-      await page.getByTestId("fathom-million").click();
+      await page.getByTestId("fathom-input").fill("8800000");
     },
   },
   {

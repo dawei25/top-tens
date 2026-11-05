@@ -31,6 +31,21 @@ export const maxPerKind = (total: number) => Math.max(9, Math.floor((total * 9) 
 export const MIN_EASY = 12;
 export const MAX_DEFINITION = 60;
 export const MAX_FACT = 200;
+/** At most this many digits before the decimal point: the player types the whole number (no scale keys). */
+export const MAX_DIGITS = 6;
+
+/** Scale words a unit may start with, for big counts: "million people", "billion trees". */
+export const UNIT_SCALES: Record<string, number> = { million: 1e6, billion: 1e9, trillion: 1e12 };
+
+/** A unit as its scale word and the unit after it: "billion trees" is 1e9 of "trees", "metres" 1 of itself. */
+export function splitUnit(unit: string): { scale: number; base: string } {
+  const m = unit.match(/^(million|billion|trillion) (\S.*)$/);
+  return m ? { scale: UNIT_SCALES[m[1]], base: m[2] } : { scale: 1, base: unit };
+}
+
+/** The amount an answer stands for, its unit's scale word counted: 86 billion neurons is 8.6e10. */
+export const amountOf = (q: Pick<Question, "answer" | "unit">): number =>
+  typeof q.unit === "string" ? q.answer * splitUnit(q.unit).scale : q.answer;
 
 /**
  * Units of measure never appear in the question ("How tall is it in metres?"): the game shows the unit beside the
@@ -113,13 +128,15 @@ export function checkQuestion(q: unknown, i: number): string[] {
   }
 
   const unit = text("unit");
+  const { scale, base } = splitUnit(unit);
   if (!unit.trim()) bad("unit is missing");
   else {
     if (unit.replace("Celsius", "celsius") !== unit.toLowerCase()) bad(`unit "${unit}" must be lower case`);
     if (/\d/.test(unit)) bad(`unit "${unit}" has a number in it`);
     if (question) {
-      const rest = MEASURES.has(unit) ? question : question.replace(new RegExp(`^How many ${escape(unit)}\\b`, "i"), "");
-      if (word(unit).test(rest)) bad(`question repeats the unit "${unit}" (the game shows it beside the input)`);
+      // A count names what it counts after "How many" ("How many trees...?" in billion trees), never its scale word.
+      const rest = MEASURES.has(base) ? question : question.replace(new RegExp(`^How many ${escape(base)}\\b`, "i"), "");
+      if (word(base).test(rest)) bad(`question repeats the unit "${base}" (the game shows it beside the input)`);
     }
   }
 
@@ -128,6 +145,9 @@ export function checkQuestion(q: unknown, i: number): string[] {
   else {
     if (question && mentions(question, answer)) bad("question gives away the answer");
     if (typeof o.definition === "string" && mentions(o.definition, answer)) bad("definition gives away the answer");
+    if (answer >= 10 ** MAX_DIGITS)
+      bad(`answer ${answer} has more than ${MAX_DIGITS} digits before the decimal point: use a bigger unit (kilometres, million people)`);
+    if (scale > 1 && answer < 1) bad(`answer ${answer} is under 1 ${unit}: use the unit without "${unit.split(" ")[0]}"`);
   }
 
   if ("definition" in o) {
@@ -212,7 +232,8 @@ export function checkBank(bank: unknown): string[] {
   for (const [kind, n] of counts) if (n > cap) out.push(`${n} questions of kind ${kind}; at most ${cap}`);
   const easy = valid.filter((q) => q.easy === true).length;
   if (easy < MIN_EASY) out.push(`${easy} easy openers; the bank needs at least ${MIN_EASY}`);
-  const answers = valid.map((q) => q.answer).filter((a) => typeof a === "number");
+  // Magnitudes by the amount, its unit's scale word counted (86 billion neurons is in the billions).
+  const answers = valid.filter((q) => typeof q.answer === "number").map(amountOf);
   if (!answers.some((a) => a < 1)) out.push("no answer under 1: the bank needs a spread of magnitudes");
   if (!answers.some((a) => a >= 1e9)) out.push("no answer in the billions: the bank needs a spread of magnitudes");
   return out;
