@@ -7,7 +7,7 @@ export type PlayEvent =
   | { kind: "found"; rank: number; found: number }
   /** Classic: a guess that found nothing new. `lifeLost` when it cost a life; `rank` for a real answer outside the top 10. */
   | { kind: "miss"; lifeLost: boolean; rank?: number }
-  /** Classic: a first-letter hint, paid with a life. */
+  /** Classic: a clue (the next letter of an answer), paid with a life. */
   | { kind: "hint"; rank: number; lives: number }
   /** Classic: the round ended. `lives` left; a win with every life kept is flawless. */
   | { kind: "end"; status: "won" | "lost" | "gave-up"; lives: number; found: number }

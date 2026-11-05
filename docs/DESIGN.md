@@ -19,7 +19,9 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
   - **A guess that fits several answers** ("jordan", "shenzhen", "avengers"): the natural reading goes in the box or
     the options are offered (see below); only a word shared by a crowd of minor names asks to be more specific.
 - **Clue:** the magnifier on an empty row shows that answer's first letter for a life, after a confirm; not on the
-  last life.
+  last life. Each further clue on the same row shows the next letter for another life ("SH", "LOS A": letters past a
+  leading The/A/An, with the spaces and punctuation between them), for as long as the row is hidden (owner, Nov 5).
+  Clues never change what a guess matches; every letter bought counts as a clue (results, Past runs, share text).
 - Misses always show a number where the data has one: the rank and figure, a dated rank or figure from another
   table on the source page ("#5 in 2018 (18.6 million)"), or how deep the ranking goes ("outside the top 118").
 - The game ends at 10/10 or 0 lives; missed slots are then revealed. A give up button reveals everything.

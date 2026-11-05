@@ -86,7 +86,8 @@ export function HowToPlay({ onClose }: { onClose: () => void }) {
               <span className="clue clue-inline" role="img" aria-label="magnifying glass">
                 <ClueIcon />
               </span>{" "}
-              on an empty row to see its <b className="gold">first letter</b> for a life. Not on your last one.
+              on an empty row to see its <b className="gold">first letter</b> for a life, and again for the next. Not on
+              your last one.
             </span>
           </li>
           <li data-testid="howto-blitz">

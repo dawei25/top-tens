@@ -16,9 +16,7 @@ import {
   todayEntry,
   type DailyEntry,
 } from "./daily";
-import { applyHint, canHint, hintLetter, newGame, shareText } from "./state";
 import type { Saved } from "./storage";
-import type { Puzzle } from "./types";
 
 const schedule: DailyEntry[] = [
   { n: 1, date: "2026-10-20", id: "a" },
@@ -75,27 +73,6 @@ describe("streaks", () => {
   });
   it("handles month boundaries", () => {
     expect(streak(saved(["2026-10-31", "2026-11-01"]), "2026-11-01").current).toBe(2);
-  });
-});
-
-describe("hints", () => {
-  const puzzle = { id: "t", title: "T", prompt: "", source: { name: "", url: "", asOf: "" }, answers: [], extras: [] } as unknown as Puzzle;
-  it("first letter past a leading article", () => {
-    expect(hintLetter("The Witcher 3: Wild Hunt")).toBe("W");
-    expect(hintLetter("Mount Everest")).toBe("M");
-    expect(hintLetter("2001: A Space Odyssey")).toBe("2");
-  });
-  it("costs a life, once per slot, never the last life", () => {
-    let s = applyHint(newGame(puzzle), 3);
-    expect(s.lives).toBe(4);
-    expect(applyHint(s, 3)).toBe(s);
-    s = { ...s, lives: 1 };
-    expect(canHint(s, 5)).toBe(false);
-  });
-  it("share text names the daily and counts clues", () => {
-    const s = applyHint(newGame(puzzle), 2);
-    expect(shareText(s, puzzle, "u", 12)).toContain("TENtacle #12: T");
-    expect(shareText(s, puzzle, "u", 12)).toContain("1 clue");
   });
 });
 

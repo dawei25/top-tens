@@ -15,7 +15,10 @@ export interface GameState {
   lives: number;
   log: GuessLog[];
   status: "playing" | "won" | "lost" | "gave-up";
-  /** Ranks whose first letter was bought with a life. */
+  /**
+   * Letters bought with a life, as ranks: a rank appears once per letter of its answer shown (twice is its first two
+   * letters). Every entry is a clue for the counts.
+   */
   hints?: number[];
   /** Epoch ms the game was created and finished (won, lost or given up). Older saves lack them. */
   startedAt?: number;
@@ -71,18 +74,34 @@ export function applyGuess(
   return { state: { ...state, found, lives, status, log: [...state.log, { text, result }], ...(finishedAt ? { finishedAt } : {}) }, result };
 }
 
-/** The letter a hint reveals: the first letter or digit of the name, past a leading "The"/"A"/"An". */
-export function hintLetter(name: string): string {
+/**
+ * What `n` clues show of a name: its first n letters or digits past a leading "The"/"A"/"An", uppercase, with the
+ * spaces and punctuation between them as written ("LOS A", "T-MO", "XI'A"), nothing after the last.
+ */
+export function hintPrefix(name: string, n: number): string {
   const core = name.replace(/^(the|a|an)\s+/i, "");
-  return (core.match(/[\p{L}\p{N}]/u)?.[0] ?? core[0] ?? "?").toUpperCase();
+  const shown = [...core.matchAll(/[\p{L}\p{N}]\p{M}*/gu)].slice(0, Math.max(0, n));
+  if (!shown.length) return "";
+  const last = shown[shown.length - 1];
+  return core.slice(shown[0].index, last.index + last[0].length).replace(/\s+/g, " ").toUpperCase();
 }
 
-/** Whether a hint can be bought for this rank now: a hidden slot, not already hinted, and not on the last life. */
+/** The letter a first clue reveals: the first letter or digit of the name, past a leading "The"/"A"/"An". */
+export function hintLetter(name: string): string {
+  return hintPrefix(name, 1);
+}
+
+/** How many letters of the answer at this rank have been bought: `hints` holds the rank once per letter. */
+export function hintCount(state: Pick<GameState, "hints">, rank: number): number {
+  return (state.hints ?? []).filter((r) => r === rank).length;
+}
+
+/** Whether a clue can be bought for this rank now: a hidden slot, and not on the last life. */
 export function canHint(state: GameState, rank: number): boolean {
-  return state.status === "playing" && state.lives > 1 && !state.found.includes(rank) && !(state.hints ?? []).includes(rank);
+  return state.status === "playing" && state.lives > 1 && !state.found.includes(rank);
 }
 
-/** Spend one life to reveal the first letter of the answer at this rank. Never spends the last life. */
+/** Spend one life to reveal the next letter of the answer at this rank. Never spends the last life. */
 export function applyHint(state: GameState, rank: number): GameState {
   if (!canHint(state, rank)) return state;
   return { ...state, lives: state.lives - 1, hints: [...(state.hints ?? []), rank] };
@@ -93,7 +112,7 @@ export function giveUp(state: GameState): GameState {
 }
 
 /**
- * Share text: one square per rank (#1 gold, found blue, missed black), lives left and clues used.
+ * Share text: one square per rank (#1 gold, found blue, missed black), lives left and clues used (every letter bought).
  * `daily` is the daily number when the game was a daily ("TENtacle #12").
  */
 export function shareText(state: GameState, puzzle: Puzzle, url: string, daily?: number): string {
