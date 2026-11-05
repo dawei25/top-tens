@@ -1,28 +1,30 @@
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import {
   askFor,
   bandLabel,
+  bandOf,
   echoText,
+  fathomScore,
   formatAmount,
   loadFathom,
   lockIn,
   MAX_TOTAL,
-  missText,
   MULTIPLIERS,
   nextQuestion,
   phaseOf,
+  playersLine,
   QUESTIONS_PER_GAME,
   readBank,
   readNumber,
   resumable,
+  RULE,
   saveFathom,
   scoreGame,
   shareText,
   startGame,
   timesOff,
   totalOf,
-  TYPICAL_TOTAL,
   type Band,
   type FathomGame,
   type FathomQuestion,
@@ -30,18 +32,22 @@ import {
   type NumberError,
   type Scored,
 } from "../../game/fathom";
+import { submitFathomGuess, useFathomCrowd } from "../../net";
 import { Loading } from "../Game";
 import { CountUp } from "../motion/effects";
 import { END_FOCUS_MS, reducedMotion, ScreenHead, SwapLabel } from "../pixel";
+import { playFathom } from "../sound/fathom";
 import { Gauge } from "./Gauge";
 import { BUOY, placed, SQUID } from "./sprites";
 import "./fathom.css";
 
 /**
  * Fathom (beta, #fathom): five questions that each ask for a number. Type a guess (THOUSAND, MILLION and BILLION
- * multiply it), lock it in, see how far off it was on a sonar, and NEXT; five of those and the results. No timer, no
- * lives, and nothing here touches the rest of the game: its own save, no record, stats or backend. Reached only by
- * its link; App loads this screen as its own chunk.
+ * multiply it), lock it in, see how close it was on a sonar, and NEXT; five of those and the results. One plain
+ * scoring rule for every question, stated on the first question and the results. No timer, no lives, and nothing here
+ * touches the rest of the game: its own save, no record or stats. With a backend, each guess is also sent, and a
+ * reveal says how real players guessed once there are enough of them. Reached only by its link; App loads this screen
+ * as its own chunk.
  */
 
 interface Props {
@@ -162,10 +168,20 @@ export default function Fathom({ onBack, onHome }: Props) {
     setGame(next);
     saveFathom({ ...loadFathom(), game: next });
   };
+  // LOCK IN: a click, the ping and the band's sound (with sound on), the guess sent (with a backend), then the reveal.
+  const lock = (value: number) => {
+    playFathom({ kind: "lock" });
+    playFathom({ kind: "reveal", band: bandOf(fathomScore(value, question.answer)) });
+    submitFathomGuess(question.id, value);
+    update(lockIn(game, value));
+  };
   // From a tap on NEXT, the next question's box takes focus inside the tap itself, so a phone opens its keyboard. The
-  // question starts at the top of the screen, whatever the reveal had scrolled to.
+  // question starts at the top of the screen, whatever the reveal had scrolled to. After the last one, the results'
+  // fanfare.
   const next = () => {
-    flushSync(() => update(nextQuestion(game)));
+    const after = nextQuestion(game);
+    if (phaseOf(after) === "results") playFathom({ kind: "results", total: totalOf(scoreGame(after, bank)) });
+    flushSync(() => update(after));
     scrollTo({ top: 0 });
     focusGuess();
   };
@@ -179,13 +195,22 @@ export default function Fathom({ onBack, onHome }: Props) {
 
   const question = questions[game.at];
   const shown = phase === "reveal" ? scored[game.at] : undefined;
+  const total = totalOf(scored);
   // What a screen reader hears as each verdict and the total appear (the line is there before its words change).
   const said = shown
     ? `${bandLabel(shown.band)}, ${shown.points} points. The answer: ${formatAmount(shown.question.answer)} ${shown.question.unit}. ` +
-      `Yours was ${timesOff(shown.guess, shown.question.answer)}.`
+      `Yours was ${timesOff(shown.guess, shown.question.answer)}.${game.at > 0 ? ` Total so far: ${total}.` : ""}`
     : phase === "results"
-      ? `Your total: ${totalOf(scored)} out of ${MAX_TOTAL}.`
+      ? `Your total: ${total} out of ${MAX_TOTAL}.`
       : "";
+  // The scoring rule, read with the first question, before the first answer. With little height (a small phone, or the
+  // keyboard up) it goes under LOCK IN, so the question, the field and LOCK IN still fit.
+  const rule = (
+    <p className="fathom-rule" data-testid="fathom-rule">
+      {RULE}
+    </p>
+  );
+  const ruleBelow = short && phase === "question";
   return (
     <main className="screen fathom" data-testid="fathom" data-phase={phase} data-short={short || undefined}>
       {head}
@@ -205,11 +230,12 @@ export default function Fathom({ onBack, onHome }: Props) {
             </div>
             <h1>{question.question}</h1>
             {question.definition && <p className="caption">{question.definition}</p>}
+            {game.at === 0 && !ruleBelow && rule}
           </section>
           {phase === "question" ? (
-            <Ask key={question.id} question={question} onLock={(value) => update(lockIn(game, value))} />
+            <Ask key={question.id} question={question} onLock={lock} footer={game.at === 0 && ruleBelow ? rule : undefined} />
           ) : (
-            <Reveal key={question.id} scored={shown!} last={game.at === QUESTIONS_PER_GAME - 1} onNext={next} />
+            <Reveal key={question.id} scored={shown!} total={game.at > 0 ? total : undefined} last={game.at === QUESTIONS_PER_GAME - 1} onNext={next} />
           )}
         </>
       )}
@@ -217,8 +243,11 @@ export default function Fathom({ onBack, onHome }: Props) {
   );
 }
 
-/** The question on screen: the field with its unit, the echo of what it reads, the multiplier keys and LOCK IN. */
-function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: number) => void }) {
+/**
+ * The question on screen: the field with its unit, the echo of what it reads, the multiplier keys and LOCK IN, and
+ * `footer` under them (the scoring rule, when there's little height).
+ */
+function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (value: number) => void; footer?: ReactNode }) {
   const [text, setText] = useState("");
   const [mult, setMult] = useState<MultiplierId | null>(null);
   const [error, setError] = useState<NumberError | null>(null);
@@ -319,6 +348,7 @@ function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: n
           Lock in
         </button>
       </div>
+      {footer}
     </form>
   );
 }
@@ -333,9 +363,14 @@ function siteOf(url: string): string {
   }
 }
 
-/** A locked-in question: the verdict, the answer against the guess, the sonar, the fact and its source, then NEXT. */
-function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNext: () => void }) {
+/**
+ * A locked-in question: the band in big type, the points (and the running total from the second question), the answer
+ * against the guess, how real players guessed (with a backend, from 20 of them), the sonar with the miss under the
+ * squid, the fact and its source, then NEXT.
+ */
+function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: number; last: boolean; onNext: () => void }) {
   const { question: q, guess, points, band } = scored;
+  const players = playersLine(useFathomCrowd(q.id, guess, q.answer), q.unit);
   const card = useRef<HTMLElement>(null);
   const nextKey = useRef<HTMLButtonElement>(null);
   // Into view at once; NEXT takes focus a beat later, so an Enter still held from LOCK IN presses nothing.
@@ -348,10 +383,17 @@ function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNex
   return (
     <section ref={card} className="panel fathom-reveal enter" data-glass data-testid="fathom-reveal" data-band={band} data-points={points}>
       <div className="reveal-head">
-        <BandChip band={band} />
-        <p className="reveal-points" data-testid="fathom-points" data-points={points}>
-          <b>{points}</b> {points === 1 ? "point" : "points"}
-        </p>
+        <BandWord band={band} />
+        <div className="reveal-score">
+          <p className="reveal-points" data-testid="fathom-points" data-points={points}>
+            <b>{points}</b> {points === 1 ? "point" : "points"}
+          </p>
+          {total !== undefined && (
+            <p className="reveal-total" data-testid="fathom-running" data-total={total}>
+              total <b>{total}</b>
+            </p>
+          )}
+        </div>
       </div>
       <div className="reveal-figures">
         <div className="figure">
@@ -369,15 +411,14 @@ function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNex
           <p className="figure-n" data-testid="fathom-guess" data-value={guess}>
             <span>{formatAmount(guess)}</span> <span className="figure-unit">{q.unit}</span>
           </p>
-          <p className="figure-off" data-band={band} data-testid="fathom-off">
-            {timesOff(guess, q.answer)}
-          </p>
-          <p className="figure-typical" data-testid="fathom-typical" data-typical={q.typical}>
-            {missText(q.typical)}
-          </p>
         </div>
       </div>
-      <Gauge guess={guess} answer={q.answer} typical={q.typical} band={band} />
+      {players && (
+        <p className="fathom-players" data-testid="fathom-players">
+          {players}
+        </p>
+      )}
+      <Gauge guess={guess} answer={q.answer} band={band} />
       <p className="fathom-fact" data-testid="fathom-fact">
         {q.fact}
       </p>
@@ -406,8 +447,8 @@ function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNex
 }
 
 /**
- * The end: the total and what a typical guesser scores, the five bands in a row, NEW QUESTIONS and COPY RESULT, then
- * each question with guess and answer.
+ * The end: the total, the five bands in a row, the scoring rule again, NEW QUESTIONS and COPY RESULT, then each
+ * question with guess and answer.
  */
 function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void }) {
   const total = totalOf(scored);
@@ -447,8 +488,8 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
             <span key={i} className="band-sq" data-band={b} />
           ))}
         </div>
-        <p className="caption" data-testid="fathom-typical-total" data-total={TYPICAL_TOTAL}>
-          a typical guesser scores about {TYPICAL_TOTAL}.
+        <p className="caption fathom-rule-end" data-testid="fathom-rule">
+          {RULE}
         </p>
         <div className="results-actions">
           <button type="button" className="key key-pink" data-testid="fathom-again" onClick={onAgain}>
@@ -488,11 +529,12 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
   );
 }
 
-function BandChip({ band }: { band: Band }) {
+/** The verdict in big type: "DEAD ON!", "CLOSE", "NEAR", "FAR", "LOST AT SEA". */
+function BandWord({ band }: { band: Band }) {
   return (
-    <span className="band-chip" data-band={band} data-testid="fathom-band">
-      {bandLabel(band)}
-    </span>
+    <p className="band-word" data-band={band} data-testid="fathom-band">
+      {band === "dead-on" ? `${bandLabel(band)}!` : bandLabel(band)}
+    </p>
   );
 }
 

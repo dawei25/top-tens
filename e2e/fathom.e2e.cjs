@@ -1,10 +1,15 @@
 // Fathom, the estimation beta (#fathom): five questions that ask for a number. The questions come from
 // e2e/fixtures/fathom/questions.json (twelve real facts, one per kind), served in place of public/fathom/questions.json.
-// - A full game on phone and desktop: the draw (five kinds, the first easy), the field (2.5m, the MILLION key, the
-//   echo), invalid input, the reveal and its yardstick (the typical miss), the results (the total is the sum, and what
-//   a typical guesser scores), COPY RESULT, NEW QUESTIONS draws new questions, and the game's own save is left alone.
+// - A full game on phone and desktop: the draw (five kinds, the first easy), the scoring rule in view on the first
+//   question before answering (and on the results), the field (2.5m, the MILLION key, the echo), invalid input, the
+//   reveal (plain closeness, the same for every question; no "most people miss by" line), the running total from the
+//   second question, the results (the total is the sum), COPY RESULT, NEW QUESTIONS draws new questions, the game's
+//   own save is left alone, and a build without a backend sends and queues nothing.
 // - A reload picks the game up where it was, the results included.
-// - The sonar: one band lit (the squid's), the rest dimmed in their own colours, plain tick labels.
+// - The sonar: the answer in the middle, the squid left for too low and right for too high by how far off (clamped at
+//   10x), the miss under it, no bands and no numbers on the scale.
+// - Dead on and Close celebrate (the squid hops among sparkles), others don't, and reduced motion never does.
+// - Sound: nothing when off; with it on, LOCK IN plays its click, ping and band, and the results a fanfare.
 // - Lost at sea's squares stand apart from empty ones.
 // - With a phone's keyboard up, the question, the field and LOCK IN stay in view (the real bank's longest questions).
 // - At 320px the echo keeps every message on one line and the keys where they were.
@@ -57,13 +62,12 @@ function openFathom(vp, { save, serve = bank(), setup, ...opts } = {}) {
   });
 }
 
-/** The scoring rule (src/game/fathom.ts), to check the screen against: spot on (within 1%) is 100, and only that. */
-const points = (guess, answer, typical) =>
-  Math.abs(guess - answer) <= answer * 0.01
-    ? 100
-    : Math.min(99, Math.round(100 * (1 - (2 / Math.PI) * Math.atan(Math.abs(Math.log10(guess / answer)) / Math.log10(typical)))));
-/** What a typical miss scores on every question, added up: the results' yardstick. */
-const TYPICAL_TOTAL = 250;
+/**
+ * The scoring rule (src/game/fathom.ts), to check the screen against: plain closeness, the same for every question.
+ * Spot on (within 1%) is 100, and only that; otherwise 100 x (1 - d)^2 with d the distance in powers of ten, 0 from 10x.
+ */
+const points = (guess, answer) =>
+  Math.abs(guess - answer) <= answer * 0.01 ? 100 : Math.min(99, Math.round(100 * Math.max(0, 1 - Math.abs(Math.log10(guess / answer))) ** 2));
 
 const attr = (page, testId, name) => page.getByTestId(testId).getAttribute(name);
 const shownQuestion = async (page) => byId.get(await attr(page, "fathom-question", "data-question"));
@@ -91,6 +95,13 @@ describe("Fathom", { concurrency: true }, () => {
       if (vp.name === "desktop") await ctx.grantPermissions(["clipboard-read", "clipboard-write"]);
       const before = await store(page);
       await page.getByTestId("fathom-input").waitFor();
+      // No backend in this build: nothing goes anywhere but this site (and the font), whatever is played.
+      const origin = new URL(page.url()).origin;
+      const away = [];
+      page.on("request", (r) => {
+        const u = new URL(r.url());
+        if (u.origin !== origin && !/^fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)) away.push(r.url());
+      });
 
       // The field: no number in it to start, a decimal keypad, type big enough that a phone doesn't zoom.
       const field = page.getByTestId("fathom-input");
@@ -105,6 +116,11 @@ describe("Fathom", { concurrency: true }, () => {
       assert.equal(first.easy, true, "the first question is an easy one");
       assert.ok((await page.getByTestId("fathom-unit").textContent()).trim().length > 0, "the unit shows beside the field");
       assert.equal(await noHScroll(page), true);
+      // The scoring rule, one plain line, in view where the player looks before the first answer (owner, after playing
+      // the beta: one rule for every question, said on screen).
+      const rule = await page.getByTestId("fathom-rule").boundingBox();
+      assert.ok(rule && rule.y >= 0 && rule.y + rule.height <= vp.viewport.height, "the rule is in view on the first question");
+      assert.ok(rule.y < (await page.getByTestId("fathom-input").boundingBox()).y, "the rule comes before the field");
 
       // 2.5m is 2.5 million, unless "m" is a unit of the question's kind: 2.5 metres (in kilometres too), 2.5 minutes.
       await field.fill("2.5m");
@@ -162,11 +178,11 @@ describe("Fathom", { concurrency: true }, () => {
       for (const id of ["fathom-points", "fathom-off", "fathom-fact"]) {
         assert.ok((await page.getByTestId(id).textContent()).trim(), `${id} says something`);
       }
-      // The yardstick: points are relative to the question's typical miss, so the reveal says what it is ("most people
-      // miss by about 1.5x"), not just "1.2x too low · NEAR · 64".
-      const yardstick = page.getByTestId("fathom-typical");
-      assert.equal(Number(await yardstick.getAttribute("data-typical")), first.typical);
-      assert.ok((await yardstick.textContent()).includes(`${first.typical}x`), "the reveal names the typical miss");
+      // No made-up yardstick ("most people miss by about x feels made up"): one rule for every question, still on screen
+      // with the first question's reveal. No running total yet: it would only repeat the points.
+      assert.equal(await page.getByTestId("fathom-typical").count(), 0, "no typical-miss line");
+      assert.equal(await page.getByTestId("fathom-rule").count(), 1, "the rule stays with the first reveal");
+      assert.equal(await page.getByTestId("fathom-running").count(), 0, "no running total on the first question");
       assert.equal(await page.getByTestId("fathom-gauge").locator("svg").count(), 1, "the sonar is drawn");
       const source = page.getByTestId("fathom-source");
       assert.equal(await source.getAttribute("href"), first.source.url);
@@ -185,6 +201,7 @@ describe("Fathom", { concurrency: true }, () => {
       for (const make of guesses) {
         await page.keyboard.press("Enter");
         await page.getByTestId("fathom-input").waitFor();
+        assert.equal(await page.getByTestId("fathom-rule").count(), 0, "the rule is said on the first question only");
         const q = await shownQuestion(page);
         played.push(q);
         const g = make(q);
@@ -193,9 +210,12 @@ describe("Fathom", { concurrency: true }, () => {
         await page.getByTestId("fathom-lock").click();
         await page.getByTestId("fathom-reveal").waitFor();
         assert.equal(Number(await attr(page, "fathom-guess", "data-value")), g.value);
-        const want = points(g.value, q.answer, q.typical);
+        const want = points(g.value, q.answer);
         expected.push(want);
         assert.equal(Number(await attr(page, "fathom-reveal", "data-points")), want, `${q.id}: ${g.value} vs ${q.answer}`);
+        // The running total, between questions.
+        const sum = expected.reduce((a, b) => a + b, 0);
+        assert.equal(Number(await attr(page, "fathom-running", "data-total")), sum, `${q.id}: the running total`);
         await page.waitForFunction(() => document.activeElement?.dataset.testid === "fathom-next");
       }
       assert.equal(new Set(played.map((q) => q.kind)).size, 5, "five questions, five kinds");
@@ -215,10 +235,9 @@ describe("Fathom", { concurrency: true }, () => {
       );
       assert.equal(await page.getByTestId("fathom-bands").locator("[data-band]").count(), 5);
       assert.equal(await noHScroll(page), true);
-      // The total's yardstick: what a typical guesser scores (a typical miss is 50 a question).
-      const typical = page.getByTestId("fathom-typical-total");
-      assert.equal(Number(await typical.getAttribute("data-total")), TYPICAL_TOTAL);
-      assert.ok((await typical.textContent()).includes(String(TYPICAL_TOTAL)), "the results say what a typical game scores");
+      // The rule again, in place of "a typical guesser scores about 250".
+      assert.equal(await page.getByTestId("fathom-rule").count(), 1, "the results say the rule");
+      assert.equal(await page.getByTestId("fathom-typical-total").count(), 0, "no typical-guesser line");
       // The key that draws new questions says so: "Play again" read as the same five again (UX.md 1 and 14).
       assert.doesNotMatch(await page.getByTestId("fathom-again").innerText(), /again/i);
 
@@ -243,6 +262,9 @@ describe("Fathom", { concurrency: true }, () => {
 
       // Fathom keeps to its own key: the game's save is as it was.
       assert.deepEqual(await store(page), before);
+      // Without a backend, no guess was sent or queued.
+      assert.deepEqual(away, [], "requests off the site");
+      assert.equal(await page.evaluate(() => localStorage.getItem("top-tens:fathom-outbox")), null, "no guesses queued");
       await ctx.close();
     });
   }
@@ -287,40 +309,129 @@ describe("Fathom", { concurrency: true }, () => {
     await ctx.close();
   });
 
-  // Nov 5 review: the sonar lit the guess's band on both sides of the answer, dimmed the rest with opacity (gold went
-  // olive, cyan teal: the palette has no green), and wrote "1e15" under a tick.
-  test("the sonar lights only the squid's band, dims the rest in its own colour, and writes ticks in plain numbers", async () => {
+  // The owner, after playing the beta: "the bar doesn't make sense". Now the answer is in the middle and the squid sits
+  // left (too low) or right (too high) by how far off, on a log scale clamped at 10x, with the miss written under it;
+  // no coloured bands, no numbers on the scale.
+  test("the sonar: the answer in the middle, the squid left or right by how far off, the miss under it", async () => {
+    // Twice too high, twice too low, 20x and a million times too high (both clamped at the edge), and spot on.
+    const ids = ["eiffel-tower-height", "adult-bones", "octopus-hearts", "moon-distance", "everest-height"];
+    const ratios = [2, 0.5, 20, 1e6, 1];
     for (const vp of VIEWPORTS) {
-      const { ctx, page } = await openFathom(vp, { reducedMotion: "reduce" });
-      await page.getByTestId("fathom-input").waitFor();
-      const sonar = () =>
-        page.getByTestId("fathom-gauge").evaluate((el) => ({
-          squid: Number(el.querySelector(".g-squid").dataset.x),
-          runs: [...el.querySelectorAll(".g-band")].map((r) => {
-            const s = getComputedStyle(r);
-            return { x: Number(r.getAttribute("x")), w: Number(r.getAttribute("width")), band: r.dataset.band, lit: r.classList.contains("hit"), fill: s.fill, opacity: [s.opacity, s.fillOpacity] };
+      const { ctx, page } = await openFathom(vp, { save: { recent: [], game: { ids, guesses: [], at: 0 } }, reducedMotion: "reduce" });
+      const seen = [];
+      for (const [i, ratio] of ratios.entries()) {
+        if (i) await next(page);
+        await page.getByTestId("fathom-input").waitFor();
+        await lockIn(page, String(byId.get(ids[i]).answer * ratio));
+        seen.push(
+          await page.getByTestId("fathom-gauge").evaluate((el) => {
+            const art = el.querySelector(".gauge-art").getBoundingClientRect();
+            const label = el.querySelector('[data-testid="fathom-off"]');
+            const r = label.getBoundingClientRect();
+            return {
+              cols: el.querySelector("svg").viewBox.baseVal.width,
+              squid: Number(el.querySelector(".g-squid").dataset.x),
+              buoy: el.querySelector(".g-buoy").getBBox().x + 2,
+              extras: el.querySelectorAll(".g-band, .g-tick, .gauge-ticks").length,
+              label: { said: label.textContent.trim().length > 0, inside: r.left >= art.left - 0.5 && r.right <= art.right + 0.5 },
+            };
           }),
-          ticks: [...el.querySelectorAll(".gauge-ticks span")].map((s) => s.textContent),
-        }));
-      // Twice too high: a band off to one side of the answer, well inside it on every easy question (typical 1.3 to 2).
-      const q = await shownQuestion(page);
-      await lockIn(page, String(q.answer * 2));
-      let s = await sonar();
-      const lit = s.runs.filter((r) => r.lit);
-      assert.equal(lit.length, 1, `${vp.name}: one run lit, not ${lit.length}`);
-      assert.ok(lit[0].x <= s.squid && s.squid < lit[0].x + lit[0].w, `${vp.name}: the lit run (${lit[0].x}+${lit[0].w}) holds the squid (${s.squid})`);
-      assert.equal(lit[0].band, await attr(page, "fathom-band", "data-band"));
-      for (const r of s.runs) assert.deepEqual(r.opacity, ["1", "1"], `${vp.name}: ${r.band} at ${r.x} faded with opacity`);
-      const mirror = s.runs.find((r) => !r.lit && r.band === lit[0].band);
-      assert.ok(mirror && mirror.fill !== lit[0].fill, `${vp.name}: the same band across the answer is dimmed`);
-      // A wild guess stretches the scale past a thousand trillion and below a millionth: still plain tick labels.
-      await next(page);
-      await lockIn(page, "1e18");
-      s = await sonar();
-      assert.ok(s.ticks.length > 0);
-      for (const t of s.ticks) assert.match(t, /^\d+(\.\d+)?[KMBT]?$/, `${vp.name}: tick "${t}"`);
+        );
+      }
+      const [high, low, far, wild, spot] = seen;
+      const mid = (high.cols - 1) / 2;
+      for (const s of seen) {
+        assert.equal(s.buoy, Math.round(mid), `${vp.name}: the answer in the middle`);
+        assert.equal(s.extras, 0, `${vp.name}: no bands or tick numbers`);
+        assert.deepEqual({ said: s.label.said, inside: s.label.inside }, { said: true, inside: true }, `${vp.name}: the miss written, inside the sonar`);
+      }
+      assert.ok(high.squid > mid && low.squid < mid, `${vp.name}: too high right (${high.squid}), too low left (${low.squid})`);
+      assert.ok(Math.abs(high.squid - mid - (mid - low.squid)) <= 1, `${vp.name}: twice and half as far either side`);
+      // Half or double sits about 30% of the way out (log10 2), short of the 10x edge.
+      assert.ok(Math.abs((high.squid - mid) / (far.squid - mid) - Math.log10(2)) < 0.05, `${vp.name}: the scale is in powers of ten`);
+      assert.equal(far.squid, wild.squid, `${vp.name}: 20x and a million times sit at the same edge`);
+      assert.ok(far.squid > high.squid && far.squid <= far.cols - 4, `${vp.name}: the edge, the squid whole`);
+      assert.equal(spot.squid, Math.round(mid), `${vp.name}: spot on, on the answer`);
       await ctx.close();
     }
+  });
+
+  // The owner: "make close feel good". Dead on and Close: the squid hops among sparkles; the rest stay quiet; reduced
+  // motion gets none of it (the word and the verdict are all there at once).
+  test("Dead on and Close celebrate, the others don't, and never with reduced motion (phone)", async () => {
+    const vp = VIEWPORTS.find((v) => v.name === "phone");
+    const ids = ["eiffel-tower-height", "adult-bones", "octopus-hearts", "moon-distance", "everest-height"];
+    // Dead on, 30% high (Close), double (Near), 4x (Far).
+    const plays = [
+      [1, "dead-on"],
+      [1.3, "close"],
+      [2, "near"],
+      [4, "far"],
+    ];
+    for (const reducedMotion of ["no-preference", "reduce"]) {
+      const { ctx, page } = await openFathom(vp, { save: { recent: [], game: { ids, guesses: [], at: 0 } }, reducedMotion });
+      for (const [i, [ratio, band]] of plays.entries()) {
+        if (i) await next(page);
+        await page.getByTestId("fathom-input").waitFor();
+        await lockIn(page, String(byId.get(ids[i]).answer * ratio));
+        assert.equal(await attr(page, "fathom-band", "data-band"), band);
+        const party = await page.getByTestId("fathom-reveal").evaluate((el) => ({
+          hop: el.querySelector(".g-squid").getAnimations().length > 0,
+          sparks: [...el.querySelectorAll(".g-spark")].some((s) => s.getAnimations().length > 0),
+          word: el.querySelector(".band-word").getAnimations().length > 0,
+        }));
+        const want = reducedMotion === "no-preference" && (band === "dead-on" || band === "close");
+        assert.deepEqual(party, { hop: want, sparks: want, word: want }, `${band}, ${reducedMotion}`);
+      }
+      await ctx.close();
+    }
+  });
+
+  // The owner: "satisfying sounds when they get super close". The speaker key (off by default) decides: nothing when
+  // off; with it on, LOCK IN clicks, pings and plays its band (Dead on fuller than Near), and the results a fanfare.
+  test("sound: nothing when off; with it on, each reveal and the results play (desktop)", async () => {
+    const vp = VIEWPORTS.find((v) => v.name === "desktop");
+    const ids = ["eiffel-tower-height", "adult-bones", "octopus-hearts", "moon-distance", "everest-height"];
+    const { ctx, page } = await openFathom(vp, {
+      save: { recent: [], game: { ids, guesses: [], at: 0 } },
+      setup: (c) =>
+        c.addInitScript(() => {
+          window.__voices = 0;
+          const C = window.AudioContext;
+          if (!C) return;
+          for (const name of ["createOscillator", "createBufferSource"]) {
+            const make = C.prototype[name];
+            C.prototype[name] = function () {
+              window.__voices += 1;
+              return make.call(this);
+            };
+          }
+        }),
+    });
+    const voices = () => page.evaluate(() => window.__voices);
+    await page.getByTestId("fathom-input").waitFor();
+    await lockIn(page, String(byId.get(ids[0]).answer));
+    assert.equal(await voices(), 0, "sound off: silent");
+    await page.getByTestId("sound-toggle").click();
+    await next(page);
+    let before = await voices();
+    await lockIn(page, String(byId.get(ids[1]).answer));
+    const deadOn = (await voices()) - before;
+    await next(page);
+    before = await voices();
+    await lockIn(page, String(byId.get(ids[2]).answer * 2));
+    const near = (await voices()) - before;
+    assert.ok(near > 0, "a reveal plays");
+    assert.ok(deadOn > near, `Dead on (${deadOn} voices) is fuller than Near (${near})`);
+    for (const i of [3, 4]) {
+      await next(page);
+      await lockIn(page, String(byId.get(ids[i]).answer));
+    }
+    before = await voices();
+    await next(page);
+    await page.getByTestId("fathom-results").waitFor();
+    assert.ok((await voices()) > before, "the results play a fanfare");
+    await ctx.close();
   });
 
   // Nov 5 review: lost at sea's square was a slate barely darker than an unplayed one, and it shared as an empty box.
@@ -389,6 +500,8 @@ describe("Fathom", { concurrency: true }, () => {
         }, visible);
         const id = await attr(page, "fathom-question", "data-question");
         assert.deepEqual({ ...seen, lockBottom: undefined }, { question: true, field: true, lock: true, lockBottom: undefined }, `${where}, ${id}: LOCK IN ends at ${seen.lockBottom}`);
+        // The first question's scoring rule is still there, under LOCK IN, out of their way.
+        if (i === 0) assert.equal(await page.getByTestId("fathom-ask").getByTestId("fathom-rule").count(), 1, `${where}: the rule under LOCK IN`);
         await page.getByTestId("fathom-lock").click();
         await page.getByTestId("fathom-reveal").waitFor();
         await next(page);
