@@ -51,10 +51,18 @@ const EXP = Math.floor(NOW.getTime() / 1000) + 3600;
 const TOKEN = `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ sub: USER.id, exp: EXP, aud: "authenticated", role: "authenticated", email: USER.email })}.sig`;
 const SESSION = { access_token: TOKEN, token_type: "bearer", expires_in: 3600, expires_at: EXP, refresh_token: "refresh-me", user: USER };
 
-/** Real players' numbers per list and mode: 120 on lists, 80 on Blitz (both past the 50 the game waits for). */
+/**
+ * Real players' numbers (list_stats): 120 on lists and 80 on Blitz, past the 30 players the estimate counts as
+ * (ESTIMATE_WEIGHT, src/net/crowd.ts), and 10 high scorers on the airports list, under it.
+ */
+const STATS = {
+  list: { n: 120, counts: [2, 4, 8, 12, 16, 20, 18, 14, 12, 8, 6], avg: 5.2 },
+  few: { n: 10, counts: [0, 0, 0, 0, 0, 1, 1, 2, 3, 2, 1], avg: 7.7 },
+  blitz: { n: 80, counts: [10, 20, 30, 20], avg: 90 },
+};
 function stats(id, mode) {
-  if (mode === "blitz") return { n: 80, counts: [10, 20, 30, 20], avg: 90 };
-  return { n: 120, counts: [2, 4, 8, 12, 16, 20, 18, 14, 12, 8, 6], avg: 5.2 };
+  if (mode === "blitz") return STATS.blitz;
+  return id === "airports" ? STATS.few : STATS.list;
 }
 
 /** Someone who signs up with an email and password. */
@@ -269,6 +277,7 @@ async function homeSignedIn(page, name) {
 
 module.exports = {
   SUPA,
+  STATS,
   serveBuild,
   USER,
   TOKEN,
