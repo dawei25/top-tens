@@ -116,7 +116,7 @@
     {
       "id": "greenland-shark-age",
       "kind": "animals",
-      "question": "How old was the oldest Greenland shark ever aged?",
+      "question": "How old was the oldest Greenland shark ever dated?",
       "unit": "years",
       "answer": 392,
       "definition": "central estimate",
@@ -140,10 +140,10 @@
     {
       "id": "statue-of-liberty-height",
       "kind": "landmarks",
-      "question": "How tall is the Statue of Liberty, from the ground to the tip of the torch?",
+      "question": "How tall is the Statue of Liberty?",
       "unit": "metres",
       "answer": 93,
-      "definition": "pedestal included",
+      "definition": "ground to torch tip, pedestal included",
       "fact": "Its copper skin is only 2.4 mm thick, hung on a metal framework built by Gustave Eiffel.",
       "source": { "title": "Statue of Liberty", "url": "https://en.wikipedia.org/wiki/Statue_of_Liberty" },
       "typical": 2,
@@ -330,7 +330,7 @@
       "unit": "trees",
       "answer": 3040000000000,
       "definition": "2015 estimate",
-      "fact": "The first trees evolved around 400 million years ago.",
+      "fact": "That's 46% fewer than when farming began, 12,000 years ago.",
       "source": { "title": "Tree", "url": "https://en.wikipedia.org/wiki/Tree" },
       "typical": 30,
       "easy": false
@@ -411,7 +411,6 @@
       "question": "What weight of tomatoes was thrown at Spain's La Tomatina festival in 2015?",
       "unit": "kilograms",
       "answer": 145000,
-      "definition": "estimate",
       "fact": "The citric acid in the tomatoes leaves some of the town's surfaces cleaner than they were before.",
       "source": { "title": "La Tomatina", "url": "https://en.wikipedia.org/wiki/La_Tomatina" },
       "typical": 10,
@@ -420,11 +419,11 @@
     {
       "id": "bank-card-width",
       "kind": "everyday",
-      "question": "How wide is a standard bank card?",
+      "question": "How long is a standard bank card?",
       "unit": "millimetres",
       "answer": 85.6,
       "definition": "the long side",
-      "fact": "Every standard European identity card is now issued in the same size.",
+      "fact": "It's the ID-1 card size, 85.60 by 53.98 mm, which most ID cards use too.",
       "source": { "title": "ISO/IEC 7810", "url": "https://en.wikipedia.org/wiki/ISO/IEC_7810" },
       "typical": 1.5,
       "easy": true
