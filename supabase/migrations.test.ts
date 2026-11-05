@@ -6,8 +6,9 @@ import { beforeAll, describe, expect, it } from "vitest";
 /**
  * The migrations, run in PGlite (Postgres in WebAssembly) against small stand-ins for what Supabase provides: the
  * anon, authenticated and service_role roles, auth.users and auth.uid(). Checks the contract the game relies on: who
- * can touch what, what submit_play, rate_list and submit_feedback accept, what the stats and ratings functions return,
- * that notes are read only with the reader key (list_feedback), the save's version check, and what account deletion
+ * can touch what, what submit_play, rate_list and submit_feedback accept, what the stats and ratings functions return
+ * (the owners and stats_excluded left out of the stats), that notes are read only with the reader key (list_feedback),
+ * the save's version check, and what account deletion
  * (api/delete-account.ts, as service_role) needs.
  *
  * Everything runs twice: once as older projects set up public (every new table and function handed to the API roles,
@@ -210,6 +211,102 @@ function suite(exposeNewTables: boolean) {
       expect(airports.n).toBe(61);
       // 60 players scoring i % 11 (sum 285) and B's first game, a 3.
       expect(Number(airports.avg)).toBeCloseTo(288 / 61, 2);
+    });
+  });
+
+  describe("testers out of the stats (owners and stats_excluded)", () => {
+    // C is an owner, D a tester the owner excluded, E a player who signs in on D's browser.
+    const C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+    const D = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
+    const E = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
+    type Stats = { n: number; counts: number[]; avg: number | null };
+    const stats = async (mode = "list") =>
+      (await as("anon", null, () => db.query<{ s: Stats }>("select public.list_stats('s-tests', $1) as s", [mode]))).rows[0].s;
+    const average = async (mode = "list") =>
+      (await as("anon", null, () => db.query<{ list_id: string; n: number; avg: string }>("select * from public.list_averages($1)", [mode]))).rows.find(
+        (r) => r.list_id === "s-tests",
+      );
+
+    beforeAll(async () => {
+      await db.query("insert into auth.users (id, email) values ($1, 'c@example.com'), ($2, 'd@example.com'), ($3, 'e@example.com')", [C, D, E]);
+      await as("anon", null, async () => {
+        // 30 players score 4, one scores 9.
+        for (let i = 0; i < 30; i++) await submit({ list: "s-tests", client: client(700 + i), score: 4, started: ago(60) });
+        await submit({ list: "s-tests", client: client(730), score: 9, started: ago(60) });
+        await submit({ list: "s-tests", mode: "blitz", client: client(700), score: 120, found: 3, started: ago(60) });
+        // Signed out on browsers C and D also use signed in (below): perfect scores.
+        await submit({ list: "s-tests", client: client(741), score: 10, started: ago(55) });
+        await submit({ list: "s-tests", client: client(751), score: 10, started: ago(55) });
+        await submit({ list: "s-tests", client: client(752), score: 10, started: ago(55) });
+      });
+      // Signed in: C and D score 10 (D in Blitz too). C rates a list on browser 741, D sends a note from 751 and plays
+      // another list on 752: those browsers are theirs.
+      await as("authenticated", C, async () => {
+        await submit({ list: "s-tests", client: client(740), score: 10, started: ago(50) });
+        await rate({ list: "s-other", client: client(741) });
+      });
+      await as("authenticated", D, async () => {
+        await submit({ list: "s-tests", client: client(750), score: 10, started: ago(50) });
+        await submit({ list: "s-tests", mode: "blitz", client: client(750), score: 600, found: 12, started: ago(50) });
+        await note({ list: "s-other", client: client(751), text: "from a tester" });
+        await submit({ list: "s-other", client: client(752), score: 8, started: ago(45) });
+      });
+      // Someone else signed in on D's browser: a 7.
+      await as("authenticated", E, () => submit({ list: "s-tests", client: client(751), score: 7, started: ago(40) }));
+    });
+
+    it("counts everyone until the owner adds them", async () => {
+      // 31 players, the 3 browsers and C, D and E.
+      expect((await stats()).n).toBe(37);
+      expect((await average())?.n).toBe(37);
+      expect((await stats("blitz")).n).toBe(2);
+    });
+
+    it("leaves out the owners and stats_excluded: their accounts' games, and their browsers' signed-out games", async () => {
+      await db.query("insert into public.owners (user_id) values ($1)", [C]);
+      // The owner's one-liner (docs/BACKEND.md, 2.7).
+      await db.query("insert into public.stats_excluded (user_id) select id from auth.users where email = 'd@example.com'");
+      // 30 at 4, one 9, and E's 7 (signed in on D's browser, still a player).
+      expect(await stats()).toEqual({ n: 32, counts: [0, 0, 0, 0, 30, 0, 0, 1, 0, 1, 0], avg: 4.25 });
+      const avg = await average();
+      expect(avg?.n).toBe(32);
+      expect(Number(avg?.avg)).toBe(4.25);
+      expect(await stats("blitz")).toEqual({ n: 1, counts: [0, 0, 1], avg: 120 });
+      // Taking a tester back out of the table counts them again.
+      await db.query("delete from public.stats_excluded where user_id = $1", [D]);
+      expect((await stats()).n).toBe(35);
+      await db.query("insert into public.stats_excluded (user_id) values ($1)", [D]);
+      expect((await stats()).n).toBe(32);
+    });
+
+    it("keeps the signatures and answers the game calls, for the public key", async () => {
+      const sig = await db.query<{ name: string; args: string; result: string }>(
+        `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
+         from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('list_stats', 'list_averages') order by 1`,
+      );
+      expect(sig.rows).toEqual([
+        { name: "list_averages", args: "p_mode text", result: "TABLE(list_id text, n integer, avg numeric)" },
+        { name: "list_stats", args: "p_list_id text, p_mode text", result: "json" },
+      ]);
+      await as("authenticated", A, async () => {
+        expect(Object.keys((await db.query<{ s: object }>("select public.list_stats('s-tests') as s")).rows[0].s)).toEqual(["n", "counts", "avg"]);
+        expect((await db.query("select * from public.list_averages()")).rows.length).toBeGreaterThan(0);
+      });
+    });
+
+    it("gives players no access to stats_excluded", async () => {
+      for (const [role, user] of [["anon", null], ["authenticated", E]] as const) {
+        await as(role, user, async () => {
+          expect(await code(db.query("select * from public.stats_excluded"))).toBe("42501");
+          expect(await code(db.query("insert into public.stats_excluded (user_id) values ($1)", [E]))).toBe("42501");
+          expect(await code(db.query("delete from public.stats_excluded"))).toBe("42501");
+        });
+      }
+    });
+
+    it("drops an account's row when the account is deleted", async () => {
+      await db.query("delete from auth.users where id = $1", [D]);
+      expect((await db.query("select * from public.stats_excluded where user_id = $1", [D])).rows).toEqual([]);
     });
   });
 
