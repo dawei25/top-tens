@@ -4,6 +4,7 @@ import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import { accountsOn, backendOn } from "./config";
 import type { CrowdStats, ListAverages } from "./crowd";
+import { FATHOM_GUESSES, type FathomCrowd, type FathomGuess } from "./fathom";
 import { cleanNote, FEEDBACK, type Feedback } from "./feedback";
 import { enqueue, localOutboxStore } from "./outbox";
 import { invalidRating, ratingKey, withRating, type Rating, type RatingMode, type RatingReason } from "./ratings";
@@ -77,7 +78,7 @@ let throttleUntil = 0;
  */
 export function startNet(): void {
   if (!backendOn) return;
-  const pending = [KEYS.outbox, KEYS.ratingOutbox, KEYS.feedbackOutbox].some((k) => /"pending":\[\{/.test(stored(k) ?? ""));
+  const pending = [KEYS.outbox, KEYS.ratingOutbox, KEYS.feedbackOutbox, KEYS.fathomOutbox].some((k) => /"pending":\[\{/.test(stored(k) ?? ""));
   const session = accountsOn && (!!stored(KEYS.auth) || authCallback());
   // A stored session names its player, so Home can show them at once; the backend code confirms it a moment later.
   let user: AccountUser | undefined;
@@ -102,6 +103,7 @@ export function startNet(): void {
       void s.flushPlays();
       void s.flushRatings();
       void s.flushFeedback();
+      void s.flushFathom();
     }),
   );
   // Coming back to the tab: catch up with other devices (at most every 30 s).
@@ -179,6 +181,28 @@ export function submitFeedback(listId: string, mode: RatingMode, text: string, r
 }
 
 /**
+ * Fathom: a guess just locked in on a question. Only with a backend: without one this sends and stores nothing. Queued
+ * in its own outbox at once (like a note: it survives the backend code failing to download offline, or a reload), then
+ * sent and retried while offline. One per question: once a question's guess is queued or sent, a later game's guess on
+ * it adds nothing (the server keeps a browser's first). False when nothing was queued.
+ */
+export function submitFathomGuess(questionId: string, guess: number): boolean {
+  if (!backendOn) return false;
+  const item: FathomGuess = { questionId, guess, at: Date.now() };
+  try {
+    if (!enqueue(localOutboxStore<FathomGuess>(globalThis.localStorage, KEYS.fathomOutbox), FATHOM_GUESSES, item, item.at)) return false;
+  } catch {
+    // No storage at all (blocked): nothing can wait to be sent.
+    return false;
+  }
+  withService((s) => {
+    s.start();
+    void s.flushFathom();
+  });
+  return true;
+}
+
+/**
  * Home's "reset all progress" just ran. Signed in, the reset is stamped on the save so it reaches the account and
  * every other device (instead of being merged back on the next sync). Signed out, it stays on this device.
  */
@@ -229,4 +253,12 @@ export function useListStats(id: string | undefined, mode: "list" | "blitz"): Cr
 /** Every list's real average; null without a backend or until loaded. */
 export function useListAverages(): ListAverages | null {
   return useLoaded("averages:list", (s) => s.listAverages());
+}
+
+/**
+ * How real players guessed on a Fathom question, against this guess and the answer shown; null without a backend,
+ * while loading, or if the server can't say (crowdLine in ./fathom decides whether there are enough of them to show).
+ */
+export function useFathomCrowd(questionId: string, guess: number, answer: number): FathomCrowd | null {
+  return useLoaded(`fathom:${questionId}:${guess}:${answer}`, (s) => s.fathomCompare(questionId, guess, answer));
 }

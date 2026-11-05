@@ -160,6 +160,13 @@ describe("without a backend (no env)", () => {
     expect(JSON.parse(store.get("top-tens:v1")!)).not.toHaveProperty("feedback");
     expect(imported).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();
+
+    // A Fathom guess: nothing sent, nothing queued.
+    expect(net.submitFathomGuess("eiffel-tower-height", 300)).toBe(false);
+    await new Promise((r) => setTimeout(r, 10));
+    expect([...store.keys()]).toEqual(["top-tens:v1"]);
+    expect(imported).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
 
@@ -254,6 +261,52 @@ describe("with a backend", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("queues a Fathom guess in its own outbox before the backend code loads, once per question, then hands it over", async () => {
+    configure();
+    let release!: () => void;
+    const loaded = new Promise<void>((r) => (release = r));
+    const svc = { start: vi.fn(), flushFathom: vi.fn() };
+    vi.doMock("./service", async () => (await loaded, svc));
+    const { store } = fakeBrowser();
+    const now = Date.UTC(2026, 10, 5, 12);
+    vi.useFakeTimers({ now, toFake: ["Date"] });
+    try {
+      const net = await import("./index");
+      expect(net.submitFathomGuess("eiffel-tower-height", 300)).toBe(true);
+      expect(net.submitFathomGuess("moon-distance", 1.5e6)).toBe(true);
+      // The same question again (a later game drew it): the first guess is the one that counts.
+      expect(net.submitFathomGuess("eiffel-tower-height", 350)).toBe(false);
+      expect(net.submitFathomGuess("Bad Id", 3)).toBe(false);
+      expect(JSON.parse(store.get("top-tens:fathom-outbox")!).pending).toEqual([
+        { questionId: "eiffel-tower-height", guess: 300, at: now },
+        { questionId: "moon-distance", guess: 1.5e6, at: now },
+      ]);
+      expect(svc.flushFathom).not.toHaveBeenCalled();
+      release();
+      await vi.waitFor(() => expect(svc.flushFathom).toHaveBeenCalledTimes(2));
+      expect(svc.start).toHaveBeenCalled();
+      // Not in the game's save, nor Fathom's.
+      expect(store.get("top-tens:v1")).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("loads the backend code at startup when Fathom guesses are waiting, and sends them when the browser comes online", async () => {
+    configure();
+    const svc = { start: vi.fn(), flushPlays: vi.fn(), flushRatings: vi.fn(), flushFeedback: vi.fn(), flushFathom: vi.fn() };
+    vi.doMock("./service", () => svc);
+    const { store } = fakeBrowser();
+    const handlers = new Map<string, () => void>();
+    vi.stubGlobal("addEventListener", (type: string, fn: () => void) => handlers.set(type, fn));
+    store.set("top-tens:fathom-outbox", JSON.stringify({ pending: [{ questionId: "moon-distance", guess: 3, at: 1 }], sent: [] }));
+    const net = await import("./index");
+    net.startNet();
+    await vi.waitFor(() => expect(svc.start).toHaveBeenCalled());
+    handlers.get("online")!();
+    await vi.waitFor(() => expect(svc.flushFathom).toHaveBeenCalled());
   });
 
   it("loads the backend code at startup when notes are waiting, and sends them when the browser comes online", async () => {

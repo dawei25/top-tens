@@ -221,6 +221,45 @@ describe("ratings", () => {
   });
 });
 
+describe("Fathom guesses", () => {
+  const sentGuesses = () => fake.calls.rpc.filter(([fn]) => fn === "submit_fathom_guess").map(([, args]) => args);
+  const queue = (items: object[]) => store.set("top-tens:fathom-outbox", JSON.stringify({ pending: items, sent: [] }));
+
+  it("sends each guess the facade queued to submit_fathom_guess, with this browser's id, and keeps it while offline", async () => {
+    queue([{ questionId: "eiffel-tower-height", guess: 300, at: Date.now() }]);
+    const svc = await import("./service");
+    const real = fake.answers.rpc;
+    fake.answers.rpc = (fn, args) => (fn === "submit_fathom_guess" ? { data: null, error: { message: "TypeError: Failed to fetch" }, status: 0 } : real(fn, args));
+    await svc.flushFathom();
+    expect(JSON.parse(store.get("top-tens:fathom-outbox")!).pending).toHaveLength(1);
+    fake.answers.rpc = real;
+    await svc.flushFathom();
+    expect(sentGuesses().at(-1)).toEqual({ p_question_id: "eiffel-tower-height", p_guess: 300, p_client_id: store.get("top-tens:client-id") });
+    expect(JSON.parse(store.get("top-tens:fathom-outbox")!)).toEqual({ pending: [], sent: ["eiffel-tower-height"] });
+  });
+
+  it("drops a guess the server refuses for good, or that it doesn't know yet (the migration not run: 404)", async () => {
+    queue([{ questionId: "moon-distance", guess: 384_000, at: Date.now() }]);
+    fake.answers.rpc = () => ({ data: null, error: { message: "not found" }, status: 404 });
+    const svc = await import("./service");
+    await svc.flushFathom();
+    expect(JSON.parse(store.get("top-tens:fathom-outbox")!).pending).toEqual([]);
+  });
+
+  it("asks fathom_compare (a read, GET) with the answer shown and this browser's id, once, and reads its answer", async () => {
+    fake.answers.rpc = (fn) => (fn === "fathom_compare" ? { data: { n: 37, median: 4, further_off: 0.72 }, error: null, status: 200 } : { data: true, error: null, status: 200 });
+    const svc = await import("./service");
+    const a = await svc.fathomCompare("blood-volume", 5, 5.5);
+    expect(await svc.fathomCompare("blood-volume", 5, 5.5)).toBe(a);
+    expect(a).toEqual({ n: 37, median: 4, furtherOff: 0.72 });
+    expect(fake.calls.rpc).toEqual([
+      ["fathom_compare", { p_question_id: "blood-volume", p_guess: 5, p_answer: 5.5, p_client_id: store.get("top-tens:client-id") }, { get: true }],
+    ]);
+    fake.answers.rpc = () => ({ data: null, error: { message: "boom" }, status: 404 });
+    expect(await svc.fathomCompare("blood-volume", 6, 5.5)).toBeNull();
+  });
+});
+
 describe("stats", () => {
   it("asks once per list and mode (with GET, it's a read), then answers from the cache", async () => {
     const svc = await import("./service");
