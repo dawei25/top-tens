@@ -78,3 +78,10 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
     usually are on that question, so "1.2x too low · NEAR · 64" beside "1.4x too low · DEAD ON · 90" looked arbitrary;
     the reveal now says "most people miss by about 1.3x", the results "a typical guesser scores about 250", and
     whatever reads "spot on" scores 100 (it had shown 99). (`e2e/fathom.e2e.cjs`, `src/game/fathom.test.ts`.)
+
+## Scope
+
+22. **Spend the effort where players are.** Build the common case simply and skip rules for cases that take several
+    unlikely things at once. Multiple clues on one answer: each letter costs a life, and nothing stops a player
+    revealing a whole name, since that needs a short answer and every life ("not a use case that's worth spending
+    time ... focus on what matters").
