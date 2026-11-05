@@ -854,7 +854,7 @@
     {
       "id": "bering-strait-width",
       "kind": "places",
-      "question": "How far apart are Russia and the US across the Bering Strait?",
+      "question": "How far is Russia from the US across the Bering Strait?",
       "unit": "kilometres",
       "answer": 82,
       "definition": "mainland to mainland, at the narrowest",

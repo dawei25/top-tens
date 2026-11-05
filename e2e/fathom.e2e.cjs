@@ -399,6 +399,39 @@ describe("Fathom", { concurrency: true }, () => {
     await ctx.close();
   });
 
+  // Every question in the bank, not just the longest by characters: wrapping decides the height, and a 99-character
+  // question (bering-strait-width) pushed LOCK IN under the keyboard while longer ones fit.
+  test("with the keyboard up on a small phone, LOCK IN stays in view for every question in the bank", async () => {
+    const real = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "public", "fathom", "questions.json"), "utf8")).questions;
+    const all = real.map((q) => q.id);
+    const fails = [];
+    for (let g = 0; g < all.length; g += QUESTIONS) {
+      const ids = all.slice(g, g + QUESTIONS);
+      while (ids.length < QUESTIONS) ids.push(all[ids.length]);
+      const { ctx, page } = await openFathom({ viewport: { width: 375, height: 400 }, isMobile: true, hasTouch: true }, {
+        serve: async () => {},
+        save: { recent: [], game: { ids, guesses: [], at: 0 } },
+        reducedMotion: "reduce",
+      });
+      for (let i = 0; i < QUESTIONS; i++) {
+        const field = page.getByTestId("fathom-input");
+        await field.waitFor();
+        await field.focus();
+        await field.fill("42");
+        const ok = await page.evaluate(() => {
+          const r = (s) => document.querySelector(s).getBoundingClientRect();
+          return ['[data-testid="fathom-question"] h1', '[data-testid="fathom-input"]', '[data-testid="fathom-lock"]'].every((s) => r(s).top >= 0 && r(s).bottom <= innerHeight + 0.5);
+        });
+        if (!ok) fails.push(await attr(page, "fathom-question", "data-question"));
+        await page.getByTestId("fathom-lock").click();
+        await page.getByTestId("fathom-reveal").waitFor();
+        await next(page);
+      }
+      await ctx.close();
+    }
+    assert.deepEqual([...new Set(fails)], [], "questions whose LOCK IN goes under the keyboard at 375x400");
+  });
+
   // Nov 5 review: the decimal keypad (iOS) has no Return key, and with it up LOCK IN was under the keyboard. A phone
   // with its keyboard up shows the question, the field and LOCK IN: the page shrinks (Android), or the keyboard covers
   // its lower part and only the visual viewport says so (iOS, faked here). The real bank's longest questions.
