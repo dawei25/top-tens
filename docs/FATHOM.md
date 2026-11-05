@@ -24,15 +24,23 @@ Write our own questions from facts. Never copy one from another estimation game.
 - **`question`**: plain, dry, one question ending with "?", naming exactly what is measured. The unit stays out of it:
   the game shows `unit` beside the input. A count names what it counts once, right after "How many" ("How many keys
   does a modern piano have?", unit `keys`); a measure never does ("How tall is it in metres?" is wrong). No trick
-  wording, and nothing in the question or the definition that gives the number away.
+  wording, and nothing in the question or the definition that gives the number away. Keep it short: the question names
+  the thing ("How tall is the Statue of Liberty?"), the definition says exactly what is measured ("ground to torch tip,
+  pedestal included"), and its words match the measure ("How long" for a card's long side, not "How wide"). With a
+  phone's keyboard up, the bank's five longest questions must still show whole above the field (`e2e/fathom.e2e.cjs`).
 - **`unit`**: plural, lower case (`degrees Celsius` is the one capital), metric: `metres`, `litres`, `kilograms`,
-  `kilometres`, `square kilometres`, `minutes`, `people`, `times`... `years` only as a duration.
+  `kilometres`, `square kilometres`, `minutes`, `people`, `times`... `years` only as a duration. A unit of measure
+  must be one the game reads (`UNITS` in `src/game/fathom.ts`): players may type it after the number in any form
+  ("343 m/s", "390000 km2"), and other units of its kind are converted exactly ("1.5 km" in metres); anything else
+  counts things. `src/game/fathom.test.ts` reads every answer back typed with its unit.
 - **`answer`**: a positive number in that unit, as the source states it. No ranges: take the source's central or
   official figure, and say which in `definition` when it matters.
 - **`definition`** (optional): one short phrase, no full stop, only when the answer depends on it: "city proper, 2020
   census", "to the tip", "average distance".
-- **`fact`**: one true sentence the player reads after guessing, from the same source. It may restate its own answer,
-  never another question's.
+- **`fact`**: one true sentence the player reads after guessing, from the same source, about the number they just
+  guessed: what it compares to, how it was counted, what makes it big or small ("That's 46% fewer than when farming
+  began", not "The first trees evolved 400 million years ago"). It may restate its own answer, never another
+  question's.
 - **`source`**: the page you actually opened and took the answer from (its canonical title and https URL).
 - **`typical`**: the typical miss, as a ratio: half of casual 18-35 players would land within this many times of the
   answer. One of 1.3, 1.5, 2, 3, 5, 10, 30. Be honest: a giraffe's height is about 1.3 to 1.5, blood in a body 2, the

@@ -70,3 +70,11 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
     hover)`), every control is 44px to the finger (a key's base counts), quick taps never zoom, and the narrowest
     phone (320px) still shows every word that matters: the clue's cost, the guess box's placeholder, a long answer
     whole. ("some ui bugs on the mobile version"; `lint:css` and `e2e/touch.e2e.cjs` enforce it.)
+
+## Scores
+
+21. **A relative score shows its yardstick.** When points are measured against something the player can't see, the
+    screen says what it is, and the words agree with the number. Fathom scores a guess against how far off people
+    usually are on that question, so "1.2x too low · NEAR · 64" beside "1.4x too low · DEAD ON · 90" looked arbitrary;
+    the reveal now says "most people miss by about 1.3x", the results "a typical guesser scores about 250", and
+    whatever reads "spot on" scores 100 (it had shown 99). (`e2e/fathom.e2e.cjs`, `src/game/fathom.test.ts`.)

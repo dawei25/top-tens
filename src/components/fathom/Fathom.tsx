@@ -1,16 +1,17 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { flushSync } from "react-dom";
 import {
+  askFor,
   bandLabel,
   echoText,
   formatAmount,
   loadFathom,
   lockIn,
   MAX_TOTAL,
+  missText,
   MULTIPLIERS,
   nextQuestion,
   phaseOf,
-  POINTS_PER_QUESTION,
   QUESTIONS_PER_GAME,
   readBank,
   readNumber,
@@ -21,6 +22,7 @@ import {
   startGame,
   timesOff,
   totalOf,
+  TYPICAL_TOTAL,
   type Band,
   type FathomGame,
   type FathomQuestion,
@@ -65,25 +67,57 @@ async function loadBank(): Promise<FathomQuestion[] | null> {
   }
 }
 
-const ERRORS: Record<NumberError, string> = {
+/** What's wrong, in one line at 320px (a unit typed that the question isn't in: "In centimetres, please."). */
+const ERRORS: Record<Exclude<NumberError, "unit">, string> = {
   empty: "Type a number first.",
   zero: "Has to be more than zero.",
-  negative: "No negatives. It's more than zero.",
+  negative: "No negatives. It's above zero.",
   text: "That doesn't read as a number.",
 };
+const errorText = (error: NumberError, unit: string) => (error === "unit" ? askFor(unit) : ERRORS[error]);
 
 const focusGuess = () => document.querySelector<HTMLInputElement>('[data-testid="fathom-input"]')?.focus();
+
+/** The screen height (CSS px) at or under which a phone gets the compact layout: a small phone, or its keyboard up. */
+const SHORT = 600;
+/**
+ * Whether the screen shows little height on a phone: a small phone, or one with its keyboard up. Android shrinks the
+ * page for the keyboard (index.html asks for interactive-widget=resizes-content), but iOS lays the keyboard over it, and
+ * only the visual viewport says so; a pinch zoom shrinks that too, so its scale is taken out.
+ */
+function useShort(): boolean {
+  const measure = () => {
+    if (typeof window === "undefined") return false;
+    const vv = window.visualViewport;
+    const height = Math.min(window.innerHeight, vv ? vv.height * vv.scale : Infinity);
+    return window.innerWidth < 700 && height <= SHORT;
+  };
+  const [short, setShort] = useState(measure);
+  useEffect(() => {
+    const check = () => setShort(measure());
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", check);
+    window.addEventListener("resize", check);
+    return () => {
+      vv?.removeEventListener("resize", check);
+      window.removeEventListener("resize", check);
+    };
+  }, []);
+  return short;
+}
 
 export default function Fathom({ onBack, onHome }: Props) {
   const [bank, setBank] = useState<FathomQuestion[] | null | "missing">(null);
   const [game, setGame] = useState<FathomGame | null>(null);
+  const short = useShort();
 
   useEffect(() => {
     let live = true;
     loadBank().then((b) => {
       if (!live) return;
       if (!b) return setBank("missing");
-      // Pick up a game left unfinished (a reload, the phone dropping the tab); otherwise a new draw.
+      // Pick up the game on screen, unfinished or on its results (a reload, the phone dropping the tab); otherwise a
+      // new draw.
       const save = loadFathom();
       const resumed = resumable(save, b);
       if (resumed) setGame(resumed);
@@ -128,9 +162,11 @@ export default function Fathom({ onBack, onHome }: Props) {
     setGame(next);
     saveFathom({ ...loadFathom(), game: next });
   };
-  // From a tap on NEXT, the next question's box takes focus inside the tap itself, so a phone opens its keyboard.
+  // From a tap on NEXT, the next question's box takes focus inside the tap itself, so a phone opens its keyboard. The
+  // question starts at the top of the screen, whatever the reveal had scrolled to.
   const next = () => {
     flushSync(() => update(nextQuestion(game)));
+    scrollTo({ top: 0 });
     focusGuess();
   };
   const again = () => {
@@ -151,7 +187,7 @@ export default function Fathom({ onBack, onHome }: Props) {
       ? `Your total: ${totalOf(scored)} out of ${MAX_TOTAL}.`
       : "";
   return (
-    <main className="screen fathom" data-testid="fathom" data-phase={phase}>
+    <main className="screen fathom" data-testid="fathom" data-phase={phase} data-short={short || undefined}>
       {head}
       <p className="sr-only" role="status">
         {said}
@@ -200,41 +236,58 @@ function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: n
     onLock(value);
   };
 
-  // The line under the field: what was read, why it can't be, or what to do.
+  // The line under the field: what was read (with the unit, when it was typed in another one: "50 centimetres"), why
+  // it can't be, or what to do.
+  const converted = "converted" in reading && reading.converted;
   const echo = error
-    ? { tone: "error", text: ERRORS[error] }
+    ? { tone: "error", text: errorText(error, question.unit) }
     : value !== null
-      ? { tone: "value", text: echoText(value) }
+      ? { tone: "value", text: converted ? `${echoText(value)} ${question.unit}` : echoText(value) }
       : text.trim()
         ? { tone: "hint", text: "can't read that yet." }
         : { tone: "hint", text: mult ? `type the number of ${mult}s.` : "type a number." };
 
+  // The lit multiplier's word right after what's typed ("8.8 million"), unless the field is too full to show it whole.
+  const scale = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const el = scale.current;
+    if (el) el.style.visibility = el.scrollWidth > el.clientWidth + 1 ? "hidden" : "";
+  }, [text, mult]);
+
   return (
     <form className="panel fathom-ask" data-glass onSubmit={submit} data-testid="fathom-ask">
       <label className="fathom-field">
-        <input
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            setError(null);
-          }}
-          // LOCK IN is off while the field is empty, so Enter there submits nothing: say why instead.
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !text.trim()) setError("empty");
-          }}
-          inputMode="decimal"
-          autoFocus
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          enterKeyHint="done"
-          placeholder="your guess"
-          aria-label="Your guess"
-          aria-describedby="fathom-unit fathom-echo"
-          aria-invalid={error ? true : undefined}
-          data-testid="fathom-input"
-        />
+        <span className="fathom-entry">
+          <input
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              setError(null);
+            }}
+            // LOCK IN is off while the field is empty, so Enter there submits nothing: say why instead.
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !text.trim()) setError("empty");
+            }}
+            inputMode="decimal"
+            autoFocus
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            enterKeyHint="done"
+            placeholder="your guess"
+            aria-label="Your guess"
+            aria-describedby="fathom-unit fathom-echo"
+            aria-invalid={error ? true : undefined}
+            data-testid="fathom-input"
+          />
+          {mult && text.trim() && (
+            // Drawn over the field in its own type: what's typed, invisible, then the word.
+            <span ref={scale} className="fathom-scale" aria-hidden="true" data-testid="fathom-scale">
+              <span className="fathom-scale-typed">{text}</span> {mult}
+            </span>
+          )}
+        </span>
         <span className="fathom-unit" id="fathom-unit" data-testid="fathom-unit">
           {question.unit}
         </span>
@@ -319,6 +372,9 @@ function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNex
           <p className="figure-off" data-band={band} data-testid="fathom-off">
             {timesOff(guess, q.answer)}
           </p>
+          <p className="figure-typical" data-testid="fathom-typical" data-typical={q.typical}>
+            {missText(q.typical)}
+          </p>
         </div>
       </div>
       <Gauge guess={guess} answer={q.answer} typical={q.typical} band={band} />
@@ -349,7 +405,10 @@ function Reveal({ scored, last, onNext }: { scored: Scored; last: boolean; onNex
   );
 }
 
-/** The end: the total, the five bands in a row, COPY RESULT and PLAY AGAIN, then each question with guess and answer. */
+/**
+ * The end: the total and what a typical guesser scores, the five bands in a row, NEW QUESTIONS and COPY RESULT, then
+ * each question with guess and answer.
+ */
 function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void }) {
   const total = totalOf(scored);
   const [copied, setCopied] = useState(false);
@@ -388,12 +447,12 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
             <span key={i} className="band-sq" data-band={b} />
           ))}
         </div>
-        <p className="caption">
-          {QUESTIONS_PER_GAME} questions, up to {POINTS_PER_QUESTION} points each.
+        <p className="caption" data-testid="fathom-typical-total" data-total={TYPICAL_TOTAL}>
+          a typical guesser scores about {TYPICAL_TOTAL}.
         </p>
         <div className="results-actions">
           <button type="button" className="key key-pink" data-testid="fathom-again" onClick={onAgain}>
-            Play again
+            New questions
           </button>
           <button ref={copyKey} type="button" className="key" data-testid="fathom-copy" onClick={copy}>
             <SwapLabel off="Copy result" on="Copied" active={copied} />

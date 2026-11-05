@@ -1,5 +1,9 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  askFor,
+  BAND_CHARS,
   bandEdge,
   bandLabel,
   bandOf,
@@ -13,6 +17,7 @@ import {
   loadFathom,
   lockIn,
   MAX_TOTAL,
+  missText,
   newGame,
   nextQuestion,
   parseNumber,
@@ -26,6 +31,8 @@ import {
   startGame,
   timesOff,
   totalOf,
+  TYPICAL_POINTS,
+  TYPICAL_TOTAL,
   type FathomKind,
   type FathomQuestion,
 } from "./fathom";
@@ -77,6 +84,31 @@ describe("scoring", () => {
   });
   it("is symmetric on the log scale", () => {
     expect(fathomScore(300, 100, 2)).toBe(fathomScore(100 / 3, 100, 2));
+  });
+  // A reveal said "spot on" beside 99 points (Nov 5 review): whatever reads as spot on scores full marks.
+  it("is 100 whenever the reveal says spot on", () => {
+    expect(fathomScore(333, 330, 1.3)).toBe(100);
+    expect(fathomScore(327, 330, 1.3)).toBe(100);
+    for (const typical of [1.3, 1.5, 2, 3, 5, 10, 30]) {
+      for (let guess = 95; guess <= 105; guess += 0.25) {
+        if (timesOff(guess, 100) === "spot on") expect(fathomScore(guess, 100, typical), `${guess} on ${typical}`).toBe(100);
+        else expect(fathomScore(guess, 100, typical)).toBeLessThan(100);
+      }
+    }
+  });
+});
+
+describe("the yardstick", () => {
+  // "1.2x too low · NEAR · 64" beside "1.4x too low · DEAD ON · 90" looked arbitrary: the points are relative to each
+  // question's typical miss, so the reveal says what that is, and the results what a typical game scores.
+  it("says how far off people usually are", () => {
+    expect(missText(1.3)).toBe("most people miss by about 1.3x");
+    expect(missText(2)).toBe("most people miss by about 2x");
+    expect(missText(30)).toBe("most people miss by about 30x");
+  });
+  it("a typical miss on every question adds up to the typical total", () => {
+    expect(TYPICAL_POINTS).toBe(fathomScore(200, 100, 2));
+    expect(TYPICAL_TOTAL).toBe(250);
   });
 });
 
@@ -178,8 +210,91 @@ describe("reading numbers", () => {
     expect(parseNumber("86400 s", "seconds")).toBe(86400);
     // Without the unit, m is a million.
     expect(parseNumber("330m", "people")).toBe(330_000_000);
-    // Only a whole unit word comes off: "2.5mm" is not "2.5m" in metres.
-    expect(parseNumber("2.5mm", "metres")).toBeNull();
+    // Only a whole unit word comes off: "2.5mm" is 2.5 millimetres, not "2.5m" with its "m" taken off.
+    expect(parseNumber("2.5mm", "metres")).toBe(0.0025);
+  });
+  // Nov 5 review: "343 m/s" and "390000 km2" were refused on questions in those units.
+  it("reads every form of the question's own unit", () => {
+    expect(parseNumber("343 m/s", "metres per second")).toBe(343);
+    expect(parseNumber("343m/s", "metres per second")).toBe(343);
+    expect(parseNumber("343 metres per second", "metres per second")).toBe(343);
+    expect(parseNumber("390000 km2", "square kilometres")).toBe(390_000);
+    expect(parseNumber("390000km²", "square kilometres")).toBe(390_000);
+    expect(parseNumber("390,000 sq km", "square kilometres")).toBe(390_000);
+    expect(parseNumber("390k km2", "square kilometres")).toBe(390_000);
+    expect(parseNumber("485 °C", "degrees Celsius")).toBe(485);
+    expect(parseNumber("12 people", "people")).toBe(12);
+    expect(parseNumber("206 bones", "bones")).toBe(206);
+    expect(parseNumber("1 bone", "bones")).toBe(1);
+  });
+  // Nov 5 review: "0.5m" on a question in centimetres read 500,000 cm, "8m" in minutes 8 million, "150t" in kilograms
+  // 150 trillion. A unit of the question's kind is a unit, never a scale word.
+  it("never reads a unit of the question's kind as a scale word", () => {
+    expect(parseNumber("0.5m", "centimetres")).toBe(50);
+    expect(parseNumber("8m", "minutes")).toBe(8);
+    expect(parseNumber("150t", "kilograms")).toBe(150_000);
+    // Elsewhere they are still a million and a trillion.
+    expect(parseNumber("8m", "people")).toBe(8_000_000);
+    expect(parseNumber("3t", "trees")).toBe(3e12);
+  });
+  it("converts another unit of the same kind exactly", () => {
+    // Length.
+    expect(parseNumber("1.5 km", "metres")).toBe(1500);
+    expect(parseNumber("45cm", "metres")).toBe(0.45);
+    expect(parseNumber("450 mm", "centimetres")).toBe(45);
+    expect(parseNumber("8.56 cm", "millimetres")).toBe(85.6);
+    expect(parseNumber("384,400,000 m", "kilometres")).toBe(384_400);
+    expect(parseNumber("2.72 metres", "centimetres")).toBe(272);
+    // Time.
+    expect(parseNumber("2 h", "minutes")).toBe(120);
+    expect(parseNumber("1.5 hours", "minutes")).toBe(90);
+    expect(parseNumber("498 s", "minutes")).toBe(8.3);
+    expect(parseNumber("660 min", "hours")).toBe(11);
+    expect(parseNumber("5832 hours", "days")).toBe(243);
+    expect(parseNumber("2 years", "months")).toBe(24);
+    // Mass.
+    expect(parseNumber("38000 g", "kilograms")).toBe(38);
+    expect(parseNumber("0.038 t", "kilograms")).toBe(38);
+    expect(parseNumber("145 tonnes", "kilograms")).toBe(145_000);
+    expect(parseNumber("6 kg", "grams")).toBe(6000);
+    // Speed, area, volume.
+    expect(parseNumber("1234.8 km/h", "metres per second")).toBe(343);
+    expect(parseNumber("49 ha", "square kilometres")).toBe(0.49);
+    expect(parseNumber("500 ml", "litres")).toBe(0.5);
+    expect(parseNumber("2500 m3", "litres")).toBe(2_500_000);
+    // A scale word and a unit together.
+    expect(parseNumber("1.2 million km", "metres")).toBe(1.2e9);
+    // Says it was converted, so the echo can name the unit.
+    expect(readNumber("0.5m", "centimetres")).toEqual({ value: 50, converted: true });
+    expect(readNumber("50 cm", "centimetres")).toEqual({ value: 50 });
+  });
+  // A new question in a unit the table doesn't know would be refused when typed with its unit: every question in the
+  // bank reads its own answer back, typed with its unit.
+  it("reads every question's answer typed with its own unit", () => {
+    const bank = readBank(JSON.parse(readFileSync(join(import.meta.dirname, "..", "..", "public", "fathom", "questions.json"), "utf8")))!;
+    expect(bank.length).toBeGreaterThan(0);
+    for (const q of bank) {
+      expect(parseNumber(`${q.answer} ${q.unit}`, q.unit), `${q.id}: "${q.answer} ${q.unit}"`).toBe(q.answer);
+      expect(parseNumber(`${q.answer}${q.unit}`, q.unit), `${q.id}: "${q.answer}${q.unit}"`).toBe(q.answer);
+    }
+  });
+  // Nov 5 review: "343 km/h" on a question in metres per second said "That doesn't read as a number."
+  it("asks for the question's unit when the one typed can't be converted", () => {
+    expect(readNumber("767 mph", "metres per second")).toEqual({ error: "unit" });
+    expect(readNumber("1000 ft", "metres")).toEqual({ error: "unit" });
+    expect(readNumber("1000 feet", "metres")).toEqual({ error: "unit" });
+    expect(readNumber("900 °F", "degrees Celsius")).toEqual({ error: "unit" });
+    expect(readNumber("84 lbs", "kilograms")).toEqual({ error: "unit" });
+    expect(readNumber("3 weeks", "months")).toEqual({ error: "unit" });
+    expect(readNumber("343 km", "metres per second")).toEqual({ error: "unit" });
+    expect(readNumber("5 kg", "metres")).toEqual({ error: "unit" });
+    expect(readNumber("5 kg", "bones")).toEqual({ error: "unit" });
+    expect(readNumber("90 minutes", "litres")).toEqual({ error: "unit" });
+    // A word that is no unit at all still doesn't read as a number.
+    expect(readNumber("12 apples", "bones")).toEqual({ error: "text" });
+    expect(askFor("centimetres")).toBe("In centimetres, please.");
+    expect(askFor("degrees Celsius")).toBe("In degrees Celsius, please.");
+    expect(askFor("bones")).toBe("Just the number of bones.");
   });
   it("says what's wrong", () => {
     expect(readNumber("")).toEqual({ error: "empty" });
@@ -210,6 +325,10 @@ describe("formatting", () => {
     expect(echoText(330)).toBe("330");
     expect(echoText(0.1)).toBe("0.1");
     expect(echoText(1e30)).toBe("1e30");
+    // From a trillion, the words alone: the digits ran the line past a 320px phone's width.
+    expect(echoText(999.9e9)).toBe("999,900,000,000 · 999.9 billion");
+    expect(echoText(3.04e12)).toBe("3.04 trillion");
+    expect(echoText(999e12)).toBe("999 trillion");
   });
   it("keeps digits clean of float noise", () => {
     expect(formatDigits(1.1 * 1000)).toBe("1,100");
@@ -323,19 +442,26 @@ describe("a game", () => {
     expect(phaseOf(g)).toBe("question");
     // Next does nothing before a guess.
     expect(nextQuestion(g)).toBe(g);
-    for (const guess of [100, 400, 1e9, 99]) g = nextQuestion(lockIn(g, guess));
+    for (const guess of [100, 400, 1e9, 98]) g = nextQuestion(lockIn(g, guess));
     expect(phaseOf(g)).toBe("results");
     const scored = scoreGame(g, bank);
-    expect(scored.map((s) => s.points)).toEqual([50, 100, 30, 3, 99]);
-    expect(totalOf(scored)).toBe(282);
+    expect(scored.map((s) => s.points)).toEqual([50, 100, 30, 3, 98]);
+    expect(totalOf(scored)).toBe(281);
     expect(scored.map((s) => s.band)).toEqual(["near", "dead-on", "far", "lost", "dead-on"]);
   });
   it("shares the total and five plain characters, no emoji", () => {
     let g = newGame(bank.slice(0, 5).map((x) => x.id));
     for (const guess of [200, 100, 400, 1e9, 130]) g = nextQuestion(lockIn(g, guess));
     const text = shareText(scoreGame(g, bank));
-    expect(text).toBe(`Fathom beta 260/${MAX_TOTAL}\n▒ █ ░ □ ▓`);
+    expect(text).toBe(`Fathom beta 260/${MAX_TOTAL}\n▒ █ ░ × ▓`);
     expect(text).not.toMatch(/\p{Extended_Pictographic}/u);
+  });
+  // Nov 5 review: lost at sea shared as "□", which reads as a question not played. Every band has its own mark, and
+  // none of them is an empty box.
+  it("marks every band apart, and lost at sea as played", () => {
+    const chars = Object.values(BAND_CHARS);
+    expect(new Set(chars).size).toBe(chars.length);
+    expect(chars.join("")).not.toMatch(/[□▢▫◻ ]/);
   });
 });
 
@@ -380,9 +506,16 @@ describe("the save", () => {
     expect(resumable(half, BANK)).toEqual(half.game);
     // A question gone from the bank (the real file replaced the old one): start over.
     expect(resumable(save, BANK.filter((x) => x.id !== save.game!.ids[3]))).toBeUndefined();
-    // A finished game starts over too.
+  });
+  // Nov 5 review: a reload on the results started a new game and lost the score. A finished game reopens on its
+  // results; only NEW QUESTIONS draws again.
+  it("reopens a finished game on its results", () => {
+    const save = startGame({ recent: [] }, BANK, seeded(2));
     let done = save.game!;
     for (let i = 0; i < 5; i++) done = nextQuestion(lockIn(done, 10));
-    expect(resumable({ ...save, game: done }, BANK)).toBeUndefined();
+    expect(phaseOf(done)).toBe("results");
+    expect(resumable({ ...save, game: done }, BANK)).toEqual(done);
+    // Not one whose questions have gone from the bank.
+    expect(resumable({ ...save, game: done }, BANK.filter((x) => x.id !== done.ids[0]))).toBeUndefined();
   });
 });
