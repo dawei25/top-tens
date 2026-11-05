@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   askFor,
@@ -265,6 +267,16 @@ describe("reading numbers", () => {
     // Says it was converted, so the echo can name the unit.
     expect(readNumber("0.5m", "centimetres")).toEqual({ value: 50, converted: true });
     expect(readNumber("50 cm", "centimetres")).toEqual({ value: 50 });
+  });
+  // A new question in a unit the table doesn't know would be refused when typed with its unit: every question in the
+  // bank reads its own answer back, typed with its unit.
+  it("reads every question's answer typed with its own unit", () => {
+    const bank = readBank(JSON.parse(readFileSync(join(import.meta.dirname, "..", "..", "public", "fathom", "questions.json"), "utf8")))!;
+    expect(bank.length).toBeGreaterThan(0);
+    for (const q of bank) {
+      expect(parseNumber(`${q.answer} ${q.unit}`, q.unit), `${q.id}: "${q.answer} ${q.unit}"`).toBe(q.answer);
+      expect(parseNumber(`${q.answer}${q.unit}`, q.unit), `${q.id}: "${q.answer}${q.unit}"`).toBe(q.answer);
+    }
   });
   // Nov 5 review: "343 km/h" on a question in metres per second said "That doesn't read as a number."
   it("asks for the question's unit when the one typed can't be converted", () => {
