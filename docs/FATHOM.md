@@ -62,3 +62,34 @@ in `.cache/wiki`), or another reputable page, fetched one at a time.
 unique ids, kinds, typical values, positive finite answers, https sources, one question ending in "?", the unit kept
 out of it, answers not given away, the mix), and `npm test` runs it on the real file
 (`scripts/fathom/check.test.ts`). Truth, fairness and the typical miss are on the writer.
+
+## Judging questions
+
+Every question is judged before players see it, by a `fathom-judge` agent (`.claude/agents/fathom-judge.md`) that
+didn't write it. The judge plays it as a curious 18-35 player who isn't a specialist, opens its source, and gives each
+question one verdict: **keep**, **fix** (it fixes the question in place) or **drop**.
+
+What a good question has, in the order the judge checks it:
+
+1. **One clear answer.** The question, definition and unit pin down a single number, and the source states it (or
+   states it exactly enough). Sources that disagree by more than 1.5×, or a range passed off as a point, mean fix or
+   drop.
+2. **A natural, typeable unit.** The unit a person would answer in (kilometres for countries apart, not metres or
+   feet), scaled so the answer has at most 6 digits before the decimal point ("million people").
+3. **Something to reason from.** A curious person can get within about 3× by thinking (a body, a building, a trip
+   they can picture). Pure trivia nobody could approach (an atom's width, an obscure count) is a drop, however true.
+4. **A reveal worth reading.** The answer surprises or teaches ("more than you'd think"); a dull administrative number
+   is a drop. The fact relates to the number and never gives away another question's answer.
+5. **Stable and dated.** It won't change from month to month; a yearly figure says its year.
+6. **Fair, short wording.** Plain, dry English, about 12 words or fewer (two lines on a phone), no trick or gotcha
+   definitions.
+7. **Safe and fresh.** Nothing gory, political or about a private person, and not a near-copy of another question in
+   the bank (same subject and measure).
+
+The owner's taste, from playing the beta: he liked blood in a body, the Eiffel Tower, a giraffe, New York City's
+population; units must be the obvious ones; scores are plain closeness, the same rule for every question.
+
+The judge records each verdict in `scripts/fathom/verdicts.json`:
+`{ "<id>": { "verdict": "keep" | "fix" | "drop", "why": "one line", "judgedAt": "YYYY-MM-DD" } }`. A fix changes only
+wording, unit, definition or fact, always from the source; it never invents an answer. A dropped question is removed
+from `public/fathom/questions.json` and kept in the verdicts file, so it isn't written again.
