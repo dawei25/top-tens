@@ -1,7 +1,7 @@
 /* ---------- Fathom (beta, #fathom) ---------- */
 /*
  * One column, phone first: the question card (index.css .prompt), then the ask card (the field with its unit, the
- * echo, THOUSAND / MILLION / BILLION and LOCK IN) or, once locked in, the reveal card in its place. The results reuse
+ * echo line and LOCK IN) or, once locked in, the reveal card in its place. The results reuse
  * the classic results card (.results, .score). Loaded with the screen's own chunk.
  *
  * Bands have one colour each, from the game's palette: dead on gold, close cyan, near periwinkle (the squid's limb
@@ -154,12 +154,6 @@
     0 0 0 3px var(--cyan-glow),
     0 0 18px rgba(77, 227, 255, 0.18);
 }
-.fathom-entry {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  display: flex;
-}
 .fathom-field input {
   flex: 1;
   min-width: 0;
@@ -170,24 +164,6 @@
   color: var(--text);
   font-size: 32px;
   caret-color: var(--cyan);
-}
-/*
- * The lit multiplier's word after the number ("8.8 million"), over the field in the field's own type and padding: the
- * typed part is there but invisible, so the word lands right after it. Hidden (Fathom.tsx) when it wouldn't fit whole.
- */
-.fathom-scale {
-  position: absolute;
-  inset: 0;
-  padding: 0 14px;
-  font-size: 32px;
-  line-height: 52px;
-  white-space: pre;
-  overflow: hidden;
-  color: var(--cyan);
-  pointer-events: none;
-}
-.fathom-scale-typed {
-  color: transparent;
 }
 /* The field's ring shows focus (above). */
 .fathom-field input:focus-visible {
@@ -207,8 +183,9 @@
   color: var(--label);
 }
 /*
- * One line kept for it, and never more, so nothing under it moves as it changes (a second line pushed the keys down at
- * 320px). Every message and number fits whole at 320px (fathom.e2e.cjs); the ellipsis is only a backstop.
+ * The echo: what's wrong, or what was read when the field doesn't show it ("2.5m"), and nothing otherwise. One line kept
+ * for it, and never more, so nothing moves as it changes (a second line pushed the keys down at 320px). Every message
+ * and number fits whole at 320px (fathom.e2e.cjs); the ellipsis is only a backstop.
  */
 .fathom-echo {
   min-height: 24px;
@@ -232,42 +209,20 @@
   color: var(--pink);
 }
 
-/* THOUSAND, MILLION, BILLION in a row of three; LOCK IN under them on a phone, beside them from 560px. */
+/* The echo line, then LOCK IN the width of the card on a phone; from 560px LOCK IN at the right end of the echo's line,
+   where NEXT is on the reveal. */
 .fathom-keys {
   display: grid;
-  gap: 12px;
-}
-.fathom-mults {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-.fathom-mult {
-  min-width: 0;
-  padding: 0 4px;
-  font-size: 18px;
-  letter-spacing: 0.12em;
-}
-/* On: a lit cyan key (aria-pressed), the same size as off. */
-.fathom-mult.on {
-  background: var(--cyan);
-  color: #03222b;
-  box-shadow: 0 5px 0 #1b7f9a;
-}
-@media (hover: hover) {
-  .fathom-mult.on:hover:not(:disabled) {
-    background-color: #82ecff;
-  }
-}
-.fathom-mult.on:active:not(:disabled) {
-  box-shadow: 0 2px 0 #1b7f9a;
+  gap: 10px;
 }
 @media (min-width: 560px) {
   .fathom-keys {
     grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
   }
   .fathom-lock {
-    min-width: 180px;
+    min-width: 200px;
   }
 }
 
@@ -545,24 +500,18 @@
   color: var(--text);
 }
 
-/* Narrow phones: the field's number and the keys' words a step smaller, so all three keys keep their words whole. */
+/* Narrow phones: the field's number a step smaller, so more of a long one shows beside the unit. */
 @media (max-width: 379px) {
-  .fathom-field input,
-  .fathom-scale {
+  .fathom-field input {
     font-size: 26px;
     padding: 0 10px;
-  }
-  .fathom-mult {
-    font-size: 16px;
-    letter-spacing: 0.04em;
   }
 }
 
 /*
  * A phone showing 600px of height or less: a small phone, or one with its keyboard up (Fathom.tsx sets data-short from
  * the visual viewport, since iOS lays its keyboard over the page instead of shrinking it). The decimal keypad has no
- * Return key, so the question card comes down to size and LOCK IN joins the multipliers' row: the question, the field
- * and LOCK IN all stay in view.
+ * Return key, so the cards come down to size: the question, the field and LOCK IN all stay in view.
  */
 .fathom[data-short] {
   gap: 10px;
@@ -581,23 +530,6 @@
   padding: 10px 12px 12px;
   gap: 8px;
 }
-/* From 560px LOCK IN is beside the multipliers anyway (above); narrower, the row's keys come down a size to share it. */
-@media (max-width: 559px) {
-  .fathom[data-short] .fathom-keys {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 8px;
-  }
-  .fathom[data-short] .fathom-mults {
-    gap: 6px;
-  }
-  .fathom[data-short] .fathom-mult {
-    padding: 0 2px;
-    font-size: 14px;
-    letter-spacing: 0.04em;
-  }
-  .fathom[data-short] .fathom-lock {
-    padding: 0 14px;
-    font-size: 20px;
-    letter-spacing: 0.15em;
-  }
+.fathom[data-short] .fathom-keys {
+  gap: 8px;
 }

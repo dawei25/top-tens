@@ -1,15 +1,14 @@
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { flushSync } from "react-dom";
 import {
   askFor,
   bandLabel,
-  echoText,
+  editField,
   formatAmount,
   loadFathom,
   lockIn,
   MAX_TOTAL,
   missText,
-  MULTIPLIERS,
   nextQuestion,
   phaseOf,
   QUESTIONS_PER_GAME,
@@ -26,7 +25,6 @@ import {
   type Band,
   type FathomGame,
   type FathomQuestion,
-  type MultiplierId,
   type NumberError,
   type Scored,
 } from "../../game/fathom";
@@ -38,10 +36,10 @@ import { BUOY, placed, SQUID } from "./sprites";
 import "./fathom.css";
 
 /**
- * Fathom (beta, #fathom): five questions that each ask for a number. Type a guess (THOUSAND, MILLION and BILLION
- * multiply it), lock it in, see how far off it was on a sonar, and NEXT; five of those and the results. No timer, no
- * lives, and nothing here touches the rest of the game: its own save, no record, stats or backend. Reached only by
- * its link; App loads this screen as its own chunk.
+ * Fathom (beta, #fathom): five questions that each ask for a number, in a unit that keeps it short ("kilometres",
+ * "million people"). Type a guess, lock it in, see how far off it was on a sonar, and NEXT; five of those and the
+ * results. No timer, no lives, and nothing here touches the rest of the game: its own save, no record, stats or
+ * backend. Reached only by its link; App loads this screen as its own chunk.
  */
 
 interface Props {
@@ -217,14 +215,15 @@ export default function Fathom({ onBack, onHome }: Props) {
   );
 }
 
-/** The question on screen: the field with its unit, the echo of what it reads, the multiplier keys and LOCK IN. */
+/**
+ * The question on screen: the field with its unit (the number grouped with commas as it's typed), a line for what's
+ * wrong or what was read when the field doesn't show it, and LOCK IN.
+ */
 function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: number) => void }) {
   const [text, setText] = useState("");
-  const [mult, setMult] = useState<MultiplierId | null>(null);
   const [error, setError] = useState<NumberError | null>(null);
-  const factor = MULTIPLIERS.find((m) => m.id === mult)?.factor ?? 1;
   const reading = readNumber(text, question.unit);
-  const value = "value" in reading && Number.isFinite(reading.value * factor) ? reading.value * factor : null;
+  const value = "value" in reading ? reading.value : null;
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -236,85 +235,59 @@ function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: n
     onLock(value);
   };
 
-  // The line under the field: what was read (with the unit, when it was typed in another one: "50 centimetres"), why
-  // it can't be, or what to do.
+  // Grouped as it's typed ("8800000" shows "8,800,000"), the caret kept after the same digit.
+  const edit = (e: ChangeEvent<HTMLInputElement>) => {
+    const el = e.target;
+    const next = editField(text, el.value, el.selectionStart ?? el.value.length);
+    if (next.text !== el.value) {
+      el.value = next.text;
+      el.setSelectionRange(next.caret, next.caret);
+    }
+    setText(next.text);
+    setError(null);
+  };
+
+  // The line under the field: why a guess can't be, or what was read when the field doesn't already show it ("2.5m"
+  // is 2.5 million; "0.5m" in centimetres 50 centimetres; "8,800,000" in million people 8.8 million people). Nothing
+  // when the field shows the number as it is.
   const converted = "converted" in reading && reading.converted;
   const echo = error
     ? { tone: "error", text: errorText(error, question.unit) }
-    : value !== null
-      ? { tone: "value", text: converted ? `${echoText(value)} ${question.unit}` : echoText(value) }
-      : text.trim()
-        ? { tone: "hint", text: "can't read that yet." }
-        : { tone: "hint", text: mult ? `type the number of ${mult}s.` : "type a number." };
-
-  // The lit multiplier's word right after what's typed ("8.8 million"), unless the field is too full to show it whole.
-  const scale = useRef<HTMLSpanElement>(null);
-  useLayoutEffect(() => {
-    const el = scale.current;
-    if (el) el.style.visibility = el.scrollWidth > el.clientWidth + 1 ? "hidden" : "";
-  }, [text, mult]);
+    : value !== null && Number(text.replace(/,/g, "")) !== value
+      ? { tone: "value", text: converted ? `${formatAmount(value)} ${question.unit}` : formatAmount(value) }
+      : { tone: "none", text: "" };
 
   return (
     <form className="panel fathom-ask" data-glass onSubmit={submit} data-testid="fathom-ask">
       <label className="fathom-field">
-        <span className="fathom-entry">
-          <input
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              setError(null);
-            }}
-            // LOCK IN is off while the field is empty, so Enter there submits nothing: say why instead.
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !text.trim()) setError("empty");
-            }}
-            inputMode="decimal"
-            autoFocus
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            enterKeyHint="done"
-            placeholder="your guess"
-            aria-label="Your guess"
-            aria-describedby="fathom-unit fathom-echo"
-            aria-invalid={error ? true : undefined}
-            data-testid="fathom-input"
-          />
-          {mult && text.trim() && (
-            // Drawn over the field in its own type: what's typed, invisible, then the word.
-            <span ref={scale} className="fathom-scale" aria-hidden="true" data-testid="fathom-scale">
-              <span className="fathom-scale-typed">{text}</span> {mult}
-            </span>
-          )}
-        </span>
+        <input
+          value={text}
+          onChange={edit}
+          // LOCK IN is off while the field is empty, so Enter there submits nothing: say why instead.
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !text.trim()) setError("empty");
+          }}
+          inputMode="decimal"
+          autoFocus
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          enterKeyHint="done"
+          placeholder="your guess"
+          aria-label="Your guess"
+          aria-describedby="fathom-unit fathom-echo"
+          aria-invalid={error ? true : undefined}
+          data-testid="fathom-input"
+        />
         <span className="fathom-unit" id="fathom-unit" data-testid="fathom-unit">
           {question.unit}
         </span>
       </label>
-      <p className="fathom-echo" id="fathom-echo" role="status" data-testid="fathom-echo" data-tone={echo.tone} data-value={value ?? undefined}>
-        {echo.text}
-      </p>
       <div className="fathom-keys">
-        <div className="fathom-mults" role="group" aria-label="Multiply by">
-          {MULTIPLIERS.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              className={`key fathom-mult ${mult === m.id ? "on" : ""}`}
-              aria-pressed={mult === m.id}
-              data-testid={`fathom-${m.id}`}
-              // A press keeps focus (and a phone's keyboard) in the field.
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                setMult((x) => (x === m.id ? null : m.id));
-                setError(null);
-              }}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
+        <p className="fathom-echo" id="fathom-echo" role="status" data-testid="fathom-echo" data-tone={echo.tone} data-value={value ?? undefined}>
+          {echo.text}
+        </p>
         <button type="submit" className="key key-pink fathom-lock" data-testid="fathom-lock" disabled={!text.trim()}>
           Lock in
         </button>
