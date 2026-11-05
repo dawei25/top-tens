@@ -5,10 +5,11 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
 
 ## How it fits together
 
-- **Supabase** (Postgres + Auth, free plan) holds four tables: `plays` (one row per finished game, anonymous),
+- **Supabase** (Postgres + Auth, free plan) holds five tables: `plays` (one row per finished game, anonymous),
   `ratings` (a thumbs up or down per player, list and mode, anonymous), `feedback` (notes on lists, free text, read
-  only with a private key) and `saves` (one row per signed-in player: their save), plus `owners` (the owner's account,
-  so his notes come first). Schema and functions: `supabase/migrations/`.
+  only with a private key), `fathom_guesses` (the Fathom beta's guesses, one per browser and question, anonymous) and
+  `saves` (one row per signed-in player: their save), plus `owners` (the owner's account, so his notes come first).
+  Schema and functions: `supabase/migrations/`.
 - **The client** is `src/net/`. The screens only touch a tiny facade (`src/net/index.ts`); the real work and
   `@supabase/supabase-js` (pinned) live in `src/net/service.ts`, loaded with a dynamic `import()` only in a build with
   the env vars, and only when there's work: a finished game, a stats view, a stored session, a sign-in.
@@ -38,6 +39,15 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   the account while signed in, and nothing in it is readable with the public key: `list_feedback` answers only to the
   reader key, whose SHA-256 (never the key) sits in a schema the Data API doesn't expose (`private.reader_keys`). The
   owner's own notes come first (`owners`). See Switch it on (2.5) and Running it.
+- **Fathom guesses** (the estimation beta, `#fathom`). Each locked-in guess is queued at once by the facade in its own
+  outbox (`top-tens:fathom-outbox`, one per question: a question drawn again in a later game adds nothing) and sent to
+  `submit_fathom_guess` (the question id, the number, the random id; linked to the account while signed in), retried
+  like plays. The table keeps a browser's first guess on each question. The reveal asks `fathom_compare` (the
+  question, the guess, the answer it shows, since the questions live in the static site, and the random id; cached 5
+  min): how many players, their median guess, and the share further off than this guess (on the game's scale, how
+  many times off), one guess per player (their first), leaving out the owners, `stats_excluded` and the player asking.
+  From 20 players on a question (`MIN_PLAYERS`, `src/game/fathom.ts`) it says "Players' typical guess: 4 litres · you
+  were closer than 72%"; below that, nothing. Never in the save, never synced. See Switch it on (2.8).
 - **Accounts.** Sign-in methods come from `VITE_SIGN_IN`: Google, an email and password (`password`: nothing is
   emailed), or a link by email (`email`, PKCE; the email also carries a code for another device). Google is our own
   key (our keycap, Google's G, "Continue with Google"). With `VITE_GOOGLE_CLIENT_ID` set (`src/net/google.ts`), it
@@ -58,11 +68,13 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   set aside for their account if someone else signs in. "Reset all progress" while signed in resets the account too.
 - **Account deletion** is `api/delete-account.ts`, a Vercel function: deleting a sign-in needs the secret key, which
   must stay on a server. It asks Supabase Auth whether the caller's access token is valid, then deletes that user's
-  notes, ratings, plays, save and sign-in (Auth's Admin API, the supported way to remove a user). A project without the
-  ratings or feedback table yet is fine (there's nothing to delete); any other failure stops before the sign-in goes.
+  notes, ratings, plays, save and sign-in (Auth's Admin API, the supported way to remove a user); their linked Fathom
+  guesses go with the sign-in (`on delete cascade`). A project without the ratings or feedback table yet is fine
+  (there's nothing to delete); any other failure stops before the sign-in goes.
 
 What's personal: only with an account, the email (plus name and picture with Google; a password only as Supabase's
-hash) and the save. `plays`, `ratings` and `feedback` hold a random per-browser id, never an IP address. A note is
+hash) and the save. `plays`, `ratings`, `feedback` and `fathom_guesses` hold a random per-browser id, never an IP
+address. A note is
 whatever the player typed, so only the owner reads notes, and the privacy page asks players to leave personal details
 out. Nothing comes from Google until the player presses Continue with Google. The in-game `#privacy` page says this.
 
@@ -141,6 +153,13 @@ says less about this one), so a few strong regulars can't lift every average.
       email = '<their email>');` counts them again; deleting their account removes the row too (and with it the
       browser link, so games they sent signed out count again). Games sent signed out from a browser never used
       signed in can't be told apart from anyone else's.
+   8. `supabase/migrations/20261105130000_fathom_guesses.sql` (after 7; run once): the Fathom beta's guesses. Adds the
+      `fathom_guesses` table (players can't read or touch it), `submit_fathom_guess` and `fathom_compare`, which
+      leaves out the owners and `stats_excluded` like the score stats. The game works before it runs: until then
+      `submit_fathom_guess` answers 404 and the game drops those guesses, and reveals show no players' line, as they
+      don't anyway below 20 players on a question. Check it took: lock in a guess on `#fathom`; Table Editor >
+      `fathom_guesses` has a row, and `select fathom_compare('eiffel-tower-height', 300, 330);` returns
+      `{"n": ..., "median": ..., "further_off": ...}`.
 
    Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the one-time steps above still go
    in the SQL Editor). Stats alone only need the first.
@@ -187,10 +206,11 @@ says less about this one), so a few strong regulars can't lift every average.
    - `email` (a link): Authentication > Emails > Templates > Magic Link: add `<p>Or type this code in the game:
      {{ .Token }}</p>`. Custom SMTP (Authentication > Emails > SMTP Settings) is **needed for real players**: the
      built-in sender only delivers to your team's addresses, a couple an hour.
-5. **Data API**: nothing to expose by hand. The game calls six functions (`submit_play`, `list_stats`,
-   `list_averages`, `rate_list`, `list_ratings`, `submit_feedback`) and reads and writes only its own `saves` row; the
-   migrations grant exactly that (`ratings`, `feedback`, `owners` and `stats_excluded`, like `plays`, have no grants
-   for players at all, and the `private` schema isn't in the API's exposed schemas: leave it out). `list_feedback` is
+5. **Data API**: nothing to expose by hand. The game calls eight functions (`submit_play`, `list_stats`,
+   `list_averages`, `rate_list`, `list_ratings`, `submit_feedback`, `submit_fathom_guess`, `fathom_compare`) and reads
+   and writes only its own `saves` row; the migrations grant exactly that (`ratings`, `feedback`, `fathom_guesses`,
+   `owners` and `stats_excluded`, like `plays`, have no grants for players at all, and the `private` schema isn't in
+   the API's exposed schemas: leave it out). `list_feedback` is
    for the loop and refuses anyone without the reader key.
 6. **Env vars in Vercel** (Project > Settings > Environment Variables, Production and Preview):
    - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` = the publishable key (`VITE_SUPABASE_PUBLISHABLE_KEY` works
@@ -302,7 +322,9 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   mode, a browser past 120 rated lists an hour ignored; clean up the same way in `ratings`. `submit_feedback` checks
   the shape (1 to 500 characters after trimming), keeps an exact repeat from the same browser once, and ignores a
   browser past 20 notes an hour; spam is cleaned up the same way in `feedback`. Notes are never shown to players, so
-  junk only costs the loop a read.
+  junk only costs the loop a read. `submit_fathom_guess` checks the shape (a question id, a number above 0 and under
+  1e300), keeps a browser's first guess on each question, and ignores a browser past 120 guesses an hour; the median
+  and the share resist a few wild guesses, and junk is cleaned up the same way in `fathom_guesses`.
 - **Local development**: `.env.local` with the URL and publishable key, `npx vite --port 5100`, and that URL in
   Supabase's Redirect URLs. `/api/delete-account` only runs on Vercel (`npx vercel dev` locally). Google sign-in
   needs `http://localhost:5100` among the client's Authorized JavaScript origins and
@@ -314,14 +336,16 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   from Google, so CSP needs no Google sources; the callback page has one script file of its own (`script-src 'self'`)
   and a small inline style.
 - **Tests**: `npm test` covers the client (`src/net/*.test.ts`), the merge and the database functions
-  (`supabase/migrations.test.ts`, in PGlite, with and without new tables exposed, ratings and notes included: no
-  player reads a note, a wrong reader key raises, the key by header, the owner's notes come first, the rate limit,
-  deletion, the owners and `stats_excluded` left out of the stats, signed in or not). `src/net/crowd.test.ts` pins
+  (`supabase/migrations.test.ts`, in PGlite, with and without new tables exposed, ratings, notes and Fathom guesses
+  included: no player reads a note, a wrong reader key raises, the key by header, the owner's notes come first, the
+  rate limits, deletion, the owners and `stats_excluded` left out of the stats and of `fathom_compare`, signed in or
+  not; a browser's first guess kept, one per player, the asker left out, ties not further off). `src/net/crowd.test.ts` pins
   the blend (n = 0 is the estimate exactly, 30 weigh equally, 300 are ~91% real, no cliff, Blitz, a list without an
   estimate). `npm run e2e` runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating on the results, and no
   note option), plus `e2e/backend.e2e.cjs`, which builds a copy with fake env vars (`e2e/backend-env.cjs`, every
   sign-in method on) and mocks Supabase (blended results above and below 30 players, `rate_list` and
-  `submit_feedback` included), `e2e/note.e2e.cjs` on the same
+  `submit_feedback` included; Fathom's guesses sent once and waiting offline, the players' line with 37 players and
+  none with 12), `e2e/note.e2e.cjs` on the same
   copy ("add a note": the exact arguments sent, offline waiting, Escape and Enter, the phone keyboard;
   `e2e/states.e2e.cjs` walks it too), and `e2e/backend-google.e2e.cjs`, a copy with a Google client ID against a fake
   Google endpoint (it answers with a redirect to the callback page, a token in the fragment): the exact request, the

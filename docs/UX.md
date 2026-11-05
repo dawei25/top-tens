@@ -73,11 +73,15 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 
 ## Scores
 
-21. **A relative score shows its yardstick.** When points are measured against something the player can't see, the
-    screen says what it is, and the words agree with the number. Fathom scores a guess against how far off people
-    usually are on that question, so "1.2x too low · NEAR · 64" beside "1.4x too low · DEAD ON · 90" looked arbitrary;
-    the reveal now says "most people miss by about 1.3x", the results "a typical guesser scores about 250", and
-    whatever reads "spot on" scores 100 (it had shown 99). (`e2e/fathom.e2e.cjs`, `src/game/fathom.test.ts`.)
+21. **A score shows its yardstick, and the yardstick is a plain rule.** The screen says how points are counted, in
+    words that agree with the numbers, and the rule is one the player can check, never a number someone made up.
+    Fathom first scored each guess against a judge's estimate of how far off people usually are on that question and
+    said so ("most people miss by about 1.3x", "a typical guesser scores about 250"); the owner, after playing: "most
+    people miss by about x feels made up", and a guess 10x off still scored well where that was usual. Now one rule
+    for every question is the yardstick, said where the player looks before the first answer and again on the
+    results: "Half or double the answer scores about 50. Ten times off scores 0." Whatever reads "spot on" scores 100
+    (it had shown 99), and the miss reads plainly ("30% low", "3x too high"). Other players come in only as real
+    players, once there are 20 of them on a question. (`e2e/fathom.e2e.cjs`, `src/game/fathom.test.ts`.)
 
 ## Scope
 
