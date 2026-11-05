@@ -14,12 +14,12 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   the env vars, and only when there's work: a finished game, a stats view, a stored session, a sign-in.
 - **Score stats.** A finished list game or Blitz round goes into a localStorage outbox and is sent once to
   `submit_play` (a `security definer` function: players can't read or write `plays` directly). The function checks
-  the payload and ignores duplicates. Offline, it waits and retries. Results read `list_stats` (cached 5 min). Until 50
-  players have finished a list (`MIN_PLAYERS`, `src/net/crowd.ts`), the results show the estimate from
-  `public/puzzles/par.json`: "PLAYERS AVG 6", the histogram, "better than 19% of players (estimated)". From 50, real
-  players replace it: their average, their histogram, "better than 12% of 1,203 players". Blitz results get a line
-  like that from 50 players. Stats adds "Vs players" (`list_averages`) for lists with 50+ players. Each player counts
-  once per list and mode (their first game), like the game's own stats (first tries only).
+  the payload and ignores duplicates. Offline, it waits and retries. Results read `list_stats` (cached 5 min) and
+  blend real players into the estimate from `public/puzzles/par.json` (How the averages blend, below): "PLAYERS AVG
+  6", the histogram, "better than 19% of players (estimated)" while the estimate outweighs them, then "better than 12%
+  of 1,203 players". Blitz has no estimate: its results get a line like that from 30 players. Stats adds "Vs players"
+  (`list_averages`, real players alone) for lists with 50+ players (`MIN_PLAYERS`). Each player counts once per list
+  and mode (their first game), like the game's own stats (first tries only), and the owner's testers not at all.
 - **List ratings.** The results of a list game or Blitz round (and their runs in Past runs) end with "Good list?" and
   a thumbs up and down; after a thumbs down, one optional reason from a fixed set (too hard, too easy, boring,
   answers felt unfair, wrong data: `RATING_REASONS`, `src/net/ratings.ts`). The rating goes into the save first
@@ -66,6 +66,19 @@ hash) and the save. `plays`, `ratings` and `feedback` hold a random per-browser 
 whatever the player typed, so only the owner reads notes, and the privacy page asks players to leave personal details
 out. Nothing comes from Google until the player presses Continue with Google. The in-game `#privacy` page says this.
 
+## How the averages blend
+
+A list's estimate (`par.json`, a synthetic crowd from the list judges' simulated players) counts as **W = 30 virtual
+players** (`ESTIMATE_WEIGHT`, `src/net/crowd.ts`), and every real player's first try joins them; nothing switches at
+a player count. The histogram and "better than X%" use W x the estimate's share of each score plus the real counts;
+the average is (W x the estimate's figure + n x the real mean) / (W + n), so a list nobody has played reads exactly as
+before, 30 real players weigh as much as the estimate, and 300 make it about 91% real. While n < W the line says
+"(estimated)"; from W it names the players ("of 1,203 players"). Blitz has no estimate, so its line waits for W real
+players. The owner and the accounts in `stats_excluded` (testers, friends: step 2.7) are left out of `list_stats` and
+`list_averages`, with the games their browsers sent signed out, so the people who built the lists don't set the
+first numbers. Planned at about 200 players a list: adjust for each player's strength (a player who aces every list
+says less about this one), so a few strong regulars can't lift every average.
+
 ## Switch it on
 
 1. **Create the Supabase project** at supabase.com: free plan, region nearest your players. "Automatically expose
@@ -94,7 +107,8 @@ out. Nothing comes from Google until the player presses Continue with Google. Th
         ```
 
         Check it took: `select count(*) from public.owners;` says 1 (0 means no account has that address yet). Notes
-        count as yours when you send them signed in. To add someone else later, the same line with their address;
+        count as yours when you send them signed in; after step 7 your games stay out of the players' numbers too. To
+        add someone else later, the same line with their address;
         `delete from public.owners where user_id = ...` removes one.
       - **Set the reader key**, the secret the improvement loop reads notes with. Make a long random one on your
         machine (`openssl rand -hex 32`: hex is safe in JSON and in a shell), keep it in your password manager, and
@@ -111,9 +125,25 @@ out. Nothing comes from Google until the player presses Continue with Google. Th
         give it a `VITE_` prefix: the game itself never reads notes.
    6. `supabase/migrations/20261104130000_feedback_reader_header.sql` (run once, after 5): `list_feedback` also takes
       the reader key from an `X-Feedback-Reader` header, which is how the cloud environment's proxy hands it over.
+   7. `supabase/migrations/20261105120000_stats_exclusions.sql` (after 4 and 5; safe to run again): testers out of the
+      public numbers. Adds the `stats_excluded` table (players can't read or touch it) and replaces `list_stats` and
+      `list_averages` with versions that leave out first tries by the owners (step 5) and by `stats_excluded`: their
+      accounts' games, and the games sent signed out from any browser they've used signed in (someone else signed in
+      there still counts). Same functions and answers, so the game works the same before and after it runs. Then, for
+      each tester or friend whose games shouldn't count (they sign in to the game once first, so the account exists):
 
-   Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the two one-time steps above
-   still go in the SQL Editor). Stats alone only need the first.
+      ```sql
+      insert into public.stats_excluded (user_id) select id from auth.users where email = '<their email>';
+      ```
+
+      Check it took: `select count(*) from public.stats_excluded;` went up by 1. It counts from the next stats read
+      (the game caches them 5 min). `delete from public.stats_excluded where user_id = (select id from auth.users where
+      email = '<their email>');` counts them again; deleting their account removes the row too (and with it the
+      browser link, so games they sent signed out count again). Games sent signed out from a browser never used
+      signed in can't be told apart from anyone else's.
+
+   Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the one-time steps above still go
+   in the SQL Editor). Stats alone only need the first.
 3. **Sign-in URLs**: Authentication > URL Configuration. Site URL: `https://<your-domain>`. Redirect URLs:
    `https://<your-domain>/**`, and for local testing `http://localhost:5100/**`. Vercel previews need their own
    pattern, for example `https://*-<your-team>.vercel.app/**`.
@@ -159,9 +189,9 @@ out. Nothing comes from Google until the player presses Continue with Google. Th
      built-in sender only delivers to your team's addresses, a couple an hour.
 5. **Data API**: nothing to expose by hand. The game calls six functions (`submit_play`, `list_stats`,
    `list_averages`, `rate_list`, `list_ratings`, `submit_feedback`) and reads and writes only its own `saves` row; the
-   migrations grant exactly that (`ratings`, `feedback` and `owners`, like `plays`, have no grants for players at all,
-   and the `private` schema isn't in the API's exposed schemas: leave it out). `list_feedback` is for the loop and
-   refuses anyone without the reader key.
+   migrations grant exactly that (`ratings`, `feedback`, `owners` and `stats_excluded`, like `plays`, have no grants
+   for players at all, and the `private` schema isn't in the API's exposed schemas: leave it out). `list_feedback` is
+   for the loop and refuses anyone without the reader key.
 6. **Env vars in Vercel** (Project > Settings > Environment Variables, Production and Preview):
    - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` = the publishable key (`VITE_SUPABASE_PUBLISHABLE_KEY` works
      too). **Public**: built into the JavaScript, which is what they're for; RLS and the functions decide what anyone
@@ -230,11 +260,12 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
 
 ## Running it
 
-- **Tuning**: `MIN_PLAYERS` (50) in `src/net/crowd.ts`; Blitz buckets are 50 points (`list_stats`); stats cache
-  5 min, averages 10 min (`src/net/service.ts`).
-- **The average**: the results switch to real players per list from 50. Past runs and Stats' "vs avg" still compare
-  with `public/puzzles/par.json` (players never see the word "par"); once lists have real players, par.json could be
-  regenerated from `list_stats`.
+- **Tuning**: `ESTIMATE_WEIGHT` (W = 30, the blend) and `MIN_PLAYERS` (50, Stats' "Vs players") in
+  `src/net/crowd.ts`; Blitz buckets are 50 points (`list_stats`); stats cache 5 min, averages 10 min
+  (`src/net/service.ts`).
+- **The average**: the results blend real players in per list (How the averages blend). Past runs and Stats' "vs avg"
+  still compare with `public/puzzles/par.json` alone (players never see the word "par"); once lists have real
+  players, par.json could be regenerated from `list_stats`. Testers: `stats_excluded` (step 2.7).
 - **Ratings for the improvement loop**: `list_ratings(p_since timestamptz default null)` returns, per list and mode,
   `up`, `down`, the downs per reason (`too_hard`, `too_easy`, `boring`, `unfair`, `wrong_data`) and `last_rated`:
   totals only, no ids, each player counted once (their latest rating). `p_since` keeps only ratings given or changed
@@ -285,9 +316,12 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
 - **Tests**: `npm test` covers the client (`src/net/*.test.ts`), the merge and the database functions
   (`supabase/migrations.test.ts`, in PGlite, with and without new tables exposed, ratings and notes included: no
   player reads a note, a wrong reader key raises, the key by header, the owner's notes come first, the rate limit,
-  deletion). `npm run e2e` runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating on the results, and no
+  deletion, the owners and `stats_excluded` left out of the stats, signed in or not). `src/net/crowd.test.ts` pins
+  the blend (n = 0 is the estimate exactly, 30 weigh equally, 300 are ~91% real, no cliff, Blitz, a list without an
+  estimate). `npm run e2e` runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating on the results, and no
   note option), plus `e2e/backend.e2e.cjs`, which builds a copy with fake env vars (`e2e/backend-env.cjs`, every
-  sign-in method on) and mocks Supabase (`rate_list` and `submit_feedback` included), `e2e/note.e2e.cjs` on the same
+  sign-in method on) and mocks Supabase (blended results above and below 30 players, `rate_list` and
+  `submit_feedback` included), `e2e/note.e2e.cjs` on the same
   copy ("add a note": the exact arguments sent, offline waiting, Escape and Enter, the phone keyboard;
   `e2e/states.e2e.cjs` walks it too), and `e2e/backend-google.e2e.cjs`, a copy with a Google client ID against a fake
   Google endpoint (it answers with a redirect to the callback page, a token in the fragment): the exact request, the
