@@ -19,7 +19,9 @@ approve or disapprove ... I'll tell you which specific ones to swap out ... effi
 3. **Report** as one short Claude doc, "TENtacle lineup, week of <Monday>": a table with one row per day (date,
    Today's list, Blitz, a one-line why, the judge's expected score for a casual player) and the spares. Send the link
    with a push notification.
-4. **He approves or names swaps.** Swap from the spares (or build new ones), then schedule the week
+4. **He approves or names swaps.** If he hasn't answered by Sunday 18:00 Hong Kong time, schedule the lineup as
+   proposed (owner, 2026-11-05); he can still swap any day after tomorrow. Swap from the spares (or build new ones), then
+   schedule the week
    (`public/puzzles/daily.json`), verify, push. Never change today or tomorrow.
 5. **Log** each day's pick and his call in `docs/OWNER_PICKS.md`. When he keeps nearly everything for several weeks
    running, propose that the lineup no longer needs his approval.
