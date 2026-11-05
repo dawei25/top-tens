@@ -14,8 +14,12 @@ export function notOnList(puzzle: Pick<Puzzle, "noun" | "answers" | "extras">): 
   return `Not one of the ${count.toLocaleString("en-US")} ${puzzle.noun}${NBSP}here.`;
 }
 
-/** The clue key on an empty row: its tooltip and accessible label. */
+/** The clue key on an empty row: its tooltip and accessible label; once a letter shows, the next one. */
 export const CLUE_LABEL = "Clue: first letter, costs a life";
+export const CLUE_NEXT_LABEL = "Clue: next letter, costs a life";
+/** The clue's confirm, in the row: the first letter, then each next one. */
+export const CLUE_ASK = "first letter? 1 life";
+export const CLUE_ASK_NEXT = "next letter? 1 life";
 
 /** What the days-in-a-row count means (Home's record and a daily's results). */
 export const STREAK_NOTE = "Days in a row you've finished Today's list.";

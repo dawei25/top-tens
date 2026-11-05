@@ -6,7 +6,8 @@ import {
   applyHint,
   canHint,
   giveUp,
-  hintLetter,
+  hintCount,
+  hintPrefix,
   MAX_LIVES,
   newGame,
   shareText,
@@ -23,7 +24,7 @@ import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
 import { ClueIcon, END_FOCUS_MS, formatAsOf, InkSac, ordinal, reducedMotion, RerollKey, ScreenHead, sourceSite, SwapLabel, TypeIn } from "./pixel";
-import { CLUE_LABEL, confirmGuess, GUESS_HINT, NO_LIFE_LOST, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT, SO_CLOSE, STREAK_NOTE } from "./copy";
+import { CLUE_ASK, CLUE_ASK_NEXT, CLUE_LABEL, CLUE_NEXT_LABEL, confirmGuess, GUESS_HINT, NO_LIFE_LOST, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT, SO_CLOSE, STREAK_NOTE } from "./copy";
 import { FloatNote } from "./Note";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
@@ -121,7 +122,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const shareRef = useRef<HTMLButtonElement>(null);
   /** Facts opened by tap, click or keyboard (by rank). */
   const [openFacts, setOpenFacts] = useState<ReadonlySet<number>>(() => new Set());
-  /** The hidden row showing the "first letter?" confirm. */
+  /** The hidden row showing the "first letter?" (or "next letter?") confirm. */
   const [hintAsk, setHintAsk] = useState<number | null>(null);
   const yesRef = useRef<HTMLButtonElement>(null);
   const parFile = usePar();
@@ -278,7 +279,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     setGame(next);
     setLostLife({ i: next.lives, key: Date.now() });
     const entry = puzzle.answers.find((a) => a.rank === rank);
-    if (entry) setFeedback({ tone: "warn", text: `#${rank} starts with ${hintLetter(entry.name)}. One life spent.`, key: Date.now() });
+    // Everything known so far: "#5 starts with SH. One life spent."
+    if (entry) setFeedback({ tone: "warn", text: `#${rank} starts with ${hintPrefix(entry.name, hintCount(next, rank))}. One life spent.`, key: Date.now() });
   };
   const share = async () => {
     const url = `${location.origin}${location.pathname}${daily ? `#daily-${daily.date}` : `#p-${puzzle.id}`}`;
@@ -416,8 +418,10 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               const typing = animate && (just || (!found && endedHere));
               const fact = revealed ? a.fact : undefined;
               const open = !!fact && openFacts.has(a.rank);
-              const hinted = !revealed && hints.includes(a.rank);
-              const hintable = !revealed && !hinted;
+              // Letters bought so far ("SH"); every hidden row offers the next one.
+              const known = revealed ? "" : hintPrefix(a.name, hintCount(game, a.rank));
+              const hinted = !!known;
+              const hintable = !revealed;
               const asking = hintable && hintAsk === a.rank;
               return (
                 <li
@@ -470,22 +474,30 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                         ) : (
                           <TypeIn text={a.name} animate={typing} delay={revealDelay} />
                         )
-                      ) : hinted ? (
-                        <span className="blank" aria-label={`not found yet, starts with ${hintLetter(a.name)}`}>
-                          <b className="hint-letter" data-testid="hint-letter">{hintLetter(a.name)}</b> . . . . . . .
-                        </span>
                       ) : (
-                        // The whole row is the clue key; the magnifier at its end says so without a hover.
+                        // The whole row is the clue key; the magnifier at its end says so without a hover. Once a
+                        // letter shows, the letters bought so far lead the dots and the key offers the next one.
                         <button
                           type="button"
                           className="blank-toggle"
                           data-testid="hint-open"
-                          aria-label={`#${a.rank} not found yet. ${CLUE_LABEL}`}
-                          title={CLUE_LABEL}
+                          aria-label={
+                            hinted ? `#${a.rank} not found yet, starts with ${known}. ${CLUE_NEXT_LABEL}` : `#${a.rank} not found yet. ${CLUE_LABEL}`
+                          }
+                          title={hinted ? CLUE_NEXT_LABEL : CLUE_LABEL}
                           aria-expanded={asking}
                         >
                           <span className="blank" aria-hidden="true">
-                            . . . . . . . .
+                            {hinted ? (
+                              <>
+                                <b className="hint-letter" data-testid="hint-letter">
+                                  {known}
+                                </b>{" "}
+                                . . . . . . .
+                              </>
+                            ) : (
+                              ". . . . . . . ."
+                            )}
                           </span>
                           <span className="clue" data-testid="clue" aria-hidden="true">
                             <ClueIcon />
@@ -501,7 +513,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                     <div className="hint-ask" data-testid="hint-ask">
                       {canHint(game, a.rank) ? (
                         <>
-                          <span className="hint-q">first letter? 1 life</span>
+                          <span className="hint-q">{hinted ? CLUE_ASK_NEXT : CLUE_ASK}</span>
                           <button
                             ref={yesRef}
                             data-testid="hint-yes"

@@ -1,5 +1,6 @@
 // The clue: every empty row shows a magnifier (labelled, with a tooltip). Pressing it by click, tap or keyboard asks
-// first; YES spends a life for the row's first letter, Escape backs out for free. Never on the last life.
+// first; YES spends a life for the row's first letter, Escape backs out for free. Pressed again on the same row, it
+// offers the next letter, for another life. Never on the last life.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, puzzle, guess } = require("./helpers.cjs");
@@ -10,11 +11,22 @@ after(() => browser.close());
 
 const LIST = "mountains";
 const CLUE = "Clue: first letter, costs a life";
-/** The letter a clue shows: the first letter or digit, past a leading article (hintLetter in src/game/state.ts). */
-const firstLetter = (name) => name.replace(/^(the|a|an)\s+/i, "").match(/[\p{L}\p{N}]/u)[0].toUpperCase();
+const CLUE_NEXT = "Clue: next letter, costs a life";
+/** The confirm's question (CLUE_ASK and CLUE_ASK_NEXT in src/components/copy.ts). */
+const ASK = { first: "first letter? 1 life", next: "next letter? 1 life" };
+/**
+ * What n clues show: the first n letters or digits past a leading article, with whatever stands between them
+ * (hintPrefix in src/game/state.ts).
+ */
+const prefix = (name, n) => {
+  const core = name.replace(/^(the|a|an)\s+/i, "");
+  const ls = [...core.matchAll(/[\p{L}\p{N}]\p{M}*/gu)].slice(0, n);
+  const last = ls[ls.length - 1];
+  return core.slice(ls[0].index, last.index + last[0].length).replace(/\s+/g, " ").toUpperCase();
+};
 
 for (const vp of VIEWPORTS) {
-  test(`the clue icon buys a first letter (${vp.name})`, async () => {
+  test(`the clue icon buys a first letter, then the next (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp, `#p-${LIST}`);
     const lives = () => page.getByTestId("lives").getAttribute("data-lives");
     const slot = (rank) => page.locator(`[data-testid="slot"][data-rank="${rank}"]`);
@@ -48,11 +60,30 @@ for (const vp of VIEWPORTS) {
     await page.getByTestId("hint-yes").waitFor();
     assert.equal(await key3.getAttribute("aria-expanded"), "true");
     assert.equal(await lives(), "5");
+    assert.equal(await page.locator('[data-testid="hint-ask"] .hint-q').textContent(), ASK.first);
     await press(page.getByTestId("hint-yes"));
     assert.equal(await lives(), "4");
     assert.equal(await slot(3).getAttribute("data-state"), "hinted");
-    assert.equal(await slot(3).getByTestId("hint-letter").textContent(), firstLetter(p.answers[2].name));
-    assert.equal(await slot(3).getByTestId("clue").count(), 0);
+    const name3 = p.answers[2].name;
+    assert.equal(await slot(3).getByTestId("hint-letter").textContent(), prefix(name3, 1));
+    assert.ok((await page.getByTestId("feedback").textContent()).includes(`#3 starts with ${prefix(name3, 1)}.`));
+
+    // The row keeps its magnifier, now for the next letter: the same confirm in the same place, another life, and the
+    // row shows both letters. Nothing on the board moves as letters appear.
+    assert.ok(await slot(3).getByTestId("clue").isVisible());
+    const next3 = slot(3).getByRole("button", { name: `#3 not found yet, starts with ${prefix(name3, 1)}. ${CLUE_NEXT}` });
+    assert.equal(await next3.getAttribute("title"), CLUE_NEXT);
+    await press(slot(3).getByTestId("clue"));
+    await page.getByTestId("hint-yes").waitFor();
+    assert.equal(await page.locator('[data-testid="hint-ask"] .hint-q').textContent(), ASK.next);
+    assert.deepEqual(await rows(), shut, "the next-letter confirm moves nothing");
+    assert.equal(await lives(), "4");
+    await press(page.getByTestId("hint-yes"));
+    assert.equal(await lives(), "3");
+    assert.equal(await slot(3).getByTestId("hint-letter").textContent(), prefix(name3, 2));
+    assert.ok((await page.getByTestId("feedback").textContent()).includes(`#3 starts with ${prefix(name3, 2)}.`));
+    assert.ok(await slot(3).getByTestId("clue").isVisible());
+    assert.deepEqual(await rows(), shut, "a second letter moves nothing");
 
     // From the keyboard: Enter on a row's clue key takes focus to YES; Escape backs out for free, back to the box.
     const key5 = slot(5).getByRole("button", { name: new RegExp(CLUE) });
@@ -62,19 +93,24 @@ for (const vp of VIEWPORTS) {
     await page.keyboard.press("Escape");
     assert.equal(await page.getByTestId("hint-yes").count(), 0);
     assert.equal(await focused(), "Your guess");
-    assert.equal(await lives(), "4");
+    assert.equal(await lives(), "3");
     await key5.focus();
     await page.keyboard.press("Enter");
     await page.keyboard.press("Enter");
-    assert.equal(await lives(), "3");
+    assert.equal(await lives(), "2");
     assert.equal(await slot(5).getAttribute("data-state"), "hinted");
 
-    // Down to the last life, the magnifier still answers, but only to say no: nothing is spent.
-    for (const r of [6, 7]) {
-      await press(slot(r).getByTestId("clue"));
-      await press(page.getByTestId("hint-yes"));
-    }
+    // A third letter on row 3 takes it down to the last life.
+    await press(slot(3).getByTestId("clue"));
+    await press(page.getByTestId("hint-yes"));
+    assert.equal(await slot(3).getByTestId("hint-letter").textContent(), prefix(name3, 3));
     assert.equal(await lives(), "1");
+
+    // On the last life, the magnifiers still answer, but only to say no: nothing is spent, on a hinted row too.
+    await press(slot(3).getByTestId("clue"));
+    await page.getByTestId("hint-refused").waitFor();
+    assert.equal(await slot(3).getByTestId("hint-letter").textContent(), prefix(name3, 3));
+    await page.keyboard.press("Escape");
     const shut8 = await slot(8).boundingBox();
     await press(slot(8).getByTestId("clue"));
     await page.getByTestId("hint-refused").waitFor();
