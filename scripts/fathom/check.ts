@@ -1,8 +1,10 @@
 // Checks the Fathom question bank (public/fathom/questions.json): shape, ids, kinds, typical misses, answers,
 // sources, wording, and the mix of the bank. The rules are in docs/FATHOM.md ("Writing questions").
 //   NODE_NO_WARNINGS=1 npx tsx scripts/fathom/check.ts [file]
+// A file other than the bank is a file of candidates for it: checked as they would join the bank, and flagged when an
+// answer is too long to type or a subject is already in the bank.
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 export const BANK = join(import.meta.dirname, "..", "..", "public", "fathom", "questions.json");
 
@@ -218,6 +220,83 @@ export function checkBank(bank: unknown): string[] {
   return out;
 }
 
+/**
+ * Words that say how something is asked or measured ("How tall is the..."), not what it is about: left out when two
+ * questions' subjects are compared.
+ */
+const NOT_SUBJECT = new Set(
+  (
+    "a an the of in on at to for from by with and or as its it is are was were be been does do did has have had " +
+    "how what which who many much long tall high deep wide far fast big large heavy hot cold old weigh weighs " +
+    "take takes last lasts hold holds can could would there each every one once all ever most known world worlds " +
+    "typical average standard modern adult person people record largest biggest longest tallest fastest deepest " +
+    "heaviest highest oldest smallest"
+  ).split(" "),
+);
+
+/** What a question is about: its content words, lower case, without a possessive or a plural s. */
+export function subjectWords(question: string): Set<string> {
+  const words = question
+    .toLowerCase()
+    .replace(/[’']s\b/g, "")
+    .split(/[^\p{L}\p{N}]+/u)
+    .map((w) => (w.length > 3 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w))
+    .filter((w) => w.length > 1 && !NOT_SUBJECT.has(w));
+  return new Set(words);
+}
+
+/** The page a source points at, comparable across spellings ("Eiffel_Tower", "Eiffel%20Tower"). */
+function sourcePage(url: unknown): string {
+  try {
+    const u = new URL(String(url));
+    return (u.host + decodeURIComponent(u.pathname)).toLowerCase().replace(/[_\s]+/g, " ");
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Whether two questions are about the same thing: the same source page ("How tall is a giraffe?" and "How long is a
+ * giraffe's tongue?" both come from "Giraffe"), or mostly the same subject words (half of all of them, or more).
+ */
+export function sameSubject(a: Pick<Question, "question" | "source">, b: Pick<Question, "question" | "source">): boolean {
+  const page = sourcePage(a.source?.url);
+  if (page && page === sourcePage(b.source?.url)) return true;
+  const x = subjectWords(String(a.question));
+  const y = subjectWords(String(b.question));
+  const shared = [...x].filter((w) => y.has(w)).length;
+  return shared > 0 && shared / (x.size + y.size - shared) >= 0.5;
+}
+
+/** The owner's rule for units: at most 6 digits before the decimal point ("million people", not "people"). */
+export const MAX_ANSWER = 1e6;
+
+/**
+ * Problems with a file of candidate questions for the bank: each candidate's own checks, the bank they would make
+ * together (ids, repeated questions, facts that give away an answer, the mix), answers too long to type, and any
+ * candidate about the same subject as a question already in the bank or another candidate.
+ */
+export function checkCandidates(candidates: unknown, bank: unknown): string[] {
+  if (typeof candidates !== "object" || candidates === null) return ["candidates file is not an object"];
+  const c = candidates as Record<string, unknown>;
+  if (!Array.isArray(c.questions)) return ["questions must be an array"];
+  const banked = (((bank as Bank | null)?.questions ?? []) as Question[]).filter((q) => typeof q === "object" && q);
+  const fresh = (c.questions as unknown[]).filter((q): q is Question => typeof q === "object" && q !== null);
+
+  const out = checkBank({ ...c, questions: [...banked, ...(c.questions as unknown[])] });
+  for (const q of fresh) {
+    if (typeof q.answer === "number" && q.answer >= MAX_ANSWER)
+      out.push(`${q.id}: answer has more than 6 digits before the decimal point; scale the unit ("million people")`);
+    for (const b of banked)
+      if (sameSubject(q, b)) out.push(`${q.id}: same subject as ${b.id} in the bank ("${b.question}")`);
+  }
+  fresh.forEach((q, i) => {
+    for (const other of fresh.slice(i + 1))
+      if (sameSubject(q, other)) out.push(`${other.id}: same subject as candidate ${q.id} ("${q.question}")`);
+  });
+  return out;
+}
+
 export function kindCounts(questions: Pick<Question, "kind">[]): Map<string, number> {
   const counts = new Map<string, number>();
   for (const q of questions) counts.set(q.kind, (counts.get(q.kind) ?? 0) + 1);
@@ -229,9 +308,10 @@ export function loadBank(file = BANK): unknown {
 }
 
 function main(): number {
-  const file = process.argv[2] ?? BANK;
+  const file = resolve(process.argv[2] ?? BANK);
   const bank = loadBank(file);
-  const issues = checkBank(bank);
+  // Any file but the bank holds candidates for it ("scripts/fathom/candidates-2.json"), checked against the bank.
+  const issues = file === resolve(BANK) ? checkBank(bank) : checkCandidates(bank, loadBank());
   const qs = (bank as Bank).questions ?? [];
   const counts = [...kindCounts(qs)].sort((a, b) => b[1] - a[1]);
   console.log(`${qs.length} questions, ${qs.filter((q) => q.easy).length} easy`);

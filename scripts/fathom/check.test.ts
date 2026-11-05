@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkBank, checkQuestion, KINDS, loadBank, type Question } from "./check";
+import { checkBank, checkCandidates, checkQuestion, KINDS, loadBank, sameSubject, subjectWords, type Question } from "./check";
 
 const question = (over: Partial<Question> & Record<string, unknown> = {}): Question =>
   ({
@@ -148,5 +148,52 @@ describe("checkBank", () => {
   it("wants version 1 and a questions array", () => {
     expect(checkBank({ version: 2, questions: [] })[0]).toBe("version must be 1, not 2");
     expect(checkBank({ version: 1 })).toEqual(["questions must be an array"]);
+  });
+});
+
+describe("candidates for the bank", () => {
+  const src = (title: string) => ({ title, url: `https://en.wikipedia.org/wiki/${title.replace(/ /g, "_")}` });
+  const q = (text: string, title: string) => ({ question: text, source: src(title) });
+  const giraffe = question({ id: "giraffe-tongue", question: "How long is a giraffe's tongue?", source: src("Giraffe") });
+
+  it("reads a question's subject without its measure words", () => {
+    expect([...subjectWords("How tall is the Eiffel Tower?")]).toEqual(["eiffel", "tower"]);
+    expect([...subjectWords("How long is a giraffe's tongue?")]).toEqual(["giraffe", "tongue"]);
+    expect([...subjectWords("How many islands belong to Hong Kong?")]).toEqual(["island", "belong", "hong", "kong"]);
+  });
+
+  it("calls two questions one subject when they share a source page or most of their words", () => {
+    expect(sameSubject(q("How tall is a giraffe?", "Giraffe"), giraffe)).toBe(true);
+    expect(sameSubject(q("How much does the Eiffel Tower weigh?", "Iron"), question())).toBe(true);
+    expect(sameSubject(q("How tall is the Burj Khalifa?", "Burj Khalifa"), question())).toBe(false);
+    const escalator = q("How long is Hong Kong's Central–Mid-Levels escalator?", "Escalator");
+    expect(sameSubject(escalator, q("How many islands belong to Hong Kong?", "Islands"))).toBe(false);
+  });
+
+  it("checks candidates as they would join the bank", () => {
+    const real = bank();
+    const egg = question({
+      id: "ostrich-egg",
+      kind: "animals",
+      question: "How much does an ostrich egg weigh?",
+      unit: "kilograms",
+      answer: 1.4,
+      source: src("Common ostrich"),
+    });
+    delete egg.definition;
+    const candidates = (...questions: Question[]) => checkCandidates({ version: 1, questions }, real);
+    expect(candidates(egg)).toEqual([]);
+
+    const tall = { ...egg, id: "giraffe-height", question: "How tall is a giraffe?", source: src("Giraffe") };
+    expect(checkCandidates({ version: 1, questions: [tall] }, { version: 1, questions: [...real.questions, giraffe] })).toEqual([
+      `giraffe-height: same subject as giraffe-tongue in the bank ("How long is a giraffe's tongue?")`,
+    ]);
+    expect(candidates(egg, { ...egg, id: "ostrich-egg-2", question: "What does an ostrich egg weigh?" })).toEqual([
+      `ostrich-egg-2: same subject as candidate ostrich-egg ("How much does an ostrich egg weigh?")`,
+    ]);
+    expect(candidates({ ...egg, id: "question-1" })).toContain("question-1: duplicate id");
+    expect(candidates({ ...egg, unit: "people", answer: 8804190 })).toEqual([
+      `ostrich-egg: answer has more than 6 digits before the decimal point; scale the unit ("million people")`,
+    ]);
   });
 });
