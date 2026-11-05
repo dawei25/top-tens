@@ -121,3 +121,30 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 }
+
+// The first and last rows reach 3px past the board's edge for the finger (a ::after over the row). The confirm's YES
+// must sit above that reach: under it, a press on YES on #1 or #10 only closed the confirm (Nov 5).
+for (const vp of VIEWPORTS) {
+  test(`YES takes the press on the first and last rows (${vp.name})`, async () => {
+    const { ctx, page } = await open(browser, vp, `#p-${LIST}`);
+    const lives = () => page.getByTestId("lives").getAttribute("data-lives");
+    await page.getByLabel("Your guess").waitFor();
+    for (const [rank, left] of [[1, "4"], [10, "3"]]) {
+      const slot = page.locator(`[data-testid="slot"][data-rank="${rank}"]`);
+      await slot.getByTestId("hint-open").focus();
+      await page.keyboard.press("Enter");
+      const yes = page.getByTestId("hint-yes");
+      await yes.waitFor();
+      const hit = await yes.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const at = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        return at && el.contains(at) ? "YES" : `${at?.tagName}.${at?.className}`;
+      });
+      assert.equal(hit, "YES", `#${rank}: something lies over YES`);
+      await (vp.hasTouch ? yes.tap() : yes.click());
+      assert.equal(await lives(), left);
+      assert.equal(await slot.getAttribute("data-state"), "hinted");
+    }
+    await ctx.close();
+  });
+}

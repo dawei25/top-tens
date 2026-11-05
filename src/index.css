@@ -1474,12 +1474,14 @@ a {
 /*
  * The clue confirm, in the row's own place: one line over the row's dots and magnifier (which keep their space,
  * unseen), the question on the left and YES where the magnifier was. Out of the flow, so the board never moves.
+ * Above the first and last rows' reach (their ::after), which otherwise took the press meant for YES.
  */
 .slot.asking .blank-toggle > * {
   visibility: hidden;
 }
 .hint-ask {
   position: absolute;
+  z-index: 1;
   top: 0;
   bottom: 0;
   left: calc(var(--slot-pad) + var(--rank-col) + var(--slot-gap));

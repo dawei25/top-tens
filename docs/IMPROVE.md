@@ -169,6 +169,7 @@ stronger.
 | (builder, Nov 5) The CIA coastline table's "Congo, Republic of the" became an entry beside the universe's Republic of the Congo | names written the way an index sorts them: one country, two entries | validate.ts errors on an inverted index name at any rank (`invertedName`, validate.test.ts); `rename` such rows |
 | (builder, Nov 5) Cape Verde and Cabo Verde, Macau and Macao, Turkey and Türkiye were two entries each on the landlocked list (another page's table beside the universe); tourism has Macau twice | one country under two names, unranked | build.ts merges a countries-universe member into the entry its usual name already names (`countryNames`, build.test.ts); validate.ts errors on one country twice in lists built from Nov 4 (`countryTwice`, validate.test.ts) |
 | (builder, Nov 5) "st kitts" found nothing on the smallest countries | two-island states and "Saint" names without their everyday short forms | COUNTRY_FORMS lines for Saint Kitts and Nevis, Saint Vincent and the Grenadines, Saint Lucia, Antigua and Barbuda; build.test.ts checks every two-part state has its first part and every Saint its "St" |
+| (frontend, Nov 5) A click or tap on the clue's YES on #1 or #10 closed the confirm and bought nothing | a row's 44px reach (`::after` on the first and last rows) lying over a control inside the row | `.hint-ask` sits above the reach (`z-index: 1`); clue.e2e.cjs hit-tests YES on #1 and #10 and presses it, phone and desktop |
 
 ## What good looks like
 
