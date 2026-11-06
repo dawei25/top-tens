@@ -184,6 +184,8 @@ stronger.
 | (launch audit, Nov 7) The Misses band was wider than the panels at game end on a phone | the band kept the dock's full width after leaving it | the band is a panel the board's width; `e2e/layout.e2e.cjs` "the Misses band lines up with the board and the results" (320, 390, 800) |
 | (launch audit, Nov 7) Rolling in Science (one list) silently landed in Geography | the category picker offered categories a roll couldn't stay in | pickers hide categories with fewer than 3 rollable lists; `src/components/freeplay.test.ts` over the real index and every scheduled date |
 | (launch audit, Nov 7) "Daily Blitz #22" wrapped "#22" onto its own line at 390; the empty Stats row was misaligned | tags and figures with no one-line check | "Blitz #22" / "List #22" never wrap (`e2e/history.e2e.cjs`); the empty Stats figures share one row (`e2e/par.e2e.cjs`) |
+| (launch audit, Nov 7) "sacramento athletics" (the A's current name) wasn't taken on the MLB list; LA Angels, NY Mets, Florida Marlins, Cubbies and 10 more weren't either | team aliases covered only one name per team | current, short and recent names in `TEAM_SHORT` (scripts/gazetteer.ts); validate's "team nickname" check; aliases.test.ts "aliases as built: what players type" |
+| (judge, painters) A junk alias "Eugčne Henri Paul Gauguin" (text decoded in the wrong code page) | redirects were taken without an encoding check | `mangledText` in scripts/aliases.ts drops such aliases at build; validate.ts "mangled text" fails any list carrying one |
 
 ## What good looks like
 
