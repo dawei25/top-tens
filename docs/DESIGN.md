@@ -82,7 +82,7 @@ account key: their headers are full, and HOME is one press away (UX.md 19). **Se
 switch and reset all progress. **Fathom (beta)** lives at `#fathom` only, with no Home or menu entry until the owner
 approves it: five estimation questions a game, scored by plain closeness, one rule for every question (docs/FATHOM.md).
 
-1. **Home:** Today's list and Blitz, then directly Free play (Random list, Random Blitz, each with a floating by-category picker);
+1. **Home:** Today's list and Blitz, then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
 2. **Game:** title card with the prompt, score (no average during play: it's revealed on the results) and a Play
    Blitz key; lives; 10 rank slots, each empty one with a
@@ -93,12 +93,13 @@ approves it: five estimation questions a game, scored by plain closeness, one ru
    A finished daily offers Today's Blitz and Random list instead. The archive is a table, one row per date: number and
    date, then a List cell and a Blitz cell (title, and score or "not played" under it), with "List" and "Blitz" named
    once at the top; each cell opens its own one-try game.
-4. **Past runs:** every game played, under a header per day, one tag per row. Each row opens its own run (the board
+4. **Past runs:** every game played, under a header per day, one tag per row ("List #22", "Blitz #22", never wrapping). Each row opens its own run (the board
    as it ended, or the Blitz round), which offers Play again (a fresh free game on that same list), the only replay
    in the game, except on a list held today (today's pair or a future day's): "back in free play after its day".
 5. **How to play:** closed by default; the footer key opens it as a dialog over the page.
 6. **Stats** (`#stats`, Your knowledge): first tries on each list against the players' average, overall, by category and by topic; placeholders
-   before the first game.
+   before the first game (the three headline figures read "--", "0", "--" in one row). Every screen opened forward
+   starts at its top; Back returns to where the player was.
 
 ## 5. Visual direction: Krillion's language, arcade high-score table
 
