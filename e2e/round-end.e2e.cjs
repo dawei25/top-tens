@@ -36,7 +36,7 @@ for (const vp of VIEWPORTS) {
     assert.ok(await page.getByTestId("blitz-results").isVisible());
     assert.equal(await hash(page), `#blitz-${LIST}`);
     assert.equal(await page.getByTestId("blitz-clock").count(), 0, "no new round started");
-    // A beat later SHARE has focus (never Roll again).
+    // A beat later SHARE has focus (never Roll another list).
     await page.clock.runFor(1000);
     assert.equal(await focused(page), "share");
     await ctx.close();
@@ -86,7 +86,7 @@ for (const vp of VIEWPORTS) {
     await hammerEnter(page);
     assert.ok(await page.getByTestId("results").isVisible());
     assert.equal(await hash(page), `#p-${LIST}`, "Enter didn't roll another list");
-    // Once the board has revealed, SHARE has focus (never Roll again).
+    // Once the board has revealed, SHARE has focus (never Roll another list).
     await page.clock.runFor(1500);
     assert.equal(await focused(page), "share");
     await ctx.close();

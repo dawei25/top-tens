@@ -2122,6 +2122,13 @@ a {
 .results-actions .key {
   flex: 1 1 160px;
 }
+/* The narrowest phones: the card leaves a key about 250px, so "Roll another list" closes up to stay whole on it. */
+@media (max-width: 359px) {
+  .results-actions .key {
+    padding: 0 14px;
+    letter-spacing: 0.15em;
+  }
+}
 .results-meta {
   display: flex;
   flex-direction: column;

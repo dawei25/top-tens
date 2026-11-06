@@ -1,5 +1,5 @@
-// Today's Blitz: one round. It counts, there is no Roll again, reopening shows that round (locked), home shows it
-// as done, and Random Blitz rolls a fresh round on another list.
+// Today's Blitz: one round. It counts, there is no Roll another list, reopening shows that round (locked), home shows
+// it as done, and Random Blitz rolls a fresh round on another list.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, TODAY, open, hash, puzzle, todaysDaily, store, guess } = require("./helpers.cjs");
@@ -20,7 +20,7 @@ for (const vp of VIEWPORTS) {
     assert.notEqual(id, (await todaysDaily(page)).id, "never today's daily list");
     const p = await puzzle(page, id);
 
-    // The round counts; no Roll again after it.
+    // The round counts; no Roll another list after it.
     await guess(page, p.answers[0].name);
     await page.clock.fastForward(91_000);
     await page.getByTestId("blitz-results").waitFor();
