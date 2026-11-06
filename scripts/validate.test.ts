@@ -162,6 +162,32 @@ describe("validate: placeholder rows", () => {
   });
 });
 
+describe("validate: text in the wrong code page", () => {
+  // Painters' judge: Paul Gauguin had "Eugčne Henri Paul Gauguin" (Eugène written in Windows-1252, read as 1250).
+  it("fails an alias or a name that reads as mangled encoding, ranked or not", () => {
+    const p = puzzle();
+    p.answers[4] = { ...p.answers[4], name: "Paul Gauguin", aliases: ["Eugene Henri Paul Gauguin", "Eugčne Henri Paul Gauguin"] };
+    p.extras[0] = { ...p.extras[0], name: "Paul Cézanne", aliases: ["CÃ©zanne"] };
+    p.extras[1] = { ...p.extras[1], name: "Eug�ne Delacroix", aliases: [] };
+    expect(errors(p)).toEqual([
+      expect.stringContaining('#5 "Paul Gauguin": alias "Eugčne Henri Paul Gauguin" is mangled text ("Eugčne" is "Eugène"'),
+      expect.stringContaining('alias "CÃ©zanne" is mangled text (UTF-8 read as Windows-1252'),
+      expect.stringContaining('name "Eug�ne Delacroix" is mangled text'),
+    ]);
+  });
+
+  it("leaves real letters of other alphabets alone", () => {
+    const p = puzzle();
+    p.answers[0] = { ...p.answers[0], name: "Mark Rothko", aliases: ["Markuss Rotkovičs", "Rothko"] };
+    p.answers[1] = { ...p.answers[1], name: "Czech Republic", aliases: ["ČR", "Česko"] };
+    p.answers[2] = { ...p.answers[2], name: "Ethiopia", aliases: ["Æthiopia"] };
+    p.answers[3] = { ...p.answers[3], name: "Antonín Dvořák", aliases: ["Dvořák", "Antonin Dvorak"] };
+    p.answers[4] = { ...p.answers[4], name: "Paul Gauguin", aliases: ["Eugène Henri Paul Gauguin", "Eugene Henri Paul Gauguin"] };
+    p.extras[0] = { ...p.extras[0], name: "Mathias Jørgensen", aliases: ["São Paulo", "Brăila", "Łódź", "Kraków"] };
+    expect(errors(p)).toEqual([]);
+  });
+});
+
 describe("validate: inverted index names", () => {
   it("fails a name written the way an index sorts it, ranked or not", () => {
     const p = puzzle();
