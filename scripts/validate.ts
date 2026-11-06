@@ -17,7 +17,7 @@ const SHARED_FORMS = [
   "Congo",
   "Congolese",
 ];
-import { bareWord, blockedAlias, gluedAlias, junkRedirect, placeholderName } from "./aliases";
+import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledForms, placeholderName } from "./aliases";
 import { citysCountries, countryOf, DIVISIONS, isContinent, MAJOR_CITIES, UNIVERSES, whereIs, type Where } from "./gazetteer";
 import { NOT_PUZZLES } from "./lexicon";
 import { TOPICS, type Topic } from "./topics";
@@ -466,6 +466,11 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   }
   if (junk.length) {
     warn(`${junk.length} alias(es) that look like junk, e.g. ${junk.slice(0, 4).join("; ")}`);
+  }
+  // Text decoded in the wrong code page is no name anyone types, on any list: "Eugčne Henri Paul Gauguin" (painters'
+  // judge). build.ts drops such aliases; a name like that needs a `rename`.
+  for (const { entry: e, form, why } of mangledForms(all)) {
+    err(`${e.rank ? `#${e.rank}` : "unranked"} "${e.name}": ${form === e.name ? "name" : "alias"} "${form}" is mangled text (${why})`);
   }
 
   // Misread numbers: "382.936" among "1,723,337"s is a dot used as a thousands separator.

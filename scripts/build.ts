@@ -17,7 +17,7 @@ import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./int
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
 import { countryOf, UNIVERSES, US_STATE_CODES, whereIs, type Place, type Region, type Where } from "./gazetteer";
-import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, placeholderName } from "./aliases";
+import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, mangledForms, placeholderName } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
 /** Fewest entries with a stat (`n`) for a list to be playable in Blitz. */
@@ -1349,6 +1349,13 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   applyIntent(topic, entries);
   // Whatever the source (redirect, cell, universe), a slur never ships.
   for (const e of entries) e.aliases = e.aliases.filter((a) => !blockedAlias(a, [e.name]));
+  // Nor text decoded in the wrong code page: "Eugčne Henri Paul Gauguin" (painters' judge). validate.ts fails a name
+  // like that, which needs a `rename`.
+  for (const { entry: e, form, why } of mangledForms(entries)) {
+    if (form === e.name) continue;
+    logDrop(topic.id, e.rank, e.name, form, `text in the wrong code page ("${why}")`);
+    e.aliases = e.aliases.filter((a) => a !== form);
+  }
   if (topic.values) {
     const [found, tried] = await addValues(topic, entries, articleOf, rows.map((r) => r.value));
     console.log(`     ${topic.id}: values for ${found} of ${tried} likely unranked answers`);

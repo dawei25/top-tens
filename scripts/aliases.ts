@@ -432,6 +432,104 @@ export function gluedAlias(alias: string, forms: string[]): boolean {
   });
 }
 
+/** Single-byte code pages text is written in and read back in by mistake: Western, Central European, Baltic. */
+const CODE_PAGES = ["windows-1252", "windows-1250", "windows-1257"];
+const decodeByte = (page: string, byte: number) => new TextDecoder(page).decode(Uint8Array.of(byte));
+
+/**
+ * For a letter as one code page shows a byte, the letters the others write with that byte, where the matcher sees a
+ * different letter: "č" (1250, read as c) → "è" (1252, read as e). Letters it doesn't read as one plain letter (Æ, ø,
+ * Ł) are left out: "Æthiopia" and "Jørgensen" are real names, and no swap of theirs is evidence of anything.
+ */
+const MISREAD = new Map<string, Set<string>>();
+const seenAs = (c: string) => (/^[a-z]$/.test(normalize(c)) ? normalize(c) : undefined);
+for (let b = 0x80; b <= 0xff; b++) {
+  const chars = CODE_PAGES.map((p) => decodeByte(p, b)).filter((c) => seenAs(c));
+  for (const shown of chars) {
+    for (const meant of chars) {
+      if (seenAs(shown) === seenAs(meant)) continue;
+      if (!MISREAD.has(shown)) MISREAD.set(shown, new Set());
+      MISREAD.get(shown)!.add(meant);
+    }
+  }
+}
+
+/** Windows-1252's byte for each character it shows, to read UTF-8 that was shown as Windows-1252 back ("CÃ©zanne"). */
+const CP1252_BYTE = new Map(Array.from({ length: 256 }, (_, b) => [decodeByte("windows-1252", b), b] as const));
+/** Splits a name into its words, apostrophes kept ("O'Keeffe"). */
+const LETTER_RUNS = /[^\p{L}\p{M}'’]+/u;
+/** A word with a letter another code page writes with the same byte as some other letter. */
+const misread = (word: string) => [...word].some((c) => MISREAD.has(c));
+
+/**
+ * Why a name reads as text decoded in the wrong code page, or null if it reads fine: "Eugčne Henri Paul Gauguin" is
+ * Eugène written in Windows-1252 and read as Windows-1250 (a redirect on Paul Gauguin); "CÃ©zanne" is UTF-8 read as
+ * Windows-1252; "�" is a character lost on the way.
+ *
+ * A letter is misread when its word is no word of the thing's and becomes one read in another code page: a word of
+ * the entry's other `forms` ("Eugene Henri Paul Gauguin"). Only the thing's own names count as that evidence: any
+ * dictionary has some word one swap from a real name ("João" read as "Joćo" is the Scots "joco", "Ilić" as "Iliã"
+ * the plural of ilium). The word as written is real if `known` says so (English, another answer's name) or a form
+ * spells it without such letters, so two redirects sharing "Eugčne" don't vouch for each other. Real letters of
+ * Czech, Polish or Latvian names ("Markuss Rotkovičs") turn into no word of the thing's, and a swap only of accents
+ * ("Brăila", "Brãila") changes nothing the matcher sees: neither counts.
+ */
+export function mangledText(text: string, forms: string[] = [], known: (word: string) => boolean = () => false): string | null {
+  if (text.includes("\uFFFD")) return 'a lost character ("\uFFFD")';
+  if (/[^\p{ASCII}]/u.test(text)) {
+    const bytes = [...text].map((c) => CP1252_BYTE.get(c));
+    if (bytes.every((b) => b !== undefined)) {
+      try {
+        const utf8 = new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(bytes as number[]));
+        if (utf8 !== text) return `UTF-8 read as Windows-1252 ("${utf8}")`;
+      } catch {
+        // Not UTF-8 in disguise: the usual case for real accented names.
+      }
+    }
+  }
+  const own = new Set<string>();
+  const ownPlain = new Set<string>();
+  for (const f of forms) {
+    if (f === text) continue;
+    for (const w of f.split(LETTER_RUNS)) {
+      own.add(normalize(w));
+      if (!misread(w)) ownPlain.add(normalize(w));
+    }
+  }
+  for (const word of text.split(LETTER_RUNS)) {
+    const odd = [...new Set(word)].filter((c) => MISREAD.has(c));
+    const n = normalize(word);
+    if (!odd.length || ownPlain.has(n) || known(n)) continue;
+    for (const c of odd) {
+      for (const meant of MISREAD.get(c)!) {
+        const fixed = word.split(c).join(meant);
+        const f = normalize(fixed);
+        if (f !== n && own.has(f)) return `"${word}" is "${fixed}" read in the wrong code page`;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Every name or alias on a list that reads as text in the wrong code page (`mangledText`), with why. The words known
+ * to be real are English and the words of the list's answers' names (those spelled without a letter that could be
+ * misread themselves). build.ts drops such aliases; validate.ts fails any that ship, on every list.
+ */
+export function mangledForms<E extends { name: string; aliases: string[] }>(entries: E[]): { entry: E; form: string; why: string }[] {
+  const names = new Set(entries.flatMap((e) => e.name.split(LETTER_RUNS).filter((w) => !misread(w)).map(normalize)));
+  const known = (w: string) => names.has(w) || isEnglishWord(w);
+  const out: { entry: E; form: string; why: string }[] = [];
+  for (const entry of entries) {
+    const forms = [entry.name, ...entry.aliases];
+    for (const form of forms) {
+      const why = mangledText(form, forms, known);
+      if (why) out.push({ entry, form, why });
+    }
+  }
+  return out;
+}
+
 /**
  * A table's stand-in for a title that doesn't exist yet: "Untitled Peaky Blinders sequel series", "Awaiting release",
  * "TBA". Never an answer (on netflix-seasons, "peaky blinders" cost a life as one). Works named "Untitled" stay:
