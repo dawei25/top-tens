@@ -38,3 +38,10 @@ measure of how well the picks match his taste.
 
 | Week of | Day | List or Blitz | Owner | Why |
 |---|---|---|---|---|
+| Nov 9 | Mon 9 | coffee-countries / music-artists | kept | approved the week as proposed |
+| Nov 9 | Tue 10 | skyscraper-cities / nobel-countries | kept | approved the week as proposed |
+| Nov 9 | Wed 11 | world-heritage-countries / farm-products | kept | approved the week as proposed |
+| Nov 9 | Thu 12 | sports-leagues / us-states-area | kept | approved the week as proposed |
+| Nov 9 | Fri 13 | retailers / mcdonalds-countries | kept | approved the week as proposed |
+| Nov 9 | Sat 14 | landlocked-countries / spotify-songs | kept | approved the week as proposed |
+| Nov 9 | Sun 15 | longest-running-tv / billionaire-countries | kept | approved the week as proposed |

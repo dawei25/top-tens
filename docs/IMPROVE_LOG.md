@@ -2,6 +2,14 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-06, weekly lineup (week of Nov 9)
+
+- Proposed 7 lists + 7 Blitzes (doc "TENtacle lineup, week of Nov 9"); the owner approved all 14 as proposed. Two new
+  lists debut (sports-leagues Thu, farm-products Blitz Wed). Spares: metro-cities, coastline-countries, painters
+  (split verdict), football-club-revenue (Blitz, held off the sports-leagues week).
+- Risk flagged to the owner: skyscraper-cities (casual finds 6) and the billionaire-countries Blitz (casual finds 5)
+  play hard.
+
 ## 2026-11-03, cycle 7 (lean), then the loop paused
 
 - Judged: pixar-films (daily list p5: the casual finds 6), world-series-wins (daily list p5: the casual finds 6, the

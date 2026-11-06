@@ -122,44 +122,44 @@
  {
   "n": 21,
   "date": "2026-11-09",
-  "id": "game-franchises",
-  "blitz": "us-states-gdp"
+  "id": "coffee-countries",
+  "blitz": "music-artists"
  },
  {
   "n": 22,
   "date": "2026-11-10",
-  "id": "europe-cities",
+  "id": "skyscraper-cities",
   "blitz": "nobel-countries"
  },
  {
   "n": 23,
   "date": "2026-11-11",
-  "id": "us-box-office",
-  "blitz": "billionaire-countries"
+  "id": "world-heritage-countries",
+  "blitz": "farm-products"
  },
  {
   "n": 24,
   "date": "2026-11-12",
-  "id": "island-countries",
-  "blitz": "spotify-songs"
+  "id": "sports-leagues",
+  "blitz": "us-states-area"
  },
  {
   "n": 25,
   "date": "2026-11-13",
-  "id": "dog-breeds",
-  "blitz": "us-states-area"
+  "id": "retailers",
+  "blitz": "mcdonalds-countries"
  },
  {
   "n": 26,
   "date": "2026-11-14",
-  "id": "market-cap-peak",
-  "blitz": "mcdonalds-countries"
+  "id": "landlocked-countries",
+  "blitz": "spotify-songs"
  },
  {
   "n": 27,
   "date": "2026-11-15",
-  "id": "athletes-earnings",
-  "blitz": "music-artists"
+  "id": "longest-running-tv",
+  "blitz": "billionaire-countries"
  },
  {
   "n": 28,
