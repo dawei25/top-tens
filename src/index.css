@@ -3422,11 +3422,8 @@ a.arch-cell:active .arch-name {
   letter-spacing: 0.06em;
   color: var(--muted);
 }
-/* Before the first game: the same sections, their numbers blank and faint, and a line saying what will show. */
-.know-big.none {
-  color: var(--muted);
-  text-shadow: none;
-}
+/* Before the first game: the same sections, their numbers blank and faint (the three figures alike: no big number
+   yet), and a line saying what will show. */
 .know-none .know-stats dd {
   color: var(--muted);
 }

@@ -75,3 +75,32 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 }
+
+// Launch audit, Nov 6: before the first game, Stats' top row read "-- vs avg", "0 games", "-- your avg / 10", and the
+// first sat about 25 px lower than the other two (a 60px dash beside 36px numbers; UX 8). The row's figures share one
+// line and one height, and so do their labels.
+for (const vp of VIEWPORTS) {
+  test(`Stats before the first game: one row, its figures and labels in line (${vp.name})`, async () => {
+    const { ctx, page } = await open(browser, vp, "#stats");
+    const empty = page.getByTestId("knowledge-empty");
+    await empty.waitFor();
+    const boxes = async (id) =>
+      empty.getByTestId(id).evaluateAll((els) =>
+        els.map((el) => {
+          const r = el.getBoundingClientRect();
+          return { top: Math.round(r.top), bottom: Math.round(r.bottom), size: getComputedStyle(el).fontSize };
+        }),
+      );
+    const figures = await boxes("know-figure");
+    const labels = await boxes("know-figure-label");
+    assert.equal(figures.length, 3);
+    assert.equal(labels.length, 3);
+    for (const [name, row] of [["figures", figures], ["labels", labels]]) {
+      for (const b of row.slice(1)) {
+        assert.deepEqual(b, row[0], `the ${name} share one line and one size: ${JSON.stringify(row)}`);
+      }
+    }
+    assert.ok(labels[0].top >= figures[0].bottom - 1, "labels under the figures");
+    await ctx.close();
+  });
+}
