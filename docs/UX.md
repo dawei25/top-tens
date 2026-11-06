@@ -9,8 +9,8 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 
 ## Words
 
-1. **Say what happens, in plain words.** A button names its effect: "Roll again" for a new random list (not "Play
-   again", which reads as the same list), "Play Blitz" (not "Blitz"). A number says what it is: "average" (not "par",
+1. **Say what happens, in plain words.** A button names its effect: "Roll another list" for a new random list (not
+   "Play again", which reads as the same list), "Play Blitz" (not "Blitz"). A number says what it is: "average" (not "par",
    asked about twice), "days in a row" (not "streak").
 2. **No jargon a casual player has to decode.** Golf, stats or game-design terms (par, percentile, streak, delta)
    get replaced or explained on the screen itself.
