@@ -1128,6 +1128,15 @@ a {
   .stage .lead {
     order: -1;
   }
+  /* At the end the misses leave the dock for the column of panels: a panel of their own, as wide as the others (in
+     play they reach into the gutter, in line with the dock's chips; UX 8). Their label lines up with the board's
+     ranks. */
+  .stage .control-col > .misses {
+    margin-inline: 0;
+    padding: 8px 12px 10px;
+    border: 1px solid var(--hairline);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+  }
   /* Blitz's answer board appears with the first answer here. */
   .blitz-hits.is-empty {
     display: none;
