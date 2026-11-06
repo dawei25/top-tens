@@ -1,0 +1,52 @@
+{
+  "NFL": {
+    "text": "It was founded in 1920 in a car showroom in Canton, Ohio, as the American Professional Football Conference.",
+    "source": "https://en.wikipedia.org/wiki/National_Football_League",
+    "evidence": "On August 20, 1920, a meeting was held by representatives of the Akron Pros, Canton Bulldogs, Cleveland Indians, and Dayton Triangles at the Jordan and Hupmobile auto showroom in Canton, Ohio. This meeting resulted in the formation of the American Professional Football Conference (APFC)"
+  },
+  "NBA": {
+    "text": "Its players earn the highest average salary of any athletes in the world (as of 2020).",
+    "source": "https://en.wikipedia.org/wiki/National_Basketball_Association",
+    "evidence": "As of 2020, NBA players are the world's highest paid athletes by average annual salary per player."
+  },
+  "MLB": {
+    "text": "It's the oldest of the major US leagues: its National League was formed in 1876, the American League in 1900.",
+    "source": "https://en.wikipedia.org/wiki/Major_League_Baseball",
+    "evidence": "MLB is the oldest major professional sports league in the United States and Canada ... Formed in 1876 and 1900, respectively, the NL and AL came into direct conflict in 1901"
+  },
+  "Premier League": {
+    "text": "It's the world's most-watched sports league, broadcast in 212 territories.",
+    "source": "https://en.wikipedia.org/wiki/Premier_League",
+    "evidence": "The Premier League is the world's most-watched sports league, broadcast in 212 territories to a potential audience of 4.7 billion people."
+  },
+  "NHL": {
+    "text": "It was founded at Montreal's Windsor Hotel in 1917 with four teams, all in Canada.",
+    "source": "https://en.wikipedia.org/wiki/National_Hockey_League",
+    "evidence": "The NHL was organized at the Windsor Hotel in Montreal on November 26, 1917 ... At its inception, the NHL had four teams, all in Canada, thus the adjective \"National\" in the league's name."
+  },
+  "La Liga": {
+    "text": "Its clubs have won 20 Champions League titles, more than any other league's.",
+    "source": "https://en.wikipedia.org/wiki/La_Liga",
+    "evidence": "Its clubs have won more UEFA Champions League (20), UEFA Europa League (14), UEFA Super Cup (17) and FIFA Club World Cup (8) titles than those of any other league"
+  },
+  "Bundesliga": {
+    "text": "Bayern Munich has won 34 of its 63 titles, including 11 in a row from 2013 to 2023.",
+    "source": "https://en.wikipedia.org/wiki/Bundesliga",
+    "evidence": "Bayern Munich has dominated with 34 of 63 titles, including 11 consecutive seasons between 2013 and 2023."
+  },
+  "Serie A": {
+    "text": "The champions wear the scudetto badge on their shirts the next season, so the title itself is called the Scudetto.",
+    "source": "https://en.wikipedia.org/wiki/Serie_A",
+    "evidence": "Since 1924, the winner of Italy's top division has worn the scudetto emblem on its kit in the following season ... Since the introduction of the Scudetto patch in 1925, the championship has also commonly been referred to as the \"Scudetto\" by metonymy."
+  },
+  "MLS": {
+    "text": "It was founded in 1993 as part of the US bid for the 1994 World Cup, and first played in 1996 with ten teams.",
+    "source": "https://en.wikipedia.org/wiki/Major_League_Soccer",
+    "evidence": "MLS was founded in 1993 as part of the United States' successful bid to host the 1994 FIFA World Cup. The inaugural season took place in 1996 with ten teams."
+  },
+  "Ligue 1": {
+    "text": "It began in 1932 as the \"National\", was Division 1 from a year later, and took its current name in 2002.",
+    "source": "https://en.wikipedia.org/wiki/Ligue_1",
+    "evidence": "Ligue 1 was inaugurated on 11 September 1932 under the name National before switching to Division 1 after a year of existence. It continued to operate under that name until 2002, when it adopted its current name."
+  }
+}

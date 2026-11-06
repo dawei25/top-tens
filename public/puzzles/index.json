@@ -655,5 +655,26 @@
   "title": "Largest cities in Africa",
   "category": "Geography",
   "blitz": true
+ },
+ {
+  "id": "sports-leagues",
+  "title": "Sports leagues with the highest revenue",
+  "category": "Sports",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "painters",
+  "title": "Painters with the most expensive paintings sold",
+  "category": "Culture",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "farm-products",
+  "title": "Farm products worth the most worldwide",
+  "category": "Oddball",
+  "blitz": true,
+  "debut": true
  }
 ]

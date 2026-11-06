@@ -1,0 +1,52 @@
+{
+  "Rice": {
+    "text": "It's the staple food of over half the world, yet only about 8% of it is traded between countries.",
+    "source": "https://en.wikipedia.org/wiki/Rice",
+    "evidence": "Rice is a cereal grain and, in its domesticated form, is the staple food of over half of the world's population ... Only some 8% of rice is traded internationally."
+  },
+  "Pork": {
+    "text": "Pigs were domesticated around 13,000 BC in Mesopotamia; ham, bacon and sausage began as ways to keep their meat.",
+    "source": "https://en.wikipedia.org/wiki/Pork",
+    "evidence": "Pigs were domesticated in Mesopotamia around 13,000 BC. ... Pork is eaten both freshly cooked and preserved; curing extends the shelf life of pork products. Ham, gammon, bacon, and pork sausage are examples of preserved pork."
+  },
+  "Beef": {
+    "text": "It has the highest greenhouse gas emissions of any farm product; the US, Brazil and China produce the most.",
+    "source": "https://en.wikipedia.org/wiki/Beef",
+    "evidence": "Beef has a high environmental impact, being a primary driver of deforestation with the highest greenhouse gas emissions of any agricultural product. ... As of 2018, the United States, Brazil, and China were the largest producers of beef."
+  },
+  "Cow's milk": {
+    "text": "In 2011 the world's 260 million dairy cows gave around 730 million tonnes of milk.",
+    "source": "https://en.wikipedia.org/wiki/Milk",
+    "evidence": "In 2011, dairy farms produced around 730 million tonnes (800 million short tons) of milk from 260 million dairy cows"
+  },
+  "Chicken": {
+    "text": "There were 19 billion chickens on Earth in 2011, more than two for every person.",
+    "source": "https://en.wikipedia.org/wiki/Chicken_as_food",
+    "evidence": "The United Nations estimated there to be 19 billion chickens on Earth in 2011, making them outnumber humans more than two to one."
+  },
+  "Corn": {
+    "text": "It was bred from a wild grass, teosinte, in southern Mexico about 9,000 years ago.",
+    "source": "https://en.wikipedia.org/wiki/Maize",
+    "evidence": "Maize was domesticated by indigenous peoples in southern Mexico about 9,000 years ago from wild teosinte."
+  },
+  "Wheat": {
+    "text": "It covers more land than any other food crop, and more of it is traded than all other crops combined.",
+    "source": "https://en.wikipedia.org/wiki/Wheat",
+    "evidence": "Wheat is grown on a larger area of land than any other food crop (219.5 million hectares or 542 million acres in 2024). World trade in wheat is greater than that of all other crops combined."
+  },
+  "Soybeans": {
+    "text": "It's the world's most grown legume, and most of it is grown in Brazil and the United States.",
+    "source": "https://en.wikipedia.org/wiki/Soybean",
+    "evidence": "Soy is a staple crop, the world's most grown legume, and an important animal feed. ... Brazil and the United States lead the world in modern soy production."
+  },
+  "Eggs": {
+    "text": "In 2009 about 6.4 billion hens laid some 62 million tonnes of eggs.",
+    "source": "https://en.wikipedia.org/wiki/Eggs_as_food",
+    "evidence": "In 2009, an estimated 62.1 million metric tons of eggs were produced worldwide from a total laying flock of approximately 6.4 billion hens."
+  },
+  "Potatoes": {
+    "text": "They were first grown in the Andes of Peru and Bolivia 7,000 to 10,000 years ago; there are now over 5,000 varieties.",
+    "source": "https://en.wikipedia.org/wiki/Potato",
+    "evidence": "Genetic studies show that the cultivated potato has a single origin, in the area of present-day southern Peru and extreme northwestern Bolivia. Potatoes were domesticated there about 7,000–10,000 years ago ... there are now over 5,000 different varieties of potatoes."
+  }
+}
