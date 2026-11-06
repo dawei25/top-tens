@@ -104,17 +104,22 @@ describe("a miss that costs a life", () => {
     expect(plain(lifeCostLine(tokyo, p))).toBe(`Tokyo isn't in ${p.region}. Lost a life.`);
   });
   it("on every built list: every miss ends 'Lost a life.', and no figure stands bare", () => {
+    const bad: string[] = [];
     for (const p of bank) {
-      for (const e of p.extras) {
+      // Every ranked miss and every unranked one with a figure; of the rest (one wording, and thousands of them on the
+      // country lists), the first 20.
+      const plainUnranked = p.extras.filter((e) => !e.rank && !e.value).slice(0, 20);
+      for (const e of [...p.extras.filter((x) => x.rank || x.value), ...plainUnranked]) {
         const line = plain(lifeCostLine(e, p));
-        expect(line, `${p.id}: ${line}`).toMatch(/ Lost a life\.$/);
-        expect(line, `${p.id}: ${line}`).not.toMatch(/#\d+, /);
         const v = shownValue(e);
         // A plain number ("200", "2") always has a word after it or a column's name before it.
-        if (v && /^[\d.,–-]+$/.test(v)) expect(line, `${p.id}: ${line}`).toMatch(new RegExp(`(: |[$€£])${esc(v)}|${esc(v)} \\p{L}`, "u"));
+        const bare = !!v && /^[\d.,–-]+$/.test(v) && !new RegExp(`(: |[$€£])${esc(v)}|${esc(v)} \\p{L}`, "u").test(line);
+        if (!/ Lost a life\.$/.test(line) || /#\d+, /.test(line) || bare) bad.push(`${p.id}: ${line}`);
       }
     }
-  });
+    expect(bad).toEqual([]);
+    // About 13,000 lines: a second or two alone, more beside the other test files.
+  }, 30_000);
 });
 
 describe("metric names mid-sentence", () => {
