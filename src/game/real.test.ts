@@ -70,6 +70,15 @@ describe("first names and partial names", () => {
   });
 });
 
+describe("a franchise's name", () => {
+  // Player's note: "monsters" filled in Monsters University (#10) when Monsters, Inc. (#14) is just as much "monsters".
+  it("pixar-films: monsters offers Monsters University and Monsters, Inc.", () => {
+    const r = judge("pixar-films", "monsters");
+    expect(r.kind).toBe("typo");
+    if (r.kind === "typo") expect(r.suggestions).toEqual(expect.arrayContaining(["Monsters University", "Monsters, Inc."]));
+  });
+});
+
 describe("intent edge cases", () => {
   it("a misspelled first name fills its own entry, not a lookalike surname", () => {
     expect(judge("nba-points", "kareen")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Kareem Abdul-Jabbar" } });
