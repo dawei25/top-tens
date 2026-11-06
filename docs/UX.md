@@ -32,6 +32,10 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
    by-category picker).
 10. **Never hide a section because it's empty.** Show it with a placeholder (the Stats tab disappeared for a new
     player).
+23. **One box, one job.** A panel holds one action and what serves it; a different action gets its own box beside it.
+    Roll again sat inside the guess panel, squeezing the guess box and its placeholder: "separate out the roll again
+    button completely outside the guess box, make its own separate box to the right of this whole thing" (now "Roll
+    another list", in its own box right of the guess panel, in free play and Blitz).
 
 ## Behavior
 
