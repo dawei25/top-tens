@@ -1,8 +1,9 @@
 // Today's Blitz: one round. It counts, there is no Roll another list, reopening shows that round (locked), home shows
-// it as done, and Random Blitz rolls a fresh round on another list.
+// it as done, and Random Blitz rolls a fresh round on another list. Its results offer Today's list while that is
+// unplayed, the Blitz's own list once it's done.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, VIEWPORTS, TODAY, open, hash, puzzle, todaysDaily, store, guess } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, TODAY, open, go, hash, puzzle, todaysDaily, store, guess, giveUp } = require("./helpers.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -32,6 +33,9 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("blitz-best").count(), 0);
     assert.equal(await page.getByTestId("blitz-again").count(), 0);
     assert.equal(await page.getByTestId("blitz-roll").count(), 1);
+    // Launch audit (Nov 6): with Today's list unplayed, the results offered "Play the list", the same list as a top 10
+    // right after showing its whole top 10. They offer Today's list instead (as a daily's results offer Today's Blitz).
+    assert.equal(await page.getByTestId("blitz-list").getAttribute("href"), `#daily-${TODAY}`);
 
     // Reopening it (reload) shows that round, locked: no guess box, no second round.
     await page.reload();
@@ -59,6 +63,13 @@ for (const vp of VIEWPORTS) {
     assert.notEqual(await screen.getAttribute("data-list"), id);
     assert.equal(await page.getByTestId("blitz-clock").getAttribute("data-started"), "false");
     assert.equal((await store(page)).blitzDaily[TODAY].score, first);
+
+    // Once Today's list is done, the locked round's list key opens its own list again.
+    await go(page, `#daily-${TODAY}`);
+    await giveUp(page);
+    await go(page, `#dailyblitz-${TODAY}`);
+    await results.waitFor();
+    assert.equal(await page.getByTestId("blitz-list").getAttribute("href"), `#p-${id}`);
     await ctx.close();
   });
 }

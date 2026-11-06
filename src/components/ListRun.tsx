@@ -7,6 +7,7 @@ import { load } from "../game/storage";
 import { runTime } from "./Blitz";
 import { Loading } from "./Game";
 import { ParBlock, usePar } from "./par";
+import { FACT_CUE, metricLabel } from "./copy";
 import { formatAsOf, ordinal, ScreenHead, sourceSite } from "./pixel";
 import { RateList } from "./rate/RateList";
 import { ClassicSquid } from "./squid";
@@ -161,6 +162,14 @@ export function ListRun({ id, meta, startedAt, onBack, onHome, onReplay }: Props
               );
             })}
           </ol>
+          {/* A phone has no hover look: the cue that a name opens its fact. */}
+          {puzzle.answers.some((a) => a.fact) && (
+            <div className="board-foot">
+              <p className="caption fact-cue" data-testid="fact-cue">
+                {FACT_CUE}
+              </p>
+            </div>
+          )}
         </section>
       </div>
 
@@ -196,8 +205,8 @@ export function ListRun({ id, meta, startedAt, onBack, onHome, onReplay }: Props
             </p>
           )}
           <p className="source">
-            {/* The metric as written: it holds names, units and acronyms (Ballon d'Or, US$, UN 2025). */}
-            {puzzle.metric && <>ranked by {puzzle.metric}. </>}
+            {/* The metric mid-sentence: only its first letter lowercased, and never an acronym's or a name's. */}
+            {puzzle.metric && <>ranked by {metricLabel(puzzle.metric)}. </>}
             source:{" "}
             <a href={puzzle.source.url} target="_blank" rel="noreferrer">
               {puzzle.source.name}

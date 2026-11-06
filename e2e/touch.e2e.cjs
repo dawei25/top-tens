@@ -5,6 +5,7 @@
 // - Every control is at least 44px to the finger, its keycap's base included.
 // - The clue's question shows its cost whole; the guess box shows its whole placeholder; long answers keep their
 //   words whole and Blitz names get the row's width.
+// - A found row's fact is announced by a caption under the board, not only by a hover look.
 // - Nothing a player reads or taps sits under a notch or the home indicator (faked over CDP).
 // - With the keyboard up on a small phone, the board still shows above the guess box.
 // - Home's account key (a build with accounts, served here) takes quick taps, reaches 44px, keeps no hover look after
@@ -179,6 +180,44 @@ test("the clue's question shows its cost whole, and the last life says why there
     for (const e of p.extras.filter((x) => x.rank > 10).slice(0, 4)) await guess(page, e.name);
     await row8.getByTestId("hint-open").click();
     await whole("hint-refused");
+    await ctx.close();
+  }
+});
+
+// Launch audit (Nov 6): a found row opens its fact on a tap, but the only cue was a desktop hover look (UX 12). Once a
+// row has a fact, a caption under the board says so, whole on one line, without moving GIVE UP; a tap opens the fact.
+test("a found row's fact is announced without hover (phones)", async () => {
+  for (const width of [320, 390]) {
+    const { ctx, page } = await open(browser, phone(width), "#p-mountains", undefined, { reducedMotion: "reduce" });
+    await page.getByLabel("Your guess").waitFor();
+    const cue = page.getByTestId("fact-cue");
+    assert.equal(await cue.count(), 0, `${width}px: no cue before a row has a fact`);
+    // GIVE UP's place in the strip under the board, and that strip's height (the rows above grow as answers are
+    // found, and the page may scroll as the dock's feedback line changes).
+    const onBoard = () =>
+      page.getByTestId("give-up").evaluate((el) => {
+        const [k, f] = [el.getBoundingClientRect(), el.parentElement.getBoundingClientRect()];
+        return { x: k.x - f.x, y: k.y - f.y, width: k.width, height: k.height, strip: f.height };
+      });
+    const give = await onBoard();
+    const p = await puzzle(page, "mountains");
+    const first = p.answers.find((a) => a.fact);
+    await guess(page, first.name);
+    await cue.waitFor();
+    const fit = await cue.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const board = el.closest(".board").getBoundingClientRect();
+      return { lines: Math.round(r.height / parseFloat(getComputedStyle(el).lineHeight)), inside: r.left >= board.left && r.right <= board.right, text: el.textContent };
+    });
+    assert.equal(fit.lines, 1, `${width}px: "${fit.text}" takes one line`);
+    assert.ok(fit.inside, `${width}px: the cue sits on the board`);
+    assert.deepEqual(await onBoard(), give, `${width}px: GIVE UP stays where it was`);
+    const row = page.locator(`[data-testid="slot"][data-rank="${first.rank}"]`);
+    await row.tap();
+    await page.locator(`[data-testid="slot"][data-rank="${first.rank}"].fact-open`).waitFor();
+    // And after the end, under the revealed board.
+    await giveUp(page);
+    await cue.waitFor();
     await ctx.close();
   }
 });

@@ -1727,9 +1727,22 @@ a {
 }
 .board-foot {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
   padding: 6px 16px 2px;
   border-top: 1px dashed var(--hairline);
+}
+/* "facts: tap a name.": the only cue a phone gets that a found row opens its fact (no hover there). Left of GIVE UP,
+   one quiet line; it comes in with the first row that has a fact, without moving the key. */
+.fact-cue {
+  margin: 0 auto 0 0;
+  font-size: 17px;
+  line-height: 1.3;
+}
+.board-foot:has(.fact-cue:only-child) {
+  padding-top: 8px;
+  padding-bottom: 6px;
 }
 .text-btn {
   min-height: 36px;
