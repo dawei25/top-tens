@@ -1,0 +1,24 @@
+{
+  "id": "farm-products",
+  "by": "builder",
+  "judgedAt": "2026-11-06",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 33, "named": 38 },
+  "difficulty": 2,
+  "tags": ["food", "farming", "everyday"],
+  "audience": "anyone",
+  "summary": "Rice, beef, chicken, wheat and corn come fast, milk and eggs follow, and soybeans and potatoes finish it; the fruit (tomatoes #11, apples, bananas) and coffee are the traps.",
+  "reasons": [
+    "Builder's replays: a casual who started with crops found 10 with 1 life lost (sugar, coffee, cotton, bananas cost lives); one who started with fruit found 8 and ran out on apples, bananas, coffee, tomatoes and oranges. A fan found 10. A 90-second Blitz scores 30+: almost every food a player names is in the 48.",
+    "Data is 3 only for its age: FAO's gross production value for 2016, the only year Wikipedia has, said in the prompt. The ten are the world's staples, so a newer year would likely reorder them more than replace them (not checked). With that accepted (data 4) it is an easy daily and a deep Blitz.",
+    "Named as people say them (Pork for \"Pig, meat\", Corn for maize); fish, cocoa, oats and other foods outside FAO's 50 are free. \"dairy\" and \"poultry\" don't hand over milk or chicken."
+  ],
+  "fixes": [
+    "Refresh when Wikipedia has a newer year of FAO's gross production value (the page says its data is for 2016)."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "painters",
+  "by": "builder",
+  "judgedAt": "2026-11-06",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 5, "blitzDepth": 3 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": { "scored": 12, "named": 22 },
+  "difficulty": 3,
+  "tags": ["culture", "art", "auctions"],
+  "audience": "anyone curious about art",
+  "summary": "Da Vinci, Picasso, Warhol and Rembrandt are the gimmes; de Kooning at #2 and Klimt's 2025 record are the surprises, and Van Gogh (#18), Monet and Basquiat are the famous traps.",
+  "reasons": [
+    "Builder's replays: a casual found 6 (da Vinci, Picasso, Warhol, Rembrandt, Pollock, Klimt) and ran out of lives on Van Gogh, Monet, Basquiat, Munch and Matisse, each showing its top price; an art-minded casual found 7. A fan found 10 with 3 lives lost. It leans hard for a daily.",
+    "Each painter ranks by their single priciest sale at the price paid (not adjusted for inflation), as the prompt says. The table takes in every painting over about $85 million in today's money, so no top-10 sale is missing. #10 Picasso $179.4 million, #11 Modigliani $170.4 million.",
+    "Michelangelo, Dalí, Kahlo, Banksy, Vermeer and Raphael have no sale this big: free, and known names. Each fact names the painting behind the price."
+  ],
+  "fixes": [
+    "The article on Rothko's No. 6 says Ken Griffin bought it for $195 million in 2024; the list's table still has the 2014 sale ($186 million). If the table is updated, Rothko ties Warhol at $195 million (#8), still no #10/#11 tie."
+  ]
+}
