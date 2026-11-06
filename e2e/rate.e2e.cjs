@@ -13,13 +13,20 @@ let browser;
 before(async () => (browser = await chromium.launch()));
 after(() => browser.close());
 
-/** Every element's box in the result card, except the floating reasons: what must stay put while they open. */
+/**
+ * Every element's box in the result card, except the floating reasons and the animated squid: what must stay put
+ * while they open. (The squid made this flaky under load: its own animation moved it between two measurements.)
+ */
 const layout = (page) =>
-  page.evaluate(() => {
+  page.evaluate(async () => {
+    // CSS animations run on real time, not the fake clock: under load the board's reveal was still settling between two
+    // measurements. Wait for every animation that ends (the squid's endless idle loop doesn't).
+    await Promise.all(document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {})));
     const card = document.querySelector('[data-testid="results"], [data-testid="blitz-results"], [data-testid="run-view"]');
     const pop = document.querySelector('[data-testid="rate-reasons"]');
     const boxes = [...card.querySelectorAll("*")]
-      .filter((el) => !pop?.contains(el) && el.getClientRects().length)
+      // The squid is a decorative animation layer: it swims and reacts on its own clock, so it isn't layout.
+      .filter((el) => !pop?.contains(el) && !el.closest(".squid") && el.getClientRects().length)
       .map((el) => {
         const r = el.getBoundingClientRect();
         return `${el.tagName}.${el.className}:${Math.round(r.x)},${Math.round(r.y + scrollY)} ${Math.round(r.width)}x${Math.round(r.height)}`;
