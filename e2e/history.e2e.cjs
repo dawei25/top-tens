@@ -105,3 +105,31 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 }
+
+// Launch audit, Nov 6: "DAILY BLITZ #22" left "#22" alone on a second line at 390, and the Blitz screen calls the same
+// round "TODAY'S BLITZ #22". A daily's tag is one name, on one line, down to the narrowest phone.
+test("today's list and Blitz in Past runs: each tag on one line at 320 and 390", async () => {
+  for (const width of [320, 390]) {
+    const { ctx, page } = await open(browser, { viewport: { width, height: 844 }, isMobile: true, hasTouch: true });
+    await page.getByTestId("today-list").click();
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("results").waitFor();
+    await go(page, "");
+    await page.getByTestId("today-blitz").click();
+    const screen = page.getByTestId("blitz-screen");
+    await screen.waitFor();
+    const list = await page.evaluate(async (id) => (await fetch(`puzzles/${id}.json`)).json(), await screen.getAttribute("data-list"));
+    await guess(page, list.answers[0].name);
+    await page.clock.fastForward(91_000);
+    await page.getByTestId("blitz-results").waitFor();
+    await go(page, "#history");
+    await page.getByTestId("history-row").first().waitFor();
+    const tags = await page.getByTestId("history-tag").evaluateAll((els) =>
+      els.map((el) => ({ text: el.textContent, lines: Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight)) })),
+    );
+    assert.equal(tags.length, 2);
+    for (const t of tags) assert.equal(t.lines, 1, `${width}px: "${t.text}" takes ${t.lines} lines`);
+    await ctx.close();
+  }
+});

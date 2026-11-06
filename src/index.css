@@ -3026,12 +3026,14 @@ a.arch-cell:active .arch-name {
   overflow-wrap: break-word;
   text-wrap: pretty;
 }
+/* One line, always ("Blitz #22"): the result beside it gives way instead. */
 .play-tag {
   grid-area: tag;
   font-size: 14px;
   line-height: 1.2;
   letter-spacing: 0.15em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--accent);
 }
 .play-result {
@@ -3050,8 +3052,10 @@ a.arch-cell:active .arch-name {
   .play-day-name {
     padding: 12px 12px 4px;
   }
+  /* The tag takes its own width and the result the rest of the row: on the narrowest phones (320) a long result
+     wraps at its dot, right-aligned, rather than the tag breaking under its number. */
   .play-row {
-    grid-template-columns: 46px minmax(0, 1fr) auto;
+    grid-template-columns: 46px auto minmax(0, 1fr);
     grid-template-areas:
       "time title title"
       ". tag result"
@@ -3067,6 +3071,7 @@ a.arch-cell:active .arch-name {
   }
   .play-result {
     font-size: 17px;
+    white-space: normal;
   }
 }
 

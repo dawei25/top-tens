@@ -17,17 +17,20 @@ interface Props {
   onHome: () => void;
 }
 
+/** A space that never breaks: on the narrowest phones a result wraps only at its dot ("283 pts ·" / "3 answers"). */
+const NB = String.fromCharCode(160);
+
 /** The score first, then how it ended. */
 function result(p: Play): { text: string; tone: string } {
   if (p.kind === "blitz") {
     const k = p.run.hits.length;
-    return { text: `${p.run.score} pts · ${k} answer${k === 1 ? "" : "s"}`, tone: "gold" };
+    return { text: `${p.run.score}${NB}pts · ${k}${NB}answer${k === 1 ? "" : "s"}`, tone: "gold" };
   }
   const r = p.run;
   const n = r.found.length;
-  if (r.status === "gave-up") return { text: `${n}/10 · gave up`, tone: "muted" };
-  if (r.status === "lost") return { text: `${n}/10 · out of lives`, tone: "text" };
-  return { text: `10/10 · ${r.lives} ${r.lives === 1 ? "life" : "lives"} left`, tone: "gold" };
+  if (r.status === "gave-up") return { text: `${n}/10 · gave${NB}up`, tone: "muted" };
+  if (r.status === "lost") return { text: `${n}/10 · out${NB}of${NB}lives`, tone: "text" };
+  return { text: `10/10 · ${r.lives}${NB}${r.lives === 1 ? "life" : "lives"}${NB}left`, tone: "gold" };
 }
 
 /** The date whose Blitz a round was (Today's Blitz, on the day or later from a link), if it was one. */
@@ -45,13 +48,16 @@ function href(p: Play, date?: string): string {
   return `#p-${p.id}/run-${p.run.startedAt}`;
 }
 
-/** The row's one tag: the mode, and the daily's number when it was a daily. */
+/**
+ * The row's one tag: the mode, and the day's number when it was that day's list or Blitz ("Blitz #22", as the Blitz
+ * screen names that date's round and the archive numbers the day). One line on any phone.
+ */
 function tag(p: Play, saved: Saved, schedule: DailyEntry[]): string {
-  if (p.kind === "list") return p.run.daily ? `Daily list #${p.run.daily}` : "List";
+  if (p.kind === "list") return p.run.daily ? `List #${p.run.daily}` : "List";
   const day = blitzDate(p, saved);
   if (!day) return "Blitz";
   const n = (entryForDate(schedule, day) ?? todayEntry(schedule, day))?.n;
-  return n ? `Daily Blitz #${n}` : "Daily Blitz";
+  return n ? `Blitz #${n}` : "Blitz";
 }
 
 /** "21:40" in the player's time. */
