@@ -264,13 +264,26 @@ const TEAMS: Record<"nba" | "nfl" | "mlb" | "nhl", string[]> = {
 
 const MULTI_WORD_NICKNAMES = /\b(Red Sox|White Sox|Blue Jays|Trail Blazers|Maple Leafs|Red Wings|Blue Jackets|Golden Knights)$/;
 
-/** Short forms fans write besides the nickname (no plain words: "cards" and "halos" are left out). */
+/**
+ * Other current names fans write besides the nickname (no plain words: "cards" and "halos" are left out): short
+ * forms, and a city's initials where fans use them. validate.ts fails a team list that lacks one.
+ */
 const TEAM_SHORT: Record<string, string[]> = {
   "Arizona Diamondbacks": ["D-backs", "Dbacks"],
-  "Washington Nationals": ["Nats"],
+  "Washington Nationals": ["Nats", "Washington Nats"],
   "Philadelphia Phillies": ["Phils"],
   "Toronto Blue Jays": ["Jays"],
   "Jacksonville Jaguars": ["Jags"],
+  // The A's dropped "Oakland" in 2025: fans name them by their home now (Sacramento) or from 2028 (Las Vegas).
+  // "sacramento athletics" was "Not one of the 30 MLB teams" (player report).
+  Athletics: ["A's", "Sacramento Athletics", "Sacramento A's", "Las Vegas Athletics", "Las Vegas A's", "Oakland Athletics", "Oakland A's"],
+  "Los Angeles Angels": ["LA Angels"],
+  "Los Angeles Dodgers": ["LA Dodgers"],
+  "New York Mets": ["NY Mets"],
+  "New York Yankees": ["NY Yankees"],
+  "San Francisco Giants": ["SF Giants"],
+  "San Diego Padres": ["SD Padres"],
+  "Kansas City Royals": ["KC Royals"],
 };
 
 function teams(league: keyof typeof TEAMS): Place[] {

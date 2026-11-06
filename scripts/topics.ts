@@ -3363,6 +3363,9 @@ export const TOPICS: Topic[] = [
       "Jackson Pollock": ["Pollock"],
       "Rembrandt": ["Rembrandt van Rijn"],
       "Vincent van Gogh": ["van Gogh"],
+      // Gauguin as it sounds ("go-GAN"), the spelling a player who has only heard the name types (judge). Not "Gogin":
+      // one letter from "login", which would then be offered as Gauguin.
+      "Paul Gauguin": ["Gogan"],
       "Edvard Munch": ["Munch"],
       "Edward Hopper": ["Hopper"],
       "Pierre-Auguste Renoir": ["Renoir", "Auguste Renoir"],
@@ -3468,7 +3471,8 @@ export const TOPICS: Topic[] = [
       Chicken: ["chicken meat", "chickens", "hen", "hens", "chicken breast"],
       Corn: ["maize", "corn", "indian corn"],
       Wheat: ["wheat grain"],
-      Eggs: ["egg", "hen eggs", "chicken eggs", "hens eggs"],
+      // Singular too: "chicken egg" went to Chicken, whose name starts it (judge).
+      Eggs: ["egg", "hen eggs", "chicken eggs", "hens eggs", "hen egg", "chicken egg", "hens egg", "chickens egg", "chickens eggs"],
       Soybeans: ["soybean", "soy", "soya", "soy beans", "soya beans"],
       Potatoes: ["potato", "spuds"],
       Tomatoes: ["tomato"],
@@ -3486,7 +3490,7 @@ export const TOPICS: Topic[] = [
       Watermelons: ["watermelon"],
       Rapeseed: ["canola"],
       Mangoes: ["mango", "mangos", "guava", "guavas", "mangosteen"],
-      "Other birds' eggs": ["duck eggs", "quail eggs", "goose eggs"],
+      "Other birds' eggs": ["duck eggs", "quail eggs", "goose eggs", "duck egg", "quail egg", "goose egg"],
       Peanuts: ["peanut", "groundnuts", "groundnut"],
       "Chili peppers": ["chili", "chilli", "chilies", "chillies", "chili pepper", "peppers", "green peppers"],
       "Sweet potatoes": ["sweet potato"],

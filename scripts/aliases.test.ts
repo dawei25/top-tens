@@ -1,5 +1,10 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { bareWord, blockedAlias, gluedAlias, junkRedirect } from "./aliases";
+import type { Lexicon } from "../src/game/junk";
+import { judgeGuess } from "../src/game/match";
+import type { Puzzle } from "../src/game/types";
+import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledText } from "./aliases";
 
 const junk = (raw: string, names: string[], forms: string[] = [], works = false) => junkRedirect(raw, { names, forms, works });
 
@@ -112,5 +117,76 @@ describe("bareWord and gluedAlias", () => {
     expect(gluedAlias("LeBronJames", ["LeBron James", "LeBron", "James"])).toBe(false);
     expect(gluedAlias("Mount Everest", forms)).toBe(false);
     expect(gluedAlias("Lotte World 2", ["Lotte World"])).toBe(false);
+  });
+});
+
+describe("mangledText", () => {
+  // Painters' judge: "Eugčne Henri Paul Gauguin" (Eugène written in Windows-1252, read as Windows-1250).
+  const gauguin = ["Paul Gauguin", "Eugene Henri Paul Gauguin", "Eugčne Henri Paul Gauguin"];
+  it("finds text decoded in the wrong code page", () => {
+    expect(mangledText("Eugčne Henri Paul Gauguin", gauguin)).toContain('"Eugène"');
+    expect(mangledText("CÃ©zanne", ["Paul Cézanne"])).toContain('"Cézanne"');
+    expect(mangledText("Eug�ne Gauguin", [])).not.toBeNull();
+    // Two redirects with the same misread word don't vouch for each other.
+    expect(mangledText("Eugčne Gauguin", [...gauguin, "Eugčne Gauguin"])).not.toBeNull();
+  });
+  it("leaves real letters alone, and takes no dictionary word as the fix", () => {
+    expect(mangledText("Eugène Henri Paul Gauguin", ["Paul Gauguin", "Eugene Henri Paul Gauguin"])).toBeNull();
+    expect(mangledText("Markuss Rotkovičs", ["Mark Rothko", "Markuss Rotkovičs"])).toBeNull();
+    expect(mangledText("Æthiopia", ["Ethiopia"])).toBeNull();
+    expect(mangledText("João Pessoa", ["João Pessoa"])).toBeNull();
+    expect(mangledText("Saša Ilić", ["Saša Ilić"])).toBeNull();
+    expect(mangledText("São Paulo", [])).toBeNull();
+  });
+});
+
+describe("aliases as built: what players type", () => {
+  const dir = join(import.meta.dirname, "..", "public", "puzzles");
+  const lex: Lexicon = JSON.parse(readFileSync(join(dir, "lexicon.json"), "utf8"));
+  /** The entry a guess lands on (corrected or not), with nothing found yet; undefined if none. */
+  const lands = (id: string, guess: string) => {
+    const r = judgeGuess(guess, JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8")) as Puzzle, new Set(), lex);
+    return "entry" in r ? r.entry.name : r.kind;
+  };
+
+  it.each([
+    // Player report: the A's current name was "Not one of the 30 MLB teams here".
+    ["sacramento athletics", "Athletics"],
+    ["sacramento a's", "Athletics"],
+    ["las vegas athletics", "Athletics"],
+    ["athletics", "Athletics"],
+    ["oakland a's", "Athletics"],
+    ["la angels", "Los Angeles Angels"],
+    ["california angels", "Los Angeles Angels"],
+    ["ny mets", "New York Mets"],
+    ["kc royals", "Kansas City Royals"],
+    ["florida marlins", "Miami Marlins"],
+    ["devil rays", "Tampa Bay Rays"],
+    ["cubbies", "Chicago Cubs"],
+    ["brew crew", "Milwaukee Brewers"],
+  ])("world-series-wins: %s -> %s", (guess, name) => {
+    expect(lands("world-series-wins", guess)).toBe(name);
+  });
+
+  it.each([
+    // Judge: "chicken egg" offered Chicken (its name starts the guess), not Eggs.
+    ["chicken egg", "Eggs"],
+    ["chicken eggs", "Eggs"],
+    ["hen egg", "Eggs"],
+    ["hens egg", "Eggs"],
+    ["chicken's egg", "Eggs"],
+    ["hen eggs", "Eggs"],
+    ["eggs", "Eggs"],
+    ["chicken", "Chicken"],
+    ["duck egg", "Other birds' eggs"],
+  ])("farm-products: %s -> %s", (guess, name) => {
+    expect(lands("farm-products", guess)).toBe(name);
+  });
+
+  it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
+    expect(lands("painters", "gogan")).toBe("Paul Gauguin");
+    expect(lands("painters", "gauguin")).toBe("Paul Gauguin");
+    expect(lands("painters", "gogh")).toBe("Vincent van Gogh");
+    expect(lands("painters", "van gogh")).toBe("Vincent van Gogh");
   });
 });

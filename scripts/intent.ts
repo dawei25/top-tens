@@ -730,10 +730,18 @@ export const INTENT: Record<string, Intent> = {
       "New York Yankees": ["Yanks", "Bronx Bombers"],
       "Pittsburgh Pirates": ["Bucs"],
       // The Cardinals' 1880s name redirects to them, but it is the Orioles' (1902-1953) that people mean.
-      "Baltimore Orioles": ["St. Louis Browns"],
+      "Baltimore Orioles": ["St. Louis Browns", "O's"],
       // Former nicknames people still use, so the miss shows the count (judge, cycle 7).
       "Cleveland Guardians": ["Indians"],
       "Washington Nationals": ["Expos"],
+      // Names from the last few decades, and nicknames fans write: each was "Not one of the 30 MLB teams", like the A's
+      // current name (player report). Current names ("Sacramento Athletics", "NY Mets") are the team universe's
+      // (gazetteer.ts TEAM_SHORT).
+      "Miami Marlins": ["Florida Marlins"],
+      "Tampa Bay Rays": ["Tampa Bay Devil Rays", "Devil Rays"],
+      "Los Angeles Angels": ["Anaheim Angels", "California Angels", "Los Angeles Angels of Anaheim"],
+      "Chicago Cubs": ["Cubbies"],
+      "Milwaukee Brewers": ["Brew Crew"],
     },
   },
   "premier-league-goals": {
