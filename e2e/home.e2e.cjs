@@ -46,6 +46,11 @@ for (const vp of VIEWPORTS) {
     assert.equal(await listStrip.getAttribute("aria-expanded"), "true");
     assert.ok((await chips.count()) > 1);
     assert.equal(await page.locator('[data-testid="category"][data-mode="blitz"]').count(), 0);
+    // A category with fewer than three lists sits out (a roll in it would soon widen to every list without a word).
+    const all = await page.evaluate(async () => (await fetch("puzzles/index.json")).json());
+    for (const c of await chips.evaluateAll((els) => els.map((e) => e.dataset.category))) {
+      assert.ok(all.filter((m) => m.category === c).length >= 3, `${c} has three lists or more`);
+    }
     assert.equal(await focusedTestId(page), "category");
     assert.equal(await focusedMode(page), "list");
     // Arrow keys move through the chips.
@@ -209,4 +214,25 @@ test("320px phone: Home never widens the page, during the logo's power-on or aft
     assert.ok(logo.x >= 0 && logo.x + logo.width <= width, `${width}: the logo spans ${Math.round(logo.x)} to ${Math.round(logo.x + logo.width)}`);
     await ctx.close();
   }
+});
+
+// Launch audit, Nov 6: "Tab reaches menu, account and sound only after the footer". The header keys come first in
+// the page, as on screen; the audit's Tab started from Today's list, which Home focuses on arrival so Enter plays it.
+// From there the header is one Shift+Tab away (sound, then the menu), and a full Tab round reaches it before Today.
+test("keyboard: Home's tab order follows the screen, the header keys first", async () => {
+  const { ctx, page } = await open(browser, VIEWPORTS.find((v) => v.name === "desktop"));
+  await page.getByTestId("today-list").waitFor();
+  const order = await page.evaluate(() =>
+    [...document.querySelectorAll("main.home a[href], main.home button:not(:disabled)")]
+      .filter((el) => el.tabIndex >= 0 && el.getClientRects().length)
+      .map((el) => el.dataset.testid),
+  );
+  assert.deepEqual(order.slice(0, 3), ["menu-key", "sound-toggle", "today-list"], `the order: ${order.join(", ")}`);
+  assert.equal(order.at(-1), "howto-key", "the footer last");
+  assert.equal(await focusedTestId(page), "today-list", "Home focuses Today's list on arrival");
+  await page.keyboard.press("Shift+Tab");
+  assert.equal(await focusedTestId(page), "sound-toggle");
+  await page.keyboard.press("Shift+Tab");
+  assert.equal(await focusedTestId(page), "menu-key");
+  await ctx.close();
 });

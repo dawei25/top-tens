@@ -123,6 +123,14 @@ function Bars({ title, rows, kind, scale, empty }: { title: string; rows: Group[
   );
 }
 
+/** A figure before there is one: a dash on screen, words for a screen reader. */
+const NONE = (
+  <>
+    <span aria-hidden="true">--</span>
+    <span className="sr-only">none yet</span>
+  </>
+);
+
 /** The overall distance from the players' average, read out in words ("+0.5 vs avg" on screen). */
 function vsAvgLabel(v: number): string {
   const n = Math.abs(v).toFixed(1);
@@ -151,22 +159,20 @@ export function Knowledge({ index, entry, onBack, onHome }: Props) {
         <p className="caption">your list games against the players' average on each list.</p>
         {k && !k.overall && (
           <div className="know-overall know-none" data-testid="knowledge-empty">
-            <p className="know-headline" aria-label="no games against the average yet">
-              <span className="know-big none" aria-hidden="true">
-                --
-              </span>
-              <span className="know-big-of" aria-hidden="true">
-                vs avg
-              </span>
-            </p>
+            {/* Nothing to compare yet, so no big number: three figures alike, each over its label, in one row
+                (UX 8; a 60px dash beside 36px numbers sat lower than them). */}
             <dl className="know-stats">
               <div>
-                <dt>games</dt>
-                <dd>0</dd>
+                <dt data-testid="know-figure-label">vs avg</dt>
+                <dd data-testid="know-figure">{NONE}</dd>
               </div>
               <div>
-                <dt>your avg / 10</dt>
-                <dd>--</dd>
+                <dt data-testid="know-figure-label">games</dt>
+                <dd data-testid="know-figure">0</dd>
+              </div>
+              <div>
+                <dt data-testid="know-figure-label">your avg / 10</dt>
+                <dd data-testid="know-figure">{NONE}</dd>
               </div>
             </dl>
             <p className="know-empty-line">play a list to see how you do against the average.</p>

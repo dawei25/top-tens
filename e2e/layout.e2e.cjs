@@ -2,7 +2,7 @@
 // aligned; the control column stays in view as the page scrolls. No sideways scroll from 1100px up (and on a phone).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, open, noHScroll } = require("./helpers.cjs");
+const { chromium, open, noHScroll, puzzle, guess, giveUp } = require("./helpers.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -39,5 +39,25 @@ test("no sideways scroll at any width", async () => {
       assert.ok(await noHScroll(page), `${width} ${hash || "home"}`);
       await ctx.close();
     }
+  }
+});
+
+// Launch audit, Nov 6: at the end of a game on a phone the Misses band ran 6 to 384 px while every panel spans 16 to
+// 374: it kept the dock's reach into the gutter after it left the dock (UX 8). At the end it lines up with the panels
+// at every width under the wide layout.
+test("a finished game: the Misses band lines up with the board and the results", async () => {
+  for (const width of [320, 390, 800]) {
+    const vp = width < 500 ? { viewport: { width, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width, height: 900 } };
+    const { ctx, page } = await open(browser, vp, "#p-mountains");
+    const p = await puzzle(page, "mountains");
+    await guess(page, p.extras.find((e) => e.rank > 10).name);
+    await giveUp(page);
+    const misses = page.getByRole("region", { name: "Wrong guesses" });
+    const [m, board, results] = [await box(misses), await box(page.getByRole("region", { name: "Top 10" })), await box(page.getByTestId("results"))];
+    for (const [name, b] of [["board", board], ["results", results]]) {
+      assert.equal(Math.round(m.left), Math.round(b.left), `${width}px: the Misses band's left edge meets the ${name}'s`);
+      assert.equal(Math.round(m.right), Math.round(b.right), `${width}px: the Misses band's right edge meets the ${name}'s`);
+    }
+    await ctx.close();
   }
 });
