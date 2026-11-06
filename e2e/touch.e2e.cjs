@@ -192,7 +192,14 @@ test("a found row's fact is announced without hover (phones)", async () => {
     await page.getByLabel("Your guess").waitFor();
     const cue = page.getByTestId("fact-cue");
     assert.equal(await cue.count(), 0, `${width}px: no cue before a row has a fact`);
-    const give = await page.getByTestId("give-up").boundingBox();
+    // GIVE UP's place in the strip under the board, and that strip's height (the rows above grow as answers are
+    // found, and the page may scroll as the dock's feedback line changes).
+    const onBoard = () =>
+      page.getByTestId("give-up").evaluate((el) => {
+        const [k, f] = [el.getBoundingClientRect(), el.parentElement.getBoundingClientRect()];
+        return { x: k.x - f.x, y: k.y - f.y, width: k.width, height: k.height, strip: f.height };
+      });
+    const give = await onBoard();
     const p = await puzzle(page, "mountains");
     const first = p.answers.find((a) => a.fact);
     await guess(page, first.name);
@@ -204,7 +211,7 @@ test("a found row's fact is announced without hover (phones)", async () => {
     });
     assert.equal(fit.lines, 1, `${width}px: "${fit.text}" takes one line`);
     assert.ok(fit.inside, `${width}px: the cue sits on the board`);
-    assert.deepEqual(await page.getByTestId("give-up").boundingBox(), give, `${width}px: GIVE UP stays where it was`);
+    assert.deepEqual(await onBoard(), give, `${width}px: GIVE UP stays where it was`);
     const row = page.locator(`[data-testid="slot"][data-rank="${first.rank}"]`);
     await row.tap();
     await page.locator(`[data-testid="slot"][data-rank="${first.rank}"].fact-open`).waitFor();
