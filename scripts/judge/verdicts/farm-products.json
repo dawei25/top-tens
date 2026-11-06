@@ -1,24 +1,26 @@
 {
   "id": "farm-products",
-  "by": "builder",
   "judgedAt": "2026-11-06",
-  "decision": "free-play",
-  "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 8, "livesLost": 4, "guesses": 14 },
-  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
-  "blitzCasual": { "scored": 33, "named": 38 },
+  "decision": "daily-blitz",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "fan": null,
+  "blitzCasual": { "scored": 23, "named": 28 },
   "difficulty": 2,
-  "tags": ["food", "farming", "everyday"],
+  "tags": ["food", "farming", "agriculture"],
   "audience": "anyone",
-  "summary": "Rice, beef, chicken, wheat and corn come fast, milk and eggs follow, and soybeans and potatoes finish it; the fruit (tomatoes #11, apples, bananas) and coffee are the traps.",
+  "summary": "Staples everyone knows (rice, beef, chicken, corn, wheat, milk), so a casual player clears or nearly clears it: too easy for Today's list, a deep and friendly Blitz where almost every food scores.",
   "reasons": [
-    "Builder's replays: a casual who started with crops found 10 with 1 life lost (sugar, coffee, cotton, bananas cost lives); one who started with fruit found 8 and ran out on apples, bananas, coffee, tomatoes and oranges. A fan found 10. A 90-second Blitz scores 30+: almost every food a player names is in the 48.",
-    "Data is 3 only for its age: FAO's gross production value for 2016, the only year Wikipedia has, said in the prompt. The ten are the world's staples, so a newer year would likely reorder them more than replace them (not checked). With that accepted (data 4) it is an easy daily and a deep Blitz.",
-    "Named as people say them (Pork for \"Pig, meat\", Corn for maize); fish, cocoa, oats and other foods outside FAO's 50 are free. \"dairy\" and \"poultry\" don't hand over milk or chicken."
+    "Three casual orders found 10, 10 and 7: grains and meats are gimmes, and lives go on fruit and cash crops (coffee #44, sugarcane #12, tomatoes #11, apples, bananas), each with a figure. A 90 s Blitz scored 23 of 28; only carrots, oats, cocoa, turkey and fish (outside FAO's 50) missed.",
+    "FAO 2016 is fine for a Blitz: the year is in the prompt and the pool of the 48 biggest farm products barely changes in a decade. Not for Today's list, where the order is the game: Wikipedia tags the table a decade old (Aug 2026) and newer FAO figures reportedly put milk ahead of rice (not checked).",
+    "Category words alone (meat, grain, dairy, poultry, cereal, livestock, crops, fruit, vegetables) hand over no top-10 answer. Cattle, cow, pig and hen give Beef, Pork and Chicken, which is fair: they are FAO's own item names."
   ],
   "fixes": [
+    "\"beet\" offers \"Did you mean Beef?\" and \"hay\" offers \"Did you mean Pork?\" (through the alias \"ham\"): both are real farm words and should be free, not corrected into top-10 answers.",
+    "\"meat\" alone offers \"Did you mean Goat meat?\" (#22), \"fruit\" offers Oil palm fruit and \"seeds\" Sunflower seeds: a bare category word should be free or \"be more specific\", not a correction to one row (in Blitz it would score).",
+    "\"chicken egg\" offers Chicken, not Eggs: add the singular \"chicken egg\" to Eggs (only \"chicken eggs\" is there).",
     "Refresh when Wikipedia has a newer year of FAO's gross production value (the page says its data is for 2016)."
   ]
 }
