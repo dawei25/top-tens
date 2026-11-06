@@ -215,3 +215,24 @@ test("320px phone: Home never widens the page, during the logo's power-on or aft
     await ctx.close();
   }
 });
+
+// Launch audit, Nov 6: "Tab reaches menu, account and sound only after the footer". The header keys come first in
+// the page, as on screen; the audit's Tab started from Today's list, which Home focuses on arrival so Enter plays it.
+// From there the header is one Shift+Tab away (sound, then the menu), and a full Tab round reaches it before Today.
+test("keyboard: Home's tab order follows the screen, the header keys first", async () => {
+  const { ctx, page } = await open(browser, VIEWPORTS.find((v) => v.name === "desktop"));
+  await page.getByTestId("today-list").waitFor();
+  const order = await page.evaluate(() =>
+    [...document.querySelectorAll("main.home a[href], main.home button:not(:disabled)")]
+      .filter((el) => el.tabIndex >= 0 && el.getClientRects().length)
+      .map((el) => el.dataset.testid),
+  );
+  assert.deepEqual(order.slice(0, 3), ["menu-key", "sound-toggle", "today-list"], `the order: ${order.join(", ")}`);
+  assert.equal(order.at(-1), "howto-key", "the footer last");
+  assert.equal(await focusedTestId(page), "today-list", "Home focuses Today's list on arrival");
+  await page.keyboard.press("Shift+Tab");
+  assert.equal(await focusedTestId(page), "sound-toggle");
+  await page.keyboard.press("Shift+Tab");
+  assert.equal(await focusedTestId(page), "menu-key");
+  await ctx.close();
+});
