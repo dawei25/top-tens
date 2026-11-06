@@ -149,9 +149,10 @@ export const alreadyGuessed = (name: string) => `Already guessed ${name}.`;
 
 /**
  * Under the board once a row there has a fact: a tap (or a click) on its name opens it. Left of GIVE UP, so short
- * enough for one line there at 320px (about 140px).
+ * enough for one line there at 320px (about 140px). One wording for every device: most players are on phones, a
+ * mouse also has the hover look, and a click is a tap to anyone reading it.
  */
-export const factCue = (touch: boolean) => `facts: ${touch ? "tap" : "click"} a name.`;
+export const FACT_CUE = "facts: tap a name.";
 
 /**
  * The list's prompt on the Blitz title card, where the goal is as many as you can:

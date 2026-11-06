@@ -7,8 +7,8 @@ import { load } from "../game/storage";
 import { runTime } from "./Blitz";
 import { Loading } from "./Game";
 import { ParBlock, usePar } from "./par";
-import { factCue, metricLabel } from "./copy";
-import { formatAsOf, ordinal, ScreenHead, sourceSite, useMedia } from "./pixel";
+import { FACT_CUE, metricLabel } from "./copy";
+import { formatAsOf, ordinal, ScreenHead, sourceSite } from "./pixel";
 import { RateList } from "./rate/RateList";
 import { ClassicSquid } from "./squid";
 
@@ -42,8 +42,6 @@ export function ListRun({ id, meta, startedAt, onBack, onHome, onReplay }: Props
   const replayRef = useRef<HTMLButtonElement>(null);
   const backRef = useRef<HTMLButtonElement>(null);
   const parFile = usePar();
-  // A mouse clicks (and hovers) a name for its fact; anything else taps it.
-  const mouse = useMedia("(hover: hover) and (pointer: fine)");
   const run = load().listRuns?.find((r) => r.id === id && r.startedAt === startedAt);
 
   useEffect(() => {
@@ -168,7 +166,7 @@ export function ListRun({ id, meta, startedAt, onBack, onHome, onReplay }: Props
           {puzzle.answers.some((a) => a.fact) && (
             <div className="board-foot">
               <p className="caption fact-cue" data-testid="fact-cue">
-                {factCue(!mouse)}
+                {FACT_CUE}
               </p>
             </div>
           )}

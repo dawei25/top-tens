@@ -29,7 +29,7 @@ import {
   CLUE_LABEL,
   CLUE_NEXT_LABEL,
   confirmGuess,
-  factCue,
+  FACT_CUE,
   GUESS_HINT,
   lifeCostLine,
   metricLabel,
@@ -133,8 +133,6 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const parFile = usePar();
   // Beside the roll box a phone's guess box is about 180px: the short placeholder there. Everywhere else it has room.
   const phone = useMedia(PHONE);
-  // A mouse clicks (and hovers) a name for its fact; anything else taps it.
-  const mouse = useMedia("(hover: hover) and (pointer: fine)");
 
   useEffect(() => {
     loadPuzzle(id)
@@ -560,7 +558,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
             <div className="board-foot">
               {factShown && (
                 <p className="caption fact-cue" data-testid="fact-cue">
-                  {factCue(!mouse)}
+                  {FACT_CUE}
                 </p>
               )}
               {!over && (
