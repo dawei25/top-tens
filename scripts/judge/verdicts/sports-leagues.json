@@ -1,0 +1,24 @@
+{
+  "id": "sports-leagues",
+  "by": "builder",
+  "judgedAt": "2026-11-06",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 3 },
+  "casual": { "found": 7, "livesLost": 3, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 13, "named": 17 },
+  "difficulty": 2,
+  "tags": ["sports", "leagues", "money"],
+  "audience": "sports fans",
+  "summary": "The NFL, NBA, MLB, NHL and Premier League come fast; Europe's other football leagues and MLS decide the score, and the IPL (#12), WNBA and Liga MX are the traps.",
+  "reasons": [
+    "Builder's replays: a US casual who doesn't follow soccer found 6 and lost lives on the WNBA (#36), Liga MX (#24), NWSL and IPL; a UK casual found 9, losing lives on the IPL, Eredivisie, Scottish Premiership and Super League. A fan found 10 with 1 life lost.",
+    "117 leagues, each with its latest season's revenue in euros (the top 10's are 2024-25 to 2025-26). No tie at #10/#11: Ligue 1 €2,165 million, the Brasileirão €1,867 million.",
+    "F1, UFC, NASCAR, the PGA Tour, the Champions League and college sports aren't leagues in the source: free, and known names. A sport alone (\"basketball\", \"football\") offers leagues past #10 to choose from, never a top-10 answer."
+  ],
+  "fixes": [
+    "\"a league\" (Australia's A-League Men, #90) is never recognized: normalize() drops the leading \"A\" (the queued normalize item in docs/REBUILD_QUEUE.md)."
+  ]
+}
