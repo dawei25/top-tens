@@ -207,9 +207,44 @@ test("the guess box shows its whole placeholder (phones: a list, a rolled list, 
     await go(page, "");
     await page.getByTestId("random-list").click();
     await page.getByTestId("reroll").waitFor();
-    await fits("a rolled list (Roll again beside GUESS)");
+    await fits("a rolled list (the roll box beside the guess panel)");
     await go(page, "#blitz-airports");
     await fits("a Blitz");
+    await ctx.close();
+  }
+});
+
+// "Roll another list" (Nov 6) ran 35px out of its key and the result card at 320px: every results key keeps its label
+// whole, inside the card, on a list's and a Blitz's results.
+test("the results keys show their labels whole, inside the card (phones)", async () => {
+  for (const width of WIDTHS) {
+    const { ctx, page } = await open(browser, phone(width), "#p-mountains", undefined, { reducedMotion: "reduce" });
+    const whole = async (where, card) => {
+      const bad = await page.getByTestId(card).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const s = getComputedStyle(el);
+        const [left, right] = [r.left + parseFloat(s.borderLeftWidth), r.right - parseFloat(s.borderRightWidth)];
+        return [...el.querySelectorAll(".results-actions .key")].flatMap((k) => {
+          const b = k.getBoundingClientRect();
+          const out = [];
+          if (k.scrollWidth > k.clientWidth + 1) out.push(`"${k.textContent}" overflows its key (${k.scrollWidth} in ${k.clientWidth})`);
+          if (b.left < left - 0.5 || b.right > right + 0.5) out.push(`"${k.textContent}" runs out of the card`);
+          return out;
+        });
+      });
+      assert.deepEqual(bad, [], `${width}px ${where}`);
+    };
+    await page.getByLabel("Your guess").waitFor();
+    await giveUp(page);
+    await page.clock.runFor(3000);
+    await whole("a list's results", "results");
+    await go(page, "#blitz-airports");
+    await page.getByLabel("Your guess").waitFor();
+    await guess(page, (await puzzle(page, "airports")).answers[0].name);
+    await page.clock.fastForward(91_000);
+    await page.getByTestId("blitz-results").waitFor();
+    await page.clock.runFor(3000);
+    await whole("a Blitz's results", "blitz-results");
     await ctx.close();
   }
 });
@@ -375,6 +410,13 @@ test("with the keyboard up on a small phone, the board still shows above the gue
     await box.focus();
     const [first, dock] = await Promise.all([page.locator('[data-testid="slot"][data-rank="1"]').boundingBox(), page.locator(".guess").boundingBox()]);
     assert.ok(first.y + first.height <= dock.y + 1, `${width}x${height}: the board's first row (to ${Math.round(first.y + first.height)}) is under the guess box (from ${Math.round(dock.y)})`);
+    // A rolled list, its roll box beside the guess panel: the dock is no taller, so the board shows as far.
+    await go(page, "");
+    await page.getByTestId("random-list").click();
+    await page.getByTestId("reroll").waitFor();
+    await box.focus();
+    const rolled = await page.locator(".guess").boundingBox();
+    assert.ok(Math.abs(rolled.y - dock.y) <= 1, `${width}x${height}: the roll box makes the guess dock taller (from ${Math.round(rolled.y)}, not ${Math.round(dock.y)})`);
     await ctx.close();
   }
 });
