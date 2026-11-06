@@ -10,8 +10,6 @@ import {
   hintPrefix,
   MAX_LIVES,
   newGame,
-  shareText,
-  rankedDepth,
   shownValue,
   type GameState,
 } from "../game/state";
@@ -24,7 +22,24 @@ import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
 import { ClueIcon, END_FOCUS_MS, formatAsOf, InkSac, ordinal, PHONE, reducedMotion, RollBox, rollState, ScreenHead, sourceSite, SwapLabel, TypeIn, useMedia } from "./pixel";
-import { CLUE_ASK, CLUE_ASK_NEXT, CLUE_LABEL, CLUE_NEXT_LABEL, confirmGuess, GUESS_HINT, NO_LIFE_LOST, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT, SO_CLOSE, STREAK_NOTE } from "./copy";
+import {
+  alreadyGuessed,
+  CLUE_ASK,
+  CLUE_ASK_NEXT,
+  CLUE_LABEL,
+  CLUE_NEXT_LABEL,
+  confirmGuess,
+  factCue,
+  GUESS_HINT,
+  lifeCostLine,
+  metricLabel,
+  NO_LIFE_LOST,
+  notOnList,
+  PLACEHOLDER,
+  PLACEHOLDER_SHORT,
+  STREAK_NOTE,
+} from "./copy";
+import { listShare } from "./share";
 import { FloatNote } from "./Note";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
@@ -76,22 +91,11 @@ function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
     case "correct":
       return { tone: "good", text: `${r.entry.name}. #${r.entry.rank} on the board.` };
     case "duplicate":
-      return { tone: "warn", text: `Already guessed ${r.entry.name}` };
+      return { tone: "warn", text: alreadyGuessed(r.entry.name) };
     case "near":
-      return {
-        tone: "bad",
-        // Show the entry's own number when the data has it: "Gasherbrum IV is #17, 7,932 m."
-        text: !r.entry.rank
-          ? // A place outside a regional list's region: "Japan isn't in Europe."
-            r.entry.elsewhere && puzzle.region
-            ? `${r.entry.name} isn't in ${puzzle.region}.`
-            : shownValue(r.entry)
-            ? `${r.entry.name}: ${shownValue(r.entry)}. Not in the top 10.`
-            : rankedDepth(puzzle) > 10
-              ? `${r.entry.name} is outside the top ${rankedDepth(puzzle)}.`
-              : `${r.entry.name} isn't in the top 10.`
-          : `${r.entry.name} is #${r.entry.rank}${shownValue(r.entry) ? `, ${shownValue(r.entry)}` : ""}.${r.entry.rank <= 15 ? ` ${SO_CLOSE}` : ""}`,
-      };
+      // Every one costs a life, and says so; its number says what it counts: "Tokyo is #11 with 200 skyscrapers.
+      // Lost a life.", "Japan is #11 (population: 122,690,000). Lost a life.", "Japan isn't in Europe. Lost a life."
+      return { tone: "bad", text: lifeCostLine(r.entry, puzzle) };
     case "typo":
       return { tone: "warn", text: "Did you mean", suggestions: r.suggestions };
     case "unknown":
@@ -129,6 +133,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const parFile = usePar();
   // Beside the roll box a phone's guess box is about 180px: the short placeholder there. Everywhere else it has room.
   const phone = useMedia(PHONE);
+  // A mouse clicks (and hovers) a name for its fact; anything else taps it.
+  const mouse = useMedia("(hover: hover) and (pointer: fine)");
 
   useEffect(() => {
     loadPuzzle(id)
@@ -287,7 +293,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   };
   const share = async () => {
     const url = `${location.origin}${location.pathname}${daily ? `#daily-${daily.date}` : `#p-${puzzle.id}`}`;
-    const text = shareText(game, puzzle, url, daily?.n);
+    const text = listShare(game, puzzle, url, daily?.n);
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ text });
       else {
@@ -318,6 +324,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     });
 
   const hints = game.hints ?? [];
+  // A revealed row with a fact opens it on a tap: a caption under the board says so, since a phone has no hover look.
+  const factShown = puzzle.answers.some((a) => a.fact && (over || game.found.includes(a.rank)));
   // Roll another list before play: a rolled list shows it in its own box right of the guess panel until anything
   // happens (no guess, no clue, nothing said in the feedback line). Then it fades out and the panel takes its room.
   const rerollSlot = !!rolled && !daily;
@@ -547,22 +555,29 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               );
             })}
           </ol>
-          {/* Board actions sit under the board: GIVE UP while playing, the facts toggle once it's over. */}
-          {!over ? (
+          {/* Under the board: the facts cue once a row has one, and GIVE UP while playing. */}
+          {(!over || factShown) && (
             <div className="board-foot">
-              <button
-                type="button"
-                className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
-                onClick={quit}
-                data-testid="give-up"
-                data-confirm={confirmQuit || undefined}
-                onBlur={() => setConfirmQuit(false)}
-              >
-                {/* The key keeps GIVE UP's width while it asks, so the second press lands where the first did. */}
-                <SwapLabel off="Give up" on="Sure?" active={confirmQuit} />
-              </button>
+              {factShown && (
+                <p className="caption fact-cue" data-testid="fact-cue">
+                  {factCue(!mouse)}
+                </p>
+              )}
+              {!over && (
+                <button
+                  type="button"
+                  className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
+                  onClick={quit}
+                  data-testid="give-up"
+                  data-confirm={confirmQuit || undefined}
+                  onBlur={() => setConfirmQuit(false)}
+                >
+                  {/* The key keeps GIVE UP's width while it asks, so the second press lands where the first did. */}
+                  <SwapLabel off="Give up" on="Sure?" active={confirmQuit} />
+                </button>
+              )}
             </div>
-          ) : null}
+          )}
         </section>
       </div>
 
@@ -676,10 +691,10 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 )}
               </div>
               <p className="source">
-                {/* The metric as the list writes it: lowercasing it would turn "UN 2025" into "un 2025". */}
+                {/* The metric mid-sentence: only its first letter lowercased, and never an acronym's or a name's. */}
                 {puzzle.metric && (
                   <>
-                    ranked by <span className="metric">{puzzle.metric}</span>.{" "}
+                    ranked by <span className="metric">{metricLabel(puzzle.metric)}</span>.{" "}
                   </>
                 )}
                 source:{" "}
