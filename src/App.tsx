@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Home } from "./components/Home";
 import { Archive } from "./components/Archive";
 import { Blitz } from "./components/Blitz";
@@ -90,6 +90,31 @@ function parentOf(hash: string, today: string): string {
   return "";
 }
 
+/**
+ * Scrolls to `y` now, and again on each frame while the screen is still too short to get there (a game draws its board
+ * once its list has loaded), for at most a second, and never once the player scrolls or presses anything. Returns its
+ * stop.
+ */
+function scrollWhenTall(y: number): () => void {
+  scrollTo(0, y);
+  if (Math.abs(scrollY - y) < 1) return () => {};
+  const until = performance.now() + 1000;
+  let frame = 0;
+  const events = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
+  const stop = () => {
+    cancelAnimationFrame(frame);
+    for (const e of events) removeEventListener(e, stop, true);
+  };
+  const tick = () => {
+    scrollTo(0, y);
+    if (Math.abs(scrollY - y) < 1 || performance.now() > until) return stop();
+    frame = requestAnimationFrame(tick);
+  };
+  for (const e of events) addEventListener(e, stop, { capture: true, passive: true });
+  frame = requestAnimationFrame(tick);
+  return stop;
+}
+
 function NoList({ text, onHome }: { text: string; onHome: () => void }) {
   return (
     <main className="screen game">
@@ -129,6 +154,13 @@ function Screens() {
    * equals the one before the current is a step back (Back key or browser back) and pops.
    */
   const trail = useRef<string[]>([location.hash]);
+  /**
+   * The scroll each screen in the trail was left at, so Back returns to the same spot. A new screen opens at its top
+   * (launch audit, Nov 6: on a phone, ARCHIVE pressed low on Home opened the archive at Home's offset, partway down).
+   */
+  const scrolls = useRef<number[]>([0]);
+  /** Where to scroll once the screen a hash change asked for is drawn. */
+  const pendingScroll = useRef<number | null>(null);
   const replacing = useRef(false);
   /** The category each random game in this tab was rolled in (by its hash), so Roll another list rolls in it too. */
   const rolledIn = useRef(new Map<string, string | undefined>());
@@ -146,18 +178,38 @@ function Screens() {
       setSchedule(s);
     });
     loadLexicon().then(setLexicon);
+    // The app keeps each screen's scroll itself: the browser's own restore runs before the screen it returns to is
+    // drawn, so it stops at the end of the one being left when that one is shorter.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     const onHash = () => {
       const h = location.hash;
       const t = trail.current;
+      const ys = scrolls.current;
+      // The screen being left, still on show (no route hash names an element, so nothing scrolled to one).
+      ys[t.length - 1] = Math.round(scrollY);
+      let y = 0;
       if (replacing.current) t[t.length - 1] = h;
-      else if (t.length > 1 && t[t.length - 2] === h) t.pop();
-      else t.push(h);
+      else if (t.length > 1 && t[t.length - 2] === h) {
+        t.pop();
+        y = ys[t.length - 1] ?? 0;
+      } else t.push(h);
+      ys.length = t.length;
       replacing.current = false;
+      pendingScroll.current = y;
       setRoute(readHash());
     };
     addEventListener("hashchange", onHash);
     return () => removeEventListener("hashchange", onHash);
   }, []);
+
+  // After a hash change, once its screen is drawn (before it's painted): a new screen at its top, the one Back
+  // returned to where it was left.
+  useLayoutEffect(() => {
+    const y = pendingScroll.current;
+    if (y === null) return;
+    pendingScroll.current = null;
+    return scrollWhenTall(y);
+  }, [route]);
 
   useEffect(() => {
     const check = () => setToday(localDate());
