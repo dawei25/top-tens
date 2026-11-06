@@ -39,11 +39,13 @@ export function rankedDepth(puzzle: Pick<Puzzle, "answers" | "extras">): number 
 
 /**
  * An entry's number as shown to the player, or nothing when it only repeats the rank: lists ranked by a rank
- * (Similarweb) store "#19" as the value of #19.
+ * (Similarweb) store "#19" as the value of #19. Only a value written as a rank ("#19") is hidden: a real figure
+ * that happens to equal the rank stays (England, #6 with 6 Ballon d'Or wins).
  */
 export function shownValue(e: Pick<Entry, "rank" | "value">): string | undefined {
   if (!e.value) return undefined;
-  return e.rank > 0 && e.value.replace(/[#\s]/g, "") === String(e.rank) ? undefined : e.value;
+  const v = e.value.trim();
+  return e.rank > 0 && v.startsWith("#") && v.replace(/[#\s]/g, "") === String(e.rank) ? undefined : e.value;
 }
 
 /** Only an accepted answer that isn't in the top 10 costs a life. */

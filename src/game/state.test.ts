@@ -62,6 +62,13 @@ describe("shown values", () => {
     expect(shownValue({ rank: 0, value: "12" })).toBe("12");
     expect(shownValue({ rank: 3 })).toBeUndefined();
   });
+
+  it("keeps a real figure that happens to equal the rank", () => {
+    // England is #6 on the Ballon d'Or list with 6 wins; Australia #15 with 15 Nobel laureates.
+    expect(shownValue({ rank: 6, value: "6" })).toBe("6");
+    expect(shownValue({ rank: 15, value: "15" })).toBe("15");
+    expect(shownValue({ rank: 1, value: "# 1" })).toBeUndefined();
+  });
 });
 
 describe("clues", () => {
