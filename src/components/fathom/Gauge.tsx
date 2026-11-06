@@ -1,13 +1,14 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { timesOff, type Band } from "../../game/fathom";
+import { missText, offAxis, type Band, type Round } from "../../game/fathom";
 import { BUOY, placed, SQUID } from "./sprites";
 
 /**
- * The reveal's sonar: the answer is the gold buoy in the middle, and the squid sits left of it (too low) or right of it
- * (too high) by how far off the guess was, on a log scale clamped at 10x (the edges), with the miss written under it
- * ("30% low"). The stretch of track from the buoy to the squid is lit in the band's colour. No bands, no numbers on
- * the scale: just where you landed. A Dead on or Close guess makes the squid hop among sparkles (not with reduced
- * motion; fathom.css).
+ * The reveal's sonar: the answer is the gold buoy in the middle, and the squid sits left of it (too low, or early) or
+ * right of it (too high, or late) by how far off the guess was, on the round's own scale with its edges where the score
+ * reaches 0 (offAxis: 10x off for an estimate, 33 points for a percent, 20 years for a year), with the miss written
+ * under it ("30% low", "6 points low", "3 years early"). The stretch of track from the buoy to the squid is lit in the
+ * band's colour. No bands, no numbers on the scale: just where you landed. A Dead on or Close guess makes the squid hop
+ * among sparkles (not with reduced motion; fathom.css).
  *
  * Drawn on a grid of P x P pixel cells as wide as the card allows (an odd number, so the buoy has a middle column),
  * so the art stays crisp at any width. Decoration: the reveal's text already says how far off the guess is.
@@ -27,6 +28,7 @@ interface Props {
   guess: number;
   answer: number;
   band: Band;
+  round: Round;
 }
 
 export function Gauge(props: Props) {
@@ -47,7 +49,7 @@ export function Gauge(props: Props) {
     return () => ro.disconnect();
   }, []);
   const art = cols >= 31 ? draw(cols, props) : null;
-  const miss = timesOff(props.guess, props.answer);
+  const miss = missText(props, props.guess);
   return (
     <div ref={ref} className="fathom-gauge" aria-hidden="true" data-testid="fathom-gauge" data-band={props.band}>
       {art && (
@@ -96,9 +98,9 @@ function ring(cx: number, cy: number, r: number, cols: number): string {
 /** A small pixel sparkle (a plus) centred on (x, y). */
 const spark = (x: number, y: number) => `M${x} ${y - 1}h1v3h-1zM${x - 1} ${y}h3v1h-3z`;
 
-function draw(cols: number, { guess, answer }: Props) {
-  // How far off, in powers of ten (negative: too low), clamped at 10x either way.
-  const d = Math.max(-1, Math.min(1, Math.log10(guess / answer)));
+function draw(cols: number, { guess, answer, round }: Props) {
+  // How far off on the round's scale (negative: too low or early), clamped where the score reaches 0.
+  const d = offAxis(round, guess, answer);
   const mid = (cols - 1) / 2;
   const ax = Math.round(mid);
   const gx = Math.round(mid + d * (mid - EDGE));

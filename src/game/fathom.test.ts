@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  amountText,
   askFor,
   BAND_CHARS,
   bandLabel,
@@ -10,31 +11,48 @@ import {
   editField,
   FATHOM_KEY,
   fathomScore,
+  figureParts,
   formatAmount,
   formatDigits,
   formatWords,
+  GAME_ROUNDS,
   groupDigits,
+  guessError,
+  isSizeQuestion,
   loadFathom,
   lockIn,
+  MAX_SIZE_PER_GAME,
   MAX_TOTAL,
   MIN_PLAYERS,
+  missText,
   newGame,
   nextQuestion,
+  offAxis,
   parseNumber,
+  percentScore,
   phaseOf,
   playersLine,
+  pointsOff,
   readBank,
+  readGuess,
   readNumber,
   resumable,
+  roundOf,
   RULE,
+  RULES,
   saveFathom,
+  scoreFor,
   scoreGame,
   shareText,
   startGame,
   timesOff,
   totalOf,
+  unitShown,
+  yearScore,
+  yearsOff,
   type FathomKind,
   type FathomQuestion,
+  type Round,
 } from "./fathom";
 
 /** A seeded random (mulberry32), so a draw can be repeated. */
@@ -115,6 +133,260 @@ describe("the rule on screen", () => {
     expect(RULE).toBe("Half or double the answer scores about 50. Ten times off scores 0.");
     for (const guess of [50, 200]) expect(Math.abs(fathomScore(guess, 100) - 50)).toBeLessThanOrEqual(1);
     for (const guess of [10, 1000]) expect(fathomScore(guess, 100)).toBe(0);
+  });
+});
+
+/** A percent question and a year question, as the bank holds them. */
+const pct = (id: string, kind: FathomKind, extra: Partial<FathomQuestion> = {}) => q(id, kind, { round: "percent", unit: "percent", answer: 71, ...extra });
+const yr = (id: string, kind: FathomKind, extra: Partial<FathomQuestion> = {}) => q(id, kind, { round: "year", unit: "year", answer: 2007, ...extra });
+
+// The owner's revamp: two new rounds beside the estimate. A percent is scored by points off, a year by years off: a
+// ratio means nothing there (65% for 71% is 9% off but 6 points; 2004 for 2007 is 0.06% off).
+describe("rounds", () => {
+  it("a question without a round is an estimate", () => {
+    expect(roundOf(q("a", "body"))).toBe("estimate");
+    expect(roundOf(pct("p", "body"))).toBe("percent");
+    expect(roundOf(yr("y", "body"))).toBe("year");
+  });
+
+  it("percent: each point off costs 3, spot on (within half a point) 100", () => {
+    expect(percentScore(71, 71)).toBe(100);
+    expect(percentScore(71.4, 71)).toBe(100);
+    expect(percentScore(70.6, 71)).toBe(100);
+    expect(percentScore(70, 71)).toBe(97);
+    expect(percentScore(65, 71)).toBe(82);
+    expect(percentScore(77, 71)).toBe(82);
+    expect(percentScore(61, 71)).toBe(70);
+    expect(percentScore(81, 71)).toBe(70);
+    expect(percentScore(38, 71)).toBe(1);
+    expect(percentScore(37, 71)).toBe(0);
+    expect(percentScore(0, 71)).toBe(0);
+    expect(percentScore(100, 2)).toBe(0);
+    // Half a point is not spot on: 98.5, and only spot on is 100.
+    expect(percentScore(71.5, 71)).toBe(99);
+  });
+
+  it("year: each year off costs 5, the exact year 100", () => {
+    expect(yearScore(2007, 2007)).toBe(100);
+    expect(yearScore(2006, 2007)).toBe(95);
+    expect(yearScore(2009, 2007)).toBe(90);
+    expect(yearScore(2005, 2007)).toBe(90);
+    expect(yearScore(1997, 2007)).toBe(50);
+    expect(yearScore(2017, 2007)).toBe(50);
+    expect(yearScore(1988, 2007)).toBe(5);
+    expect(yearScore(1987, 2007)).toBe(0);
+    expect(yearScore(1066, 2007)).toBe(0);
+  });
+
+  it("scores each question by its round's rule", () => {
+    expect(scoreFor(q("a", "body"), 200)).toBe(fathomScore(200, 100));
+    expect(scoreFor(pct("p", "body"), 65)).toBe(82);
+    expect(scoreFor(yr("y", "body"), 2004)).toBe(85);
+    const bank = [q("a", "body"), pct("p", "food"), yr("y", "space")];
+    const g = [200, 65, 2004].reduce((game, guess) => nextQuestion(lockIn(game, guess)), newGame(["a", "p", "y"]));
+    expect(scoreGame(g, bank).map((s) => s.points)).toEqual([49, 82, 85]);
+  });
+
+  it("never goes up as a guess gets further off, either way", () => {
+    for (const [score, answer, step] of [
+      [percentScore, 50, 0.25],
+      [yearScore, 1900, 1],
+    ] as const) {
+      let up = 101;
+      let down = 101;
+      for (let off = 0; off <= 40; off += step) {
+        expect(score(answer + off, answer)).toBeLessThanOrEqual(up);
+        expect(score(answer - off, answer)).toBeLessThanOrEqual(down);
+        expect(score(answer + off, answer)).toBe(score(answer - off, answer));
+        up = score(answer + off, answer);
+        down = score(answer - off, answer);
+      }
+    }
+  });
+
+  // UX 21: each round says its rule in one plain line before the answer, and the rule agrees with the numbers.
+  it("each round's rule is one plain line that agrees with the numbers", () => {
+    expect(RULES.estimate).toBe(RULE);
+    expect(RULES.percent).toBe("Each point off costs 3, so 10 off scores 70.");
+    expect(RULES.year).toBe("Each year off costs 5, so 10 years off scores 50.");
+    expect(percentScore(60, 50)).toBe(70);
+    expect(percentScore(40, 50)).toBe(70);
+    expect(percentScore(51, 50)).toBe(97);
+    expect(yearScore(1910, 1900)).toBe(50);
+    expect(yearScore(1890, 1900)).toBe(50);
+    expect(yearScore(1901, 1900)).toBe(95);
+    for (const rule of Object.values(RULES)) {
+      expect(rule).not.toMatch(/—|\p{Extended_Pictographic}/u);
+      expect(rule.length).toBeLessThanOrEqual(70);
+    }
+  });
+
+  it("says a percent's miss in points, a year's in years early or late", () => {
+    expect(pointsOff(65, 71)).toBe("6 points low");
+    expect(pointsOff(72, 71)).toBe("1 point high");
+    expect(pointsOff(73.5, 71)).toBe("2.5 points high");
+    expect(pointsOff(71.96, 71)).toBe("1 point high");
+    expect(pointsOff(71.3, 71)).toBe("spot on");
+    expect(pointsOff(0, 71)).toBe("71 points low");
+    expect(yearsOff(2004, 2007)).toBe("3 years early");
+    expect(yearsOff(2008, 2007)).toBe("1 year late");
+    expect(yearsOff(1066, 2007)).toBe("941 years early");
+    expect(yearsOff(2007, 2007)).toBe("spot on");
+    expect(missText(q("a", "body"), 300)).toBe("3x too high");
+    expect(missText(pct("p", "body"), 65)).toBe("6 points low");
+    expect(missText(yr("y", "body"), 2010)).toBe("3 years late");
+  });
+
+  // Whatever reads "spot on" scores 100, and nothing else does (UX 21), in every round.
+  it("is 100 whenever the miss says spot on, and only then, in every round", () => {
+    const cases: [FathomQuestion, number[]][] = [
+      [q("a", "body"), Array.from({ length: 41 }, (_, i) => 95 + i * 0.25)],
+      [pct("p", "body"), Array.from({ length: 41 }, (_, i) => 66 + i * 0.25)],
+      [yr("y", "body"), Array.from({ length: 11 }, (_, i) => 2002 + i)],
+    ];
+    for (const [question, guesses] of cases) {
+      for (const guess of guesses) {
+        const spot = missText(question, guess) === "spot on";
+        expect(scoreFor(question, guess) === 100, `${roundOf(question)} ${guess}`).toBe(spot);
+      }
+    }
+  });
+
+  it("places the squid by the round's own scale, at the edge where the score reaches 0", () => {
+    expect(offAxis("estimate", 200, 100)).toBeCloseTo(Math.log10(2));
+    expect(offAxis("estimate", 1, 100)).toBe(-1);
+    expect(offAxis("estimate", 1e9, 100)).toBe(1);
+    expect(offAxis("percent", 81, 71)).toBeCloseTo(0.3);
+    expect(offAxis("percent", 61, 71)).toBeCloseTo(-0.3);
+    expect(offAxis("percent", 0, 71)).toBe(-1);
+    expect(offAxis("year", 2017, 2007)).toBeCloseTo(0.5);
+    expect(offAxis("year", 1950, 2007)).toBe(-1);
+    // The edge is where the round scores 0.
+    expect(percentScore(71 + 100 / 3, 71)).toBe(0);
+    expect(yearScore(2027, 2007)).toBe(0);
+  });
+});
+
+describe("reading a guess, by round", () => {
+  const percent = pct("p", "body");
+  const year = yr("y", "body");
+  const value = (text: string, question: FathomQuestion) => {
+    const r = readGuess(text, question);
+    return "value" in r ? r.value : r.error;
+  };
+  it("reads a percent typed as 71, 71%, 71.5 or 71 percent, from 0 to 100", () => {
+    expect(value("71", percent)).toBe(71);
+    expect(value("71%", percent)).toBe(71);
+    expect(value("71 %", percent)).toBe(71);
+    expect(value("71.5", percent)).toBe(71.5);
+    expect(value("71,5", percent)).toBe(71.5);
+    expect(value("71 percent", percent)).toBe(71);
+    expect(value("71 per cent", percent)).toBe(71);
+    expect(value("about 70", percent)).toBe(70);
+    // Zero is a fair guess at a share; past 100 or below 0 isn't one.
+    expect(value("0", percent)).toBe(0);
+    expect(value("0%", percent)).toBe(0);
+    expect(value("100", percent)).toBe(100);
+    expect(value("100.5", percent)).toBe("range");
+    expect(value("150", percent)).toBe("range");
+    expect(value("-5", percent)).toBe("range");
+    expect(value("", percent)).toBe("empty");
+    expect(value("abc", percent)).toBe("text");
+    expect(value("71 kg", percent)).toBe("unit");
+  });
+  it("reads a year as typed, a whole AD year of up to four digits", () => {
+    expect(value("2007", year)).toBe(2007);
+    expect(value(" 2007 ", year)).toBe(2007);
+    expect(value("2007 AD", year)).toBe(2007);
+    expect(value("AD 2007", year)).toBe(2007);
+    expect(value("2007 CE", year)).toBe(2007);
+    expect(value("about 1900", year)).toBe(1900);
+    expect(value("c. 1900", year)).toBe(1900);
+    expect(value("1,969", year)).toBe(1969);
+    expect(value("800", year)).toBe(800);
+    expect(value("2007.5", year)).toBe("whole");
+    expect(value("10000", year)).toBe("range");
+    expect(value("2.5m", year)).toBe("range");
+    expect(value("0", year)).toBe("zero");
+    expect(value("-500", year)).toBe("negative");
+    expect(value("", year)).toBe("empty");
+    expect(value("abc", year)).toBe("text");
+    expect(value("1969 years", year)).toBe("text");
+  });
+  it("reads an estimate as before", () => {
+    expect(readGuess("8,800,000", q("c", "places", { unit: "million people", answer: 8.8 }))).toEqual({ value: 8.8, converted: true });
+    expect(readGuess("0", q("a", "body"))).toEqual({ error: "zero" });
+  });
+  it("says what's wrong in the round's own words, each short enough for one line at 320px", () => {
+    expect(guessError("range", percent)).toBe("0 to 100, please.");
+    expect(guessError("whole", year)).toBe("A whole year, please.");
+    expect(guessError("range", year)).toBe("A year has four digits.");
+    expect(guessError("text", year)).toBe("That doesn't read as a year.");
+    expect(guessError("empty", year)).toBe("Type a year first.");
+    expect(guessError("text", percent)).toBe("That doesn't read as a number.");
+    expect(guessError("unit", percent)).toBe("In percent, please.");
+    expect(guessError("unit", q("a", "body", { unit: "centimetres" }))).toBe("In centimetres, please.");
+    expect(guessError("negative", q("a", "body"))).toBe("No negatives. It's above zero.");
+    // "That doesn't read as a number." is the longest one the 320px echo already fits.
+    for (const question of [q("a", "body"), percent, year])
+      for (const e of ["empty", "zero", "negative", "text", "range", "whole"] as const)
+        expect(guessError(e, question).length, `${roundOf(question)} ${e}`).toBeLessThanOrEqual(30);
+  });
+});
+
+describe("showing a number, by round", () => {
+  it("shows an estimate with its unit, a percent with %, a year as typed (never 2,007)", () => {
+    expect(amountText(q("c", "places", { unit: "million people" }), 8.8)).toBe("8.8 million people");
+    expect(amountText(q("a", "body", { unit: "metres" }), 8848.86)).toBe("8,849 metres");
+    expect(amountText(pct("p", "body"), 71)).toBe("71%");
+    expect(amountText(pct("p", "body"), 71.5)).toBe("71.5%");
+    expect(amountText(pct("p", "body"), 0)).toBe("0%");
+    expect(amountText(yr("y", "body"), 2007)).toBe("2007");
+    expect(amountText(yr("y", "body"), 800)).toBe("800");
+    expect(figureParts(q("a", "body", { unit: "metres" }), 330)).toEqual({ n: "330", unit: "metres" });
+    expect(figureParts(pct("p", "body"), 71)).toEqual({ n: "71%" });
+    expect(figureParts(yr("y", "body"), 2007)).toEqual({ n: "2007" });
+    // Beside the field: the unit, a percent's sign.
+    expect(unitShown(q("a", "body", { unit: "metres" }))).toBe("metres");
+    expect(unitShown(pct("p", "body"))).toBe("%");
+    expect(unitShown(yr("y", "body"))).toBe("year");
+  });
+  it("never groups a year's digits as it's typed", () => {
+    expect(type([..."2007"], undefined, "year")).toEqual({ text: "2007", caret: 4 });
+    expect(type([..."2007"])).toEqual({ text: "2,007", caret: 5 });
+    expect(type([..."71"], undefined, "percent").text).toBe("71");
+  });
+  it("says how real players guessed in the round's own terms", () => {
+    expect(playersLine({ n: 25, median: 1969.4, furtherOff: 0.5 }, "year", "year")).toBe("Players' typical guess: 1969 · you were closer than 50%");
+    expect(playersLine({ n: 25, median: 64.25, furtherOff: 0.5 }, "percent", "percent")).toBe("Players' typical guess: 64.3% · you were closer than 50%");
+  });
+});
+
+// The owner: "Too many are how much does xx weigh, how tall is xx." At most two of those a game.
+describe("how tall / how heavy questions", () => {
+  const ask = (question: string, unit: string, extra: Partial<FathomQuestion> = {}) => isSizeQuestion({ question, unit, ...extra });
+  it("are estimates in a length or a mass that ask how big or heavy a thing is", () => {
+    expect(ask("How tall is the Eiffel Tower?", "metres")).toBe(true);
+    expect(ask("How long is a marathon?", "kilometres")).toBe(true);
+    expect(ask("How high is a basketball hoop?", "metres")).toBe(true);
+    expect(ask("How deep is Lake Baikal, the world's deepest lake?", "metres")).toBe(true);
+    expect(ask("How wide is an adult human eyeball?", "millimetres")).toBe(true);
+    expect(ask("How much does an ostrich egg weigh?", "kilograms")).toBe(true);
+    expect(ask("How much can a single jackfruit weigh?", "kilograms")).toBe(true);
+    expect(ask("What weight of tomatoes was thrown at Spain's La Tomatina festival?", "tonnes")).toBe(true);
+    expect(ask("How heavy is a giraffe?", "tonnes")).toBe(true);
+  });
+  it("aren't distances, amounts, durations, counts or other rounds", () => {
+    expect(ask("How far away is the Moon?", "kilometres")).toBe(false);
+    expect(ask("How far does an Arctic tern fly in a year?", "kilometres")).toBe(false);
+    expect(ask("How much tea does Turkey get through per person each year?", "kilograms")).toBe(false);
+    expect(ask("How much can the fastest-growing bamboo grow in one day?", "centimetres")).toBe(false);
+    expect(ask("How long does sunlight take to reach Earth?", "minutes")).toBe(false);
+    expect(ask("How long is a year on Mars?", "days")).toBe(false);
+    expect(ask("How much blood is in a typical adult's body?", "litres")).toBe(false);
+    expect(ask("How many bones are in an adult human skeleton?", "bones")).toBe(false);
+    expect(ask("What is the area of Vatican City?", "square kilometres")).toBe(false);
+    expect(ask("How tall is the Eiffel Tower?", "percent", { round: "percent" })).toBe(false);
   });
 });
 
@@ -368,11 +640,11 @@ describe("reading numbers", () => {
 });
 
 /** Types `keys` into the field one at a time at the caret (Backspace deletes before it), as editField sees it. */
-function type(keys: string[], start = { text: "", caret: 0 }) {
+function type(keys: string[], start = { text: "", caret: 0 }, round?: Round) {
   let f = start;
   for (const k of keys) {
     const next = k === "Backspace" ? f.text.slice(0, f.caret - 1) + f.text.slice(f.caret) : f.text.slice(0, f.caret) + k + f.text.slice(f.caret);
-    f = editField(f.text, next, k === "Backspace" ? f.caret - 1 : f.caret + k.length);
+    f = editField(f.text, next, k === "Backspace" ? f.caret - 1 : f.caret + k.length, round);
   }
   return f;
 }
@@ -469,6 +741,21 @@ describe("the bank", () => {
     expect(readBank("<!doctype html>")).toBeNull();
     expect(readBank({ version: 1 })).toBeNull();
   });
+  // A round the game can't play, or an answer outside its round's range, is left out rather than played wrong.
+  it("keeps a question's round, and leaves out one it can't play", () => {
+    const good = [pct("p", "body", { answer: 100 }), yr("y", "food", { answer: 1889 }), { ...q("e", "space"), round: "estimate" as const }];
+    const bank = readBank({
+      version: 1,
+      questions: [
+        ...good,
+        { ...q("n", "space"), round: "name" },
+        pct("p1", "body", { answer: 101 }),
+        yr("y1", "body", { answer: 1889.5 }),
+        yr("y2", "body", { answer: 12000 }),
+      ],
+    });
+    expect(bank).toEqual(good);
+  });
 });
 
 /** Twelve questions, one of each kind, three of them easy. */
@@ -496,12 +783,13 @@ describe("the draw", () => {
     }
   });
   it("brings back the oldest held-back questions first when it must", () => {
-    const bank = BANK.slice(0, 6).map((x) => ({ ...x, easy: true }));
+    const bank = BANK.slice(0, 7).map((x) => ({ ...x, easy: true }));
     const recent = [["q0", "q1", "q2"], ["q3", "q4"], ["q5"]];
     const ids = drawQuestions(bank, recent, seeded(3)).map((d) => d.id);
-    // q5 (three games ago) first, then q3, q4 (two ago), then from the last game.
-    expect(ids[0]).toBe("q5");
-    expect(ids.slice(1, 3).sort()).toEqual(["q3", "q4"]);
+    // q6 (never played) first, then q5 (three games ago) and q3, q4 (two ago), and one from the last game.
+    expect(ids[0]).toBe("q6");
+    expect(ids.filter((id) => ["q3", "q4", "q5", "q6"].includes(id)).sort()).toEqual(["q3", "q4", "q5", "q6"]);
+    expect(ids.filter((id) => ["q0", "q1", "q2"].includes(id))).toHaveLength(1);
   });
   it("prefers an easy question for the first, even a recent one", () => {
     const bank = BANK.map((x) => ({ ...x, easy: x.id === "q4" }));
@@ -512,12 +800,80 @@ describe("the draw", () => {
     const bank = [q("a", "food"), q("b", "food"), q("c", "food"), q("d", "body"), q("e", "body")];
     const drawn = drawQuestions(bank, [], seeded(9));
     expect(drawn.map((d) => d.id).sort()).toEqual(["a", "b", "c", "d", "e"]);
-    // The two kinds come first, before any repeat.
-    expect(new Set(drawn.slice(0, 2).map((d) => d.kind)).size).toBe(2);
+    // Kinds repeat only once the bank runs out of others: with a third kind, all three are in.
+    const wider = [...bank, q("f", "space")];
+    for (let seed = 1; seed <= 50; seed++) expect(new Set(drawQuestions(wider, [], seeded(seed)).map((d) => d.kind)).size).toBe(3);
   });
   it("is random", () => {
     const firsts = new Set(Array.from({ length: 60 }, (_, s) => drawQuestions(BANK, [], seeded(s + 1)).map((d) => d.id).join()));
     expect(firsts.size).toBeGreaterThan(30);
+  });
+});
+
+/**
+ * A bank with every round: an estimate, two percent and two year questions of each kind (the kinds shifted, so a round
+ * doesn't keep to one kind), a third of them easy, and half the estimates how tall / how heavy questions.
+ */
+const MIXED = KINDS.flatMap((kind, i) => [
+  q(`e${i}`, kind, { easy: i % 3 === 0, ...(i % 2 === 0 && { question: `How tall is thing ${i}?`, unit: "metres" }) }),
+  q(`f${i}`, kind, { ...(i % 2 === 1 && { question: `How much does thing ${i} weigh?`, unit: "kilograms" }) }),
+  pct(`p${i}`, KINDS[(i + 1) % 12], { easy: i % 4 === 0 }),
+  yr(`y${i}`, KINDS[(i + 2) % 12], { easy: i % 4 === 1 }),
+]);
+
+// The owner's revamp plan: five rounds a game, two estimates, a percent, a year, and a fifth that will be a name-it
+// round (another estimate until then); a mixed order with an easy one first; at most two how tall / how heavy.
+describe("the game's shape", () => {
+  const rounds = (drawn: FathomQuestion[]) => drawn.map(roundOf);
+  const count = (drawn: FathomQuestion[], round: Round) => rounds(drawn).filter((r) => r === round).length;
+
+  it("is two estimates, a percent, a year, and a fifth that is an estimate for now", () => {
+    expect(GAME_ROUNDS).toEqual(["estimate", "estimate", "percent", "year", "estimate"]);
+    for (let seed = 1; seed <= 200; seed++) {
+      const drawn = drawQuestions(MIXED, [], seeded(seed));
+      expect(drawn).toHaveLength(5);
+      expect([count(drawn, "estimate"), count(drawn, "percent"), count(drawn, "year")], `seed ${seed}`).toEqual([3, 1, 1]);
+      expect(drawn[0].easy, `seed ${seed}`).toBe(true);
+      expect(new Set(drawn.map((d) => d.kind)).size, `seed ${seed}: five kinds`).toBe(5);
+    }
+  });
+  it("mixes the order: the percent and the year turn up anywhere after the first", () => {
+    const at = (round: Round) => new Set(Array.from({ length: 200 }, (_, s) => rounds(drawQuestions(MIXED, [], seeded(s + 1))).indexOf(round)));
+    for (const round of ["percent", "year"] as const) for (const i of [1, 2, 3, 4]) expect(at(round).has(i), `${round} at ${i}`).toBe(true);
+  });
+  it(`has at most ${MAX_SIZE_PER_GAME} how tall / how heavy questions while the bank has others`, () => {
+    expect(MAX_SIZE_PER_GAME).toBe(2);
+    // Half of MIXED's estimates are, so a draw that ignored them would often take three.
+    for (let seed = 1; seed <= 300; seed++) {
+      const drawn = drawQuestions(MIXED, [], seeded(seed));
+      expect(drawn.filter(isSizeQuestion).length, `seed ${seed}`).toBeLessThanOrEqual(MAX_SIZE_PER_GAME);
+    }
+    // A bank of nothing else still fills a game.
+    const tall = KINDS.slice(0, 5).map((kind, i) => q(`t${i}`, kind, { question: `How tall is thing ${i}?`, unit: "metres", easy: true }));
+    expect(drawQuestions(tall, [], seeded(1))).toHaveLength(5);
+  });
+  it("fills a round the bank lacks with estimates, rather than come up short", () => {
+    const noYear = MIXED.filter((x) => roundOf(x) !== "year");
+    for (let seed = 1; seed <= 50; seed++) {
+      const drawn = drawQuestions(noYear, [], seeded(seed));
+      expect([count(drawn, "estimate"), count(drawn, "percent"), count(drawn, "year")]).toEqual([4, 1, 0]);
+    }
+    expect(rounds(drawQuestions(BANK, [], seeded(1)))).toEqual(["estimate", "estimate", "estimate", "estimate", "estimate"]);
+    // A bank with only percent and year questions besides one estimate: five all the same.
+    const few = [q("a", "body", { easy: true }), pct("p1", "food"), pct("p2", "space"), yr("y1", "sports"), yr("y2", "culture")];
+    expect(drawQuestions(few, [], seeded(2)).map((d) => d.id).sort()).toEqual(["a", "p1", "p2", "y1", "y2"]);
+  });
+  it("holds back the last games' percent and year questions while the bank has others, and brings back the oldest", () => {
+    const rand = seeded(11);
+    let recent: string[][] = [];
+    for (let game = 0; game < 6; game++) {
+      const ids = drawQuestions(MIXED, recent, rand).map((d) => d.id);
+      expect(ids.filter((id) => recent.flat().includes(id))).toEqual([]);
+      recent = [ids, ...recent].slice(0, 3);
+    }
+    // One percent in the bank, played last game: it comes back rather than leave the round out.
+    const one = [...MIXED.filter((x) => roundOf(x) !== "percent"), pct("only", "food")];
+    expect(drawQuestions(one, [["only"]], seeded(4)).map((d) => d.id)).toContain("only");
   });
 });
 
@@ -590,6 +946,15 @@ describe("the save", () => {
     };
     expect(loadFathom(throwing)).toEqual({ recent: [] });
     expect(() => saveFathom(save, throwing)).not.toThrow();
+  });
+  // A guess of 0% is a fair guess at a share: a save holding one picks up as it was.
+  it("keeps a guess of zero (a percent) in the save", () => {
+    const store = memory();
+    const save = { recent: [["p", "a"]], game: { ids: ["p", "a"], guesses: [0], at: 0 } };
+    saveFathom(save, store);
+    expect(loadFathom(store)).toEqual(save);
+    store.setItem(FATHOM_KEY, JSON.stringify({ ...save, game: { ...save.game, guesses: [-1] } }));
+    expect(loadFathom(store).game).toBeUndefined();
   });
   it("resumes an unfinished game whose questions are all still in the bank", () => {
     const save = startGame({ recent: [] }, BANK, seeded(2));

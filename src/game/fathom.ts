@@ -1,6 +1,7 @@
 /**
  * Fathom (beta, #fathom): five questions that each ask for a number, about two minutes, no timer, no lives. A guess
- * scores by how close it is, on a log scale, by one plain rule for every question (RULE).
+ * scores by how close it is, by one plain rule for each round (RULES): an estimate on a log scale, a percent by points
+ * off, a year by years off.
  *
  * Pure functions only: reading numbers, scoring, the draw, the share text, and the save (its own localStorage key,
  * never the game's save: Fathom touches no record, stat or streak; with a backend, each guess is also sent, see
@@ -26,9 +27,24 @@ export type FathomKind = (typeof FATHOM_KINDS)[number];
 /** The typical miss on a question, as a ratio (2: people are usually about 2x off): the writers' estimate. */
 export const TYPICALS = [1.3, 1.5, 2, 3, 5, 10, 30] as const;
 
+/**
+ * How a question is asked and scored. An estimate (the default) is a number in a unit, scored by how many times off;
+ * a percent is 0 to 100 (unit "percent"), scored by points off; a year is an AD year (unit "year"), scored by years
+ * off. `kind` is the topic, apart from this.
+ */
+export const ROUNDS = ["estimate", "percent", "year"] as const;
+export type Round = (typeof ROUNDS)[number];
+
+/** The unit a percent or a year question is in (scripts/fathom/check.ts holds the bank to it). */
+export const ROUND_UNITS: Partial<Record<Round, string>> = { percent: "percent", year: "year" };
+
+export const roundOf = (q: Pick<FathomQuestion, "round">): Round => q.round ?? "estimate";
+
 export interface FathomQuestion {
   id: string;
   kind: FathomKind;
+  /** Absent: an estimate. */
+  round?: Round;
   question: string;
   /**
    * Shown beside the input and with the answer: "metres", or with a scale word for big counts ("million people",
@@ -75,8 +91,49 @@ export function fathomScore(guess: number, answer: number): number {
   return Math.min(POINTS_PER_QUESTION - 1, Math.round(POINTS_PER_QUESTION * Math.max(0, 1 - d) ** 2));
 }
 
-/** The scoring rule in one plain line: on the first question, where the player looks before answering, and the results. */
-export const RULE = "Half or double the answer scores about 50. Ten times off scores 0.";
+/** A percent within half a point of the answer: spot on, full marks. */
+const percentSpotOn = (guess: number, answer: number): boolean => Math.abs(guess - answer) < 0.5;
+
+/** Points a percent loses for each point off (so about 33 points off scores 0). */
+export const PER_POINT = 3;
+/** Points a year loses for each year off (so 20 years off scores 0). */
+export const PER_YEAR = 5;
+
+/**
+ * Points for a percent guess: 100 - 3 x points off, rounded, never under 0. Within half a point is spot on, 100; 1 off
+ * 97, 10 off 70, 34 off or more 0.
+ */
+export function percentScore(guess: number, answer: number): number {
+  if (percentSpotOn(guess, answer)) return POINTS_PER_QUESTION;
+  return Math.min(POINTS_PER_QUESTION - 1, Math.max(0, Math.round(POINTS_PER_QUESTION - PER_POINT * Math.abs(guess - answer))));
+}
+
+/** Points for a year guess: 100 - 5 x years off, never under 0. The exact year is 100, 2 off 90, 10 off 50, 20 off 0. */
+export function yearScore(guess: number, answer: number): number {
+  return Math.max(0, Math.round(POINTS_PER_QUESTION - PER_YEAR * Math.abs(guess - answer)));
+}
+
+/** Points for a guess on a question, by its round's rule. */
+export function scoreFor(q: Pick<FathomQuestion, "round" | "answer">, guess: number): number {
+  const round = roundOf(q);
+  if (round === "percent") return percentScore(guess, q.answer);
+  if (round === "year") return yearScore(guess, q.answer);
+  return fathomScore(guess, q.answer);
+}
+
+/**
+ * Each round's scoring rule in one plain line, said where the player looks before answering (the first question of
+ * that round in a game) and again on the results. Each one names a miss and what it scores, and the numbers agree
+ * (fathom.test.ts).
+ */
+export const RULES: Record<Round, string> = {
+  estimate: "Half or double the answer scores about 50. Ten times off scores 0.",
+  percent: `Each point off costs ${PER_POINT}, so 10 off scores ${POINTS_PER_QUESTION - 10 * PER_POINT}.`,
+  year: `Each year off costs ${PER_YEAR}, so 10 years off scores ${POINTS_PER_QUESTION - 10 * PER_YEAR}.`,
+};
+
+/** The estimate's rule (RULES.estimate). */
+export const RULE = RULES.estimate;
 
 export type Band = "dead-on" | "close" | "near" | "far" | "lost";
 
@@ -122,18 +179,78 @@ export function timesOff(guess: number, answer: number): string {
   return `${times(Math.max(2, ratio))} too ${high ? "high" : "low"}`;
 }
 
+/** A percent's miss in points: "6 points low", "1 point high", "2.5 points high", "spot on" within half a point. */
+export function pointsOff(guess: number, answer: number): string {
+  if (percentSpotOn(guess, answer)) return "spot on";
+  const off = trimZeros(Math.abs(guess - answer).toFixed(1));
+  return `${off} ${off === "1" ? "point" : "points"} ${guess > answer ? "high" : "low"}`;
+}
+
+/** A year's miss: "3 years early", "1 year late", "spot on" for the year itself. */
+export function yearsOff(guess: number, answer: number): string {
+  const off = Math.round(Math.abs(guess - answer));
+  if (off === 0) return "spot on";
+  return `${off} ${off === 1 ? "year" : "years"} ${guess > answer ? "late" : "early"}`;
+}
+
+/** The miss in the round's own words: "3x too high", "6 points low", "3 years early". */
+export function missText(q: Pick<FathomQuestion, "round" | "answer">, guess: number): string {
+  const round = roundOf(q);
+  if (round === "percent") return pointsOff(guess, q.answer);
+  if (round === "year") return yearsOff(guess, q.answer);
+  return timesOff(guess, q.answer);
+}
+
+/**
+ * How far off a guess is on its round's scale, from -1 (too low or early) to 1 (too high or late), 1 where the score
+ * reaches 0: powers of ten for an estimate (10x off), points for a percent (100 / 3 of them), years for a year (20).
+ * The sonar places the squid by it.
+ */
+export function offAxis(round: Round, guess: number, answer: number): number {
+  const d =
+    round === "percent"
+      ? (guess - answer) / (POINTS_PER_QUESTION / PER_POINT)
+      : round === "year"
+        ? (guess - answer) / (POINTS_PER_QUESTION / PER_YEAR)
+        : Math.log10(guess / answer);
+  return Number.isNaN(d) ? 0 : Math.max(-1, Math.min(1, d));
+}
+
+/** The most "how tall / how heavy" questions in one game (the owner: too many of them). */
+export const MAX_SIZE_PER_GAME = 2;
+
+/** Asks how big or heavy a thing is: "How tall...", "How long is...", "How deep...", "...weigh?", "What weight of...". */
+const ASKS_SIZE = /^how (?:tall|long|high|deep|wide|big|large|thick|heavy)\b|\bweigh(?:s|ed)?\b|\bweight\b/i;
+
+/**
+ * A "how tall / how heavy" question: an estimate whose unit is a length or a mass (any scale word in front) and that
+ * asks how tall, long, high, deep, wide, big or heavy something is, or what it weighs. A distance ("How far..."), an
+ * amount used ("How much tea..."), a growth or a duration isn't one, nor is a percent or a year. A game has at most
+ * MAX_SIZE_PER_GAME, and the bank at most one in five (scripts/fathom/check.ts).
+ */
+export function isSizeQuestion(q: Pick<FathomQuestion, "question" | "unit" | "round">): boolean {
+  if (roundOf(q) !== "estimate") return false;
+  const kind = measureOf(splitScale(q.unit).base ?? "")?.kind;
+  return (kind === "length" || kind === "mass") && ASKS_SIZE.test(q.question.trim());
+}
+
 /** Players needed on a question before its reveal says how they guessed. */
 export const MIN_PLAYERS = 20;
 
 /**
  * The reveal's line about real players (fathom_compare, through src/net): "Players' typical guess: 4 litres · you were
  * closer than 72%", from MIN_PLAYERS players on; null below that (the reveal shows nothing) or without numbers. The
- * share is rounded down, so 100% is everyone.
+ * share is rounded down, so 100% is everyone. A percent's typical guess shows to a tenth ("64.3%"), a year's whole.
  */
-export function playersLine(crowd: { n: number; median: number | null; furtherOff: number | null } | null, unit: string): string | null {
+export function playersLine(
+  crowd: { n: number; median: number | null; furtherOff: number | null } | null,
+  unit: string,
+  round: Round = "estimate",
+): string | null {
   if (!crowd || crowd.n < MIN_PLAYERS || crowd.median === null || crowd.furtherOff === null) return null;
   const share = Math.floor(crowd.furtherOff * 100 + 1e-9);
-  return `Players' typical guess: ${formatAmount(crowd.median)} ${unit} · you were closer than ${share}%`;
+  const median = round === "year" ? Math.round(crowd.median) : round === "percent" ? Math.round(crowd.median * 10) / 10 : crowd.median;
+  return `Players' typical guess: ${amountText({ unit, round }, median)} · you were closer than ${share}%`;
 }
 
 /* ---------- Reading numbers ---------- */
@@ -310,7 +427,8 @@ export function askFor(unit: string): string {
   return scale > 1 || measureOf(base ?? "") ? `In ${unit}, please.` : `Just the number of ${unit}.`;
 }
 
-export type NumberError = "empty" | "zero" | "negative" | "text" | "unit";
+/** Why a guess can't be read: `range` a percent past 0 to 100 or a year past four digits, `whole` a year with a fraction. */
+export type NumberError = "empty" | "zero" | "negative" | "text" | "unit" | "range" | "whole";
 /**
  * A number read, `converted` when what was typed wasn't in the question's unit: another unit of its kind ("0.5m" in
  * centimetres), or the whole amount on a question in a scaled unit ("8,800,000" in million people).
@@ -377,6 +495,56 @@ export function parseNumber(text: string, unit?: string): number | null {
   return "value" in r ? r.value : null;
 }
 
+/** The latest year a guess can be: four digits. */
+export const MAX_YEAR = 9999;
+
+/**
+ * Reads a guess on a question, by its round. An estimate as readNumber reads it, in the question's unit. A percent from
+ * 0 to 100, with or without its sign ("71", "71%", "71.5", "71 percent"): 0 is a fair guess at a share. A year as a
+ * whole AD year of up to four digits ("2007", "AD 2007", "c. 1900"); a fraction of one is `whole`, five digits `range`.
+ */
+export function readGuess(text: string, q: Pick<FathomQuestion, "round" | "unit">): NumberReading {
+  const round = roundOf(q);
+  if (round === "percent") {
+    const r = readNumber(text, ROUND_UNITS.percent);
+    if ("error" in r) return r.error === "zero" ? { value: 0 } : r.error === "negative" ? { error: "range" } : r;
+    return r.value > 100 ? { error: "range" } : { value: r.value };
+  }
+  if (round === "year") {
+    const bare = text
+      .trim()
+      .replace(/^(?:ad|a\.d\.|ce)\s*/i, "")
+      .replace(/\s*(?:ad|a\.d\.|ce|c\.e\.)$/i, "");
+    const r = readNumber(bare);
+    if ("error" in r) return r.error === "unit" ? { error: "text" } : r;
+    if (r.value > MAX_YEAR) return { error: "range" };
+    return Number.isInteger(r.value) ? { value: r.value } : { error: "whole" };
+  }
+  return readNumber(text, q.unit);
+}
+
+/** What's wrong with a guess, in one line at 320px: the round's own words ("A whole year, please."). */
+export function guessError(error: NumberError, q: Pick<FathomQuestion, "round" | "unit">): string {
+  const round = roundOf(q);
+  if (error === "unit") return askFor(q.unit);
+  if (round === "year") {
+    if (error === "empty") return "Type a year first.";
+    if (error === "text") return "That doesn't read as a year.";
+    if (error === "whole") return "A whole year, please.";
+    if (error === "range") return "A year has four digits.";
+  }
+  if (round === "percent" && error === "range") return "0 to 100, please.";
+  const plain: Record<Exclude<NumberError, "unit">, string> = {
+    empty: "Type a number first.",
+    zero: "Has to be more than zero.",
+    negative: "No negatives. It's above zero.",
+    text: "That doesn't read as a number.",
+    range: "That doesn't read as a number.",
+    whole: "That doesn't read as a number.",
+  };
+  return plain[error];
+}
+
 /* ---------- The field ---------- */
 
 /** "8800000" as "8,800,000", "1234.5" as "1,234.5": the leading digits in groups of three, anything after as typed. */
@@ -401,9 +569,10 @@ function inserted(prev: string, next: string): string {
  * `caret` where the caret is in `next`. The field's own commas come off and the digits are grouped again, the caret
  * kept after the same digit ("8,800,00|" and a 0 is "8,800,000|"). A comma the player types is theirs: the field
  * then shows what they type as typed until it's gone, since it may be a decimal comma ("2,5" from a keypad whose only
- * separator is a comma), which readNumber reads.
+ * separator is a comma), which readNumber reads. A year is never grouped: it shows as typed ("2007", not "2,007").
  */
-export function editField(prev: string, next: string, caret: number): { text: string; caret: number } {
+export function editField(prev: string, next: string, caret: number, round: Round = "estimate"): { text: string; caret: number } {
+  if (round === "year") return { text: next, caret };
   const ours = !prev.includes(",") || groupDigits(prev.replace(/,/g, "")) === prev;
   if (!ours || inserted(prev, next).includes(",")) return { text: next, caret };
   const text = groupDigits(next.replace(/,/g, ""));
@@ -449,6 +618,27 @@ export function formatAmount(n: number): string {
   return formatDigits(n >= 1000 ? Math.round(n) : n);
 }
 
+/**
+ * A guess or an answer as the reveal and the results show it, in its round's terms: as the big number and the unit
+ * beside it for an estimate ("8.8", "million people"), a percent with its sign ("71%"), a year as typed ("2007", never
+ * "2,007").
+ */
+export function figureParts(q: Pick<FathomQuestion, "round" | "unit">, n: number): { n: string; unit?: string } {
+  const round = roundOf(q);
+  if (round === "percent") return { n: `${formatDigits(n)}%` };
+  if (round === "year") return { n: String(n) };
+  return { n: formatAmount(n), unit: q.unit };
+}
+
+/** The same, in one piece: "8.8 million people", "71%", "2007". */
+export function amountText(q: Pick<FathomQuestion, "round" | "unit">, n: number): string {
+  const f = figureParts(q, n);
+  return f.unit ? `${f.n} ${f.unit}` : f.n;
+}
+
+/** What shows beside the field: the unit ("metres", "million people", "year"), a percent's sign. */
+export const unitShown = (q: Pick<FathomQuestion, "round" | "unit">): string => (roundOf(q) === "percent" ? "%" : q.unit);
+
 /* ---------- The bank ---------- */
 
 const isText = (x: unknown): x is string => typeof x === "string" && x.trim().length > 0;
@@ -462,10 +652,16 @@ function readQuestion(q: unknown): FathomQuestion | null {
   if (!(FATHOM_KINDS as readonly unknown[]).includes(o.kind)) return null;
   if (typeof o.answer !== "number" || !Number.isFinite(o.answer) || o.answer <= 0) return null;
   if (!src || !isText(src.title) || !isText(src.url)) return null;
+  // A round the game can't play (a newer bank's), or an answer outside its round's range, is left out.
+  if (o.round !== undefined && !(ROUNDS as readonly unknown[]).includes(o.round)) return null;
+  const round = o.round as Round | undefined;
+  if (round === "percent" && o.answer > 100) return null;
+  if (round === "year" && (!Number.isInteger(o.answer) || o.answer > MAX_YEAR)) return null;
   // `typical` is the writers' (scripts/fathom/check.ts checks it); the game leaves it out.
   return {
     id: o.id,
     kind: o.kind as FathomKind,
+    ...(round && { round }),
     question: o.question,
     unit: o.unit,
     answer: o.answer,
@@ -497,9 +693,18 @@ export function readBank(json: unknown): FathomQuestion[] | null {
 export const HOLD_GAMES = 3;
 
 /**
- * Five questions for a game: no two of the same kind, the first one easy, and none from the last HOLD_GAMES games
- * (`recent`, newest first) while the bank has others. When it doesn't, the questions from the oldest of those games
- * come back first; a bank too small for five kinds repeats a kind rather than come up short.
+ * A game's rounds: two estimates, a percent, a year, and a fifth that will be a name-it round (an estimate until that
+ * round exists). Drawn in a mixed order, an easy question first.
+ */
+export const GAME_ROUNDS: readonly Round[] = ["estimate", "estimate", "percent", "year", "estimate"];
+
+/**
+ * Five questions for a game, one per round of GAME_ROUNDS: the first one easy, then the rest in a random order. A round
+ * the bank has none of is played as an estimate instead (and once the estimates run out, anything left). Within that:
+ * no two of the same kind, at most MAX_SIZE_PER_GAME how tall / how heavy questions, and none from the last HOLD_GAMES
+ * games (`recent`, newest first) while the bank has others. When it doesn't, the questions from the oldest of those
+ * games come back first; a bank too small for five kinds repeats a kind rather than come up short, and one of nothing
+ * but how tall / how heavy questions takes more of them.
  */
 export function drawQuestions(
   questions: readonly FathomQuestion[],
@@ -514,17 +719,38 @@ export function drawQuestions(
     (tier.get(a.id) ?? 0) - (tier.get(b.id) ?? 0) || key.get(a.id)! - key.get(b.id)!;
   const pool = [...questions].sort(order);
 
-  const picked: FathomQuestion[] = [];
   const first = pool.find((q) => q.easy) ?? pool[0];
   if (!first) return [];
-  picked.push(first);
-  while (picked.length < QUESTIONS_PER_GAME) {
-    const left = pool.filter((q) => !picked.includes(q));
-    if (!left.length) break;
+  const picked: FathomQuestion[] = [first];
+
+  // The rounds still to fill: the shape, less the opener's round (or an estimate, if the opener's round isn't in it).
+  const slots = GAME_ROUNDS.map((r) => (pool.some((q) => roundOf(q) === r) ? r : "estimate"));
+  const at = slots.indexOf(roundOf(first));
+  slots.splice(at >= 0 ? at : slots.indexOf("estimate"), 1);
+  // The rarer rounds first, so one isn't lost to a kind an estimate already took.
+  slots.sort((a, b) => Number(a === "estimate") - Number(b === "estimate"));
+
+  const sizes = () => picked.filter(isSizeQuestion).length;
+  /** The first question left in the pool that `fits`: of a new kind and within the cap, else within the cap, else any. */
+  const pick = (fits: (q: FathomQuestion) => boolean) => {
+    const left = pool.filter((q) => !picked.includes(q) && fits(q));
     const kinds = new Set(picked.map((q) => q.kind));
-    picked.push(left.find((q) => !kinds.has(q.kind)) ?? left[0]);
+    const capped = left.filter((q) => !isSizeQuestion(q) || sizes() < MAX_SIZE_PER_GAME);
+    return capped.find((q) => !kinds.has(q.kind)) ?? capped[0] ?? left[0];
+  };
+  for (const round of slots) {
+    const next = pick((q) => roundOf(q) === round) ?? pick((q) => roundOf(q) === "estimate") ?? pick(() => true);
+    if (!next) break;
+    picked.push(next);
   }
-  return picked;
+
+  // A mixed order after the opener.
+  const rest = picked.slice(1);
+  for (let i = rest.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [rest[i], rest[j]] = [rest[j], rest[i]];
+  }
+  return [first, ...rest].slice(0, QUESTIONS_PER_GAME);
 }
 
 /* ---------- A game ---------- */
@@ -574,7 +800,7 @@ export function scoreGame(game: FathomGame, bank: readonly FathomQuestion[]): Sc
   return game.guesses.flatMap((guess, i) => {
     const question = byId.get(game.ids[i]);
     if (!question) return [];
-    const points = fathomScore(guess, question.answer);
+    const points = scoreFor(question, guess);
     return [{ question, guess, points, band: bandOf(points) }];
   });
 }
@@ -626,7 +852,7 @@ export function loadFathom(store: Store | undefined = defaultStore()): FathomSav
     const recent = Array.isArray(raw?.recent) ? raw.recent.filter(isIds).slice(0, HOLD_GAMES) : [];
     const g = raw?.game;
     const game =
-      g && isIds(g.ids) && Array.isArray(g.guesses) && g.guesses.every((n) => typeof n === "number" && n > 0) && Number.isInteger(g.at)
+      g && isIds(g.ids) && Array.isArray(g.guesses) && g.guesses.every((n) => Number.isFinite(n) && n >= 0) && Number.isInteger(g.at)
         ? { ids: g.ids, guesses: g.guesses, at: g.at }
         : undefined;
     return { recent, ...(game && { game }) };
