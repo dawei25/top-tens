@@ -261,8 +261,15 @@ export function judgeGuess(
    * when the next is only in the wider pool), it goes in the box to confirm; once it's found, the next one does.
    * Otherwise the most prominent few are offered. Only a huge spread of unranked names (a common word) asks the
    * player to be more specific.
+   *
+   * `typed`: what was typed fits these names exactly (not a misspelling). Then a franchise's name doesn't pick a title:
+   * when it is only the first words of several titles ("monsters": Monsters University #10, Monsters, Inc. #14), and
+   * one of the others is a notable near miss (a figure, ranked within NEAR_MISS_RANK), the title the list ranks higher
+   * is not the likelier reading, so the fits are offered, as "toy story" and "incredibles" already are. People and
+   * teams keep the natural reading: a surname ("jordan") ends the name rather than starting it, and a first name or a
+   * city ("drew", "new york") starts a name whose last word stands alone (`titleHead`).
    */
-  const natural = (cs: Candidate[], max: number): GuessResult => {
+  const natural = (cs: Candidate[], max: number, typed = false): GuessResult => {
     const byProminence = (a: Candidate, b: Candidate) =>
       prominence(a) - prominence(b) || nameWordCount(a) - nameWordCount(b) || a.entry.name.localeCompare(b.entry.name);
     const open = cs.filter((c) => !(c.inTop10 && found.has(c.entry.rank))).sort(byProminence);
@@ -276,7 +283,8 @@ export function judgeGuess(
     const [top, next] = open;
     if (!next) return resolve(top, true);
     const standsOut = (top.inTop10 && !next.inTop10) || (top.entry.rank > 0 && next.entry.rank === 0);
-    if (standsOut) return resolve(top, true);
+    const franchise = typed && titleHead(guess, top) && open.some((c) => c !== top && notableNearMiss(c) && titleHead(guess, c));
+    if (standsOut && !franchise) return resolve(top, true);
     if (top.entry.rank === 0 && open.length > VAGUE_ABOVE) return { kind: "unknown", junk: false, vague: open.length };
     // Alphabetical, so the order never hints at which choice is in the top 10.
     const names = open.slice(0, max).map((c) => c.entry.name).sort((a, b) => a.localeCompare(b));
@@ -295,7 +303,7 @@ export function judgeGuess(
     const core = cs.filter((c) => coreName(c.entry.name) === guess);
     if (core.length === 1) return resolve(core[0], part);
     if (core.length > 1 && core.length <= MAX_CHOICES) return choose(core, false);
-    return natural(cs, MAX_CHOICES);
+    return natural(cs, MAX_CHOICES, true);
   };
 
   // What the list is about ("tour" on concert tours, "museums", "names"), maybe with a small number ("season 3" on
@@ -363,6 +371,31 @@ const MAX_CHOICES = 4;
 const MAX_TYPO_CHOICES = 2;
 /** Past this many unranked names sharing a word, the word is too common to guess from: ask for more. */
 const VAGUE_ABOVE = 8;
+/** A near miss this high, with a figure, is as likely a reading of a franchise's name as the top-10 title. */
+const NEAR_MISS_RANK = 20;
+
+function notableNearMiss(c: Candidate): boolean {
+  return !c.inTop10 && c.entry.rank > 0 && c.entry.rank <= NEAR_MISS_RANK && c.entry.value !== undefined;
+}
+
+/**
+ * Whether the guess is the shared start of a title rather than a first name or a city: it is the first words of the
+ * name and not all of it ("monsters" in "Monsters University"), and the rest isn't one word the entry answers to by
+ * itself. That one word is a surname ("Drew Bledsoe": "Bledsoe") or a team's nickname ("New York Jets": "Jets"), and
+ * then the guess only says which one, so the natural reading stands ("drew" is Drew Brees, "new york" the Giants).
+ */
+function titleHead(guess: string, c: Candidate): boolean {
+  const words = normalize(c.entry.name).split(" ");
+  const compact = guess.replace(/ /g, "");
+  let joined = "";
+  for (let i = 0; i < words.length - 1 && joined.length < compact.length; i++) {
+    joined += words[i];
+    if (joined !== compact) continue;
+    const rest = words.slice(i + 1);
+    return rest.length > 1 || !c.entry.aliases.some((a) => normalize(a) === rest[0]);
+  }
+  return false;
+}
 
 /** Lower is more prominent: the list's own ranking first, the wider pool after. */
 function prominence(c: Candidate): number {

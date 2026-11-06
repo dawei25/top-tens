@@ -298,6 +298,47 @@ describe("an exact title that is the less likely reading", () => {
   });
 });
 
+describe("a franchise's name shared by a top-10 title and a notable near miss", () => {
+  const v = (rank: number, name: string, value: string, aliases: string[] = []): Entry => ({ rank, name, aliases, value });
+  const pixar: Puzzle = {
+    ...puzzle,
+    id: "pixar7",
+    noun: "Pixar films",
+    answers: [v(1, "Inside Out 2", "$1.70 billion"), ...puzzle.answers.slice(1, 9), v(10, "Monsters University", "$744 million")],
+    extras: [v(14, "Monsters, Inc.", "$580 million", ["Monsters Incorporated"]), v(15, "Cars 2", "$560 million"), e(0, "Monsters at Work")],
+  };
+  const j = (g: string, found: number[] = []) => judgeGuess(g, pixar, new Set(found));
+  it("offers both films rather than steering to the higher-grossing one (player's note: \"monsters\")", () => {
+    expect(j("monsters")).toEqual({ kind: "typo", suggestions: ["Monsters at Work", "Monsters University", "Monsters, Inc."] });
+    // Once Monsters University is found, the other one is the reading.
+    expect(j("monsters", [10])).toMatchObject({ kind: "near", corrected: true, entry: { name: "Monsters, Inc." } });
+    // A full name is still that film.
+    expect(j("monsters university")).toMatchObject({ kind: "correct", corrected: false, entry: { rank: 10 } });
+    expect(j("monsters inc")).toMatchObject({ kind: "near", corrected: false, entry: { rank: 14 } });
+  });
+  it("still takes the top-10 one when the others are obscure or far down", () => {
+    const far: Puzzle = { ...pixar, extras: [v(31, "Monsters, Inc.", "$580 million"), e(0, "Monsters at Work")] };
+    expect(judgeGuess("monsters", far, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { rank: 10 } });
+  });
+  it("people keep the natural reading: a surname or a first name is not a franchise", () => {
+    const nba: Puzzle = {
+      ...puzzle,
+      id: "nba7",
+      answers: [...puzzle.answers.slice(0, 5), v(6, "Michael Jordan", "32,292"), ...puzzle.answers.slice(6)],
+      extras: [v(14, "DeAndre Jordan", "20,000")],
+    };
+    expect(judgeGuess("jordan", nba, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Michael Jordan" } });
+    // A first name before a surname that stands alone (the build gives ranked people their surname as a short form).
+    const qbs: Puzzle = {
+      ...puzzle,
+      id: "qbs7",
+      answers: [puzzle.answers[0], v(2, "Drew Brees", "80,358", ["Brees"]), ...puzzle.answers.slice(2)],
+      extras: [v(14, "Drew Bledsoe", "44,611", ["Bledsoe"])],
+    };
+    expect(judgeGuess("drew", qbs, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Drew Brees" } });
+  });
+});
+
 describe("an answer's name followed by who made it", () => {
   const songs: Puzzle = {
     ...puzzle,
