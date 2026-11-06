@@ -5,7 +5,7 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
 ## 1. Rules
 
 - 10 hidden slots, ordered by rank. A correct guess reveals its slot (rank, name, source value).
-- 5 lives. **Only an accepted answer outside the top 10 costs a life**, and the game shows where it ranks ("Austria is #113").
+- 5 lives. **Only an accepted answer outside the top 10 costs a life**, and the game shows where it ranks and says so ("Tokyo is #11 with 200 skyscrapers. Lost a life.").
   On a regional geography list, a place outside the region also costs a life and says so ("Tokyo isn't in Europe.");
   places on two continents that the source leaves out are free (owner, Nov 3).
 - Free (no life lost):
@@ -87,7 +87,9 @@ approves it: five estimation questions a game, scored by plain closeness, one ru
 2. **Game:** title card with the prompt, score (no average during play: it's revealed on the results) and a Play
    Blitz key; lives; 10 rank slots, each empty one with a
    clue magnifier; feedback line; chips for life-costing misses.
-   Blitz's title card shows the prompt and "name as many <noun> as you can".
+   Blitz's title card shows the prompt only when it adds words beyond the title, "name as many <noun> as you can", and
+   its scoring rule ("#1 gets 100, smaller numbers get less, down to 10"), repeated on the results. Once a found row
+   has a fact, "facts: tap a name." sits under the board.
 3. **Results:** score, the average and histogram (where you stand), full list with values, source link, share, Roll
    again (a new random game).
    A finished daily offers Today's Blitz and Random list instead. The archive is a table, one row per date: number and
