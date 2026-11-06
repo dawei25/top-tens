@@ -23,7 +23,7 @@ import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { ClueIcon, END_FOCUS_MS, formatAsOf, InkSac, ordinal, reducedMotion, RerollKey, ScreenHead, sourceSite, SwapLabel, TypeIn } from "./pixel";
+import { ClueIcon, END_FOCUS_MS, formatAsOf, InkSac, ordinal, PHONE, reducedMotion, RollBox, rollState, ScreenHead, sourceSite, SwapLabel, TypeIn, useMedia } from "./pixel";
 import { CLUE_ASK, CLUE_ASK_NEXT, CLUE_LABEL, CLUE_NEXT_LABEL, confirmGuess, GUESS_HINT, NO_LIFE_LOST, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT, SO_CLOSE, STREAK_NOTE } from "./copy";
 import { FloatNote } from "./Note";
 import { CountUp } from "./motion/effects";
@@ -43,11 +43,12 @@ interface Props {
   lexicon?: Lexicon;
   onBack: () => void;
   onHome: () => void;
-  /** A fresh random list: Roll again on a random list, Random list on a finished daily. */
+  /** A fresh random list: Roll another list on a random list, Random list on a finished daily. */
   onRoll: () => void;
   /**
-   * This game was rolled (Random list, a category, Roll again) in this tab. Until the first guess it offers Roll again
-   * beside GUESS, to skip to another list; never once play starts, so a losing game can't be dodged.
+   * This game was rolled (Random list, a category, Roll another list) in this tab. Until the first guess it offers Roll
+   * another list beside the guess panel, to skip to another list; never once play starts, so a losing game can't be
+   * dodged.
    */
   rolled?: boolean;
   /** Today's Blitz, while it's unplayed (a finished daily offers it). */
@@ -126,6 +127,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const [hintAsk, setHintAsk] = useState<number | null>(null);
   const yesRef = useRef<HTMLButtonElement>(null);
   const parFile = usePar();
+  // Beside the roll box a phone's guess box is about 180px: the short placeholder there. Everywhere else it has room.
+  const phone = useMedia(PHONE);
 
   useEffect(() => {
     loadPuzzle(id)
@@ -315,8 +318,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     });
 
   const hints = game.hints ?? [];
-  // Roll again before play: a rolled list keeps a slot for it right of GUESS, and offers it until anything happens
-  // (no guess, no clue, nothing said in the feedback line). Then it fades out of its slot, so nothing moves.
+  // Roll another list before play: a rolled list shows it in its own box right of the guess panel until anything
+  // happens (no guess, no clue, nothing said in the feedback line). Then it fades out and the panel takes its room.
   const rerollSlot = !!rolled && !daily;
   const reroll = rerollSlot && game.status === "playing" && game.log.length === 0 && hints.length === 0 && !feedback;
   const par = parFile?.[puzzle.id];
@@ -563,11 +566,11 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         </section>
       </div>
 
-      <div className="control-col" data-testid="control-col">
+      <div className={`control-col ${rerollSlot && !over ? "has-roll" : ""}`} data-testid="control-col">
         {!over ? (
           <div className="control-card" data-glass>
             {missChips}
-            <form className="guess" onSubmit={submit} data-guess-dock data-glass>
+            <form className="guess" onSubmit={submit} data-guess-dock data-glass data-roll={rollState(rerollSlot, reroll)}>
               <div className="feedback-line">
                 {feedback ? (
                   <div key={feedback.key} className={`feedback ${feedback.tone}`} role="status" data-testid="feedback" data-tone={feedback.tone}>
@@ -582,12 +585,12 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                   <p className="feedback hint">{GUESS_HINT}</p>
                 )}
               </div>
-              <div key={shake.n} className={`guess-row ${rerollSlot ? "has-reroll" : ""} ${shake.n ? "shake" : ""} ${shake.hit ? "hit" : ""}`}>
+              <div key={shake.n} className={`guess-row ${shake.n ? "shake" : ""} ${shake.hit ? "hit" : ""}`}>
                 <input
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder={rerollSlot ? PLACEHOLDER_SHORT : PLACEHOLDER}
+                  placeholder={reroll && phone ? PLACEHOLDER_SHORT : PLACEHOLDER}
                   autoFocus
                   autoComplete="off"
                   autoCorrect="off"
@@ -599,8 +602,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button className="key key-pink" type="submit" data-testid="guess-submit" disabled={!input.trim()}>
                   Guess
                 </button>
-                <RerollKey slot={rerollSlot} on={reroll} onRoll={onRoll} />
               </div>
+              <RollBox slot={rerollSlot} on={reroll} onRoll={onRoll} />
             </form>
           </div>
         ) : (
@@ -644,11 +647,11 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               )}
               {/* No autofocus here: SHARE takes focus a beat after the end (above), so a key still held lands nowhere. */}
               <div className="results-actions">
-                {/* Free play leads with Roll again: a new random list, never this one (so not "Play again"). The same
-                    list again is only ever offered from its run in Past runs. */}
+                {/* Free play leads with Roll another list: a new random list, never this one (so not "Play again").
+                    The same list again is only ever offered from its run in Past runs. */}
                 {!daily && (
                   <button className="key key-pink" data-testid="play-again" onClick={onRoll}>
-                    Roll again
+                    Roll another list
                   </button>
                 )}
                 <button ref={shareRef} className={daily ? "key key-pink" : "key"} data-testid="share" onClick={share}>

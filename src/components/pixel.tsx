@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { SoundToggle } from "./sound/SoundToggle";
 import { MenuKey } from "./menu";
 
@@ -44,20 +44,49 @@ export function sourceSite(name: string): string {
  */
 export type Mode = "classic" | "blitz";
 
+/** Whether a media query matches now, kept current (false where there is no matchMedia). */
+export function useMedia(query: string): boolean {
+  const subscribe = useCallback(
+    (change: () => void) => {
+      if (typeof matchMedia !== "function") return () => {};
+      const mq = matchMedia(query);
+      mq.addEventListener("change", change);
+      return () => mq.removeEventListener("change", change);
+    },
+    [query],
+  );
+  return useSyncExternalStore(subscribe, () => typeof matchMedia === "function" && matchMedia(query).matches, () => false);
+}
+
+/** Phones: the guess box is the dock at the bottom of the screen (index.css, under 700px). */
+export const PHONE = "(max-width: 699px)";
+
 /**
- * Roll again before play (a rolled list before its first guess, a rolled Blitz before its clock starts): a navy key
- * right of GUESS in the guess row, as tall as GUESS. Where it can show (`slot`) its slot stays for the whole game: when
- * play starts (`on` goes false) it fades out in place, so the guess box and GUESS never move. Where it never shows
- * (dailies, Today's Blitz, links, replays) there is no slot.
+ * Roll another list, before play (a rolled list before its first guess, a rolled Blitz before its clock starts): its
+ * own box right of the guess panel, outside it (owner, Nov 6), as tall as the panel (the pill, on phones). It lives in
+ * the guess form, which makes room for it while `on` (data-roll, index.css). When play starts it fades out and the
+ * guess panel stretches into its room. Where it never shows (dailies, Today's Blitz, links, replays) there is none.
  */
-export function RerollKey({ slot, on, onRoll }: { slot: boolean; on: boolean; onRoll?: () => void }) {
+export function RollBox({ slot, on, onRoll }: { slot: boolean; on: boolean; onRoll?: () => void }) {
   if (!slot) return null;
   return (
-    <button type="button" className="key key-reroll" data-testid="reroll" data-gone={on ? undefined : ""} disabled={!on} onClick={onRoll}>
-      Roll again
+    <button
+      type="button"
+      className="roll-box"
+      data-testid="reroll"
+      data-gone={on ? undefined : ""}
+      // Glass to the ocean only while it shows: once gone it leaves the squid its water.
+      data-glass={on ? "" : undefined}
+      disabled={!on}
+      onClick={onRoll}
+    >
+      Roll another list
     </button>
   );
 }
+
+/** The guess form's data-roll: "on" while the roll box shows, "gone" after it (the panel takes its room back). */
+export const rollState = (slot: boolean, on: boolean) => (!slot ? undefined : on ? "on" : "gone");
 
 /**
  * The keyboard hint on a home key, on its status line. Always laid out; CSS makes it visible only on the focused key,
