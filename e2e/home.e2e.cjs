@@ -46,6 +46,11 @@ for (const vp of VIEWPORTS) {
     assert.equal(await listStrip.getAttribute("aria-expanded"), "true");
     assert.ok((await chips.count()) > 1);
     assert.equal(await page.locator('[data-testid="category"][data-mode="blitz"]').count(), 0);
+    // A category with fewer than three lists sits out (a roll in it would soon widen to every list without a word).
+    const all = await page.evaluate(async () => (await fetch("puzzles/index.json")).json());
+    for (const c of await chips.evaluateAll((els) => els.map((e) => e.dataset.category))) {
+      assert.ok(all.filter((m) => m.category === c).length >= 3, `${c} has three lists or more`);
+    }
     assert.equal(await focusedTestId(page), "category");
     assert.equal(await focusedMode(page), "list");
     // Arrow keys move through the chips.

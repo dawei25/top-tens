@@ -12,11 +12,10 @@ import { Game, Loading } from "./components/Game";
 import { shortDate } from "./components/pixel";
 import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
-import { blitzAvailable, freshBlitz } from "./game/blitz";
+import { freshBlitz } from "./game/blitz";
 import { freshList, lastPlayed } from "./game/history";
 import {
   blitzHold,
-  blitzHoldouts,
   blitzOfTheDay,
   rollHoldouts,
   entryForDate,
@@ -31,6 +30,7 @@ import { load, save } from "./game/storage";
 import { useSaveVersion } from "./net";
 import { PrivacyScreen } from "./components/account";
 import { FathomScreen } from "./components/fathom";
+import { openBlitzLists, rollableLists } from "./components/freeplay";
 
 type Route =
   | { screen: "home" }
@@ -248,10 +248,7 @@ function Screens() {
   };
   // The lists open for a free Blitz right now (Home's counts and the Blitz roll use the same filter): never today's
   // list or Blitz, or a future day's.
-  const openBlitz = (saved = load()) => {
-    const held = blitzHoldouts(schedule, index, saved, today);
-    return index.filter((m) => m.blitz && !held.has(m.id) && blitzAvailable({ id: m.id, blitz: true }, schedule, localDate(), saved));
-  };
+  const openBlitz = (saved = load()) => openBlitzLists(schedule, index, saved, today);
   // Blitz a random list (optionally in a category): a uniformly random open Blitz list, never one of the last few
   // rolled (per category, like the classic roll), never `leave` (the list on screen), always a fresh round. A
   // category with nothing else open widens to all; false when no list is open at all.
@@ -440,6 +437,7 @@ function Screens() {
         onRoll={roll}
         onBlitz={blitzRoll}
         blitzLists={openBlitz()}
+        freeLists={rollableLists(schedule, index, load(), today)}
         onArchive={() => (location.hash = "#archive")}
       />
     );

@@ -12,6 +12,7 @@ import { SoundToggle } from "./sound/SoundToggle";
 import { HomeAccountKey, PrivacyLink } from "./account";
 import { MenuKey } from "./menu";
 import { todayStatus } from "./today";
+import { pickerCategories } from "./freeplay";
 
 /**
  * A home key: its status on top (right), the action below. Today's keys carry their mode's accent while unplayed
@@ -72,20 +73,12 @@ const NONE = (
   </>
 );
 
-/**
- * The categories `lists` covers, with how many lists each has, in one order for both pickers: the order categories
- * first appear in the full index (the Blitz lists open right now would order them differently).
- */
-function countByCategory(index: PuzzleMeta[], lists: PuzzleMeta[]): [string, number][] {
-  const counts = new Map<string, number>();
-  for (const m of lists) counts.set(m.category, (counts.get(m.category) ?? 0) + 1);
-  return [...new Set(index.map((m) => m.category))].flatMap((c) => (counts.has(c) ? [[c, counts.get(c)!] as [string, number]] : []));
-}
-
 interface Props {
   index: PuzzleMeta[];
   /** The lists open for Blitz right now (the same filter as the Blitz roll). */
   blitzLists: PuzzleMeta[];
+  /** The lists a random list can land on right now (the same filter as the roll). */
+  freeLists: PuzzleMeta[];
   /** Today's daily; missing only if the schedule failed to load. */
   entry?: DailyEntry;
   archiveCount: number;
@@ -104,6 +97,7 @@ interface Props {
 export function Home({
   index,
   blitzLists,
+  freeLists,
   entry,
   archiveCount,
   onDaily,
@@ -201,8 +195,9 @@ export function Home({
     };
   }, [picker]);
   const plays = recentPlays(saved, 1000).length;
-  const listCats = countByCategory(index, index);
-  const blitzCats = countByCategory(index, blitzLists);
+  // Each chip counts its category's lists; a category with too few left to roll in sits out (freeplay.ts).
+  const listCats = pickerCategories(index, index, freeLists);
+  const blitzCats = pickerCategories(index, blitzLists);
 
   const blitzRoll = (category?: string) => {
     setNoBlitz(false);
