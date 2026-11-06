@@ -5,6 +5,7 @@
 // answer is too long to type or a subject is already in the bank.
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { isSizeQuestion, ROUND_UNITS, ROUNDS, type Round } from "../../src/game/fathom";
 
 export const BANK = join(import.meta.dirname, "..", "..", "public", "fathom", "questions.json");
 
@@ -79,19 +80,29 @@ export const MEASURES = new Set([
   "times",
 ]);
 
-const KEYS = new Set(["id", "kind", "question", "unit", "answer", "definition", "fact", "source", "typical", "easy"]);
+const KEYS = new Set(["id", "kind", "round", "question", "unit", "answer", "definition", "fact", "source", "typical", "easy"]);
+
+/** The earliest year a year question may answer: four digits, as the player types it. */
+export const MIN_YEAR = 1000;
+/** A year question asks for one plainly. */
+const ASKS_YEAR = /^(?:In (?:what|which) year|When)\b/;
+/** No more than one in five of the bank asks how tall or how heavy (a warning for now: bankWarnings). */
+export const MAX_SIZE_SHARE = 1 / 5;
 
 export type Kind = (typeof KINDS)[number];
 export interface Question {
   id: string;
   kind: Kind;
+  /** Absent: an estimate. */
+  round?: Round;
   question: string;
   unit: string;
   answer: number;
   definition?: string;
   fact: string;
   source: { title: string; url: string };
-  typical: (typeof TYPICALS)[number];
+  /** An estimate's only. */
+  typical?: (typeof TYPICALS)[number];
   easy: boolean;
 }
 export interface Bank {
@@ -123,6 +134,8 @@ export function checkQuestion(q: unknown, i: number): string[] {
   for (const k of Object.keys(o)) if (!KEYS.has(k)) bad(`unknown field "${k}"`);
   if (typeof o.id !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(o.id)) bad("id must be kebab-case");
   if (!KINDS.includes(o.kind as Kind)) bad(`kind "${String(o.kind)}" is not one of ${KINDS.join(", ")}`);
+  if (o.round !== undefined && !ROUNDS.includes(o.round as Round)) bad(`round "${String(o.round)}" is not one of ${ROUNDS.join(", ")}`);
+  const round: Round = ROUNDS.includes(o.round as Round) ? (o.round as Round) : "estimate";
 
   const question = text("question");
   if (!question.trim()) bad("question is missing");
@@ -141,7 +154,15 @@ export function checkQuestion(q: unknown, i: number): string[] {
   else {
     if (unit.replace("Celsius", "celsius") !== unit.toLowerCase()) bad(`unit "${unit}" must be lower case`);
     if (/\d/.test(unit)) bad(`unit "${unit}" has a number in it`);
-    if (question) {
+    // A round's unit is its own: "percent" for a percent, "year" for a year, and neither on an estimate.
+    const own = ROUND_UNITS[round];
+    if (own && unit !== own) bad(`a ${round} question's unit is "${own}", not "${unit}"`);
+    for (const [r, u] of Object.entries(ROUND_UNITS))
+      if (round === "estimate" && unit === u) bad(`unit "${u}" belongs to a ${r} question: give it round "${r}"`);
+    if (round === "year") {
+      // The year is what's asked for: the question says so.
+      if (question && !ASKS_YEAR.test(question)) bad(`a year question asks "In what year...?" or "When...?"`);
+    } else if (question) {
       // A count names what it counts after "How many" ("How many trees...?" in billion trees), never its scale word.
       const rest = MEASURES.has(base) ? question : question.replace(new RegExp(`^How many ${escape(base)}\\b`, "i"), "");
       if (word(base).test(rest)) bad(`question repeats the unit "${base}" (the game shows it beside the input)`);
@@ -156,6 +177,10 @@ export function checkQuestion(q: unknown, i: number): string[] {
     if (answer >= 10 ** MAX_DIGITS)
       bad(`answer ${answer} has more than ${MAX_DIGITS} digits before the decimal point: use a bigger unit (kilometres, million people)`);
     if (scale > 1 && answer < 1) bad(`answer ${answer} is under 1 ${unit}: use the unit without "${unit.split(" ")[0]}"`);
+    if (round === "percent" && answer > 100) bad(`a percent's answer is 0 to 100, not ${answer}`);
+    const thisYear = new Date().getFullYear();
+    if (round === "year" && !(Number.isInteger(answer) && answer >= MIN_YEAR && answer <= thisYear))
+      bad(`a year's answer is a whole year of four digits (${MIN_YEAR} to ${thisYear}), not ${answer}`);
   }
 
   if ("definition" in o) {
@@ -194,8 +219,10 @@ export function checkQuestion(q: unknown, i: number): string[] {
     for (const k of Object.keys(s)) if (k !== "title" && k !== "url") bad(`unknown source field "${k}"`);
   }
 
-  if (!TYPICALS.includes(o.typical as (typeof TYPICALS)[number]))
-    bad(`typical ${String(o.typical)} is not one of ${TYPICALS.join(", ")}`);
+  // The typical miss is a ratio: it means something on an estimate only.
+  if (round !== "estimate") {
+    if ("typical" in o) bad(`typical is an estimate's (a ratio): leave it out of a ${round} question`);
+  } else if (!TYPICALS.includes(o.typical as (typeof TYPICALS)[number])) bad(`typical ${String(o.typical)} is not one of ${TYPICALS.join(", ")}`);
   if (typeof o.easy !== "boolean") bad("easy must be true or false");
   return out;
 }
@@ -225,11 +252,22 @@ export function checkBank(bank: unknown): string[] {
   }
 
   // A fact is read after its own question, but never gives away another one's answer (3+ digit answers: small
-  // numbers turn up everywhere by chance).
+  // numbers turn up everywhere by chance). A year question's answer is given away by any other question's text that
+  // states it, its question and definition too ("Woodstock in 1969" beside "In what year...").
+  const isYear = (q: Question) => q.round === "year";
   for (const q of valid) {
     for (const other of valid) {
-      if (other === q || typeof other.answer !== "number" || other.answer < 100 || typeof q.fact !== "string") continue;
+      if (other === q || isYear(other) || typeof other.answer !== "number" || other.answer < 100 || typeof q.fact !== "string") continue;
       if (mentions(q.fact, other.answer)) out.push(`${q.id}: fact gives away the answer to ${other.id} (${other.answer})`);
+    }
+  }
+  for (const q of valid) {
+    for (const other of valid.filter(isYear)) {
+      if (other === q || typeof other.answer !== "number") continue;
+      for (const field of ["definition", "fact", "question"] as const) {
+        const text = q[field];
+        if (typeof text === "string" && mentions(text, other.answer)) out.push(`${q.id}: ${field} gives away the answer to ${other.id} (${other.answer})`);
+      }
     }
   }
 
@@ -240,11 +278,32 @@ export function checkBank(bank: unknown): string[] {
   for (const [kind, n] of counts) if (n > cap) out.push(`${n} questions of kind ${kind}; at most ${cap}`);
   const easy = valid.filter((q) => q.easy === true).length;
   if (easy < MIN_EASY) out.push(`${easy} easy openers; the bank needs at least ${MIN_EASY}`);
-  // Magnitudes by the amount, its unit's scale word counted (86 billion neurons is in the billions).
-  const answers = valid.filter((q) => typeof q.answer === "number").map(amountOf);
+  // Magnitudes by the amount, its unit's scale word counted (86 billion neurons is in the billions): estimates only, as
+  // a percent or a year is no magnitude.
+  const answers = valid.filter((q) => typeof q.answer === "number" && (q.round ?? "estimate") === "estimate").map(amountOf);
   if (!answers.some((a) => a < 1)) out.push("no answer under 1: the bank needs a spread of magnitudes");
   if (!answers.some((a) => a >= 1e9)) out.push("no answer in the billions: the bank needs a spread of magnitudes");
   return out;
+}
+
+/** The how tall / how heavy questions in a bank (isSizeQuestion, src/game/fathom.ts). */
+export function sizeQuestions(bank: unknown): Question[] {
+  const qs = ((bank as Bank | null)?.questions ?? []) as unknown[];
+  const readable = (q: unknown): q is Question =>
+    typeof q === "object" && q !== null && typeof (q as Question).question === "string" && typeof (q as Question).unit === "string";
+  return qs.filter(readable).filter((q) => isSizeQuestion(q));
+}
+
+/**
+ * What the bank should fix but may ship with for now: more than one in five of it asking how tall or how heavy (the
+ * owner: "Too many are how much does xx weigh, how tall is xx"). A warning until the rebuilt bank lands, then an error.
+ */
+export function bankWarnings(bank: unknown): string[] {
+  const total = ((bank as Bank | null)?.questions ?? []).length;
+  const n = sizeQuestions(bank).length;
+  const cap = Math.floor(total * MAX_SIZE_SHARE);
+  if (!total || n <= cap) return [];
+  return [`${n} of ${total} questions (${Math.round((n / total) * 100)}%) are how tall / how heavy; at most 1 in 5 (${cap})`];
 }
 
 /**
@@ -343,6 +402,10 @@ function main(): number {
   const counts = [...kindCounts(qs)].sort((a, b) => b[1] - a[1]);
   console.log(`${qs.length} questions, ${qs.filter((q) => q.easy).length} easy`);
   console.log(counts.map(([k, n]) => `${k} ${n}`).join(", "));
+  console.log(ROUNDS.map((r) => `${r} ${qs.filter((q) => (q.round ?? "estimate") === r).length}`).join(", "));
+  const sizes = sizeQuestions(bank).length;
+  console.log(`how tall / how heavy: ${sizes} of ${qs.length} (${qs.length ? Math.round((sizes / qs.length) * 100) : 0}%)`);
+  for (const w of bankWarnings(bank)) console.log(`  warning: ${w}`);
   for (const i of issues) console.log(`  error: ${i}`);
   console.log(`${issues.length} error(s)`);
   return issues.length ? 1 : 0;
