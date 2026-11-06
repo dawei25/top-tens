@@ -5,9 +5,7 @@ import {
   blitzGuess,
   blitzHistory,
   blitzScore,
-  blitzShareText,
   dailyBlitzPlayed,
-  dailyBlitzShareText,
   finishBlitz,
   isOver,
   missedTop,
@@ -32,7 +30,8 @@ import { emitPlay } from "../game/events";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
 import { END_FOCUS_MS, PHONE, RollBox, rollState, ScreenHead, SwapLabel, useMedia } from "./pixel";
-import { blitzPrompt, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT } from "./copy";
+import { BLITZ_SCORING, blitzPromptShown, metricLabel, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT } from "./copy";
+import { blitzShare, dailyBlitzShare } from "./share";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
 import { BlitzCrowdLine } from "./account";
@@ -474,8 +473,8 @@ export function Blitz({
   const share = async () => {
     const base = `${location.origin}${location.pathname}`;
     const text = dailyBlitz
-      ? dailyBlitzShareText(state, puzzle, `${base}#dailyblitz-${dailyBlitz.date}`, dailyBlitz.n)
-      : blitzShareText(state, puzzle, `${base}#blitz-${puzzle.id}`);
+      ? dailyBlitzShare(state, puzzle, `${base}#dailyblitz-${dailyBlitz.date}`, dailyBlitz.n)
+      : blitzShare(state, puzzle, `${base}#blitz-${puzzle.id}`);
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ text });
       else {
@@ -489,24 +488,30 @@ export function Blitz({
   };
 
   const score = locked ? locked.score : blitzScore(state);
+  const prompt = blitzPromptShown(puzzle.title, puzzle.prompt);
   const hits = [...state.hits].reverse();
   const n = locked ? locked.answers : state.hits.length;
   const runs = blitzHistory(saved, id);
   const best = saved.blitzBest?.[id];
   const pastRuns = <PastRuns runs={runs} best={best} open={runsOpen} onToggle={setRunsOpen} onOpen={openRun} />;
   const viewRun = openAt ? runs.find((r) => r.startedAt === openAt) : undefined;
-  // "Play the list": a date's Blitz on that date's own list goes to that daily (one try, and where the rest of the answers
-  // wait while it's unfinished). Otherwise the list itself, but never when that would be today's daily, still unplayed.
+  // The list key on the results. A date's Blitz on that date's own list goes to that daily (one try, and where the rest
+  // of the answers wait while it's unfinished). A date's Blitz otherwise offers Today's list while that is unplayed, as
+  // a daily's results offer Today's Blitz: never the same list as a top 10 right after the results showed its whole top
+  // 10. Otherwise "Play the list", but never when that would be today's daily, still unplayed.
   const todays = todayEntry(schedule, today);
-  const liveDaily = !!todays && todays.id === puzzle.id && (dailyGame(saved, todays)?.status ?? "playing") === "playing";
+  const todayOpen = !!todays && (dailyGame(saved, todays)?.status ?? "playing") === "playing";
+  const liveDaily = todayOpen && todays.id === puzzle.id;
   const ownDaily = dailyBlitz && (entryForDate(schedule, dailyBlitz.date) ?? todayEntry(schedule, dailyBlitz.date));
   const waitFor = hold && (hold === todays ? "today's list" : `daily #${hold.n}`);
   const theList =
     ownDaily && ownDaily.id === puzzle.id
-      ? { href: `#daily-${ownDaily.date}`, label: ownDaily === todays ? "Today's list" : "Play the list" }
-      : liveDaily
-        ? undefined
-        : { href: `#p-${puzzle.id}`, label: "Play the list" };
+      ? { href: `#daily-${ownDaily.date}`, label: ownDaily === todays ? "Today's list" : "Play the list", next: !!hold }
+      : dailyBlitz && todayOpen
+        ? { href: `#daily-${todays.date}`, label: "Today's list", next: true }
+        : liveDaily
+          ? undefined
+          : { href: `#p-${puzzle.id}`, label: "Play the list", next: false };
   // A new best needs an old one to beat: never on a list's first round.
   const newBest = !!record?.best && score > 0 && record.previous !== undefined;
 
@@ -528,6 +533,7 @@ export function Blitz({
           <p>
             <b>{k}</b> answer{k === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
           </p>
+          <p>{BLITZ_SCORING}</p>
           {isBest && <p className="gold">best on this list</p>}
         </div>
         {/* Play again leads: a fresh round on this same list. A held list waits for its day. */}
@@ -661,6 +667,8 @@ export function Blitz({
           <p>
             <b>{n}</b> answer{n === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
           </p>
+          {/* The yardstick under the score (UX 21), as the title card says it. */}
+          <p data-testid="blitz-scoring">{BLITZ_SCORING}</p>
           <BlitzCrowdLine id={id} score={score} />
           {/* The day's score, only when it isn't the big number right above (it almost always is). */}
           {record?.daily?.counted && dailyBlitz && record.daily.score !== score && (
@@ -695,8 +703,8 @@ export function Blitz({
               <SwapLabel off="Share" on="Copied" active={copied} />
             </button>
           )}
-          {/* While the rest waits for the daily, that daily is the next thing to play. */}
-          {hold && theList && (
+          {/* The daily still to play (the one holding the rest of these answers, or Today's list) is the next thing. */}
+          {theList?.next && (
             <a className="key key-pink" data-testid="blitz-list" href={theList.href}>
               {theList.label}
             </a>
@@ -706,7 +714,7 @@ export function Blitz({
               Random Blitz
             </button>
           )}
-          {!hold && theList && (
+          {theList && !theList.next && (
             <a className="key" data-testid="blitz-list" href={theList.href}>
               {theList.label}
             </a>
@@ -739,13 +747,16 @@ export function Blitz({
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
           </div>
           <h1>{puzzle.title}</h1>
-          <p className="caption" data-testid="title-prompt">
-            {blitzPrompt(puzzle.prompt)}
-          </p>
-          {/* The metric as the list writes it: lowercased, "US$" and "UN" would read "us$" and "un". */}
+          {/* The prompt only when it says more than the title (and the line under it): never the same thing three times. */}
+          {prompt && (
+            <p className="caption" data-testid="title-prompt">
+              {prompt}
+            </p>
+          )}
+          {/* What to name, and the scoring rule in words that agree with the points (UX 21). */}
           <p className="caption blitz-rule" data-testid="blitz-rule">
             name as many {puzzle.noun ? `${puzzle.noun} ` : ""}as you can. scored by{" "}
-            {puzzle.metric ? <span className="metric">{puzzle.metric}</span> : "the number"}: bigger is better.
+            {puzzle.metric ? <span className="metric">{metricLabel(puzzle.metric)}</span> : "the number"}: {BLITZ_SCORING}
           </p>
         </section>
 
