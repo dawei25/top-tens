@@ -80,7 +80,8 @@ export const MEASURES = new Set([
   "times",
 ]);
 
-const KEYS = new Set(["id", "kind", "round", "question", "unit", "answer", "definition", "fact", "source", "typical", "easy"]);
+/** `verified`: the judge opened the source and confirmed the figure (the judged candidates carry it; the game ignores it). */
+const KEYS = new Set(["id", "kind", "round", "question", "unit", "answer", "definition", "fact", "source", "typical", "easy", "verified"]);
 
 /** The earliest year a year question may answer: four digits, as the player types it. */
 export const MIN_YEAR = 1000;
@@ -101,9 +102,11 @@ export interface Question {
   definition?: string;
   fact: string;
   source: { title: string; url: string };
-  /** An estimate's only. */
+  /** An estimate's only, and optional: the writers' estimate of the typical miss, which the game doesn't read. */
   typical?: (typeof TYPICALS)[number];
   easy: boolean;
+  /** The judge confirmed the figure against its source. */
+  verified?: boolean;
 }
 export interface Bank {
   version: 1;
@@ -119,8 +122,12 @@ function spellings(n: number): string[] {
   const grouped = n.toLocaleString("en-US", { maximumFractionDigits: 10 });
   return [...new Set([plain, grouped])];
 }
+/**
+ * Whether the text states the number on its own: not inside a longer one, before or after ("3,330", "300.12" and
+ * "400,000" don't state 330, 300 or 400). A full stop or comma after it counts only when no digit follows ("It is 300.").
+ */
 const mentions = (text: string, n: number) =>
-  spellings(n).some((s) => new RegExp(`(^|[^\\d.,])${escape(s)}($|[^\\d]|[.,](?!\\d))`).test(text));
+  spellings(n).some((s) => new RegExp(`(^|[^\\d.,])${escape(s)}($|[^\\d.,]|[.,](?!\\d))`).test(text));
 
 /** Problems with one question, each a message starting with its id. */
 export function checkQuestion(q: unknown, i: number): string[] {
@@ -219,10 +226,12 @@ export function checkQuestion(q: unknown, i: number): string[] {
     for (const k of Object.keys(s)) if (k !== "title" && k !== "url") bad(`unknown source field "${k}"`);
   }
 
-  // The typical miss is a ratio: it means something on an estimate only.
-  if (round !== "estimate") {
-    if ("typical" in o) bad(`typical is an estimate's (a ratio): leave it out of a ${round} question`);
-  } else if (!TYPICALS.includes(o.typical as (typeof TYPICALS)[number])) bad(`typical ${String(o.typical)} is not one of ${TYPICALS.join(", ")}`);
+  // The typical miss is optional (the game doesn't read it), and a ratio: it means something on an estimate only.
+  if (o.typical !== undefined) {
+    if (round !== "estimate") bad(`typical is an estimate's (a ratio): leave it out of a ${round} question`);
+    else if (!TYPICALS.includes(o.typical as (typeof TYPICALS)[number])) bad(`typical ${String(o.typical)} is not one of ${TYPICALS.join(", ")}`);
+  }
+  if (o.verified !== undefined && typeof o.verified !== "boolean") bad("verified, when present, is true or false");
   if (typeof o.easy !== "boolean") bad("easy must be true or false");
   return out;
 }

@@ -147,6 +147,23 @@ describe("checkBank", () => {
     expect(checkBank(b)).toEqual(["question-7: fact gives away the answer to question-6 (1306)"]);
   });
 
+  // A judge's find: the number after the digits was matched by [^\d], so "300.12" and "400,000" counted as 300 and 400.
+  it("counts a number only when it stands alone, not inside a longer one", () => {
+    const b = bank();
+    b.questions[5].answer = 300;
+    b.questions[7].answer = 400;
+    b.questions[6].fact = "It weighs 300.12 tonnes and holds 400,000 people.";
+    expect(checkBank(b)).toEqual([]);
+    for (const fact of ["It is 300.", "It is 300, give or take.", "It is 300 tonnes.", "Some 300 of them."]) {
+      b.questions[6].fact = fact;
+      expect(checkBank(b), fact).toEqual(["question-7: fact gives away the answer to question-6 (300)"]);
+    }
+    // In a question or a definition too.
+    expect(errors({ answer: 330, definition: "330.5 to the tip" })).toEqual([]);
+    expect(errors({ answer: 330, question: "How tall is the 3,330 tower?" })).toEqual([]);
+    expect(errors({ answer: 330, definition: "330, to the tip" })).toEqual(["eiffel-tower-height: definition gives away the answer"]);
+  });
+
   it("wants enough questions, 8 kinds, no kind over 9, 12 easy openers and a spread of magnitudes", () => {
     const short = bank();
     short.questions.length = MIN_QUESTIONS - 1;
@@ -290,9 +307,26 @@ describe("rounds", () => {
     ]);
   });
 
-  it("wants a typical miss on an estimate only (it's a ratio)", () => {
-    expect(errs(question({ typical: undefined }))[0]).toMatch(/typical undefined is not one of/);
+  it("wants a typical miss, when there is one, on an estimate only (it's a ratio)", () => {
     expect(errs({ ...percent(), typical: 2 } as Question)).toEqual(['ocean-share: typical is an estimate\'s (a ratio): leave it out of a percent question']);
+    expect(errs(question({ typical: 4 as Question["typical"] }))[0]).toMatch(/typical 4 is not one of/);
+  });
+
+  // The rebuilt bank: kept old questions (with a typical miss) and judged candidates that carry a round, verified: true
+  // and no typical miss. Both shapes pass.
+  it("takes a judged candidate's shape: a round, verified, no typical miss", () => {
+    const judged = (over: Record<string, unknown>) => {
+      const q = question({ round: "estimate", verified: true, ...over }) as unknown as Record<string, unknown>;
+      delete q.typical;
+      return q as unknown as Question;
+    };
+    expect(errs(judged({}))).toEqual([]);
+    expect(errs({ ...percent(), verified: true } as Question)).toEqual([]);
+    expect(errs({ ...year(), verified: true } as Question)).toEqual([]);
+    expect(errs(judged({ verified: "yes" }))).toEqual(["eiffel-tower-height: verified, when present, is true or false"]);
+    const b = bank();
+    b.questions = b.questions.map((q, i) => (i % 2 ? judged({ ...q }) : q));
+    expect(checkBank(b)).toEqual([]);
   });
 
   it("counts the spread of magnitudes on estimates only", () => {
