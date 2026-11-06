@@ -1378,6 +1378,92 @@
       },
       "typical": 5,
       "easy": false
+    },
+    {
+      "id": "air-oxygen-share",
+      "kind": "science",
+      "round": "percent",
+      "question": "How much of the air we breathe is oxygen?",
+      "unit": "percent",
+      "answer": 20.95,
+      "definition": "dry air, by volume",
+      "fact": "Nearly all the rest is nitrogen, at 78%, and carbon dioxide is only about 0.04%.",
+      "source": {
+        "title": "Atmosphere of Earth",
+        "url": "https://en.wikipedia.org/wiki/Atmosphere_of_Earth"
+      },
+      "easy": false
+    },
+    {
+      "id": "moon-visible-share",
+      "kind": "space",
+      "round": "percent",
+      "question": "How much of the Moon's surface can we see from Earth?",
+      "unit": "percent",
+      "answer": 59,
+      "definition": "added up over time",
+      "fact": "It always turns the same face to us, but it wobbles as it orbits, so we see a little way round its edges.",
+      "source": {
+        "title": "Libration",
+        "url": "https://en.wikipedia.org/wiki/Libration"
+      },
+      "easy": false
+    },
+    {
+      "id": "left-handed-share",
+      "kind": "body",
+      "round": "percent",
+      "question": "What share of people are left-handed?",
+      "unit": "percent",
+      "answer": 10,
+      "fact": "Men are a little more likely than women to be left-handed.",
+      "source": {
+        "title": "Handedness",
+        "url": "https://en.wikipedia.org/wiki/Handedness"
+      },
+      "easy": true
+    },
+    {
+      "id": "wright-first-flight-year",
+      "kind": "science",
+      "round": "year",
+      "question": "In what year did the Wright brothers first fly a plane?",
+      "unit": "year",
+      "answer": 1903,
+      "fact": "That first flight, at Kitty Hawk in North Carolina, lasted 12 seconds and covered 37 metres.",
+      "source": {
+        "title": "Wright brothers",
+        "url": "https://en.wikipedia.org/wiki/Wright_brothers"
+      },
+      "easy": false
+    },
+    {
+      "id": "harry-potter-first-book-year",
+      "kind": "culture",
+      "round": "year",
+      "question": "In what year did the first Harry Potter book come out?",
+      "unit": "year",
+      "answer": 1997,
+      "fact": "Its first print run was just 500 hardback copies, 300 of them sent to libraries.",
+      "source": {
+        "title": "Harry Potter and the Philosopher's Stone",
+        "url": "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher%27s_Stone"
+      },
+      "easy": true
+    },
+    {
+      "id": "first-youtube-video-year",
+      "kind": "everyday",
+      "round": "year",
+      "question": "In what year was the first video uploaded to YouTube?",
+      "unit": "year",
+      "answer": 2005,
+      "fact": "Called Me at the Zoo, it is 19 seconds of co-founder Jawed Karim in front of the elephants at San Diego Zoo.",
+      "source": {
+        "title": "Me at the zoo",
+        "url": "https://en.wikipedia.org/wiki/Me_at_the_zoo"
+      },
+      "easy": false
     }
   ]
 }

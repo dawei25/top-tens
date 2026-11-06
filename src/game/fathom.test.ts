@@ -598,7 +598,14 @@ describe("reading numbers", () => {
     for (const q of bank) {
       expect(parseNumber(`${q.answer} ${q.unit}`, q.unit), `${q.id}: "${q.answer} ${q.unit}"`).toBe(q.answer);
       expect(parseNumber(`${q.answer}${q.unit}`, q.unit), `${q.id}: "${q.answer}${q.unit}"`).toBe(q.answer);
+      // As its round reads a guess, typed bare and, for a percent or a year, as the reveal shows it ("20.95%", "1903"; an
+      // estimate's shows rounded past a thousand): full marks.
+      for (const typed of [String(q.answer), ...(roundOf(q) === "estimate" ? [] : [amountText(q, q.answer)])]) {
+        expect(readGuess(typed, q), `${q.id}: "${typed}"`).toMatchObject({ value: q.answer });
+        expect(scoreFor(q, q.answer), q.id).toBe(100);
+      }
     }
+    expect(bank.some((q) => roundOf(q) === "percent") && bank.some((q) => roundOf(q) === "year"), "the bank plays every round").toBe(true);
   });
   // Nov 5 review: "343 km/h" on a question in metres per second said "That doesn't read as a number."
   it("asks for the question's unit when the one typed can't be converted", () => {
