@@ -1,6 +1,6 @@
 // The by-category pickers on the real puzzle bank (public/puzzles). Launch audit, Nov 6: Science had one list; picked,
 // then rolled again, it landed in Geography without a word. A category is offered only while a roll in it has at least
-// MIN_CATEGORY_LISTS lists to land on, so Roll another list stays in it.
+// MIN_CATEGORY_LISTS lists to land on, so Roll new list stays in it.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";

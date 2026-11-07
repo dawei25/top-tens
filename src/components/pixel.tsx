@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { SoundToggle } from "./sound/SoundToggle";
 import { MenuKey } from "./menu";
+import { ROLL_NEW } from "./copy";
 
 export function reducedMotion(): boolean {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -62,10 +63,11 @@ export function useMedia(query: string): boolean {
 export const PHONE = "(max-width: 699px)";
 
 /**
- * Roll another list, before play (a rolled list before its first guess, a rolled Blitz before its clock starts): its
- * own box right of the guess panel, outside it (owner, Nov 6), as tall as the panel (the pill, on phones). It lives in
- * the guess form, which makes room for it while `on` (data-roll, index.css). When play starts it fades out and the
- * guess panel stretches into its room. Where it never shows (dailies, Today's Blitz, links, replays) there is none.
+ * Roll new list, before play (a rolled list before its first guess, a rolled Blitz before its clock starts): its own
+ * box right of the guess panel, outside it (owner, Nov 6), level with the guess row and no taller (the pill, on
+ * phones; owner, Nov 7). The results' key for the same action has the same name (ROLL_NEW). It lives in the guess
+ * form, which makes room for it while `on` (data-roll, index.css). When play starts it fades out and the guess panel
+ * stretches into its room. Where it never shows (dailies, Today's Blitz, links, replays) there is none.
  */
 export function RollBox({ slot, on, onRoll }: { slot: boolean; on: boolean; onRoll?: () => void }) {
   if (!slot) return null;
@@ -80,7 +82,7 @@ export function RollBox({ slot, on, onRoll }: { slot: boolean; on: boolean; onRo
       disabled={!on}
       onClick={onRoll}
     >
-      Roll another list
+      {ROLL_NEW}
     </button>
   );
 }

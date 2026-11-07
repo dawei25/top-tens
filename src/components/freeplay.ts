@@ -23,7 +23,7 @@ export function openBlitzLists(schedule: DailyEntry[], index: PuzzleMeta[], save
 /**
  * A picker's categories, in one order for both pickers (the order categories first appear in the full index), each
  * with how many of `counted` it has. Only those with at least MIN_CATEGORY_LISTS lists in `rollable` (what a roll in
- * it can land on): with fewer, Roll another list would run out and widen to every list, and the player who picked
+ * it can land on): with fewer, Roll new list would run out and widen to every list, and the player who picked
  * Science would land in Geography without a word (launch audit, Nov 6). A small category waits until it grows.
  */
 export function pickerCategories(index: PuzzleMeta[], counted: PuzzleMeta[], rollable: PuzzleMeta[] = counted): [string, number][] {

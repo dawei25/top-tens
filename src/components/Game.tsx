@@ -37,6 +37,7 @@ import {
   notOnList,
   PLACEHOLDER,
   PLACEHOLDER_SHORT,
+  ROLL_NEW,
   STREAK_NOTE,
 } from "./copy";
 import { listShare } from "./share";
@@ -58,12 +59,11 @@ interface Props {
   lexicon?: Lexicon;
   onBack: () => void;
   onHome: () => void;
-  /** A fresh random list: Roll another list on a random list, Random list on a finished daily. */
+  /** A fresh random list: Roll new list on a random list, Random list on a finished daily. */
   onRoll: () => void;
   /**
-   * This game was rolled (Random list, a category, Roll another list) in this tab. Until the first guess it offers Roll
-   * another list beside the guess panel, to skip to another list; never once play starts, so a losing game can't be
-   * dodged.
+   * This game was rolled (Random list, a category, Roll new list) in this tab. Until the first guess it offers Roll new
+   * list beside the guess panel, to skip to another list; never once play starts, so a losing game can't be dodged.
    */
   rolled?: boolean;
   /** Today's Blitz, while it's unplayed (a finished daily offers it). */
@@ -324,7 +324,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
   const hints = game.hints ?? [];
   // A revealed row with a fact opens it on a tap: a caption under the board says so, since a phone has no hover look.
   const factShown = puzzle.answers.some((a) => a.fact && (over || game.found.includes(a.rank)));
-  // Roll another list before play: a rolled list shows it in its own box right of the guess panel until anything
+  // Roll new list before play: a rolled list shows it in its own box right of the guess panel until anything
   // happens (no guess, no clue, nothing said in the feedback line). Then it fades out and the panel takes its room.
   const rerollSlot = !!rolled && !daily;
   const reroll = rerollSlot && game.status === "playing" && game.log.length === 0 && hints.length === 0 && !feedback;
@@ -660,11 +660,11 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               )}
               {/* No autofocus here: SHARE takes focus a beat after the end (above), so a key still held lands nowhere. */}
               <div className="results-actions">
-                {/* Free play leads with Roll another list: a new random list, never this one (so not "Play again").
+                {/* Free play leads with Roll new list: a new random list, never this one (so not "Play again").
                     The same list again is only ever offered from its run in Past runs. */}
                 {!daily && (
                   <button className="key key-pink" data-testid="play-again" onClick={onRoll}>
-                    Roll another list
+                    {ROLL_NEW}
                   </button>
                 )}
                 <button ref={shareRef} className={daily ? "key key-pink" : "key"} data-testid="share" onClick={share}>
