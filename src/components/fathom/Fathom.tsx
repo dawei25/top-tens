@@ -1,33 +1,39 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import {
-  askFor,
+  amountText,
   bandLabel,
   bandOf,
   editField,
-  fathomScore,
+  figureParts,
   formatAmount,
+  guessError,
   loadFathom,
   lockIn,
   MAX_TOTAL,
+  missText,
   nextQuestion,
   phaseOf,
   playersLine,
   QUESTIONS_PER_GAME,
   readBank,
-  readNumber,
+  readGuess,
   resumable,
-  RULE,
+  roundOf,
+  ROUNDS,
+  RULES,
   saveFathom,
+  scoreFor,
   scoreGame,
   shareText,
   startGame,
-  timesOff,
   totalOf,
+  unitShown,
   type Band,
   type FathomGame,
   type FathomQuestion,
   type NumberError,
+  type Round,
   type Scored,
 } from "../../game/fathom";
 import { submitFathomGuess, useFathomCrowd } from "../../net";
@@ -40,12 +46,12 @@ import { BUOY, placed, SQUID } from "./sprites";
 import "./fathom.css";
 
 /**
- * Fathom (beta, #fathom): five questions that each ask for a number, in a unit that keeps it short ("kilometres",
- * "million people"). Type a guess, lock it in, see how close it was on a sonar, and NEXT; five of those and the
- * results. One plain scoring rule for every question, stated on the first question and the results. No timer, no
- * lives, and nothing here touches the rest of the game: its own save, no record or stats. With a backend, each guess is
- * also sent, and a reveal says how real players guessed once there are enough of them. Reached only by its link; App
- * loads this screen as its own chunk.
+ * Fathom (beta, #fathom): five questions that each ask for a number: estimates in a unit that keeps them short
+ * ("kilometres", "million people"), a percent and a year. Type a guess, lock it in, see how close it was on a sonar,
+ * and NEXT; five of those and the results. One plain scoring rule for each round, stated on the round's first question
+ * and again on the results. No timer, no lives, and nothing here touches the rest of the game: its own save, no record
+ * or stats. With a backend, each guess is also sent, and a reveal says how real players guessed once there are enough
+ * of them. Reached only by its link; App loads this screen as its own chunk.
  */
 
 interface Props {
@@ -70,15 +76,6 @@ async function loadBank(): Promise<FathomQuestion[] | null> {
     return null;
   }
 }
-
-/** What's wrong, in one line at 320px (a unit typed that the question isn't in: "In centimetres, please."). */
-const ERRORS: Record<Exclude<NumberError, "unit">, string> = {
-  empty: "Type a number first.",
-  zero: "Has to be more than zero.",
-  negative: "No negatives. It's above zero.",
-  text: "That doesn't read as a number.",
-};
-const errorText = (error: NumberError, unit: string) => (error === "unit" ? askFor(unit) : ERRORS[error]);
 
 const focusGuess = () => document.querySelector<HTMLInputElement>('[data-testid="fathom-input"]')?.focus();
 
@@ -169,7 +166,7 @@ export default function Fathom({ onBack, onHome }: Props) {
   // LOCK IN: a click, the ping and the band's sound (with sound on), the guess sent (with a backend), then the reveal.
   const lock = (value: number) => {
     playFathom({ kind: "lock" });
-    playFathom({ kind: "reveal", band: bandOf(fathomScore(value, question.answer)) });
+    playFathom({ kind: "reveal", band: bandOf(scoreFor(question, value)) });
     submitFathomGuess(question.id, value);
     update(lockIn(game, value));
   };
@@ -196,16 +193,19 @@ export default function Fathom({ onBack, onHome }: Props) {
   const total = totalOf(scored);
   // What a screen reader hears as each verdict and the total appear (the line is there before its words change).
   const said = shown
-    ? `${bandLabel(shown.band)}, ${shown.points} points. The answer: ${formatAmount(shown.question.answer)} ${shown.question.unit}. ` +
-      `Yours was ${timesOff(shown.guess, shown.question.answer)}.${game.at > 0 ? ` Total so far: ${total}.` : ""}`
+    ? `${bandLabel(shown.band)}, ${shown.points} points. The answer: ${amountText(shown.question, shown.question.answer)}. ` +
+      `Yours was ${missText(shown.question, shown.guess)}.${game.at > 0 ? ` Total so far: ${total}.` : ""}`
     : phase === "results"
       ? `Your total: ${total} out of ${MAX_TOTAL}.`
       : "";
-  // The scoring rule, read with the first question, before the first answer. With little height (a small phone, or the
-  // keyboard up) it goes under LOCK IN, so the question, the field and LOCK IN still fit.
-  const rule = (
-    <p className="fathom-rule" data-testid="fathom-rule">
-      {RULE}
+  // The round's scoring rule, read with the first question of that round, before its first answer (the estimate's on
+  // the first estimate, the percent's on the percent). With little height (a small phone, or the keyboard up) it goes
+  // under LOCK IN, so the question, the field and LOCK IN still fit.
+  const round = question && roundOf(question);
+  const firstOfRound = !!question && questions.findIndex((x) => roundOf(x) === round) === game.at;
+  const rule = firstOfRound && (
+    <p className="fathom-rule" data-testid="fathom-rule" data-round={round}>
+      {RULES[round]}
     </p>
   );
   const ruleBelow = short && phase === "question";
@@ -219,7 +219,7 @@ export default function Fathom({ onBack, onHome }: Props) {
         <Results scored={scored} onAgain={again} />
       ) : (
         <>
-          <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id}>
+          <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id} data-round={round}>
             <div className="prompt-top">
               <span className="label cyan">
                 Question {game.at + 1} of {QUESTIONS_PER_GAME}
@@ -228,10 +228,10 @@ export default function Fathom({ onBack, onHome }: Props) {
             </div>
             <h1>{question.question}</h1>
             {question.definition && <p className="caption">{question.definition}</p>}
-            {game.at === 0 && !ruleBelow && rule}
+            {!ruleBelow && rule}
           </section>
           {phase === "question" ? (
-            <Ask key={question.id} question={question} onLock={lock} footer={game.at === 0 && ruleBelow ? rule : undefined} />
+            <Ask key={question.id} question={question} onLock={lock} footer={ruleBelow && rule ? rule : undefined} />
           ) : (
             <Reveal key={question.id} scored={shown!} total={game.at > 0 ? total : undefined} last={game.at === QUESTIONS_PER_GAME - 1} onNext={next} />
           )}
@@ -242,14 +242,15 @@ export default function Fathom({ onBack, onHome }: Props) {
 }
 
 /**
- * The question on screen: the field with its unit (the number grouped with commas as it's typed), a line for what's
- * wrong or what was read when the field doesn't show it, LOCK IN, and `footer` under them (the scoring rule, when
- * there's little height).
+ * The question on screen: the field with its unit (the number grouped with commas as it's typed; a year as typed), a
+ * line for what's wrong or what was read when the field doesn't show it, LOCK IN, and `footer` under them (the scoring
+ * rule, when there's little height). A phone gets a decimal keypad, or for a year a plain number pad.
  */
 function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (value: number) => void; footer?: ReactNode }) {
   const [text, setText] = useState("");
   const [error, setError] = useState<NumberError | null>(null);
-  const reading = readNumber(text, question.unit);
+  const round = roundOf(question);
+  const reading = readGuess(text, question);
   const value = "value" in reading ? reading.value : null;
 
   const submit = (e: FormEvent) => {
@@ -262,10 +263,10 @@ function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (
     onLock(value);
   };
 
-  // Grouped as it's typed ("8800000" shows "8,800,000"), the caret kept after the same digit.
+  // Grouped as it's typed ("8800000" shows "8,800,000"), the caret kept after the same digit; a year never is.
   const edit = (e: ChangeEvent<HTMLInputElement>) => {
     const el = e.target;
-    const next = editField(text, el.value, el.selectionStart ?? el.value.length);
+    const next = editField(text, el.value, el.selectionStart ?? el.value.length, round);
     if (next.text !== el.value) {
       el.value = next.text;
       el.setSelectionRange(next.caret, next.caret);
@@ -275,13 +276,14 @@ function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (
   };
 
   // The line under the field: why a guess can't be, or what was read when the field doesn't already show it ("2.5m"
-  // is 2.5 million; "0.5m" in centimetres 50 centimetres; "8,800,000" in million people 8.8 million people). Nothing
-  // when the field shows the number as it is.
+  // is 2.5 million; "0.5m" in centimetres 50 centimetres; "8,800,000" in million people 8.8 million people; "AD 2007"
+  // 2007). Nothing when the field shows the number as it is ("71%" too).
   const converted = "converted" in reading && reading.converted;
+  const bare = text.replace(/,/g, "").replace(/\s*%\s*$/, "");
   const echo = error
-    ? { tone: "error", text: errorText(error, question.unit) }
-    : value !== null && Number(text.replace(/,/g, "")) !== value
-      ? { tone: "value", text: converted ? `${formatAmount(value)} ${question.unit}` : formatAmount(value) }
+    ? { tone: "error", text: guessError(error, question) }
+    : value !== null && Number(bare) !== value
+      ? { tone: "value", text: converted || round !== "estimate" ? amountText(question, value) : formatAmount(value) }
       : { tone: "none", text: "" };
 
   return (
@@ -294,7 +296,7 @@ function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (
           onKeyDown={(e) => {
             if (e.key === "Enter" && !text.trim()) setError("empty");
           }}
-          inputMode="decimal"
+          inputMode={round === "year" ? "numeric" : "decimal"}
           autoFocus
           autoComplete="off"
           autoCorrect="off"
@@ -308,7 +310,7 @@ function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (
           data-testid="fathom-input"
         />
         <span className="fathom-unit" id="fathom-unit" data-testid="fathom-unit">
-          {question.unit}
+          {unitShown(question)}
         </span>
       </label>
       <div className="fathom-keys">
@@ -342,7 +344,9 @@ function siteOf(url: string): string {
 function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: number; last: boolean; onNext: () => void }) {
   const { question: q, guess, points, band } = scored;
   const crowd = useFathomCrowd(q.id, guess, q.answer);
-  const players = playersLine(crowd, q.unit);
+  const players = playersLine(crowd, q.unit, roundOf(q));
+  const answer = figureParts(q, q.answer);
+  const yours = figureParts(q, guess);
   const card = useRef<HTMLElement>(null);
   const nextKey = useRef<HTMLButtonElement>(null);
   // Into view at once; NEXT takes focus a beat later, so an Enter still held from LOCK IN presses nothing.
@@ -373,7 +377,7 @@ function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: numbe
             <Mark kind="buoy" /> The answer
           </p>
           <p className="figure-n gold" data-testid="fathom-answer" data-value={q.answer}>
-            <span>{formatAmount(q.answer)}</span> <span className="figure-unit">{q.unit}</span>
+            <Figure parts={answer} />
           </p>
         </div>
         <div className="figure">
@@ -381,7 +385,7 @@ function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: numbe
             <Mark kind="squid" /> Your guess
           </p>
           <p className="figure-n" data-testid="fathom-guess" data-value={guess}>
-            <span>{formatAmount(guess)}</span> <span className="figure-unit">{q.unit}</span>
+            <Figure parts={yours} />
           </p>
         </div>
       </div>
@@ -390,7 +394,7 @@ function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: numbe
           {players}
         </p>
       )}
-      <Gauge guess={guess} answer={q.answer} band={band} />
+      <Gauge guess={guess} answer={q.answer} band={band} round={roundOf(q)} />
       <p className="fathom-fact" data-testid="fathom-fact">
         {q.fact}
       </p>
@@ -418,9 +422,24 @@ function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: numbe
   );
 }
 
+/** A number on the reveal, and its unit beside it when it has one ("330" "metres"; "71%", "2007" have none). */
+function Figure({ parts }: { parts: { n: string; unit?: string } }) {
+  return (
+    <>
+      <span>{parts.n}</span>
+      {parts.unit && (
+        <>
+          {" "}
+          <span className="figure-unit">{parts.unit}</span>
+        </>
+      )}
+    </>
+  );
+}
+
 /**
- * The end: the total, the five bands in a row, the scoring rule again, NEW QUESTIONS and COPY RESULT, then each
- * question with guess and answer.
+ * The end: the total, the five bands in a row, the scoring rules again (one line for each round played), NEW
+ * QUESTIONS and COPY RESULT, then each question with guess and answer.
  */
 function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void }) {
   const total = totalOf(scored);
@@ -445,6 +464,7 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
     }
   };
   const bands = scored.map((s) => s.band);
+  const played: Round[] = ROUNDS.filter((r) => scored.some((s) => roundOf(s.question) === r));
   return (
     <>
       <section className="panel results enter fathom-results" data-glass data-testid="fathom-results">
@@ -460,9 +480,11 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
             <span key={i} className="band-sq" data-band={b} />
           ))}
         </div>
-        <p className="caption fathom-rule-end" data-testid="fathom-rule">
-          {RULE}
-        </p>
+        {played.map((r) => (
+          <p key={r} className="caption fathom-rule-end" data-testid="fathom-rule" data-round={r}>
+            {RULES[r]}
+          </p>
+        ))}
         <div className="results-actions">
           <button type="button" className="key key-pink" data-testid="fathom-again" onClick={onAgain}>
             New questions
@@ -474,27 +496,32 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
       </section>
       <section className="panel fathom-recap" data-glass aria-label="Your answers">
         <ol>
-          {scored.map((s) => (
-            <li
-              key={s.question.id}
-              data-testid="fathom-row"
-              data-question={s.question.id}
-              data-guess={s.guess}
-              data-points={s.points}
-              data-band={s.band}
-            >
-              <span className="band-sq" data-band={s.band} aria-hidden="true" />
-              <span className="recap-body">
-                <span className="recap-q">{s.question.question}</span>
-                <span className="recap-nums">
-                  you <b>{formatAmount(s.guess)}</b> · answer <b className="gold">{formatAmount(s.question.answer)}</b> {s.question.unit}
+          {scored.map((s) => {
+            const unit = figureParts(s.question, s.question.answer).unit;
+            return (
+              <li
+                key={s.question.id}
+                data-testid="fathom-row"
+                data-question={s.question.id}
+                data-round={roundOf(s.question)}
+                data-guess={s.guess}
+                data-points={s.points}
+                data-band={s.band}
+              >
+                <span className="band-sq" data-band={s.band} aria-hidden="true" />
+                <span className="recap-body">
+                  <span className="recap-q">{s.question.question}</span>
+                  <span className="recap-nums" data-testid="fathom-row-nums">
+                    you <b>{figureParts(s.question, s.guess).n}</b> · answer <b className="gold">{figureParts(s.question, s.question.answer).n}</b>
+                    {unit && ` ${unit}`}
+                  </span>
                 </span>
-              </span>
-              <span className="recap-points" aria-label={`${s.points} points, ${bandLabel(s.band)}`}>
-                {s.points}
-              </span>
-            </li>
-          ))}
+                <span className="recap-points" aria-label={`${s.points} points, ${bandLabel(s.band)}`}>
+                  {s.points}
+                </span>
+              </li>
+            );
+          })}
         </ol>
       </section>
     </>

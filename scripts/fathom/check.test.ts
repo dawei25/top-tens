@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { checkBank, checkCandidates, checkQuestion, KINDS, loadBank, MIN_QUESTIONS, sameSubject, subjectWords, type Question } from "./check";
+import {
+  bankWarnings,
+  checkBank,
+  checkCandidates,
+  checkQuestion,
+  KINDS,
+  loadBank,
+  MIN_QUESTIONS,
+  sameSubject,
+  subjectWords,
+  type Question,
+} from "./check";
 
 const question = (over: Partial<Question> & Record<string, unknown> = {}): Question =>
   ({
@@ -136,6 +147,23 @@ describe("checkBank", () => {
     expect(checkBank(b)).toEqual(["question-7: fact gives away the answer to question-6 (1306)"]);
   });
 
+  // A judge's find: the number after the digits was matched by [^\d], so "300.12" and "400,000" counted as 300 and 400.
+  it("counts a number only when it stands alone, not inside a longer one", () => {
+    const b = bank();
+    b.questions[5].answer = 300;
+    b.questions[7].answer = 400;
+    b.questions[6].fact = "It weighs 300.12 tonnes and holds 400,000 people.";
+    expect(checkBank(b)).toEqual([]);
+    for (const fact of ["It is 300.", "It is 300, give or take.", "It is 300 tonnes.", "Some 300 of them."]) {
+      b.questions[6].fact = fact;
+      expect(checkBank(b), fact).toEqual(["question-7: fact gives away the answer to question-6 (300)"]);
+    }
+    // In a question or a definition too.
+    expect(errors({ answer: 330, definition: "330.5 to the tip" })).toEqual([]);
+    expect(errors({ answer: 330, question: "How tall is the 3,330 tower?" })).toEqual([]);
+    expect(errors({ answer: 330, definition: "330, to the tip" })).toEqual(["eiffel-tower-height: definition gives away the answer"]);
+  });
+
   it("wants enough questions, 8 kinds, no kind over 9, 12 easy openers and a spread of magnitudes", () => {
     const short = bank();
     short.questions.length = MIN_QUESTIONS - 1;
@@ -216,6 +244,125 @@ describe("candidates for the bank", () => {
     expect(candidates({ ...ball, id: "question-1" })).toContain("question-1: duplicate id");
     // Too many digits: the bank's own per-question rule reports it (one message is enough).
     expect(candidates({ ...ball, unit: "people", answer: 8804190 }).some((e) => e.startsWith("bowling-ball: answer 8804190 has more than 6 digits"))).toBe(true);
+  });
+});
+
+// The owner's revamp: a percent round and a year round beside the estimate.
+describe("rounds", () => {
+  /** A question of another round, as the bank holds it: no typical miss (a ratio means nothing there). */
+  const of = (over: Record<string, unknown>) => {
+    const q = question({ definition: undefined, ...over }) as unknown as Record<string, unknown>;
+    delete q.definition;
+    delete q.typical;
+    return q as unknown as Question;
+  };
+  const percent = (over: Record<string, unknown> = {}) =>
+    of({ id: "ocean-share", kind: "nature", round: "percent", question: "How much of Earth's surface is ocean?", unit: "percent", answer: 71, ...over });
+  const year = (over: Record<string, unknown> = {}) =>
+    of({ id: "iphone-year", kind: "everyday", round: "year", question: "In what year did the first iPhone go on sale?", unit: "year", answer: 2007, ...over });
+  const errs = (q: Question) => checkQuestion(q, 0);
+  const thisYear = new Date().getFullYear();
+
+  it("takes a percent and a year question, and no other round", () => {
+    expect(errs(percent())).toEqual([]);
+    expect(errs(year())).toEqual([]);
+    expect(errs(year({ question: "When did the first iPhone go on sale?" }))).toEqual([]);
+    expect(errs(question({ round: "estimate" }))).toEqual([]);
+    expect(errs(question({ round: "name" }))[0]).toMatch(/round "name" is not one of estimate, percent, year/);
+  });
+
+  it("keeps a round's unit to its round", () => {
+    expect(errs(percent({ unit: "%" }))).toEqual(['ocean-share: a percent question\'s unit is "percent", not "%"']);
+    expect(errs(year({ unit: "years" }))).toEqual(['iphone-year: a year question\'s unit is "year", not "years"']);
+    // An estimate in percent or a calendar year would be scored on the wrong scale.
+    expect(errs(question({ unit: "percent", question: "How much of Earth is ocean?", answer: 71 }))).toEqual([
+      'eiffel-tower-height: unit "percent" belongs to a percent question: give it round "percent"',
+    ]);
+    expect(errs(question({ unit: "year", question: "When was it built?", answer: 1889 }))).toEqual([
+      'eiffel-tower-height: unit "year" belongs to a year question: give it round "year"',
+    ]);
+    // A duration in years is an estimate.
+    expect(errs(question({ unit: "years", question: "How old was the oldest Greenland shark?", answer: 392 }))).toEqual([]);
+  });
+
+  it("wants a percent from 0 to 100, kept out of the question", () => {
+    expect(errs(percent({ answer: 100 }))).toEqual([]);
+    expect(errs(percent({ answer: 0.5 }))).toEqual([]);
+    expect(errs(percent({ answer: 101 }))).toEqual(["ocean-share: a percent's answer is 0 to 100, not 101"]);
+    expect(errs(percent({ question: "What percent of Earth's surface is ocean?" }))[0]).toMatch(/repeats the unit "percent"/);
+    expect(errs(percent({ question: "What percentage of Earth's surface is ocean?" }))).toEqual([]);
+  });
+
+  it(`wants a whole year of four digits, no later than this year (${thisYear})`, () => {
+    expect(errs(year({ answer: thisYear }))).toEqual([]);
+    expect(errs(year({ answer: 1066 }))).toEqual([]);
+    expect(errs(year({ answer: 2007.5 }))).toEqual(["iphone-year: a year's answer is a whole year of four digits (1000 to " + thisYear + "), not 2007.5"]);
+    expect(errs(year({ answer: 800 }))[0]).toMatch(/whole year of four digits/);
+    expect(errs(year({ answer: thisYear + 1 }))[0]).toMatch(/whole year of four digits/);
+  });
+
+  it("wants a year question to ask for a year", () => {
+    expect(errs(year({ question: "How long ago did the first iPhone go on sale?" }))).toEqual([
+      'iphone-year: a year question asks "In what year...?" or "When...?"',
+    ]);
+  });
+
+  it("wants a typical miss, when there is one, on an estimate only (it's a ratio)", () => {
+    expect(errs({ ...percent(), typical: 2 } as Question)).toEqual(['ocean-share: typical is an estimate\'s (a ratio): leave it out of a percent question']);
+    expect(errs(question({ typical: 4 as Question["typical"] }))[0]).toMatch(/typical 4 is not one of/);
+  });
+
+  // The rebuilt bank: kept old questions (with a typical miss) and judged candidates that carry a round, verified: true
+  // and no typical miss. Both shapes pass.
+  it("takes a judged candidate's shape: a round, verified, no typical miss", () => {
+    const judged = (over: Record<string, unknown>) => {
+      const q = question({ round: "estimate", verified: true, ...over }) as unknown as Record<string, unknown>;
+      delete q.typical;
+      return q as unknown as Question;
+    };
+    expect(errs(judged({}))).toEqual([]);
+    expect(errs({ ...percent(), verified: true } as Question)).toEqual([]);
+    expect(errs({ ...year(), verified: true } as Question)).toEqual([]);
+    expect(errs(judged({ verified: "yes" }))).toEqual(["eiffel-tower-height: verified, when present, is true or false"]);
+    const b = bank();
+    b.questions = b.questions.map((q, i) => (i % 2 ? judged({ ...q }) : q));
+    expect(checkBank(b)).toEqual([]);
+  });
+
+  it("counts the spread of magnitudes on estimates only", () => {
+    const b = bank();
+    // The only answer under 1 was question-1's 0.5 metres: a 0.5% share doesn't stand in for it.
+    b.questions[0] = percent({ id: "question-1", answer: 0.5, question: "How much of Earth's water is fresh and liquid?" });
+    expect(checkBank(b)).toEqual(["no answer under 1: the bank needs a spread of magnitudes"]);
+  });
+
+  // In one game, a year that another question's text states gives the year question away.
+  it("rejects a year another question's question, definition or fact states", () => {
+    const b = bank();
+    b.questions.push(year({ id: "iphone-year", kind: "everyday" }));
+    expect(checkBank(b)).toEqual([]);
+    b.questions[3].definition = "2007 survey";
+    b.questions[4].fact = "It was built in 2007.";
+    b.questions[5].question = "How tall was the tower in 2007?";
+    expect(checkBank(b)).toEqual([
+      "question-4: definition gives away the answer to iphone-year (2007)",
+      "question-5: fact gives away the answer to iphone-year (2007)",
+      "question-6: question gives away the answer to iphone-year (2007)",
+    ]);
+  });
+
+  // The owner: "Too many are how much does xx weigh, how tall is xx." No more than one in five of the bank: a warning
+  // for now (the old bank fails it until the new one lands), not an error.
+  it("warns when more than one in five of the bank is a how tall / how heavy question", () => {
+    const b = bank();
+    expect(checkBank(b)).toEqual([]);
+    expect(bankWarnings(b)).toEqual(["50 of 50 questions (100%) are how tall / how heavy; at most 1 in 5 (10)"]);
+    b.questions.forEach((q, i) => {
+      if (i >= 10) q.question = `How many visitors does landmark number ${i} get?`;
+    });
+    expect(bankWarnings(b)).toEqual([]);
+    b.questions[10].question = "How much does landmark number 10 weigh?";
+    expect(bankWarnings(b)).toEqual(["11 of 50 questions (22%) are how tall / how heavy; at most 1 in 5 (10)"]);
   });
 });
 

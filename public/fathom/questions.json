@@ -1,1383 +1,1491 @@
 {
-  "version": 1,
-  "questions": [
-    {
-      "id": "adult-blood-volume",
-      "kind": "body",
-      "question": "How much blood is in a typical adult's body?",
-      "unit": "litres",
-      "answer": 5,
-      "fact": "Men and women carry about the same share of their body weight as blood, 7 to 8%.",
-      "source": {
-        "title": "Blood volume",
-        "url": "https://en.wikipedia.org/wiki/Blood_volume"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "adult-bones",
-      "kind": "body",
-      "question": "How many bones are in an adult human skeleton?",
-      "unit": "bones",
-      "answer": 206,
-      "fact": "Babies are born with around 270; some of them fuse together on the way to adulthood.",
-      "source": {
-        "title": "Human skeleton",
-        "url": "https://en.wikipedia.org/wiki/Human_skeleton"
-      },
-      "typical": 1.5,
-      "easy": true
-    },
-    {
-      "id": "brain-neurons",
-      "kind": "body",
-      "question": "How many nerve cells are in the human brain?",
-      "unit": "billion neurons",
-      "answer": 86,
-      "fact": "The whole adult brain weighs only about 1.2 to 1.4 kg, around 2% of the body's weight.",
-      "source": {
-        "title": "Human brain",
-        "url": "https://en.wikipedia.org/wiki/Human_brain"
-      },
-      "typical": 10,
-      "easy": false
-    },
-    {
-      "id": "breath-volume",
-      "kind": "body",
-      "question": "How much air does an adult take in with one breath?",
-      "unit": "litres",
-      "answer": 0.5,
-      "definition": "an ordinary breath at rest",
-      "fact": "British rower Pete Reed is reported to have the largest lung capacity on record, 11.68 litres.",
-      "source": {
-        "title": "Lung volumes and capacities",
-        "url": "https://en.wikipedia.org/wiki/Lung_volumes_and_capacities"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "tallest-person",
-      "kind": "body",
-      "question": "How tall was Robert Wadlow, the tallest person ever recorded?",
-      "unit": "metres",
-      "answer": 2.72,
-      "fact": "He weighed 199 kg when he died, aged 22.",
-      "source": {
-        "title": "Robert Wadlow",
-        "url": "https://en.wikipedia.org/wiki/Robert_Wadlow"
-      },
-      "typical": 1.3,
-      "easy": true
-    },
-    {
-      "id": "giraffe-tongue-length",
-      "kind": "animals",
-      "question": "How long is a giraffe's tongue?",
-      "unit": "centimetres",
-      "answer": 45,
-      "fact": "It's black, perhaps against sunburn, and grabs food from branches straight above when the giraffe tips its head back.",
-      "source": {
-        "title": "Giraffe",
-        "url": "https://en.wikipedia.org/wiki/Giraffe"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "blue-whale-length",
-      "kind": "animals",
-      "question": "How long was the longest blue whale ever scientifically measured?",
-      "unit": "metres",
-      "answer": 29.9,
-      "definition": "snout to tail",
-      "fact": "A stranded blue whale's heart weighed 180 kg, the largest known heart of any animal.",
-      "source": {
-        "title": "Blue whale",
-        "url": "https://en.wikipedia.org/wiki/Blue_whale"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "elephant-pregnancy",
-      "kind": "animals",
-      "question": "How long does an African bush elephant's pregnancy last?",
-      "unit": "months",
-      "answer": 22,
-      "fact": "It's the longest pregnancy of any mammal.",
-      "source": {
-        "title": "African bush elephant",
-        "url": "https://en.wikipedia.org/wiki/African_bush_elephant"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "millipede-legs",
-      "kind": "animals",
-      "question": "How many legs does the leggiest millipede on record have?",
-      "unit": "legs",
-      "answer": 1306,
-      "fact": "It was the first millipede found with more than a thousand legs, and its name, Eumillipes, means 'true thousand feet'.",
-      "source": {
-        "title": "Eumillipes",
-        "url": "https://en.wikipedia.org/wiki/Eumillipes"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "chicken-population",
-      "kind": "animals",
-      "question": "What is the world's chicken population?",
-      "unit": "billion chickens",
-      "answer": 26.5,
-      "definition": "2023",
-      "fact": "More than 50 billion are raised every year for meat and eggs.",
-      "source": {
-        "title": "Chicken",
-        "url": "https://en.wikipedia.org/wiki/Chicken"
-      },
-      "typical": 10,
-      "easy": false
-    },
-    {
-      "id": "greenland-shark-age",
-      "kind": "animals",
-      "question": "How old was the oldest Greenland shark ever dated?",
-      "unit": "years",
-      "answer": 392,
-      "definition": "central estimate",
-      "fact": "Greenland sharks only reach maturity at around 150 years old.",
-      "source": {
-        "title": "Greenland shark",
-        "url": "https://en.wikipedia.org/wiki/Greenland_shark"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "eiffel-tower-height",
-      "kind": "landmarks",
-      "question": "How tall is the Eiffel Tower?",
-      "unit": "metres",
-      "answer": 330,
-      "definition": "to the tip",
-      "fact": "It was the tallest human-made structure in the world for 41 years, until New York's Chrysler Building in 1930.",
-      "source": {
-        "title": "Eiffel Tower",
-        "url": "https://en.wikipedia.org/wiki/Eiffel_Tower"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "statue-of-liberty-height",
-      "kind": "landmarks",
-      "question": "How tall is the Statue of Liberty?",
-      "unit": "metres",
-      "answer": 93,
-      "definition": "ground to torch tip, pedestal included",
-      "fact": "The copper statue itself is 46 metres to the torch; the pedestal and foundation make up the other half.",
-      "source": {
-        "title": "Statue of Liberty",
-        "url": "https://en.wikipedia.org/wiki/Statue_of_Liberty"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "great-wall-length",
-      "kind": "landmarks",
-      "question": "How long is the Great Wall of China, counting all its sections?",
-      "unit": "kilometres",
-      "answer": 21196,
-      "definition": "all walls and trenches, 2012 survey",
-      "fact": "The wall built under the Ming dynasty accounts for 8,850 km of it.",
-      "source": {
-        "title": "Great Wall of China",
-        "url": "https://en.wikipedia.org/wiki/Great_Wall_of_China"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "burj-khalifa-height",
-      "kind": "landmarks",
-      "question": "How tall is the Burj Khalifa?",
-      "unit": "metres",
-      "answer": 829.8,
-      "definition": "to the tip",
-      "fact": "Almost a third of that is a spire with very little usable space: without it, the tower would stand 585 metres tall.",
-      "source": {
-        "title": "Burj Khalifa",
-        "url": "https://en.wikipedia.org/wiki/Burj_Khalifa"
-      },
-      "typical": 1.5,
-      "easy": true
-    },
-    {
-      "id": "new-york-city-population",
-      "kind": "places",
-      "question": "What is the population of New York City?",
-      "unit": "million people",
-      "answer": 8.80419,
-      "definition": "city proper, 2020 census",
-      "fact": "An estimated 800 languages are spoken there, making it the most linguistically diverse city in the world.",
-      "source": {
-        "title": "New York City",
-        "url": "https://en.wikipedia.org/wiki/New_York_City"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "vatican-city-area",
-      "kind": "places",
-      "question": "What is the area of Vatican City?",
-      "unit": "square kilometres",
-      "answer": 0.49,
-      "fact": "That makes it the world's smallest country, and with about 882 residents, the least populous too.",
-      "source": {
-        "title": "Vatican City",
-        "url": "https://en.wikipedia.org/wiki/Vatican_City"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "moon-distance",
-      "kind": "space",
-      "question": "How far away is the Moon?",
-      "unit": "kilometres",
-      "answer": 384399,
-      "definition": "average distance",
-      "fact": "It is spiralling away from Earth by about 3.8 cm a year.",
-      "source": {
-        "title": "Lunar distance",
-        "url": "https://en.wikipedia.org/wiki/Lunar_distance"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "sunlight-travel-time",
-      "kind": "space",
-      "question": "How long does sunlight take to reach Earth?",
-      "unit": "minutes",
-      "answer": 8.3,
-      "fact": "Getting out of the Sun is the slow part: light from its centre can take 10,000 to 170,000 years to reach the surface.",
-      "source": {
-        "title": "Sunlight",
-        "url": "https://en.wikipedia.org/wiki/Sunlight"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "iss-orbit-time",
-      "kind": "space",
-      "question": "How long does the International Space Station take to circle Earth once?",
-      "unit": "minutes",
-      "answer": 92.9,
-      "fact": "It travels at about 27,600 km/h, a little over 400 km up.",
-      "source": {
-        "title": "International Space Station",
-        "url": "https://en.wikipedia.org/wiki/International_Space_Station"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "moonwalkers",
-      "kind": "space",
-      "question": "How many people walked on the Moon during the Apollo program?",
-      "unit": "people",
-      "answer": 12,
-      "fact": "Nobody who landed there ever went back for a second time.",
-      "source": {
-        "title": "Apollo program",
-        "url": "https://en.wikipedia.org/wiki/Apollo_program"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "challenger-deep-depth",
-      "kind": "nature",
-      "question": "How deep is the Challenger Deep, the deepest known point in the ocean?",
-      "unit": "metres",
-      "answer": 10935,
-      "definition": "below sea level, 2021 survey",
-      "fact": "Two men first reached the bottom in 1960, in the bathyscaphe Trieste.",
-      "source": {
-        "title": "Challenger Deep",
-        "url": "https://en.wikipedia.org/wiki/Challenger_Deep"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "angel-falls-height",
-      "kind": "nature",
-      "question": "How tall is Angel Falls in Venezuela, the world's tallest waterfall?",
-      "unit": "metres",
-      "answer": 979,
-      "definition": "total height",
-      "fact": "Its biggest single plunge is 807 metres.",
-      "source": {
-        "title": "Angel Falls",
-        "url": "https://en.wikipedia.org/wiki/Angel_Falls"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "lightning-per-second",
-      "kind": "nature",
-      "question": "How many flashes of lightning happen on Earth every second?",
-      "unit": "flashes",
-      "answer": 44,
-      "definition": "global average",
-      "fact": "That adds up to nearly 1.4 billion flashes a year.",
-      "source": {
-        "title": "Lightning",
-        "url": "https://en.wikipedia.org/wiki/Lightning"
-      },
-      "typical": 10,
-      "easy": false
-    },
-    {
-      "id": "trees-on-earth",
-      "kind": "nature",
-      "question": "How many trees are there on Earth?",
-      "unit": "trillion trees",
-      "answer": 3.04,
-      "definition": "2015 estimate",
-      "fact": "That's 46% fewer than when farming began, 12,000 years ago.",
-      "source": {
-        "title": "Tree",
-        "url": "https://en.wikipedia.org/wiki/Tree"
-      },
-      "typical": 30,
-      "easy": false
-    },
-    {
-      "id": "speed-of-sound",
-      "kind": "science",
-      "question": "How fast does sound travel through air?",
-      "unit": "metres per second",
-      "answer": 343,
-      "definition": "at 20 °C",
-      "fact": "Through iron it goes almost 15 times faster.",
-      "source": {
-        "title": "Speed of sound",
-        "url": "https://en.wikipedia.org/wiki/Speed_of_sound"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "air-weight",
-      "kind": "science",
-      "question": "How much does a cubic metre of air weigh?",
-      "unit": "kilograms",
-      "answer": 1.225,
-      "definition": "at sea level and 15 °C",
-      "fact": "That is still about 800 times lighter than the same volume of water.",
-      "source": {
-        "title": "Density of air",
-        "url": "https://en.wikipedia.org/wiki/Density_of_air"
-      },
-      "typical": 10,
-      "easy": false
-    },
-    {
-      "id": "known-elements",
-      "kind": "science",
-      "question": "How many elements are known to science?",
-      "unit": "elements",
-      "answer": 118,
-      "definition": "chemical elements",
-      "fact": "Only the first 94 have been found occurring naturally on Earth.",
-      "source": {
-        "title": "Chemical element",
-        "url": "https://en.wikipedia.org/wiki/Chemical_element"
-      },
-      "typical": 1.5,
-      "easy": true
-    },
-    {
-      "id": "saffron-flowers",
-      "kind": "food",
-      "question": "How many flowers does it take to make one kilogram of saffron?",
-      "unit": "flowers",
-      "answer": 150000,
-      "definition": "saffron crocus",
-      "fact": "Picking them by hand takes about forty hours.",
-      "source": {
-        "title": "Saffron",
-        "url": "https://en.wikipedia.org/wiki/Saffron"
-      },
-      "typical": 30,
-      "easy": false
-    },
-    {
-      "id": "parmesan-wheel",
-      "kind": "food",
-      "question": "How much does a typical wheel of Parmigiano Reggiano weigh?",
-      "unit": "kilograms",
-      "answer": 38,
-      "fact": "It takes a lot of milk: each 1,100-litre vat makes just two wheels.",
-      "source": {
-        "title": "Parmesan",
-        "url": "https://en.wikipedia.org/wiki/Parmesan"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "neapolitan-pizza-oven",
-      "kind": "food",
-      "question": "How hot must the oven be for a true Neapolitan pizza?",
-      "unit": "degrees Celsius",
-      "answer": 485,
-      "fact": "At that heat the pizza bakes in 60 to 90 seconds.",
-      "source": {
-        "title": "Neapolitan pizza",
-        "url": "https://en.wikipedia.org/wiki/Neapolitan_pizza"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "la-tomatina-tomatoes",
-      "kind": "food",
-      "question": "What weight of tomatoes was thrown at Spain's La Tomatina festival?",
-      "unit": "tonnes",
-      "answer": 145,
-      "definition": "2015",
-      "fact": "It's thrown by up to 20,000 ticket holders, in a town of about 9,000 people.",
-      "source": {
-        "title": "La Tomatina",
-        "url": "https://en.wikipedia.org/wiki/La_Tomatina"
-      },
-      "typical": 10,
-      "easy": false
-    },
-    {
-      "id": "bank-card-width",
-      "kind": "everyday",
-      "question": "How long is a standard bank card?",
-      "unit": "millimetres",
-      "answer": 85.6,
-      "definition": "the long side",
-      "fact": "It's the ID-1 card size, 85.60 by 53.98 mm, which most ID cards use too.",
-      "source": {
-        "title": "ISO/IEC 7810",
-        "url": "https://en.wikipedia.org/wiki/ISO/IEC_7810"
-      },
-      "typical": 1.5,
-      "easy": true
-    },
-    {
-      "id": "a380-capacity",
-      "kind": "everyday",
-      "question": "How many passengers is an Airbus A380 certified to carry?",
-      "unit": "passengers",
-      "answer": 853,
-      "definition": "maximum",
-      "fact": "In the evacuation test, everyone got out in 78 seconds with half the exits blocked.",
-      "source": {
-        "title": "Airbus A380",
-        "url": "https://en.wikipedia.org/wiki/Airbus_A380"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "olympic-pool-volume",
-      "kind": "everyday",
-      "question": "How much water does an Olympic swimming pool hold?",
-      "unit": "million litres",
-      "answer": 2.5,
-      "definition": "at the minimum Olympic depth",
-      "fact": "The rules set no maximum depth, so as a unit of volume it's only ever approximate.",
-      "source": {
-        "title": "Olympic-size swimming pool",
-        "url": "https://en.wikipedia.org/wiki/Olympic-size_swimming_pool"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "marathon-distance",
-      "kind": "sports",
-      "question": "How long is a marathon?",
-      "unit": "kilometres",
-      "answer": 42.195,
-      "fact": "The distance was fixed in 1921, copied from the course of the 1908 London Olympics.",
-      "source": {
-        "title": "Marathon",
-        "url": "https://en.wikipedia.org/wiki/Marathon"
-      },
-      "typical": 1.3,
-      "easy": true
-    },
-    {
-      "id": "basketball-hoop-height",
-      "kind": "sports",
-      "question": "How high is a basketball hoop?",
-      "unit": "metres",
-      "answer": 3.05,
-      "definition": "to the top of the rim",
-      "fact": "The first baskets were peach baskets nailed to a gym balcony; metal hoops replaced them in 1906.",
-      "source": {
-        "title": "Basketball",
-        "url": "https://en.wikipedia.org/wiki/Basketball"
-      },
-      "typical": 1.3,
-      "easy": true
-    },
-    {
-      "id": "gold-medal-gold",
-      "kind": "sports",
-      "question": "How much gold is in an Olympic gold medal?",
-      "unit": "grams",
-      "answer": 6,
-      "definition": "the minimum the rules require",
-      "fact": "The rest of the medal is at least 92.5% silver.",
-      "source": {
-        "title": "Olympic medal",
-        "url": "https://en.wikipedia.org/wiki/Olympic_medal"
-      },
-      "typical": 10,
-      "easy": false
-    },
-    {
-      "id": "longest-tennis-match",
-      "kind": "sports",
-      "question": "How long did the longest professional tennis match last?",
-      "unit": "hours",
-      "answer": 11,
-      "definition": "playing time, Wimbledon 2010",
-      "fact": "John Isner beat Nicolas Mahut 70-68 in the fifth set, after 11 hours 5 minutes spread over three days.",
-      "source": {
-        "title": "Isner–Mahut match at the 2010 Wimbledon Championships",
-        "url": "https://en.wikipedia.org/wiki/Isner%E2%80%93Mahut_match_at_the_2010_Wimbledon_Championships"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "piano-keys",
-      "kind": "culture",
-      "question": "How many keys does a modern piano have?",
-      "unit": "keys",
-      "answer": 88,
-      "fact": "In Mozart's day pianos had five octaves; today's 88 keys span more than seven.",
-      "source": {
-        "title": "Piano",
-        "url": "https://en.wikipedia.org/wiki/Piano"
-      },
-      "typical": 1.3,
-      "easy": true
-    },
-    {
-      "id": "mona-lisa-height",
-      "kind": "culture",
-      "question": "How tall is the Mona Lisa?",
-      "unit": "centimetres",
-      "answer": 77,
-      "definition": "the painting, without its frame",
-      "fact": "It's painted on wood, not canvas: a poplar panel 77 by 53 cm.",
-      "source": {
-        "title": "Mona Lisa",
-        "url": "https://en.wikipedia.org/wiki/Mona_Lisa"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "phantom-performances",
-      "kind": "culture",
-      "question": "How many performances did The Phantom of the Opera give on Broadway?",
-      "unit": "performances",
-      "answer": 13981,
-      "definition": "original production",
-      "fact": "It closed in 2023 as Broadway's longest-running show, by over 3,500 performances.",
-      "source": {
-        "title": "The Phantom of the Opera (1986 musical)",
-        "url": "https://en.wikipedia.org/wiki/The_Phantom_of_the_Opera_(1986_musical)"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "czech-beer",
-      "kind": "lists",
-      "question": "How much beer does the Czech Republic drink per person each year?",
-      "unit": "litres",
-      "answer": 126,
-      "definition": "2024",
-      "fact": "No country drinks more; Austria comes second, at about 108 litres.",
-      "source": {
-        "title": "List of countries by beer consumption per capita",
-        "url": "https://en.wikipedia.org/wiki/List_of_countries_by_beer_consumption_per_capita"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "turkey-tea",
-      "kind": "lists",
-      "question": "How much tea does Turkey get through per person each year?",
-      "unit": "kilograms",
-      "answer": 3.16,
-      "definition": "dry tea, 2016",
-      "fact": "No country drinks more; Ireland comes second, at 2.36 kg.",
-      "source": {
-        "title": "List of countries by tea consumption per capita",
-        "url": "https://en.wikipedia.org/wiki/List_of_countries_by_tea_consumption_per_capita"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "biggest-stadium",
-      "kind": "lists",
-      "question": "How many people can the world's biggest stadium hold?",
-      "unit": "people",
-      "answer": 132000,
-      "definition": "India's Narendra Modi Stadium",
-      "fact": "North Korea's Rungrado 1st of May Stadium is next, at 113,281.",
-      "source": {
-        "title": "List of stadiums by capacity",
-        "url": "https://en.wikipedia.org/wiki/List_of_stadiums_by_capacity"
-      },
-      "typical": 1.5,
-      "easy": false
-    },
-    {
-      "id": "caspian-sea-area",
-      "kind": "lists",
-      "question": "What is the area of the Caspian Sea, the world's largest lake?",
-      "unit": "square kilometres",
-      "answer": 389000,
-      "fact": "Lake Superior, the next largest, is only about a fifth of its size.",
-      "source": {
-        "title": "List of lakes by area",
-        "url": "https://en.wikipedia.org/wiki/List_of_lakes_by_area"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "hairs-on-head",
-      "kind": "body",
-      "question": "How many hairs are on a typical brown-haired person's head?",
-      "unit": "hairs",
-      "answer": 110000,
-      "fact": "It depends on colour: blond heads have the most, and redheads the fewest, about 90,000.",
-      "source": {
-        "title": "Human hair growth",
-        "url": "https://en.wikipedia.org/wiki/Human_hair_growth"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "breath-hold-record",
-      "kind": "body",
-      "question": "How long is the record for holding your breath?",
-      "unit": "minutes",
-      "answer": 11.58,
-      "definition": "official freediving record, breathing only air first",
-      "fact": "Breathe pure oxygen beforehand and the record is over 29 minutes.",
-      "source": {
-        "title": "Static apnea",
-        "url": "https://en.wikipedia.org/wiki/Static_apnea"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "eyeball-width",
-      "kind": "body",
-      "question": "How wide is an adult human eyeball?",
-      "unit": "millimetres",
-      "answer": 24,
-      "fact": "At birth it is already 16 to 17 mm across, and it reaches full size by about age 12.",
-      "source": {
-        "title": "Human eye",
-        "url": "https://en.wikipedia.org/wiki/Human_eye"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "liver-weight",
-      "kind": "body",
-      "question": "How much does an adult human liver weigh?",
-      "unit": "kilograms",
-      "answer": 1.5,
-      "fact": "It is the heaviest internal organ, and healthy adult livers range from about 0.6 to 1.9 kg.",
-      "source": {
-        "title": "Liver",
-        "url": "https://en.wikipedia.org/wiki/Liver"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "ostrich-egg-weight",
-      "kind": "animals",
-      "question": "How much does an ostrich egg weigh?",
-      "unit": "kilograms",
-      "answer": 1.4,
-      "fact": "That is over 20 times a chicken's egg, yet it's the smallest egg of any bird relative to the mother's size.",
-      "source": {
-        "title": "Common ostrich",
-        "url": "https://en.wikipedia.org/wiki/Common_ostrich"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "arctic-tern-migration",
-      "kind": "animals",
-      "question": "How far does an Arctic tern fly in a year?",
-      "unit": "kilometres",
-      "answer": 70900,
-      "definition": "average for birds nesting in Greenland and Iceland",
-      "fact": "It flies from the Arctic to the Antarctic and back, the longest migration known in the animal kingdom.",
-      "source": {
-        "title": "Arctic tern",
-        "url": "https://en.wikipedia.org/wiki/Arctic_tern"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "emperor-penguin-dive",
-      "kind": "animals",
-      "question": "How deep can an emperor penguin dive?",
-      "unit": "metres",
-      "answer": 564,
-      "definition": "deepest dive recorded",
-      "fact": "That dive, by a penguin from the Auster colony in 1994, lasted 21.8 minutes.",
-      "source": {
-        "title": "Emperor penguin",
-        "url": "https://en.wikipedia.org/wiki/Emperor_penguin"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "hummingbird-heart-rate",
-      "kind": "animals",
-      "question": "How fast can a hummingbird's heart beat?",
-      "unit": "beats per minute",
-      "answer": 1260,
-      "definition": "fastest measured, in a blue-throated hummingbird",
-      "fact": "At night, in a torpor, a hummingbird's heart can slow to around 50 beats a minute.",
-      "source": {
-        "title": "Hummingbird",
-        "url": "https://en.wikipedia.org/wiki/Hummingbird"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "cheetah-top-speed",
-      "kind": "animals",
-      "question": "How fast can a cheetah run?",
-      "unit": "kilometres per hour",
-      "answer": 104,
-      "definition": "highest reliably measured speed",
-      "fact": "Its acceleration is the real weapon: from 0 to 97 km/h in under 3 seconds.",
-      "source": {
-        "title": "Cheetah",
-        "url": "https://en.wikipedia.org/wiki/Cheetah"
-      },
-      "typical": 1.3,
-      "easy": true
-    },
-    {
-      "id": "great-pyramid-height",
-      "kind": "landmarks",
-      "question": "How tall was the Great Pyramid of Giza when it was built?",
-      "unit": "metres",
-      "answer": 146.6,
-      "definition": "before its outer casing was stripped",
-      "fact": "It was the tallest human-made structure in the world for more than 3,700 years.",
-      "source": {
-        "title": "Great Pyramid of Giza",
-        "url": "https://en.wikipedia.org/wiki/Great_Pyramid_of_Giza"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "pisa-tower-height",
-      "kind": "landmarks",
-      "question": "How tall is the Leaning Tower of Pisa?",
-      "unit": "metres",
-      "answer": 55.86,
-      "definition": "from the ground, on the low side",
-      "fact": "Its top leans about 3.9 m out from the vertical.",
-      "source": {
-        "title": "Leaning Tower of Pisa",
-        "url": "https://en.wikipedia.org/wiki/Leaning_Tower_of_Pisa"
-      },
-      "typical": 1.5,
-      "easy": true
-    },
-    {
-      "id": "hong-kong-zhuhai-macau-bridge",
-      "kind": "landmarks",
-      "question": "How long is the Hong Kong–Zhuhai–Macau Bridge?",
-      "unit": "kilometres",
-      "answer": 55,
-      "definition": "the whole crossing, link roads included",
-      "fact": "It is the longest sea crossing in the world; the main bridge alone runs 29.6 km.",
-      "source": {
-        "title": "Hong Kong–Zhuhai–Macau Bridge",
-        "url": "https://en.wikipedia.org/wiki/Hong_Kong%E2%80%93Zhuhai%E2%80%93Macau_Bridge"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "bering-strait-width",
-      "kind": "places",
-      "question": "How far is Russia from the US across the Bering Strait?",
-      "unit": "kilometres",
-      "answer": 82,
-      "definition": "mainland to mainland, at the narrowest",
-      "fact": "In the middle of the strait, Russia's Big Diomede and the US's Little Diomede islands are just 3.8 km apart.",
-      "source": {
-        "title": "Bering Strait",
-        "url": "https://en.wikipedia.org/wiki/Bering_Strait"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "greenland-population",
-      "kind": "places",
-      "question": "How many people live in Greenland?",
-      "unit": "people",
-      "answer": 56542,
-      "definition": "2025",
-      "fact": "That makes it the least densely populated country in the world.",
-      "source": {
-        "title": "Greenland",
-        "url": "https://en.wikipedia.org/wiki/Greenland"
-      },
-      "typical": 10,
-      "easy": false
-    },
-    {
-      "id": "trans-siberian-length",
-      "kind": "places",
-      "question": "How long is the Trans-Siberian Railway?",
-      "unit": "kilometres",
-      "answer": 9289,
-      "definition": "Moscow to Vladivostok",
-      "fact": "It crosses eight time zones, a record for one railway line.",
-      "source": {
-        "title": "Trans-Siberian Railway",
-        "url": "https://en.wikipedia.org/wiki/Trans-Siberian_Railway"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "antarctica-winter-population",
-      "kind": "places",
-      "question": "How many people live in Antarctica in winter?",
-      "unit": "people",
-      "answer": 1000,
-      "definition": "researchers and their support staff",
-      "fact": "In summer the number swells to about 4,000.",
-      "source": {
-        "title": "Demographics of Antarctica",
-        "url": "https://en.wikipedia.org/wiki/Demographics_of_Antarctica"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "sun-width-in-earths",
-      "kind": "space",
-      "question": "How much wider than Earth is the Sun?",
-      "unit": "times",
-      "answer": 109,
-      "definition": "comparing diameters",
-      "fact": "The Sun holds 99.86% of all the mass in the Solar System.",
-      "source": {
-        "title": "Sun",
-        "url": "https://en.wikipedia.org/wiki/Sun"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "olympus-mons-height",
-      "kind": "space",
-      "question": "How tall is Olympus Mons, the giant volcano on Mars?",
-      "unit": "kilometres",
-      "answer": 22,
-      "definition": "above the Martian surface",
-      "fact": "It covers an area about the size of Italy.",
-      "source": {
-        "title": "Olympus Mons",
-        "url": "https://en.wikipedia.org/wiki/Olympus_Mons"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "saturn-v-height",
-      "kind": "space",
-      "question": "How tall was the Saturn V rocket?",
-      "unit": "metres",
-      "answer": 111,
-      "definition": "with the Apollo spacecraft on top",
-      "fact": "Its first stage alone was 42 m tall and 10 m wide.",
-      "source": {
-        "title": "Saturn V",
-        "url": "https://en.wikipedia.org/wiki/Saturn_V"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "mars-year",
-      "kind": "space",
-      "question": "How long is a year on Mars?",
-      "unit": "days",
-      "answer": 687,
-      "definition": "in Earth days",
-      "fact": "So its seasons last nearly twice as long as Earth's.",
-      "source": {
-        "title": "Mars",
-        "url": "https://en.wikipedia.org/wiki/Mars"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "giant-pumpkin-record",
-      "kind": "food",
-      "question": "How much did the heaviest pumpkin ever grown weigh?",
-      "unit": "kilograms",
-      "answer": 1431.5,
-      "definition": "world record as of 2026",
-      "fact": "A giant pumpkin can put on up to 23 kg in a single day.",
-      "source": {
-        "title": "Giant pumpkin",
-        "url": "https://en.wikipedia.org/wiki/Giant_pumpkin"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "jackfruit-weight",
-      "kind": "food",
-      "question": "How much can a single jackfruit weigh?",
-      "unit": "kilograms",
-      "answer": 50,
-      "definition": "the biggest ones",
-      "fact": "It is the largest fruit that grows on trees, up to 90 cm long.",
-      "source": {
-        "title": "Jackfruit",
-        "url": "https://en.wikipedia.org/wiki/Jackfruit"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "hot-dog-eating-record",
-      "kind": "food",
-      "question": "How many hot dogs did the record holder eat in 10 minutes?",
-      "unit": "hot dogs",
-      "answer": 76,
-      "definition": "with buns, Nathan's contest, 2021",
-      "fact": "In 2001 Takeru Kobayashi ate 50, nearly doubling the old record of 25.5.",
-      "source": {
-        "title": "Nathan's Hot Dog Eating Contest",
-        "url": "https://en.wikipedia.org/wiki/Nathan%27s_Hot_Dog_Eating_Contest"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "baguette-length",
-      "kind": "food",
-      "question": "How long is a typical French baguette?",
-      "unit": "centimetres",
-      "answer": 65,
-      "fact": "In the 19th century some French loaves were far longer, about 1.8 m.",
-      "source": {
-        "title": "Baguette",
-        "url": "https://en.wikipedia.org/wiki/Baguette"
-      },
-      "typical": 1.5,
-      "easy": true
-    },
-    {
-      "id": "gold-bar-weight",
-      "kind": "everyday",
-      "question": "How much does a standard central bank gold bar weigh?",
-      "unit": "kilograms",
-      "answer": 12.4,
-      "definition": "the Good Delivery bar that central banks trade",
-      "fact": "The largest gold bar ever made, cast in Dubai in 2024, weighed 300.12 kg.",
-      "source": {
-        "title": "Gold bar",
-        "url": "https://en.wikipedia.org/wiki/Gold_bar"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "longest-flight-distance",
-      "kind": "everyday",
-      "question": "How far does the world's longest non-stop flight go?",
-      "unit": "kilometres",
-      "answer": 15349,
-      "definition": "New York to Singapore, 2026",
-      "fact": "It is scheduled to take nearly 19 hours.",
-      "source": {
-        "title": "Longest flights",
-        "url": "https://en.wikipedia.org/wiki/Longest_flights"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "ever-given-length",
-      "kind": "everyday",
-      "question": "How long is the Ever Given, which blocked the Suez Canal?",
-      "unit": "metres",
-      "answer": 399.94,
-      "fact": "Wedged across the canal in 2021, it blocked traffic for six days and backed up over two hundred ships.",
-      "source": {
-        "title": "Ever Given",
-        "url": "https://en.wikipedia.org/wiki/Ever_Given"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "everest-height",
-      "kind": "nature",
-      "question": "How tall is Mount Everest?",
-      "unit": "metres",
-      "answer": 8848.86,
-      "definition": "above sea level, 2020 survey",
-      "fact": "China and Nepal once argued over whether to count its snow cap, a difference of about 4 m.",
-      "source": {
-        "title": "Mount Everest",
-        "url": "https://en.wikipedia.org/wiki/Mount_Everest"
-      },
-      "typical": 1.3,
-      "easy": true
-    },
-    {
-      "id": "tallest-tree-height",
-      "kind": "nature",
-      "question": "How tall is the tallest known living tree?",
-      "unit": "metres",
-      "answer": 116.22,
-      "definition": "Hyperion, a California coast redwood, 2026",
-      "fact": "It has grown about 67 cm since it was first measured in 2006.",
-      "source": {
-        "title": "Hyperion (tree)",
-        "url": "https://en.wikipedia.org/wiki/Hyperion_(tree)"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "lake-baikal-depth",
-      "kind": "nature",
-      "question": "How deep is Lake Baikal, the world's deepest lake?",
-      "unit": "metres",
-      "answer": 1642,
-      "definition": "at its deepest point",
-      "fact": "It holds more water than all of North America's Great Lakes combined.",
-      "source": {
-        "title": "Lake Baikal",
-        "url": "https://en.wikipedia.org/wiki/Lake_Baikal"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "bamboo-growth",
-      "kind": "nature",
-      "question": "How much can the fastest-growing bamboo grow in one day?",
-      "unit": "centimetres",
-      "answer": 91,
-      "definition": "Guinness record, in 24 hours",
-      "fact": "Most garden bamboos grow a more modest 3 to 10 cm a day in their growing season.",
-      "source": {
-        "title": "Bamboo",
-        "url": "https://en.wikipedia.org/wiki/Bamboo"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "great-barrier-reef-length",
-      "kind": "nature",
-      "question": "How long is the Great Barrier Reef?",
-      "unit": "kilometres",
-      "answer": 2300,
-      "fact": "It is made up of over 2,900 separate reefs and 900 islands.",
-      "source": {
-        "title": "Great Barrier Reef",
-        "url": "https://en.wikipedia.org/wiki/Great_Barrier_Reef"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "mercury-litre-weight",
-      "kind": "science",
-      "question": "How much does one litre of mercury weigh?",
-      "unit": "kilograms",
-      "answer": 13.546,
-      "definition": "liquid, at room temperature",
-      "fact": "Mercury is so dense that old lighthouse lenses floated on a bath of it, which worked as a bearing.",
-      "source": {
-        "title": "Mercury (element)",
-        "url": "https://en.wikipedia.org/wiki/Mercury_(element)"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "earth-spin-speed",
-      "kind": "science",
-      "question": "How fast does Earth spin at the equator?",
-      "unit": "kilometres per hour",
-      "answer": 1674.7,
-      "definition": "the speed of the ground",
-      "fact": "It slows away from the equator: about 1,184 km/h at 45° latitude, and zero at the poles.",
-      "source": {
-        "title": "Earth's rotation",
-        "url": "https://en.wikipedia.org/wiki/Earth%27s_rotation"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "inner-core-temperature",
-      "kind": "science",
-      "question": "How hot is it at the surface of Earth's inner core?",
-      "unit": "degrees Celsius",
-      "answer": 5430,
-      "definition": "estimate",
-      "fact": "That is about as hot as the surface of the Sun.",
-      "source": {
-        "title": "Earth's inner core",
-        "url": "https://en.wikipedia.org/wiki/Earth%27s_inner_core"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "candle-flame-temperature",
-      "kind": "science",
-      "question": "How hot is the hottest part of a candle flame?",
-      "unit": "degrees Celsius",
-      "answer": 1400,
-      "fact": "The hottest spot is just above the dull blue part at the base; the bright yellow zone is cooler.",
-      "source": {
-        "title": "Candle",
-        "url": "https://en.wikipedia.org/wiki/Candle"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "bolt-top-speed",
-      "kind": "sports",
-      "question": "How fast did Usain Bolt run at his top speed?",
-      "unit": "kilometres per hour",
-      "answer": 44.72,
-      "definition": "during his 100 m world record, 2009",
-      "fact": "His average over the whole race, start included, was 37.58 km/h.",
-      "source": {
-        "title": "Usain Bolt",
-        "url": "https://en.wikipedia.org/wiki/Usain_Bolt"
-      },
-      "typical": 1.5,
-      "easy": true
-    },
-    {
-      "id": "high-jump-record",
-      "kind": "sports",
-      "question": "How high is the men's high jump world record?",
-      "unit": "metres",
-      "answer": 2.45,
-      "fact": "Javier Sotomayor set it in 1993, and nobody has beaten it since.",
-      "source": {
-        "title": "Men's high jump world record progression",
-        "url": "https://en.wikipedia.org/wiki/Men%27s_high_jump_world_record_progression"
-      },
-      "typical": 1.3,
-      "easy": true
-    },
-    {
-      "id": "badminton-smash-speed",
-      "kind": "sports",
-      "question": "How fast is the fastest badminton smash recorded in a match?",
-      "unit": "kilometres per hour",
-      "answer": 426,
-      "fact": "The fastest tennis serve on record is only about 60% as fast.",
-      "source": {
-        "title": "Badminton",
-        "url": "https://en.wikipedia.org/wiki/Badminton"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "world-cup-trophy-weight",
-      "kind": "sports",
-      "question": "How much does the FIFA World Cup trophy weigh?",
-      "unit": "kilograms",
-      "answer": 6.175,
-      "fact": "It is hollow: in solid gold it would weigh 70 to 80 kg, too heavy to lift.",
-      "source": {
-        "title": "FIFA World Cup Trophy",
-        "url": "https://en.wikipedia.org/wiki/FIFA_World_Cup_Trophy"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "table-tennis-ball-weight",
-      "kind": "sports",
-      "question": "How much does a table tennis ball weigh?",
-      "unit": "grams",
-      "answer": 2.7,
-      "fact": "The rules also say it must bounce 24 to 26 cm when dropped from 30.5 cm onto steel.",
-      "source": {
-        "title": "Table tennis",
-        "url": "https://en.wikipedia.org/wiki/Table_tennis"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "terracotta-army-size",
-      "kind": "culture",
-      "question": "How many soldiers are in China's Terracotta Army?",
-      "unit": "soldiers",
-      "answer": 8000,
-      "definition": "2007 estimate, most still buried",
-      "fact": "Every figure is life-sized, about 1.75 to 2 m tall, and the officers are the tallest.",
-      "source": {
-        "title": "Terracotta Army",
-        "url": "https://en.wikipedia.org/wiki/Terracotta_Army"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "david-statue-height",
-      "kind": "culture",
-      "question": "How tall is Michelangelo's David?",
-      "unit": "metres",
-      "answer": 5.17,
-      "fact": "It was only measured exactly in 1998-99, and turned out taller than any source had said.",
-      "source": {
-        "title": "David (Michelangelo)",
-        "url": "https://en.wikipedia.org/wiki/David_(Michelangelo)"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "bayeux-tapestry-length",
-      "kind": "culture",
-      "question": "How long is the Bayeux Tapestry?",
-      "unit": "metres",
-      "answer": 68.38,
-      "fact": "It is only about 50 cm tall, and tells the story of the Norman conquest of England.",
-      "source": {
-        "title": "Bayeux Tapestry",
-        "url": "https://en.wikipedia.org/wiki/Bayeux_Tapestry"
-      },
-      "typical": 5,
-      "easy": false
-    },
-    {
-      "id": "hollywood-sign-letters",
-      "kind": "culture",
-      "question": "How tall are the letters of the Hollywood Sign?",
-      "unit": "metres",
-      "answer": 13.7,
-      "fact": "The original 1923 sign read HOLLYWOODLAND, in letters about 15 m tall, and was meant to last only a year and a half.",
-      "source": {
-        "title": "Hollywood Sign",
-        "url": "https://en.wikipedia.org/wiki/Hollywood_Sign"
-      },
-      "typical": 2,
-      "easy": false
-    },
-    {
-      "id": "woodstock-crowd",
-      "kind": "culture",
-      "question": "How many people came to the Woodstock festival in 1969?",
-      "unit": "people",
-      "answer": 500000,
-      "definition": "high estimate",
-      "fact": "The organisers had told the town to expect no more than 50,000.",
-      "source": {
-        "title": "Woodstock",
-        "url": "https://en.wikipedia.org/wiki/Woodstock"
-      },
-      "typical": 3,
-      "easy": false
-    },
-    {
-      "id": "nile-length",
-      "kind": "lists",
-      "question": "How long is the Nile?",
-      "unit": "kilometres",
-      "answer": 6650,
-      "fact": "Some scientists argue the Amazon is longer: it depends on where you say each river starts and ends.",
-      "source": {
-        "title": "List of river systems by length",
-        "url": "https://en.wikipedia.org/wiki/List_of_river_systems_by_length"
-      },
-      "typical": 2,
-      "easy": true
-    },
-    {
-      "id": "shanghai-metro-trips",
-      "kind": "lists",
-      "question": "How many trips are taken on the Shanghai Metro each year?",
-      "unit": "billion trips",
-      "answer": 3.7738,
-      "definition": "2024",
-      "fact": "No metro system in the world carries more passengers.",
-      "source": {
-        "title": "List of metro systems",
-        "url": "https://en.wikipedia.org/wiki/List_of_metro_systems"
-      },
-      "typical": 5,
-      "easy": false
-    }
-  ]
+ "version": 1,
+ "questions": [
+  {
+   "id": "adult-blood-volume",
+   "kind": "body",
+   "question": "How much blood is in a typical adult's body?",
+   "unit": "litres",
+   "answer": 5,
+   "fact": "Men and women carry about the same share of their body weight as blood, 7 to 8%.",
+   "source": {
+    "title": "Blood volume",
+    "url": "https://en.wikipedia.org/wiki/Blood_volume"
+   },
+   "typical": 2,
+   "easy": true
+  },
+  {
+   "id": "adult-bones",
+   "kind": "body",
+   "question": "How many bones are in an adult human skeleton?",
+   "unit": "bones",
+   "answer": 206,
+   "fact": "Babies are born with around 270; some of them fuse together on the way to adulthood.",
+   "source": {
+    "title": "Human skeleton",
+    "url": "https://en.wikipedia.org/wiki/Human_skeleton"
+   },
+   "typical": 1.5,
+   "easy": true
+  },
+  {
+   "id": "breath-volume",
+   "kind": "body",
+   "question": "How much air does an adult take in with one breath?",
+   "unit": "litres",
+   "answer": 0.5,
+   "definition": "an ordinary breath at rest",
+   "fact": "British rower Pete Reed is reported to have the largest lung capacity on record, 11.68 litres.",
+   "source": {
+    "title": "Lung volumes and capacities",
+    "url": "https://en.wikipedia.org/wiki/Lung_volumes_and_capacities"
+   },
+   "typical": 3,
+   "easy": false
+  },
+  {
+   "id": "tallest-person",
+   "kind": "body",
+   "question": "How tall was Robert Wadlow, the tallest person ever recorded?",
+   "unit": "metres",
+   "answer": 2.72,
+   "fact": "He weighed 199 kg when he died, aged 22.",
+   "source": {
+    "title": "Robert Wadlow",
+    "url": "https://en.wikipedia.org/wiki/Robert_Wadlow"
+   },
+   "typical": 1.3,
+   "easy": true
+  },
+  {
+   "id": "elephant-pregnancy",
+   "kind": "animals",
+   "question": "How long does an African bush elephant's pregnancy last?",
+   "unit": "months",
+   "answer": 22,
+   "fact": "It's the longest pregnancy of any mammal.",
+   "source": {
+    "title": "African bush elephant",
+    "url": "https://en.wikipedia.org/wiki/African_bush_elephant"
+   },
+   "typical": 2,
+   "easy": false
+  },
+  {
+   "id": "eiffel-tower-height",
+   "kind": "landmarks",
+   "question": "How tall is the Eiffel Tower?",
+   "unit": "metres",
+   "answer": 330,
+   "definition": "to the tip",
+   "fact": "It was the tallest human-made structure in the world for 41 years, until New York's Chrysler Building in 1930.",
+   "source": {
+    "title": "Eiffel Tower",
+    "url": "https://en.wikipedia.org/wiki/Eiffel_Tower"
+   },
+   "typical": 2,
+   "easy": true
+  },
+  {
+   "id": "new-york-city-population",
+   "kind": "places",
+   "question": "What is the population of New York City?",
+   "unit": "million people",
+   "answer": 8.80419,
+   "definition": "city proper, 2020 census",
+   "fact": "An estimated 800 languages are spoken there, making it the most linguistically diverse city in the world.",
+   "source": {
+    "title": "New York City",
+    "url": "https://en.wikipedia.org/wiki/New_York_City"
+   },
+   "typical": 2,
+   "easy": true
+  },
+  {
+   "id": "iss-orbit-time",
+   "kind": "space",
+   "question": "How long does the International Space Station take to circle Earth once?",
+   "unit": "minutes",
+   "answer": 92.9,
+   "fact": "It travels at about 27,600 km/h and circles Earth about 15.5 times a day.",
+   "source": {
+    "title": "International Space Station",
+    "url": "https://en.wikipedia.org/wiki/International_Space_Station"
+   },
+   "typical": 3,
+   "easy": false
+  },
+  {
+   "id": "moonwalkers",
+   "kind": "space",
+   "question": "How many people walked on the Moon during the Apollo program?",
+   "unit": "people",
+   "answer": 12,
+   "fact": "Nobody who landed there ever went back for a second time.",
+   "source": {
+    "title": "Apollo program",
+    "url": "https://en.wikipedia.org/wiki/Apollo_program"
+   },
+   "typical": 2,
+   "easy": true
+  },
+  {
+   "id": "speed-of-sound",
+   "kind": "science",
+   "question": "How fast does sound travel through air?",
+   "unit": "metres per second",
+   "answer": 343,
+   "definition": "at 20 °C",
+   "fact": "Through iron it goes almost 15 times faster.",
+   "source": {
+    "title": "Speed of sound",
+    "url": "https://en.wikipedia.org/wiki/Speed_of_sound"
+   },
+   "typical": 3,
+   "easy": false
+  },
+  {
+   "id": "neapolitan-pizza-oven",
+   "kind": "food",
+   "question": "How hot must the oven be for a true Neapolitan pizza?",
+   "unit": "degrees Celsius",
+   "answer": 485,
+   "fact": "At that heat the pizza bakes in 60 to 90 seconds.",
+   "source": {
+    "title": "Neapolitan pizza",
+    "url": "https://en.wikipedia.org/wiki/Neapolitan_pizza"
+   },
+   "typical": 2,
+   "easy": false
+  },
+  {
+   "id": "a380-capacity",
+   "kind": "everyday",
+   "question": "How many passengers is an Airbus A380 certified to carry?",
+   "unit": "passengers",
+   "answer": 853,
+   "definition": "maximum",
+   "fact": "In the evacuation test, everyone got out in 78 seconds with half the exits blocked.",
+   "source": {
+    "title": "Airbus A380",
+    "url": "https://en.wikipedia.org/wiki/Airbus_A380"
+   },
+   "typical": 2,
+   "easy": false
+  },
+  {
+   "id": "olympic-pool-volume",
+   "kind": "everyday",
+   "question": "How much water does an Olympic swimming pool hold?",
+   "unit": "million litres",
+   "answer": 2.5,
+   "definition": "at the minimum Olympic depth",
+   "fact": "It's 50 m long, 25 m wide and at least 2 m deep: 2,500 cubic metres of water.",
+   "source": {
+    "title": "Olympic-size swimming pool",
+    "url": "https://en.wikipedia.org/wiki/Olympic-size_swimming_pool"
+   },
+   "typical": 5,
+   "easy": false
+  },
+  {
+   "id": "marathon-distance",
+   "kind": "sports",
+   "question": "How long is a marathon?",
+   "unit": "kilometres",
+   "answer": 42.195,
+   "fact": "The distance was fixed in 1921, copied from the course of the 1908 London Olympics.",
+   "source": {
+    "title": "Marathon",
+    "url": "https://en.wikipedia.org/wiki/Marathon"
+   },
+   "typical": 1.3,
+   "easy": true
+  },
+  {
+   "id": "longest-tennis-match",
+   "kind": "sports",
+   "question": "How long did the longest professional tennis match last?",
+   "unit": "hours",
+   "answer": 11,
+   "definition": "playing time, Wimbledon 2010",
+   "fact": "John Isner beat Nicolas Mahut 70-68 in the fifth set, after 11 hours 5 minutes spread over three days.",
+   "source": {
+    "title": "Isner–Mahut match at the 2010 Wimbledon Championships",
+    "url": "https://en.wikipedia.org/wiki/Isner%E2%80%93Mahut_match_at_the_2010_Wimbledon_Championships"
+   },
+   "typical": 2,
+   "easy": false
+  },
+  {
+   "id": "piano-keys",
+   "kind": "culture",
+   "question": "How many keys does a modern piano have?",
+   "unit": "keys",
+   "answer": 88,
+   "fact": "In Mozart's day pianos had five octaves; today's 88 keys span more than seven.",
+   "source": {
+    "title": "Piano",
+    "url": "https://en.wikipedia.org/wiki/Piano"
+   },
+   "typical": 1.3,
+   "easy": true
+  },
+  {
+   "id": "phantom-performances",
+   "kind": "culture",
+   "question": "How many performances did The Phantom of the Opera give on Broadway?",
+   "unit": "performances",
+   "answer": 13981,
+   "definition": "original run, 1988 to 2023",
+   "fact": "It is Broadway's longest-running show, by over 3,500 performances.",
+   "source": {
+    "title": "The Phantom of the Opera (1986 musical)",
+    "url": "https://en.wikipedia.org/wiki/The_Phantom_of_the_Opera_(1986_musical)"
+   },
+   "typical": 5,
+   "easy": false
+  },
+  {
+   "id": "czech-beer",
+   "kind": "lists",
+   "question": "How much beer does the Czech Republic drink per person each year?",
+   "unit": "litres",
+   "answer": 126,
+   "definition": "2024",
+   "fact": "That's about 250 half-litre glasses for every Czech, children included, and no country drinks more.",
+   "source": {
+    "title": "List of countries by beer consumption per capita",
+    "url": "https://en.wikipedia.org/wiki/List_of_countries_by_beer_consumption_per_capita"
+   },
+   "typical": 2,
+   "easy": false
+  },
+  {
+   "id": "breath-hold-record",
+   "kind": "body",
+   "question": "How long is the record for holding your breath?",
+   "unit": "minutes",
+   "answer": 11.58,
+   "definition": "official freediving record, breathing only air first",
+   "fact": "Breathe pure oxygen beforehand and the record is over 29 minutes.",
+   "source": {
+    "title": "Static apnea",
+    "url": "https://en.wikipedia.org/wiki/Static_apnea"
+   },
+   "typical": 3,
+   "easy": false
+  },
+  {
+   "id": "ostrich-egg-weight",
+   "kind": "animals",
+   "question": "How much does an ostrich egg weigh?",
+   "unit": "kilograms",
+   "answer": 1.4,
+   "fact": "That is over 20 times a chicken's egg, yet it's the smallest egg of any bird relative to the mother's size.",
+   "source": {
+    "title": "Common ostrich",
+    "url": "https://en.wikipedia.org/wiki/Common_ostrich"
+   },
+   "typical": 2,
+   "easy": true
+  },
+  {
+   "id": "hummingbird-heart-rate",
+   "kind": "animals",
+   "question": "How fast can a hummingbird's heart beat?",
+   "unit": "beats per minute",
+   "answer": 1260,
+   "definition": "fastest measured, in a blue-throated hummingbird",
+   "fact": "At night, in a torpor, a hummingbird's heart can slow to around 50 beats a minute.",
+   "source": {
+    "title": "Hummingbird",
+    "url": "https://en.wikipedia.org/wiki/Hummingbird"
+   },
+   "typical": 3,
+   "easy": false
+  },
+  {
+   "id": "cheetah-top-speed",
+   "kind": "animals",
+   "question": "How fast can a cheetah run?",
+   "unit": "kilometres per hour",
+   "answer": 104,
+   "definition": "highest reliably measured speed",
+   "fact": "Its acceleration is the real weapon: from 0 to 97 km/h in under 3 seconds.",
+   "source": {
+    "title": "Cheetah",
+    "url": "https://en.wikipedia.org/wiki/Cheetah"
+   },
+   "typical": 1.3,
+   "easy": true
+  },
+  {
+   "id": "antarctica-winter-population",
+   "kind": "places",
+   "question": "How many people live in Antarctica in winter?",
+   "unit": "people",
+   "answer": 1000,
+   "definition": "researchers and their support staff",
+   "fact": "In summer the number swells to about 4,000.",
+   "source": {
+    "title": "Demographics of Antarctica",
+    "url": "https://en.wikipedia.org/wiki/Demographics_of_Antarctica"
+   },
+   "typical": 5,
+   "easy": false
+  },
+  {
+   "id": "mars-year",
+   "kind": "space",
+   "question": "How long is a year on Mars?",
+   "unit": "days",
+   "answer": 687,
+   "definition": "in Earth days",
+   "fact": "So its seasons last nearly twice as long as Earth's.",
+   "source": {
+    "title": "Mars",
+    "url": "https://en.wikipedia.org/wiki/Mars"
+   },
+   "typical": 2,
+   "easy": false
+  },
+  {
+   "id": "hot-dog-eating-record",
+   "kind": "food",
+   "question": "How many hot dogs did the record holder eat in 10 minutes?",
+   "unit": "hot dogs",
+   "answer": 76,
+   "definition": "with buns, Nathan's contest, 2021",
+   "fact": "In 2001 Takeru Kobayashi ate 50, nearly doubling the old record of 25.5.",
+   "source": {
+    "title": "Nathan's Hot Dog Eating Contest",
+    "url": "https://en.wikipedia.org/wiki/Nathan%27s_Hot_Dog_Eating_Contest"
+   },
+   "typical": 2,
+   "easy": false
+  },
+  {
+   "id": "earth-spin-speed",
+   "kind": "science",
+   "question": "How fast does Earth spin at the equator?",
+   "unit": "kilometres per hour",
+   "answer": 1674.7,
+   "definition": "the speed of the ground",
+   "fact": "It slows away from the equator: about 1,184 km/h at 45° latitude, and zero at the poles.",
+   "source": {
+    "title": "Earth's rotation",
+    "url": "https://en.wikipedia.org/wiki/Earth%27s_rotation"
+   },
+   "typical": 5,
+   "easy": false
+  },
+  {
+   "id": "bolt-top-speed",
+   "kind": "sports",
+   "question": "How fast did Usain Bolt run at his top speed?",
+   "unit": "kilometres per hour",
+   "answer": 44.72,
+   "definition": "during his 100 m world record, 9.58 s",
+   "fact": "His average over the whole race, start included, was 37.58 km/h.",
+   "source": {
+    "title": "Usain Bolt",
+    "url": "https://en.wikipedia.org/wiki/Usain_Bolt"
+   },
+   "typical": 1.5,
+   "easy": true
+  },
+  {
+   "id": "high-jump-record",
+   "kind": "sports",
+   "question": "How high is the men's high jump world record?",
+   "unit": "metres",
+   "answer": 2.45,
+   "fact": "Javier Sotomayor set it in 1993, and nobody has beaten it since.",
+   "source": {
+    "title": "Men's high jump world record progression",
+    "url": "https://en.wikipedia.org/wiki/Men%27s_high_jump_world_record_progression"
+   },
+   "typical": 1.3,
+   "easy": true
+  },
+  {
+   "id": "woodstock-crowd",
+   "kind": "culture",
+   "question": "How many people came to the Woodstock festival in 1969?",
+   "unit": "people",
+   "answer": 500000,
+   "definition": "high estimate",
+   "fact": "The organisers had told the town to expect no more than 50,000.",
+   "source": {
+    "title": "Woodstock",
+    "url": "https://en.wikipedia.org/wiki/Woodstock"
+   },
+   "typical": 3,
+   "easy": false
+  },
+  {
+   "id": "air-oxygen-share",
+   "kind": "science",
+   "round": "percent",
+   "question": "How much of the air we breathe is oxygen?",
+   "unit": "percent",
+   "answer": 20.95,
+   "definition": "dry air, by volume",
+   "fact": "Nearly all the rest is nitrogen, at 78%, and carbon dioxide is only about 0.04%.",
+   "source": {
+    "title": "Atmosphere of Earth",
+    "url": "https://en.wikipedia.org/wiki/Atmosphere_of_Earth"
+   },
+   "easy": false
+  },
+  {
+   "id": "moon-visible-share",
+   "kind": "space",
+   "round": "percent",
+   "question": "How much of the Moon's surface can we see from Earth?",
+   "unit": "percent",
+   "answer": 59,
+   "definition": "added up over time",
+   "fact": "It always turns the same face to us, but it wobbles as it orbits, so we see a little way round its edges.",
+   "source": {
+    "title": "Libration",
+    "url": "https://en.wikipedia.org/wiki/Libration"
+   },
+   "easy": false
+  },
+  {
+   "id": "wright-first-flight-year",
+   "kind": "science",
+   "round": "year",
+   "question": "In what year did the Wright brothers first fly a plane?",
+   "unit": "year",
+   "answer": 1903,
+   "fact": "That first flight, at Kitty Hawk in North Carolina, lasted 12 seconds and covered 37 metres.",
+   "source": {
+    "title": "Wright brothers",
+    "url": "https://en.wikipedia.org/wiki/Wright_brothers"
+   },
+   "easy": false
+  },
+  {
+   "id": "first-youtube-video-year",
+   "kind": "everyday",
+   "round": "year",
+   "question": "In what year was the first video uploaded to YouTube?",
+   "unit": "year",
+   "answer": 2005,
+   "fact": "Called Me at the Zoo, it is 19 seconds of co-founder Jawed Karim in front of the elephants at San Diego Zoo.",
+   "source": {
+    "title": "Me at the zoo",
+    "url": "https://en.wikipedia.org/wiki/Me_at_the_zoo"
+   },
+   "easy": false
+  },
+  {
+   "id": "fingernail-growth",
+   "round": "estimate",
+   "kind": "body",
+   "question": "How much does a fingernail grow in a month?",
+   "unit": "millimetres",
+   "answer": 3.5,
+   "definition": "average adult",
+   "fact": "Toenails grow about half as fast, about 1.6 mm a month, and a whole fingernail takes three to six months to regrow.",
+   "source": {
+    "title": "Nail (anatomy)",
+    "url": "https://en.wikipedia.org/wiki/Nail_(anatomy)"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "oldest-person-age",
+   "round": "estimate",
+   "kind": "body",
+   "question": "How old was the oldest person whose age has been verified?",
+   "unit": "years",
+   "answer": 122.45,
+   "fact": "Jeanne Calment of France lived 122 years and 164 days, and said that at 13 she had met Vincent van Gogh in her uncle's shop.",
+   "source": {
+    "title": "Jeanne Calment",
+    "url": "https://en.wikipedia.org/wiki/Jeanne_Calment"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "lunar-day",
+   "round": "estimate",
+   "kind": "space",
+   "question": "How long is a day on the Moon, from one sunrise to the next?",
+   "unit": "days",
+   "answer": 29.53,
+   "definition": "in Earth days",
+   "fact": "It matches the cycle of the Moon's phases, because the Moon turns once per orbit and always shows us the same face.",
+   "source": {
+    "title": "Lunar day",
+    "url": "https://en.wikipedia.org/wiki/Lunar_day"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "perseverance-trip",
+   "round": "estimate",
+   "kind": "space",
+   "question": "How long did NASA's Perseverance rover take to fly from Earth to Mars?",
+   "unit": "days",
+   "answer": 203,
+   "definition": "launch to landing",
+   "fact": "It left in a launch window of under a month, when Earth and Mars were best placed for the trip, alongside missions from China and the UAE.",
+   "source": {
+    "title": "Mars 2020",
+    "url": "https://en.wikipedia.org/wiki/Mars_2020"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "venus-surface-temperature",
+   "round": "estimate",
+   "kind": "space",
+   "question": "How hot is the surface of Venus?",
+   "unit": "degrees Celsius",
+   "answer": 464,
+   "definition": "average",
+   "fact": "Its thick carbon dioxide air traps the heat, making it hotter than Mercury, which is much closer to the Sun.",
+   "source": {
+    "title": "Venus",
+    "url": "https://en.wikipedia.org/wiki/Venus"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "longest-space-stay",
+   "round": "estimate",
+   "kind": "space",
+   "question": "How long is the longest single trip anyone has made in space?",
+   "unit": "days",
+   "answer": 437.75,
+   "fact": "Valeri Polyakov spent it on the Mir space station, to learn how a human body would cope with a long trip to Mars.",
+   "source": {
+    "title": "Valeri Polyakov",
+    "url": "https://en.wikipedia.org/wiki/Valeri_Polyakov"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "hen-eggs-per-year",
+   "round": "estimate",
+   "kind": "animals",
+   "question": "How many eggs can a laying hen produce in a year?",
+   "unit": "eggs",
+   "answer": 300,
+   "fact": "The record is 371 eggs in 364 days.",
+   "source": {
+    "title": "Chicken",
+    "url": "https://en.wikipedia.org/wiki/Chicken"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "elephant-daily-food",
+   "round": "estimate",
+   "kind": "animals",
+   "question": "How much food can an elephant eat in a day?",
+   "unit": "kilograms",
+   "answer": 300,
+   "definition": "at most",
+   "fact": "Less than half of it gets digested, so its dung feeds other animals, from dung beetles to monkeys.",
+   "source": {
+    "title": "Elephant",
+    "url": "https://en.wikipedia.org/wiki/Elephant"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "oldest-bread",
+   "round": "estimate",
+   "kind": "food",
+   "question": "How old are the oldest known remains of bread?",
+   "unit": "years",
+   "answer": 14500,
+   "fact": "It was found at a Natufian site in Jordan's north-eastern desert, older than farming, which made grain a staple from around 10,000 BC.",
+   "source": {
+    "title": "Bread",
+    "url": "https://en.wikipedia.org/wiki/Bread"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "us-penny-cost",
+   "round": "estimate",
+   "kind": "everyday",
+   "question": "How much did it cost the US Mint to make one penny?",
+   "unit": "cents",
+   "answer": 3.69,
+   "definition": "2024",
+   "fact": "Losing money on every coin is largely why the Mint stopped making pennies for circulation in November 2025.",
+   "source": {
+    "title": "Penny (United States coin)",
+    "url": "https://en.wikipedia.org/wiki/Penny_(United_States_coin)"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "concorde-speed",
+   "round": "estimate",
+   "kind": "everyday",
+   "question": "How fast did Concorde fly?",
+   "unit": "kilometres per hour",
+   "answer": 2150,
+   "definition": "average cruising speed",
+   "fact": "That's more than twice the speed of other airliners, so it crossed the Atlantic in just under 3.5 hours.",
+   "source": {
+    "title": "Concorde",
+    "url": "https://en.wikipedia.org/wiki/Concorde"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "youtube-new-video",
+   "round": "estimate",
+   "kind": "culture",
+   "question": "How much new video did YouTube get every minute?",
+   "unit": "hours",
+   "answer": 500,
+   "definition": "as of May 2019",
+   "fact": "That's up from 48 hours a minute in 2011.",
+   "source": {
+    "title": "YouTube",
+    "url": "https://en.wikipedia.org/wiki/YouTube"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "chess-first-moves",
+   "round": "estimate",
+   "kind": "culture",
+   "question": "How many positions are possible after one move by each chess player?",
+   "unit": "positions",
+   "answer": 400,
+   "fact": "White and Black each have 20 first moves, and after five moves each there are over 69 trillion possible games.",
+   "source": {
+    "title": "Shannon number",
+    "url": "https://en.wikipedia.org/wiki/Shannon_number"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "football-pitch-length",
+   "round": "estimate",
+   "kind": "sports",
+   "question": "How long is a football pitch?",
+   "unit": "metres",
+   "answer": 105,
+   "definition": "FIFA's recommended size for top matches",
+   "fact": "The Laws of the Game allow anything from 91 to 119 m, so pitches really do vary.",
+   "source": {
+    "title": "Football pitch",
+    "url": "https://en.wikipedia.org/wiki/Football_pitch"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "tour-de-france-distance",
+   "round": "estimate",
+   "kind": "sports",
+   "question": "How far does a Tour de France rider cycle in all?",
+   "unit": "kilometres",
+   "answer": 3498,
+   "definition": "2024 race",
+   "fact": "It's split into 21 stages over three weeks, with only two rest days.",
+   "source": {
+    "title": "2024 Tour de France",
+    "url": "https://en.wikipedia.org/wiki/2024_Tour_de_France"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "f1-fastest-pit-stop",
+   "round": "estimate",
+   "kind": "sports",
+   "question": "How long did the fastest Formula One pit stop take?",
+   "unit": "seconds",
+   "answer": 1.8,
+   "definition": "record as of 2026",
+   "fact": "A crew of up to 20 mechanics changes all four tyres in that time.",
+   "source": {
+    "title": "Pit stop",
+    "url": "https://en.wikipedia.org/wiki/Pit_stop"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "record-transfer-fee",
+   "round": "estimate",
+   "kind": "sports",
+   "question": "How much was the most expensive football transfer ever?",
+   "unit": "million euros",
+   "answer": 222,
+   "definition": "Neymar to Paris Saint-Germain, 2017",
+   "fact": "It more than doubled the previous record, Paul Pogba's move to Manchester United a year earlier.",
+   "source": {
+    "title": "List of most expensive association football transfers",
+    "url": "https://en.wikipedia.org/wiki/List_of_most_expensive_association_football_transfers"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "people-ever-born",
+   "round": "estimate",
+   "kind": "places",
+   "question": "How many people have ever been born?",
+   "unit": "billion people",
+   "answer": 117,
+   "definition": "Population Reference Bureau estimate, 2020",
+   "fact": "That makes the people alive today about 6.7% of everyone who has ever lived.",
+   "source": {
+    "title": "World population",
+    "url": "https://en.wikipedia.org/wiki/World_population"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "everest-boiling-point",
+   "round": "estimate",
+   "kind": "science",
+   "question": "At what temperature does water boil on top of Mount Everest?",
+   "unit": "degrees Celsius",
+   "answer": 71,
+   "fact": "The air pressure up there is about 34 kPa, a third of sea level's, so water boils long before 100 °C.",
+   "source": {
+    "title": "Boiling point",
+    "url": "https://en.wikipedia.org/wiki/Boiling_point"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "dinosaur-extinction",
+   "round": "estimate",
+   "kind": "nature",
+   "question": "How long ago did the dinosaurs die out?",
+   "unit": "million years",
+   "answer": 66,
+   "definition": "all but the birds",
+   "fact": "An asteroid strike wiped out about three quarters of all plant and animal species on Earth.",
+   "source": {
+    "title": "Cretaceous–Paleogene extinction event",
+    "url": "https://en.wikipedia.org/wiki/Cretaceous%E2%80%93Paleogene_extinction_event"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "first-homo-sapiens",
+   "round": "estimate",
+   "kind": "science",
+   "question": "How long ago did our species, Homo sapiens, first appear?",
+   "unit": "years",
+   "answer": 300000,
+   "fact": "For all but the last 12,000 or so of those years, every human lived as a hunter-gatherer.",
+   "source": {
+    "title": "Human",
+    "url": "https://en.wikipedia.org/wiki/Human"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "horizon-distance",
+   "round": "estimate",
+   "kind": "science",
+   "question": "How far away is the horizon when you look out to sea?",
+   "unit": "kilometres",
+   "answer": 4.65,
+   "definition": "standing on the beach, eyes 1.7 m up",
+   "fact": "Climb a 100 m tower and it's 35.7 km away.",
+   "source": {
+    "title": "Horizon",
+    "url": "https://en.wikipedia.org/wiki/Horizon"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "skydiver-fall-speed",
+   "round": "estimate",
+   "kind": "sports",
+   "question": "How fast does a skydiver fall before the parachute opens?",
+   "unit": "kilometres per hour",
+   "answer": 198,
+   "definition": "terminal speed, lying face down",
+   "fact": "Jumping from 38,887 m up, where the air is thin, Felix Baumgartner reached 380 m/s, about 1,368 km/h.",
+   "source": {
+    "title": "Terminal velocity",
+    "url": "https://en.wikipedia.org/wiki/Terminal_velocity"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "van-gogh-oil-paintings",
+   "round": "estimate",
+   "kind": "culture",
+   "question": "How many oil paintings did Vincent van Gogh make?",
+   "unit": "oil paintings",
+   "answer": 860,
+   "fact": "With drawings and watercolours he made about 2,100 works, most of them in the last two years of his life.",
+   "source": {
+    "title": "Vincent van Gogh",
+    "url": "https://en.wikipedia.org/wiki/Vincent_van_Gogh"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "record-painting-price",
+   "round": "estimate",
+   "kind": "culture",
+   "question": "How much did the most expensive painting ever sold go for?",
+   "unit": "million dollars",
+   "answer": 450.3,
+   "definition": "Leonardo's Salvator Mundi, 2017",
+   "fact": "Decades earlier it had sold for just £45, when it was thought to be the work of a follower.",
+   "source": {
+    "title": "Salvator Mundi (painting)",
+    "url": "https://en.wikipedia.org/wiki/Salvator_Mundi_(painting)"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "moon-landing-audience",
+   "round": "estimate",
+   "kind": "culture",
+   "question": "How many people watched the first Moon landing live on TV?",
+   "unit": "million people",
+   "answer": 600,
+   "definition": "estimate",
+   "fact": "That was roughly one in five of everyone alive at the time.",
+   "source": {
+    "title": "Apollo 11",
+    "url": "https://en.wikipedia.org/wiki/Apollo_11"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "empire-state-build-time",
+   "round": "estimate",
+   "kind": "landmarks",
+   "question": "How long did it take to build the Empire State Building?",
+   "unit": "days",
+   "answer": 410,
+   "definition": "first steel columns to opening day",
+   "fact": "At its fastest the frame rose by about four and a half floors a week.",
+   "source": {
+    "title": "Empire State Building",
+    "url": "https://en.wikipedia.org/wiki/Empire_State_Building"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "deepest-hole",
+   "round": "estimate",
+   "kind": "nature",
+   "question": "How deep is the deepest hole ever drilled?",
+   "unit": "metres",
+   "answer": 12262,
+   "definition": "the Kola Superdeep Borehole, Russia",
+   "fact": "It took 19 years to drill, and got only about a third of the way through the crust beneath it.",
+   "source": {
+    "title": "Kola Superdeep Borehole",
+    "url": "https://en.wikipedia.org/wiki/Kola_Superdeep_Borehole"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "all-gold-mined",
+   "round": "estimate",
+   "kind": "everyday",
+   "question": "How much gold has been mined in all of history?",
+   "unit": "tonnes",
+   "answer": 201296,
+   "definition": "all the gold above ground, 2020",
+   "fact": "Put together, it would make a cube just 21.7 m on each side.",
+   "source": {
+    "title": "Gold",
+    "url": "https://en.wikipedia.org/wiki/Gold"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-mobile-phone-weight",
+   "round": "estimate",
+   "kind": "everyday",
+   "question": "How much did the first handheld mobile phone weigh?",
+   "unit": "grams",
+   "answer": 790,
+   "definition": "Motorola DynaTAC, the version approved for sale",
+   "fact": "A full charge took about 10 hours and gave just 30 minutes of talking.",
+   "source": {
+    "title": "DynaTAC",
+    "url": "https://en.wikipedia.org/wiki/DynaTAC"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "fresh-water-share",
+   "round": "percent",
+   "kind": "nature",
+   "question": "What share of Earth's water is fresh water?",
+   "unit": "percent",
+   "answer": 2.5,
+   "fact": "About 69% of that is frozen as ice and snow, and only 0.3% is liquid water at the surface.",
+   "source": {
+    "title": "Water distribution on Earth",
+    "url": "https://en.wikipedia.org/wiki/Water_distribution_on_Earth"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "forest-cover-share",
+   "round": "percent",
+   "kind": "nature",
+   "question": "What share of Earth's land is covered by forest?",
+   "unit": "percent",
+   "answer": 32,
+   "definition": "2025",
+   "fact": "More than half of all forest is in just five countries: Russia, Brazil, Canada, the US and China.",
+   "source": {
+    "title": "Forest",
+    "url": "https://en.wikipedia.org/wiki/Forest"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "netherlands-below-sea-level",
+   "round": "percent",
+   "kind": "places",
+   "question": "What share of the Netherlands lies below sea level?",
+   "unit": "percent",
+   "answer": 26,
+   "fact": "About 21% of the Dutch live below sea level too, on land kept dry by dykes, canals and pumping stations.",
+   "source": {
+    "title": "Netherlands",
+    "url": "https://en.wikipedia.org/wiki/Netherlands"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "southern-hemisphere-people",
+   "round": "percent",
+   "kind": "places",
+   "question": "What share of the world's people live south of the equator?",
+   "unit": "percent",
+   "answer": 11,
+   "fact": "It holds only 32.7% of Earth's land, since 80.9% of its surface is water.",
+   "source": {
+    "title": "Southern Hemisphere",
+    "url": "https://en.wikipedia.org/wiki/Southern_Hemisphere"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "wild-mammals-share",
+   "round": "percent",
+   "kind": "animals",
+   "question": "What share of all mammals on Earth, by weight, are wild?",
+   "unit": "percent",
+   "answer": 4,
+   "definition": "the rest are people and livestock",
+   "fact": "On land it's under 2%: nearly all the rest is people and farm animals.",
+   "source": {
+    "title": "Biomass (ecology)",
+    "url": "https://en.wikipedia.org/wiki/Biomass_(ecology)"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "internet-users-share",
+   "round": "percent",
+   "kind": "everyday",
+   "question": "What share of the world's people use the internet?",
+   "unit": "percent",
+   "answer": 74,
+   "definition": "2025",
+   "fact": "That's up from 60% in 2020, but still leaves about 2.2 billion people offline.",
+   "source": {
+    "title": "Global Internet usage",
+    "url": "https://en.wikipedia.org/wiki/Global_Internet_usage"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "beetle-share-of-animals",
+   "round": "percent",
+   "kind": "animals",
+   "question": "What share of all known animal species are beetles?",
+   "unit": "percent",
+   "answer": 25,
+   "fact": "With hundreds of thousands of described species, beetles are the largest order of all, and almost 40% of known arthropods.",
+   "source": {
+    "title": "Beetle",
+    "url": "https://en.wikipedia.org/wiki/Beetle"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "brain-energy-share",
+   "round": "percent",
+   "kind": "body",
+   "question": "What share of the body's energy can the brain use?",
+   "unit": "percent",
+   "answer": 20,
+   "fact": "It uses more than any other organ, though it's only about 2% of the body's weight.",
+   "source": {
+    "title": "Human brain",
+    "url": "https://en.wikipedia.org/wiki/Human_brain"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "mars-gravity-share",
+   "round": "percent",
+   "kind": "space",
+   "question": "On Mars, what share of your Earth weight would you feel?",
+   "unit": "percent",
+   "answer": 38,
+   "fact": "Mars is about half Earth's width but has only 11% of its mass, so it pulls far less.",
+   "source": {
+    "title": "Mars",
+    "url": "https://en.wikipedia.org/wiki/Mars"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "amazon-in-brazil",
+   "round": "percent",
+   "kind": "nature",
+   "question": "What share of the Amazon rainforest is in Brazil?",
+   "unit": "percent",
+   "answer": 60,
+   "fact": "Peru has 13% and Colombia 10%, and six more countries and territories share the rest.",
+   "source": {
+    "title": "Amazon rainforest",
+    "url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "greenland-ice-share",
+   "round": "percent",
+   "kind": "places",
+   "question": "What share of Greenland is covered by ice?",
+   "unit": "percent",
+   "answer": 80,
+   "definition": "its ice sheet",
+   "fact": "If it all melted, the oceans would rise by about 7.4 m.",
+   "source": {
+    "title": "Greenland ice sheet",
+    "url": "https://en.wikipedia.org/wiki/Greenland_ice_sheet"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "ordinary-matter-share",
+   "round": "percent",
+   "kind": "space",
+   "question": "What share of the universe is ordinary matter, like stars and people?",
+   "unit": "percent",
+   "answer": 4.9,
+   "definition": "by mass and energy",
+   "fact": "The rest is dark energy, about 68%, and dark matter, about 27%.",
+   "source": {
+    "title": "Universe",
+    "url": "https://en.wikipedia.org/wiki/Universe"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "avocado-fat-share",
+   "round": "percent",
+   "kind": "food",
+   "question": "What share of an avocado's flesh is fat?",
+   "unit": "percent",
+   "answer": 14.66,
+   "definition": "by weight",
+   "fact": "Most of the rest is water, about 73%.",
+   "source": {
+    "title": "Avocado",
+    "url": "https://en.wikipedia.org/wiki/Avocado"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "red-green-colour-blind-men",
+   "round": "percent",
+   "kind": "body",
+   "question": "What share of men are red-green colour blind?",
+   "unit": "percent",
+   "answer": 8,
+   "definition": "men of Northern European descent",
+   "fact": "In women it's only about 0.5%, because the genes for it sit on the X chromosome.",
+   "source": {
+    "title": "Color blindness",
+    "url": "https://en.wikipedia.org/wiki/Color_blindness"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "ring-of-fire-earthquakes",
+   "round": "percent",
+   "kind": "nature",
+   "question": "What share of the world's earthquakes happen along the Pacific Ring of Fire?",
+   "unit": "percent",
+   "answer": 90,
+   "fact": "The belt runs about 40,000 km around the Pacific, and holds about two thirds of the world's volcanoes too.",
+   "source": {
+    "title": "Ring of Fire",
+    "url": "https://en.wikipedia.org/wiki/Ring_of_Fire"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "left-handed-share",
+   "round": "percent",
+   "kind": "body",
+   "question": "What share of people are left-handed?",
+   "unit": "percent",
+   "answer": 10,
+   "fact": "If both parents are left-handed, their child has a 26% chance of being left-handed too.",
+   "source": {
+    "title": "Handedness",
+    "url": "https://en.wikipedia.org/wiki/Handedness"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "body-water-share",
+   "round": "percent",
+   "kind": "body",
+   "question": "What share of an adult's body weight is water?",
+   "unit": "percent",
+   "answer": 60,
+   "fact": "Muscle is about 75% water and fat only about 10%, so the share varies from person to person.",
+   "source": {
+    "title": "Body water",
+    "url": "https://en.wikipedia.org/wiki/Body_water"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "first-iphone",
+   "round": "year",
+   "kind": "everyday",
+   "question": "When did the first iPhone go on sale?",
+   "unit": "year",
+   "answer": 2007,
+   "fact": "It launched without an App Store, which only opened a year later.",
+   "source": {
+    "title": "IPhone (1st generation)",
+    "url": "https://en.wikipedia.org/wiki/IPhone_(1st_generation)"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "first-email",
+   "round": "year",
+   "kind": "everyday",
+   "question": "When was the first email sent from one computer to another?",
+   "unit": "year",
+   "answer": 1971,
+   "fact": "Ray Tomlinson sent it over ARPANET, and picked the @ sign to separate the user's name from the computer's.",
+   "source": {
+    "title": "Ray Tomlinson",
+    "url": "https://en.wikipedia.org/wiki/Ray_Tomlinson"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-text-message",
+   "round": "year",
+   "kind": "everyday",
+   "question": "When was the first text message sent to a mobile phone?",
+   "unit": "year",
+   "answer": 1992,
+   "fact": "It read 'Merry Christmas', and was typed on a personal computer and sent to a colleague's phone.",
+   "source": {
+    "title": "SMS",
+    "url": "https://en.wikipedia.org/wiki/SMS"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-bitcoins",
+   "round": "year",
+   "kind": "everyday",
+   "question": "When were the first bitcoins created?",
+   "unit": "year",
+   "answer": 2009,
+   "fact": "The first notable purchase of goods with them came the next year: two pizzas for 10,000 bitcoins.",
+   "source": {
+    "title": "History of bitcoin",
+    "url": "https://en.wikipedia.org/wiki/History_of_bitcoin"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "titanic-sinking",
+   "round": "year",
+   "kind": "culture",
+   "question": "When did the Titanic sink?",
+   "unit": "year",
+   "answer": 1912,
+   "fact": "It went down on its maiden voyage, less than three hours after hitting an iceberg.",
+   "source": {
+    "title": "Titanic",
+    "url": "https://en.wikipedia.org/wiki/Titanic"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "first-powered-flight",
+   "round": "year",
+   "kind": "science",
+   "question": "When did the Wright brothers make the first powered aeroplane flight?",
+   "unit": "year",
+   "answer": 1903,
+   "fact": "It lasted 12 seconds and covered 37 m; by the day's fourth flight they managed 59 seconds.",
+   "source": {
+    "title": "Wright Flyer",
+    "url": "https://en.wikipedia.org/wiki/Wright_Flyer"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "sputnik-launch",
+   "round": "year",
+   "kind": "space",
+   "question": "When was the first satellite, Sputnik 1, launched?",
+   "unit": "year",
+   "answer": 1957,
+   "fact": "It circled Earth every 96 minutes, beeping, until its batteries died three weeks later.",
+   "source": {
+    "title": "Sputnik 1",
+    "url": "https://en.wikipedia.org/wiki/Sputnik_1"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-modern-olympics",
+   "round": "year",
+   "kind": "sports",
+   "question": "When were the first modern Olympic Games held?",
+   "unit": "year",
+   "answer": 1896,
+   "fact": "They took place in Athens, with 241 athletes from 14 nations, all of them men.",
+   "source": {
+    "title": "1896 Summer Olympics",
+    "url": "https://en.wikipedia.org/wiki/1896_Summer_Olympics"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "first-harry-potter-book",
+   "round": "year",
+   "kind": "culture",
+   "question": "When was the first Harry Potter book published?",
+   "unit": "year",
+   "answer": 1997,
+   "fact": "Most publishers thought it too long, until the eight-year-old daughter of Bloomsbury's boss said it was 'so much better than anything else'.",
+   "source": {
+    "title": "Harry Potter and the Philosopher's Stone",
+    "url": "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher%27s_Stone"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "first-star-wars-film",
+   "round": "year",
+   "kind": "culture",
+   "question": "When did the first Star Wars film come out?",
+   "unit": "year",
+   "answer": 1977,
+   "fact": "It became the highest-grossing film ever made, until E.T. overtook it.",
+   "source": {
+    "title": "Star Wars (film)",
+    "url": "https://en.wikipedia.org/wiki/Star_Wars_(film)"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "lego-brick-patent",
+   "round": "year",
+   "kind": "everyday",
+   "question": "When was the modern Lego brick designed?",
+   "unit": "year",
+   "answer": 1958,
+   "fact": "Bricks made that year still click together with the ones sold today.",
+   "source": {
+    "title": "Lego",
+    "url": "https://en.wikipedia.org/wiki/Lego"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "penicillin-discovery",
+   "round": "year",
+   "kind": "science",
+   "question": "When did Alexander Fleming discover penicillin?",
+   "unit": "year",
+   "answer": 1928,
+   "fact": "He spotted a mould killing the bacteria on a dish he had left out while away on holiday.",
+   "source": {
+    "title": "History of penicillin",
+    "url": "https://en.wikipedia.org/wiki/History_of_penicillin"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-underground-railway",
+   "round": "year",
+   "kind": "places",
+   "question": "When did the world's first underground railway open, in London?",
+   "unit": "year",
+   "answer": 1863,
+   "fact": "Steam engines pulled its trains, filling stations and carriages with smoke, until the line was electrified in 1905.",
+   "source": {
+    "title": "Metropolitan Railway",
+    "url": "https://en.wikipedia.org/wiki/Metropolitan_Railway"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "everest-first-ascent",
+   "round": "year",
+   "kind": "nature",
+   "question": "When was Mount Everest first climbed to the top?",
+   "unit": "year",
+   "answer": 1953,
+   "fact": "Edmund Hillary and Tenzing Norgay reached the top on 29 May, and the news broke in London on the morning of Queen Elizabeth II's coronation.",
+   "source": {
+    "title": "1953 British Mount Everest expedition",
+    "url": "https://en.wikipedia.org/wiki/1953_British_Mount_Everest_expedition"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "sydney-opera-house-opening",
+   "round": "year",
+   "kind": "landmarks",
+   "question": "When did the Sydney Opera House open?",
+   "unit": "year",
+   "answer": 1973,
+   "fact": "It opened ten years late, at more than 14 times its first budget.",
+   "source": {
+    "title": "Sydney Opera House",
+    "url": "https://en.wikipedia.org/wiki/Sydney_Opera_House"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "coca-cola-invented",
+   "round": "year",
+   "kind": "food",
+   "question": "When was Coca-Cola invented?",
+   "unit": "year",
+   "answer": 1886,
+   "fact": "John Pemberton first sold it at an Atlanta pharmacy for five cents a glass, as an alcohol-free take on his coca wine tonic.",
+   "source": {
+    "title": "Coca-Cola",
+    "url": "https://en.wikipedia.org/wiki/Coca-Cola"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-heart-transplant",
+   "round": "year",
+   "kind": "body",
+   "question": "When was the first human heart transplant?",
+   "unit": "year",
+   "answer": 1967,
+   "fact": "Christiaan Barnard did it in Cape Town, and his patient lived for 18 days.",
+   "source": {
+    "title": "Heart transplantation",
+    "url": "https://en.wikipedia.org/wiki/Heart_transplantation"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-youtube-video",
+   "round": "year",
+   "kind": "culture",
+   "question": "When was the first video uploaded to YouTube?",
+   "unit": "year",
+   "answer": 2005,
+   "fact": "It's 19 seconds of co-founder Jawed Karim at San Diego Zoo, talking about elephants.",
+   "source": {
+    "title": "Me at the zoo",
+    "url": "https://en.wikipedia.org/wiki/Me_at_the_zoo"
+   },
+   "easy": true,
+   "verified": true
+  }
+ ]
 }

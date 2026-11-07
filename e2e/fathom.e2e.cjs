@@ -1,11 +1,17 @@
 // Fathom, the estimation beta (#fathom): five questions that ask for a number. The questions come from
-// e2e/fixtures/fathom/questions.json (twelve real facts, one per kind), served in place of public/fathom/questions.json.
+// e2e/fixtures/fathom/questions.json (twelve real facts, one per kind, all estimates, so a draw from it fills the
+// percent and year rounds with estimates), served in place of public/fathom/questions.json; the percent and year
+// rounds add two real questions of their own (PERCENT, YEAR).
 // - A full game on phone and desktop: the draw (five kinds, the first easy), the scoring rule in view on the first
 //   question before answering (and on the results), the field (no scale keys or words, the number grouped with commas
 //   as it's typed and the caret after the same digit, "2.5m" still read), invalid input, the reveal (plain closeness,
 //   the same for every question; no "most people miss by" line), the running total from the second question, the
 //   results (the total is the sum), COPY RESULT, NEW QUESTIONS draws new questions, the game's own save is left alone,
 //   and a build without a backend sends and queues nothing.
+// - A percent round and a year round on phone and desktop: each one's rule in view before its answer (and all three on
+//   the results), the field (a decimal keypad and "%" for a percent, 0 to 100; a number pad for a year, never grouped
+//   as "2,007"), the points by points off and by years off, the miss and the sonar on the round's own scale, the
+//   results and the share text; at 320px every message on one line, no sideways scroll, and every control 44px.
 // - A unit with a scale word ("million people"): the short number typed, and the whole amount read back in the unit.
 // - A reload picks the game up where it was, the results included.
 // - The sonar: the answer in the middle, the squid left for too low and right for too high by how far off (clamped at
@@ -70,6 +76,36 @@ function openFathom(vp, { save, serve = bank(), setup, ...opts } = {}) {
  */
 const points = (guess, answer) =>
   Math.abs(guess - answer) <= answer * 0.01 ? 100 : Math.min(99, Math.round(100 * Math.max(0, 1 - Math.abs(Math.log10(guess / answer))) ** 2));
+/** A percent: each point off costs 3 (within half a point, 100). A year: each year off costs 5. */
+const percentPoints = (guess, answer) => (Math.abs(guess - answer) < 0.5 ? 100 : Math.min(99, Math.max(0, Math.round(100 - 3 * Math.abs(guess - answer)))));
+const yearPoints = (guess, answer) => Math.max(0, 100 - 5 * Math.abs(guess - answer));
+
+/** A real percent question and a real year question (as in public/fathom/questions.json), for the new rounds. */
+const PERCENT = {
+  id: "moon-visible-share",
+  kind: "space",
+  round: "percent",
+  question: "How much of the Moon's surface can we see from Earth?",
+  unit: "percent",
+  answer: 59,
+  definition: "added up over time",
+  fact: "It always turns the same face to us, but it wobbles as it orbits, so we see a little way round its edges.",
+  source: { title: "Libration", url: "https://en.wikipedia.org/wiki/Libration" },
+  easy: false,
+};
+const YEAR = {
+  id: "harry-potter-first-book-year",
+  kind: "culture",
+  round: "year",
+  question: "In what year did the first Harry Potter book come out?",
+  unit: "year",
+  answer: 1997,
+  fact: "Its first print run was just 500 hardback copies, 300 of them sent to libraries.",
+  source: { title: "Harry Potter and the Philosopher's Stone", url: "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher%27s_Stone" },
+  easy: true,
+};
+/** The fixture bank with the percent and the year question. */
+const ROUNDS_BANK = bank({ status: 200, contentType: "application/json", body: JSON.stringify({ version: 1, questions: [...BANK, PERCENT, YEAR] }) });
 
 const attr = (page, testId, name) => page.getByTestId(testId).getAttribute(name);
 const shownQuestion = async (page) => byId.get(await attr(page, "fathom-question", "data-question"));
@@ -206,7 +242,7 @@ describe("Fathom", { concurrency: true }, () => {
       for (const make of guesses) {
         await page.keyboard.press("Enter");
         await page.getByTestId("fathom-input").waitFor();
-        assert.equal(await page.getByTestId("fathom-rule").count(), 0, "the rule is said on the first question only");
+        assert.equal(await page.getByTestId("fathom-rule").count(), 0, "the rule is said on its round's first question only (all estimates here)");
         const q = await shownQuestion(page);
         played.push(q);
         const g = make(q);
@@ -314,6 +350,183 @@ describe("Fathom", { concurrency: true }, () => {
     await page.getByTestId("fathom-reveal").waitFor();
     assert.equal(Number(await attr(page, "fathom-guess", "data-value")), 8.8);
     assert.equal(await attr(page, "fathom-band", "data-band"), "dead-on");
+    await ctx.close();
+  });
+
+  // The owner's revamp: a percent round (scored by points off) and a year round (by years off) beside the estimates.
+  // Each says its own rule before its answer (UX 21), and its field fits a phone (UX 20).
+  for (const vp of VIEWPORTS) {
+    test(`a percent round and a year round: the rule, the field, the points, the sonar, the results (${vp.name})`, async () => {
+      const ids = ["eiffel-tower-height", PERCENT.id, YEAR.id, "adult-bones", "piano-keys"];
+      const { ctx, page } = await openFathom(vp, { serve: ROUNDS_BANK, save: { recent: [], game: { ids, guesses: [], at: 0 } }, reducedMotion: "reduce" });
+      if (vp.name === "desktop") await ctx.grantPermissions(["clipboard-read", "clipboard-write"]);
+      const field = page.getByTestId("fathom-input");
+      await field.waitFor();
+      /** The round's rule: one line, in view, above the field, before the answer. */
+      const ruleBefore = async (round) => {
+        const rules = page.getByTestId("fathom-rule");
+        assert.equal(await rules.count(), 1, `${round}: one rule`);
+        assert.equal(await rules.getAttribute("data-round"), round);
+        const box = await rules.boundingBox();
+        assert.ok(box.y >= 0 && box.y + box.height <= vp.viewport.height, `${round}: the rule in view`);
+        assert.ok(box.y < (await field.boundingBox()).y, `${round}: the rule before the field`);
+      };
+      /** The squid's place on the sonar, from -1 (the left edge, where the score is 0) to 1. */
+      const squidAt = () =>
+        page.getByTestId("fathom-gauge").evaluate((el) => {
+          const cols = el.querySelector("svg").viewBox.baseVal.width;
+          const mid = (cols - 1) / 2;
+          return (Number(el.querySelector(".g-squid").dataset.x) - mid) / (mid - 4);
+        });
+
+      // The estimate first, with its own rule.
+      await ruleBefore("estimate");
+      await lockIn(page, "330");
+      await next(page);
+
+      // The percent: "%" beside a decimal keypad, its rule, 0 to 100.
+      assert.equal(await attr(page, "fathom-question", "data-round"), "percent");
+      await ruleBefore("percent");
+      assert.equal((await page.getByTestId("fathom-unit").textContent()).trim(), "%");
+      assert.equal(await field.getAttribute("inputmode"), "decimal");
+      for (const [text, want] of [["59%", 59], ["59.5", 59.5], ["0", 0]]) {
+        await field.fill(text);
+        assert.equal(await echoValue(page), want, `"${text}"`);
+        assert.equal((await page.getByTestId("fathom-echo").textContent()).trim(), "", `"${text}": the field says it`);
+      }
+      await field.fill("59 percent");
+      assert.equal(await echoValue(page), 59);
+      assert.equal((await page.getByTestId("fathom-echo").textContent()).trim(), "59%", "the echo says what it read");
+      for (const bad of ["150", "-5", "abc"]) {
+        await field.fill(bad);
+        await page.getByTestId("fathom-lock").click();
+        assert.equal(await attr(page, "fathom-echo", "data-tone"), "error", `"${bad}" is refused`);
+        assert.equal(await page.getByTestId("fathom-reveal").count(), 0);
+      }
+      // 6 points low: 100 - 3 x 6.
+      await lockIn(page, "53");
+      const percentWant = percentPoints(53, PERCENT.answer);
+      assert.equal(percentWant, 82);
+      assert.equal(Number(await attr(page, "fathom-reveal", "data-points")), percentWant);
+      assert.equal(Number(await attr(page, "fathom-guess", "data-value")), 53);
+      assert.equal((await page.getByTestId("fathom-answer").textContent()).trim(), "59%");
+      assert.equal((await page.getByTestId("fathom-guess").textContent()).trim(), "53%");
+      assert.match(await page.getByTestId("fathom-off").textContent(), /^6 points? low$/, "the miss in points");
+      assert.ok(Math.abs((await squidAt()) - -6 / (100 / 3)) < 0.05, "the squid left, by points off on a 33-point scale");
+      assert.equal(await page.getByTestId("fathom-rule").count(), 1, "the rule stays with the percent's reveal");
+      assert.equal(Number(await attr(page, "fathom-running", "data-total")), 100 + percentWant, "the running total");
+      assert.equal(await noHScroll(page), true);
+      await next(page);
+
+      // The year: a number pad, typed as four digits and never grouped.
+      assert.equal(await attr(page, "fathom-question", "data-round"), "year");
+      await ruleBefore("year");
+      assert.equal(await field.getAttribute("inputmode"), "numeric");
+      assert.ok((await page.getByTestId("fathom-unit").textContent()).trim().length > 0, "the unit shows beside the field");
+      await field.focus();
+      await page.keyboard.type("2007");
+      assert.equal(await field.inputValue(), "2007", "a year shows as typed, not 2,007");
+      assert.equal(await field.evaluate((el) => el.selectionStart), 4);
+      assert.equal(await echoValue(page), 2007);
+      assert.equal((await page.getByTestId("fathom-echo").textContent()).trim(), "");
+      for (const bad of ["2007.5", "10000", "abc"]) {
+        await field.fill(bad);
+        await page.getByTestId("fathom-lock").click();
+        assert.equal(await attr(page, "fathom-echo", "data-tone"), "error", `"${bad}" is refused`);
+        assert.equal(await page.getByTestId("fathom-reveal").count(), 0);
+      }
+      // 3 years early: 100 - 5 x 3.
+      await lockIn(page, "1994");
+      const yearWant = yearPoints(1994, YEAR.answer);
+      assert.equal(yearWant, 85);
+      assert.equal(Number(await attr(page, "fathom-reveal", "data-points")), yearWant);
+      assert.equal((await page.getByTestId("fathom-answer").textContent()).trim(), "1997");
+      assert.equal((await page.getByTestId("fathom-guess").textContent()).trim(), "1994");
+      assert.match(await page.getByTestId("fathom-off").textContent(), /^3 years? early$/, "the miss in years");
+      assert.ok(Math.abs((await squidAt()) - -3 / 20) < 0.05, "the squid left, by years off on a 20-year scale");
+      assert.equal(await noHScroll(page), true);
+
+      // Two estimates more, without a rule (the estimate's was on the first).
+      for (const id of ["adult-bones", "piano-keys"]) {
+        await next(page);
+        assert.equal(await page.getByTestId("fathom-rule").count(), 0, `${id}: no rule on a second estimate`);
+        await lockIn(page, String(byId.get(id).answer));
+      }
+      await next(page);
+      await page.getByTestId("fathom-results").waitFor();
+      const rows = page.getByTestId("fathom-row");
+      assert.deepEqual(await rows.evaluateAll((els) => els.map((el) => el.dataset.round)), ["estimate", "percent", "year", "estimate", "estimate"]);
+      const expected = [100, percentWant, yearWant, 100, 100];
+      assert.deepEqual(await rows.evaluateAll((els) => els.map((el) => Number(el.dataset.points))), expected);
+      const total = expected.reduce((a, b) => a + b, 0);
+      assert.equal(Number(await attr(page, "fathom-total", "data-total")), total);
+      // The recap shows a percent with its sign and a year as typed.
+      const nums = await page.getByTestId("fathom-row-nums").allTextContents();
+      assert.match(nums[1], /\b53%.*\b59%/);
+      assert.match(nums[2], /\b1994\b.*\b1997\b/);
+      assert.doesNotMatch(nums[2], /1,99/);
+      // Every round's rule again, once each.
+      assert.deepEqual(await page.getByTestId("fathom-rule").evaluateAll((els) => els.map((el) => el.dataset.round)), ["estimate", "percent", "year"]);
+      assert.equal(await noHScroll(page), true);
+      if (vp.name === "desktop") {
+        await page.getByTestId("fathom-copy").click();
+        const text = await page.evaluate(() => navigator.clipboard.readText());
+        assert.match(text, new RegExp(`^Fathom beta ${total}/500\\n\\S( \\S){4}$`));
+      }
+      await ctx.close();
+    });
+  }
+
+  // UX 20 for the new rounds at the narrowest phone: every message on one line, the keys where they were, no sideways
+  // scroll and every control 44px to the finger, on the question, its reveal and the results.
+  test("a percent and a year at 320px: one-line messages, no sideways scroll, 44px controls", async () => {
+    const vp = { viewport: { width: 320, height: 700 }, isMobile: true, hasTouch: true };
+    const ids = [PERCENT.id, YEAR.id, "speed-of-light", "moon-distance", "un-members"];
+    const { ctx, page } = await openFathom(vp, { serve: ROUNDS_BANK, save: { recent: [], game: { ids, guesses: [], at: 0 } }, reducedMotion: "reduce" });
+    const field = page.getByTestId("fathom-input");
+    const reach = async (where) => {
+      assert.equal(await noHScroll(page), true, `${where} scrolls sideways`);
+      for (const y of [0, 99999]) {
+        await page.evaluate((y) => scrollTo(0, y), y);
+        await page.waitForTimeout(50);
+        assert.deepEqual(await shortReach(page), [], where);
+      }
+    };
+    const messages = {
+      percent: [["", true], ["150", true], ["-5", true], ["abc", true], ["5 kg", true], ["59 percent", false]],
+      year: [["", true], ["2007.5", true], ["10000", true], ["0", true], ["-5", true], ["abc", true], ["AD 1997", false]],
+    };
+    for (const [round, guess] of [["percent", "53"], ["year", "1994"]]) {
+      await field.waitFor();
+      await field.fill("42");
+      const rest = await page.getByTestId("fathom-lock").boundingBox();
+      for (const [text, refused] of messages[round]) {
+        await field.fill(text);
+        if (refused && text) await page.getByTestId("fathom-lock").click();
+        else if (refused) await field.press("Enter");
+        const echo = await page.getByTestId("fathom-echo").evaluate((el) => {
+          const r = document.createRange();
+          r.selectNodeContents(el);
+          const lines = new Set([...r.getClientRects()].map((b) => Math.round(b.top))).size;
+          return { lines, cut: el.scrollWidth > el.clientWidth + 0.5, tone: el.dataset.tone, text: el.textContent };
+        });
+        assert.ok(echo.lines <= 1 && !echo.cut, `${round} "${text}": "${echo.text}" takes ${echo.lines} lines${echo.cut ? ", cut" : ""}`);
+        assert.equal(echo.tone, refused ? "error" : "value", `${round} "${text}"`);
+        assert.deepEqual(await page.getByTestId("fathom-lock").boundingBox(), rest, `${round} "${text}": the keys moved`);
+      }
+      await field.fill(guess);
+      await reach(`the ${round} question`);
+      await page.getByTestId("fathom-lock").click();
+      await page.getByTestId("fathom-reveal").waitFor();
+      await reach(`the ${round} reveal`);
+      await next(page);
+    }
+    for (const text of ["300000", "400k", "190"]) {
+      await lockIn(page, text);
+      await next(page);
+    }
+    await page.getByTestId("fathom-results").waitFor();
+    await reach("the results");
     await ctx.close();
   });
 
