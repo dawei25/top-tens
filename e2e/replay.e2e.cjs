@@ -1,6 +1,6 @@
 // Play again on a past run: a run opened from Past runs (a list run's view, a Blitz run's view) leads with Play again,
 // a fresh free game on that same list, except for a list held right now (today's list or Blitz, or a future day's): a
-// quiet line instead. A list's results never offer Play again, just ended or opened again (Roll another list is the way on).
+// quiet line instead. A list's results never offer Play again, just ended or opened again (Roll new list is the way on).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, TODAY, open, go, hash, store, guess, puzzle, noHScroll } = require("./helpers.cjs");

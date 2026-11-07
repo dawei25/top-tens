@@ -67,7 +67,7 @@ const SCREENS = [
   },
   {
     // A Random list before its first guess: the roll box beside the guess panel. (The picker has closed: focus left it.)
-    name: "rolled list, Roll another list",
+    name: "rolled list, Roll new list",
     setup: async (page) => {
       await page.getByTestId("random-list").click();
       await page.getByTestId("reroll").waitFor();
@@ -123,7 +123,7 @@ const SCREENS = [
   },
   {
     // A Random Blitz before its clock starts: the roll box beside the guess panel.
-    name: "rolled Blitz, Roll another list",
+    name: "rolled Blitz, Roll new list",
     setup: async (page) => {
       await go(page, "");
       await page.getByTestId("random-blitz").click();

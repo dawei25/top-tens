@@ -1,4 +1,4 @@
-// Roll another list on the results (data-testid play-again / blitz-again): on a random list it lands on another list,
+// Roll new list on the results (data-testid play-again / blitz-again): on a random list it lands on another list,
 // a fresh game, in the same category when the list was rolled in one; on a Blitz it lands on another open Blitz list,
 // a fresh round, keeping the category too. The key never says "Play again", which players read as the same list again.
 const { test, before, after } = require("node:test");
@@ -20,7 +20,7 @@ async function giveUp(page) {
 }
 
 for (const vp of VIEWPORTS) {
-  test(`list Roll another list lands on another list (${vp.name})`, async () => {
+  test(`list Roll new list lands on another list (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp);
     const lists = await index(page);
     const category = (m) => lists.find((x) => x.id === m).category;
@@ -38,7 +38,7 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("lives").getAttribute("data-lives"), "5");
     assert.equal(await page.locator('[data-testid="slot"][data-state="found"]').count(), 0);
 
-    // Rolled in a category: Roll another list stays in it.
+    // Rolled in a category: Roll new list stays in it.
     await page.getByTestId("nav-home").click();
     await page.getByTestId("random-list-categories").click();
     const counts = {};
@@ -57,7 +57,7 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 
-  test(`Blitz Roll another list lands on another Blitz list (${vp.name})`, async () => {
+  test(`Blitz Roll new list lands on another Blitz list (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp);
     const lists = await index(page);
     const screen = page.getByTestId("blitz-screen");
