@@ -1486,6 +1486,145 @@
    },
    "easy": true,
    "verified": true
+  },
+  {
+   "id": "name-country-1m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-population",
+   "target": 1000000,
+   "question": "Name a country with about 1 million people",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries score 70 or more, within about 1.45x of 1 million (expect Cyprus, Estonia, Djibouti, Eswatini, Mauritius, Fiji, Timor-Leste), and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-country-10m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-population",
+   "target": 10000000,
+   "question": "Name a country with about 10 million people",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries within about 1.45x of 10 million (expect Sweden, Portugal, Greece, Czechia, Hungary, Austria, Jordan, UAE), and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-country-50m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-population",
+   "target": 50000000,
+   "question": "Name a country with about 50 million people",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries within about 1.45x of 50 million (expect Colombia, South Korea, Spain, Kenya, Myanmar, Sudan, Uganda), and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-country-100m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-population",
+   "target": 100000000,
+   "question": "Name a country with about 100 million people",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries within about 1.45x of 100 million (expect Vietnam, DR Congo, Egypt, Philippines, Japan, Ethiopia, Iran), and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-country-as-big-as-france",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-area",
+   "target": 551695,
+   "question": "Name a country about as big as France",
+   "definition": "mainland France, without its overseas regions",
+   "except": [
+    "France"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries within about 1.45x of 551,695 km² (expect Ukraine, Kenya, Madagascar, Botswana, Spain, Thailand, Yemen); check France is named \"France\" on the list, and that 551,695 is its mainland figure on the page, and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-country-as-big-as-uk",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-area",
+   "target": 242495,
+   "question": "Name a country about as big as the UK",
+   "except": [
+    "United Kingdom"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries within about 1.45x of 242,495 km² (expect Ghana, Romania, Laos, Uganda, Guinea, Guyana, Belarus); set target to the list's own figure for the UK, and check it is named \"United Kingdom\" there, and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-city-1m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "cities-population",
+   "target": 1000000,
+   "question": "Name a city with about 1 million people",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 cities within about 1.45x of 1 million; add a definition naming the list's measure (city proper, urban area or metro area), since a city's population means three different things, and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-city-10m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "cities-population",
+   "target": 10000000,
+   "question": "Name a city with about 10 million people",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 cities within about 1.45x of 10 million (city proper: expect Lima, Cairo, Jakarta, Seoul, London, Bangkok); add a definition naming the list's measure, and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-country-no-land-borders",
+   "round": "name",
+   "kind": "places",
+   "list": "land-borders",
+   "target": 0,
+   "question": "Name a country with no land borders",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries with 0 or 1 land borders (expect Japan, Iceland, Australia, New Zealand, Madagascar, Cuba, Sri Lanka), and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-country-3-borders",
+   "round": "name",
+   "kind": "places",
+   "list": "land-borders",
+   "target": 3,
+   "question": "Name a country with 3 land borders",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries within one border of 3 (expect Mexico, Finland, Norway, Chile, Vietnam, Malaysia, Indonesia, North Korea at 3), and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-country-6-borders",
+   "round": "name",
+   "kind": "places",
+   "list": "land-borders",
+   "target": 6,
+   "question": "Name a country with 6 land borders",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries within one border of 6 (expect Italy, India, Ethiopia, Afghanistan, Chad, Cameroon, Iraq at 6), and every obvious answer registers (type them)."
+  },
+  {
+   "id": "name-country-9-borders",
+   "round": "name",
+   "kind": "places",
+   "list": "land-borders",
+   "target": 9,
+   "question": "Name a country with 9 land borders",
+   "easy": false,
+   "verified": false,
+   "note": "Once the list lands: at least 3 countries within one border of 9 (expect Germany and DR Congo at 9; France, Austria, Serbia, Tanzania, Turkey, Zambia at 8; Brazil at 10), and every obvious answer registers (type them)."
   }
  ]
 }

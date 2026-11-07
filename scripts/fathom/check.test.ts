@@ -458,8 +458,15 @@ describe("name-it questions", () => {
   // When the real lists are there (once the data agent's branch is merged), the real bank is checked against them.
   it("the real bank passes with whatever lists are in public/fathom/lists", () => {
     expect(checkBank(loadBank(), fileLists())).toEqual([]);
-    const real = readList(JSON.parse(readFileSync(join(FIXTURES, "land-borders.json"), "utf8")));
-    expect(real?.scoring).toBe("steps");
+  });
+  // A dry run of the lists landing: the real bank's name-it questions against the fixtures (a subset of each list, so a
+  // target fair here is very likely fair on the whole list; the judge still checks the real one).
+  it("the real bank's name-it questions pass against the fixture lists", () => {
+    const bank = loadBank() as { questions: Record<string, unknown>[] };
+    expect(bank.questions.filter((q) => q.round === "name").length).toBeGreaterThanOrEqual(10);
+    expect(checkBank(bank, fixtures)).toEqual([]);
+    expect(bankWarnings(bank, fixtures)).toEqual([]);
+    expect(readList(JSON.parse(readFileSync(join(FIXTURES, "land-borders.json"), "utf8")))?.scoring).toBe("steps");
   });
 });
 
