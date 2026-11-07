@@ -7,7 +7,8 @@ exports.BACKEND_ENV = {
   VITE_PRIVACY_CONTACT: "privacy@example.com",
 };
 
-// The same with a Google client ID (backend-google.e2e.cjs): Google sign-in from this site to Google and back. Pasted
-// with a trailing newline, the way Vercel kept the owner's: the game trims it.
+// The launch build (backend-google.e2e.cjs): a Google client ID, for Google sign-in from this site to Google and back,
+// and no VITE_SIGN_IN, so the default methods: Google alone (owner, Nov 7: "google only for now"). The client ID is
+// pasted with a trailing newline, the way Vercel kept the owner's: the game trims it.
 exports.GOOGLE_CLIENT_ID = "1234567890-e2etest.apps.googleusercontent.com";
-exports.GOOGLE_ENV = { ...exports.BACKEND_ENV, VITE_GOOGLE_CLIENT_ID: `${exports.GOOGLE_CLIENT_ID}\n` };
+exports.GOOGLE_ENV = { ...exports.BACKEND_ENV, VITE_SIGN_IN: "", VITE_GOOGLE_CLIENT_ID: `${exports.GOOGLE_CLIENT_ID}\n` };

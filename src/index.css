@@ -1067,10 +1067,11 @@ a {
     padding: 6px 16px;
   }
   .stage .control-card .guess {
+    --guess-pad: 16px;
     order: 2;
     position: static;
     max-width: none;
-    padding: 16px;
+    padding: var(--guess-pad);
     gap: 10px;
   }
   /* The feedback line reads under the box here (above it on narrower screens, where the box sits low). */
@@ -1078,20 +1079,30 @@ a {
     order: 1;
     align-items: flex-start;
   }
-  /* A rolled game before play: the roll box (see .roll-box) in the open water right of the control card, as tall as
-     the card, out to the frame's edge. The column takes in that strip; the card keeps its width. */
+  /* A rolled game before play: the roll box (see .roll-box) in the open water right of the control card, level with
+     the guess row (the input and GUESS), out to the frame's edge. The column takes in that strip (a size container,
+     so the box can be as wide as the strip: 100cqw is the column); the card keeps its width. The guess form places
+     the box: the row is its first part here (the feedback line reads under it), so the box sits at the form's top
+     padding, as tall as the row (its input and keys are 52px). */
   .stage .control-col.has-roll {
     grid-column: 2 / 4;
+    container-type: inline-size;
   }
   .stage .control-col.has-roll > * {
     width: var(--ctl-w);
   }
+  /* Relative only to place the box: no offset (the dock's sticky `bottom` would lift it). */
+  .stage .control-col.has-roll .guess {
+    position: relative;
+    bottom: auto;
+  }
   .stage .control-card .roll-box {
-    top: 0;
-    bottom: 0;
-    left: calc(var(--ctl-w) + var(--gap));
-    right: 0;
-    width: auto;
+    top: var(--guess-pad);
+    height: 52px;
+    /* Past the card's 1px edge and the gap, to the end of the column. */
+    left: calc(100% + 1px + var(--gap));
+    right: auto;
+    width: calc(100cqw - var(--ctl-w) - var(--gap));
     background: var(--glass-panel) var(--scan);
   }
   .stage .control-card .misses {
@@ -1879,12 +1890,15 @@ a {
 }
 @media (min-width: 700px) {
   .guess {
+    /* The padding on the guess row's side (here its bottom; from 1100px all round): the roll box sits level with the
+       row by it. */
+    --guess-pad: 12px;
     align-self: center;
     align-items: stretch;
     gap: 10px;
     width: 100%;
     max-width: 600px;
-    padding: 10px 12px 12px;
+    padding: 10px 12px var(--guess-pad);
     border-radius: 8px;
     /* Opaque: it floats over the board, whose rows would otherwise read through it. */
     background: var(--bar) var(--scan);
@@ -1968,13 +1982,14 @@ a {
   padding: 0 18px;
 }
 /*
- * Roll another list, before play (a rolled list before its first guess, a rolled Blitz before its clock starts): its
- * own box right of the guess panel, outside it (owner, Nov 6), the panel's height and look, a pressable box. It sits
- * in the guess form, absolutely placed:
+ * Roll new list, before play (a rolled list before its first guess, a rolled Blitz before its clock starts): its own
+ * box right of the guess panel, outside it (owner, Nov 6), level with the guess row (the input and GUESS) and no
+ * taller (owner, Nov 7: "desktop, the new button is too tall"), a pressable box. Its label takes two lines at most, at
+ * a key's letter-spacing ("mobile, the words are too crammed"). It sits in the guess form, absolutely placed:
  * - Under 1100px the form makes room for it while it shows (data-roll="on": a right margin of --roll-room, the box's
  *   width and the gap). Phones: beside the pill, the pill's height; the feedback plate above spans both. From 700px:
- *   beside the floating guess box, the box's full height, the two together as wide as the box alone.
- * - From 1100px: in the strip of open water right of the control card, the card's height (see the stage).
+ *   beside the floating guess box, level with its row, the two together as wide as the box alone.
+ * - From 1100px: in the strip of open water right of the control card, level with the row (see the stage).
  * When play starts (data-roll="gone", data-gone on the box) it fades out where it is, then --roll-room runs down to 0:
  * the guess panel stretches into its room, its left edge staying put, the box standing still over it (its right edge
  * is the room's). No hover, focus or press moves anything; this is a state change, once a game.
@@ -1994,13 +2009,13 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 6px;
+  padding: 0 4px;
   border: 0;
   border-radius: var(--radius);
   background: var(--bar) var(--scan);
   color: var(--text);
   font-size: 18px;
-  line-height: 1.05;
+  line-height: 1.15;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-align: center;
@@ -2045,10 +2060,10 @@ a {
     --roll-room: calc(var(--roll-w) + var(--roll-gap));
   }
 }
-/* Phones: a capsule beside the pill (the pill's height), three short lines. */
+/* Phones: a capsule beside the pill, the pill's height, two lines ("ROLL NEW", "LIST") at a key's letter-spacing. */
 @media (max-width: 699px) {
   .guess {
-    --roll-w: 74px;
+    --roll-w: 80px;
     --roll-gap: 8px;
     margin-right: var(--roll-room);
   }
@@ -2060,25 +2075,35 @@ a {
     width: max-content;
     max-width: calc(100% + var(--roll-room));
   }
+  /* Rounded, not a full capsule: a capsule's curve would run into the ends of a two-line label's longer line. */
   .roll-box {
     bottom: 0;
     height: 62px;
-    border-radius: 999px;
+    border-radius: 20px;
     font-size: 16px;
-    line-height: 1;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.15em;
   }
-  /* The pill beside it closes up (GUESS's padding and letter-spacing, a tighter gap), so the box keeps about 180px
-     for a typed name (the short placeholder; App's PLACEHOLDER_SHORT). */
+  /* The pill beside it closes up (GUESS's padding and letter-spacing, a tighter gap, the box's padding), so the box
+     keeps room for the short placeholder (copy's PLACEHOLDER_SHORT) and a typical name ("Dhaulagiri I"). */
   .guess[data-roll="on"] .guess-row {
     gap: 6px;
+  }
+  .guess[data-roll="on"] .guess-row input {
+    padding: 0 14px;
   }
   .guess[data-roll="on"] .guess-row .key {
     padding: 0 12px;
     letter-spacing: 0.1em;
   }
 }
-/* From 700px: beside the floating box, as tall, two lines; the pair is as wide as the box alone. */
+/* A step narrower than 390px, the typed name a step smaller beside the box (it would lose its last letter). */
+@media (min-width: 380px) and (max-width: 389px) {
+  .guess[data-roll="on"] .guess-row input {
+    font-size: 26px;
+  }
+}
+/* From 700px: beside the floating box, level with its row (the form's bottom padding under it), one line; the pair
+   is as wide as the box alone. */
 @media (min-width: 700px) and (max-width: 1099px) {
   .guess {
     --roll-w: 148px;
@@ -2088,8 +2113,8 @@ a {
     margin-right: var(--roll-room);
   }
   .roll-box {
-    top: 0;
-    bottom: 0;
+    bottom: var(--guess-pad);
+    height: 52px;
     border-radius: 8px;
     font-size: 20px;
   }
@@ -2144,7 +2169,7 @@ a {
 .results-actions .key {
   flex: 1 1 160px;
 }
-/* The narrowest phones: the card leaves a key about 250px, so "Roll another list" closes up to stay whole on it. */
+/* The narrowest phones: the card leaves a key about 250px, so a long label closes up to stay whole on it. */
 @media (max-width: 359px) {
   .results-actions .key {
     padding: 0 14px;
@@ -2314,16 +2339,12 @@ a {
     padding: 0 12px;
     font-size: 22px;
   }
-  /* Beside the roll box, "your guess" and "Dhaulagiri I". */
-  .guess[data-roll="on"] .guess-row input {
-    padding: 0 10px;
-    font-size: 20px;
-  }
 }
-/* Narrow phones, beside the roll box: GUESS and the box close up a step more. */
+/* Narrow phones, beside the roll box: GUESS and the box close up a step more, the box's label a step smaller (at the
+   same letter-spacing), and the typed name a step smaller again, so "your guess" and "Dhaulagiri I" still fit. */
 @media (max-width: 379px) {
   .guess {
-    --roll-w: 66px;
+    --roll-w: 74px;
     --roll-gap: 6px;
   }
   .guess[data-roll="on"] .guess-row .key {
@@ -2331,8 +2352,20 @@ a {
     letter-spacing: 0.05em;
   }
   .roll-box {
+    padding: 0 3px;
     font-size: 15px;
-    letter-spacing: 0.05em;
+  }
+}
+@media (max-width: 359px) {
+  .guess[data-roll="on"] .guess-row input {
+    padding: 0 12px;
+    font-size: 22px;
+  }
+}
+@media (max-width: 339px) {
+  .guess[data-roll="on"] .guess-row input {
+    padding: 0 8px;
+    font-size: 20px;
   }
 }
 /* Under 320px there's no room beside the pill for a name: the box goes directly above the guess panel, full width,
@@ -2348,7 +2381,6 @@ a {
     width: auto;
     height: 48px;
     font-size: 18px;
-    letter-spacing: 0.1em;
   }
   .roll-box[data-gone] {
     display: none;

@@ -30,7 +30,7 @@ import { emitPlay } from "../game/events";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
 import { END_FOCUS_MS, PHONE, RollBox, rollState, ScreenHead, SwapLabel, useMedia } from "./pixel";
-import { BLITZ_SCORING, blitzPromptShown, metricLabel, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT } from "./copy";
+import { BLITZ_SCORING, blitzPromptShown, metricLabel, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT, ROLL_NEW } from "./copy";
 import { blitzShare, dailyBlitzShare } from "./share";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
@@ -63,13 +63,13 @@ interface Props {
   onBack: () => void;
   onHome: () => void;
   /**
-   * A fresh round on another random open Blitz list: Roll another list after a round, Random Blitz after Today's
-   * Blitz. Missing when no other list is open.
+   * A fresh round on another random open Blitz list: Roll new list after a round, Random Blitz after Today's Blitz.
+   * Missing when no other list is open.
    */
   onRoll?: () => void;
   /**
-   * This round was rolled (Random Blitz, a category, Roll another list) in this tab. Until the clock starts it offers
-   * Roll another list beside the guess panel, to skip to another list; never once the round is on.
+   * This round was rolled (Random Blitz, a category, Roll new list) in this tab. Until the clock starts it offers Roll
+   * new list beside the guess panel, to skip to another list; never once the round is on.
    */
   rolled?: boolean;
   /**
@@ -557,7 +557,7 @@ export function Blitz({
     );
     board = <RoundLists puzzle={puzzle} hits={viewRun.hits} byName={byName} waitFor={waitFor} />;
   } else if (!over) {
-    // A rolled round shows Roll another list in its own box right of the guess panel until the clock starts.
+    // A rolled round shows Roll new list in its own box right of the guess panel until the clock starts.
     const reroll = rerollSlot && !state.startedAt;
     control = (
       <div className="control-card" data-glass>
@@ -689,13 +689,13 @@ export function Blitz({
               </p>
             ))}
         </div>
-        {/* A date's Blitz is one round: no Roll another list there, a Random Blitz instead. Free play leads with Roll
-            another list (never this one: so not "Play again"). No key is autofocused: SHARE takes focus a beat after
-            the buzzer (above). */}
+        {/* A date's Blitz is one round: no Roll new list there, a Random Blitz instead. Free play leads with Roll new
+            list (never this one: so not "Play again"). No key is autofocused: SHARE takes focus a beat after the
+            buzzer (above). */}
         <div className="results-actions">
           {!dailyBlitz && onRoll && (
             <button className="key key-gold" data-testid="blitz-again" onClick={onRoll}>
-              Roll another list
+              {ROLL_NEW}
             </button>
           )}
           {!locked?.gone && (

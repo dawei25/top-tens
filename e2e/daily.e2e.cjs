@@ -55,7 +55,7 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("score").getAttribute("data-found"), "2");
     assert.ok(await noHScroll(page));
 
-    // One try: no Roll another list; Today's Blitz (unplayed) and a random list instead.
+    // One try: no Roll new list; Today's Blitz (unplayed) and a random list instead.
     assert.equal(await page.getByTestId("play-again").count(), 0);
     assert.equal(await page.getByTestId("results-daily-blitz").count(), 1);
     assert.equal(await page.getByTestId("results-roll").count(), 1);

@@ -137,11 +137,17 @@ export function lifeCostLine(entry: Entry, puzzle: Pick<Puzzle, "metric" | "regi
  */
 export const GUESS_HINT = "type a name and guess. typos are free.";
 /**
- * The guess box's placeholder. On a phone with the roll box beside the guess panel the box is about 180px (130 at
+ * The guess box's placeholder. On a phone with the roll box beside the guess panel the box is about 170px (120 at
  * 320), room for ten letters: the short one there.
  */
 export const PLACEHOLDER = "type a guess...";
 export const PLACEHOLDER_SHORT = "your guess";
+/**
+ * A new random list (or Blitz list), never this one: the roll box before play and the results' key, one name for the
+ * one action (UX 1: not "Play again", which reads as the same list). Short, so the roll box beside a phone's guess
+ * panel says it in two lines at a key's letter-spacing (owner, Nov 7: "maybe just say roll new list instead?").
+ */
+export const ROLL_NEW = "Roll new list";
 /** "Dubai? Guess again to confirm.": one line at 390 for most names, the instruction wrapping as one piece. */
 export const confirmGuess = (name: string) => `${name}? ${["Guess", "again", "to", "confirm."].join(NBSP)}`;
 /** A guess already on the board (or one that already cost a life). */

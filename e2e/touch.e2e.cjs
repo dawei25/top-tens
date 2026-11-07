@@ -253,8 +253,8 @@ test("the guess box shows its whole placeholder (phones: a list, a rolled list, 
   }
 });
 
-// "Roll another list" (Nov 6) ran 35px out of its key and the result card at 320px: every results key keeps its label
-// whole, inside the card, on a list's and a Blitz's results.
+// "Roll another list" (Nov 6, now "Roll new list") ran 35px out of its key and the result card at 320px: every results
+// key keeps its label whole, inside the card, on a list's and a Blitz's results.
 test("the results keys show their labels whole, inside the card (phones)", async () => {
   for (const width of WIDTHS) {
     const { ctx, page } = await open(browser, phone(width), "#p-mountains", undefined, { reducedMotion: "reduce" });

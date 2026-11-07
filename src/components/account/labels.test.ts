@@ -1,5 +1,32 @@
 import { describe, expect, it } from "vitest";
-import { accountAlert, accountKeyLabel, ago, cleanName, homeName, HOME_NAME_MAX, syncLabel } from "./labels";
+import { accountAlert, accountKeyLabel, ago, cleanName, homeName, HOME_NAME_MAX, privacySignInLine, signInCaption, syncLabel } from "./labels";
+import type { SignInMethod } from "../../net/config";
+
+// Every build's sign-in copy is right for what it offers: the launch offers Google alone (owner, Nov 7: "google only
+// for now"), and the email link and the password come back behind VITE_SIGN_IN.
+describe("sign-in copy for the methods a build offers", () => {
+  const sets: SignInMethod[][] = [["google"], ["email"], ["password"], ["google", "email"], ["google", "password"], ["email", "password"], ["google", "email", "password"]];
+
+  it("Google alone: no email link or password to speak of, and Google's part said once", () => {
+    expect(signInCaption(["google"])).toBe("keep your games, streaks and bests on every device.");
+    expect(privacySignInLine(["google"])).toBe("Your email address, name and picture, as Google sends them, to sign you in.");
+  });
+
+  it("'no password.' only where the sheet offers an email link and no password", () => {
+    for (const m of sets) expect(signInCaption(m).endsWith(" no password."), m.join(",")).toBe(m.includes("email") && !m.includes("password"));
+  });
+
+  it("the privacy line names Google only where Google is offered", () => {
+    for (const m of sets) {
+      expect(privacySignInLine(m).includes("Google"), m.join(",")).toBe(m.includes("google"));
+      expect(privacySignInLine(m)).toMatch(/^Your email address/);
+    }
+  });
+
+  it("uses no em dashes or emoji (UI copy rule)", () => {
+    for (const m of sets) for (const s of [signInCaption(m), privacySignInLine(m)]) expect(s).not.toMatch(/[—\u{1F300}-\u{1FAFF}]/u);
+  });
+});
 
 describe("homeName (the account key's 'signed in as')", () => {
   it("shows the display name, else the email's part before the @, and never a whole address", () => {

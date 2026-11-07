@@ -16,7 +16,11 @@ export interface Backend {
 /** google: Google. email: a link (and code) by email. password: an email and password, no email sent. */
 export type SignInMethod = "google" | "email" | "password";
 const METHODS: readonly SignInMethod[] = ["google", "email", "password"];
-const DEFAULT_SIGN_IN = "google,email";
+/**
+ * Google only for the launch (owner, Nov 7: "google only for now"). The email link and the password stay built and
+ * tested behind VITE_SIGN_IN ("google,email", say), for when the project has an email provider to send with.
+ */
+const DEFAULT_SIGN_IN = "google";
 
 export function readBackend(url?: string, anonKey?: string, signIn?: string): Backend | null {
   const u = url?.trim() ?? "";

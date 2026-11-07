@@ -1,4 +1,27 @@
+import type { SignInMethod } from "../../net/config";
 import type { AccountState, AccountUser } from "../../net/store";
+
+/**
+ * The sign-in sheet's line under its heading, for the methods this build offers (VITE_SIGN_IN). "no password." only
+ * where the sheet offers an email link and no password: with Google alone (the launch) it would read as Google
+ * signing you in without one.
+ */
+export function signInCaption(methods: readonly SignInMethod[]): string {
+  const link = methods.includes("email") && !methods.includes("password");
+  return `keep your games, streaks and bests on every device.${link ? " no password." : ""}`;
+}
+
+/**
+ * The privacy page's line on what signing in keeps of you: the email address, and with Google the name and picture
+ * Google sends. Google alone says it once, as one thing from Google; an email method alone never mentions Google.
+ */
+export function privacySignInLine(methods: readonly SignInMethod[]): string {
+  const google = methods.includes("google");
+  const email = methods.includes("email") || methods.includes("password");
+  if (google && !email) return "Your email address, name and picture, as Google sends them, to sign you in.";
+  if (!google) return "Your email address, to sign you in.";
+  return "Your email address, to sign you in. With Google, also the name and picture Google sends.";
+}
 
 /** A display name as typed, tidied: spaces collapsed, 1 to 24 characters, no control characters. Null if not. */
 export function cleanName(raw: string): string | null {

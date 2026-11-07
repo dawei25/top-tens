@@ -39,10 +39,18 @@ describe("readBackend", () => {
     expect(readBackend("https://x.supabase.co", "")).toBeNull();
     expect(readBackend("", "key")).toBeNull();
     expect(readBackend("not a url", "key")).toBeNull();
-    expect(readBackend(" https://x.supabase.co/ ", " key ")).toEqual({ url: "https://x.supabase.co", anonKey: "key", signIn: ["google", "email"] });
+    expect(readBackend(" https://x.supabase.co/ ", " key ")).toEqual({ url: "https://x.supabase.co", anonKey: "key", signIn: ["google"] });
   });
 
-  it("offers the sign-in methods VITE_SIGN_IN names (google and email by default, none to switch accounts off)", () => {
+  it("offers Google only by default (the launch: no email provider yet), blank or unset alike", () => {
+    expect(readBackend("https://x.supabase.co", "k")?.signIn).toEqual(["google"]);
+    expect(readBackend("https://x.supabase.co", "k", "")?.signIn).toEqual(["google"]);
+    // Vercel keeps a pasted newline: still the default.
+    expect(readBackend("https://x.supabase.co", "k", " \n")?.signIn).toEqual(["google"]);
+  });
+
+  it("offers the sign-in methods VITE_SIGN_IN names (email and password stay behind it; none switches accounts off)", () => {
+    expect(readBackend("https://x.supabase.co", "k", "google,email")?.signIn).toEqual(["google", "email"]);
     expect(readBackend("https://x.supabase.co", "k", "email")?.signIn).toEqual(["email"]);
     expect(readBackend("https://x.supabase.co", "k", "Google , email")?.signIn).toEqual(["google", "email"]);
     expect(readBackend("https://x.supabase.co", "k", "none")?.signIn).toEqual([]);
@@ -65,6 +73,19 @@ describe("env values pasted with a trailing newline (Vercel keeps it)", () => {
     vi.stubEnv("VITE_GOOGLE_CLIENT_ID", "1234-abc.apps.googleusercontent.com\n");
     const config = await import("./config");
     expect(config.BACKEND).toEqual({ url: "https://example.supabase.co", anonKey: "sb_publishable_key", signIn: ["google", "password"] });
+    expect(config.GOOGLE_CLIENT_ID).toBe("1234-abc.apps.googleusercontent.com");
+  });
+});
+
+describe("the launch build (no VITE_SIGN_IN)", () => {
+  it("offers Google only, from this site with the client ID", async () => {
+    vi.stubEnv("VITE_SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "sb_publishable_key");
+    vi.stubEnv("VITE_SIGN_IN", "");
+    vi.stubEnv("VITE_GOOGLE_CLIENT_ID", "1234-abc.apps.googleusercontent.com");
+    const config = await import("./config");
+    expect(config.BACKEND?.signIn).toEqual(["google"]);
+    expect(config.accountsOn).toBe(true);
     expect(config.GOOGLE_CLIENT_ID).toBe("1234-abc.apps.googleusercontent.com");
   });
 });
