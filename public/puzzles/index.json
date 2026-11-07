@@ -366,6 +366,12 @@
   "blitz": true
  },
  {
+  "id": "hedge-funds",
+  "title": "Largest hedge fund firms by assets",
+  "category": "Business",
+  "blitz": false
+ },
+ {
   "id": "richest-people",
   "title": "Richest people",
   "category": "Business",

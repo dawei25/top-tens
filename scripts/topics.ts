@@ -378,6 +378,77 @@ const DOG_NAMES: Record<string, string> = {
   "Laborador Retriever": "Labrador Retriever",
 };
 
+/**
+ * The notable hedge fund firms "List of hedge funds" lists in bullets (Americas, Asia-Pacific, EMEA), with the short
+ * forms people say, less the 17 its ranked table already has. Unranked accepted answers on hedge-funds (the build
+ * reads tables only). Names are the article titles without ", LLC"; a one-word short form that is a plain word
+ * ("Sculptor", "Fortress", "Maverick") is left out: the matcher reads a word of a longer name by itself.
+ */
+const HEDGE_FUND_FIRMS: Record<string, string[]> = {
+  // Americas
+  "Acadian Asset Management": [], "Adage Capital Management": ["Adage Capital"], "Alphadyne Asset Management": [],
+  "AlphaSimplex Group": ["AlphaSimplex"], "Altimeter Capital": [], "Angelo Gordon": ["Angelo, Gordon & Co."],
+  "Appaloosa Management": [], "Archegos Capital Management": ["Archegos", "Archegos Capital"],
+  "Assured Investment Management": [], "Atlantic Investment Management": [], "Aurelius Capital Management": [],
+  "Avenue Capital Group": ["Avenue Capital"], "Baker Brothers Advisors": [], "Balyasny Asset Management": ["Balyasny"],
+  "Beach Point Capital Management": [], "Bracebridge Capital": [], "Canyon Capital Advisors": [],
+  "Capstone Investment Advisors": [], "Coatue Management": ["Coatue"], "Deerfield Management": [],
+  "Discovery Capital Management": [], "Dragoneer Investment Group": ["Dragoneer"], "Ellington Management Group": [],
+  "Engineers Gate": [], "ESL Investments": [], "ExodusPoint Capital Management": ["ExodusPoint"],
+  "Farallon Capital": ["Farallon", "Farallon Capital Management"], "Fortress Investment Group": [],
+  "Garda Capital Partners": [], "GCM Grosvenor": [], "Glenview Capital Management": ["Glenview Capital"],
+  "Graham Capital Management": ["Graham Capital"], "Gramercy Funds Management": [], "Greenlight Capital": [],
+  "Harbinger Capital": [], "HBK Investments": ["HBK"], "Highbridge Capital Management": ["Highbridge Capital", "Highbridge"],
+  "Highfields Capital Management": [], "Himalaya Capital": [], "Hudson Bay Capital Management": ["Hudson Bay Capital"],
+  "Jain Global": [], "JANA Partners": ["JANA Partners LLC"], "K2 Advisors": [],
+  "King Street Capital Management": ["King Street Capital"], "Lighthouse Investment Partners": [], "Lone Pine Capital": ["Lone Pine"],
+  "Magnetar Capital": [], "Marathon Asset Management": [], "Maverick Capital": [], "Moore Capital Management": ["Moore Capital"],
+  OrbiMed: [], "Ospraie Management": ["Ospraie Management, LLC"], "PanAgora Asset Management": [], "Pantera Capital": [],
+  "Paulson & Co.": ["Paulson & Company"], "PDT Partners": [], "Perceptive Advisors": [],
+  "Pershing Square Capital Management": ["Pershing Square"],
+  "Quantum Fund": ["Quantum Group of Funds", "Soros Fund Management"], "RA Capital Management": [],
+  "Revere Capital Advisors": [], "Saba Capital Management": ["Saba Capital"], "Schonfeld Strategic Advisors": ["Schonfeld"],
+  "Scion Asset Management": ["Scion Capital"], "Sculptor Capital Management": ["Sculptor Capital", "Och-Ziff", "Och-Ziff Capital Management"],
+  "Silver Point Capital": [], "SkyBridge Capital": ["SkyBridge"], "SPX Capital": [], "Squarepoint Capital": ["Squarepoint"],
+  "Statar Capital": [], "Sylebra Capital": [], "TGS Management": [], "Third Point Management": ["Third Point"],
+  "Tiger Global Management": ["Tiger Global"], "Touradji Capital Management": [], "Trian Partners": [],
+  "Tudor Investment Corporation": ["Tudor Investment"], "Tsai Capital": [], "Universa Investments": ["Universa"],
+  "ValueAct Capital": ["ValueAct"], "Verition Fund Management": ["Verition"], "Viking Global Investors": ["Viking Global"],
+  "Voloridge Investment Management": ["Voloridge"], "Walleye Capital": [], "Waterfall Asset Management": [],
+  WorldQuant: [], "Wynnefield Capital": [], "Voleon Group": ["Voleon"], "York Capital Management": ["York Capital"],
+  // Asia-Pacific
+  "BFAM Partners": [], "Dymon Asia": [], "Greenwoods Asset Management": [], "High-Flyer": [],
+  "Hillhouse Capital Group": ["Hillhouse Capital", "Hillhouse"], "Lingjun Investment": [], "Maso Capital": [],
+  "Minghong Investment": [], "Navigator Global Investments": [], "Oasis Management": [], "Perseverance Asset Management": [],
+  "Pinpoint Asset Management": [], "Platinum Asset Management": [], Quantedge: [], "Segantii Capital Management": ["Segantii"],
+  "SPARX Group": ["SPARX"], "Tybourne Capital Management": [], Ubiquant: [], "Value Partners": [], "Yanfu Investments": [],
+  // EMEA
+  "AKO Capital": [], "Aspect Capital": [], "BlueCrest Capital Management": ["BlueCrest"], "Capital Fund Management": ["CFM"],
+  "Caxton Associates": ["Caxton"], "Cheyne Capital": [], CQS: ["CQS (Asset Manager)"], "Egerton Capital": [],
+  "Eisler Capital": [], "G-Research": [], "GLG Partners": ["GLG"], "GSA Capital": [], "Lansdowne Partners": [],
+  "LMR Partners": [], "Pharo Management": [], "Qube Research & Technologies": ["QRT", "Qube"],
+  "Rokos Capital Management": ["Rokos"], "Scipion Capital": [], "Systematica Investments": ["Systematica"],
+  "The Children's Investment Fund Management": ["The Children's Investment Fund", "TCI Fund Management", "TCI"],
+  "Toscafund Asset Management": ["Toscafund"], "Winton Group": ["Winton Capital", "Winton"],
+};
+
+/**
+ * Finance firms a player may name on hedge-funds that aren't hedge funds there: free, and real names, so none is ever
+ * read as one ("citadel securities" is not Citadel, "two sigma securities" not Two Sigma). The proprietary trading
+ * firms and market makers first (what finance people type), then famous hedge funds the page doesn't list and the
+ * big asset managers and banks.
+ */
+const NOT_HEDGE_FUNDS = [
+  "Jane Street", "Jane Street Capital", "Citadel Securities", "Citadel Securities LLC", "Jump Trading", "Hudson River Trading", "HRT", "Optiver",
+  "Susquehanna International Group", "SIG", "Virtu Financial", "Virtu", "IMC Trading", "IMC", "DRW", "DRW Trading",
+  "Tower Research Capital", "Tower Research", "XTX Markets", "XTX", "Flow Traders", "Akuna Capital", "Five Rings",
+  "Wolverine Trading", "Old Mission Capital", "Peak6", "Two Sigma Securities", "Jump Crypto",
+  "Point72", "Point72 Asset Management", "Baupost Group", "Tiger Management", "Long-Term Capital Management", "LTCM",
+  "Melvin Capital", "S.A.C. Capital Advisors", "SAC Capital", "Icahn Enterprises", "Starboard Value", "Berkshire Hathaway",
+  "Blackstone", "KKR", "Apollo Global Management", "Carlyle Group", "Bain Capital", "Brookfield Asset Management",
+  "Vanguard", "Fidelity Investments", "State Street", "JPMorgan Chase", "Morgan Stanley",
+];
+
 export const TOPICS: Topic[] = [
   // Geography
   {
@@ -1824,6 +1895,53 @@ export const TOPICS: Topic[] = [
       "EMC Mortgage Corporation", "ICBC.com.cn", "ICBC Leasing",
       ...["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"].map((n) => `BAC Capital Trust ${n}`),
     ],
+  },
+  {
+    id: "hedge-funds",
+    category: "Business",
+    title: "Largest hedge fund firms by assets",
+    noun: "hedge fund firms",
+    // Pensions & Investments counts only assets in hedge fund strategies: BlackRock and PIMCO are #18 and #17.
+    prompt: "Name the 10 hedge fund firms with the most hedge fund assets (June 2025)",
+    page: "List of hedge funds",
+    tables: [0],
+    name: "Firm",
+    value: "AUM",
+    metric: "Hedge fund assets (US$ millions)",
+    dataAsOf: "June 2025",
+    rename: {
+      "Millennium Management, LLC": "Millennium Management",
+      "Citadel LLC": "Citadel",
+      "AQR Capital": "AQR Capital Management",
+      "Pacific Investment Management Co.": "PIMCO",
+      "Wellington Management Group": "Wellington Management",
+    },
+    aliases: {
+      "Bridgewater Associates": ["Bridgewater"],
+      "Millennium Management": ["Millennium", "Millennium Management LLC"],
+      "Elliott Investment Management": ["Elliott Management", "Elliott", "Elliott Associates", "Elliott Management Corporation"],
+      Citadel: ["Citadel LLC", "Citadel Investment Group", "Citadel Advisors"],
+      "Man Group": ["Man Group plc", "Man AHL", "Man GLG"],
+      "D. E. Shaw & Co.": ["DE Shaw", "D. E. Shaw", "D.E. Shaw", "DE Shaw & Co", "D. E. Shaw Group"],
+      "AQR Capital Management": ["AQR", "AQR Capital"],
+      "Two Sigma": ["Two Sigma Investments"],
+      // The natural reading on a hedge fund list: Goldman's hedge fund arm.
+      "Goldman Sachs Asset Management": ["Goldman Sachs", "Goldman", "GSAM"],
+      "Renaissance Technologies": ["RenTech", "Ren Tech", "Renaissance", "Medallion Fund"],
+      PIMCO: ["Pacific Investment Management Company", "Pacific Investment Management"],
+      "Wellington Management": ["Wellington Management Company", "Wellington Management Group"],
+      "Davidson Kempner Capital Management": ["Davidson Kempner"],
+      "Capula Investment Management": ["Capula"],
+      "GoldenTree Asset Management": ["GoldenTree"],
+      Ruffer: ["Ruffer Investment Company", "Ruffer LLP"],
+      "D1 Capital Partners": ["D1 Capital"],
+    },
+    // "Man Group" without "Group" is the word. Citadel Securities is a market maker of its own (a free guess), and
+    // the other redirects are a co-founder, a venture arm and a fraternity.
+    junkAliases: ["Man", "Citadel Securities LLC", "John M. Liew", "Two Sigma Ventures", "Two Sigma Pi"],
+    more: HEDGE_FUND_FIRMS,
+    noFigures: "the page lists its other notable firms without their assets",
+    knownNames: NOT_HEDGE_FUNDS,
   },
   {
     id: "richest-people",

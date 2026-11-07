@@ -183,6 +183,34 @@ describe("aliases as built: what players type", () => {
     expect(lands("farm-products", guess)).toBe(name);
   });
 
+  it.each([
+    // The usual short names, and Goldman's hedge fund arm as the natural reading of "goldman sachs".
+    ["bridgewater", "Bridgewater Associates"],
+    ["millennium", "Millennium Management"],
+    ["elliott management", "Elliott Investment Management"],
+    ["de shaw", "D. E. Shaw & Co."],
+    ["d.e. shaw", "D. E. Shaw & Co."],
+    ["rentech", "Renaissance Technologies"],
+    ["renaissance", "Renaissance Technologies"],
+    ["goldman sachs", "Goldman Sachs Asset Management"],
+    ["man group", "Man Group"],
+    // Proprietary trading firms and market makers are not hedge funds here: free, never read as one.
+    ["citadel securities", "unknown"],
+    ["citadel securities llc", "unknown"],
+    ["two sigma securities", "unknown"],
+    ["jane street", "unknown"],
+    ["jump trading", "unknown"],
+    ["hudson river trading", "unknown"],
+    ["optiver", "unknown"],
+    ["susquehanna", "unknown"],
+    ["virtu", "unknown"],
+    ["tower research", "unknown"],
+    // "Man" is a word, not Man Group.
+    ["man", "unknown"],
+  ])("hedge-funds: %s -> %s", (guess, name) => {
+    expect(lands("hedge-funds", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");
