@@ -440,7 +440,7 @@ function AskName({
   };
 
   return (
-    <form className="panel fathom-ask" data-glass onSubmit={submit} data-testid="fathom-ask" data-round="name">
+    <form className="panel fathom-ask" data-glass onSubmit={submit} data-testid="fathom-ask" data-round="name" data-lexicon={lex ? "" : undefined}>
       <label className="fathom-field" data-round="name">
         <input
           value={text}

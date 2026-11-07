@@ -230,8 +230,21 @@
 .fathom-echo[data-tone="choose"] {
   color: var(--gold);
 }
+/* With little height (a phone's keyboard up), a step smaller still, so a question with a definition, the field, a
+   two-line message and LOCK IN all fit above the keyboard. The input stays 44px to the finger. */
+.fathom[data-short] .fathom-ask[data-round="name"] {
+  gap: 6px;
+}
+.fathom[data-short] .fathom-field[data-round="name"] {
+  min-height: 48px;
+}
+.fathom[data-short] .fathom-field[data-round="name"] input {
+  height: 44px;
+  font-size: 24px;
+}
 .fathom[data-short] .fathom-echo[data-round="name"] {
-  min-height: 24px;
+  min-height: 21px;
+  font-size: 17px;
 }
 
 /* The echo line, then LOCK IN the width of the card on a phone; from 560px LOCK IN at the right end of the echo's line,

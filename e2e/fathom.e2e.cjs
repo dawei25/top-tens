@@ -30,6 +30,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { chromium, VIEWPORTS, open, go, store, noHScroll } = require("./helpers.cjs");
+const { shortReach } = require("./fathom-lib.cjs");
 
 const { PNG } = require("pngjs");
 
@@ -726,7 +727,8 @@ describe("Fathom", { concurrency: true }, () => {
   // Every question in the bank, not just the longest by characters: wrapping decides the height, and a 99-character
   // question (bering-strait-width) pushed LOCK IN under the keyboard while longer ones fit.
   test("with the keyboard up on a small phone, LOCK IN stays in view for every question in the bank", async () => {
-    const real = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "public", "fathom", "questions.json"), "utf8")).questions;
+    // The number questions (the name-it ones need their lists: fathom-name.e2e.cjs plays them with the keyboard up).
+    const real = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "public", "fathom", "questions.json"), "utf8")).questions.filter((q) => q.round !== "name");
     const all = real.map((q) => q.id);
     const fails = [];
     for (let g = 0; g < all.length; g += QUESTIONS) {
@@ -760,7 +762,8 @@ describe("Fathom", { concurrency: true }, () => {
   // with its keyboard up shows the question, the field and LOCK IN: the page shrinks (Android), or the keyboard covers
   // its lower part and only the visual viewport says so (iOS, faked here). The real bank's longest questions.
   test("with the keyboard up, the question, the field and LOCK IN stay in view (phones)", async () => {
-    const real = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "public", "fathom", "questions.json"), "utf8")).questions;
+    // The number questions (the name-it ones need their lists: fathom-name.e2e.cjs plays them with the keyboard up).
+    const real = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "public", "fathom", "questions.json"), "utf8")).questions.filter((q) => q.round !== "name");
     const words = (q) => q.question.length + (q.definition?.length ?? 0);
     const ids = [...real].sort((a, b) => words(b) - words(a)).slice(0, QUESTIONS).map((q) => q.id);
     for (const { width, height, visible } of [
@@ -966,32 +969,3 @@ async function standsOut(page, square, against) {
   return px.filter((p) => contrast(p, against) >= 3).length >= px.length / 5;
 }
 
-/**
- * Every visible control's reach (e2e/touch.e2e.cjs has the same check for the other screens): the points 22px above
- * and below its middle (and beside it, if it's narrower than 44px) must press it, unless another control is there.
- */
-const shortReach = (page) =>
-  page.evaluate(() => {
-    const CONTROL = 'a[href], button, input, [role="button"], [role="switch"]';
-    const out = [];
-    for (const el of document.querySelectorAll(`main ${CONTROL.split(", ").join(", main ")}`)) {
-      if (el.disabled || !el.checkVisibility({ checkVisibilityCSS: true, visibilityProperty: true, opacityProperty: true })) continue;
-      const r = el.getBoundingClientRect();
-      if (r.width < 1 || r.top < 30 || r.bottom > innerHeight - 30 || r.left < 0 || r.right > innerWidth) continue;
-      // A link inside a sentence is as tall as its line (WCAG 2.5.8 leaves those out).
-      if (el.matches("a") && getComputedStyle(el).display === "inline") continue;
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const sideways = r.width < 44 && !(innerWidth < 360 && el.closest(".game-head"));
-      const spots = [[cx, cy - 21.5], [cx, cy + 21.5], ...(sideways ? [[cx - 21.5, cy], [cx + 21.5, cy]] : [])];
-      for (const [x, y] of spots) {
-        const hit = document.elementFromPoint(x, y);
-        if (!hit || el.contains(hit) || hit.closest(CONTROL)) continue;
-        // The field's box is the input's own reach (a tap on it focuses the input).
-        if (el.matches("input") && hit.closest("label")?.contains(el)) continue;
-        out.push(`${el.tagName.toLowerCase()} ${el.dataset.testid ?? el.getAttribute("aria-label") ?? ""} ${Math.round(r.width)}x${Math.round(r.height)}: misses ${Math.round(x - cx)},${Math.round(y - cy)}`);
-        break;
-      }
-    }
-    return out;
-  });
