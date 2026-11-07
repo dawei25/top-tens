@@ -1,7 +1,8 @@
 /**
- * Fathom (beta, #fathom): five questions that each ask for a number, about two minutes, no timer, no lives. A guess
- * scores by how close it is, by one plain rule for each round (RULES): an estimate on a log scale, a percent by points
- * off, a year by years off.
+ * Fathom (beta, #fathom): five questions, about two minutes, no timer, no lives. Four ask for a number and one asks the
+ * player to name a thing whose figure is close to a target (the name-it round, src/game/fathom-name.ts reads the name).
+ * Each scores by how close it is, by one plain rule for each round (ruleFor): an estimate on a log scale, a percent by
+ * points off, a year by years off, a name-it round by its list's figure against the target (a ratio, or steps off).
  *
  * Pure functions only: reading numbers, scoring, the draw, the share text, and the save (its own localStorage key,
  * never the game's save: Fathom touches no record, stat or streak; with a backend, each guess is also sent, see
@@ -30,15 +31,36 @@ export const TYPICALS = [1.3, 1.5, 2, 3, 5, 10, 30] as const;
 /**
  * How a question is asked and scored. An estimate (the default) is a number in a unit, scored by how many times off;
  * a percent is 0 to 100 (unit "percent"), scored by points off; a year is an AD year (unit "year"), scored by years
- * off. `kind` is the topic, apart from this.
+ * off; a name-it round asks for a thing from a list ("Name a country with about 50 million people"), scored by that
+ * thing's figure against the target. `kind` is the topic, apart from this.
  */
-export const ROUNDS = ["estimate", "percent", "year"] as const;
+export const ROUNDS = ["estimate", "percent", "year", "name"] as const;
 export type Round = (typeof ROUNDS)[number];
 
 /** The unit a percent or a year question is in (scripts/fathom/check.ts holds the bank to it). */
 export const ROUND_UNITS: Partial<Record<Round, string>> = { percent: "percent", year: "year" };
 
 export const roundOf = (q: Pick<FathomQuestion, "round">): Round => q.round ?? "estimate";
+
+/**
+ * How a name-it round scores the figure of the thing named against the target: `ratio` by the estimate's rule (how
+ * many times off: a population, an area), `steps` by whole steps off (a count of land borders).
+ */
+export type NameScoring = "ratio" | "steps";
+
+/** What a name-it question takes from its list (src/game/fathom-name.ts fills it in when the bank is read). */
+export interface NameIt {
+  /** The list's id: public/fathom/lists/<id>.json. */
+  list: string;
+  scoring: NameScoring;
+  /** What the player names: "country", "countries". */
+  noun: string;
+  nounPlural: string;
+  /** Names that don't count, said plainly: "France" on "Name a country about as big as France". */
+  except?: string[];
+  /** When the list's figures are from, as the list says it. */
+  asOf?: string;
+}
 
 export interface FathomQuestion {
   id: string;
@@ -48,13 +70,17 @@ export interface FathomQuestion {
   question: string;
   /**
    * Shown beside the input and with the answer: "metres", or with a scale word for big counts ("million people",
-   * "billion trees"), so every answer has at most 6 digits before the decimal point and the player just types it.
+   * "billion trees"), so every answer has at most 6 digits before the decimal point and the player just types it. A
+   * name-it round's is its list's measure ("people", "km²", "land borders").
    */
   unit: string;
+  /** A name-it round's is its target. */
   answer: number;
   /** What exactly is measured: "to the tip of its antenna". */
   definition?: string;
+  /** Empty on a name-it round without one (its best answers are the reveal). */
   fact: string;
+  /** A name-it round's is its list's. */
   source: { title: string; url: string };
   /**
    * The writers' estimate of the typical miss (docs/FATHOM.md). In the file, checked by scripts/fathom/check.ts, but
@@ -63,6 +89,8 @@ export interface FathomQuestion {
   typical?: number;
   /** The first question of a game is always an easy one. */
   easy?: boolean;
+  /** A name-it round's list and its scoring. */
+  nameIt?: NameIt;
 }
 
 export interface FathomBank {
@@ -113,20 +141,36 @@ export function yearScore(guess: number, answer: number): number {
   return Math.max(0, Math.round(POINTS_PER_QUESTION - PER_YEAR * Math.abs(guess - answer)));
 }
 
-/** Points for a guess on a question, by its round's rule. */
-export function scoreFor(q: Pick<FathomQuestion, "round" | "answer">, guess: number): number {
+/** Points a name-it round on a steps list loses for each step off (one land border off scores 70, two 40). */
+export const PER_STEP = 30;
+
+/** Points for a figure a whole number of steps from the target: 100 - 30 x steps off, never under 0. */
+export function stepsScore(guess: number, answer: number): number {
+  return Math.max(0, Math.round(POINTS_PER_QUESTION - PER_STEP * Math.abs(guess - answer)));
+}
+
+/** Points for a name-it round: the figure of the thing named against the target, by its list's scoring. */
+export const nameScore = (scoring: NameScoring | undefined, figure: number, target: number): number =>
+  scoring === "steps" ? stepsScore(figure, target) : fathomScore(figure, target);
+
+/**
+ * Points for a guess on a question, by its round's rule. A name-it round's guess is the figure of the thing named (its
+ * population, its land borders), against the target.
+ */
+export function scoreFor(q: Pick<FathomQuestion, "round" | "answer" | "nameIt">, guess: number): number {
   const round = roundOf(q);
   if (round === "percent") return percentScore(guess, q.answer);
   if (round === "year") return yearScore(guess, q.answer);
+  if (round === "name") return nameScore(q.nameIt?.scoring, guess, q.answer);
   return fathomScore(guess, q.answer);
 }
 
 /**
- * Each round's scoring rule in one plain line, said where the player looks before answering (the first question of
- * that round in a game) and again on the results. Each one names a miss and what it scores, and the numbers agree
- * (fathom.test.ts).
+ * The number rounds' scoring rules, each in one plain line, said where the player looks before answering (the first
+ * question of that round in a game) and again on the results. Each one names a miss and what it scores, and the
+ * numbers agree (fathom.test.ts). A name-it round's depends on its list: ruleFor.
  */
-export const RULES: Record<Round, string> = {
+export const RULES: Record<Exclude<Round, "name">, string> = {
   estimate: "Half or double the answer scores about 50. Ten times off scores 0.",
   percent: `Each point off costs ${PER_POINT}, so 10 off scores ${POINTS_PER_QUESTION - 10 * PER_POINT}.`,
   year: `Each year off costs ${PER_YEAR}, so 10 years off scores ${POINTS_PER_QUESTION - 10 * PER_YEAR}.`,
@@ -134,6 +178,45 @@ export const RULES: Record<Round, string> = {
 
 /** The estimate's rule (RULES.estimate). */
 export const RULE = RULES.estimate;
+
+/** What a ratio list's measure is called, for its rule: "Your country's population: ...". */
+const MEASURE_WORDS: Record<string, string> = {
+  people: "population",
+  inhabitants: "population",
+  residents: "population",
+  "km²": "area",
+  km2: "area",
+  "sq km": "area",
+  "square kilometres": "area",
+  "square kilometers": "area",
+  "square miles": "area",
+};
+
+/** "land borders" as one: "land border". */
+export function singular(unit: string): string {
+  if (/(?:ss|us|is)$/.test(unit)) return unit;
+  if (/ies$/.test(unit)) return unit.replace(/ies$/, "y");
+  if (/(?:ch|sh|x)es$/.test(unit)) return unit.replace(/es$/, "");
+  return unit.replace(/s$/, "");
+}
+
+/**
+ * A name-it round's rule, in one plain line that agrees with the numbers: on a ratio list, the estimate's rule with
+ * the thing's own figure against the target ("Your country's population: half or double the target scores about
+ * 50."); on a steps list, what each step costs ("Each land border off costs 30, so one off scores 70.").
+ */
+export function nameRule(q: Pick<FathomQuestion, "unit" | "nameIt">): string {
+  if (q.nameIt?.scoring === "steps") return `Each ${singular(q.unit)} off costs ${PER_STEP}, so one off scores ${POINTS_PER_QUESTION - PER_STEP}.`;
+  const what = MEASURE_WORDS[q.unit.trim().toLowerCase()];
+  if (!what || !q.nameIt) return "Half or double the target scores about 50. Ten times off scores 0.";
+  return `Your ${q.nameIt.noun}'s ${what}: half or double the target scores about 50.`;
+}
+
+/** A question's scoring rule, by its round. */
+export const ruleFor = (q: Pick<FathomQuestion, "round" | "unit" | "nameIt">): string => {
+  const round = roundOf(q);
+  return round === "name" ? nameRule(q) : RULES[round];
+};
 
 export type Band = "dead-on" | "close" | "near" | "far" | "lost";
 
@@ -193,26 +276,53 @@ export function yearsOff(guess: number, answer: number): string {
   return `${off} ${off === 1 ? "year" : "years"} ${guess > answer ? "late" : "early"}`;
 }
 
-/** The miss in the round's own words: "3x too high", "6 points low", "3 years early". */
-export function missText(q: Pick<FathomQuestion, "round" | "answer">, guess: number): string {
+/**
+ * A name-it round's miss, the thing's figure against the target. Steps: "3 land borders too many", "1 land border too
+ * few". A ratio on a count: "6% more people", "20% fewer people", "2x too many people", "3x too few people"; on a unit
+ * of measure, as an estimate's ("6% high", "2x too high"). "spot on" where it scores 100.
+ */
+export function nameOff(q: Pick<FathomQuestion, "answer" | "unit" | "nameIt">, figure: number): string {
+  const target = q.answer;
+  if (q.nameIt?.scoring === "steps") {
+    const off = Math.round(Math.abs(figure - target));
+    if (off === 0) return "spot on";
+    return `${off} ${off === 1 ? singular(q.unit) : q.unit} too ${figure > target ? "many" : "few"}`;
+  }
+  if (measureOf(q.unit) || spotOn(figure, target)) return timesOff(figure, target);
+  const high = figure > target;
+  const ratio = high ? figure / target : target / figure;
+  const percent = Math.round((Math.abs(figure - target) / target) * 100);
+  if (ratio < 2 && percent < 100) return `${percent}% ${high ? "more" : "fewer"} ${q.unit}`;
+  return `${times(Math.max(2, ratio))} too ${high ? "many" : "few"} ${q.unit}`;
+}
+
+/** The miss in the round's own words: "3x too high", "6 points low", "3 years early", "3 land borders too many". */
+export function missText(q: Pick<FathomQuestion, "round" | "answer" | "unit" | "nameIt">, guess: number): string {
   const round = roundOf(q);
   if (round === "percent") return pointsOff(guess, q.answer);
   if (round === "year") return yearsOff(guess, q.answer);
+  if (round === "name") return nameOff(q, guess);
   return timesOff(guess, q.answer);
 }
 
+/** Steps off where a name-it round on a steps list reaches 0 (100 / 30 of them). */
+const STEPS_EDGE = POINTS_PER_QUESTION / PER_STEP;
+
 /**
  * How far off a guess is on its round's scale, from -1 (too low or early) to 1 (too high or late), 1 where the score
- * reaches 0: powers of ten for an estimate (10x off), points for a percent (100 / 3 of them), years for a year (20).
- * The sonar places the squid by it.
+ * reaches 0: powers of ten for an estimate (10x off) and a name-it round on a ratio list, points for a percent (100 /
+ * 3 of them), years for a year (20), steps for a name-it round on a steps list (100 / 30). The sonar places the squid
+ * by it.
  */
-export function offAxis(round: Round, guess: number, answer: number): number {
+export function offAxis(round: Round, guess: number, answer: number, scoring?: NameScoring): number {
   const d =
     round === "percent"
       ? (guess - answer) / (POINTS_PER_QUESTION / PER_POINT)
       : round === "year"
         ? (guess - answer) / (POINTS_PER_QUESTION / PER_YEAR)
-        : Math.log10(guess / answer);
+        : round === "name" && scoring === "steps"
+          ? (guess - answer) / STEPS_EDGE
+          : Math.log10(guess / answer);
   return Number.isNaN(d) ? 0 : Math.max(-1, Math.min(1, d));
 }
 
@@ -627,6 +737,8 @@ export function figureParts(q: Pick<FathomQuestion, "round" | "unit">, n: number
   const round = roundOf(q);
   if (round === "percent") return { n: `${formatDigits(n)}%` };
   if (round === "year") return { n: String(n) };
+  // A name-it round's figure in its list's measure, one of it singular: "1 land border".
+  if (round === "name") return { n: formatAmount(n), unit: n === 1 ? singular(q.unit) : q.unit };
   return { n: formatAmount(n), unit: q.unit };
 }
 
@@ -636,8 +748,9 @@ export function amountText(q: Pick<FathomQuestion, "round" | "unit">, n: number)
   return f.unit ? `${f.n} ${f.unit}` : f.n;
 }
 
-/** What shows beside the field: the unit ("metres", "million people", "year"), a percent's sign. */
-export const unitShown = (q: Pick<FathomQuestion, "round" | "unit">): string => (roundOf(q) === "percent" ? "%" : q.unit);
+/** What shows beside the field: the unit ("metres", "million people", "year"), a percent's sign; nothing for a name. */
+export const unitShown = (q: Pick<FathomQuestion, "round" | "unit">): string =>
+  roundOf(q) === "percent" ? "%" : roundOf(q) === "name" ? "" : q.unit;
 
 /* ---------- The bank ---------- */
 
@@ -648,6 +761,8 @@ function readQuestion(q: unknown): FathomQuestion | null {
   if (!q || typeof q !== "object") return null;
   const o = q as Record<string, unknown>;
   const src = o.source as Record<string, unknown> | undefined;
+  // A name-it question takes its unit, answer and source from its list: src/game/fathom-name.ts reads it with that.
+  if (o.round === "name") return null;
   if (!isText(o.id) || !isText(o.question) || !isText(o.unit) || !isText(o.fact)) return null;
   if (!(FATHOM_KINDS as readonly unknown[]).includes(o.kind)) return null;
   if (typeof o.answer !== "number" || !Number.isFinite(o.answer) || o.answer <= 0) return null;
@@ -673,8 +788,9 @@ function readQuestion(q: unknown): FathomQuestion | null {
 }
 
 /**
- * The questions in a bank file (`public/fathom/questions.json`): the well-formed ones, each id once. Null when it
- * isn't a bank at all (missing, HTML, another shape).
+ * The number questions in a bank file (`public/fathom/questions.json`): the well-formed ones, each id once. Null when
+ * it isn't a bank at all (missing, HTML, another shape). Name-it questions need their lists: readFullBank in
+ * src/game/fathom-name.ts adds them.
  */
 export function readBank(json: unknown): FathomQuestion[] | null {
   if (!json || typeof json !== "object" || !Array.isArray((json as FathomBank).questions)) return null;
@@ -693,18 +809,19 @@ export function readBank(json: unknown): FathomQuestion[] | null {
 export const HOLD_GAMES = 3;
 
 /**
- * A game's rounds: two estimates, a percent, a year, and a fifth that will be a name-it round (an estimate until that
- * round exists). Drawn in a mixed order, an easy question first.
+ * A game's rounds: two estimates, a percent, a year, and a name-it round (an estimate when the bank has none, or its
+ * lists didn't load). Drawn in a mixed order, an easy question first.
  */
-export const GAME_ROUNDS: readonly Round[] = ["estimate", "estimate", "percent", "year", "estimate"];
+export const GAME_ROUNDS: readonly Round[] = ["estimate", "estimate", "percent", "year", "name"];
 
 /**
- * Five questions for a game, one per round of GAME_ROUNDS: the first one easy, then the rest in a random order. A round
- * the bank has none of is played as an estimate instead (and once the estimates run out, anything left). Within that:
- * no two of the same kind, at most MAX_SIZE_PER_GAME how tall / how heavy questions, and none from the last HOLD_GAMES
- * games (`recent`, newest first) while the bank has others. When it doesn't, the questions from the oldest of those
- * games come back first; a bank too small for five kinds repeats a kind rather than come up short, and one of nothing
- * but how tall / how heavy questions takes more of them.
+ * Five questions for a game, one per round of GAME_ROUNDS: the first one easy (and a number to type: never the name-it
+ * round, which is the odd one out), then the rest in a random order. A round the bank has none of is played as an
+ * estimate instead (and once the estimates run out, anything left). Within that: no two of the same kind, at most
+ * MAX_SIZE_PER_GAME how tall / how heavy questions, and none from the last HOLD_GAMES games (`recent`, newest first)
+ * while the bank has others. When it doesn't, the questions from the oldest of those games come back first; a bank too
+ * small for five kinds repeats a kind rather than come up short, and one of nothing but how tall / how heavy questions
+ * takes more of them.
  */
 export function drawQuestions(
   questions: readonly FathomQuestion[],
@@ -719,7 +836,8 @@ export function drawQuestions(
     (tier.get(a.id) ?? 0) - (tier.get(b.id) ?? 0) || key.get(a.id)! - key.get(b.id)!;
   const pool = [...questions].sort(order);
 
-  const first = pool.find((q) => q.easy) ?? pool[0];
+  const number = (q: FathomQuestion) => roundOf(q) !== "name";
+  const first = pool.find((q) => q.easy && number(q)) ?? pool.find(number) ?? pool[0];
   if (!first) return [];
   const picked: FathomQuestion[] = [first];
 
@@ -758,12 +876,17 @@ export function drawQuestions(
 export interface FathomGame {
   /** The five questions, by id, in order. */
   ids: string[];
-  /** The locked-in guesses, in order. */
+  /**
+   * The locked-in guesses, in order. A name-it round's is the figure of the thing named (its population), which is
+   * what scores; the name itself is in `picks`.
+   */
   guesses: number[];
   /**
    * The question on screen (0-4); it is revealed once it has a guess (guesses.length > at). At 5 the results show.
    */
   at: number;
+  /** What was named on a name-it round, by question id: "Colombia". */
+  picks?: Record<string, string>;
 }
 
 export const newGame = (ids: string[]): FathomGame => ({ ids, guesses: [], at: 0 });
@@ -775,10 +898,11 @@ export function phaseOf(game: FathomGame): FathomPhase {
   return game.guesses.length > game.at ? "reveal" : "question";
 }
 
-/** Locks in a guess for the question on screen (once). */
-export function lockIn(game: FathomGame, guess: number): FathomGame {
+/** Locks in a guess for the question on screen (once); on a name-it round, `pick` is the name, `guess` its figure. */
+export function lockIn(game: FathomGame, guess: number, pick?: string): FathomGame {
   if (phaseOf(game) !== "question") return game;
-  return { ...game, guesses: [...game.guesses, guess] };
+  const picks = pick === undefined ? game.picks : { ...game.picks, [game.ids[game.at]]: pick };
+  return { ...game, guesses: [...game.guesses, guess], ...(picks && { picks }) };
 }
 
 /** From a revealed question to the next one, or to the results after the last. */
@@ -792,6 +916,8 @@ export interface Scored {
   guess: number;
   points: number;
   band: Band;
+  /** A name-it round's: what was named. */
+  pick?: string;
 }
 
 /** Each answered question with its points and band. */
@@ -801,7 +927,8 @@ export function scoreGame(game: FathomGame, bank: readonly FathomQuestion[]): Sc
     const question = byId.get(game.ids[i]);
     if (!question) return [];
     const points = scoreFor(question, guess);
-    return [{ question, guess, points, band: bandOf(points) }];
+    const pick = game.picks?.[question.id];
+    return [{ question, guess, points, band: bandOf(points), ...(pick !== undefined && { pick }) }];
   });
 }
 
@@ -845,16 +972,22 @@ function defaultStore(): Store | undefined {
 
 const isIds = (x: unknown): x is string[] => Array.isArray(x) && x.every((id) => typeof id === "string");
 
+/** A save's picks: names (strings) by the game's own question ids. */
+function readPicks(x: unknown, ids: string[]): Record<string, string> | undefined {
+  if (!x || typeof x !== "object" || Array.isArray(x)) return undefined;
+  const out = Object.fromEntries(Object.entries(x).filter(([id, name]) => ids.includes(id) && typeof name === "string" && name.trim()));
+  return Object.keys(out).length ? out : undefined;
+}
+
 /** The save, or an empty one (nothing stored, junk, blocked storage). */
 export function loadFathom(store: Store | undefined = defaultStore()): FathomSave {
   try {
     const raw = JSON.parse(store?.getItem(FATHOM_KEY) ?? "null") as Partial<FathomSave> | null;
     const recent = Array.isArray(raw?.recent) ? raw.recent.filter(isIds).slice(0, HOLD_GAMES) : [];
     const g = raw?.game;
-    const game =
-      g && isIds(g.ids) && Array.isArray(g.guesses) && g.guesses.every((n) => Number.isFinite(n) && n >= 0) && Number.isInteger(g.at)
-        ? { ids: g.ids, guesses: g.guesses, at: g.at }
-        : undefined;
+    const ok = g && isIds(g.ids) && Array.isArray(g.guesses) && g.guesses.every((n) => Number.isFinite(n) && n >= 0) && Number.isInteger(g.at);
+    const picks = ok ? readPicks(g.picks, g.ids) : undefined;
+    const game = ok ? { ids: g.ids, guesses: g.guesses, at: g.at, ...(picks && { picks }) } : undefined;
     return { recent, ...(game && { game }) };
   } catch {
     return { recent: [] };

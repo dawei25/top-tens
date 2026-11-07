@@ -21,7 +21,7 @@ import {
   resumable,
   roundOf,
   ROUNDS,
-  RULES,
+  ruleFor,
   saveFathom,
   scoreFor,
   scoreGame,
@@ -33,7 +33,6 @@ import {
   type FathomGame,
   type FathomQuestion,
   type NumberError,
-  type Round,
   type Scored,
 } from "../../game/fathom";
 import { submitFathomGuess, useFathomCrowd } from "../../net";
@@ -205,7 +204,7 @@ export default function Fathom({ onBack, onHome }: Props) {
   const firstOfRound = !!question && questions.findIndex((x) => roundOf(x) === round) === game.at;
   const rule = firstOfRound && (
     <p className="fathom-rule" data-testid="fathom-rule" data-round={round}>
-      {RULES[round]}
+      {ruleFor(question)}
     </p>
   );
   const ruleBelow = short && phase === "question";
@@ -394,7 +393,7 @@ function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: numbe
           {players}
         </p>
       )}
-      <Gauge guess={guess} answer={q.answer} band={band} round={roundOf(q)} />
+      <Gauge guess={guess} answer={q.answer} band={band} round={roundOf(q)} unit={q.unit} nameIt={q.nameIt} />
       <p className="fathom-fact" data-testid="fathom-fact">
         {q.fact}
       </p>
@@ -464,7 +463,11 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
     }
   };
   const bands = scored.map((s) => s.band);
-  const played: Round[] = ROUNDS.filter((r) => scored.some((s) => roundOf(s.question) === r));
+  // Each round's rule once, from the first question of that round (a name-it round's is its list's).
+  const played = ROUNDS.flatMap((r) => {
+    const first = scored.find((s) => roundOf(s.question) === r);
+    return first ? [{ r, rule: ruleFor(first.question) }] : [];
+  });
   return (
     <>
       <section className="panel results enter fathom-results" data-glass data-testid="fathom-results">
@@ -480,9 +483,9 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
             <span key={i} className="band-sq" data-band={b} />
           ))}
         </div>
-        {played.map((r) => (
+        {played.map(({ r, rule }) => (
           <p key={r} className="caption fathom-rule-end" data-testid="fathom-rule" data-round={r}>
-            {RULES[r]}
+            {rule}
           </p>
         ))}
         <div className="results-actions">
