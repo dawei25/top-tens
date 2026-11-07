@@ -908,5 +908,65 @@
     "verdict": "keep",
     "why": "coordinator check against well-known figures (source not reopened); passes the bar",
     "judgedAt": "2026-11-07"
+  },
+  "name-country-1m-people": {
+    "verdict": "keep",
+    "why": "Small countries everyone has heard of: Estonia, Cyprus, Mauritius, Fiji land Close (13 score 70+), and Iceland, Malta and Luxembourg turn out smaller than people think. Swaziland, East Timor, Trinidad, typos all register.",
+    "judgedAt": "2026-11-07"
+  },
+  "name-country-10m-people": {
+    "verdict": "keep",
+    "why": "Half of Europe sits near 10 million (Sweden, Portugal, Greece, Czechia, Hungary, Belgium, Austria), so anyone has a way in; 31 score 70+ and the reveal (Papua New Guinea, Honduras) surprises.",
+    "judgedAt": "2026-11-07"
+  },
+  "name-country-50m-people": {
+    "verdict": "keep",
+    "why": "Spain, South Korea, Colombia, Kenya, Italy, the UK and France all land Close (27 score 70+); Columbia, Burma, Korea, UK, Espana register.",
+    "judgedAt": "2026-11-07"
+  },
+  "name-country-100m-people": {
+    "verdict": "keep",
+    "why": "Mexico, Japan, the Philippines, Egypt, Germany, Turkey, Iran land Close (15 score 70+) while Nigeria and Brazil overshoot; Türkiye, Persia, DRC, Phillipines register.",
+    "judgedAt": "2026-11-07"
+  },
+  "name-country-as-big-as-france": {
+    "verdict": "fix",
+    "why": "Target was 551,695 (not on the list's page); the page gives France (metropolitan) 551,500 km², now the target. Spain, Ukraine, Sweden, Kenya, Madagascar land Close (27); France is the yardstick.",
+    "judgedAt": "2026-11-07"
+  },
+  "name-country-as-big-as-uk": {
+    "verdict": "keep",
+    "why": "Target is the page's own UK figure (244,376 km²). New Zealand, Italy, Romania, Ghana, Poland land Close (26 score 70+); UK, Britain, England read as the yardstick.",
+    "judgedAt": "2026-11-07"
+  },
+  "name-city-10m-people": {
+    "verdict": "fix",
+    "why": "Definition said 'urban area', but the page's Urban area column is another figure (New York 21.5M vs the UN's 13.9M): now 'built-up area'. London, Paris, Chicago, Lima, Rio land Close (42).",
+    "judgedAt": "2026-11-07"
+  },
+  "name-city-20m-people": {
+    "verdict": "fix",
+    "why": "Definition said 'urban area', but the page's Urban area column is another figure (New York 21.5M vs the UN's 13.9M): now 'built-up area'. Mexico City, São Paulo, Mumbai, Seoul, Cairo Close (18).",
+    "judgedAt": "2026-11-07"
+  },
+  "name-country-no-land-borders": {
+    "verdict": "fix",
+    "why": "Any island country scores 100, so the reveal taught nothing; added a fact from the list (38 have none; Ireland, Haiti, Papua New Guinea share their islands), the twist UK and Ireland players hit.",
+    "judgedAt": "2026-11-07"
+  },
+  "name-country-3-borders": {
+    "verdict": "keep",
+    "why": "Count round a mental map: Mexico, Finland, Norway, Vietnam, Chile at 3; the US, Canada, the Netherlands, Belgium Close; Portugal (1) and Spain (5, Gibraltar and Ceuta) teach.",
+    "judgedAt": "2026-11-07"
+  },
+  "name-country-6-borders": {
+    "verdict": "fix",
+    "why": "France was a trap: the list counts the whole Republic (11, French Guiana and Saint Martin) where players picture 6 to 8; the definition now says so. Italy, Iraq, Ethiopia, South Africa at 6.",
+    "judgedAt": "2026-11-07"
+  },
+  "name-country-9-borders": {
+    "verdict": "fix",
+    "why": "France was a trap: the list counts the whole Republic (11) where players count 8, a Close answer; the definition now says so. Germany counts out to 9 from a map; Brazil, Austria, Turkey Close.",
+    "judgedAt": "2026-11-07"
   }
 }
