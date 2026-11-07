@@ -1,12 +1,13 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { missText, offAxis, type Band, type Round } from "../../game/fathom";
+import { missText, offAxis, type Band, type NameIt, type Round } from "../../game/fathom";
 import { BUOY, placed, SQUID } from "./sprites";
 
 /**
- * The reveal's sonar: the answer is the gold buoy in the middle, and the squid sits left of it (too low, or early) or
- * right of it (too high, or late) by how far off the guess was, on the round's own scale with its edges where the score
- * reaches 0 (offAxis: 10x off for an estimate, 33 points for a percent, 20 years for a year), with the miss written
- * under it ("30% low", "6 points low", "3 years early"). The stretch of track from the buoy to the squid is lit in the
+ * The reveal's sonar: the answer (a name-it round's target) is the gold buoy in the middle, and the squid sits left of
+ * it (too low, or early) or right of it (too high, or late) by how far off the guess was, on the round's own scale with
+ * its edges where the score reaches 0 (offAxis: 10x off for an estimate and a ratio list, 33 points for a percent, 20
+ * years for a year, 3.3 steps for a steps list), with the miss written under it ("30% low", "6 points low", "3 years
+ * early", "3 land borders too many"). The stretch of track from the buoy to the squid is lit in the
  * band's colour. No bands, no numbers on the scale: just where you landed. A Dead on or Close guess makes the squid hop
  * among sparkles (not with reduced motion; fathom.css).
  *
@@ -29,6 +30,9 @@ interface Props {
   answer: number;
   band: Band;
   round: Round;
+  /** The question's unit and, on a name-it round, its list's scoring: the miss is said in them. */
+  unit: string;
+  nameIt?: NameIt;
 }
 
 export function Gauge(props: Props) {
@@ -98,9 +102,9 @@ function ring(cx: number, cy: number, r: number, cols: number): string {
 /** A small pixel sparkle (a plus) centred on (x, y). */
 const spark = (x: number, y: number) => `M${x} ${y - 1}h1v3h-1zM${x - 1} ${y}h3v1h-3z`;
 
-function draw(cols: number, { guess, answer, round }: Props) {
+function draw(cols: number, { guess, answer, round, nameIt }: Props) {
   // How far off on the round's scale (negative: too low or early), clamped where the score reaches 0.
-  const d = offAxis(round, guess, answer);
+  const d = offAxis(round, guess, answer, nameIt?.scoring);
   const mid = (cols - 1) / 2;
   const ax = Math.round(mid);
   const gx = Math.round(mid + d * (mid - EDGE));

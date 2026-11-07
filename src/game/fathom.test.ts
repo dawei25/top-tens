@@ -50,10 +50,32 @@ import {
   unitShown,
   yearScore,
   yearsOff,
+  nameOff,
+  nameRule,
+  PER_STEP,
+  ruleFor,
+  singular,
+  stepsScore,
   type FathomKind,
   type FathomQuestion,
   type Round,
 } from "./fathom";
+import { trainLexicon } from "./junk";
+import {
+  asOfText,
+  bestAnswers,
+  goodAnswers,
+  MIN_GOOD,
+  nameLine,
+  nameListIds,
+  readFullBank,
+  readList,
+  readName,
+  readNameQuestion,
+  withArticle,
+  type NameList,
+  type NameRead,
+} from "./fathom-name";
 
 /** A seeded random (mulberry32), so a draw can be repeated. */
 function seeded(seed: number) {
@@ -828,14 +850,14 @@ const MIXED = KINDS.flatMap((kind, i) => [
   yr(`y${i}`, KINDS[(i + 2) % 12], { easy: i % 4 === 1 }),
 ]);
 
-// The owner's revamp plan: five rounds a game, two estimates, a percent, a year, and a fifth that will be a name-it
-// round (another estimate until then); a mixed order with an easy one first; at most two how tall / how heavy.
+// The owner's revamp plan: five rounds a game, two estimates, a percent, a year, and a name-it round (another estimate
+// when the bank has none); a mixed order with an easy one first; at most two how tall / how heavy.
 describe("the game's shape", () => {
   const rounds = (drawn: FathomQuestion[]) => drawn.map(roundOf);
   const count = (drawn: FathomQuestion[], round: Round) => rounds(drawn).filter((r) => r === round).length;
 
-  it("is two estimates, a percent, a year, and a fifth that is an estimate for now", () => {
-    expect(GAME_ROUNDS).toEqual(["estimate", "estimate", "percent", "year", "estimate"]);
+  it("is two estimates, a percent, a year, and a fifth that is an estimate while the bank has no name-it round", () => {
+    expect(GAME_ROUNDS).toEqual(["estimate", "estimate", "percent", "year", "name"]);
     for (let seed = 1; seed <= 200; seed++) {
       const drawn = drawQuestions(MIXED, [], seeded(seed));
       expect(drawn).toHaveLength(5);
@@ -981,5 +1003,362 @@ describe("the save", () => {
     expect(resumable({ ...save, game: done }, BANK)).toEqual(done);
     // Not one whose questions have gone from the bank.
     expect(resumable({ ...save, game: done }, BANK.filter((x) => x.id !== done.ids[0]))).toBeUndefined();
+  });
+});
+
+/* ---------- The name-it round ---------- */
+
+// The owner: "Name a country that has 6 land borders", "Name a human organ that weighs about 1 kg" ... "brain didn't
+// even register". A fair answer must always register; one locked answer per round. The lists here are a subset of the
+// real ones, in the data agent's format (e2e/fixtures/fathom/lists, the browser suite's too).
+const FIXTURES = join(import.meta.dirname, "..", "..", "e2e", "fixtures", "fathom");
+const fixtureList = (id: string): NameList => readList(JSON.parse(readFileSync(join(FIXTURES, "lists", `${id}.json`), "utf8")))!;
+const POPULATION = fixtureList("countries-population");
+const AREA = fixtureList("countries-area");
+const BORDERS = fixtureList("land-borders");
+const CITIES = fixtureList("cities-population");
+const LISTS = new Map([POPULATION, AREA, BORDERS, CITIES].map((l) => [l.id, l]));
+const NAME_BANK = JSON.parse(readFileSync(join(FIXTURES, "name-questions.json"), "utf8"));
+const named = readFullBank(NAME_BANK, LISTS)!;
+const nameQ = (id: string) => named.find((x) => x.id === id)!;
+
+describe("name-it: the lists", () => {
+  it("reads a list in the data agent's format", () => {
+    expect(POPULATION).toMatchObject({ id: "countries-population", noun: "country", nounPlural: "countries", measure: "people", scoring: "ratio" });
+    expect(BORDERS.scoring).toBe("steps");
+    expect(POPULATION.entries.find((e) => e.name === "United Kingdom")).toEqual({ name: "United Kingdom", aliases: ["UK", "U.K.", "Britain", "Great Britain"], value: 68350000 });
+  });
+  it("leaves out malformed entries, and isn't a list without a shape or an entry", () => {
+    const base = { id: "x", noun: "country", nounPlural: "countries", measure: "people", scoring: "ratio", source: { title: "t", url: "https://e.org" } };
+    const list = readList({ ...base, entries: [{ name: "A", value: 3 }, { name: "", value: 3 }, { name: "B", value: -1 }, { name: "C", value: "3" }, { name: "D", aliases: ["d", 4], value: 0 }] });
+    expect(list?.entries).toEqual([
+      { name: "A", aliases: [], value: 3 },
+      { name: "D", aliases: ["d"], value: 0 },
+    ]);
+    expect(readList({ ...base, entries: [] })).toBeNull();
+    expect(readList({ ...base, scoring: "log", entries: [{ name: "A", value: 1 }] })).toBeNull();
+    expect(readList({ ...base, id: "../x", entries: [{ name: "A", value: 1 }] })).toBeNull();
+    expect(readList("<!doctype html>")).toBeNull();
+    expect(readList(null)).toBeNull();
+  });
+});
+
+describe("name-it: reading the name", () => {
+  const read = (text: string, list = POPULATION, extra: Parameters<typeof readName>[3] = {}) => readName(text, list, [...LISTS.values()], extra);
+  const said = (r: NameRead) => (r.kind === "answer" || r.kind === "confirm" ? `${r.kind} ${r.entry.name}` : r.kind === "choose" ? `choose ${r.names.join(" / ")}` : r.kind === "other" ? `other ${r.name} (${r.noun})` : r.kind === "except" || r.kind === "offList" ? `${r.kind} ${r.name}` : r.kind);
+
+  it("takes a name or any alias, however it's spelled out", () => {
+    for (const [typed, name] of [
+      ["Colombia", "Colombia"],
+      ["colombia", "Colombia"],
+      ["  COLOMBIA ", "Colombia"],
+      ["UK", "United Kingdom"],
+      ["u.k.", "United Kingdom"],
+      ["Britain", "United Kingdom"],
+      ["USA", "United States"],
+      ["US", "United States"],
+      ["America", "United States"],
+      ["the United States", "United States"],
+      ["Türkiye", "Turkey"],
+      ["Turkiye", "Turkey"],
+      ["turkey", "Turkey"],
+      ["Holland", "Netherlands"],
+      ["the netherlands", "Netherlands"],
+      ["Czechia", "Czech Republic"],
+      ["Burma", "Myanmar"],
+      ["Côte d'Ivoire", "Ivory Coast"],
+      ["cote divoire", "Ivory Coast"],
+      ["DRC", "Democratic Republic of the Congo"],
+      ["Guinea", "Guinea"],
+      ["Niger", "Niger"],
+      ["Sudan", "Sudan"],
+    ])
+      expect(said(read(typed)), typed).toBe(`answer ${name}`);
+    expect(said(read("NYC", CITIES))).toBe("answer New York City");
+    expect(said(read("Bombay", CITIES))).toBe("answer Mumbai");
+    expect(said(read("Sao Paulo", CITIES))).toBe("answer São Paulo");
+    expect(said(read("St Petersburg", CITIES))).toBe("answer Saint Petersburg");
+  });
+
+  it("puts a misspelling in the box to confirm, and offers the choices when it could be more than one", () => {
+    expect(said(read("Frnace"))).toBe("confirm France");
+    expect(said(read("Colmbia"))).toBe("confirm Colombia");
+    expect(said(read("Phillipines"))).toBe("confirm Philippines");
+    expect(said(read("Irak"))).toBe("choose Iran / Iraq");
+    expect(said(read("Congo"))).toBe("choose Democratic Republic of the Congo / Republic of the Congo");
+    expect(said(read("Korea"))).toBe("choose North Korea / South Korea");
+    // A choice the game offered, typed or tapped, is that one.
+    expect(said(read("Iraq", POPULATION, { offered: ["Iran", "Iraq"] }))).toBe("answer Iraq");
+    expect(said(read("Republic of the Congo"))).toBe("answer Republic of the Congo");
+  });
+
+  it("knows a thing of another kind, and says so instead of reading it as something on the list", () => {
+    expect(said(read("Paris"))).toBe("other Paris (city)");
+    expect(said(read("tokyo"))).toBe("other Tokyo (city)");
+    // A city named exactly is that city, not a misspelling of a country or the start of one's name.
+    expect(said(read("Lagos"))).toBe("other Lagos (city)");
+    expect(said(read("Mexico City"))).toBe("other Mexico City (city)");
+    expect(said(read("Hong Kong"))).toBe("other Hong Kong (city)");
+    expect(said(read("Washington"))).toBe("other Washington, D.C. (city)");
+    // And a country on a city question.
+    expect(said(read("France", CITIES))).toBe("other France (country)");
+    expect(said(read("Japan", CITIES))).toBe("other Japan (country)");
+    // A name that is both stays what the question asks for.
+    expect(said(read("Singapore"))).toBe("answer Singapore");
+    expect(said(read("Singapore", CITIES))).toBe("answer Singapore");
+    expect(said(read("Hong Kong", CITIES))).toBe("answer Hong Kong");
+    expect(said(read("Mexico"))).toBe("answer Mexico");
+  });
+
+  // The coordinator: no dependencies on the lists (Greenland, Puerto Rico are not countries). A place no list has is
+  // still named for what it is, and never becomes an answer.
+  it("names the places no list has for what they are: territories, US states, continents, the UK's nations", () => {
+    expect(said(read("Greenland"))).toBe("other Greenland (territory)");
+    expect(said(read("puerto rico"))).toBe("other Puerto Rico (territory)");
+    expect(said(read("Texas"))).toBe("other Texas (US state)");
+    expect(said(read("Africa"))).toBe("other Africa (continent)");
+    expect(said(read("Greenland", CITIES))).toBe("other Greenland (territory)");
+    // A name the list has is that: Georgia the country (once it's on the list; these fixtures leave it out), not the US
+    // state.
+    expect(said(read("Georgia", BORDERS))).toBe("other Georgia (US state)");
+    expect(said(readName("Georgia", { ...POPULATION, entries: [...POPULATION.entries, { name: "Georgia", aliases: [], value: 3.7e6 }] }, []))).toBe("answer Georgia");
+    // And a misspelling of a country is no reason to miss one: "Hawaii" is a US state, not Haiti.
+    const withHaiti = { ...POPULATION, entries: [...POPULATION.entries, { name: "Haiti", aliases: [], value: 11.7e6 }] };
+    expect(said(readName("Hawaii", withHaiti, []))).toBe("other Hawaii (US state)");
+    expect(said(readName("Haitii", withHaiti, []))).toBe("confirm Haiti");
+    const ni = read("Northern Ireland");
+    expect(ni).toEqual({ kind: "other", name: "Northern Ireland", noun: "", partOf: "the UK" });
+  });
+
+  it("says when it doesn't know it, and never turns it into an answer", () => {
+    for (const typed of ["asdf", "brain", "Atlantis", "pope", "islands", "123"]) expect(said(read(typed)), typed).toBe("unknown");
+    expect(said(read(""))).toBe("empty");
+    expect(said(read("  "))).toBe("empty");
+    // A country another list of countries has and this one doesn't.
+    expect(said(read("Serbia", POPULATION))).toBe("offList Serbia");
+  });
+
+  // With the game's lexicon: a real name the list doesn't have says so, and a misspelling the lexicon happens to know as
+  // a name elsewhere ("Irak") is still offered: it needs a tap either way.
+  it("with the game's lexicon, says a real name isn't on the list, and still offers what a misspelling means", () => {
+    const lex = trainLexicon(["water"], ["Berlin", "Irak", "Lagos", "Kyiv"]);
+    const withLex = (text: string, l = POPULATION) => said(readName(text, l, [...LISTS.values()], { lex }));
+    expect(withLex("Berlin", CITIES)).toBe("offList Berlin");
+    expect(withLex("kyiv", CITIES)).toBe("offList Kyiv");
+    expect(nameLine(readName("berlin", CITIES, [], { lex }), CITIES)).toBe(`Berlin isn't one of our ${CITIES.entries.length} cities. Try again.`);
+    expect(withLex("Irak")).toBe("choose Iran / Iraq");
+    expect(withLex("Lagos")).toBe("other Lagos (city)");
+    expect(withLex("Frnace")).toBe("confirm France");
+    expect(withLex("asdf")).toBe("unknown");
+  });
+
+  it("leaves out the question's own yardstick", () => {
+    const except = ["United Kingdom"];
+    expect(said(read("UK", AREA, { except }))).toBe("except United Kingdom");
+    expect(said(read("United Kingdom", AREA, { except }))).toBe("except United Kingdom");
+    expect(said(read("Ghana", AREA, { except }))).toBe("answer Ghana");
+  });
+
+  it("says each in a plain line, two lines at most at 320px", () => {
+    const line = (r: NameRead, list = POPULATION) => nameLine(r, list);
+    expect(line(read("Paris"))).toBe("Paris is a city, not a country. Try again.");
+    expect(line(read("France", CITIES), CITIES)).toBe("France is a country, not a city. Try again.");
+    expect(line(read("asdf"))).toBe("Not one we know. Try again.");
+    expect(line(read("Frnace"))).toBe("France? Lock in to confirm.");
+    expect(line(read("Irak"))).toBe("Did you mean");
+    expect(line(read("Serbia"))).toBe(`Serbia isn't one of our ${POPULATION.entries.length} countries. Try again.`);
+    expect(line(read("Greenland"))).toBe("Greenland is a territory, not a country. Try again.");
+    expect(line(read("Northern Ireland"))).toBe("Northern Ireland is part of the UK. Try again.");
+    expect(line({ kind: "offList", name: "Bosnia Herzegovina" })).toBe(`That isn't one of our ${POPULATION.entries.length} countries. Try again.`);
+    expect(line(read("UK", AREA, { except: ["United Kingdom"] }), AREA)).toBe("Any country but United Kingdom. Try again.");
+    expect(line({ kind: "empty" })).toBe("Type a country first.");
+    expect(line({ kind: "vague" })).toBe("More than one fits. Be more specific.");
+    // A long name is left out of the line rather than run it to three.
+    expect(line({ kind: "other", name: "Saint Vincent and the Grenadines", noun: "island" })).toBe("That is an island, not a country. Try again.");
+    // The longest a line gets: an 18-letter name of another kind (fathom-name.e2e.cjs: two lines at 320px).
+    for (const r of [read("Paris"), read("asdf"), read("Frnace"), { kind: "other", name: "Ho Chi Minh City", noun: "city" } as NameRead])
+      expect(line(r).length, line(r)).toBeLessThanOrEqual(56);
+    for (const l of [line(read("Paris")), line(read("asdf"))]) expect(l).not.toMatch(/—|\p{Extended_Pictographic}/u);
+    expect(withArticle("organ")).toBe("an organ");
+    expect(withArticle("US state")).toBe("a US state");
+    expect(withArticle("university")).toBe("a university");
+  });
+});
+
+describe("name-it: scoring", () => {
+  it("steps: exactly right 100, one off 70, two off 40, three off 10, then 0", () => {
+    expect(PER_STEP).toBe(30);
+    expect([6, 7, 5, 8, 4, 9, 3, 10, 0, 14].map((n) => stepsScore(n, 6))).toEqual([100, 70, 70, 40, 40, 10, 10, 0, 0, 0]);
+  });
+  it("a ratio list scores the thing's figure against the target by the estimate's rule", () => {
+    const q = nameQ("name-country-50m-people");
+    expect(scoreFor(q, 50e6)).toBe(100);
+    expect(scoreFor(q, 52886363)).toBe(fathomScore(52886363, 50e6));
+    expect(scoreFor(q, 100e6)).toBe(49);
+    expect(scoreFor(q, 25e6)).toBe(49);
+    expect(scoreFor(q, 500e6)).toBe(0);
+    const steps = nameQ("name-country-6-borders");
+    expect([6, 7, 9].map((n) => scoreFor(steps, n))).toEqual([100, 70, 10]);
+  });
+  // UX 21: the rule says how points are counted, in words that agree with the numbers, before the answer.
+  it("says its rule in one plain line that agrees with the numbers", () => {
+    const pop = nameQ("name-country-50m-people");
+    expect(ruleFor(pop)).toBe("Your country's population: half or double the target scores about 50.");
+    expect(Math.abs(scoreFor(pop, 100e6) - 50)).toBeLessThanOrEqual(1);
+    expect(Math.abs(scoreFor(pop, 25e6) - 50)).toBeLessThanOrEqual(1);
+    expect(ruleFor(nameQ("name-city-10m-people"))).toBe("Your city's population: half or double the target scores about 50.");
+    expect(ruleFor(nameQ("name-country-as-big-as-uk"))).toBe("Your country's area: half or double the target scores about 50.");
+    const steps = nameQ("name-country-6-borders");
+    expect(ruleFor(steps)).toBe("Each land border off costs 30, so one off scores 70.");
+    expect(scoreFor(steps, 7)).toBe(70);
+    expect(scoreFor(steps, 5)).toBe(70);
+    // A measure without a word of its own: the estimate's rule, with the target.
+    expect(nameRule({ unit: "kilograms", nameIt: { list: "organs", scoring: "ratio", noun: "organ", nounPlural: "organs" } })).toBe(
+      "Half or double the target scores about 50. Ten times off scores 0.",
+    );
+    for (const q of named) {
+      expect(ruleFor(q).length, q.id).toBeLessThanOrEqual(70);
+      expect(ruleFor(q)).not.toMatch(/—|\p{Extended_Pictographic}/u);
+    }
+  });
+  it("says the miss plainly", () => {
+    const pop = nameQ("name-country-50m-people");
+    expect(nameOff(pop, 52886363)).toBe("6% more people");
+    expect(nameOff(pop, 40e6)).toBe("20% fewer people");
+    expect(nameOff(pop, 100e6)).toBe("2x too many people");
+    expect(nameOff(pop, 15e6)).toBe("3.3x too few people");
+    expect(nameOff(pop, 50.2e6)).toBe("spot on");
+    // An area is a measure: as an estimate says it.
+    const area = nameQ("name-country-as-big-as-uk");
+    expect(nameOff(area, 238533)).toBe("2% low");
+    expect(nameOff(area, 600000)).toBe("2.5x too high");
+    const steps = nameQ("name-country-6-borders");
+    expect(nameOff(steps, 9)).toBe("3 land borders too many");
+    expect(nameOff(steps, 5)).toBe("1 land border too few");
+    expect(nameOff(steps, 6)).toBe("spot on");
+    expect(missText(steps, 9)).toBe("3 land borders too many");
+    // Whatever reads "spot on" scores 100, and nothing else does.
+    for (let f = 45e6; f <= 55e6; f += 0.1e6) expect(nameOff(pop, f) === "spot on", `${f}`).toBe(scoreFor(pop, f) === 100);
+    for (let n = 0; n <= 12; n++) expect(nameOff(steps, n) === "spot on").toBe(scoreFor(steps, n) === 100);
+  });
+  it("shows the figures in the list's measure, one of it singular", () => {
+    const pop = nameQ("name-country-50m-people");
+    expect(amountText(pop, 50e6)).toBe("50 million people");
+    expect(figureParts(pop, 52886363)).toEqual({ n: "52.89 million", unit: "people" });
+    const steps = nameQ("name-country-6-borders");
+    expect(amountText(steps, 6)).toBe("6 land borders");
+    expect(amountText(steps, 1)).toBe("1 land border");
+    expect(amountText(steps, 0)).toBe("0 land borders");
+    expect(amountText(nameQ("name-country-as-big-as-uk"), 238533)).toBe("238,533 square kilometres");
+    expect(singular("land borders")).toBe("land border");
+    expect(singular("cities")).toBe("city");
+    expect(unitShown(pop)).toBe("");
+  });
+  it("places the squid by the list's scale: powers of ten, or steps with the edge where it scores 0", () => {
+    expect(offAxis("name", 100e6, 50e6, "ratio")).toBeCloseTo(Math.log10(2));
+    expect(offAxis("name", 7, 6, "steps")).toBeCloseTo(0.3);
+    expect(offAxis("name", 3, 6, "steps")).toBeCloseTo(-0.9);
+    expect(offAxis("name", 14, 6, "steps")).toBe(1);
+    expect(offAxis("name", 0, 3, "steps")).toBeCloseTo(-0.9);
+    expect(stepsScore(6 + 100 / 30, 6)).toBe(0);
+  });
+});
+
+describe("name-it: the questions", () => {
+  it("are read with their lists: the list's measure, source and scoring, the target as the answer", () => {
+    expect(nameListIds(NAME_BANK)).toEqual(["countries-population", "land-borders", "countries-area", "cities-population"]);
+    expect(nameQ("name-country-50m-people")).toEqual({
+      id: "name-country-50m-people",
+      kind: "places",
+      round: "name",
+      question: "Name a country with about 50 million people",
+      unit: "people",
+      answer: 50e6,
+      fact: "",
+      source: { title: "List of countries and dependencies by population", url: "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population" },
+      nameIt: { list: "countries-population", scoring: "ratio", noun: "country", nounPlural: "countries", asOf: "2026-11-02" },
+    });
+    expect(nameQ("name-country-as-big-as-uk").nameIt?.except).toEqual(["United Kingdom"]);
+    expect(nameQ("name-city-10m-people").definition).toBe("its whole urban area, UN figures for 2025");
+    // readBank alone (no lists) leaves them out.
+    expect(readBank(NAME_BANK)).toEqual([]);
+  });
+  it("are left out when their list isn't there, or the target leaves fewer than three good answers", () => {
+    const raw = NAME_BANK.questions[0];
+    expect(readNameQuestion(raw, undefined)).toBeNull();
+    expect(readNameQuestion(raw, BORDERS)).toBeNull();
+    expect(readFullBank(NAME_BANK, new Map())).toEqual([]);
+    // 14 land borders: China and Russia, and nothing within a step.
+    expect(goodAnswers(BORDERS, 14).map((e) => e.name)).toEqual(["China", "Russia"]);
+    expect(MIN_GOOD).toBe(3);
+    expect(readNameQuestion({ ...NAME_BANK.questions[1], target: 14 }, BORDERS)).toBeNull();
+    expect(readNameQuestion({ ...NAME_BANK.questions[1], target: 6.5 }, BORDERS)).toBeNull();
+    expect(readNameQuestion({ ...raw, target: 0 }, POPULATION)).toBeNull();
+    expect(readNameQuestion({ ...raw, kind: "weather" }, POPULATION)).toBeNull();
+    // The yardstick doesn't count toward them.
+    expect(goodAnswers(AREA, 244376, ["United Kingdom"]).map((e) => e.name)).not.toContain("United Kingdom");
+  });
+  it("show the best answers: the closest first, the yardstick left out", () => {
+    const best = (list: NameList, target: number, except?: string[]) => bestAnswers(list, target, except).map((e) => `${e.name} ${e.value}`);
+    // Spain (2.8% fewer, 98) before South Korea (3.4% more, 97): by points, then how close.
+    expect(best(POPULATION, 50e6)).toEqual(["Uganda 49924252", "Sudan 50448963", "Spain 48592909", "South Korea 51717590"]);
+    expect(best(BORDERS, 6)).toEqual(["Italy 6", "Ethiopia 6", "Afghanistan 6", "Chad 6"]);
+    // The UK's own figure on the list: Guinea (0.6% bigger) spot on, Uganda 99, then Ghana and Romania at 98, Ghana closer.
+    expect(best(AREA, 244376, ["United Kingdom"])).toEqual(["Guinea 245857", "Uganda 241550", "Ghana 238533", "Romania 238397"]);
+  });
+  it("says when the figures are from", () => {
+    expect(asOfText("2026-11-02")).toBe("November 2026");
+    expect(asOfText("2024")).toBe("2024");
+    expect(asOfText(undefined)).toBe("");
+  });
+});
+
+describe("name-it: a game", () => {
+  const NUMBERS = MIXED;
+  const withNames = [...NUMBERS, ...named];
+  it("plays the name-it round fifth in the shape, never first, when the bank has one", () => {
+    for (let seed = 1; seed <= 200; seed++) {
+      const drawn = drawQuestions(withNames, [], seeded(seed));
+      expect(drawn.map(roundOf).filter((r) => r === "name"), `seed ${seed}`).toHaveLength(1);
+      expect(roundOf(drawn[0]), `seed ${seed}`).not.toBe("name");
+      expect(drawn.map(roundOf).sort()).toEqual(["estimate", "estimate", "name", "percent", "year"]);
+    }
+    // Anywhere after the first.
+    const at = new Set(Array.from({ length: 200 }, (_, s) => drawQuestions(withNames, [], seeded(s + 1)).findIndex((x) => roundOf(x) === "name")));
+    expect([...at].sort()).toEqual([1, 2, 3, 4]);
+    // Even an easy one never opens.
+    const easy = named.map((x) => ({ ...x, easy: true }));
+    for (let seed = 1; seed <= 50; seed++) expect(roundOf(drawQuestions([...NUMBERS, ...easy], [], seeded(seed))[0])).not.toBe("name");
+  });
+  it("is an estimate when the bank has none (its lists didn't load)", () => {
+    for (let seed = 1; seed <= 50; seed++) expect(drawQuestions(readFullBank({ version: 1, questions: [...NUMBERS, ...NAME_BANK.questions] }, new Map())!, [], seeded(seed)).map(roundOf).sort()).toEqual(["estimate", "estimate", "estimate", "percent", "year"]);
+  });
+  it("locks one answer, keeps what was named, scores its figure, and shares like any round", () => {
+    const bank = [q("a", "body"), nameQ("name-country-50m-people"), q("b", "food"), q("c", "space"), q("d", "sports")];
+    let g = newGame(bank.map((x) => x.id));
+    g = nextQuestion(lockIn(g, 100));
+    g = lockIn(g, 52886363, "Colombia");
+    expect(phaseOf(g)).toBe("reveal");
+    expect(lockIn(g, 1, "Spain")).toBe(g);
+    expect(g.picks).toEqual({ "name-country-50m-people": "Colombia" });
+    g = nextQuestion(g);
+    for (const guess of [100, 200, 50]) g = nextQuestion(lockIn(g, guess));
+    const scored = scoreGame(g, bank);
+    expect(scored[1]).toMatchObject({ pick: "Colombia", guess: 52886363, points: fathomScore(52886363, 50e6), band: "dead-on" });
+    expect(scored[0].pick).toBeUndefined();
+    expect(totalOf(scored)).toBe(100 + fathomScore(52886363, 50e6) + 100 + 49 + 49);
+    expect(shareText(scored)).toBe(`Fathom beta ${totalOf(scored)}/500\n█ █ █ ▒ ▒`);
+  });
+  it("keeps what was named in the save, and drops a pick that isn't a name of this game's", () => {
+    const m = new Map<string, string>();
+    const store = { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v) };
+    const game = { ids: ["a", "n"], guesses: [100, 6], at: 1, picks: { n: "Italy" } };
+    saveFathom({ recent: [], game }, store);
+    expect(loadFathom(store).game).toEqual(game);
+    store.setItem(FATHOM_KEY, JSON.stringify({ recent: [], game: { ...game, picks: { n: 4, x: "Spain" } } }));
+    expect(loadFathom(store).game).toEqual({ ids: ["a", "n"], guesses: [100, 6], at: 1 });
+    // A land border count of 0 is a fair figure.
+    store.setItem(FATHOM_KEY, JSON.stringify({ recent: [], game: { ...game, guesses: [100, 0], picks: { n: "Japan" } } }));
+    expect(loadFathom(store).game?.guesses).toEqual([100, 0]);
   });
 });

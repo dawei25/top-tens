@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "name-country-50m-people",
+      "kind": "places",
+      "round": "name",
+      "list": "countries-population",
+      "target": 50000000,
+      "question": "Name a country with about 50 million people",
+      "easy": false
+    },
+    {
+      "id": "name-country-6-borders",
+      "kind": "places",
+      "round": "name",
+      "list": "land-borders",
+      "target": 6,
+      "question": "Name a country with 6 land borders",
+      "easy": false
+    },
+    {
+      "id": "name-country-as-big-as-uk",
+      "kind": "places",
+      "round": "name",
+      "list": "countries-area",
+      "target": 244376,
+      "question": "Name a country about as big as the UK",
+      "except": ["United Kingdom"],
+      "easy": false
+    },
+    {
+      "id": "name-city-10m-people",
+      "kind": "places",
+      "round": "name",
+      "list": "cities-population",
+      "target": 10000000,
+      "question": "Name a city with about 10 million people",
+      "definition": "its whole urban area, UN figures for 2025",
+      "easy": false
+    }
+  ]
+}

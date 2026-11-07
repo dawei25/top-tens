@@ -1,8 +1,9 @@
 # Fathom
 
-An estimation mini-game (hidden at `#fathom`): each game shows 5 questions, the player types a number, and the score
-is plain closeness, by one rule for each round (`scoreFor`, `src/game/fathom.ts`). The questions live in
-`public/fathom/questions.json`.
+An estimation mini-game (hidden at `#fathom`): each game shows 5 questions, the player types a number (or, in the
+name-it round, a name), and the score is plain closeness, by one rule for each round (`scoreFor`, `src/game/fathom.ts`).
+The questions live in `public/fathom/questions.json`; the name-it round's lists in `public/fathom/lists/<id>.json`
+(written by the data agent's pipeline).
 
 ## The rounds
 
@@ -13,6 +14,7 @@ A question's `round` says how it is asked and scored (absent means an estimate).
 | `estimate` | a number in the question's unit | 100 x (1 - d)^2, d = \|log10(guess / answer)\|; within 1% spot on, 100 | "Half or double the answer scores about 50. Ten times off scores 0." | "30% low", "3x too high" |
 | `percent` | 0 to 100: "71", "71%", "71.5" | 100 - 3 x points off, never under 0; within half a point spot on, 100 | "Each point off costs 3, so 10 off scores 70." | "6 points low" |
 | `year` | an AD year, up to four digits: "2007" | 100 - 5 x years off, never under 0; the exact year 100 | "Each year off costs 5, so 10 years off scores 50." | "3 years early" |
+| `name` | a name from the question's list: "Colombia" for "Name a country with about 50 million people" | the thing's figure against the target: a `ratio` list by the estimate's rule, a `steps` list 100 - 30 x steps off (one off 70, two 40) | ratio: "Your country's population: half or double the target scores about 50." (or "area"; any other measure: the estimate's rule with "the target"); steps: "Each land border off costs 30, so one off scores 70." | "6% more people", "2x too many people", "2% low" (an area, a unit of measure), "3 land borders too many" |
 
 Why these: a ratio means nothing on a share or a date (65% for 71% is 9% off but 6 points; 2004 for 2007 is 0.06%
 off), so those rounds score the distance the player thinks in. 3 a point puts Dead on (90+) within 3 points and Close
@@ -24,12 +26,44 @@ played. Whatever reads "spot on" scores 100, in every round. The bands, the sona
 
 The field: a decimal keypad for an estimate and a percent ("%" beside it for a percent), a plain number pad for a year,
 which never groups its digits ("2007", not "2,007"). A percent of 0 is a fair guess; past 100 says "0 to 100, please."
-A year with a fraction says "A whole year, please.", five digits "A year has four digits."
+A year with a fraction says "A whole year, please.", five digits "A year has four digits." A name-it round has a text
+field ("your country") and no unit.
+
+### The name-it round
+
+The owner: "Name a country that has 6 land borders", "Name a human organ that weighs about 1 kg" ... "brain didn't even
+register". **A fair answer must always register**, and one answer locks per round.
+
+- **Reading the name** (`readName`, `src/game/fathom-name.ts`): TENtacle's own matcher (`judgeGuess`,
+  `src/game/match.ts`) over the list's names and aliases, so "UK", "Türkiye", "USA", "Holland" and typos read as they
+  do in TENtacle. An exact name or alias locks at once. A misspelling that points at one thing goes in the box to
+  confirm ("France? Lock in to confirm."); a name several things share offers them to tap ("Irak": Iran or Iraq;
+  "Congo"); a tap fills the box. Only a name on the list locks; nothing else costs anything.
+- **What isn't on the list** says why, and costs nothing: a thing on another of the game's lists ("Paris is a city, not
+  a country. Try again.", read before any misspelling, so "Lagos" is the city, not Laos, and "Mexico City" not Mexico);
+  a place no list has (`PLACES`: territories, US states, continents, the UK's nations: "Greenland is a territory, not a
+  country.", "Northern Ireland is part of the UK."), never an answer and only when the list doesn't have the name
+  (Georgia is the country); a real name the list lacks, by the game's lexicon ("Berlin isn't one of our 85 cities.");
+  the question's own yardstick (`except`: "Any country but United Kingdom."); anything else, "Not one we know. Try
+  again." A name the lexicon knows elsewhere ("Irak", an alias in TENtacle's bank) is still read as a misspelling when
+  nothing else reads it: it needs a confirm or a tap either way. Each line keeps to two lines at 320px (a long name is
+  left out: "That is a territory, not a country.").
+- **The reveal**: the target, what was named and its figure ("Colombia, 52.89 million people"), the points, the sonar
+  on the list's scale (10x off at its edges on a ratio list, 3.3 steps on a steps list) with the miss under it, the
+  best four answers on the list with their figures (by points, then closeness, then the list's order; the yardstick
+  left out), the fact if the question has one, and the list's source with its date. The results' recap reads "you
+  Colombia 52.89 million · target 50 million people". A name-it guess isn't sent to the backend (the players' typical
+  guess means nothing there).
+- **Its lists**: `{ id, noun, nounPlural, measure, scoring: "ratio" | "steps", source: { title, url }, asOf, entries: [{
+  name, aliases, value }] }`, each complete for what it holds (every country). The game fetches the lists the bank's
+  name-it questions use before it draws; a question whose list didn't load, or whose target leaves fewer than 3 good
+  answers on it (a list that changed), is left out, and the fifth round is an estimate.
 
 ## A game
 
-Five rounds (`GAME_ROUNDS`): two estimates, a percent, a year, and a fifth that will be a name-it round (an estimate
-until it exists). No timer. The first question is an easy one; the other four come in a random order. Within that, no
+Five rounds (`GAME_ROUNDS`): two estimates, a percent, a year, and a name-it round (an estimate when the bank has none
+whose list loaded). No timer. The first question is an easy one, and a number to type (never the name-it round); the
+other four come in a random order. Within that, no
 two of the same kind, at most two how tall / how heavy questions, and none from the last 3 games while the bank has
 others (then the oldest come back first). A round the bank has none of is played as an estimate, so a small bank never
 breaks a game.
@@ -86,7 +120,8 @@ Write our own questions from facts. Never copy one from another estimation game.
 - **`id`**: kebab-case, unique.
 - **`kind`**: one of body, animals, landmarks, places, space, food, everyday, nature, science, sports, culture,
   lists. `lists` is for figures from TENtacle's own lists (`public/puzzles/*.json`); about 6 in 50 at most.
-- **`round`** (optional): `percent` or `year`; leave it out for an estimate. The rules for each are below.
+- **`round`** (optional): `percent`, `year` or `name`; leave it out for an estimate. The rules for each are below (a
+  name-it question has its own shape).
 - **`question`**: plain, dry, one question ending with "?", naming exactly what is measured. The unit stays out of it:
   the game shows `unit` beside the input. A count names what it counts once, right after "How many" ("How many keys
   does a modern piano have?", unit `keys`); a measure never does ("How tall is it in metres?" is wrong). No trick
@@ -141,6 +176,36 @@ something before or after it ("before the iPhone, after the internet"). The fact
 second date that gives it away. The year must not appear in any other question's question, definition or fact
 (`check.ts`: two questions in one game would give it away).
 
+**A name-it question** (`round: "name"`): the player names a thing from a list whose figure is close to a target.
+
+```json
+{ "id": "name-country-6-borders", "round": "name", "kind": "places", "list": "land-borders", "target": 6,
+  "question": "Name a country with 6 land borders", "easy": false }
+{ "id": "name-country-as-big-as-uk", "round": "name", "kind": "places", "list": "countries-area", "target": 244376,
+  "question": "Name a country about as big as the UK", "except": ["United Kingdom"], "easy": false }
+```
+
+- **`list`**: a list id in `public/fathom/lists`. It gives the question its unit (the list's measure), its source and
+  its scoring; leave `unit`, `answer` and `source` out.
+- **`question`**: "Name a ..." or "Name an ...", naming the list's noun ("country", "city"), no end punctuation, the
+  target in it as a player says it ("about 50 million people", "6 land borders", "no land borders", "about as big as
+  France"). 100 characters with the definition, as any question.
+- **`target`**: in the list's measure (people, square kilometres, land borders): a whole number on a steps list, more
+  than 0 on a ratio list. When the question names a yardstick ("as big as the UK"), the target is that thing's own
+  figure on the list, and the yardstick goes in **`except`** so it doesn't score (a definition says it when the target
+  is another figure for it: "mainland France, without its overseas regions").
+- **Several good answers, not one**: at least 3 things on the list score 70 or more against the target (Close:
+  within about 1.45x on a ratio list, one step on a steps list), so a fair answer is never a lucky one. Targets in the
+  middle of a list's range: the cities list holds only cities of 5 million and more (UN 2025), so no city target under
+  about 8 million or over about 30 million; a country list holds the 197 countries (193 UN members and Vatican City,
+  Palestine, Taiwan, Kosovo; no dependencies).
+- **`definition`** when the figure needs it: a city's population means three things (the city, its urban area, its
+  metro), so a city question says which the list uses ("its whole urban area, UN figures for 2025").
+- **`fact`** (optional): a sentence about the target or its answers, from the list's page. The best answers are the
+  reveal, so a question can do without.
+- **`verified: false` and a `note`** while a question waits for its list or a judge: the note says what the judge
+  checks. The game leaves a question out while its list isn't there.
+
 **Stable and safe:** an answer that stays put, plain about what's counted without background knowledge (the Sydney
 Opera House's roof tiles were dropped: the big panels or the single tiles?). No live counts (followers, streams, net
 worth), nothing that changes month to month, nothing gory or political. A dated figure is fine when the date is in the
@@ -149,8 +214,9 @@ worth), nothing that changes month to month, nothing gory or political. A dated 
 **The bank's mix:** at least 40 questions (judging drops weak ones) over at least 8 kinds, no kind more than 9 in 50,
 at least 12 easy openers, and a spread of estimate magnitudes from under 1 to billions (counting the unit's scale word:
 86 billion neurons is in the billions; a percent or a year is no magnitude). No more than one in five how tall / how
-heavy (a warning for now). Each game plays one percent and one year, and holds back the last 3 games' questions while
-the bank has others, so aim for at least 10 of each round; with fewer, the same ones come back game after game.
+heavy (a warning for now). Each game plays one percent, one year and one name-it round, and holds back the last 3
+games' questions while the bank has others, so aim for at least 10 of each round; with fewer, the same ones come back
+game after game. A name-it question counts toward its kind (`places` for countries and cities) like any other.
 
 **Fetching:** Wikipedia's normal page HTML through `scripts/wiki.ts` (1.5 s between requests, one at a time, cached
 in `.cache/wiki`), or another reputable page, fetched one at a time.
@@ -161,7 +227,12 @@ its "In what year" or "When", a typical value only on an estimate and only one o
 positive finite answers of at most 6 digits before the point, https sources, one question ending in "?", the unit kept
 out of it, answers not given away (a number standing alone, not inside a longer one: "300.12" doesn't state 300; a
 year by any other question's text), the mix), prints the count by round and the how tall / how heavy share, and warns
-past one in five.
+past one in five. A name-it question is checked against its list: it asks "Name a ...", names the list's noun, takes
+its unit, answer and source from the list, its target fits the list's scoring, its `except` is on the list, and at
+least 3 answers score 70 or more; one whose list isn't there yet passes only while `verified` is false, with a warning.
+Every list a question uses is checked too (`listMisses`): each name and alias reads back as its entry, and names
+everyone uses for the same thing (UK and Britain, Holland, Czechia, DRC, East Timor, Bombay, Saigon, NYC:
+`SAME_THING`) register wherever one of them is on the list.
 `npm test` runs it on the real file (`scripts/fathom/check.test.ts`). Truth, fairness, the bar and the typical miss are
 on the writer and the judge.
 
@@ -202,6 +273,13 @@ The judge checks, in this order, and stops at the first fail:
    the bank (same subject and measure).
 8. **The how tall / how heavy share.** Count them (`check.ts` prints the share). While the bank is over one in five,
    a how tall / how heavy question has to beat the others on all three tests to stay: the plainer ones go first.
+9. **A name-it question: type every obvious answer to the question; each must register.** Play it at #fathom with
+   its list there. Write down the answers a curious player would try (the well-known countries near the target, their
+   short forms and old names: "UK", "USA", "Holland", "Burma", "Bombay"), type each, and check it locks as the right
+   thing, or goes in the box or offers a choice that includes it. One that says "Not one we know." is a missing alias
+   (the list's, for the data agent) or a question to drop. Then type a few wrong kinds (a city, a territory, a US
+   state) and check each says what it is and costs nothing. Check the target against the list's page (the yardstick's
+   own figure, the list's measure in the definition), and that the best answers the reveal shows are fair ones.
 
 The owner's taste, from playing the beta: he liked blood in a body, the Eiffel Tower, a giraffe, New York City's
 population; units must be the obvious ones; scores are plain closeness, one plain rule for each round; and too many

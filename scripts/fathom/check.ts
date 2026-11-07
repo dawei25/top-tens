@@ -3,11 +3,38 @@
 //   NODE_NO_WARNINGS=1 npx tsx scripts/fathom/check.ts [file]
 // A file other than the bank is a file of candidates for it: checked as they would join the bank, and flagged when an
 // answer is too long to type or a subject is already in the bank.
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { isSizeQuestion, ROUND_UNITS, ROUNDS, type Round } from "../../src/game/fathom";
+import { goodAnswers, GOOD_POINTS, LIST_ID, MIN_GOOD, readList, readName, type NameList } from "../../src/game/fathom-name";
+import { normalize } from "../../src/game/match";
 
 export const BANK = join(import.meta.dirname, "..", "..", "public", "fathom", "questions.json");
+/** The name-it round's lists, one file each (written by the data agent's pipeline). */
+export const LISTS = join(import.meta.dirname, "..", "..", "public", "fathom", "lists");
+
+/** A list by id: the list, null when its file isn't one, undefined when there is no file. */
+export type ListSource = (id: string) => NameList | null | undefined;
+
+/** The lists in public/fathom/lists, read once each. */
+export function fileLists(dir = LISTS): ListSource {
+  const seen = new Map<string, NameList | null | undefined>();
+  return (id) => {
+    if (!seen.has(id)) {
+      const file = join(dir, `${id}.json`);
+      let list: NameList | null | undefined;
+      if (LIST_ID.test(id) && existsSync(file)) {
+        try {
+          list = readList(JSON.parse(readFileSync(file, "utf8")));
+        } catch {
+          list = null;
+        }
+      }
+      seen.set(id, list);
+    }
+    return seen.get(id);
+  };
+}
 
 export const KINDS = [
   "body",
@@ -82,6 +109,13 @@ export const MEASURES = new Set([
 
 /** `verified`: the judge opened the source and confirmed the figure (the judged candidates carry it; the game ignores it). */
 const KEYS = new Set(["id", "kind", "round", "question", "unit", "answer", "definition", "fact", "source", "typical", "easy", "verified"]);
+/**
+ * A name-it question's: its list and target in place of a unit, an answer and a source (all three are the list's),
+ * names that don't count (`except`), and a `note` for the judge while it waits to be verified.
+ */
+const NAME_KEYS = new Set(["id", "kind", "round", "list", "target", "question", "definition", "fact", "except", "easy", "verified", "note"]);
+/** A name-it question asks for one: "Name a country with about 50 million people", "Name an organ that...". */
+const ASKS_NAME = /^Name an? \S/;
 
 /** The earliest year a year question may answer: four digits, as the player types it. */
 export const MIN_YEAR = 1000;
@@ -129,8 +163,146 @@ function spellings(n: number): string[] {
 const mentions = (text: string, n: number) =>
   spellings(n).some((s) => new RegExp(`(^|[^\\d.,])${escape(s)}($|[^\\d.,]|[.,](?!\\d))`).test(text));
 
-/** Problems with one question, each a message starting with its id. */
-export function checkQuestion(q: unknown, i: number): string[] {
+/** The checks on a definition and a fact that every round shares. */
+function checkWords(o: Record<string, unknown>, bad: (msg: string) => void, factRequired: boolean): void {
+  const text = (k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
+  if ("definition" in o) {
+    const d = o.definition;
+    if (typeof d !== "string" || !d.trim()) bad("definition, when present, must be a short phrase");
+    else {
+      if (d.length > MAX_DEFINITION) bad(`definition is longer than ${MAX_DEFINITION} characters`);
+      if (/[.?!]$/.test(d)) bad("definition is a phrase, not a sentence (no end punctuation)");
+    }
+  }
+
+  const fact = text("fact");
+  if (!fact.trim()) {
+    if (factRequired || "fact" in o) bad("fact is missing");
+  } else {
+    if (!fact.endsWith(".")) bad("fact must end with a full stop");
+    if (/[.!?]\s+[A-Z]/.test(fact)) bad("fact must be one sentence");
+    if (fact.length > MAX_FACT) bad(`fact is longer than ${MAX_FACT} characters`);
+  }
+
+  for (const k of ["question", "definition", "fact"]) {
+    if (text(k).includes("—")) bad(`${k} has an em dash (UI copy uses none)`);
+    if (/\p{Extended_Pictographic}/u.test(text(k))) bad(`${k} has an emoji`);
+  }
+}
+
+/** Whether `typed` registers on the list as `entry`: it locks as it, goes in the box as it, or is one of the choices. */
+function registersAs(typed: string, list: NameList, entry: string): boolean {
+  const r = readName(typed, list);
+  if (r.kind === "answer" || r.kind === "confirm") return r.entry.name === entry;
+  return r.kind === "choose" && r.names.includes(entry);
+}
+
+/**
+ * Names everyone uses for the same thing. On a list that has one of them as a name or an alias, every other must
+ * register as that entry too: "UK" and "Britain" wherever the United Kingdom is, "Bombay" wherever Mumbai is.
+ */
+export const SAME_THING: readonly (readonly string[])[] = [
+  ["United States", "United States of America", "USA", "US", "America"],
+  ["United Kingdom", "UK", "Britain", "Great Britain"],
+  ["Turkey", "Türkiye"],
+  ["Netherlands", "Holland"],
+  ["Czech Republic", "Czechia"],
+  ["Ivory Coast", "Côte d'Ivoire"],
+  ["Myanmar", "Burma"],
+  ["Democratic Republic of the Congo", "DR Congo", "DRC"],
+  ["Eswatini", "Swaziland"],
+  ["Timor-Leste", "East Timor"],
+  ["Cape Verde", "Cabo Verde"],
+  ["North Macedonia", "Macedonia"],
+  ["Bosnia and Herzegovina", "Bosnia"],
+  ["United Arab Emirates", "UAE"],
+  ["Vatican City", "Vatican"],
+  ["Russia", "Russian Federation"],
+  ["Vietnam", "Viet Nam"],
+  ["New York City", "New York", "NYC"],
+  ["Mumbai", "Bombay"],
+  ["Kolkata", "Calcutta"],
+  ["Chennai", "Madras"],
+  ["Ho Chi Minh City", "Saigon"],
+  ["Saint Petersburg", "St Petersburg"],
+  ["Kyiv", "Kiev"],
+  ["São Paulo", "Sao Paulo"],
+  ["Bogotá", "Bogota"],
+];
+
+/**
+ * What on a list doesn't register as it should (the owner: "brain didn't even register"): each entry's name and
+ * aliases read back as that entry (or one of the choices, for a name 2 to 4 entries share), and the names in
+ * SAME_THING all register wherever one of them is on the list.
+ */
+export function listMisses(list: NameList): string[] {
+  const out: string[] = [];
+  for (const e of list.entries)
+    for (const form of [e.name, ...e.aliases])
+      if (!registersAs(form, list, e.name)) out.push(`list ${list.id}: "${form}" doesn't register as ${e.name}`);
+  for (const group of SAME_THING) {
+    const forms = new Set(group.map(normalize));
+    const entry = list.entries.find((e) => [e.name, ...e.aliases].some((f) => forms.has(normalize(f))));
+    if (!entry) continue;
+    for (const typed of group) if (!registersAs(typed, list, entry.name)) out.push(`list ${list.id}: "${typed}" doesn't register as ${entry.name}`);
+  }
+  return out;
+}
+
+/**
+ * Problems with a name-it question, against its list when the list is there: the question asks for a name and names
+ * the list's noun ("Name a country..."), the target fits the list's scoring, any `except` is on the list, and at least
+ * MIN_GOOD answers score GOOD_POINTS or more. A question whose list isn't there yet passes only while it waits for a
+ * judge (`verified: false`); bankWarnings says so.
+ */
+function checkNameQuestion(o: Record<string, unknown>, bad: (msg: string) => void, lists: ListSource): void {
+  for (const k of Object.keys(o)) {
+    if (NAME_KEYS.has(k)) continue;
+    if (k === "unit" || k === "answer" || k === "source") bad(`a name-it question takes its ${k} from its list: leave "${k}" out`);
+    else bad(`unknown field "${k}"`);
+  }
+  if (typeof o.id !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(o.id)) bad("id must be kebab-case");
+  if (!KINDS.includes(o.kind as Kind)) bad(`kind "${String(o.kind)}" is not one of ${KINDS.join(", ")}`);
+  const question = typeof o.question === "string" ? o.question : "";
+  if (!question.trim()) bad("question is missing");
+  else {
+    if (!ASKS_NAME.test(question)) bad(`a name-it question asks "Name a ..." or "Name an ..."`);
+    if (/[?.!]$/.test(question)) bad("a name-it question is an ask, with no end punctuation");
+    if (question !== question.trim() || /\s{2}/.test(question)) bad("question has stray spaces");
+    const shown = question.length + (typeof o.definition === "string" ? o.definition.length : 0);
+    if (shown > MAX_SHOWN) bad(`question and definition run ${shown} characters; keep them to ${MAX_SHOWN} so LOCK IN stays above a phone keyboard`);
+  }
+  checkWords(o, bad, false);
+  const target = o.target;
+  const targetOk = typeof target === "number" && Number.isFinite(target) && target >= 0;
+  if (!targetOk) bad("target must be a finite number, 0 or more");
+  if (o.except !== undefined && !(Array.isArray(o.except) && o.except.every((x) => typeof x === "string" && x.trim())))
+    bad("except, when present, is a list of names");
+  if (o.easy !== undefined && typeof o.easy !== "boolean") bad("easy, when present, is true or false");
+  if (o.verified !== undefined && typeof o.verified !== "boolean") bad("verified, when present, is true or false");
+  if (o.note !== undefined && (typeof o.note !== "string" || !o.note.trim())) bad("note, when present, says what the judge must check");
+
+  if (typeof o.list !== "string" || !LIST_ID.test(o.list)) return bad("list must be a list id (kebab-case)");
+  const list = lists(o.list);
+  if (list === null) return bad(`list "${o.list}" is not a list file (public/fathom/lists/${o.list}.json)`);
+  if (list === undefined) {
+    if (o.verified !== false) bad(`list "${o.list}" isn't there (public/fathom/lists/${o.list}.json)`);
+    return;
+  }
+  const nouns = [list.noun, list.nounPlural];
+  if (question && !nouns.some((n) => word(n).test(question))) bad(`question doesn't name what to name ("${list.noun}")`);
+  if (!targetOk) return;
+  if (list.scoring === "steps" && !Number.isInteger(target)) bad(`list ${list.id} counts whole steps: target ${target} must be a whole number`);
+  if (list.scoring === "ratio" && target === 0) bad(`list ${list.id} scores a ratio: target must be more than 0`);
+  const except = Array.isArray(o.except) ? o.except.filter((x): x is string => typeof x === "string") : [];
+  for (const name of except) if (readName(name, list).kind !== "answer") bad(`except "${name}" isn't a name on list ${list.id}`);
+  const good = goodAnswers(list, target as number, except);
+  if (good.length < MIN_GOOD)
+    bad(`target ${target} leaves ${good.length} answer(s) scoring ${GOOD_POINTS} or more on ${list.id}; it needs at least ${MIN_GOOD}`);
+}
+
+/** Problems with one question, each a message starting with its id. `lists` finds a name-it question's list. */
+export function checkQuestion(q: unknown, i: number, lists: ListSource = fileLists()): string[] {
   const out: string[] = [];
   if (typeof q !== "object" || q === null || Array.isArray(q)) return [`#${i}: not an object`];
   const o = q as Record<string, unknown>;
@@ -138,6 +310,10 @@ export function checkQuestion(q: unknown, i: number): string[] {
   const bad = (msg: string) => out.push(`${id}: ${msg}`);
   const text = (k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
 
+  if (o.round === "name") {
+    checkNameQuestion(o, bad, lists);
+    return out;
+  }
   for (const k of Object.keys(o)) if (!KEYS.has(k)) bad(`unknown field "${k}"`);
   if (typeof o.id !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(o.id)) bad("id must be kebab-case");
   if (!KINDS.includes(o.kind as Kind)) bad(`kind "${String(o.kind)}" is not one of ${KINDS.join(", ")}`);
@@ -190,27 +366,7 @@ export function checkQuestion(q: unknown, i: number): string[] {
       bad(`a year's answer is a whole year of four digits (${MIN_YEAR} to ${thisYear}), not ${answer}`);
   }
 
-  if ("definition" in o) {
-    const d = o.definition;
-    if (typeof d !== "string" || !d.trim()) bad("definition, when present, must be a short phrase");
-    else {
-      if (d.length > MAX_DEFINITION) bad(`definition is longer than ${MAX_DEFINITION} characters`);
-      if (/[.?!]$/.test(d)) bad("definition is a phrase, not a sentence (no end punctuation)");
-    }
-  }
-
-  const fact = text("fact");
-  if (!fact.trim()) bad("fact is missing");
-  else {
-    if (!fact.endsWith(".")) bad("fact must end with a full stop");
-    if (/[.!?]\s+[A-Z]/.test(fact)) bad("fact must be one sentence");
-    if (fact.length > MAX_FACT) bad(`fact is longer than ${MAX_FACT} characters`);
-  }
-
-  for (const k of ["question", "definition", "fact"]) {
-    if (text(k).includes("—")) bad(`${k} has an em dash (UI copy uses none)`);
-    if (/\p{Extended_Pictographic}/u.test(text(k))) bad(`${k} has an emoji`);
-  }
+  checkWords(o, bad, true);
 
   const s = o.source as Record<string, unknown> | undefined;
   if (typeof s !== "object" || s === null) bad("source is missing");
@@ -236,8 +392,17 @@ export function checkQuestion(q: unknown, i: number): string[] {
   return out;
 }
 
-/** Every problem with the bank; empty when it is fine to ship. */
-export function checkBank(bank: unknown): string[] {
+/** The list ids a bank's name-it questions use. */
+function listIds(qs: unknown[]): string[] {
+  const ids = qs.map((q) => (q && typeof q === "object" && (q as Record<string, unknown>).round === "name" ? (q as Record<string, unknown>).list : undefined));
+  return [...new Set(ids.filter((id): id is string => typeof id === "string" && LIST_ID.test(id)))];
+}
+
+/**
+ * Every problem with the bank; empty when it is fine to ship. `lists` finds the name-it questions' lists (the files in
+ * public/fathom/lists): each one there is checked too, so every name on it registers (listMisses).
+ */
+export function checkBank(bank: unknown, lists: ListSource = fileLists()): string[] {
   if (typeof bank !== "object" || bank === null) return ["bank is not an object"];
   const b = bank as Record<string, unknown>;
   const out: string[] = [];
@@ -245,7 +410,11 @@ export function checkBank(bank: unknown): string[] {
   if (b.version !== 1) out.push(`version must be 1, not ${String(b.version)}`);
   if (!Array.isArray(b.questions)) return [...out, "questions must be an array"];
   const qs = b.questions as unknown[];
-  qs.forEach((q, i) => out.push(...checkQuestion(q, i)));
+  qs.forEach((q, i) => out.push(...checkQuestion(q, i, lists)));
+  for (const id of listIds(qs)) {
+    const list = lists(id);
+    if (list) out.push(...listMisses(list));
+  }
   const valid = qs.filter((q): q is Question => typeof q === "object" && q !== null) as Question[];
 
   const seen = new Set<string>();
@@ -305,14 +474,22 @@ export function sizeQuestions(bank: unknown): Question[] {
 
 /**
  * What the bank should fix but may ship with for now: more than one in five of it asking how tall or how heavy (the
- * owner: "Too many are how much does xx weigh, how tall is xx"). A warning until the rebuilt bank lands, then an error.
+ * owner: "Too many are how much does xx weigh, how tall is xx"), a warning until the rebuilt bank lands, then an
+ * error; and name-it questions waiting for their lists (the game leaves a question out until its list is there).
  */
-export function bankWarnings(bank: unknown): string[] {
-  const total = ((bank as Bank | null)?.questions ?? []).length;
+export function bankWarnings(bank: unknown, lists: ListSource = fileLists()): string[] {
+  const qs = ((bank as Bank | null)?.questions ?? []) as unknown[];
+  const out: string[] = [];
+  const total = qs.length;
   const n = sizeQuestions(bank).length;
   const cap = Math.floor(total * MAX_SIZE_SHARE);
-  if (!total || n <= cap) return [];
-  return [`${n} of ${total} questions (${Math.round((n / total) * 100)}%) are how tall / how heavy; at most 1 in 5 (${cap})`];
+  if (total && n > cap) out.push(`${n} of ${total} questions (${Math.round((n / total) * 100)}%) are how tall / how heavy; at most 1 in 5 (${cap})`);
+  for (const id of listIds(qs)) {
+    if (lists(id) !== undefined) continue;
+    const waiting = qs.filter((q) => (q as Record<string, unknown>)?.list === id && (q as Record<string, unknown>).round === "name").length;
+    out.push(`${waiting} name-it question(s) wait for list ${id} (public/fathom/lists/${id}.json); the game leaves them out until it's there`);
+  }
+  return out;
 }
 
 /**

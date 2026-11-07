@@ -16,12 +16,11 @@ import {
   phaseOf,
   playersLine,
   QUESTIONS_PER_GAME,
-  readBank,
   readGuess,
   resumable,
   roundOf,
   ROUNDS,
-  RULES,
+  ruleFor,
   saveFathom,
   scoreFor,
   scoreGame,
@@ -33,9 +32,21 @@ import {
   type FathomGame,
   type FathomQuestion,
   type NumberError,
-  type Round,
   type Scored,
 } from "../../game/fathom";
+import {
+  asOfText,
+  bestAnswers,
+  nameLine,
+  nameListIds,
+  readFullBank,
+  readList,
+  readName,
+  type NameList,
+  type NameRead,
+} from "../../game/fathom-name";
+import type { Lexicon } from "../../game/junk";
+import { loadLexicon } from "../../game/puzzles";
 import { submitFathomGuess, useFathomCrowd } from "../../net";
 import { Loading } from "../Game";
 import { CountUp } from "../motion/effects";
@@ -46,12 +57,13 @@ import { BUOY, placed, SQUID } from "./sprites";
 import "./fathom.css";
 
 /**
- * Fathom (beta, #fathom): five questions that each ask for a number: estimates in a unit that keeps them short
- * ("kilometres", "million people"), a percent and a year. Type a guess, lock it in, see how close it was on a sonar,
- * and NEXT; five of those and the results. One plain scoring rule for each round, stated on the round's first question
- * and again on the results. No timer, no lives, and nothing here touches the rest of the game: its own save, no record
- * or stats. With a backend, each guess is also sent, and a reveal says how real players guessed once there are enough
- * of them. Reached only by its link; App loads this screen as its own chunk.
+ * Fathom (beta, #fathom): five questions: estimates in a unit that keeps them short ("kilometres", "million people"),
+ * a percent, a year, and a name-it round ("Name a country with about 50 million people", read with the game's matcher
+ * over its list). Type a guess, lock it in, see how close it was on a sonar, and NEXT; five of those and the results.
+ * One plain scoring rule for each round, stated on the round's first question and again on the results. No timer, no
+ * lives, and nothing here touches the rest of the game: its own save, no record or stats. With a backend, each number
+ * guess is also sent, and a reveal says how real players guessed once there are enough of them. Reached only by its
+ * link; App loads this screen as its own chunk.
  */
 
 interface Props {
@@ -60,18 +72,42 @@ interface Props {
 }
 
 const BANK_URL = `${import.meta.env.BASE_URL}fathom/questions.json`;
+const listUrl = (id: string) => `${import.meta.env.BASE_URL}fathom/lists/${id}.json`;
 
-/** The questions, or null when the file isn't there (or isn't a bank, or holds too few for a game). */
-async function loadBank(): Promise<FathomQuestion[] | null> {
+/** A name-it round's list, or null when its file isn't there (or isn't that list). */
+async function loadList(id: string): Promise<NameList | null> {
+  try {
+    const res = await fetch(listUrl(id));
+    if (!res.ok) return null;
+    const list = readList(await res.json());
+    return list?.id === id ? list : null;
+  } catch {
+    return null;
+  }
+}
+
+interface Loaded {
+  bank: FathomQuestion[];
+  /** The name-it rounds' lists, by id: each other one tells a thing of another kind (a city on a country question). */
+  lists: Map<string, NameList>;
+}
+
+/**
+ * The questions, with the lists the name-it questions use, or null when the bank isn't there (or isn't a bank, or holds
+ * too few for a game). A name-it question whose list didn't load is left out, and the draw plays an estimate.
+ */
+async function loadBank(): Promise<Loaded | null> {
   try {
     const res = await fetch(BANK_URL);
     if (!res.ok) return null;
     const json = await res.json();
-    const bank = readBank(json);
+    const loaded = await Promise.all(nameListIds(json).map(loadList));
+    const lists = new Map(loaded.filter((l): l is NameList => !!l).map((l) => [l.id, l]));
+    const bank = readFullBank(json, lists);
     // Malformed questions are left out, not fatal; say so where whoever writes the file will look.
     const dropped = (json?.questions?.length ?? 0) - (bank?.length ?? 0);
-    if (bank && dropped > 0) console.warn(`fathom: ${dropped} question(s) in the file left out (malformed or repeated ids)`);
-    return bank && bank.length >= QUESTIONS_PER_GAME ? bank : null;
+    if (bank && dropped > 0) console.warn(`fathom: ${dropped} question(s) in the file left out (malformed, repeated ids, or a name-it list not there)`);
+    return bank && bank.length >= QUESTIONS_PER_GAME ? { bank, lists } : null;
   } catch {
     return null;
   }
@@ -108,15 +144,19 @@ function useShort(): boolean {
 }
 
 export default function Fathom({ onBack, onHome }: Props) {
-  const [bank, setBank] = useState<FathomQuestion[] | null | "missing">(null);
+  const [data, setData] = useState<Loaded | null | "missing">(null);
   const [game, setGame] = useState<FathomGame | null>(null);
+  // The matcher's lexicon (TENtacle's, the app already has it cached): what was typed is a real name of its own, so it
+  // is never "corrected" into a different one. Optional: without it, a name still reads.
+  const [lex, setLex] = useState<Lexicon>();
   const short = useShort();
 
   useEffect(() => {
     let live = true;
-    loadBank().then((b) => {
+    loadBank().then((loaded) => {
       if (!live) return;
-      if (!b) return setBank("missing");
+      if (!loaded) return setData("missing");
+      const b = loaded.bank;
       // Pick up the game on screen, unfinished or on its results (a reload, the phone dropping the tab); otherwise a
       // new draw.
       const save = loadFathom();
@@ -127,7 +167,8 @@ export default function Fathom({ onBack, onHome }: Props) {
         saveFathom(next);
         setGame(next.game!);
       }
-      setBank(b);
+      setData(loaded);
+      if (loaded.lists.size) loadLexicon().then((l) => live && setLex(l));
     });
     return () => {
       live = false;
@@ -140,7 +181,7 @@ export default function Fathom({ onBack, onHome }: Props) {
     </ScreenHead>
   );
 
-  if (bank === "missing") {
+  if (data === "missing") {
     return (
       <main className="screen fathom" data-testid="fathom" data-phase="missing">
         {head}
@@ -152,7 +193,8 @@ export default function Fathom({ onBack, onHome }: Props) {
       </main>
     );
   }
-  if (!bank || !game) return <Loading />;
+  if (!data || !game) return <Loading />;
+  const { bank, lists } = data;
 
   const byId = new Map(bank.map((q) => [q.id, q]));
   const questions = game.ids.map((id) => byId.get(id)!);
@@ -164,11 +206,13 @@ export default function Fathom({ onBack, onHome }: Props) {
     saveFathom({ ...loadFathom(), game: next });
   };
   // LOCK IN: a click, the ping and the band's sound (with sound on), the guess sent (with a backend), then the reveal.
-  const lock = (value: number) => {
+  // A name-it round's guess is the figure of the thing named, kept with its name; it isn't sent (the players' typical
+  // guess means nothing there).
+  const lock = (value: number, pick?: string) => {
     playFathom({ kind: "lock" });
     playFathom({ kind: "reveal", band: bandOf(scoreFor(question, value)) });
-    submitFathomGuess(question.id, value);
-    update(lockIn(game, value));
+    if (pick === undefined) submitFathomGuess(question.id, value);
+    update(lockIn(game, value, pick));
   };
   // From a tap on NEXT, the next question's box takes focus inside the tap itself, so a phone opens its keyboard. The
   // question starts at the top of the screen, whatever the reveal had scrolled to. After the last one, the results'
@@ -193,11 +237,16 @@ export default function Fathom({ onBack, onHome }: Props) {
   const total = totalOf(scored);
   // What a screen reader hears as each verdict and the total appear (the line is there before its words change).
   const said = shown
-    ? `${bandLabel(shown.band)}, ${shown.points} points. The answer: ${amountText(shown.question, shown.question.answer)}. ` +
-      `Yours was ${missText(shown.question, shown.guess)}.${game.at > 0 ? ` Total so far: ${total}.` : ""}`
+    ? `${bandLabel(shown.band)}, ${shown.points} points. ` +
+      (roundOf(shown.question) === "name"
+        ? `The target: ${amountText(shown.question, shown.question.answer)}. ${shown.pick ?? "Yours"}: ` +
+          `${amountText(shown.question, shown.guess)}, ${missText(shown.question, shown.guess)}.`
+        : `The answer: ${amountText(shown.question, shown.question.answer)}. Yours was ${missText(shown.question, shown.guess)}.`) +
+      (game.at > 0 ? ` Total so far: ${total}.` : "")
     : phase === "results"
       ? `Your total: ${total} out of ${MAX_TOTAL}.`
       : "";
+  const list = question?.nameIt ? lists.get(question.nameIt.list) : undefined;
   // The round's scoring rule, read with the first question of that round, before its first answer (the estimate's on
   // the first estimate, the percent's on the percent). With little height (a small phone, or the keyboard up) it goes
   // under LOCK IN, so the question, the field and LOCK IN still fit.
@@ -205,7 +254,7 @@ export default function Fathom({ onBack, onHome }: Props) {
   const firstOfRound = !!question && questions.findIndex((x) => roundOf(x) === round) === game.at;
   const rule = firstOfRound && (
     <p className="fathom-rule" data-testid="fathom-rule" data-round={round}>
-      {RULES[round]}
+      {ruleFor(question)}
     </p>
   );
   const ruleBelow = short && phase === "question";
@@ -231,9 +280,28 @@ export default function Fathom({ onBack, onHome }: Props) {
             {!ruleBelow && rule}
           </section>
           {phase === "question" ? (
-            <Ask key={question.id} question={question} onLock={lock} footer={ruleBelow && rule ? rule : undefined} />
+            list ? (
+              <AskName
+                key={question.id}
+                question={question}
+                list={list}
+                others={[...lists.values()]}
+                lex={lex}
+                onLock={lock}
+                footer={ruleBelow && rule ? rule : undefined}
+              />
+            ) : (
+              <Ask key={question.id} question={question} onLock={lock} footer={ruleBelow && rule ? rule : undefined} />
+            )
           ) : (
-            <Reveal key={question.id} scored={shown!} total={game.at > 0 ? total : undefined} last={game.at === QUESTIONS_PER_GAME - 1} onNext={next} />
+            <Reveal
+              key={question.id}
+              scored={shown!}
+              list={list}
+              total={game.at > 0 ? total : undefined}
+              last={game.at === QUESTIONS_PER_GAME - 1}
+              onNext={next}
+            />
           )}
         </>
       )}
@@ -326,6 +394,106 @@ function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (
   );
 }
 
+/** The tone of a name-it line: a choice to tap, a name in the box to confirm, or why nothing locked. */
+const toneOf = (r: NameRead) => (r.kind === "choose" ? "choose" : r.kind === "confirm" ? "value" : "error");
+
+/**
+ * A name-it round on screen: the field for a name (a phone's own keyboard, with its Return key), a line for what was
+ * read when it didn't lock, LOCK IN, and `footer` (the rule, when there's little height). Only a name the list knows
+ * locks: a misspelling goes in the box to confirm ("France? Lock in to confirm."), several readings are offered to tap
+ * (the tap fills the box), and a thing of another kind, an unknown name or a word too many names share says so and
+ * costs nothing ("Paris is a city, not a country. Try again.").
+ */
+function AskName({
+  question,
+  list,
+  others,
+  lex,
+  onLock,
+  footer,
+}: {
+  question: FathomQuestion;
+  list: NameList;
+  others: NameList[];
+  lex?: Lexicon;
+  onLock: (value: number, pick: string) => void;
+  footer?: ReactNode;
+}) {
+  const [text, setText] = useState("");
+  const [read, setRead] = useState<NameRead | null>(null);
+  // The names last offered: typing or tapping one of them picks it, even after the line is gone.
+  const offered = useRef<string[] | undefined>(undefined);
+  const noun = list.noun;
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    const r = readName(text, list, others, { lex, offered: offered.current, except: question.nameIt?.except });
+    if (r.kind === "answer") return onLock(r.entry.value, r.entry.name);
+    if (r.kind === "confirm") setText(r.entry.name);
+    if (r.kind === "choose") offered.current = r.names;
+    setRead(r);
+    focusGuess();
+  };
+  const fill = (name: string) => {
+    setText(name);
+    focusGuess();
+  };
+
+  return (
+    <form className="panel fathom-ask" data-glass onSubmit={submit} data-testid="fathom-ask" data-round="name" data-lexicon={lex ? "" : undefined}>
+      <label className="fathom-field" data-round="name">
+        <input
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            // A choice stays to tap while the player edits; anything else said goes as they type.
+            if (read && read.kind !== "choose") setRead(null);
+          }}
+          // LOCK IN is off while the field is empty, so Enter there submits nothing: say why instead.
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !text.trim()) setRead({ kind: "empty" });
+          }}
+          inputMode="text"
+          autoFocus
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          enterKeyHint="done"
+          placeholder={`your ${noun}`}
+          aria-label="Your answer"
+          aria-describedby="fathom-echo"
+          aria-invalid={read && toneOf(read) === "error" ? true : undefined}
+          data-testid="fathom-input"
+        />
+      </label>
+      <div className="fathom-keys">
+        <div
+          className="fathom-echo"
+          id="fathom-echo"
+          role="status"
+          data-testid="fathom-echo"
+          data-round="name"
+          data-tone={read ? toneOf(read) : "none"}
+          data-read={read?.kind}
+        >
+          {read && <span>{nameLine(read, list)}</span>}
+          {read?.kind === "choose" &&
+            read.names.map((name) => (
+              <button key={name} type="button" className="suggestion" data-testid="fathom-choice" data-name={name} onClick={() => fill(name)}>
+                {name}
+              </button>
+            ))}
+        </div>
+        <button type="submit" className="key key-pink fathom-lock" data-testid="fathom-lock" disabled={!text.trim()}>
+          Lock in
+        </button>
+      </div>
+      {footer}
+    </form>
+  );
+}
+
 /** The site a source link goes to, by name: "Wikipedia", or the host. */
 function siteOf(url: string): string {
   try {
@@ -336,17 +504,31 @@ function siteOf(url: string): string {
   }
 }
 
+/** How real players guessed on a number question (with a backend, from 20 of them); nothing until then. */
+function Players({ q, guess }: { q: FathomQuestion; guess: number }) {
+  const crowd = useFathomCrowd(q.id, guess, q.answer);
+  const players = playersLine(crowd, q.unit, roundOf(q));
+  if (!players || !crowd) return null;
+  return (
+    <p className="fathom-players" data-testid="fathom-players" data-n={crowd.n} data-median={crowd.median ?? undefined} data-further={crowd.furtherOff ?? undefined}>
+      {players}
+    </p>
+  );
+}
+
 /**
  * A locked-in question: the band in big type, the points (and the running total from the second question), the answer
  * against the guess, how real players guessed (with a backend, from 20 of them), the sonar with the miss under the
- * squid, the fact and its source, then NEXT.
+ * squid, the fact and its source, then NEXT. A name-it round shows the target, then what was named with its figure, and
+ * after the sonar the best answers on its list with theirs.
  */
-function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: number; last: boolean; onNext: () => void }) {
-  const { question: q, guess, points, band } = scored;
-  const crowd = useFathomCrowd(q.id, guess, q.answer);
-  const players = playersLine(crowd, q.unit, roundOf(q));
+function Reveal({ scored, list, total, last, onNext }: { scored: Scored; list?: NameList; total?: number; last: boolean; onNext: () => void }) {
+  const { question: q, guess, points, band, pick } = scored;
+  const name = roundOf(q) === "name";
   const answer = figureParts(q, q.answer);
   const yours = figureParts(q, guess);
+  const best = name && list ? bestAnswers(list, q.answer, q.nameIt?.except) : [];
+  const asOf = asOfText(q.nameIt?.asOf);
   const card = useRef<HTMLElement>(null);
   const nextKey = useRef<HTMLButtonElement>(null);
   // Into view at once; NEXT takes focus a beat later, so an Enter still held from LOCK IN presses nothing.
@@ -374,7 +556,7 @@ function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: numbe
       <div className="reveal-figures">
         <div className="figure">
           <p className="label gold">
-            <Mark kind="buoy" /> The answer
+            <Mark kind="buoy" /> {name ? "The target" : "The answer"}
           </p>
           <p className="figure-n gold" data-testid="fathom-answer" data-value={q.answer}>
             <Figure parts={answer} />
@@ -382,28 +564,51 @@ function Reveal({ scored, total, last, onNext }: { scored: Scored; total?: numbe
         </div>
         <div className="figure">
           <p className="label cyan">
-            <Mark kind="squid" /> Your guess
+            <Mark kind="squid" /> {name ? `Your ${q.nameIt?.noun ?? "answer"}` : "Your guess"}
           </p>
-          <p className="figure-n" data-testid="fathom-guess" data-value={guess}>
-            <Figure parts={yours} />
-          </p>
+          {name ? (
+            <>
+              <p className="figure-n figure-name" data-testid="fathom-guess" data-value={guess} data-pick={pick}>
+                <span>{pick ?? "?"}</span>
+              </p>
+              <p className="figure-of" data-testid="fathom-pick-figure">
+                <Figure parts={yours} />
+              </p>
+            </>
+          ) : (
+            <p className="figure-n" data-testid="fathom-guess" data-value={guess}>
+              <Figure parts={yours} />
+            </p>
+          )}
         </div>
       </div>
-      {players && crowd && (
-        <p className="fathom-players" data-testid="fathom-players" data-n={crowd.n} data-median={crowd.median ?? undefined} data-further={crowd.furtherOff ?? undefined}>
-          {players}
+      {!name && <Players q={q} guess={guess} />}
+      <Gauge guess={guess} answer={q.answer} band={band} round={roundOf(q)} unit={q.unit} nameIt={q.nameIt} />
+      {best.length > 0 && (
+        <div className="fathom-best" data-testid="fathom-best">
+          <p className="label gold">Best answers</p>
+          <ol>
+            {best.map((e) => (
+              <li key={e.name} data-testid="fathom-best-row" data-name={e.name} data-value={e.value} data-yours={e.name === pick || undefined}>
+                <span className="best-name">{e.name}</span>
+                <span className="best-n">{formatAmount(e.value)}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+      {q.fact && (
+        <p className="fathom-fact" data-testid="fathom-fact">
+          {q.fact}
         </p>
       )}
-      <Gauge guess={guess} answer={q.answer} band={band} round={roundOf(q)} />
-      <p className="fathom-fact" data-testid="fathom-fact">
-        {q.fact}
-      </p>
       <p className="fathom-source">
         source:{" "}
         <a href={q.source.url} target="_blank" rel="noreferrer" data-testid="fathom-source">
           {q.source.title}
         </a>
         {site && `, ${site}`}
+        {asOf && `, ${asOf}`}
       </p>
       <button
         ref={nextKey}
@@ -464,7 +669,11 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
     }
   };
   const bands = scored.map((s) => s.band);
-  const played: Round[] = ROUNDS.filter((r) => scored.some((s) => roundOf(s.question) === r));
+  // Each round's rule once, from the first question of that round (a name-it round's is its list's).
+  const played = ROUNDS.flatMap((r) => {
+    const first = scored.find((s) => roundOf(s.question) === r);
+    return first ? [{ r, rule: ruleFor(first.question) }] : [];
+  });
   return (
     <>
       <section className="panel results enter fathom-results" data-glass data-testid="fathom-results">
@@ -480,9 +689,9 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
             <span key={i} className="band-sq" data-band={b} />
           ))}
         </div>
-        {played.map((r) => (
+        {played.map(({ r, rule }) => (
           <p key={r} className="caption fathom-rule-end" data-testid="fathom-rule" data-round={r}>
-            {RULES[r]}
+            {rule}
           </p>
         ))}
         <div className="results-actions">
@@ -503,6 +712,7 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
                 key={s.question.id}
                 data-testid="fathom-row"
                 data-question={s.question.id}
+                data-pick={s.pick}
                 data-round={roundOf(s.question)}
                 data-guess={s.guess}
                 data-points={s.points}
@@ -511,10 +721,17 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
                 <span className="band-sq" data-band={s.band} aria-hidden="true" />
                 <span className="recap-body">
                   <span className="recap-q">{s.question.question}</span>
-                  <span className="recap-nums" data-testid="fathom-row-nums">
-                    you <b>{figureParts(s.question, s.guess).n}</b> · answer <b className="gold">{figureParts(s.question, s.question.answer).n}</b>
-                    {unit && ` ${unit}`}
-                  </span>
+                  {roundOf(s.question) === "name" ? (
+                    // "you Colombia 52.89 million · target 50 million people"
+                    <span className="recap-nums" data-testid="fathom-row-nums">
+                      you <b>{s.pick ?? "?"}</b> {formatAmount(s.guess)} · target <b className="gold">{formatAmount(s.question.answer)}</b> {s.question.unit}
+                    </span>
+                  ) : (
+                    <span className="recap-nums" data-testid="fathom-row-nums">
+                      you <b>{figureParts(s.question, s.guess).n}</b> · answer <b className="gold">{figureParts(s.question, s.question.answer).n}</b>
+                      {unit && ` ${unit}`}
+                    </span>
+                  )}
                 </span>
                 <span className="recap-points" aria-label={`${s.points} points, ${bandLabel(s.band)}`}>
                   {s.points}

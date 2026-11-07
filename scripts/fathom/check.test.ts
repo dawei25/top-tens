@@ -1,14 +1,20 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { readList, type NameList } from "../../src/game/fathom-name";
 import {
   bankWarnings,
   checkBank,
   checkCandidates,
   checkQuestion,
+  fileLists,
   KINDS,
+  listMisses,
   loadBank,
   MIN_QUESTIONS,
   sameSubject,
   subjectWords,
+  type ListSource,
   type Question,
 } from "./check";
 
@@ -263,12 +269,12 @@ describe("rounds", () => {
   const errs = (q: Question) => checkQuestion(q, 0);
   const thisYear = new Date().getFullYear();
 
-  it("takes a percent and a year question, and no other round", () => {
+  it("takes a percent, a year and a name-it question, and no other round", () => {
     expect(errs(percent())).toEqual([]);
     expect(errs(year())).toEqual([]);
     expect(errs(year({ question: "When did the first iPhone go on sale?" }))).toEqual([]);
     expect(errs(question({ round: "estimate" }))).toEqual([]);
-    expect(errs(question({ round: "name" }))[0]).toMatch(/round "name" is not one of estimate, percent, year/);
+    expect(errs(question({ round: "guess" as Question["round"] }))[0]).toMatch(/round "guess" is not one of estimate, percent, year, name/);
   });
 
   it("keeps a round's unit to its round", () => {
@@ -363,6 +369,106 @@ describe("rounds", () => {
     expect(bankWarnings(b)).toEqual([]);
     b.questions[10].question = "How much does landmark number 10 weigh?";
     expect(bankWarnings(b)).toEqual(["11 of 50 questions (22%) are how tall / how heavy; at most 1 in 5 (10)"]);
+  });
+});
+
+// The owner: "Name a country that has 6 land borders" ... "brain didn't even register". A name-it question asks for a
+// name and is checked against its list: the noun named, the target fair (at least 3 good answers), and every name on
+// the list registering. The lists here are the browser suite's fixtures (a subset of the real ones).
+describe("name-it questions", () => {
+  const FIXTURES = join(import.meta.dirname, "..", "..", "e2e", "fixtures", "fathom", "lists");
+  const fixtures: ListSource = fileLists(FIXTURES);
+  const none: ListSource = () => undefined;
+  const name = (over: Record<string, unknown> = {}) =>
+    ({
+      id: "name-country-50m-people",
+      kind: "places",
+      round: "name",
+      list: "countries-population",
+      target: 50_000_000,
+      question: "Name a country with about 50 million people",
+      easy: false,
+      ...over,
+    }) as unknown as Question;
+  const errs = (q: Question, lists = fixtures) => checkQuestion(q, 0, lists);
+
+  it("passes a fair one", () => {
+    expect(errs(name())).toEqual([]);
+    expect(errs(name({ id: "b", list: "land-borders", target: 6, question: "Name a country with 6 land borders" }))).toEqual([]);
+    expect(errs(name({ id: "c", list: "countries-area", target: 244376, question: "Name a country about as big as the UK", except: ["United Kingdom"] }))).toEqual([]);
+    expect(errs(name({ list: "cities-population", target: 1e7, question: "Name a city with about 10 million people", definition: "its whole urban area" }))).toEqual([]);
+    // The cities list starts at 5 million: a city of about 1 million has no fair answer on it.
+    expect(errs(name({ list: "cities-population", target: 1e6, question: "Name a city with about 1 million people" }))[0]).toMatch(/leaves 0 answer\(s\) scoring 70/);
+    expect(errs(name({ fact: "Colombia and South Korea are within 3% of it." }))).toEqual([]);
+  });
+
+  it("asks for a name and names what to name, with no unit, answer or source of its own", () => {
+    expect(errs(name({ question: "Which country has about 50 million people?" }))).toEqual([
+      'name-country-50m-people: a name-it question asks "Name a ..." or "Name an ..."',
+      "name-country-50m-people: a name-it question is an ask, with no end punctuation",
+    ]);
+    expect(errs(name({ question: "Name a place with about 50 million people" }))).toEqual([
+      'name-country-50m-people: question doesn\'t name what to name ("country")',
+    ]);
+    expect(errs(name({ unit: "people", answer: 5e7 }))).toEqual([
+      'name-country-50m-people: a name-it question takes its unit from its list: leave "unit" out',
+      'name-country-50m-people: a name-it question takes its answer from its list: leave "answer" out',
+    ]);
+    expect(errs(name({ colour: "red" }))).toEqual(['name-country-50m-people: unknown field "colour"']);
+    expect(errs(name({ question: "Name a country with about 50 million people — roughly" }))).toContain("name-country-50m-people: question has an em dash (UI copy uses none)");
+  });
+
+  it("wants a target that leaves at least 3 good answers, in the list's own terms", () => {
+    // 14 land borders: China and Russia, and nothing within a step.
+    expect(errs(name({ list: "land-borders", target: 14, question: "Name a country with 14 land borders" }))).toEqual([
+      "name-country-50m-people: target 14 leaves 2 answer(s) scoring 70 or more on land-borders; it needs at least 3",
+    ]);
+    expect(errs(name({ list: "land-borders", target: 6.5, question: "Name a country with 6.5 land borders" }))[0]).toMatch(/must be a whole number/);
+    expect(errs(name({ target: 0 }))).toContain("name-country-50m-people: list countries-population scores a ratio: target must be more than 0");
+    expect(errs(name({ target: -3 }))).toEqual(["name-country-50m-people: target must be a finite number, 0 or more"]);
+    expect(errs(name({ except: ["Atlantis"] }))).toEqual(['name-country-50m-people: except "Atlantis" isn\'t a name on list countries-population']);
+  });
+
+  it("waits for its list only while a judge hasn't verified it", () => {
+    expect(errs(name({ verified: false, note: "check 3 answers near 50 million" }), none)).toEqual([]);
+    expect(errs(name(), none)).toEqual(['name-country-50m-people: list "countries-population" isn\'t there (public/fathom/lists/countries-population.json)']);
+    expect(errs(name({ verified: true }), none)[0]).toMatch(/isn't there/);
+    expect(errs(name({ note: "" }), none)).toContain("name-country-50m-people: note, when present, says what the judge must check");
+    expect(errs(name({ list: "../secrets" }))).toEqual(["name-country-50m-people: list must be a list id (kebab-case)"]);
+    // The bank says what waits.
+    const b = { version: 1, questions: [name({ verified: false }), name({ id: "x", verified: false, target: 1e8 })] };
+    expect(bankWarnings(b, none)).toEqual([
+      "2 name-it question(s) wait for list countries-population (public/fathom/lists/countries-population.json); the game leaves them out until it's there",
+    ]);
+    expect(bankWarnings(b, fixtures)).toEqual([]);
+  });
+
+  it("finds what on a list doesn't register: a name or alias, or one of the names everyone uses", () => {
+    for (const id of ["countries-population", "countries-area", "land-borders", "cities-population"]) expect(listMisses(fixtures(id)!), id).toEqual([]);
+    const list = (entries: NameList["entries"]): NameList => ({ ...fixtures("countries-population")!, entries });
+    // "Holland" missing from the Netherlands, and "UK" taken by two countries' worth of aliases elsewhere.
+    expect(listMisses(list([{ name: "Netherlands", aliases: [], value: 1 }, { name: "Spain", aliases: [], value: 2 }]))).toEqual([
+      'list countries-population: "Holland" doesn\'t register as Netherlands',
+    ]);
+    // An alias five entries share: the matcher offers the four biggest, so the fifth never registers by it.
+    const andes = (name: string, value: number) => ({ name, aliases: ["Andes"], value });
+    expect(listMisses(list([andes("Colombia", 5), andes("Peru", 4), andes("Chile", 3), andes("Ecuador", 2), andes("Bolivia", 1)]))).toEqual([
+      'list countries-population: "Andes" doesn\'t register as Bolivia',
+    ]);
+  });
+
+  // When the real lists are there (once the data agent's branch is merged), the real bank is checked against them.
+  it("the real bank passes with whatever lists are in public/fathom/lists", () => {
+    expect(checkBank(loadBank(), fileLists())).toEqual([]);
+  });
+  // A dry run of the lists landing: the real bank's name-it questions against the fixtures (a subset of each list, so a
+  // target fair here is very likely fair on the whole list; the judge still checks the real one).
+  it("the real bank's name-it questions pass against the fixture lists", () => {
+    const bank = loadBank() as { questions: Record<string, unknown>[] };
+    expect(bank.questions.filter((q) => q.round === "name").length).toBeGreaterThanOrEqual(10);
+    expect(checkBank(bank, fixtures)).toEqual([]);
+    expect(bankWarnings(bank, fixtures)).toEqual([]);
+    expect(readList(JSON.parse(readFileSync(join(FIXTURES, "land-borders.json"), "utf8")))?.scoring).toBe("steps");
   });
 });
 
