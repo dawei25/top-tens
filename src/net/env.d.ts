@@ -8,7 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_ANON_KEY?: string;
   /** The same key under its new name; wins over VITE_SUPABASE_ANON_KEY when both are set. */
   readonly VITE_SUPABASE_PUBLISHABLE_KEY?: string;
-  /** Comma list of "google", "email", "password" (default "google,email"); "none" for stats without accounts. */
+  /** Comma list of "google", "email", "password" (default "google"); "none" for stats without accounts. */
   readonly VITE_SIGN_IN?: string;
   /** Google's OAuth web client ID (…apps.googleusercontent.com): Google sign-in from this site, not via Supabase. */
   readonly VITE_GOOGLE_CLIENT_ID?: string;

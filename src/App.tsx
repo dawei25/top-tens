@@ -162,7 +162,7 @@ function Screens() {
   /** Where to scroll once the screen a hash change asked for is drawn. */
   const pendingScroll = useRef<number | null>(null);
   const replacing = useRef(false);
-  /** The category each random game in this tab was rolled in (by its hash), so Roll another list rolls in it too. */
+  /** The category each random game in this tab was rolled in (by its hash), so Roll new list rolls in it too. */
   const rolledIn = useRef(new Map<string, string | undefined>());
   /** Bumped by Play again, so the screen it opens starts over even when it's the one on screen (same list). */
   const [replays, setReplays] = useState(0);
@@ -272,7 +272,7 @@ function Screens() {
     location.hash = `#blitz-${id}`;
     return true;
   };
-  /** Roll another list on a Blitz: another random open list (in the round's category, if it was rolled in one). */
+  /** Roll new list on a Blitz: another random open list (in the round's category, if it was rolled in one). */
   const blitzAgain = (id: string, category?: string) =>
     blitzChoices(category, id).open.length > 0 ? () => void blitzRoll(category, id) : undefined;
   // Play again on a past run: a fresh free game on that same list (a roll, but of this list). Never on a list held
@@ -282,7 +282,7 @@ function Screens() {
     const to = mode === "list" ? `#p-${id}` : `#blitz-${id}`;
     return () => {
       save(mode === "list" ? freshList(load(), id) : freshBlitz(load(), id));
-      // Not rolled in a category: Roll another list after it rolls from every list.
+      // Not rolled in a category: Roll new list after it rolls from every list.
       rolledIn.current.delete(to);
       setReplays((n) => n + 1);
       location.hash = to;
@@ -415,7 +415,7 @@ function Screens() {
           lexicon={lexicon}
           onBack={back}
           onHome={home}
-          // Roll another list on a random list rolls another in the same category (if it was rolled in one); a finished
+          // Roll new list on a random list rolls another in the same category (if it was rolled in one); a finished
           // daily offers a plain random list instead.
           onRoll={() => roll(entry ? undefined : rolledIn.current.get(`#p-${id}`), id)}
           rolled={!entry && rolledIn.current.has(`#p-${id}`)}

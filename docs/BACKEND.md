@@ -218,7 +218,7 @@ says less about this one), so a few strong regulars can't lift every average.
      can do with them.
    - `SUPABASE_SERVICE_ROLE_KEY` = the secret key (`SUPABASE_SECRET_KEY` works too). **Secret**: mark it Sensitive.
      Only `api/delete-account.ts` reads it. Never give it a `VITE_` prefix, never commit it.
-   - `VITE_SIGN_IN`: for example `google,password`. Default `google,email`; `none` for stats without accounts.
+   - `VITE_SIGN_IN`: for example `google,password`. Default `google` (Google only, until there is an email provider: `google,email` needs custom SMTP); `none` for stats without accounts.
      Unknown names are ignored.
    - `VITE_GOOGLE_CLIENT_ID`: the Google OAuth web client ID (`...apps.googleusercontent.com`, Google Auth Platform
      > Clients; not the secret). **Public**, like the Supabase key. With it, Google sign-in goes from the game to
