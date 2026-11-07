@@ -16,6 +16,8 @@ const REAL = [
   "Popocatepetl", "Nkunku", "Coco", "BTS", "KFC", "Wii", "Xbox", "Pikachu", "Tchaikovsky", "Xi Jinping",
   "Giannis Antetokounmpo", "Nikola Jokic", "Ouagadougou", "Phnom Penh", "Eyjafjallajokull", "Mbappe",
   "Huawei", "Xiaomi", "Tbilisi", "Iqaluit", "Fred", "Barack Obama", "Elon Musk", "Shrek", "Up",
+  // Three letters in a row only across a word break (the judge on hedge-funds: "merrilllynch").
+  "Merrill Lynch", "Bell Labs", "Wall Lane",
 ];
 
 describe("isJunk", () => {

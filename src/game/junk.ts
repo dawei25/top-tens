@@ -155,7 +155,8 @@ export function isJunk(text: string, lex?: Lexicon): boolean {
   const letters = s.replace(/[^a-z0-9]/g, "");
   if (letters.length < 2 || NON_ANSWERS.has(s)) return true;
   if (lex && isKnownName(text, lex)) return false;
-  if (/(.)\1\1/.test(letters)) return true;
+  // Three of a letter in a row, within a word: across a break it is a real name ("Merrill Lynch", "Bell Labs").
+  if (s.split(" ").some((w) => /(.)\1\1/.test(w.replace(/[^a-z0-9]/g, "")))) return true;
   // "jfjfj", "sdfsdfsdf". Two repeats are left to the model: Nkunku, Coco and Bora Bora are real.
   if (/^(.{1,3})\1\1+/.test(letters)) return true;
   if (isKeyboardRun(letters)) return true;

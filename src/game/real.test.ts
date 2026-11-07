@@ -21,6 +21,18 @@ const lex = read<Lexicon>("lexicon.json");
 const judge = (id: string, guess: string) => judgeGuess(guess, read<Puzzle>(`${id}.json`), new Set(), lex);
 
 describe("built puzzles", () => {
+  it("hedge funds: a firm-name word alone gives nothing away (the judge, Nov 7)", () => {
+    for (const g of ["capital", "management", "asset management", "investment management", "associates", "technologies", "partners"]) {
+      expect(judge("hedge-funds", g).kind, g).toBe("unknown");
+    }
+    expect(judge("hedge-funds", "bridgewater")).toMatchObject({ kind: "correct", entry: { name: expect.stringContaining("Bridgewater") } });
+    expect(judge("hedge-funds", "aqr capital")).toMatchObject({ kind: "correct" });
+    expect(judge("hedge-funds", "glg")).toMatchObject({ kind: "correct", entry: { name: "Man Group" } });
+    expect(judge("hedge-funds", "2 sigma")).toMatchObject({ kind: "correct", entry: { name: "Two Sigma" } });
+    expect(judge("hedge-funds", "renaissance tech")).toMatchObject({ kind: "correct", entry: { name: "Renaissance Technologies" } });
+    expect(judge("hedge-funds", "two sigma ventures").kind).toBe("unknown");
+  });
+
   it("video games: number-aware matching", () => {
     expect(judge("video-games", "gta5")).toMatchObject({ kind: "correct", entry: { name: "Grand Theft Auto V" } });
     expect(judge("video-games", "gta v")).toMatchObject({ kind: "correct", entry: { name: "Grand Theft Auto V" } });

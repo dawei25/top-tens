@@ -425,7 +425,7 @@ const HEDGE_FUND_FIRMS: Record<string, string[]> = {
   // EMEA
   "AKO Capital": [], "Aspect Capital": [], "BlueCrest Capital Management": ["BlueCrest"], "Capital Fund Management": ["CFM"],
   "Caxton Associates": ["Caxton"], "Cheyne Capital": [], CQS: ["CQS (Asset Manager)"], "Egerton Capital": [],
-  "Eisler Capital": [], "G-Research": [], "GLG Partners": ["GLG"], "GSA Capital": [], "Lansdowne Partners": [],
+  "Eisler Capital": [], "G-Research": [], "GSA Capital": [], "Lansdowne Partners": [],
   "LMR Partners": [], "Pharo Management": [], "Qube Research & Technologies": ["QRT", "Qube"],
   "Rokos Capital Management": ["Rokos"], "Scipion Capital": [], "Systematica Investments": ["Systematica"],
   "The Children's Investment Fund Management": ["The Children's Investment Fund", "TCI Fund Management", "TCI"],
@@ -439,7 +439,7 @@ const HEDGE_FUND_FIRMS: Record<string, string[]> = {
  * big asset managers and banks.
  */
 const NOT_HEDGE_FUNDS = [
-  "Jane Street", "Jane Street Capital", "Citadel Securities", "Citadel Securities LLC", "Jump Trading", "Hudson River Trading", "HRT", "Optiver",
+  "Two Sigma Ventures", "Jane Street", "Jane Street Capital", "Citadel Securities", "Citadel Securities LLC", "Jump Trading", "Hudson River Trading", "HRT", "Optiver",
   "Susquehanna International Group", "SIG", "Virtu Financial", "Virtu", "IMC Trading", "IMC", "DRW", "DRW Trading",
   "Tower Research Capital", "Tower Research", "XTX Markets", "XTX", "Flow Traders", "Akuna Capital", "Five Rings",
   "Wolverine Trading", "Old Mission Capital", "Peak6", "Two Sigma Securities", "Jump Crypto",
@@ -1921,13 +1921,14 @@ export const TOPICS: Topic[] = [
       "Millennium Management": ["Millennium", "Millennium Management LLC"],
       "Elliott Investment Management": ["Elliott Management", "Elliott", "Elliott Associates", "Elliott Management Corporation"],
       Citadel: ["Citadel LLC", "Citadel Investment Group", "Citadel Advisors"],
-      "Man Group": ["Man Group plc", "Man AHL", "Man GLG"],
+      // GLG and AHL have been Man Group's since 2010 and 1989: the parent, not a firm of their own.
+      "Man Group": ["Man Group plc", "Man AHL", "Man GLG", "GLG", "GLG Partners", "AHL"],
       "D. E. Shaw & Co.": ["DE Shaw", "D. E. Shaw", "D.E. Shaw", "DE Shaw & Co", "D. E. Shaw Group"],
       "AQR Capital Management": ["AQR", "AQR Capital"],
-      "Two Sigma": ["Two Sigma Investments"],
+      "Two Sigma": ["Two Sigma Investments", "2 Sigma"],
       // The natural reading on a hedge fund list: Goldman's hedge fund arm.
       "Goldman Sachs Asset Management": ["Goldman Sachs", "Goldman", "GSAM"],
-      "Renaissance Technologies": ["RenTech", "Ren Tech", "Renaissance", "Medallion Fund"],
+      "Renaissance Technologies": ["RenTech", "Ren Tech", "Renaissance", "Renaissance Tech", "Medallion Fund"],
       PIMCO: ["Pacific Investment Management Company", "Pacific Investment Management"],
       "Wellington Management": ["Wellington Management Company", "Wellington Management Group"],
       "Davidson Kempner Capital Management": ["Davidson Kempner"],

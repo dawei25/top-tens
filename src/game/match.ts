@@ -413,6 +413,7 @@ const GENERIC = new Set(
     "de la el le du international airport island islands isle lake river mount mountain mountains peak sea ocean bay " +
     "stadium arena park tower building centre center city state states county province republic kingdom united " +
     "national people federal democratic company corporation group bank holdings inc film movie game games series " +
+    "capital management asset assets investment investments partners associates technologies advisors " +
     "world cup league club team fc music band bands season seasons part story"
   ).split(" "),
 );
