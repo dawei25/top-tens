@@ -53,7 +53,7 @@ Puzzles are prebuilt from Wikipedia tables (`scripts/topics.ts`, `scripts/build.
 with every table row as an accepted answer, aliases from redirects, and a source link with an "as of" date.
 Modes: daily (Today's list and Today's Blitz, from `public/puzzles/daily.json`) and free play (a random list or Blitz,
 optionally by category). **Dailies are one try each**, archive dailies included: a finished daily always reopens on
-its result. Free play is endless: Roll another list rolls a new random game, keeping the category if one was picked, and
+its result. Free play is endless: Roll new list rolls a new random game, keeping the category if one was picked, and
 prefers lists the player hasn't played in that mode. Before play it sits in its own box right of the guess panel.
 
 **Separate topics.** Today's list and Today's Blitz are different lists, because a good list rewards knowing the

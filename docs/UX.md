@@ -9,7 +9,7 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 
 ## Words
 
-1. **Say what happens, in plain words.** A button names its effect: "Roll another list" for a new random list (not
+1. **Say what happens, in plain words.** A button names its effect: "Roll new list" for a new random list (not
    "Play again", which reads as the same list), "Play Blitz" (not "Blitz"). A number says what it is: "average" (not "par",
    asked about twice), "days in a row" (not "streak").
 2. **No jargon a casual player has to decode.** Golf, stats or game-design terms (par, percentile, streak, delta)
@@ -26,7 +26,10 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
    free play read as random).
 6. **The main thing gets the most room.** Today's list is the main feature: two thirds of the row, Blitz one third.
 7. **Compact by default.** Keys no taller than their content needs; side by side when the width allows ("takes up
-   too much space", "the height is still too tall").
+   too much space", "the height is still too tall"). A key beside a panel is as tall as the row it sits by, not the
+   whole panel, and its label is short enough to read without squeezing: "Roll another list" stretched to the Blitz
+   card's full 261px and crammed into three lines on a phone ("desktop, the new button is too tall, mobile, the
+   words are too crammed"), so it became "Roll new list", as tall as the guess row.
 8. **Aligned.** Things in a row share one baseline and one height (free play keys).
 9. **Popovers float.** A dropdown, picker or note opens over the page and never grows the panel it came from (the
    by-category picker).
@@ -35,7 +38,7 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 23. **One box, one job.** A panel holds one action and what serves it; a different action gets its own box beside it.
     Roll again sat inside the guess panel, squeezing the guess box and its placeholder: "separate out the roll again
     button completely outside the guess box, make its own separate box to the right of this whole thing" (now "Roll
-    another list", in its own box right of the guess panel, in free play and Blitz).
+    new list", in its own box right of the guess panel, in free play and Blitz).
 
 ## Behavior
 
