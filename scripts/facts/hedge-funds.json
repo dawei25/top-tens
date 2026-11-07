@@ -1,0 +1,52 @@
+{
+  "Bridgewater Associates": {
+    "text": "Ray Dalio founded it in 1975 in an office in his Manhattan apartment.",
+    "source": "https://en.wikipedia.org/wiki/Bridgewater_Associates",
+    "evidence": "Ray Dalio founded Bridgewater Associates in 1975 in an office in his Manhattan apartment."
+  },
+  "Millennium Management": {
+    "text": "Israel Englander founded it in 1989 with $35 million; his co-founder left six months later.",
+    "source": "https://en.wikipedia.org/wiki/Millennium_Management,_LLC",
+    "evidence": "Israel A. Englander and Ronald Shear, an acquaintance from the American Stock Exchange (AMEX), founded the firm in 1989 with $35 million. ... co-founder Ronald Shear left the firm six months after founding it."
+  },
+  "Elliott Investment Management": {
+    "text": "Paul Singer started it in 1977 with $1.3 million from friends and family, and named it after his middle name.",
+    "source": "https://en.wikipedia.org/wiki/Elliott_Investment_Management",
+    "evidence": "Singer created Elliott Associates in January 1977, starting with $1.3 million from friends and family and choosing the brand \"Elliott,\" his middle name."
+  },
+  "Citadel": {
+    "text": "Ken Griffin began trading from his Harvard dorm room, with a satellite dish hooked to its roof.",
+    "source": "https://en.wikipedia.org/wiki/Citadel_LLC",
+    "evidence": "Griffin started his trading career out of his dorm room at Harvard University in 1987, trading convertible bonds. As a sophomore, he hooked a satellite dish to the roof of his dormitory."
+  },
+  "Man Group": {
+    "text": "Founded in 1783 as a sugar brokerage, it supplied the Royal Navy's daily rum ration until 1970.",
+    "source": "https://en.wikipedia.org/wiki/Man_Group",
+    "evidence": "The company was founded by James Man in 1783 as a sugar cooperage and brokerage ... The following year Man Group won the contract to supply the Royal Navy with rum for its daily rum ration ... This tradition continued until 1970, with Man Group holding the contract throughout."
+  },
+  "D. E. Shaw & Co.": {
+    "text": "Its founder was a Columbia computer science professor, and in the 1990s it also started the email provider Juno.",
+    "source": "https://en.wikipedia.org/wiki/D._E._Shaw_%26_Co.",
+    "evidence": "The company was founded by David E. Shaw, a former Columbia University computer science professor ... Its non-hedge fund activities in the mid-90s included ... founding the email provider Juno Online Services"
+  },
+  "AQR Capital Management": {
+    "text": "AQR stands for Applied Quantitative Research; its founders left Goldman Sachs to start it in 1998.",
+    "source": "https://en.wikipedia.org/wiki/AQR_Capital_Management",
+    "evidence": "AQR Capital Management (short for Applied Quantitative Research) ... In 1998, Asness, David Kabiller, Krail and Liew left Goldman Sachs to establish AQR."
+  },
+  "Two Sigma": {
+    "text": "The name plays on sigma: lower case for an investment's volatility, upper case for a sum.",
+    "source": "https://en.wikipedia.org/wiki/Two_Sigma",
+    "evidence": "A lower case sigma, σ, designates the volatility of an investment's return over a given benchmark, and an upper case sigma, Σ, denotes sum."
+  },
+  "Goldman Sachs Asset Management": {
+    "text": "Goldman Sachs formed it in 1986, the same year the bank took Microsoft public.",
+    "source": "https://en.wikipedia.org/wiki/Goldman_Sachs",
+    "evidence": "In 1986, the firm formed Goldman Sachs Asset Management ... Also in 1986, the firm underwrote the IPO of Microsoft"
+  },
+  "Renaissance Technologies": {
+    "text": "Founder Jim Simons was a Cold War codebreaker; its Medallion Fund is named for his and James Ax's math awards.",
+    "source": "https://en.wikipedia.org/wiki/Renaissance_Technologies",
+    "evidence": "Renaissance originated as Monemetrics, founded in 1978 by mathematician and former Cold War codebreaker Jim Simons ... The hedge fund was named Medallion in honor of the math awards Simons and Ax had won."
+  }
+}
