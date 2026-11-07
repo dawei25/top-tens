@@ -83,7 +83,8 @@ switch and reset all progress. **Fathom (beta)** lives at `#fathom` only, with n
 approves it: five estimation questions a game, scored by plain closeness, one rule for every question (docs/FATHOM.md).
 
 1. **Home:** Today's list and Blitz, then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on);
-   Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ).
+   Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ). Home never names today's list or
+   Blitz: the topic is the surprise (owner, Nov 7).
 2. **Game:** title card with the prompt, score (no average during play: it's revealed on the results) and a Play
    Blitz key; lives; 10 rank slots, each empty one with a
    clue magnifier; feedback line; chips for life-costing misses.
@@ -113,7 +114,8 @@ metaphor is a **retro arcade high-score table**, which a top 10 already is.
   glass `#08182e` at 85-95%. Hairlines `#7d93b8` at 22%.
 - Text `#e8f1ff`, muted `#7d93b8`, labels `#8fa3c4`.
 - Accents: cyan `#4de3ff` (primary), pink `#ff5d8f` (go buttons, wrong), gold `#ffd166` (suggestions, #1),
-  red `#ff5252` (danger). No green anywhere.
+  red `#ff5252` (danger). No green anywhere, except the 2nd and 3rd rank numerals (lime `#b6f36a`, mint `#5cf2a8`,
+  from the squid's limbs), which the owner kept (Nov 7).
 - One font: **VT323** (Google Fonts), weight 400, pixel-crisp. Body 22px/1.35. Hierarchy from size, color,
   UPPERCASE and wide letter-spacing (0.25em buttons, 0.3em labels).
 - Keycap buttons: 52px tall, radius 6, hard shadow `0 5px 0 #02060f` (pink key `0 5px 0 #a8365d`), press sinks 3px.
