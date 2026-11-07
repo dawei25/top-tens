@@ -242,13 +242,14 @@ async function openMenu(page) {
 }
 /**
  * Home's account key, signed out: opens the sign-in sheet (to sign in; `mode` "up" then switches it to create an
- * account, as "new here? create an account" does). Goes Home first if need be.
+ * account, as "new here? create an account" does, in a build with passwords). Goes Home first if need be. The sheet is
+ * ready once its first way in is: the Google key (the launch build has nothing else), or the password form.
  */
 async function openSignIn(page, mode = "in") {
   if (await page.evaluate(() => location.hash.length > 1)) await page.evaluate(() => (location.hash = ""));
   await page.locator('[data-testid="account-key"][data-state="out"]').click();
   await page.getByTestId("sign-in-sheet").waitFor();
-  await page.locator('[data-testid="sign-in-password-form"][data-mode="in"]').waitFor();
+  await page.locator('[data-testid="sign-in-google"], [data-testid="sign-in-password-form"][data-mode="in"]').first().waitFor();
   if (mode === "up") {
     await page.getByTestId("sign-in-mode").click();
     await page.locator('[data-testid="sign-in-password-form"][data-mode="up"]').waitFor();

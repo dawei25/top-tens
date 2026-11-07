@@ -1,5 +1,5 @@
-// Google sign-in from our own key: a copy built with a Google client ID (GOOGLE_ENV), Supabase mocked, and Google's
-// authorization endpoint faked. The fake records each request and answers like Google's implicit flow does: a
+// Google sign-in from our own key: the launch build (GOOGLE_ENV: a Google client ID and the default methods, Google
+// alone), Supabase mocked, and Google's authorization endpoint faked. The fake records each request and answers like Google's implicit flow does: a
 // redirect to the redirect_uri with the ID token (carrying the nonce it was asked with) and the state in the fragment.
 // Or it keeps its chooser up (the player closes the window), answers access_denied (Cancel at Google), sends a state
 // the game didn't ask with, or a token Supabase refuses.
@@ -279,5 +279,34 @@ test("the privacy page says what Continue with Google does", async () => {
   const { ctx, page } = await open(desktop, "#privacy", FRESH);
   await page.getByTestId("privacy-google").waitFor();
   assert.ok(await noHScroll(page));
+  await ctx.close();
+});
+
+// The launch offers Google alone (no VITE_SIGN_IN; owner, Nov 7: "google only for now"): the sign-in sheet is the
+// Google key and its close key, with no email field and no other way in, and the privacy page drops the password's
+// line. The copy for each set of methods is labels.test.ts's (no "no password." here: that was the email link's). The
+// email link and the password stay covered by backend.e2e.cjs, whose build names them in VITE_SIGN_IN.
+test("the launch build offers Google alone: the sign-in sheet and the privacy page (phone)", async () => {
+  const { ctx, page } = await open(phone, "", FRESH, undefined, withGoogle({}));
+  await openSignIn(page);
+  const sheet = page.getByTestId("sign-in-sheet");
+  await page.getByTestId("sign-in-google").waitFor();
+  assert.equal(await sheet.locator("input").count(), 0, "no email or password field");
+  assert.equal(await sheet.locator("form").count(), 0, "no email or password form");
+  for (const id of ["sign-in-email", "sign-in-send", "sign-in-password-form", "sign-in-switch", "sign-in-mode", "sign-in-forgot"]) {
+    assert.equal(await page.getByTestId(id).count(), 0, `no ${id}`);
+  }
+  // Only the two keys to press: Google's and Close.
+  const keys = await sheet.locator("button").evaluateAll((els) => els.map((el) => el.dataset.testid));
+  assert.deepEqual(keys.sort(), ["sign-in-close", "sign-in-google"]);
+  await page.getByTestId("sign-in-caption").waitFor();
+  assert.ok(await noHScroll(page));
+  await page.getByTestId("sign-in-close").click();
+  await sheet.waitFor({ state: "detached" });
+
+  await page.evaluate(() => (location.hash = "#privacy"));
+  await page.getByTestId("privacy-sign-in").waitFor();
+  await page.getByTestId("privacy-google").waitFor();
+  assert.equal(await page.getByTestId("privacy-password").count(), 0, "no password line");
   await ctx.close();
 });

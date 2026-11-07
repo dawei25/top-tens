@@ -4,6 +4,7 @@ import { loadService, useAccount } from "../../net";
 import type { GoogleOutcome } from "../../net/google";
 import { setAccount } from "../../net/store";
 import GoogleSignIn from "./GoogleSignIn";
+import { signInCaption } from "./labels";
 import { Sheet } from "./Sheet";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,8 +15,9 @@ type Busy = "google" | "email" | "code" | "password" | null;
 type Service = NonNullable<Awaited<ReturnType<typeof loadService>>>;
 
 /**
- * Sign in with the methods this build offers (VITE_SIGN_IN): Google; an email and password (sign in or create an
- * account, nothing emailed); a link (and a code, for opening it on another device) by email. A sheet over the screen
+ * Sign in with the methods this build offers (VITE_SIGN_IN; Google alone by default, for the launch): Google; an email
+ * and password (sign in or create an account, nothing emailed); a link (and a code, for opening it on another device)
+ * by email. With Google alone the sheet is the Google key and nothing else to choose. A sheet over the screen
  * (./Sheet): Escape, the close key or a press outside closes it; focus stays inside while it's open; the first control
  * takes focus (the Google key when there is one: no keyboard pops up on a phone).
  *
@@ -252,7 +254,9 @@ export default function SignInSheet({ onClose, start = "in" }: { onClose: () => 
           Close
         </button>
       </div>
-      <p className="caption">keep your games, streaks and bests on every device.{hasPassword ? "" : " no password."}</p>
+      <p className="caption" data-testid="sign-in-caption">
+        {signInCaption(methods)}
+      </p>
       {account.notice && (
         <p className="sheet-error" role="alert">
           {account.notice}
