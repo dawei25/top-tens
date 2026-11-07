@@ -209,6 +209,31 @@
   color: var(--pink);
 }
 
+/*
+ * The name-it round: a name in the field, a step smaller than a number so a long one shows ("Papua New Guinea"), and no
+ * unit. Its line says why a name didn't lock ("Paris is a city, not a country. Try again.") or offers the names to tap:
+ * two lines kept for it, wrapping, so the usual messages move nothing; the choices are TENtacle's suggestion keys.
+ */
+.fathom-field[data-round="name"] input {
+  font-size: 28px;
+}
+.fathom-echo[data-round="name"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-height: 48px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.fathom-echo[data-tone="choose"] {
+  color: var(--gold);
+}
+.fathom[data-short] .fathom-echo[data-round="name"] {
+  min-height: 24px;
+}
+
 /* The echo line, then LOCK IN the width of the card on a phone; from 560px LOCK IN at the right end of the echo's line,
    where NEXT is on the reveal. */
 .fathom-keys {
@@ -339,6 +364,53 @@
   font-size: 22px;
   line-height: 1.1;
   color: var(--muted);
+}
+/* A name-it round's pick: the name, then its figure under it. */
+.figure-name {
+  font-size: 32px;
+}
+.figure-of {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-top: 4px;
+  font-size: 24px;
+  line-height: 1.1;
+  color: var(--text);
+}
+.figure-of .figure-unit {
+  font-size: 20px;
+}
+/* The best answers on the list: name left, figure right, the player's own in cyan. */
+.fathom-best ol {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+.fathom-best li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 3px 0;
+  font-size: 20px;
+  line-height: 1.2;
+}
+.fathom-best li + li {
+  border-top: 1px dashed var(--hairline);
+}
+.best-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.best-n {
+  flex: none;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.fathom-best li[data-yours] .best-name {
+  color: var(--cyan);
 }
 /* How real players guessed (with a backend, from 20 of them). */
 .fathom-players {
