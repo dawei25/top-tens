@@ -1,0 +1,28 @@
+{
+  "id": "hedge-funds",
+  "judgedAt": "2026-11-07",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 2,
+  "scores": { "recognizability": 2, "curve": 3, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 5, "livesLost": 2, "guesses": 15 },
+  "fan": { "found": 9, "livesLost": 5, "guesses": 16 },
+  "blitzCasual": null,
+  "difficulty": 4,
+  "tags": ["business", "finance", "hedge funds"],
+  "audience": "finance people",
+  "summary": "A good list for people who know finance: the big multi-managers and quant shops come quickly, and Goldman Sachs at #9 is the surprise. A typical player knows only two or three of the names, so it belongs in free play.",
+  "reasons": [
+    "Casual run: found Citadel, Bridgewater, Goldman Sachs, Renaissance and Two Sigma. BlackRock (#18, $28,577m) and Pershing Square (unranked, no figure) cost lives. Vanguard, JP Morgan, Point72, Melvin Capital, Berkshire, Jane Street, Soros and Morgan Stanley were all free.",
+    "Fan run: 9 of 10 in the first nine guesses. Then five real near misses (Balyasny, Marshall Wace #11, Davidson Kempner #13, Farallon, Brevan Howard #15) ended the game before Goldman, the one stretch answer. Point72 and Baupost are free because the page doesn't list them.",
+    "The traps hold. Every prop firm and market maker is free (Jane Street, Citadel Securities, Jump, HRT, Optiver, SIG, Virtu, IMC, DRW, XTX), 'citadel securities' never fills Citadel, 'goldman sachs', 'goldman' and 'gsam' reach GSAM, and 'man' is free. The top 20 matches the page's P&I June 2025 table, and the ten facts check out against their sources.",
+    "Unranked misses show no figure, because the page gives none for its notable firms. That is acceptable, but those misses read flatter than the ranked ones."
+  ],
+  "fixes": [
+    "Generic firm-name words hand over top-10 answers in the confirm box: 'capital' and 'capital management' offer #7 AQR, 'asset' and 'asset management' #9 GSAM, 'investment' and 'investment management' #3 Elliott, 'associates' #1 Bridgewater, 'technologies' #10 Renaissance. Once those are found, the next firm is offered and costs a life if confirmed ('asset management' offers #16 GoldenTree, 'capital partners' #20 D1). Class fix in src/game/match.ts (coordinator): add capital, management, asset, assets, investment, investments, partners, associates, advisors, technologies, global, fund, funds, llc, lp, plc to GENERIC next to company/corporation/group/holdings/inc, so these words alone are 'be more specific' (no rebuild: GENERIC is not normalize()). This also fixes 'capital group' (the asset manager), which now offers Avenue Capital Group / Hillhouse Capital Group. Guard: aliases.test.ts hedge-funds 'capital', 'asset management', 'associates' -> unknown.",
+    "'tiger management' is a knownNames entry (Julian Robertson's fund), but the game offers it as Tiger Global Management, which costs a life if confirmed. The gapped word match in judgeGuess runs before the known-name check. In src/game/match.ts, skip wordMatches when the guess is itself a known name (ownName), as leadingName and near-spellings already do.",
+    "'glg' costs a life as unranked GLG Partners, but GLG has been part of Man Group (Man GLG) since 2010. Move 'GLG Partners' and 'GLG' to #5 Man Group's aliases and drop GLG Partners from HEDGE_FUND_FIRMS. Add 'AHL' to Man Group too ('ahl' is not recognized).",
+    "Missing short forms: add 'Renaissance Tech' to #10 Renaissance Technologies ('renaissance tech' is not recognized) and '2 Sigma' to #8 Two Sigma ('2 sigma' is not recognized). Add 'Two Sigma Ventures' to NOT_HEDGE_FUNDS: it is a junk alias, but 'two sigma ventures' still offers Two Sigma. It was spun out in 2026 as Deviation Capital.",
+    "'merrill lynch' gets 'That doesn't look like an answer.' because isJunk in src/game/junk.ts tests for a triple letter after joining the words ('merrilllynch'). Run that test per word (coordinator), and add 'Merrill Lynch' to NOT_HEDGE_FUNDS in the meantime."
+  ]
+}
