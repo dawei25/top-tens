@@ -16,7 +16,7 @@ import {
   type NameIt,
   type NameScoring,
 } from "./fathom";
-import type { Lexicon } from "./junk";
+import { isKnownName, type Lexicon } from "./junk";
 import { judgeGuess, normalize } from "./match";
 import type { Entry, Puzzle } from "./types";
 
@@ -210,9 +210,42 @@ export type NameRead =
   | { kind: "choose"; names: string[] }
   | { kind: "vague" }
   | { kind: "except"; name: string }
-  | { kind: "other"; name: string; noun: string }
+  /** `partOf`: a place that is part of something on the list ("Northern Ireland": the UK), not a kind of its own. */
+  | { kind: "other"; name: string; noun: string; partOf?: string }
   | { kind: "offList"; name: string }
   | { kind: "unknown" };
+
+/**
+ * Places a player may well type that none of the lists has, by what they are: a territory, a US state, a continent,
+ * part of the UK. Only to say what they are ("Greenland is a territory, not a country."): never an answer, and a name
+ * the round's own list has (Georgia, the country) is read as that first.
+ */
+const PLACES: readonly { noun: string; partOf?: string; names: readonly string[] }[] = [
+  {
+    noun: "territory",
+    names: [
+      "Greenland", "Puerto Rico", "Hong Kong", "Macau", "Macao", "Guam", "Bermuda", "Faroe Islands", "Faroes",
+      "New Caledonia", "French Polynesia", "Tahiti", "Gibraltar", "Cayman Islands", "Aruba", "Curaçao", "Isle of Man",
+      "Jersey", "Guernsey", "Falkland Islands", "Falklands", "American Samoa", "US Virgin Islands", "British Virgin Islands",
+      "Northern Mariana Islands", "Réunion", "Martinique", "Guadeloupe", "French Guiana", "Mayotte", "Anguilla",
+      "Montserrat", "Turks and Caicos Islands", "Sint Maarten", "Bonaire", "Åland", "Svalbard", "Saint Helena",
+    ],
+  },
+  {
+    noun: "US state",
+    names: [
+      "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida",
+      "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+      "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+      "New Hampshire", "New Jersey", "New Mexico", "New York State", "North Carolina", "North Dakota", "Ohio", "Oklahoma",
+      "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
+      "Virginia", "Washington State", "West Virginia", "Wisconsin", "Wyoming",
+    ],
+  },
+  { noun: "continent", names: ["Africa", "Europe", "Asia", "North America", "South America", "Antarctica", "Oceania"] },
+  { noun: "", partOf: "the UK", names: ["England", "Scotland", "Wales", "Northern Ireland"] },
+];
+const placeByForm = new Map(PLACES.flatMap((p) => p.names.map((name) => [normalize(name), { ...p, name }] as const)));
 
 interface Read {
   puzzle: Puzzle;
@@ -284,11 +317,17 @@ function judge(text: string, list: NameList, lex?: Lexicon, offered?: string[]):
 
 const sameNoun = (a: NameList, b: NameList) => normalize(a.noun) === normalize(b.noun);
 
+/** What was typed, as a name in a line: "berlin" as "Berlin". */
+const titled = (text: string) => text.trim().replace(/\s+/g, " ").replace(/(^|[\s-])(\p{L})/gu, (_, a: string, b: string) => a + b.toUpperCase());
+
 /**
  * Reads a typed name on a name-it round over its `list`. `others` are the other lists the game has (a city list on a
  * country question): what was typed is a thing of another kind when one of them knows it by that name and this list
- * doesn't ("Paris", "Lagos" rather than a misspelling of Laos, "Mexico City" rather than Mexico). `offered`: the names
- * the last read offered, so typing or tapping one picks it. `except`: names that don't count.
+ * doesn't ("Paris", "Lagos" rather than a misspelling of Laos, "Mexico City" rather than Mexico), and so is a place
+ * none of them has (PLACES: Greenland, Texas). `lex`, the game's lexicon: a name of its own isn't read as a misspelling
+ * of something on the list, unless nothing else reads it (the confirm or the tap that a misspelling needs keeps that
+ * fair); and a real name the list doesn't have says so ("Berlin isn't one of our 85 cities."). `offered`: the names the
+ * last read offered, so typing or tapping one picks it. `except`: names that don't count.
  */
 export function readName(
   text: string,
@@ -301,30 +340,46 @@ export function readName(
   const main = judge(text, list, lex, offered);
   if (main.kind === "exact") return out(main.entry) ? { kind: "except", name: main.entry.name } : { kind: "answer", entry: main.entry };
 
-  // Not an exact name on this list: what the other lists make of it.
+  // Not an exact name on this list: what the other lists make of it, and whether it's a place none of them has.
   const elsewhere = others
     .filter((o) => o.id !== list.id)
     .map((o) => ({ o, j: judge(text, o, lex) }))
     .filter((x): x is { o: NameList; j: Extract<Judged, { entry: NameEntry }> } => x.j.kind === "exact" || x.j.kind === "confirm");
   const exactElsewhere = elsewhere.find((x) => x.j.kind === "exact" && !sameNoun(x.o, list));
+  const place = placeByForm.get(normalize(text));
+  const placeRead: NameRead | undefined = place && { kind: "other", name: place.name, noun: place.noun, ...(place.partOf && { partOf: place.partOf }) };
   // A thing of another kind, named exactly, is that thing, not a misspelling or part of something on this list.
-  if (exactElsewhere && main.kind !== "none") return { kind: "other", name: exactElsewhere.j.entry.name, noun: exactElsewhere.o.noun };
-
-  if (main.kind === "confirm") return out(main.entry) ? { kind: "except", name: main.entry.name } : { kind: "confirm", entry: main.entry };
-  if (main.kind === "choose") {
-    const names = main.names.filter((n) => !(except ?? []).some((x) => normalize(x) === normalize(n)));
-    if (names.length === 1) {
-      const entry = list.entries.find((e) => e.name === names[0]);
-      if (entry) return { kind: "confirm", entry };
-    }
-    return names.length ? { kind: "choose", names } : { kind: "except", name: main.names[0] };
+  if (main.kind !== "none") {
+    if (exactElsewhere) return { kind: "other", name: exactElsewhere.j.entry.name, noun: exactElsewhere.o.noun };
+    if (placeRead) return placeRead;
   }
-  if (main.kind === "vague") return { kind: "vague" };
+
+  const kept = (m: Judged): NameRead | undefined => {
+    if (m.kind === "confirm") return out(m.entry) ? { kind: "except", name: m.entry.name } : { kind: "confirm", entry: m.entry };
+    if (m.kind === "choose") {
+      const names = m.names.filter((n) => !(except ?? []).some((x) => normalize(x) === normalize(n)));
+      if (names.length === 1) {
+        const entry = list.entries.find((e) => e.name === names[0]);
+        if (entry) return { kind: "confirm", entry };
+      }
+      return names.length ? { kind: "choose", names } : { kind: "except", name: m.names[0] };
+    }
+    if (m.kind === "vague") return { kind: "vague" };
+    return undefined;
+  };
+  const read = kept(main);
+  if (read) return read;
 
   const kind = elsewhere.find((x) => !sameNoun(x.o, list));
   if (kind) return { kind: "other", name: kind.j.entry.name, noun: kind.o.noun };
+  if (placeRead) return placeRead;
   const same = elsewhere.find((x) => x.j.kind === "exact" && sameNoun(x.o, list));
   if (same) return { kind: "offList", name: same.j.entry.name };
+  // The lexicon held back a reading because what was typed is a name somewhere ("Irak", an alias elsewhere in the
+  // game): it still needs a confirm or a tap, so offer it.
+  const plain = lex ? kept(judge(text, list, undefined, offered)) : undefined;
+  if (plain) return plain;
+  if (lex && isKnownName(text, lex)) return { kind: "offList", name: titled(text) };
   return { kind: "unknown" };
 }
 
@@ -336,15 +391,18 @@ export function withArticle(noun: string): string {
   return `${an ? "an" : "a"} ${noun}`;
 }
 
-/** A name longer than this is left out of a line, so the line keeps to two lines on the narrowest phone. */
+/**
+ * A name longer than this is left out of a line, so the line keeps to two lines on the narrowest phone (a line about a
+ * list of countries holds a little less of one).
+ */
 const NAME_IN_LINE = 18;
-const named = (name: string, fallback: string) => (name.length <= NAME_IN_LINE ? name : fallback);
+const named = (name: string, fallback: string, max = NAME_IN_LINE) => (name.length <= max ? name : fallback);
 
 /**
  * What the round says about a typed name that doesn't lock (nothing for `answer`; `choose` is followed by the names to
  * tap). Short and plain, two lines at most at 320px, "Try again." where nothing was lost and the player goes on.
  */
-export function nameLine(read: NameRead, list: Pick<NameList, "noun">): string {
+export function nameLine(read: NameRead, list: Pick<NameList, "noun" | "nounPlural" | "entries">): string {
   switch (read.kind) {
     case "empty":
       return `Type ${withArticle(list.noun)} first.`;
@@ -357,9 +415,10 @@ export function nameLine(read: NameRead, list: Pick<NameList, "noun">): string {
     case "except":
       return `Any ${list.noun} but ${named(read.name, "that one")}. Try again.`;
     case "other":
+      if (read.partOf) return `${named(read.name, "That")} is part of ${read.partOf}. Try again.`;
       return `${named(read.name, "That")} is ${withArticle(read.noun)}, not ${withArticle(list.noun)}. Try again.`;
     case "offList":
-      return `${named(read.name, "That")} isn't on our list. Try again.`;
+      return `${named(read.name, "That", 14)} isn't one of our ${list.entries.length} ${list.nounPlural}. Try again.`;
     case "unknown":
       return "Not one we know. Try again.";
     default:

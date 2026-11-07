@@ -2,13 +2,13 @@
   "id": "countries-area",
   "noun": "country",
   "nounPlural": "countries",
-  "measure": "km²",
+  "measure": "square kilometres",
   "scoring": "ratio",
   "source": {
     "title": "List of countries and dependencies by area",
     "url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area"
   },
-  "asOf": "2026-11-07",
+  "asOf": "2026-11-02",
   "entries": [
     {"name":"Russia","aliases":["Russian Federation"],"value":17098246},
     {"name":"Canada","aliases":[],"value":9984670},
@@ -59,7 +59,7 @@
     {"name":"New Zealand","aliases":[],"value":268021},
     {"name":"Gabon","aliases":[],"value":267668},
     {"name":"Guinea","aliases":[],"value":245857},
-    {"name":"United Kingdom","aliases":["UK","U.K.","Britain","Great Britain"],"value":242495},
+    {"name":"United Kingdom","aliases":["UK","U.K.","Britain","Great Britain"],"value":244376},
     {"name":"Uganda","aliases":[],"value":241550},
     {"name":"Ghana","aliases":[],"value":238533},
     {"name":"Romania","aliases":[],"value":238397},

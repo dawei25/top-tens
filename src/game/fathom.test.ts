@@ -60,6 +60,7 @@ import {
   type FathomQuestion,
   type Round,
 } from "./fathom";
+import { trainLexicon } from "./junk";
 import {
   asOfText,
   bestAnswers,
@@ -1097,22 +1098,58 @@ describe("name-it: reading the name", () => {
     // A city named exactly is that city, not a misspelling of a country or the start of one's name.
     expect(said(read("Lagos"))).toBe("other Lagos (city)");
     expect(said(read("Mexico City"))).toBe("other Mexico City (city)");
-    expect(said(read("Kiev"))).toBe("other Kyiv (city)");
+    expect(said(read("Hong Kong"))).toBe("other Hong Kong (city)");
+    expect(said(read("Washington"))).toBe("other Washington, D.C. (city)");
     // And a country on a city question.
     expect(said(read("France", CITIES))).toBe("other France (country)");
     expect(said(read("Japan", CITIES))).toBe("other Japan (country)");
     // A name that is both stays what the question asks for.
     expect(said(read("Singapore"))).toBe("answer Singapore");
     expect(said(read("Singapore", CITIES))).toBe("answer Singapore");
+    expect(said(read("Hong Kong", CITIES))).toBe("answer Hong Kong");
     expect(said(read("Mexico"))).toBe("answer Mexico");
   });
 
+  // The coordinator: no dependencies on the lists (Greenland, Puerto Rico are not countries). A place no list has is
+  // still named for what it is, and never becomes an answer.
+  it("names the places no list has for what they are: territories, US states, continents, the UK's nations", () => {
+    expect(said(read("Greenland"))).toBe("other Greenland (territory)");
+    expect(said(read("puerto rico"))).toBe("other Puerto Rico (territory)");
+    expect(said(read("Texas"))).toBe("other Texas (US state)");
+    expect(said(read("Africa"))).toBe("other Africa (continent)");
+    expect(said(read("Greenland", CITIES))).toBe("other Greenland (territory)");
+    // A name the list has is that: Georgia the country (once it's on the list; these fixtures leave it out), not the US
+    // state.
+    expect(said(read("Georgia", BORDERS))).toBe("other Georgia (US state)");
+    expect(said(readName("Georgia", { ...POPULATION, entries: [...POPULATION.entries, { name: "Georgia", aliases: [], value: 3.7e6 }] }, []))).toBe("answer Georgia");
+    // And a misspelling of a country is no reason to miss one: "Hawaii" is a US state, not Haiti.
+    const withHaiti = { ...POPULATION, entries: [...POPULATION.entries, { name: "Haiti", aliases: [], value: 11.7e6 }] };
+    expect(said(readName("Hawaii", withHaiti, []))).toBe("other Hawaii (US state)");
+    expect(said(readName("Haitii", withHaiti, []))).toBe("confirm Haiti");
+    const ni = read("Northern Ireland");
+    expect(ni).toEqual({ kind: "other", name: "Northern Ireland", noun: "", partOf: "the UK" });
+  });
+
   it("says when it doesn't know it, and never turns it into an answer", () => {
-    for (const typed of ["asdf", "brain", "Atlantis", "Texas", "pope", "islands", "123"]) expect(said(read(typed)), typed).toBe("unknown");
+    for (const typed of ["asdf", "brain", "Atlantis", "pope", "islands", "123"]) expect(said(read(typed)), typed).toBe("unknown");
     expect(said(read(""))).toBe("empty");
     expect(said(read("  "))).toBe("empty");
     // A country another list of countries has and this one doesn't.
     expect(said(read("Serbia", POPULATION))).toBe("offList Serbia");
+  });
+
+  // With the game's lexicon: a real name the list doesn't have says so, and a misspelling the lexicon happens to know as
+  // a name elsewhere ("Irak") is still offered: it needs a tap either way.
+  it("with the game's lexicon, says a real name isn't on the list, and still offers what a misspelling means", () => {
+    const lex = trainLexicon(["water"], ["Berlin", "Irak", "Lagos", "Kyiv"]);
+    const withLex = (text: string, l = POPULATION) => said(readName(text, l, [...LISTS.values()], { lex }));
+    expect(withLex("Berlin", CITIES)).toBe("offList Berlin");
+    expect(withLex("kyiv", CITIES)).toBe("offList Kyiv");
+    expect(nameLine(readName("berlin", CITIES, [], { lex }), CITIES)).toBe(`Berlin isn't one of our ${CITIES.entries.length} cities. Try again.`);
+    expect(withLex("Irak")).toBe("choose Iran / Iraq");
+    expect(withLex("Lagos")).toBe("other Lagos (city)");
+    expect(withLex("Frnace")).toBe("confirm France");
+    expect(withLex("asdf")).toBe("unknown");
   });
 
   it("leaves out the question's own yardstick", () => {
@@ -1129,7 +1166,10 @@ describe("name-it: reading the name", () => {
     expect(line(read("asdf"))).toBe("Not one we know. Try again.");
     expect(line(read("Frnace"))).toBe("France? Lock in to confirm.");
     expect(line(read("Irak"))).toBe("Did you mean");
-    expect(line(read("Serbia"))).toBe("Serbia isn't on our list. Try again.");
+    expect(line(read("Serbia"))).toBe(`Serbia isn't one of our ${POPULATION.entries.length} countries. Try again.`);
+    expect(line(read("Greenland"))).toBe("Greenland is a territory, not a country. Try again.");
+    expect(line(read("Northern Ireland"))).toBe("Northern Ireland is part of the UK. Try again.");
+    expect(line({ kind: "offList", name: "Bosnia Herzegovina" })).toBe(`That isn't one of our ${POPULATION.entries.length} countries. Try again.`);
     expect(line(read("UK", AREA, { except: ["United Kingdom"] }), AREA)).toBe("Any country but United Kingdom. Try again.");
     expect(line({ kind: "empty" })).toBe("Type a country first.");
     expect(line({ kind: "vague" })).toBe("More than one fits. Be more specific.");
@@ -1166,7 +1206,7 @@ describe("name-it: scoring", () => {
     expect(ruleFor(pop)).toBe("Your country's population: half or double the target scores about 50.");
     expect(Math.abs(scoreFor(pop, 100e6) - 50)).toBeLessThanOrEqual(1);
     expect(Math.abs(scoreFor(pop, 25e6) - 50)).toBeLessThanOrEqual(1);
-    expect(ruleFor(nameQ("name-city-1m-people"))).toBe("Your city's population: half or double the target scores about 50.");
+    expect(ruleFor(nameQ("name-city-10m-people"))).toBe("Your city's population: half or double the target scores about 50.");
     expect(ruleFor(nameQ("name-country-as-big-as-uk"))).toBe("Your country's area: half or double the target scores about 50.");
     const steps = nameQ("name-country-6-borders");
     expect(ruleFor(steps)).toBe("Each land border off costs 30, so one off scores 70.");
@@ -1209,7 +1249,7 @@ describe("name-it: scoring", () => {
     expect(amountText(steps, 6)).toBe("6 land borders");
     expect(amountText(steps, 1)).toBe("1 land border");
     expect(amountText(steps, 0)).toBe("0 land borders");
-    expect(amountText(nameQ("name-country-as-big-as-uk"), 238533)).toBe("238,533 km²");
+    expect(amountText(nameQ("name-country-as-big-as-uk"), 238533)).toBe("238,533 square kilometres");
     expect(singular("land borders")).toBe("land border");
     expect(singular("cities")).toBe("city");
     expect(unitShown(pop)).toBe("");
@@ -1236,10 +1276,10 @@ describe("name-it: the questions", () => {
       answer: 50e6,
       fact: "",
       source: { title: "List of countries and dependencies by population", url: "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population" },
-      nameIt: { list: "countries-population", scoring: "ratio", noun: "country", nounPlural: "countries", asOf: "2026-11-07" },
+      nameIt: { list: "countries-population", scoring: "ratio", noun: "country", nounPlural: "countries", asOf: "2026-11-02" },
     });
     expect(nameQ("name-country-as-big-as-uk").nameIt?.except).toEqual(["United Kingdom"]);
-    expect(nameQ("name-city-1m-people").definition).toBe("the city itself, not its metro area");
+    expect(nameQ("name-city-10m-people").definition).toBe("its whole urban area, UN figures for 2025");
     // readBank alone (no lists) leaves them out.
     expect(readBank(NAME_BANK)).toEqual([]);
   });
@@ -1256,18 +1296,18 @@ describe("name-it: the questions", () => {
     expect(readNameQuestion({ ...raw, target: 0 }, POPULATION)).toBeNull();
     expect(readNameQuestion({ ...raw, kind: "weather" }, POPULATION)).toBeNull();
     // The yardstick doesn't count toward them.
-    expect(goodAnswers(AREA, 242495, ["United Kingdom"]).map((e) => e.name)).not.toContain("United Kingdom");
+    expect(goodAnswers(AREA, 244376, ["United Kingdom"]).map((e) => e.name)).not.toContain("United Kingdom");
   });
   it("show the best answers: the closest first, the yardstick left out", () => {
     const best = (list: NameList, target: number, except?: string[]) => bestAnswers(list, target, except).map((e) => `${e.name} ${e.value}`);
     // Spain (2.8% fewer, 98) before South Korea (3.4% more, 97): by points, then how close.
     expect(best(POPULATION, 50e6)).toEqual(["Uganda 49924252", "Sudan 50448963", "Spain 48592909", "South Korea 51717590"]);
-    expect(best(BORDERS, 6)).toEqual(["Italy 6", "India 6", "Ethiopia 6", "Afghanistan 6"]);
-    // Guinea, Ghana and Romania all score 99: Guinea (1.4% bigger) is the closest of them.
-    expect(best(AREA, 242495, ["United Kingdom"])).toEqual(["Uganda 241550", "Guinea 245857", "Ghana 238533", "Romania 238397"]);
+    expect(best(BORDERS, 6)).toEqual(["Italy 6", "Ethiopia 6", "Afghanistan 6", "Chad 6"]);
+    // The UK's own figure on the list: Guinea (0.6% bigger) spot on, Uganda 99, then Ghana and Romania at 98, Ghana closer.
+    expect(best(AREA, 244376, ["United Kingdom"])).toEqual(["Guinea 245857", "Uganda 241550", "Ghana 238533", "Romania 238397"]);
   });
   it("says when the figures are from", () => {
-    expect(asOfText("2026-11-07")).toBe("November 2026");
+    expect(asOfText("2026-11-02")).toBe("November 2026");
     expect(asOfText("2024")).toBe("2024");
     expect(asOfText(undefined)).toBe("");
   });

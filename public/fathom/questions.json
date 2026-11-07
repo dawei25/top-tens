@@ -1496,7 +1496,7 @@
    "question": "Name a country with about 1 million people",
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries score 70 or more, within about 1.45x of 1 million (expect Cyprus, Estonia, Djibouti, Eswatini, Mauritius, Fiji, Timor-Leste), and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 13 countries score 70 or more (Cyprus, Guyana, Comoros, Djibouti, Fiji, Eswatini). Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-country-10m-people",
@@ -1507,7 +1507,7 @@
    "question": "Name a country with about 10 million people",
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries within about 1.45x of 10 million (expect Sweden, Portugal, Greece, Czechia, Hungary, Austria, Jordan, UAE), and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 31 score 70 or more (Papua New Guinea, Honduras, Azerbaijan, Israel, Greece, Hungary). Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-country-50m-people",
@@ -1518,7 +1518,7 @@
    "question": "Name a country with about 50 million people",
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries within about 1.45x of 50 million (expect Colombia, South Korea, Spain, Kenya, Myanmar, Sudan, Uganda), and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 27 score 70 or more (Spain, South Korea, Myanmar, Algeria, Sudan, Colombia). Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-country-100m-people",
@@ -1529,7 +1529,7 @@
    "question": "Name a country with about 100 million people",
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries within about 1.45x of 100 million (expect Vietnam, DR Congo, Egypt, Philippines, Japan, Ethiopia, Iran), and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 15 score 70 or more (Vietnam, Egypt, Ethiopia, Iran, Philippines, Turkey). Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-country-as-big-as-france",
@@ -1544,32 +1544,21 @@
    ],
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries within about 1.45x of 551,695 km² (expect Ukraine, Kenya, Madagascar, Botswana, Spain, Thailand, Yemen); check France is named \"France\" on the list, and that 551,695 is its mainland figure on the page, and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 27 score 70 or more (Kenya, Botswana, Madagascar, Thailand, Spain, Ukraine). The list has France at 643,801 km² with its overseas regions; the target is mainland France (551,695), as the definition says: check the page states it. Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-country-as-big-as-uk",
    "round": "name",
    "kind": "places",
    "list": "countries-area",
-   "target": 242495,
+   "target": 244376,
    "question": "Name a country about as big as the UK",
    "except": [
     "United Kingdom"
    ],
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries within about 1.45x of 242,495 km² (expect Ghana, Romania, Laos, Uganda, Guinea, Guyana, Belarus); set target to the list's own figure for the UK, and check it is named \"United Kingdom\" there, and every obvious answer registers (type them)."
-  },
-  {
-   "id": "name-city-1m-people",
-   "round": "name",
-   "kind": "places",
-   "list": "cities-population",
-   "target": 1000000,
-   "question": "Name a city with about 1 million people",
-   "easy": false,
-   "verified": false,
-   "note": "Once the list lands: at least 3 cities within about 1.45x of 1 million; add a definition naming the list's measure (city proper, urban area or metro area), since a city's population means three different things, and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): the target is the list's own UK figure (244,376 km²); 25 score 70 or more (Guinea, Uganda, Ghana, Romania, Laos, Gabon). Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-city-10m-people",
@@ -1578,9 +1567,22 @@
    "list": "cities-population",
    "target": 10000000,
    "question": "Name a city with about 10 million people",
+   "definition": "its whole urban area, UN figures for 2025",
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 cities within about 1.45x of 10 million (city proper: expect Lima, Cairo, Jakarta, Seoul, London, Bangkok); add a definition naming the list's measure, and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 42 cities score 70 or more (London, Rio de Janeiro, Lima, Bogotá, Paris, Hyderabad). The list is UN 2025 figures of 5 million and up: check the definition names its measure. Judge: open the list's page, type every obvious answer (each must register), then set verified."
+  },
+  {
+   "id": "name-city-20m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "cities-population",
+   "target": 20000000,
+   "question": "Name a city with about 20 million people",
+   "definition": "its whole urban area, UN figures for 2025",
+   "easy": false,
+   "verified": false,
+   "note": "Checked against the lists on main (Nov 7): 18 cities score 70 or more (Kolkata, Seoul, Karachi, Mumbai, São Paulo, Bangkok, Mexico City). The list is UN 2025 figures: check the definition names its measure. Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-country-no-land-borders",
@@ -1591,7 +1593,7 @@
    "question": "Name a country with no land borders",
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries with 0 or 1 land borders (expect Japan, Iceland, Australia, New Zealand, Madagascar, Cuba, Sri Lanka), and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 38 countries have none, 18 more have 1. Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-country-3-borders",
@@ -1602,7 +1604,7 @@
    "question": "Name a country with 3 land borders",
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries within one border of 3 (expect Mexico, Finland, Norway, Chile, Vietnam, Malaysia, Indonesia, North Korea at 3), and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 81 within one border of 3 (Indonesia, Mexico, Vietnam, Morocco, Malaysia, Ghana at 3). Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-country-6-borders",
@@ -1613,7 +1615,7 @@
    "question": "Name a country with 6 land borders",
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries within one border of 6 (expect Italy, India, Ethiopia, Afghanistan, Chad, Cameroon, Iraq at 6), and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 48 within one border of 6 (Ethiopia, South Africa, Italy, Iraq, Mozambique, Cameroon at 6). Judge: open the list's page, type every obvious answer (each must register), then set verified."
   },
   {
    "id": "name-country-9-borders",
@@ -1624,7 +1626,7 @@
    "question": "Name a country with 9 land borders",
    "easy": false,
    "verified": false,
-   "note": "Once the list lands: at least 3 countries within one border of 9 (expect Germany and DR Congo at 9; France, Austria, Serbia, Tanzania, Turkey, Zambia at 8; Brazil at 10), and every obvious answer registers (type them)."
+   "note": "Checked against the lists on main (Nov 7): 9 within one border of 9 (DR Congo and Germany at 9, Brazil at 10, Turkey, Tanzania, Saudi Arabia at 8). Judge: open the list's page, type every obvious answer (each must register), then set verified."
   }
  ]
 }

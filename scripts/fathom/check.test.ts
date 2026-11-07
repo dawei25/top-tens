@@ -395,8 +395,10 @@ describe("name-it questions", () => {
   it("passes a fair one", () => {
     expect(errs(name())).toEqual([]);
     expect(errs(name({ id: "b", list: "land-borders", target: 6, question: "Name a country with 6 land borders" }))).toEqual([]);
-    expect(errs(name({ id: "c", list: "countries-area", target: 242495, question: "Name a country about as big as the UK", except: ["United Kingdom"] }))).toEqual([]);
-    expect(errs(name({ list: "cities-population", target: 1e6, question: "Name a city with about 1 million people", definition: "city proper" }))).toEqual([]);
+    expect(errs(name({ id: "c", list: "countries-area", target: 244376, question: "Name a country about as big as the UK", except: ["United Kingdom"] }))).toEqual([]);
+    expect(errs(name({ list: "cities-population", target: 1e7, question: "Name a city with about 10 million people", definition: "its whole urban area" }))).toEqual([]);
+    // The cities list starts at 5 million: a city of about 1 million has no fair answer on it.
+    expect(errs(name({ list: "cities-population", target: 1e6, question: "Name a city with about 1 million people" }))[0]).toMatch(/leaves 0 answer\(s\) scoring 70/);
     expect(errs(name({ fact: "Colombia and South Korea are within 3% of it." }))).toEqual([]);
   });
 

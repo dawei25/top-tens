@@ -24,19 +24,19 @@
       "kind": "places",
       "round": "name",
       "list": "countries-area",
-      "target": 242495,
+      "target": 244376,
       "question": "Name a country about as big as the UK",
       "except": ["United Kingdom"],
       "easy": false
     },
     {
-      "id": "name-city-1m-people",
+      "id": "name-city-10m-people",
       "kind": "places",
       "round": "name",
       "list": "cities-population",
-      "target": 1000000,
-      "question": "Name a city with about 1 million people",
-      "definition": "the city itself, not its metro area",
+      "target": 10000000,
+      "question": "Name a city with about 10 million people",
+      "definition": "its whole urban area, UN figures for 2025",
       "easy": false
     }
   ]
