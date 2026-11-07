@@ -1,11 +1,12 @@
-// Roll another list before play: a rolled list (Random list, a category, Roll another list) offers it until the first
-// guess, a rolled Blitz (Random Blitz, a category, Roll another list) until the clock starts. It is its own box, outside
-// the guess panel and right of it (owner, Nov 6), as tall as the panel and aligned with it: the pill on a phone, the
-// floating guess box from 700px, the control card from 1100px (in the open water right of it). The guess box beside it
-// still shows its placeholder and a typical answer whole. Under 320px it sits directly above the guess panel instead,
-// full width. It lands on another list, keeps offering itself there, and goes once play starts (a losing game can't
-// be dodged): the panel then takes the full width, its left edge where it was, and nothing else moves. Never on a
-// daily, Today's Blitz or a list opened directly.
+// Roll new list before play: a rolled list (Random list, a category, Roll new list) offers it until the first guess, a
+// rolled Blitz (Random Blitz, a category, Roll new list) until the clock starts. It is its own box, outside the guess
+// panel and right of it (owner, Nov 6), level with the guess row and no taller (owner, Nov 7: "desktop, the new button
+// is too tall"): the pill on a phone, the input and GUESS from 700px (beside the floating guess box; from 1100px in the
+// open water right of the control card). Its label takes two lines at most and isn't squeezed ("mobile, the words are
+// too crammed"), and the guess box beside it still shows its placeholder and a typical answer whole. Under 320px it
+// sits directly above the guess panel instead, full width. It lands on another list, keeps offering itself there, and
+// goes once play starts (a losing game can't be dodged): the panel then takes the full width, its left edge where it
+// was, and nothing else moves. Never on a daily, Today's Blitz or a list opened directly.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, go, hash, puzzle, guess } = require("./helpers.cjs");
@@ -20,8 +21,9 @@ const top = async (loc) => Math.round((await loc.boundingBox()).y);
 
 /**
  * The guess panel, the roll box and the guess box, as laid out (untransformed boxes are what "nothing moves" means).
- * `panel` is what the roll box lines up with: the pill on a phone, the guess form from 700px, the control card from
- * 1100px. `whole` is the panel's outer frame: the form (phones and from 700px) or the card.
+ * `row` is what the roll box lines up with: the guess row, the input and GUESS (the pill, on a phone). `whole` is the
+ * panel's outer frame: the form (phones and from 700px) or the control card (from 1100px). `label` is how the roll
+ * box sets its words: their lines, size, letter-spacing and line height, and the extent of the lines.
  */
 const layout = (page, typical = TYPICAL) =>
   page.evaluate((typical) => {
@@ -33,20 +35,38 @@ const layout = (page, typical = TYPICAL) =>
     const input = document.querySelector('input[aria-label="Your guess"]');
     const form = input.closest("form");
     const vw = innerWidth;
-    const panel = vw < 700 ? input.closest(".guess-row") : vw < 1100 ? form : form.closest(".control-card");
     const cs = getComputedStyle(input);
     // The placeholder and a typical answer, in the box's own font, against the room inside its padding and border.
     const ctx = document.createElement("canvas").getContext("2d");
     ctx.font = `${cs.fontSize} ${cs.fontFamily}`;
     const room = input.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     const roll = document.querySelector('[data-testid="reroll"]');
+    let label = null;
+    if (roll) {
+      const range = document.createRange();
+      range.selectNodeContents(roll);
+      const rects = [...range.getClientRects()].filter((r) => r.width > 0);
+      const rs = getComputedStyle(roll);
+      const size = parseFloat(rs.fontSize);
+      label = {
+        lines: new Set(rects.map((r) => Math.round(r.top))).size,
+        size,
+        spacing: parseFloat(rs.letterSpacing) / size,
+        leading: parseFloat(rs.lineHeight) / size,
+        x: Math.min(...rects.map((r) => r.left)),
+        r: Math.max(...rects.map((r) => r.right)),
+        y: Math.min(...rects.map((r) => r.top)),
+        b: Math.max(...rects.map((r) => r.bottom)),
+      };
+    }
     return {
       input: box(input),
       guess: box(form.querySelector('button[type="submit"]')),
-      panel: box(panel),
-      whole: box(vw < 1100 ? form : panel),
+      row: box(input.closest(".guess-row")),
+      whole: box(vw < 1100 ? form : form.closest(".control-card")),
       feedback: box(form.querySelector(".feedback-line")),
       roll: box(roll),
+      label,
       header: box(document.querySelector(".game-head")),
       placeholderFits: ctx.measureText(input.placeholder).width <= room,
       typicalFits: ctx.measureText(typical).width <= room,
@@ -54,25 +74,39 @@ const layout = (page, typical = TYPICAL) =>
     };
   }, typical);
 
-const near = (a, b) => Math.abs(a - b) <= 0.5;
+const near = (a, b, by = 0.5) => Math.abs(a - b) <= by;
 
-/** Before play: the roll box is outside the guess panel and right of it, as tall, on screen; the box keeps its room. */
+/**
+ * Before play: the roll box is outside the guess panel and right of it, level with the guess row and no taller, on
+ * screen, its label in two lines at most and not squeezed; the guess box keeps its room.
+ */
 async function besidePanel(page, where = "") {
   const l = await layout(page);
   const at = `${where} ${l.viewport}px`;
   // Outside the guess panel: its own box, clear of the panel's frame (it sits in the form's markup, not its look).
   if (l.viewport < 320) {
     // Stacked: directly above the guess panel (and its feedback line), full width.
-    assert.ok(l.roll.b <= l.feedback.y && l.roll.b <= l.panel.y, `${at}: the roll box is above the guess panel`);
+    assert.ok(l.roll.b <= l.feedback.y && l.roll.b <= l.row.y, `${at}: the roll box is above the guess panel`);
     assert.ok(near(l.roll.x, l.whole.x) && near(l.roll.r, l.whole.r), `${at}: the roll box is as wide as the guess panel`);
   } else {
     assert.ok(l.roll.x >= l.whole.r + 4, `${at}: the roll box is right of the guess panel, apart from it`);
-    assert.ok(near(l.roll.y, l.panel.y) && near(l.roll.b, l.panel.b), `${at}: the roll box is as tall as the guess panel, top and bottom aligned`);
+    // Owner, Nov 7: "desktop, the new button is too tall" (it was the whole control card, 261px beside Blitz's clock).
+    assert.ok(l.roll.h <= l.row.h + 2, `${at}: the roll box is no taller than the guess row (${l.roll.h}px, the row ${l.row.h}px)`);
+    assert.ok(near(l.roll.y, l.row.y, 2) && near(l.roll.b, l.row.b, 2), `${at}: the roll box is level with the guess row, top and bottom`);
   }
   assert.ok(l.roll.r <= l.viewport, `${at}: the roll box fits on the screen`);
   // From 1100px it sits in the frame, in the open water right of the control card.
   if (l.viewport >= 1100) assert.ok(near(l.roll.r, l.header.r), `${at}: the roll box ends at the frame's edge`);
   assert.ok(l.roll.w >= 44 && l.roll.h >= 44, `${at}: the roll box is at least 44px (${l.roll.w}x${l.roll.h})`);
+  // Owner, Nov 7: "mobile, the words are too crammed" (three lines, at 0.05-0.08em and a line height of 1). A phone's
+  // keys space their letters 0.15em (GUESS, the results keys at 320); wider, the box keeps its 0.1em.
+  const t = l.label;
+  const spacing = l.viewport < 700 ? 0.15 : 0.1;
+  assert.ok(t.lines <= 2, `${at}: the roll box's label takes at most two lines (${t.lines})`);
+  assert.ok(t.size >= 15, `${at}: the roll box's label is at least 15px (${t.size}px)`);
+  assert.ok(t.spacing >= spacing - 1e-6, `${at}: the roll box's label keeps a key's letter-spacing (${t.spacing.toFixed(3)}em)`);
+  assert.ok(t.leading >= 1.1 - 1e-6, `${at}: the roll box's lines aren't pressed together (line height ${t.leading.toFixed(2)})`);
+  assert.ok(t.x >= l.roll.x && t.r <= l.roll.r && t.y >= l.roll.y && t.b <= l.roll.b, `${at}: the roll box's label stays inside it`);
   assert.ok(l.placeholderFits, `${at}: the placeholder fits the guess box`);
   assert.ok(l.typicalFits, `${at}: "${TYPICAL}" fits the guess box (${l.input.w}px)`);
   return l;
@@ -97,7 +131,7 @@ async function panelTakesRoom(page, was) {
 }
 
 for (const vp of VIEWPORTS) {
-  test(`Roll another list before a rolled list's first guess (${vp.name})`, async () => {
+  test(`Roll new list before a rolled list's first guess (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp);
     const roll = page.getByTestId("reroll");
     await page.getByTestId("random-list").click();
@@ -139,7 +173,7 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 
-  test(`Roll another list before a rolled Blitz starts (${vp.name})`, async () => {
+  test(`Roll new list before a rolled Blitz starts (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp);
     const roll = page.getByTestId("reroll");
     const screen = page.getByTestId("blitz-screen");
@@ -179,7 +213,7 @@ for (const vp of VIEWPORTS) {
 
   // The owner's report: a Random Blitz without its roll key. Reached through the Home key from another screen (a Blitz
   // opened by its link, which has none), Random Blitz and a category pick both offer it before the first keystroke.
-  test(`Roll another list on a Blitz rolled from Home, through the Home key (${vp.name})`, async () => {
+  test(`Roll new list on a Blitz rolled from Home, through the Home key (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp, "#blitz-airports");
     const roll = page.getByTestId("reroll");
     const clock = page.getByTestId("blitz-clock");
@@ -204,7 +238,7 @@ for (const vp of VIEWPORTS) {
     assert.equal(await clock.getAttribute("data-started"), "false");
     await roll.waitFor();
     await besidePanel(page, "a category's Blitz");
-    // Rolled in that category (when it has another list open, Roll another list stays in it too).
+    // Rolled in that category (when it has another list open, Roll new list stays in it too).
     const id = await page.getByTestId("blitz-screen").getAttribute("data-list");
     const index = await page.evaluate(async () => (await fetch("puzzles/index.json")).json());
     assert.equal(index.find((m) => m.id === id)?.category, category);
@@ -213,10 +247,11 @@ for (const vp of VIEWPORTS) {
 }
 
 // Every width the layout changes at: phones (the pill) down to 320, the stack under it, the floating box from 700px,
-// the control card from 1100px. Each shows the box right of the panel (or above it), and the panel takes the room once
-// play starts.
+// the control card from 1100px; and the narrowest width of each step of the guess box's type beside it (340, 360, 380,
+// 390: at 340 and 380 "Dhaulagiri I" lost its last letter before Nov 7). Each shows the box right of the panel (or
+// above it), and the panel takes the room once play starts.
 test("the roll box beside the guess panel, and the panel taking its room, at every layout", async () => {
-  for (const width of [300, 320, 360, 390, 430, 700, 768, 1024, 1100, 1280]) {
+  for (const width of [300, 320, 340, 360, 375, 380, 390, 430, 700, 768, 1024, 1100, 1280]) {
     for (const mode of ["list", "blitz"]) {
       const phone = width < 700;
       const vp = { viewport: { width, height: phone ? 844 : 900 }, isMobile: phone, hasTouch: phone };

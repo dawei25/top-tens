@@ -2381,7 +2381,6 @@ a {
     width: auto;
     height: 48px;
     font-size: 18px;
-    letter-spacing: 0.1em;
   }
   .roll-box[data-gone] {
     display: none;
