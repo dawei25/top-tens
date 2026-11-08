@@ -14,6 +14,7 @@ import {
   LIFE_LOST,
   lifeCostLine,
   metricLabel,
+  missLine,
   NO_LIFE_LOST,
   notOnList,
 } from "./copy";
@@ -54,6 +55,15 @@ describe("miss copy", () => {
   it("keeps the noun's last word with its 'here.', and 'No life lost.' in one piece", () => {
     expect(notOnList({ noun: "NBA players", answers: entries(10), extras: [] })).toContain(`players${NBSP}here.`);
     expect(NO_LIFE_LOST).toBe(["No", "life", "lost."].join(NBSP));
+  });
+  // The owner, on hedge-funds: "Point72" read "Not one of the 151 firms here.", as if the game didn't know it.
+  it("says a real name the list doesn't rank plainly, and giving up is not a guess", () => {
+    const funds = { noun: "firms", answers: entries(10), extras: entries(141) };
+    expect(plain(missLine({ kind: "unknown", junk: false, known: true }, funds, " point72 "))).toBe("Point72 isn't in this ranking. No life lost.");
+    expect(plain(missLine({ kind: "unknown", junk: false, giveUp: true }, funds, "pass"))).toBe("Not a guess. No life lost.");
+    expect(plain(missLine({ kind: "unknown", junk: false }, funds, "Pointy"))).toBe("Not one of the 151 firms here. No life lost.");
+    expect(plain(missLine({ kind: "unknown", junk: true }, funds, "asdf"))).toBe("That doesn't look like an answer. No life lost.");
+    expect(plain(missLine({ kind: "unknown", junk: false, vague: 4 }, funds, "pizza"))).toBe("More than one answer fits. Be more specific. No life lost.");
   });
 });
 

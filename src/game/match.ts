@@ -293,8 +293,8 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
         viaWord = isWord;
         ends = g[0] === rest[0] && g[g.length - 1] === rest[rest.length - 1];
         // One slip in a short word beside a whole shared word ("john rahm" / "jon rahm"); a three-letter word slipped is
-        // another word ("vw bus" is not "VW Bug").
-        besideShared = g !== guess && g[0] === rest[0] && g.length >= 4;
+        // another word ("vw bus" is not "VW Bug"), though a code's number left off is not ("j league": J1 League).
+        besideShared = g !== guess && g[0] === rest[0] && (g.length >= 4 || /^\d+$/.test(rest.slice(g.length)) && rest.startsWith(g));
         sameStart = g[0] === rest[0];
         sounds = skeleton(g) === skeleton(rest);
       }

@@ -33,8 +33,7 @@ import {
   GUESS_HINT,
   lifeCostLine,
   metricLabel,
-  NO_LIFE_LOST,
-  notOnList,
+  missLine,
   PLACEHOLDER,
   PLACEHOLDER_SHORT,
   ROLL_NEW,
@@ -86,7 +85,7 @@ interface Feedback {
 /** Milliseconds between missed rows typing in at the end of a game. */
 const REVEAL_STEP = 90;
 
-function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null {
+function describe(r: GuessResult, puzzle: Puzzle, typed: string): Omit<Feedback, "key"> | null {
   switch (r.kind) {
     case "correct":
       return { tone: "good", text: `${r.entry.name}. #${r.entry.rank} on the board.` };
@@ -99,11 +98,8 @@ function describe(r: GuessResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
     case "typo":
       return { tone: "warn", text: "Did you mean", suggestions: r.suggestions };
     case "unknown":
-      return {
-        tone: "warn",
-        // The noun copy is for a plain miss only: a vague guess may well be part of the list's names.
-        text: `${r.vague ? "More than one answer fits. Be more specific." : r.junk ? "That doesn't look like an answer." : notOnList(puzzle)} ${NO_LIFE_LOST}`,
-      };
+      // "Point72 isn't in this ranking.", "Not a guess.", "Not one of the 237 films here.": each ends "No life lost."
+      return { tone: "warn", text: missLine(r, puzzle, typed) };
     default:
       return null;
   }
@@ -252,7 +248,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
       return;
     }
     const { state, result } = applyGuess(game, puzzle, text, lexicon, offered);
-    const fb = describe(result, puzzle);
+    const fb = describe(result, puzzle, text);
     if (!fb) return;
     setHintAsk(null);
     if (result.kind === "correct") emitPlay({ kind: "found", rank: result.entry.rank, found: state.found.length });
