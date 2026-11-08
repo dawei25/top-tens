@@ -327,6 +327,24 @@ describe("aliases as built: what players type", () => {
     expect(lands("longest-running-tv", guess)).toBe(name);
   });
 
+  it.each([
+    // Owner: "makkah royal clock tower" should count, and Mecca's other spellings with it.
+    ["makkah royal clock tower", "Mecca Royal Clock Tower"],
+    ["makkah clock tower", "Mecca Royal Clock Tower"],
+    ["mekkah clock tower", "Mecca Royal Clock Tower"],
+    // Coverage audit: "tower" is generic, so these found nothing or the wrong tower.
+    ["merdeka tower", "Merdeka Maybank Tower"],
+    ["pnb tower", "Merdeka Maybank Tower"],
+    ["ping an tower", "Ping An Finance Centre"],
+    ["trump tower chicago", "Trump International Hotel and Tower"],
+    ["wtc", "One World Trade Center"],
+    ["kingdom tower", "Jeddah Tower"],
+    // Towers that aren't buildings are free, not junk.
+    ["tokyo skytree", "unknown"],
+  ])("buildings: %s -> %s", (guess, name) => {
+    expect(lands("buildings", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

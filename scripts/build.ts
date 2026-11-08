@@ -1090,6 +1090,41 @@ function applyIntent(topic: Topic, entries: Entry[]): void {
   }
 }
 
+/**
+ * Words English writes several ways, any of them in any name: "makkah royal clock tower" is the Mecca Royal Clock
+ * Tower (owner, on buildings: "Mecca/Makkah spellings in general").
+ */
+const SPELLINGS = [
+  ["Mecca", "Makkah", "Makka", "Mekka", "Mekkah"],
+  ["Medina", "Madinah", "Madina"],
+];
+
+/** A name written with each other spelling of a SPELLINGS word in it. */
+export function spellingVariants(form: string): string[] {
+  const out: string[] = [];
+  for (const set of SPELLINGS) {
+    for (const w of set) {
+      const re = new RegExp(`\\b${w}\\b`, "gi");
+      if (re.test(form)) for (const v of set) if (v !== w) out.push(form.replace(re, v));
+    }
+  }
+  return out;
+}
+
+/** Every entry's names in the other spellings (SPELLINGS), unless another entry goes by that form. */
+function addSpellings(entries: Entry[]): void {
+  const owner = new Map<string, Entry>();
+  for (const e of entries) for (const f of [e.name, ...e.aliases]) if (!owner.has(normalize(f))) owner.set(normalize(f), e);
+  for (const e of entries) {
+    for (const v of [e.name, ...e.aliases].flatMap(spellingVariants)) {
+      const n = normalize(v);
+      if (owner.has(n)) continue;
+      owner.set(n, e);
+      e.aliases.push(v);
+    }
+  }
+}
+
 const FACTS_DIR = join(import.meta.dirname, "facts");
 
 /**
@@ -1372,6 +1407,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   }
   pruneAliases(entries, namesakes, lower);
   applyIntent(topic, entries);
+  addSpellings(entries);
   // Whatever the source (redirect, cell, universe), a slur never ships.
   for (const e of entries) e.aliases = e.aliases.filter((a) => !blockedAlias(a, [e.name]));
   // Nor text decoded in the wrong code page: "Eugčne Henri Paul Gauguin" (painters' judge). validate.ts fails a name

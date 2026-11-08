@@ -650,11 +650,15 @@ export const INTENT: Record<string, Intent> = {
   },
   buildings: {
     same: {
-      "Willis Tower": ["Sears Tower"],
-      "Merdeka Maybank Tower": ["Merdeka 118", "PNB 118", "Merdeka PNB118"],
-      "Mecca Royal Clock Tower": ["Abraj Al Bait", "Makkah Royal Clock Tower", "Mecca Clock Tower"],
-      "Ping An Finance Centre": ["Ping An Finance Center", "Ping An"],
-      "One World Trade Center": ["Freedom Tower", "One WTC", "World Trade Center"],
+      "Willis Tower": ["Sears Tower", "Sears"],
+      // Coverage audit: "tower" is a generic word, so "merdeka tower" and "ping an tower" need their own.
+      "Merdeka Maybank Tower": ["Merdeka 118", "PNB 118", "Merdeka PNB118", "Merdeka Tower", "PNB Tower"],
+      // Every spelling of Mecca follows (build.ts SPELLINGS: "makkah clock tower").
+      "Mecca Royal Clock Tower": ["Abraj Al Bait", "Abraj Al-Bait", "Mecca Clock Tower", "Mecca Tower"],
+      "Ping An Finance Centre": ["Ping An Finance Center", "Ping An", "Ping An Tower"],
+      "One World Trade Center": ["Freedom Tower", "One WTC", "World Trade Center", "WTC"],
+      "Trump International Hotel and Tower": ["Trump Tower Chicago", "Trump Chicago"],
+      "Jeddah Tower": ["Kingdom Tower"],
       "Guangzhou CTF Finance Centre": ["Chow Tai Fook Centre"],
       "CITIC Tower": ["China Zun"],
       "Lotte World Tower": ["Lotte Tower"],

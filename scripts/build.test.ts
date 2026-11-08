@@ -25,6 +25,7 @@ import {
   sameKey,
   scaledFigure,
   skipName,
+  spellingVariants,
 } from "./build";
 import { inRegion, UNIVERSES, whereIs } from "./gazetteer";
 import { COUNTRY_FORMS } from "./intent";
@@ -170,6 +171,20 @@ describe("matchFacts", () => {
       expect(p.answers.map((e) => e.fact ?? null), p.id).toEqual(keys.map((k) => (k ? facts[k] : null)));
     }
     expect(lists).toBeGreaterThan(50);
+  });
+});
+
+describe("spelling variants", () => {
+  // Owner, on buildings: "makkah royal clock tower" should count (Mecca/Makkah spellings in general).
+  it("write a name with each other spelling of Mecca or Medina", () => {
+    expect(spellingVariants("Mecca Royal Clock Tower")).toEqual(
+      expect.arrayContaining(["Makkah Royal Clock Tower", "Makka Royal Clock Tower", "Mekka Royal Clock Tower"]),
+    );
+    expect(spellingVariants("Makkah")).toEqual(expect.arrayContaining(["Mecca"]));
+    expect(spellingVariants("Al-Madinah")).toEqual(expect.arrayContaining(["Al-Medina"]));
+    expect(spellingVariants("Burj Khalifa")).toEqual([]);
+    // A whole word only: "Meccano" is no Mecca.
+    expect(spellingVariants("Meccano")).toEqual([]);
   });
 });
 

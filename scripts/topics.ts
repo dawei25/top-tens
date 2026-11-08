@@ -1032,6 +1032,12 @@ export const TOPICS: Topic[] = [
     junkAliases: ["B-12PP", "Central Park", "Trump International Hotel and", "Signiel"],
     // Famous, completed, and missing from the tables (it would otherwise be corrected to Burj Almasa).
     more: { "Burj Al Arab": ["Burj al-Arab"] },
+    // Towers that aren't buildings (no floors to live or work on): free, and real names ("skytree" read as junk).
+    knownNames: [
+      "Tokyo Skytree", "Skytree", "CN Tower", "Canton Tower", "Oriental Pearl Tower", "Ostankino Tower", "Eiffel Tower",
+      "Space Needle", "Tokyo Tower", "Milad Tower", "Kuala Lumpur Tower", "KL Tower", "Berliner Fernsehturm",
+      "Sky Tower", "Stratosphere", "Strat",
+    ],
   },
 
   // Sports
