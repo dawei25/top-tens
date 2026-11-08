@@ -11,17 +11,16 @@ A question's `round` says how it is asked and scored (absent means an estimate).
 
 | Round | The player types | Points | The rule on screen | The miss |
 |---|---|---|---|---|
-| `estimate` | a number in the question's unit | 100 x (1 - d)^2, d = \|log10(guess / answer)\|; within 1% spot on, 100 | "Half or double the answer scores about 50. Ten times off scores 0." | "30% low", "3x too high" |
-| `percent` | 0 to 100: "71", "71%", "71.5" | 100 - 3 x points off, never under 0; within half a point spot on, 100 | "Each point off costs 3, so 10 off scores 70." | "6 points low" |
-| `year` | an AD year, up to four digits: "2007" | 100 - 5 x years off, never under 0; the exact year 100 | "Each year off costs 5, so 10 years off scores 50." | "3 years early" |
-| `name` | a name from the question's list: "Colombia" for "Name a country with about 50 million people" | the thing's figure against the target: a `ratio` list by the estimate's rule, a `steps` list 100 - 30 x steps off (one off 70, two 40) | ratio: "Your country's population: half or double the target scores about 50." (or "area"; any other measure: the estimate's rule with "the target"); steps: "Each land border off costs 30, so one off scores 70." | "6% more people", "2x too many people", "2% low" (an area, a unit of measure), "3 land borders too many" |
+| `estimate` | a number in the question's unit | 100 x (1 - d)^2, d = \|log10(guess / answer)\|; within 1% spot on, 100 | "The closer your guess, the more points." | "30% low", "3x too high" |
+| `percent` | 0 to 100: "71", "71%", "71.5" | 100 - 3 x points off, never under 0; within half a point spot on, 100 | "The closer your guess, the more points." | "6 points low" |
+| `year` | an AD year, up to four digits: "2007" | 100 - 5 x years off, never under 0; the exact year 100 | "The closer your guess, the more points." | "3 years early" |
+| `name` | a name from the question's list: "Colombia" for "Name a country with about 50 million people" | the thing's figure against the target: a `ratio` list by the estimate's rule, a `steps` list 100 - 30 x steps off (one off 70, two 40) | "The closer to the target, the more points." | "6% more people", "2x too many people", "2% low" (an area, a unit of measure), "3 land borders too many" |
 
 Why these: a ratio means nothing on a share or a date (65% for 71% is 9% off but 6 points; 2004 for 2007 is 0.06%
 off), so those rounds score the distance the player thinks in. 3 a point puts Dead on (90+) within 3 points and Close
-(70+) within 10; 5 a year puts Dead on within 2 years, Close within 6, and 20 years off at 0. Each rule names a miss and
-what it scores, and the numbers agree (`fathom.test.ts`; UX.md 21). It shows on the first question of its round in a
-game, before the answer (under LOCK IN when a phone has little height), and the results show the rule of every round
-played. Whatever reads "spot on" scores 100, in every round. The bands, the sonar (its edges where the round scores
+(70+) within 10; 5 a year puts Dead on within 2 years, Close within 6, and 20 years off at 0. On screen every round says only
+"The closer your guess, the more points." (UX.md 21); the numbers above bear it out (`fathom.test.ts`). It shows on the first question of its round in a
+game, before the answer (under LOCK IN when a phone has little height), and the results say it once. Whatever reads "spot on" scores 100, in every round. The bands, the sonar (its edges where the round scores
 0: 10x off, 33 points, 20 years), the share text, the sound and the celebration work the same for every round.
 
 The field: a decimal keypad for an estimate and a percent ("%" beside it for a percent), a plain number pad for a year,

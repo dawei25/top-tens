@@ -182,10 +182,10 @@ describe("Blitz title card", () => {
       "Name the busiest airports in the world by passenger traffic (2025)",
     );
   });
-  // Launch audit (Nov 6), UX 21: "scored by Nobel laureates: bigger is better" gave no yardstick (426 laureates scored
-  // +100, 22 scored +39). The rule says what the scores do, and every Blitz list agrees with it.
+  // The owner, Nov 8: scoring lines stay simple ("closer the guess the more points"). The line is true on every Blitz
+  // list (next test): a bigger number never scores less.
   it("states the scoring rule plainly", () => {
-    expect(BLITZ_SCORING).toBe("#1 gets 100, smaller numbers get less, down to 10.");
+    expect(BLITZ_SCORING).toBe("bigger numbers score more.");
   });
   it("the rule agrees with the scores on every Blitz list", () => {
     for (const p of bank.filter((x) => x.blitz)) {

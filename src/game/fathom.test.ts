@@ -51,7 +51,7 @@ import {
   yearScore,
   yearsOff,
   nameOff,
-  nameRule,
+
   PER_STEP,
   ruleFor,
   singular,
@@ -151,10 +151,13 @@ describe("scoring: plain closeness, the same rule for every question", () => {
 
 describe("the rule on screen", () => {
   // Stated where the player looks before the first answer, and on the results, in words that agree with the numbers.
-  it("says what a miss scores, and the numbers agree", () => {
-    expect(RULE).toBe("Half or double the answer scores about 50. Ten times off scores 0.");
+  // The owner, Nov 8: "keep it simple, just say closer the guess the more points you get". The line has to be true.
+  it("says it plainly, and a closer guess never scores less", () => {
+    expect(RULE).toBe("The closer your guess, the more points.");
+    const guesses = [100, 120, 150, 200, 400, 1000];
+    const pts = guesses.map((g) => fathomScore(g, 100));
+    for (let i = 1; i < pts.length; i++) expect(pts[i]).toBeLessThanOrEqual(pts[i - 1]);
     for (const guess of [50, 200]) expect(Math.abs(fathomScore(guess, 100) - 50)).toBeLessThanOrEqual(1);
-    for (const guess of [10, 1000]) expect(fathomScore(guess, 100)).toBe(0);
   });
 });
 
@@ -226,11 +229,11 @@ describe("rounds", () => {
     }
   });
 
-  // UX 21: each round says its rule in one plain line before the answer, and the rule agrees with the numbers.
-  it("each round's rule is one plain line that agrees with the numbers", () => {
+  // UX 21: each round says its rule in one plain line before the answer, and the scores behind it agree.
+  it("each round's rule is one plain line that the numbers bear out", () => {
     expect(RULES.estimate).toBe(RULE);
-    expect(RULES.percent).toBe("Each point off costs 3, so 10 off scores 70.");
-    expect(RULES.year).toBe("Each year off costs 5, so 10 years off scores 50.");
+    expect(RULES.percent).toBe(RULE);
+    expect(RULES.year).toBe(RULE);
     expect(percentScore(60, 50)).toBe(70);
     expect(percentScore(40, 50)).toBe(70);
     expect(percentScore(51, 50)).toBe(97);
@@ -1201,21 +1204,14 @@ describe("name-it: scoring", () => {
     expect([6, 7, 9].map((n) => scoreFor(steps, n))).toEqual([100, 70, 10]);
   });
   // UX 21: the rule says how points are counted, in words that agree with the numbers, before the answer.
-  it("says its rule in one plain line that agrees with the numbers", () => {
+  it("says its rule in one plain line that the numbers bear out", () => {
     const pop = nameQ("name-country-50m-people");
-    expect(ruleFor(pop)).toBe("Your country's population: half or double the target scores about 50.");
+    expect(ruleFor(pop)).toBe("The closer to the target, the more points.");
     expect(Math.abs(scoreFor(pop, 100e6) - 50)).toBeLessThanOrEqual(1);
     expect(Math.abs(scoreFor(pop, 25e6) - 50)).toBeLessThanOrEqual(1);
-    expect(ruleFor(nameQ("name-city-10m-people"))).toBe("Your city's population: half or double the target scores about 50.");
-    expect(ruleFor(nameQ("name-country-as-big-as-uk"))).toBe("Your country's area: half or double the target scores about 50.");
     const steps = nameQ("name-country-6-borders");
-    expect(ruleFor(steps)).toBe("Each land border off costs 30, so one off scores 70.");
-    expect(scoreFor(steps, 7)).toBe(70);
-    expect(scoreFor(steps, 5)).toBe(70);
-    // A measure without a word of its own: the estimate's rule, with the target.
-    expect(nameRule({ unit: "kilograms", nameIt: { list: "organs", scoring: "ratio", noun: "organ", nounPlural: "organs" } })).toBe(
-      "Half or double the target scores about 50. Ten times off scores 0.",
-    );
+    expect(ruleFor(steps)).toBe("The closer to the target, the more points.");
+    expect([6, 7, 8, 9].map((n) => scoreFor(steps, n))).toEqual([100, 70, 40, 10]);
     for (const q of named) {
       expect(ruleFor(q).length, q.id).toBeLessThanOrEqual(70);
       expect(ruleFor(q)).not.toMatch(/—|\p{Extended_Pictographic}/u);

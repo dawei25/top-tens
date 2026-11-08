@@ -123,7 +123,7 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
       // Its rule, one plain line, in view before the answer (UX 21).
       const rule = page.getByTestId("fathom-rule");
       assert.equal(await rule.getAttribute("data-round"), "name");
-      assert.equal(await text(page, "fathom-rule"), "Your country's population: half or double the target scores about 50.");
+      assert.equal(await text(page, "fathom-rule"), "The closer to the target, the more points.");
       const box = await rule.boundingBox();
       assert.ok(box.y >= 0 && box.y + box.height <= vp.viewport.height && box.y < (await field.boundingBox()).y, "the rule in view, before the field");
 
@@ -235,7 +235,7 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
     const ids = ["eiffel-tower-height", "name-country-6-borders", "adult-bones", "octopus-hearts", "piano-keys"];
     const { ctx, page } = await openFathom(vp, { save: gameAt(ids, 1) });
     await page.getByTestId("fathom-input").waitFor();
-    assert.equal(await text(page, "fathom-rule"), "Each land border off costs 30, so one off scores 70.");
+    assert.equal(await text(page, "fathom-rule"), "The closer to the target, the more points.");
     // "Congo": two countries are called that.
     const congo = await say(page, "Congo");
     assert.equal(congo.read, "choose");

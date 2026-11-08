@@ -80,15 +80,14 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 
 ## Scores
 
-21. **A score shows its yardstick, and the yardstick is a plain rule.** The screen says how points are counted, in
-    words that agree with the numbers, and the rule is one the player can check, never a number someone made up.
-    Fathom first scored each guess against a judge's estimate of how far off people usually are on that question and
-    said so ("most people miss by about 1.3x", "a typical guesser scores about 250"); the owner, after playing: "most
-    people miss by about x feels made up", and a guess 10x off still scored well where that was usual. Now one rule
-    for every question is the yardstick, said where the player looks before the first answer and again on the
-    results: "Half or double the answer scores about 50. Ten times off scores 0." Whatever reads "spot on" scores 100
-    (it had shown 99), and the miss reads plainly ("30% low", "3x too high"). Other players come in only as real
-    players, once there are 20 of them on a question. (`e2e/fathom.e2e.cjs`, `src/game/fathom.test.ts`.)
+21. **A score says how it works in one plain line, and no more.** "The closer your guess, the more points." (Fathom)
+    and "bigger numbers score more." (Blitz). No formulas, multiples or examples on screen: the owner on "Half or
+    double the answer scores about 50. Ten times off scores 0.": "keep it simle just saw closer the guess the more
+    points you get". The line must be true (a closer guess never scores less; tests check it on every round and every
+    Blitz list), and never a number someone made up: Fathom once scored against a judge's guess of how far off people
+    usually are ("most people miss by about 1.3x"), and the owner: "feels made up". Whatever reads "spot on" scores
+    100, and a miss reads plainly ("30% low", "3x too high"). Other players come in only as real players, once there
+    are 20 of them on a question. (`src/game/fathom.test.ts`, `src/components/copy.test.ts`.)
 
 ## Scope
 

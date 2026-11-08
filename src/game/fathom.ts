@@ -166,31 +166,16 @@ export function scoreFor(q: Pick<FathomQuestion, "round" | "answer" | "nameIt">,
 }
 
 /**
- * The number rounds' scoring rules, each in one plain line, said where the player looks before answering (the first
- * question of that round in a game) and again on the results. Each one names a miss and what it scores, and the
- * numbers agree (fathom.test.ts). A name-it round's depends on its list: ruleFor.
+ * The scoring rule, said where the player looks before answering (the first question of a round in a game) and on the
+ * results: one plain line, no arithmetic. The owner, Nov 8: "keep it simple, just say closer the guess the more points
+ * you get". The numbers behind it (log scale, points off, years off, steps) stay in the code and docs/FATHOM.md; the
+ * line only has to be true, and it is in every round: a closer guess never scores less (fathom.test.ts).
  */
-export const RULES: Record<Exclude<Round, "name">, string> = {
-  estimate: "Half or double the answer scores about 50. Ten times off scores 0.",
-  percent: `Each point off costs ${PER_POINT}, so 10 off scores ${POINTS_PER_QUESTION - 10 * PER_POINT}.`,
-  year: `Each year off costs ${PER_YEAR}, so 10 years off scores ${POINTS_PER_QUESTION - 10 * PER_YEAR}.`,
-};
+export const CLOSER = "The closer your guess, the more points.";
+export const RULES: Record<Exclude<Round, "name">, string> = { estimate: CLOSER, percent: CLOSER, year: CLOSER };
 
 /** The estimate's rule (RULES.estimate). */
 export const RULE = RULES.estimate;
-
-/** What a ratio list's measure is called, for its rule: "Your country's population: ...". */
-const MEASURE_WORDS: Record<string, string> = {
-  people: "population",
-  inhabitants: "population",
-  residents: "population",
-  "km²": "area",
-  km2: "area",
-  "sq km": "area",
-  "square kilometres": "area",
-  "square kilometers": "area",
-  "square miles": "area",
-};
 
 /** "land borders" as one: "land border". */
 export function singular(unit: string): string {
@@ -200,16 +185,9 @@ export function singular(unit: string): string {
   return unit.replace(/s$/, "");
 }
 
-/**
- * A name-it round's rule, in one plain line that agrees with the numbers: on a ratio list, the estimate's rule with
- * the thing's own figure against the target ("Your country's population: half or double the target scores about
- * 50."); on a steps list, what each step costs ("Each land border off costs 30, so one off scores 70.").
- */
-export function nameRule(q: Pick<FathomQuestion, "unit" | "nameIt">): string {
-  if (q.nameIt?.scoring === "steps") return `Each ${singular(q.unit)} off costs ${PER_STEP}, so one off scores ${POINTS_PER_QUESTION - PER_STEP}.`;
-  const what = MEASURE_WORDS[q.unit.trim().toLowerCase()];
-  if (!what || !q.nameIt) return "Half or double the target scores about 50. Ten times off scores 0.";
-  return `Your ${q.nameIt.noun}'s ${what}: half or double the target scores about 50.`;
+/** A name-it round's rule: the same plain line, said against the target. */
+export function nameRule(_q: Pick<FathomQuestion, "unit" | "nameIt">): string {
+  return "The closer to the target, the more points.";
 }
 
 /** A question's scoring rule, by its round. */

@@ -670,10 +670,11 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
   };
   const bands = scored.map((s) => s.band);
   // Each round's rule once, from the first question of that round (a name-it round's is its list's).
+  // Rounds that share a rule say it once.
   const played = ROUNDS.flatMap((r) => {
     const first = scored.find((s) => roundOf(s.question) === r);
     return first ? [{ r, rule: ruleFor(first.question) }] : [];
-  });
+  }).filter((p, i, all) => all.findIndex((q) => q.rule === p.rule) === i);
   return (
     <>
       <section className="panel results enter fathom-results" data-glass data-testid="fathom-results">
