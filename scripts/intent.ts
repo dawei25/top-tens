@@ -200,7 +200,7 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["United Arab Emirates", "UAE", "Emirates"],
   ["Myanmar", "Burma"],
   ["Eswatini", "Swaziland"],
-  ["North Macedonia", "Macedonia"],
+  ["North Macedonia", "Macedonia", "FYROM", "Former Yugoslav Republic of Macedonia"],
   ["Cape Verde", "Cabo Verde"],
   ["East Timor", "Timor-Leste"],
   ["Vatican City", "Vatican", "Holy See"],
@@ -221,11 +221,17 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["Hong Kong", "HK"],
   ["Macau", "Macao"],
   ["Vietnam", "Viet Nam"],
-  ["Laos", "Lao PDR"],
+  ["Laos", "Lao PDR", "Lao"],
   ["Micronesia", "Federated States of Micronesia"],
   ["Palestine", "State of Palestine", "Palestinian territories"],
   ["São Tomé and Príncipe", "Sao Tome and Principe", "Sao Tome"],
-  ["Kyrgyzstan", "Kyrgyz Republic"],
+  ["Kyrgyzstan", "Kyrgyz Republic", "Kyrgyz", "Kirghizia"],
+  // Coverage audit (landlocked countries): initials, a common misspelling and former names. "car" was corrected to
+  // Czechia by its "ČR".
+  ["Central African Republic", "CAR", "C.A.R.", "Central African Rep"],
+  ["Liechtenstein", "Lichtenstein"],
+  ["Belarus", "Byelorussia", "Belorussia"],
+  ["Burkina Faso", "Upper Volta", "Burkina"],
   ["Ireland", "Republic of Ireland", "Eire"],
   // Two-island states are named by their main island, and "Saint" is written "St" ("st kitts" found nothing on the
   // smallest countries).

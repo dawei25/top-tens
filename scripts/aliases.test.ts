@@ -280,6 +280,21 @@ describe("aliases as built: what players type", () => {
     expect(lands("retailers", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: "car" was corrected to Czechia (its "ČR"); the usual misspelling and former names.
+    ["car", "Central African Republic"],
+    ["c.a.r.", "Central African Republic"],
+    ["central african rep", "Central African Republic"],
+    ["lichtenstein", "Liechtenstein"],
+    ["byelorussia", "Belarus"],
+    ["upper volta", "Burkina Faso"],
+    ["fyrom", "North Macedonia"],
+    ["kyrgyz", "Kyrgyzstan"],
+    ["lao", "Laos"],
+  ])("landlocked-countries: %s -> %s", (guess, name) => {
+    expect(lands("landlocked-countries", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");
