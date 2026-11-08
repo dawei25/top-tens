@@ -15,9 +15,9 @@
     "judgedAt": "2026-11-07"
   },
   "breath-volume": {
-    "verdict": "keep",
-    "why": "Everyone breathes and has blown up a balloon. Most guess 1 to 2 litres, so half a litre teaches something. Optional: a fact comparing it with the lungs' total capacity would explain it better (couldn't check the source tonight).",
-    "judgedAt": "2026-11-07"
+    "verdict": "drop",
+    "why": "the owner cut it (calibration sheet, Nov 8)",
+    "judgedAt": "2026-11-08"
   },
   "tallest-person": {
     "verdict": "keep",
@@ -490,8 +490,8 @@
     "judgedAt": "2026-11-07"
   },
   "woodstock-crowd": {
-    "verdict": "fix",
-    "why": "familiarity (owner: label it, do not cut): a short label in the question",
+    "verdict": "drop",
+    "why": "the owner cut it (calibration sheet, Nov 8)",
     "judgedAt": "2026-11-08"
   },
   "nile-length": {
