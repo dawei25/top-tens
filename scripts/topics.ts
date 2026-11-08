@@ -1583,8 +1583,23 @@ export const TOPICS: Topic[] = [
     works: true,
     // The computer-animated, stop-motion and traditionally animated top 50s, each with its worldwide gross: Cars 2,
     // Aladdin and Coraline show and score theirs.
-    also: [{ tables: [1, 2, 3], name: "Title", value: "Worldwide gross" }],
-    aliases: { "Minions: The Rise of Gru": ["Minions 2"] },
+    also: [
+      { tables: [1, 2, 3], name: "Title", value: "Worldwide gross" },
+      // Coverage audit: Toy Story 2, WALL-E, Cars and How to Train Your Dragon were "not one of the animated films
+      // here" (or corrected to a sequel), though the page's by-year and franchise tables give their grosses. The
+      // franchise tables mix series totals in: only film rows (no film count in column 3).
+      { tables: [4], name: "Title", value: "Worldwide gross" },
+      { tables: range(9, 47), name: 1, value: 2, nameFromLink: true, where: { col: 3, match: /^$/ } },
+    ],
+    // The big studios' films, for the famous ones no table above lists (Encanto, Elemental): answers, unranked.
+    universeCategories: [
+      "Pixar animated films", "Walt Disney Animation Studios films", "DreamWorks Animation films",
+      "Illumination (company) animated films", "Sony Pictures Animation films", "Studio Ghibli animated films",
+      "Blue Sky Studios films",
+    ],
+    // Not answers: a blank cell, a gross in euros, and the studios' films not out yet.
+    skip: ["—N/a", "The Enchanted Sword", "Coco 2", "Incredibles 3", "Frozen 3", "Shrek 5", "KPop Demon Hunters 2"],
+    aliases: { "Minions: The Rise of Gru": ["Minions 2"], Zootopia: ["Zootropolis"] },
     junkAliases: [
       "Inside Out 3", "Zootopia Three", "Frozen IIII", "Jikŋon 2", "Frozen fandom", "Frozen Reo Māori", "The Lion King 4",
       "The Super Mario Bros. Movie 3", "Pratt Mario",

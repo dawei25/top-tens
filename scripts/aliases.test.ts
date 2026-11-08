@@ -447,6 +447,29 @@ describe("aliases as built: what players type", () => {
     expect(lands("game-franchises", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: the by-year, franchise and studio tables' films ("cars" was corrected to Cars 2).
+    ["toy story 2", "Toy Story 2"],
+    ["wall-e", "WALL-E"],
+    ["encanto", "Encanto"],
+    ["kung fu panda 4", "Kung Fu Panda 4"],
+    ["cars", "Cars"],
+    ["zootropolis", "Zootopia"],
+    // A short form two films share ("Demon Slayer") no longer merges the second into the first.
+    ["demon slayer mugen train", "Demon Slayer: Kimetsu no Yaiba Mugen Train"],
+    // Films not out yet are no answers.
+    ["frozen 3", "unknown"],
+  ])("animated-films: %s -> %s", (guess, name) => {
+    expect(lands("animated-films", guess)).toBe(name);
+  });
+
+  it("animated-films: one Lion King per film, not a third from the franchise table", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "animated-films.json"), "utf8"));
+    expect([...p.answers, ...p.extras].filter((e) => e.name.startsWith("The Lion King")).map((e) => e.name).sort()).toEqual([
+      "The Lion King (1994)", "The Lion King (2019)", "The Lion King 1½",
+    ]);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

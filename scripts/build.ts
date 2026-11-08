@@ -30,6 +30,8 @@ const LINK = new WeakMap<Entry, string | undefined>();
 /** Aliases an unranked entry takes from other columns (the artist of a tour): names of something else, so they never
  * make it the same thing as another entry. */
 const COLUMN_ALIASES = new WeakMap<Entry, Set<string>>();
+/** Aliases an unranked entry only has as short forms cut from its name ("Demon Slayer"), not as a name its cell says. */
+const SHORT = new WeakMap<Entry, Set<string>>();
 const ownForms = (e: Entry) => [e.name, ...e.aliases.filter((a) => !COLUMN_ALIASES.get(e)?.has(a))];
 
 const SPELLED_OUT: Record<string, string> = { st: "saint", ste: "sainte", mt: "mount", ft: "fort" };
@@ -877,6 +879,9 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         ARTICLE.set(entry, family ? name : redirectTarget(name, cell, hasCountries(topic)));
         LINK.set(entry, cell.link);
         COLUMN_ALIASES.set(entry, new Set(others.map(cleanName).filter((a) => a && !lines.map(cleanName).includes(a))));
+        // Compared normalized: "Lion King" cut from "The Lion King" is the name itself.
+        const said = new Set([name, ...lines, cell.linkText ?? ""].map((s) => normalize(cleanName(s))));
+        SHORT.set(entry, new Set(shortForms(name, topic.stripWords).map(cleanName).filter((s) => s && !said.has(normalize(s)))));
         out.push(entry);
       }
     }
@@ -1397,10 +1402,20 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     for (const f of forms) if (f && sameKey(f) && !owner.has(sameKey(f))) owner.set(sameKey(f), e);
   };
   for (const [i, e] of entries.entries()) own(e, [e.name, ...real(e), rows[i].redirectTarget, rows[i].link]);
+  // The article each ranked row's name cell links, beside LINK for the others.
+  const linked = new Map(entries.map((e, i) => [e, rows[i].link]));
   for (const e of extra) {
     const forms = ownForms(e).map(normalize).filter(Boolean);
     if (countryMembers.has(e)) forms.push(...countryNames(forms));
-    const known = forms.find((f) => taken.has(f));
+    // A short form cut from the name ("Demon Slayer" of "Demon Slayer: Kimetsu no Yaiba Mugen Train") is no evidence
+    // of the same thing when both link different articles: the two films share it as an alias instead (coverage
+    // audit: Mugen Train had vanished into Infinity Castle).
+    const weak = new Set([...(SHORT.get(e) ?? [])].map(normalize));
+    const apart = (x: Entry) => {
+      const [a, b] = [LINK.get(e), linked.get(x) ?? LINK.get(x)];
+      return !!a && !!b && a !== b;
+    };
+    const known = forms.find((f) => taken.has(f) && !(weak.has(f) && apart(taken.get(f)!)));
     if (known) {
       // A team row by the member's own name first: the Orioles' cell also names their 1901 self, "Milwaukee Brewers".
       const into = (nicknamed.has(e) && entries.find((x) => normalize(x.name) === normalize(e.name))) || taken.get(known)!;
@@ -1422,7 +1437,12 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     // Add-ons of an entry already listed ("Skyrim – Dragonborn" next to Skyrim) only blur what its name means.
     const base = e.name.split(" – ")[0];
     if (base !== e.name && taken.has(normalize(base))) continue;
-    const same = [...ownForms(e), ARTICLE.get(e), LINK.get(e)].map((f) => f && owner.get(sameKey(f))).find(Boolean);
+    const same = [...ownForms(e), ARTICLE.get(e), LINK.get(e)]
+      .map((f) => {
+        const x = f ? owner.get(sameKey(f)) : undefined;
+        return x && !(weak.has(normalize(f!)) && apart(x)) ? x : undefined;
+      })
+      .find(Boolean);
     if (same) {
       if (!same.aliases.includes(e.name)) same.aliases.push(e.name);
       if (same.n === undefined && e.n !== undefined) Object.assign(same, { value: e.value, n: e.n });
