@@ -1019,6 +1019,19 @@ export const TOPICS: Topic[] = [
     // Authors with only a high estimate (Lewis Carroll, David Baldacci, Patricia Cornwell) are answers without a
     // rank: a miss shows that figure.
     also: [{ tables: [0], name: "Author", value: "Max. estimated sales", dated: { label: "high estimate only" } }],
+    // Coverage audit: the page leaves these out "because no exact figures could be found, although it is possible
+    // that they too have more than 100 million copies" (its own words), then famous authors it doesn't name. Answers,
+    // unranked, by surname too ("dickens").
+    more: {
+      "Jane Austen": ["Austen"], "Miguel de Cervantes": ["Cervantes"], "Alexandre Dumas": ["Dumas"],
+      "Charles Dickens": ["Dickens"], "Arthur Conan Doyle": ["Conan Doyle"], "Victor Hugo": ["Hugo"],
+      "Jules Verne": ["Verne"], "Ernest Hemingway": ["Hemingway"], "Jack Higgins": ["Higgins"],
+      "Isaac Asimov": ["Asimov"], "Leon Uris": ["Uris"], "Mark Twain": ["Twain"],
+      "Fyodor Dostoevsky": ["Dostoevsky", "Dostoyevsky"], "Leo Tolstoy": ["Tolstoy"], "Edgar Allan Poe": ["Poe"],
+      "Suzanne Collins": [], "George R. R. Martin": ["George RR Martin", "GRRM"], "Rick Riordan": ["Riordan"],
+      "Neil Gaiman": ["Gaiman"], "Terry Pratchett": ["Pratchett"],
+    },
+    aliases: { "Eiichiro Oda": ["Oda"] },
     // Books, relatives, companies and studies among the redirects (pen names stay: Mary Westmacott, Robert Galbraith).
     junkAliases: [
       "William Shakespeare biography", "Shakespearean theatre", "Shakespearean scholar", "Shakespearian studies",

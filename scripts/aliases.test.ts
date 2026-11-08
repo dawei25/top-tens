@@ -505,6 +505,19 @@ describe("aliases as built: what players type", () => {
     expect(lands("books", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: the authors the page leaves out "because no exact figures could be found", and others.
+    ["dickens", "Charles Dickens"],
+    ["jane austen", "Jane Austen"],
+    ["hemingway", "Ernest Hemingway"],
+    ["conan doyle", "Arthur Conan Doyle"],
+    ["mark twain", "Mark Twain"],
+    ["george rr martin", "George R. R. Martin"],
+    ["oda", "Eiichiro Oda"],
+  ])("fiction-authors: %s -> %s", (guess, name) => {
+    expect(lands("fiction-authors", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");
