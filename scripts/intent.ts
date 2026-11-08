@@ -1266,6 +1266,15 @@ export const INTENT: Record<string, Intent> = {
       Louvre: ["The Louvre", "Louvre Museum", "Musée du Louvre"],
       "Vatican Museums": ["Vatican Museum", "Musei Vaticani"],
       "Metropolitan Museum of Art": ["The Met", "Met Museum", "The Metropolitan Museum"],
+      // Coverage audit: the names visitors use ("science museum" was corrected to China's, #7).
+      "London Science Museum": ["Science Museum", "Science Museum London", "Science Museum, London"],
+      "Victoria and Albert Museum": ["V&A", "V and A", "V&A Museum", "V&A South Kensington"],
+      "Galleria degli Uffizi": ["Uffizi Gallery", "Uffizi Galleries", "The Uffizi"],
+      "Prado Museum": ["Museo del Prado", "Museo Nacional del Prado", "The Prado"],
+      "Musée d'Orsay": ["Orsay", "Orsay Museum", "Musee d Orsay"],
+      "Natural History Museum, South Kensington": [
+        "Natural History Museum London", "Natural History Museum, London", "London Natural History Museum", "NHM London",
+      ],
     },
     groups: {
       Smithsonian: ["National Museum of Natural History", "National Air and Space Museum", "Smithsonian Museum of American History", "Smithsonian American Art Museum"],

@@ -847,6 +847,19 @@ describe("aliases as built: what players type", () => {
     expect(lands("spotify-artists", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: the names visitors use; "science museum" was corrected to China's (#7).
+    ["science museum", "London Science Museum"],
+    ["v&a", "Victoria and Albert Museum"],
+    ["uffizi gallery", "Galleria degli Uffizi"],
+    ["museo del prado", "Prado Museum"],
+    ["orsay", "Musée d'Orsay"],
+    ["natural history museum london", "Natural History Museum, South Kensington"],
+    ["forbidden city", "Palace Museum"],
+  ])("museums: %s -> %s", (guess, name) => {
+    expect(lands("museums", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

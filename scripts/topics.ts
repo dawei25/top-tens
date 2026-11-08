@@ -2104,6 +2104,12 @@ export const TOPICS: Topic[] = [
     metric: "Visitors per year",
     // Not the Paris galleries category: commercial galleries with no visitor figures.
     universeCategories: ["Museums in London", "Museums in New York City"],
+    // Coverage audit: "palace museum" was corrected to Taipei's National Palace Museum (#46). The source leaves
+    // palaces out on purpose (Beijing's Palace Museum, Versailles): answers, unranked, with no figure here.
+    more: {
+      "Palace Museum": ["Forbidden City", "Palace Museum Beijing", "Beijing Palace Museum"],
+      "Palace of Versailles": ["Versailles", "Chateau de Versailles"],
+    },
     junkAliases: [
       "Suzanne Brenner", "Sloane library", "British Museum Publications", "The British Museum Press",
       "Www.britishmuseum.org", "Sainsbury African Galleries", "Carre gallery", "Salle des etats", "National 9", "11 Museum",
