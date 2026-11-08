@@ -35,7 +35,7 @@ const question = (over: Partial<Question> & Record<string, unknown> = {}): Quest
 
 const errors = (over: Partial<Question> & Record<string, unknown>) => checkQuestion(question(over), 0);
 
-/** A bank that passes: 50 questions over every kind, 12 easy, answers from under 10 to billions (2 billion metres). */
+/** A bank that passes: 50 questions over every kind, 12 easy, answers from under 1 to billions (2 billion metres). */
 function bank(): { version: 1; questions: Question[] } {
   const questions = Array.from({ length: 50 }, (_, i) =>
     question({
@@ -337,7 +337,7 @@ describe("rounds", () => {
 
   it("counts the spread of magnitudes on estimates only", () => {
     const b = bank();
-    // The only answer under 10 was question-1's 0.5 metres: a 0.5% share doesn't stand in for it.
+    // The only answer under 1 was question-1's 0.5 metres: a 0.5% share doesn't stand in for it.
     b.questions[0] = percent({ id: "question-1", answer: 0.5, question: "How much of Earth's water is fresh and liquid?" });
     expect(checkBank(b)).toEqual(["no answer under 10: the bank needs a spread of magnitudes"]);
   });
