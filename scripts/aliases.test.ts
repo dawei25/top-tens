@@ -179,6 +179,11 @@ describe("aliases as built: what players type", () => {
     ["eggs", "Eggs"],
     ["chicken", "Chicken"],
     ["duck egg", "Other birds' eggs"],
+    // Coverage audit: other farm products were corrected into answers ("hay" to Pork by its "ham").
+    ["hay", "unknown"],
+    ["sheep milk", "unknown"],
+    ["goat milk", "unknown"],
+    ["cocoa", "unknown"],
   ])("farm-products: %s -> %s", (guess, name) => {
     expect(lands("farm-products", guess)).toBe(name);
   });
@@ -207,8 +212,338 @@ describe("aliases as built: what players type", () => {
     ["tower research", "unknown"],
     // "Man" is a word, not Man Group.
     ["man", "unknown"],
+    // Player notes: Point72 and the other real hedge funds the page leaves out are answers (SAC became Point72).
+    ["point72", "Point72 Asset Management"],
+    ["sac capital", "Point72 Asset Management"],
+    ["baupost", "Baupost Group"],
+    ["tiger management", "Tiger Management"],
+    ["ltcm", "Long-Term Capital Management"],
+    ["melvin capital", "Melvin Capital"],
+    // Coverage audit: what finance people call them.
+    ["soros", "Quantum Fund"],
+    ["medallion", "Renaissance Technologies"],
+    ["greenlight", "Greenlight Capital"],
+    ["scion", "Scion Asset Management"],
+    ["d1", "D1 Capital Partners"],
   ])("hedge-funds: %s -> %s", (guess, name) => {
     expect(lands("hedge-funds", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: the borough and the peninsula that hold their city's towers.
+    ["manhattan", "New York City"],
+    ["kowloon", "Hong Kong"],
+    // Real skylines under the page's cut: free, never corrected into another city.
+    ["brisbane", "unknown"],
+    ["jeddah", "unknown"],
+    ["monterrey", "unknown"],
+  ])("skyscraper-cities: %s -> %s", (guess, name) => {
+    expect(lands("skyscraper-cities", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: what fans call the leagues past #10, which have no redirects of their own.
+    ["dutch eredivisie", "Eredivisie"],
+    ["liga portugal", "Primeira Liga"],
+    ["jupiler pro league", "Belgian Pro League"],
+    ["roshn saudi league", "Saudi Professional League"],
+    ["aussie rules", "Australian Football League"],
+    ["bundesliga 2", "2. Bundesliga"],
+    ["milb", "Minor League Baseball"],
+    ["cba", "Chinese Basketball Association"],
+    ["nbl", "National Basketball League (Australia)"],
+    ["j1", "J1 League"],
+    ["ligue une", "Ligue 1"],
+    ["serie a brazil", "Campeonato Brasileiro Série A"],
+    ["spfl", "Scottish Premiership"],
+    ["aleague", "A-League Men"],
+    // Tours, series and college sport are free, and never junk.
+    ["lpga", "unknown"],
+    ["usfl", "unknown"],
+    ["nascar", "unknown"],
+  ])("sports-leagues: %s -> %s", (guess, name) => {
+    expect(lands("sports-leagues", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: stores people shop at count for the group Deloitte ranks, as Lidl does for Schwarz.
+    ["sam's club", "Walmart"],
+    ["flipkart", "Walmart"],
+    ["whole foods", "Amazon"],
+    ["trader joes", "Aldi"],
+    ["tj maxx", "TJX Companies"],
+    ["tk maxx", "TJX Companies"],
+    ["marshalls", "TJX Companies"],
+    ["safeway", "Albertsons"],
+    ["food lion", "Ahold Delhaize"],
+    ["sephora", "LVMH"],
+    ["gucci", "Kering"],
+    ["m&s", "Marks & Spencer"],
+    ["bjs", "BJ's Wholesale Club"],
+    ["7 11", "Seven & I Holdings"],
+    ["711", "Seven & I Holdings"],
+    ["old navy", "Gap"],
+    ["circle k", "Alimentation Couche-Tard"],
+    ["bunnings", "Wesfarmers"],
+    // Kmart was corrected to Walmart by a "WMart" redirect; famous retailers outside the 100 are free.
+    ["kmart", "unknown"],
+    ["ebay", "unknown"],
+    ["primark", "unknown"],
+  ])("retailers: %s -> %s", (guess, name) => {
+    expect(lands("retailers", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: "car" was corrected to Czechia (its "ČR"); the usual misspelling and former names.
+    ["car", "Central African Republic"],
+    ["c.a.r.", "Central African Republic"],
+    ["central african rep", "Central African Republic"],
+    ["lichtenstein", "Liechtenstein"],
+    ["byelorussia", "Belarus"],
+    ["upper volta", "Burkina Faso"],
+    ["fyrom", "North Macedonia"],
+    ["kyrgyz", "Kyrgyzstan"],
+    ["lao", "Laos"],
+  ])("landlocked-countries: %s -> %s", (guess, name) => {
+    expect(lands("landlocked-countries", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: only Hot 100 number ones were answers; billion-stream hits were "not one of the songs here",
+    // and real titles were corrected into other songs ("heathens" to Heartless, "seven nation army" to Seven).
+    ["levitating", "Levitating"],
+    ["shivers", "Shivers"],
+    ["gangnam style", "Gangnam Style"],
+    ["story of my life", "Story of My Life"],
+    ["heathens", "Heathens"],
+    ["seven nation army", "Seven Nation Army"],
+    ["here comes the sun", "Here Comes the Sun"],
+    ["mockingbird", "Mockingbird"],
+    ["shape of u", "Shape of You"],
+  ])("spotify-songs: %s -> %s", (guess, name) => {
+    expect(lands("spotify-songs", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: spin-offs were read as their parent, and the short forms fans write found nothing.
+    ["ncis la", "NCIS: Los Angeles"],
+    ["ncis hawaii", "unknown"],
+    ["law and order criminal intent", "unknown"],
+    ["law & order: organized crime", "unknown"],
+    ["911", "9-1-1"],
+    ["himym", "How I Met Your Mother"],
+    ["tbbt", "The Big Bang Theory"],
+    ["xfiles", "The X-Files"],
+    ["l&o", "Law & Order"],
+    ["law n order", "Law & Order"],
+  ])("longest-running-tv: %s -> %s", (guess, name) => {
+    expect(lands("longest-running-tv", guess)).toBe(name);
+  });
+
+  it.each([
+    // Owner: "makkah royal clock tower" should count, and Mecca's other spellings with it.
+    ["makkah royal clock tower", "Mecca Royal Clock Tower"],
+    ["makkah clock tower", "Mecca Royal Clock Tower"],
+    ["mekkah clock tower", "Mecca Royal Clock Tower"],
+    // Coverage audit: "tower" is generic, so these found nothing or the wrong tower.
+    ["merdeka tower", "Merdeka Maybank Tower"],
+    ["pnb tower", "Merdeka Maybank Tower"],
+    ["ping an tower", "Ping An Finance Centre"],
+    ["trump tower chicago", "Trump International Hotel and Tower"],
+    ["wtc", "One World Trade Center"],
+    ["kingdom tower", "Jeddah Tower"],
+    // Towers that aren't buildings are free, not junk.
+    ["tokyo skytree", "unknown"],
+  ])("buildings: %s -> %s", (guess, name) => {
+    expect(lands("buildings", guess)).toBe(name);
+  });
+
+  it("islands: what Hawaii calls its biggest island (coverage audit)", () => {
+    expect(lands("islands", "big island")).toBe("Hawaiʻi");
+    expect(lands("islands", "hawaii island")).toBe("Hawaiʻi");
+  });
+
+  it.each([
+    // Coverage audit: the category stopped at "Mb", and some surnames are plain words or untypeable letters.
+    ["rashford", "Marcus Rashford"],
+    ["cole palmer", "Cole Palmer"],
+    ["palmer", "Cole Palmer"],
+    ["fernando torres", "Fernando Torres"],
+    ["solskjaer", "Ole Gunnar Solskjær"],
+    ["odegaard", "Martin Ødegaard"],
+    ["hojlund", "Rasmus Højlund"],
+    ["hazard", "Eden Hazard"],
+    ["bale", "Gareth Bale"],
+    ["declan rice", "Declan Rice"],
+  ])("premier-league-goals: %s -> %s", (guess, name) => {
+    expect(lands("premier-league-goals", guess)).toBe(name);
+  });
+
+  it("premier-league-goals: the owner's note, the players' average is lower (par 4, not 5)", () => {
+    const par = JSON.parse(readFileSync(join(dir, "par.json"), "utf8"));
+    expect(par["premier-league-goals"].par).toBeLessThanOrEqual(4);
+  });
+
+  it("passwords: the prompt names the ranking and says an answer is exact (player note on 88888888)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "passwords.json"), "utf8"));
+    expect(p.prompt).toMatch(/NordPass/);
+    expect(p.prompt).toMatch(/exactly/);
+    expect(lands("passwords", "888888")).toBe("888888");
+    expect(lands("passwords", "i love you")).toBe("iloveyou");
+  });
+
+  it.each([
+    // Coverage audit: only 75 companies were answers; the companies a casual player names first were "not one of
+    // the companies here".
+    ["home depot", "The Home Depot"],
+    ["coca cola", "Coca-Cola"],
+    ["sony", "Sony"],
+    ["allianz", "Allianz"],
+    ["ups", "United Parcel Service"],
+    ["disney", "Walt Disney"],
+    ["ikea", "Ingka Group"],
+    ["vw", "Volkswagen Group"],
+    ["j&j", "Johnson & Johnson"],
+    ["p&g", "Procter & Gamble"],
+    // A plain word is no company of the S&P 500 ("Ball Corporation").
+    ["ball", "unknown"],
+  ])("companies-revenue: %s -> %s", (guess, name) => {
+    expect(lands("companies-revenue", guess)).toBe(name);
+  });
+
+  it("companies-revenue: a miss shows its revenue from the US or European ranking", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "companies-revenue.json"), "utf8"));
+    const value = (name: string) => p.extras.find((e) => e.name === name)?.value;
+    expect(value("The Home Depot")).toMatch(/^\$\d+ billion \(Fortune 500, 2025\)$/);
+    expect(value("Allianz")).toMatch(/^\$\d+ billion \(Fortune Global 500, 2026\)$/);
+  });
+
+  it.each([
+    // Coverage audit: "snapchat" was corrected to Stripchat; big sites outside the two categories found nothing.
+    ["snapchat", "Snapchat"],
+    ["discord", "Discord"],
+    ["spotify", "Spotify"],
+    ["bbc", "BBC"],
+    ["tumblr", "Tumblr"],
+    ["hotmail", "Outlook.com"],
+    ["office", "Microsoft 365"],
+    ["google gemini", "Gemini"],
+  ])("websites: %s -> %s", (guess, name) => {
+    expect(lands("websites", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: franchises outside the top category, free-to-play series, and what players call them.
+    ["warcraft", "Warcraft"],
+    ["world of warcraft", "Warcraft"],
+    ["fortnite", "Fortnite"],
+    ["lol", "League of Legends"],
+    ["the last of us", "The Last of Us"],
+    ["angry birds", "Angry Birds"],
+    ["csgo", "Counter-Strike"],
+    ["pes", "Pro Evolution Soccer"],
+    ["sims 4", "The Sims"],
+  ])("game-franchises: %s -> %s", (guess, name) => {
+    expect(lands("game-franchises", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: the by-year, franchise and studio tables' films ("cars" was corrected to Cars 2).
+    ["toy story 2", "Toy Story 2"],
+    ["wall-e", "WALL-E"],
+    ["encanto", "Encanto"],
+    ["kung fu panda 4", "Kung Fu Panda 4"],
+    ["cars", "Cars"],
+    ["zootropolis", "Zootopia"],
+    // A short form two films share ("Demon Slayer") no longer merges the second into the first.
+    ["demon slayer mugen train", "Demon Slayer: Kimetsu no Yaiba Mugen Train"],
+    // Films not out yet are no answers.
+    ["frozen 3", "unknown"],
+  ])("animated-films: %s -> %s", (guess, name) => {
+    expect(lands("animated-films", guess)).toBe(name);
+  });
+
+  it("animated-films: one Lion King per film, not a third from the franchise table", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "animated-films.json"), "utf8"));
+    expect([...p.answers, ...p.extras].filter((e) => e.name.startsWith("The Lion King")).map((e) => e.name).sort()).toEqual([
+      "The Lion King (1994)", "The Lion King (2019)", "The Lion King 1½",
+    ]);
+  });
+
+  it("gdp-per-capita: Monaco and the other rows with no IMF figure are answers with the World Bank's (coverage audit)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "gdp-per-capita.json"), "utf8"));
+    expect(lands("gdp-per-capita", "monaco")).toBe("Monaco");
+    expect(p.extras.find((e) => e.name === "Monaco")?.value).toMatch(/World Bank, 20\d\d\)$/);
+    expect(lands("gdp-per-capita", "lichtenstein")).toBe("Liechtenstein");
+  });
+
+  it.each([
+    // Coverage audit: common guesses and spellings ("sassanids" was corrected to the Umayyads, #8).
+    ["ussr", "Soviet Union"],
+    ["nazi germany", "Nazi Germany"],
+    ["rome", "Roman Empire"],
+    ["sassanids", "Sasanian Empire"],
+    ["mogul empire", "Mughal Empire"],
+    ["byzantium", "Byzantine Empire"],
+    ["golden horde", "Jochi Khanate"],
+    ["austria-hungary", "Austro-Hungarian Empire"],
+    ["england", "British Empire"],
+  ])("empires: %s -> %s", (guess, name) => {
+    expect(lands("empires", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: the rest of the Harry Potter series, and famous single books the page leaves out.
+    ["goblet of fire", "Harry Potter and the Goblet of Fire"],
+    ["deathly hallows", "Harry Potter and the Deathly Hallows"],
+    ["the lion the witch and the wardrobe", "The Lion, the Witch and the Wardrobe"],
+    ["1984", "Nineteen Eighty-Four"],
+    // Religious texts and series are outside the prompt: free.
+    ["the bible", "unknown"],
+    ["lord of the rings", "unknown"],
+  ])("books: %s -> %s", (guess, name) => {
+    expect(lands("books", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: the authors the page leaves out "because no exact figures could be found", and others.
+    ["dickens", "Charles Dickens"],
+    ["jane austen", "Jane Austen"],
+    ["hemingway", "Ernest Hemingway"],
+    ["conan doyle", "Arthur Conan Doyle"],
+    ["mark twain", "Mark Twain"],
+    ["george rr martin", "George R. R. Martin"],
+    ["oda", "Eiichiro Oda"],
+  ])("fiction-authors: %s -> %s", (guess, name) => {
+    expect(lands("fiction-authors", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: classic best-sellers outside the table, with their platform's figure.
+    ["nintendogs", "Nintendogs"],
+    ["diablo 3", "Diablo III"],
+    ["brain age", "Brain Age: Train Your Brain in Minutes a Day!"],
+    ["super mario world", "Super Mario World"],
+    ["mario kart ds", "Mario Kart DS"],
+    ["gta 4", "Grand Theft Auto IV"],
+    ["rdr", "Red Dead Redemption"],
+  ])("video-games: %s -> %s", (guess, name) => {
+    expect(lands("video-games", guess)).toBe(name);
+  });
+
+  it("video-games: a game shows its own platform's figure, not a re-release's", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "video-games.json"), "utf8"));
+    expect(p.extras.find((e) => e.name === "Super Mario Bros. 3")?.value).toMatch(/\(on NES\)$/);
+  });
+
+  it.each([
+    // Agent B: these merged into other films through a short form ("Star Wars") or a junk alias ("Spider-Man 3").
+    ["the phantom menace", "Star Wars: Episode I – The Phantom Menace"],
+    ["spider-man 3", "Spider-Man 3"],
+    ["the two towers", "The Lord of the Rings: The Two Towers"],
+    ["rogue one", "Rogue One: A Star Wars Story"],
+  ])("films-gross: %s -> %s", (guess, name) => {
+    expect(lands("films-gross", guess)).toBe(name);
   });
 
   // Coverage audit, Nov 8: names players type that found nothing, or found the wrong answer, fixed in the data
@@ -498,6 +833,69 @@ describe("aliases as built: what players type", () => {
     expect(junk("instagram", "9gag")).toBe(false);
     expect(junk("national-parks", "statue of liberty")).toBe(false);
     expect(junk("africa-cities", "oujda")).toBe(false);
+  });
+
+  it.each([
+    // Coverage audit: today's big streaming artists were "not one of the artists here".
+    ["sabrina carpenter", "Sabrina Carpenter"],
+    ["morgan wallen", "Morgan Wallen"],
+    ["peso pluma", "Peso Pluma"],
+    ["rose", "Rosé"],
+    ["avicii", "Avicii"],
+    ["radiohead", "Radiohead"],
+  ])("spotify-artists: %s -> %s", (guess, name) => {
+    expect(lands("spotify-artists", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: the names visitors use; "science museum" was corrected to China's (#7).
+    ["science museum", "London Science Museum"],
+    ["v&a", "Victoria and Albert Museum"],
+    ["uffizi gallery", "Galleria degli Uffizi"],
+    ["museo del prado", "Prado Museum"],
+    ["orsay", "Musée d'Orsay"],
+    ["natural history museum london", "Natural History Museum, South Kensington"],
+    ["forbidden city", "Palace Museum"],
+  ])("museums: %s -> %s", (guess, name) => {
+    expect(lands("museums", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: "alcaraz" was corrected to Canelo (#2); past stars are free on purpose, and never read as
+    // another athlete.
+    ["alcaraz", "unknown"],
+    ["tiger woods", "unknown"],
+    ["mayweather", "unknown"],
+    ["neymar jr", "Neymar"],
+    ["dak", "Dak Prescott"],
+  ])("athletes-earnings: %s -> %s", (guess, name) => {
+    expect(lands("athletes-earnings", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: China's and Japan's richest and the famous US billionaires were "not one of the people here".
+    ["jack ma", "Jack Ma"],
+    ["pony ma", "Ma Huateng"],
+    ["zhong shanshan", "Zhong Shanshan"],
+    ["tadashi yanai", "Tadashi Yanai"],
+    ["oprah", "Oprah Winfrey"],
+    ["donald trump", "Donald Trump"],
+  ])("richest-people: %s -> %s", (guess, name) => {
+    expect(lands("richest-people", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: famous nameplates the page lists only as a brand's second, the model alone, the VW Bus.
+    ["rav4", "Toyota RAV4"],
+    ["cr-v", "Honda CR-V"],
+    ["ford focus", "Ford Focus"],
+    ["miata", "Mazda MX-5"],
+    ["911", "Porsche 911"],
+    ["2cv", "Citroën 2CV"],
+    ["vw bus", "Volkswagen Type 2"],
+    ["altima", "Nissan Altima"],
+  ])("car-models: %s -> %s", (guess, name) => {
+    expect(lands("car-models", guess)).toBe(name);
   });
 
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {

@@ -205,7 +205,7 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["United Arab Emirates", "UAE", "Emirates"],
   ["Myanmar", "Burma"],
   ["Eswatini", "Swaziland"],
-  ["North Macedonia", "Macedonia"],
+  ["North Macedonia", "Macedonia", "FYROM", "Former Yugoslav Republic of Macedonia"],
   ["Cape Verde", "Cabo Verde"],
   ["East Timor", "Timor-Leste"],
   ["Vatican City", "Vatican", "Holy See"],
@@ -226,11 +226,18 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["Hong Kong", "HK"],
   ["Macau", "Macao"],
   ["Vietnam", "Viet Nam"],
-  ["Laos", "Lao PDR"],
+  ["Laos", "Lao PDR", "Lao"],
   ["Micronesia", "Federated States of Micronesia"],
   ["Palestine", "State of Palestine", "Palestinian territories"],
   ["São Tomé and Príncipe", "Sao Tome and Principe", "Sao Tome"],
-  ["Kyrgyzstan", "Kyrgyz Republic"],
+  ["Kyrgyzstan", "Kyrgyz Republic", "Kyrgyz", "Kirghizia"],
+  // Coverage audit (landlocked countries): initials and former names ("car" was corrected to the Czech Republic by
+  // its "ČR"); Liechtenstein's misspelling is with the others below.
+  ["Central African Republic", "CAR", "C.A.R.", "Central African Rep"],
+  // The islands table's name for the kingdom (Greenland, Zealand, Funen).
+  ["Denmark", "Kingdom of Denmark", "Danish Realm"],
+  ["Belarus", "Byelorussia", "Belorussia"],
+  ["Burkina Faso", "Upper Volta", "Burkina"],
   ["Ireland", "Republic of Ireland", "Eire"],
   // Two-island states are named by their main island, and "Saint" is written "St" ("st kitts" found nothing on the
   // smallest countries).
@@ -251,9 +258,6 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["Kazakhstan", "Kazakstan"],
   ["Libya", "Lybia"],
   ["Brazil", "Brasil"],
-  // Its usual abbreviation ("car" was corrected to the Czech Republic) and Belarus's old names (data agent B, Nov 8).
-  ["Central African Republic", "CAR"],
-  ["Belarus", "Byelorussia", "Belorussia"],
 ];
 
 export const COUNTRY_FORMS: string[][] = [
@@ -717,6 +721,11 @@ export const INTENT: Record<string, Intent> = {
       "PUBG: Battlegrounds": ["PlayerUnknown's Battlegrounds", "PUBG"],
       "The Elder Scrolls V: Skyrim": ["Skyrim", "Elder Scrolls Skyrim"],
       "The Witcher 3: Wild Hunt": ["Witcher 3", "The Witcher 3"],
+      // Coverage audit: as GTA V has "GTA V".
+      "Grand Theft Auto IV": ["GTA IV", "GTA 4"],
+      "Red Dead Redemption": ["RDR", "Red Dead 1"],
+      "Super Mario Bros. 3": ["SMB3", "Mario 3"],
+      "Brain Age: Train Your Brain in Minutes a Day!": ["Brain Age", "Brain Training"],
     },
     groups: {
       CoD: ["Call of Duty: Black Ops III", "Call of Duty: Modern Warfare", "Call of Duty: Black Ops Cold War", "Call of Duty: Modern Warfare 3"],
@@ -766,6 +775,8 @@ export const INTENT: Record<string, Intent> = {
       "Harry Potter and the Philosopher's Stone": ["Harry Potter and the Sorcerer's Stone", "Philosopher's Stone", "Sorcerer's Stone"],
       "Alice's Adventures in Wonderland": ["Alice in Wonderland"],
       "The Little Prince": ["Le Petit Prince"],
+      // All digits, so the automatic aliases drop it as a number.
+      "Nineteen Eighty-Four": ["1984"],
     },
     groups: {
       HP: ["Harry Potter and the Philosopher's Stone", "Harry Potter and the Chamber of Secrets"],
@@ -789,11 +800,15 @@ export const INTENT: Record<string, Intent> = {
   },
   buildings: {
     same: {
-      "Willis Tower": ["Sears Tower"],
-      "Merdeka Maybank Tower": ["Merdeka 118", "PNB 118", "Merdeka PNB118"],
-      "Mecca Royal Clock Tower": ["Abraj Al Bait", "Makkah Royal Clock Tower", "Mecca Clock Tower"],
-      "Ping An Finance Centre": ["Ping An Finance Center", "Ping An"],
-      "One World Trade Center": ["Freedom Tower", "One WTC", "World Trade Center"],
+      "Willis Tower": ["Sears Tower", "Sears"],
+      // Coverage audit: "tower" is a generic word, so "merdeka tower" and "ping an tower" need their own.
+      "Merdeka Maybank Tower": ["Merdeka 118", "PNB 118", "Merdeka PNB118", "Merdeka Tower", "PNB Tower"],
+      // Every spelling of Mecca follows (build.ts SPELLINGS: "makkah clock tower").
+      "Mecca Royal Clock Tower": ["Abraj Al Bait", "Abraj Al-Bait", "Mecca Clock Tower", "Mecca Tower"],
+      "Ping An Finance Centre": ["Ping An Finance Center", "Ping An", "Ping An Tower"],
+      "One World Trade Center": ["Freedom Tower", "One WTC", "World Trade Center", "WTC"],
+      "Trump International Hotel and Tower": ["Trump Tower Chicago", "Trump Chicago"],
+      "Jeddah Tower": ["Kingdom Tower"],
       "Guangzhou CTF Finance Centre": ["Chow Tai Fook Centre"],
       "CITIC Tower": ["China Zun"],
       "Lotte World Tower": ["Lotte Tower"],
@@ -859,6 +874,16 @@ export const INTENT: Record<string, Intent> = {
       "State Grid Corporation of China": ["State Grid"],
       "Saudi Aramco": ["Aramco"],
       ExxonMobil: ["Exxon", "Exxon Mobil", "Mobil"],
+      // Coverage audit: the short forms of the answers past the ranking, which have no redirects.
+      "Volkswagen Group": ["VW", "Volkswagen"],
+      "Johnson & Johnson": ["J&J"],
+      "Procter & Gamble": ["P&G"],
+      "General Electric": ["GE"],
+      "Walt Disney": ["Disney", "The Walt Disney Company", "Walt Disney Company"],
+      "United Parcel Service": ["UPS"],
+      "Ingka Group": ["IKEA"],
+      "Verizon Communications": ["Verizon"],
+      "Coca-Cola": ["Coke", "Coca Cola Company"],
     },
   },
   "super-bowl-wins": {
@@ -942,6 +967,12 @@ export const INTENT: Record<string, Intent> = {
       "Alan Shearer": ["Shearer"],
       "Harry Kane": ["Kane"],
       "Wayne Rooney": ["Rooney", "Wazza"],
+      // Coverage audit: surnames that are plain words, which a word of a name alone never matches. The famous one
+      // of each (Micky Hazard and four other Palmers also played).
+      "Eden Hazard": ["Hazard"],
+      "Gareth Bale": ["Bale"],
+      "Cole Palmer": ["Palmer"],
+      "Ivan Toney": ["Toney"],
     },
   },
   "nfl-passing-yards": {
@@ -1096,6 +1127,14 @@ export const INTENT: Record<string, Intent> = {
       "Resident Evil": ["Biohazard", "Resident Evil 4", "RE4"],
       "Final Fantasy": ["FF", "Final Fantasy VII", "FF7", "FFVII"],
       "Assassin's Creed": ["AC"],
+      // Coverage audit: the names players use ("lol" and "csgo" read as junk, "pes" found nothing).
+      Warcraft: ["World of Warcraft", "WoW"],
+      Yakuza: ["Like a Dragon"],
+      "Counter-Strike": ["CSGO", "CS:GO", "CS GO", "CS2", "Counter Strike"],
+      "Pro Evolution Soccer": ["PES", "eFootball", "Winning Eleven"],
+      "Tony Hawk's": ["Tony Hawk's Pro Skater", "Tony Hawk", "THPS"],
+      "League of Legends": ["LoL"],
+      "The Sims": ["Sims 4", "The Sims 4", "Sims"],
     },
   },
   websites: {
@@ -1106,6 +1145,11 @@ export const INTENT: Record<string, Intent> = {
       "Microsoft Bing": ["Bing"],
       Instagram: ["IG", "Insta"],
       WhatsApp: ["Whats App"],
+      // Coverage audit: what people call the sites ("office" was corrected to Virtual Office Website, "google
+      // gemini" to Google Search).
+      "Outlook.com": ["Outlook", "Hotmail", "Microsoft Outlook"],
+      "Microsoft 365": ["Office", "Office 365", "office.com", "Microsoft Office"],
+      Gemini: ["Google Gemini", "Bard", "Google Bard"],
     },
   },
   "europe-cities": {
@@ -1188,7 +1232,16 @@ export const INTENT: Record<string, Intent> = {
       "Xiongnu Empire": ["Xiongnu"],
       "Achaemenid Empire": ["Persian Empire", "Persia", "Persian", "First Persian Empire"],
       "Empire of Japan": ["Japanese Empire", "Imperial Japan"],
-      "British Empire": ["British", "Britain"],
+      "British Empire": ["British", "Britain", "UK", "United Kingdom", "England", "English Empire"],
+      // Coverage audit: the usual English spellings and names ("sassanids" was corrected to the Umayyads, #8, and
+      // "mogul empire" to the Mongols, #2).
+      "Roman Empire": ["Rome", "Ancient Rome"],
+      "Sasanian Empire": ["Sassanid", "Sassanid Empire", "Sassanids", "Sassanian Empire", "Sasanians", "Sassanian"],
+      "Mughal Empire": ["Mogul Empire", "Moghul Empire", "Mogul", "Moghul", "Moguls", "Mughals"],
+      "Byzantine Empire": ["Byzantium", "Eastern Roman Empire", "Byzantines"],
+      "Jochi Khanate": ["Golden Horde", "Ulus of Jochi"],
+      "Austro-Hungarian Empire": ["Austria-Hungary", "Austria Hungary", "Austro-Hungary"],
+      "Soviet Union": ["USSR", "Soviet Empire", "Soviets", "U.S.S.R."],
       "Mongol Empire": ["Mongols", "Mongolian Empire"],
       "Russian Empire": ["Russia", "Tsarist Russia", "Imperial Russia"],
       "Qing dynasty": ["Qing", "Qing Empire", "Qing China"],
@@ -1213,6 +1266,15 @@ export const INTENT: Record<string, Intent> = {
       Louvre: ["The Louvre", "Louvre Museum", "Musée du Louvre"],
       "Vatican Museums": ["Vatican Museum", "Musei Vaticani"],
       "Metropolitan Museum of Art": ["The Met", "Met Museum", "The Metropolitan Museum"],
+      // Coverage audit: the names visitors use ("science museum" was corrected to China's, #7).
+      "London Science Museum": ["Science Museum", "Science Museum London", "Science Museum, London"],
+      "Victoria and Albert Museum": ["V&A", "V and A", "V&A Museum", "V&A South Kensington"],
+      "Galleria degli Uffizi": ["Uffizi Gallery", "Uffizi Galleries", "The Uffizi"],
+      "Prado Museum": ["Museo del Prado", "Museo Nacional del Prado", "The Prado"],
+      "Musée d'Orsay": ["Orsay", "Orsay Museum", "Musee d Orsay"],
+      "Natural History Museum, South Kensington": [
+        "Natural History Museum London", "Natural History Museum, London", "London Natural History Museum", "NHM London",
+      ],
     },
     groups: {
       Smithsonian: ["National Museum of Natural History", "National Air and Space Museum", "Smithsonian Museum of American History", "Smithsonian American Art Museum"],
@@ -1276,6 +1338,9 @@ export const INTENT: Record<string, Intent> = {
   "richest-people": {
     same: {
       "S. Robson Walton": ["Rob Walton", "Robson Walton"],
+      // Coverage audit: the names the West uses.
+      "Ma Huateng": ["Pony Ma"],
+      "Jack Ma": ["Ma Yun"],
       "Elon Musk": ["Elon"],
       "Mark Zuckerberg": ["Zuck"],
       "Jensen Huang": ["Jensen"],
@@ -1385,37 +1450,22 @@ export const INTENT: Record<string, Intent> = {
       "Hank Aaron": ["Hammerin' Hank"],
     },
   },
-  "theme-parks": {
-    same: {
-      "Disneyland Paris": ["Disneyland Park Paris", "Euro Disney", "Euro Disneyland", "Disney Paris", "Paris Disneyland"],
-      "Disney Adventure World": ["Walt Disney Studios", "Walt Disney Studios Park"],
-      "Shanghai Disneyland": ["Shanghai Disney", "Disneyland Shanghai"],
-      "Hong Kong Disneyland": ["Hong Kong Disney", "HK Disneyland", "Disneyland Hong Kong"],
-      "Universal Studios Florida": ["Universal Studios Orlando"],
-      "Chimelong Ocean Kingdom": ["Ocean Kingdom"],
-      "Universal Studios Beijing": ["Universal Beijing"],
-      "Magic Kingdom": ["Walt Disney World", "Disney World"],
-      Disneyland: ["Disneyland California", "Disneyland Anaheim"],
-      "Universal Studios Japan": ["USJ", "Universal Japan"],
-      "Disney's Hollywood Studios": ["Hollywood Studios", "MGM Studios", "Disney-MGM Studios"],
-      // Without these, "universal hollywood" read as the "Universal" alias plus words: Universal Studios Japan.
-      "Universal Studios Hollywood": ["Universal Hollywood"],
-      "Ocean Park Hong Kong": ["Ocean Park"],
-    },
-    groups: {
-      // Universal Orlando Resort's two parks.
-      "Universal Orlando": ["Universal Studios Florida", "Universal Islands of Adventure"],
-      // No top-10 park has "Disney" in its name: the guess offers the four Disney parks of the top 10.
-      Disney: ["Magic Kingdom", "Disneyland", "Tokyo Disneyland", "Shanghai Disneyland"],
-      "Universal Studios": ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
-      Universal: ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
-      "Tokyo Disney": ["Tokyo Disneyland", "Tokyo DisneySea"],
-    },
-  },
   "car-models": {
     // Model names that are plain words ("mustang", "impala") aren't read as part of a longer name: say them here.
     same: {
       "Ford Model T": ["Model T", "Tin Lizzie"],
+      // Coverage audit: the model alone, as people say it (under four letters, it is never read as a word of the
+      // name), and the VW Bus ("vw bus" was corrected to the Beetle).
+      "Mazda MX-5": ["MX-5", "MX5", "Miata", "Mazda Miata"],
+      "Mazda RX-7": ["RX-7", "RX7"],
+      "Porsche 911": ["911"],
+      "Citroën 2CV": ["2CV", "Citroen 2CV"],
+      "Audi A4": ["A4"],
+      "Peugeot 206": ["206"],
+      "BMW 3 Series": ["3 Series", "BMW 3"],
+      "Mercedes-Benz C-Class": ["C-Class", "C Class", "Mercedes C-Class"],
+      "Volkswagen Type 2": ["VW Bus", "Volkswagen Bus", "Kombi", "Microbus", "VW Camper", "VW Transporter", "Type 2"],
+      "Volkswagen Beetle": ["Fusca", "Vocho"],
       "Ford Mustang": ["Mustang"],
       "Chevrolet Impala": ["Impala", "Chevy Impala"],
       "Jeep Wrangler": ["Wrangler"],
@@ -1750,9 +1800,22 @@ export const INTENT: Record<string, Intent> = {
       "Springer Spaniel": ["English Springer Spaniel", "Welsh Springer Spaniel"],
     },
   },
+  passwords: {
+    // Coverage audit: spacing never matters elsewhere ("i love you" reads its "i" as the numeral 1).
+    same: { iloveyou: ["i love you", "I love u", "iloveu"] },
+  },
+  retailers: {
+    // All digits, so the automatic aliases drop them as numbers (coverage audit: "7 11" was not 7-Eleven).
+    same: { "Seven & I Holdings": ["7-11", "711", "7/11"] },
+  },
   "athletes-earnings": {
     // The usual spelling of the name, and a typo of it (judge, cycle 5).
-    same: { "Jon Rahm": ["John Rahm", "Jhon Rahm"] },
+    same: {
+      "Jon Rahm": ["John Rahm", "Jhon Rahm"],
+      // Coverage audit: how fans write them.
+      Neymar: ["Neymar Jr", "Neymar Jr."],
+      "Dak Prescott": ["Dak"],
+    },
   },
   // Coverage audit, Nov 8: what players typed that found nothing, or found the wrong answer.
   "pixar-films": {

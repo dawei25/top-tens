@@ -52,6 +52,12 @@ export interface Topic {
    * that isn't numbered ("Limited Series") is named like the thing. `rename` takes "Monster (Season 1)" too.
    */
   part?: string | number;
+  /**
+   * Header text or column index naming the country (or countries) each ranked row is in. It becomes the entry's
+   * `country`, as the country lists name it ("Japan"; ["Brunei", "Indonesia", "Malaysia"] for Borneo), so a typed
+   * country can offer its islands to choose from (owner, on islands: "typing japan should offer Honshu, Okinawa").
+   */
+  countryCol?: string | number;
   /** Take names from cell text instead of the first link's text. */
   nameFromText?: boolean;
   /** Take names from the first link's article title ("Nokia 1100" for a cell showing "1100"). */
@@ -120,6 +126,12 @@ export interface Topic {
    */
   universeCategories?: string[];
   categoryDepth?: number;
+  /**
+   * Most titles taken from each of the topic's categories (default build.ts CATEGORY_CAP). A category reads in
+   * alphabetical order, so a cap it reaches cuts the pool off at a letter ("Premier League players" stopped at "Mb":
+   * no Rashford, Saka or Solskjaer); the build warns when one does.
+   */
+  categoryCap?: number;
   /** Display names for category members, by article title ("Dalmatian dog" is shown as "Dalmatian"); the title stays an alias. */
   categoryRename?: Record<string, string>;
   /** Extra aliases by entry name, for well-known short forms Wikipedia has no redirect for. */
@@ -218,6 +230,8 @@ export interface Also {
   name: string | number;
   nameFromText?: boolean;
   nameFromLink?: boolean;
+  /** Removed from names, as on a topic: the S&P 500's ", Inc." */
+  nameStrip?: RegExp;
   skip?: string[];
   /** Other columns that also name the row (the artist of a tour), as on a topic. */
   aliasCols?: (string | number)[];
@@ -237,6 +251,13 @@ export interface Also {
    * which stops above $200 million. A number at or above the last ranked row's means something else and is dropped.
    */
   value?: string | number;
+  /**
+   * The `name` column lists several answers, each with its own figure in the list's unit: "New York City (324),
+   * Jersey City (22), Fort Lee (2)" (a metro area's cities). Each one named there is an unranked answer showing its
+   * figure (below the last ranked row's, as with `value`); the row itself adds nothing. List such a source before
+   * the others, so its figures win over a namesake with none.
+   */
+  counts?: boolean;
   /**
    * These tables rank the same thing for another year or by another source (the 2024 top 10 on a 2025 list, a 2016
    * survey): an unranked answer shows its latest rank and figure from them, labelled so it can't pass for the
@@ -270,6 +291,11 @@ export interface Dated {
   figure?: string;
   /** The name cell ends with the figure ("Tencent 688,000"): the number is the figure, the rest the name. */
   figureInName?: boolean;
+  /**
+   * Between this table's figure and one of the same year from another `largest` table, the bigger wins, not the
+   * first listed: a game's own platform, not a re-release ("Super Mario Bros. 3": NES, not the Wii's 1.0 million).
+   */
+  largest?: boolean;
   /**
    * A table with one row per year (each year's top tour, the record as it grew): `col` holds the row's year (the
    * latest, if it lists several), which fills "{year}" in the label row by row, and `rank` is the rank every row
@@ -381,34 +407,35 @@ const DOG_NAMES: Record<string, string> = {
 /**
  * The notable hedge fund firms "List of hedge funds" lists in bullets (Americas, Asia-Pacific, EMEA), with the short
  * forms people say, less the 17 its ranked table already has. Unranked accepted answers on hedge-funds (the build
- * reads tables only). Names are the article titles without ", LLC"; a one-word short form that is a plain word
- * ("Sculptor", "Fortress", "Maverick") is left out: the matcher reads a word of a longer name by itself.
+ * reads tables only). Names are the article titles without ", LLC". A one-word short form that is a plain word
+ * ("Sculptor", "Fortress", "Greenlight") is listed too: the matcher never reads a plain word as a word of an
+ * unranked name with no figure (coverage audit). So is the founder people name the firm by ("Michael Burry").
  */
 const HEDGE_FUND_FIRMS: Record<string, string[]> = {
   // Americas
   "Acadian Asset Management": [], "Adage Capital Management": ["Adage Capital"], "Alphadyne Asset Management": [],
   "AlphaSimplex Group": ["AlphaSimplex"], "Altimeter Capital": [], "Angelo Gordon": ["Angelo, Gordon & Co."],
-  "Appaloosa Management": [], "Archegos Capital Management": ["Archegos", "Archegos Capital"],
+  "Appaloosa Management": ["Appaloosa", "David Tepper"], "Archegos Capital Management": ["Archegos", "Archegos Capital"],
   "Assured Investment Management": [], "Atlantic Investment Management": [], "Aurelius Capital Management": [],
   "Avenue Capital Group": ["Avenue Capital"], "Baker Brothers Advisors": [], "Balyasny Asset Management": ["Balyasny"],
   "Beach Point Capital Management": [], "Bracebridge Capital": [], "Canyon Capital Advisors": [],
   "Capstone Investment Advisors": [], "Coatue Management": ["Coatue"], "Deerfield Management": [],
   "Discovery Capital Management": [], "Dragoneer Investment Group": ["Dragoneer"], "Ellington Management Group": [],
   "Engineers Gate": [], "ESL Investments": [], "ExodusPoint Capital Management": ["ExodusPoint"],
-  "Farallon Capital": ["Farallon", "Farallon Capital Management"], "Fortress Investment Group": [],
+  "Farallon Capital": ["Farallon", "Farallon Capital Management"], "Fortress Investment Group": ["Fortress"],
   "Garda Capital Partners": [], "GCM Grosvenor": [], "Glenview Capital Management": ["Glenview Capital"],
-  "Graham Capital Management": ["Graham Capital"], "Gramercy Funds Management": [], "Greenlight Capital": [],
+  "Graham Capital Management": ["Graham Capital"], "Gramercy Funds Management": [], "Greenlight Capital": ["Greenlight", "David Einhorn"],
   "Harbinger Capital": [], "HBK Investments": ["HBK"], "Highbridge Capital Management": ["Highbridge Capital", "Highbridge"],
   "Highfields Capital Management": [], "Himalaya Capital": [], "Hudson Bay Capital Management": ["Hudson Bay Capital"],
   "Jain Global": [], "JANA Partners": ["JANA Partners LLC"], "K2 Advisors": [],
   "King Street Capital Management": ["King Street Capital"], "Lighthouse Investment Partners": [], "Lone Pine Capital": ["Lone Pine"],
-  "Magnetar Capital": [], "Marathon Asset Management": [], "Maverick Capital": [], "Moore Capital Management": ["Moore Capital"],
+  "Magnetar Capital": [], "Marathon Asset Management": [], "Maverick Capital": ["Maverick"], "Moore Capital Management": ["Moore Capital"],
   OrbiMed: [], "Ospraie Management": ["Ospraie Management, LLC"], "PanAgora Asset Management": [], "Pantera Capital": [],
   "Paulson & Co.": ["Paulson & Company"], "PDT Partners": [], "Perceptive Advisors": [],
-  "Pershing Square Capital Management": ["Pershing Square"],
-  "Quantum Fund": ["Quantum Group of Funds", "Soros Fund Management"], "RA Capital Management": [],
+  "Pershing Square Capital Management": ["Pershing Square", "Bill Ackman"],
+  "Quantum Fund": ["Quantum Group of Funds", "Soros Fund Management", "Soros", "Soros Fund", "George Soros"], "RA Capital Management": [],
   "Revere Capital Advisors": [], "Saba Capital Management": ["Saba Capital"], "Schonfeld Strategic Advisors": ["Schonfeld"],
-  "Scion Asset Management": ["Scion Capital"], "Sculptor Capital Management": ["Sculptor Capital", "Och-Ziff", "Och-Ziff Capital Management"],
+  "Scion Asset Management": ["Scion Capital", "Scion", "Michael Burry"], "Sculptor Capital Management": ["Sculptor Capital", "Och-Ziff", "Och-Ziff Capital Management", "Sculptor"],
   "Silver Point Capital": [], "SkyBridge Capital": ["SkyBridge"], "SPX Capital": [], "Squarepoint Capital": ["Squarepoint"],
   "Statar Capital": [], "Sylebra Capital": [], "TGS Management": [], "Third Point Management": ["Third Point"],
   "Tiger Global Management": ["Tiger Global"], "Touradji Capital Management": [], "Trian Partners": [],
@@ -416,6 +443,12 @@ const HEDGE_FUND_FIRMS: Record<string, string[]> = {
   "ValueAct Capital": ["ValueAct"], "Verition Fund Management": ["Verition"], "Viking Global Investors": ["Viking Global"],
   "Voloridge Investment Management": ["Voloridge"], "Walleye Capital": [], "Waterfall Asset Management": [],
   WorldQuant: [], "Wynnefield Capital": [], "Voleon Group": ["Voleon"], "York Capital Management": ["York Capital"],
+  // Famous hedge funds the page leaves out (player notes on Point72; coverage audit): answers, unranked. SAC Capital
+  // became Point72 in 2014.
+  "Point72 Asset Management": ["Point72", "Point 72", "S.A.C. Capital Advisors", "SAC Capital", "SAC Capital Advisors", "Steve Cohen"],
+  "Baupost Group": ["Baupost", "Seth Klarman"], "Tiger Management": ["Tiger Management Corp", "Julian Robertson"],
+  "Long-Term Capital Management": ["LTCM", "Long Term Capital Management"], "Melvin Capital": ["Melvin Capital Management", "Melvin"],
+  "Starboard Value": ["Starboard"],
   // Asia-Pacific
   "BFAM Partners": [], "Dymon Asia": [], "Greenwoods Asset Management": [], "High-Flyer": [],
   "Hillhouse Capital Group": ["Hillhouse Capital", "Hillhouse"], "Lingjun Investment": [], "Maso Capital": [],
@@ -435,16 +468,15 @@ const HEDGE_FUND_FIRMS: Record<string, string[]> = {
 /**
  * Finance firms a player may name on hedge-funds that aren't hedge funds there: free, and real names, so none is ever
  * read as one ("citadel securities" is not Citadel, "two sigma securities" not Two Sigma). The proprietary trading
- * firms and market makers first (what finance people type), then famous hedge funds the page doesn't list and the
- * big asset managers and banks.
+ * firms and market makers first (what finance people type), then holding companies, the big asset managers and
+ * banks. Real hedge funds the page doesn't list (Point72, Baupost, Tiger Management) are answers: HEDGE_FUND_FIRMS.
  */
 const NOT_HEDGE_FUNDS = [
   "Two Sigma Ventures", "Jane Street", "Jane Street Capital", "Citadel Securities", "Citadel Securities LLC", "Jump Trading", "Hudson River Trading", "HRT", "Optiver",
   "Susquehanna International Group", "SIG", "Virtu Financial", "Virtu", "IMC Trading", "IMC", "DRW", "DRW Trading",
   "Tower Research Capital", "Tower Research", "XTX Markets", "XTX", "Flow Traders", "Akuna Capital", "Five Rings",
   "Wolverine Trading", "Old Mission Capital", "Peak6", "Two Sigma Securities", "Jump Crypto",
-  "Point72", "Point72 Asset Management", "Baupost Group", "Tiger Management", "Long-Term Capital Management", "LTCM",
-  "Melvin Capital", "S.A.C. Capital Advisors", "SAC Capital", "Icahn Enterprises", "Starboard Value", "Berkshire Hathaway",
+  "Icahn Enterprises", "Berkshire Hathaway",
   "Blackstone", "KKR", "Apollo Global Management", "Carlyle Group", "Bain Capital", "Brookfield Asset Management",
   "Vanguard", "Fidelity Investments", "State Street", "JPMorgan Chase", "Morgan Stanley",
 ];
@@ -708,6 +740,10 @@ export const TOPICS: Topic[] = [
     value: "Area",
     metric: "Area",
     unit: " km²",
+    // Each island's country, for the matcher: "japan" offers Honshu, Hokkaido, Okinawa to choose from (owner).
+    countryCol: "Nation",
+    // Coverage audit: what Hawaii's people call the island.
+    aliases: { "Hawaiʻi": ["Big Island", "Hawaii Island", "Big Island of Hawaii"] },
     values: { kind: "area" },
     universe: "countries",
     also: [{ page: "List of archipelagos", tables: [0], name: 0 }],
@@ -812,7 +848,8 @@ export const TOPICS: Topic[] = [
       "Titanic DVD Release", "Titanic DVD", "Titanic VHS", "Titanic 5 Disc", "Titanic Blu-ray", "Titanic 3D",
       "The Super Mario Bros. Movie 3", "Pratt Mario",
     ],
-    skip: ["Harry Potter and the Sorcerer's Stone"],
+    // The cost table's short title for #50, Rogue One: A Star Wars Story (whose cell links a redirect).
+    skip: ["Harry Potter and the Sorcerer's Stone", "Rogue One"],
   },
   {
     id: "youtube-channels",
@@ -901,10 +938,29 @@ export const TOPICS: Topic[] = [
     value: "Sales",
     metric: "Copies sold (millions)",
     works: true,
+    // Coverage audit: the table stops near 25 million and the categories skip classic best-sellers (Nintendogs,
+    // Brain Age, Super Mario World, Diablo III). Each platform's best-seller list gives them its figure, saying
+    // which platform it counts ("24.0 million (on Nintendo DS)"); the platform with the most wins.
+    also: (
+      [
+        ["List of best-selling Nintendo Switch video games", 0, "Title", "Copies sold", "Nintendo Switch"],
+        ["List of best-selling Nintendo DS video games", 0, "Game", "Copies sold", "Nintendo DS"],
+        ["List of best-selling Wii video games", 1, "Game", "Copies sold", "Wii"],
+        ["List of best-selling PlayStation 4 video games", 0, "Game", "Copies sold", "PlayStation 4"],
+        ["List of best-selling PlayStation 2 video games", 0, "Game", "Copies sold", "PlayStation 2"],
+        ["List of best-selling PC games", 0, "Game", "Total copies sold", "PC"],
+        ["List of best-selling Xbox 360 video games", 0, "Game", "Copies sold", "Xbox 360"],
+        ["List of best-selling Nintendo Entertainment System video games", 1, "Game", "Sales", "NES"],
+        ["List of best-selling Super Nintendo Entertainment System video games", 1, "Game", "Sales", "SNES"],
+        ["List of best-selling Game Boy video games", 1, "Game", "Sales", "Game Boy"],
+      ] as const
+    ).map(([page, t, name, value, on]) => ({ page, tables: [t], name, value, dated: { label: `on ${on}`, scale: 1e6, unit: " million", largest: true } })),
     universeCategories: ["The Game Awards winners", "Golden Joystick Award for Game of the Year winners", "Spike Video Game Awards Game of the Year winners", "Video games adapted into films", "Open-world video games", "Namco arcade games", "Arcade video games"],
-    // People, teams, studios and a show among the award categories.
+    // The 1997 game by its year: "grand theft auto" means the series (intent.ts offers its games).
+    categoryRename: { "Grand Theft Auto (video game)": "Grand Theft Auto (1997)" },
+    // People, teams, studios and a show among the award categories; the Grand Theft Auto series' article.
     skip: [
-      "Ludwig Ahgren", "Laura Bailey", "Greg Miller", "Amir Satvat", "Carol Shaw", "Boogie2988", "Bugha", "Chovy", "SonicFox",
+      "Grand Theft Auto", "Ludwig Ahgren", "Laura Bailey", "Greg Miller", "Amir Satvat", "Carol Shaw", "Boogie2988", "Bugha", "Chovy", "SonicFox",
       "Cloud9", "G2 Esports", "Ninjas in Pyjamas", "CD Projekt Red", "Arcane",
     ],
     junkAliases: [
@@ -951,6 +1007,24 @@ export const TOPICS: Topic[] = [
     metric: "Copies sold (approx.)",
     // A half-translated Japanese title with a stray parenthesis.
     also: [{ tables: [9, 10, 11, 12], name: "Book", skip: ["六星占術によるあなたの運命 Tells Your Fortune)"] }],
+    // Coverage audit: players who find Philosopher's Stone try the rest of the series, and the page lists only the
+    // first two. Single books no table here has: answers, unranked.
+    more: {
+      "Harry Potter and the Prisoner of Azkaban": ["Prisoner of Azkaban"],
+      "Harry Potter and the Goblet of Fire": ["Goblet of Fire"],
+      "Harry Potter and the Order of the Phoenix": ["Order of the Phoenix"],
+      "Harry Potter and the Half-Blood Prince": ["Half-Blood Prince", "Half Blood Prince"],
+      "Harry Potter and the Deathly Hallows": ["Deathly Hallows"],
+      "The Lion, the Witch and the Wardrobe": ["The Lion the Witch and the Wardrobe"],
+      "Animal Farm": [], "Nineteen Eighty-Four": ["1984"], "The Great Gatsby": [], "To Kill a Mockingbird": [],
+      "Pride and Prejudice": [], "The Hunger Games": [], "Twilight": [], "The Fault in Our Stars": [],
+    },
+    // Series and religious or political texts are outside the prompt: free, and still real names.
+    knownOnly: [{ tables: [4, 5, 6, 7, 8], name: "Book series" }],
+    knownNames: [
+      "The Bible", "Bible", "Quran", "Koran", "Quotations from Chairman Mao Tse-tung", "Little Red Book",
+      "The Lord of the Rings", "LOTR", "Narnia", "Harry Potter series",
+    ],
     works: true,
     junkAliases: [
       "The Da Vinci Code paintings", "Lord of the Rings Prequel", "Vengeance", "Roger Cly", "Mrs. Cruncher",
@@ -976,6 +1050,19 @@ export const TOPICS: Topic[] = [
     // Authors with only a high estimate (Lewis Carroll, David Baldacci, Patricia Cornwell) are answers without a
     // rank: a miss shows that figure.
     also: [{ tables: [0], name: "Author", value: "Max. estimated sales", dated: { label: "high estimate only" } }],
+    // Coverage audit: the page leaves these out "because no exact figures could be found, although it is possible
+    // that they too have more than 100 million copies" (its own words), then famous authors it doesn't name. Answers,
+    // unranked, by surname too ("dickens").
+    more: {
+      "Jane Austen": ["Austen"], "Miguel de Cervantes": ["Cervantes"], "Alexandre Dumas": ["Dumas"],
+      "Charles Dickens": ["Dickens"], "Arthur Conan Doyle": ["Conan Doyle"], "Victor Hugo": ["Hugo"],
+      "Jules Verne": ["Verne"], "Ernest Hemingway": ["Hemingway"], "Jack Higgins": ["Higgins"],
+      "Isaac Asimov": ["Asimov"], "Leon Uris": ["Uris"], "Mark Twain": ["Twain"],
+      "Fyodor Dostoevsky": ["Dostoevsky", "Dostoyevsky"], "Leo Tolstoy": ["Tolstoy"], "Edgar Allan Poe": ["Poe"],
+      "Suzanne Collins": [], "George R. R. Martin": ["George RR Martin", "GRRM"], "Rick Riordan": ["Riordan"],
+      "Neil Gaiman": ["Gaiman"], "Terry Pratchett": ["Pratchett"],
+    },
+    aliases: { "Eiichiro Oda": ["Oda"] },
     // Books, relatives, companies and studies among the redirects (pen names stay: Mary Westmacott, Robert Galbraith).
     junkAliases: [
       "William Shakespeare biography", "Shakespearean theatre", "Shakespearean scholar", "Shakespearian studies",
@@ -1031,6 +1118,12 @@ export const TOPICS: Topic[] = [
     junkAliases: ["B-12PP", "Central Park", "Trump International Hotel and", "Signiel"],
     // Famous, completed, and missing from the tables (it would otherwise be corrected to Burj Almasa).
     more: { "Burj Al Arab": ["Burj al-Arab"] },
+    // Towers that aren't buildings (no floors to live or work on): free, and real names ("skytree" read as junk).
+    knownNames: [
+      "Tokyo Skytree", "Skytree", "CN Tower", "Canton Tower", "Oriental Pearl Tower", "Ostankino Tower", "Eiffel Tower",
+      "Space Needle", "Tokyo Tower", "Milad Tower", "Kuala Lumpur Tower", "KL Tower", "Berliner Fernsehturm",
+      "Sky Tower", "Stratosphere", "Strat",
+    ],
   },
 
   // Sports
@@ -1115,7 +1208,50 @@ export const TOPICS: Topic[] = [
       { page: "List of public corporations by market capitalization", tables: [0], name: "Company", skip: MARKET_CAP_SKIP },
       { page: "List of public corporations by market capitalization", tables: range(1, 27), name: 2, skip: MARKET_CAP_SKIP },
       { page: "List of public corporations by market capitalization", tables: range(1, 27), name: 4, skip: MARKET_CAP_SKIP },
+      // Coverage audit: only 75 companies were answers, so Home Depot, Coca-Cola and Sony were "not one of the
+      // companies here". The US (Fortune 500) and European (Fortune Global 500) revenue rankings give misses a dated
+      // figure, without their regional rank (it would read as the world's); the S&P 500 adds the household names.
+      {
+        page: "List of largest companies in the United States by revenue",
+        tables: [0],
+        name: "Name",
+        value: "Revenue",
+        dated: { label: "2025", source: "Fortune 500", scale: 1e3, prefix: "$", unit: " billion" },
+      },
+      {
+        page: "List of largest companies in the United States by revenue",
+        tables: [1],
+        name: "Name",
+        value: "Revenue",
+        dated: { label: "2025", source: "Forbes, private", prefix: "$", unit: " billion" },
+      },
+      {
+        page: "List of largest companies in Europe by revenue",
+        tables: [1],
+        name: "Company",
+        value: "Revenue",
+        dated: { label: "2026", source: "Fortune Global 500", scale: 1, prefix: "$", unit: " billion" },
+      },
+      {
+        page: "List of S&P 500 companies",
+        tables: [0],
+        name: "Security",
+        nameStrip: /,?\s+(Inc\.?|Incorporated|Corporation|Corp\.|plc|N\.V\.)$/,
+        // The revenue table's names for the same companies; and full names for those a plain word names ("ball").
+        rename: {
+          "TJX Companies": "TJX", "Capital One": "Capital One Financial", Verizon: "Verizon Communications",
+          Ball: "Ball Corporation", Dover: "Dover Corporation", Waters: "Waters Corporation", Coherent: "Coherent Corp",
+          Block: "Block Inc", Tapestry: "Tapestry Inc",
+        },
+      },
     ],
+    // Famous companies no table here lists (coverage audit): answers, unranked. Siemens is in the European table.
+    more: {
+      Huawei: [], Honda: ["Honda Motor"], "Hyundai Motor Company": ["Hyundai", "Hyundai Motor"], Sony: ["Sony Group"],
+      Pemex: [], "JD.com": ["JD"], BYD: ["BYD Auto"], LVMH: ["Louis Vuitton Moët Hennessy"], Xiaomi: [], Nintendo: [],
+      Nissan: [], Panasonic: [], Hitachi: [], "Tata Group": ["Tata"], "Reliance Industries": ["Reliance"],
+      "Mitsubishi Corporation": ["Mitsubishi"],
+    },
     // Junk among the redirects: COMPANY_JUNK in scripts/aliases.ts, shared by every company list.
     webNames: true,
   },
@@ -1234,6 +1370,9 @@ export const TOPICS: Topic[] = [
       { page: "Ballon d'Or", tables: [2], name: "Player" },
     ],
     universeCategories: ["First Division/Premier League top scorers", "Premier League Hall of Fame inductees", "English Football Hall of Fame inductees", "Premier League players"],
+    // Every Premier League player: the default cap of 3,000 stopped the category at "Mb" (coverage audit: no
+    // Rashford, Saka, Palmer, Solskjaer or Fernando Torres).
+    categoryCap: 12000,
     junkAliases: ["Elen Rivas", "Nicole Merry", "Tommy Rooney", "Sergioaguero.com"],
   },
   {
@@ -1358,12 +1497,27 @@ export const TOPICS: Topic[] = [
     value: "Streams",
     metric: "Streams (billions)",
     works: true,
-    also: [{ tables: [4], name: "Song" }],
-    universeCategories: ["Billboard Hot 100 number-one singles"],
+    // Coverage audit: only Hot 100 number ones were answers, so "levitating", "shivers", "heathens" and most
+    // billion-stream hits were "not one of the songs here". The page's other song tables, every Billboard Year-End
+    // Hot 100 of the streaming era and the UK and Global 200 number ones widen it.
+    also: [
+      { tables: [2, 4, 6, 7, 9, 10, 12, 13, 15, 16, 17, 18], name: "Song" },
+      ...Array.from({ length: 26 }, (_, i) => ({ page: `Billboard Year-End Hot 100 singles of ${2000 + i}`, tables: [0], name: "Title" })),
+    ],
+    universeCategories: ["Billboard Hot 100 number-one singles", "UK singles chart number-one singles", "Billboard Global 200 number-one singles"],
+    // Classics and streaming staples no chart table here lists.
+    more: {
+      "Stairway to Heaven": [], "We Will Rock You": [], "Here Comes the Sun": [], "Fix You": [], "Seven Nation Army": [],
+      Rasputin: [], "Ocean Eyes": [], "Count on Me": [], Faded: [], Mockingbird: [], "Till I Collapse": [], Nights: [],
+      "Do I Wanna Know?": ["Do I Wanna Know"], "Smells Like Teen Spirit": [], "Mr. Brightside": ["Mr Brightside"],
+      "Don't Stop Me Now": [], "Wonderwall": [], "Hotel California": [], "Back in Black": [], "Sweet Caroline": [],
+      "Don't Stop Believin'": ["Dont Stop Believing", "Don't Stop Believing"], "Riptide": [], "Electric Feel": [],
+      "Somebody That I Used to Know": [],
+    },
     titleCase: true,
     // A phrasal verb keeps its capital (the article is "Take On Me").
     rename: { "Take on Me": "Take On Me" },
-    aliases: { "Sweet Child O' Mine": ["Sweet Child of Mine"], "7 Rings": ["Seven Rings"] },
+    aliases: { "Sweet Child O' Mine": ["Sweet Child of Mine"], "7 Rings": ["Seven Rings"], "Shape of You": ["Shape of U"] },
   },
   {
     id: "albums",
@@ -1494,8 +1648,23 @@ export const TOPICS: Topic[] = [
     works: true,
     // The computer-animated, stop-motion and traditionally animated top 50s, each with its worldwide gross: Cars 2,
     // Aladdin and Coraline show and score theirs.
-    also: [{ tables: [1, 2, 3], name: "Title", value: "Worldwide gross" }],
-    aliases: { "Minions: The Rise of Gru": ["Minions 2"] },
+    also: [
+      { tables: [1, 2, 3], name: "Title", value: "Worldwide gross" },
+      // Coverage audit: Toy Story 2, WALL-E, Cars and How to Train Your Dragon were "not one of the animated films
+      // here" (or corrected to a sequel), though the page's by-year and franchise tables give their grosses. The
+      // franchise tables mix series totals in: only film rows (no film count in column 3).
+      { tables: [4], name: "Title", value: "Worldwide gross" },
+      { tables: range(9, 47), name: 1, value: 2, nameFromLink: true, where: { col: 3, match: /^$/ } },
+    ],
+    // The big studios' films, for the famous ones no table above lists (Encanto, Elemental): answers, unranked.
+    universeCategories: [
+      "Pixar animated films", "Walt Disney Animation Studios films", "DreamWorks Animation films",
+      "Illumination (company) animated films", "Sony Pictures Animation films", "Studio Ghibli animated films",
+      "Blue Sky Studios films",
+    ],
+    // Not answers: a blank cell, a gross in euros, and the studios' films not out yet.
+    skip: ["—N/a", "The Enchanted Sword", "Coco 2", "Incredibles 3", "Frozen 3", "Shrek 5", "KPop Demon Hunters 2"],
+    aliases: { "Minions: The Rise of Gru": ["Minions 2"], Zootopia: ["Zootropolis"] },
     junkAliases: [
       "Inside Out 3", "Zootopia Three", "Frozen IIII", "Jikŋon 2", "Frozen fandom", "Frozen Reo Māori", "The Lion King 4",
       "The Super Mario Bros. Movie 3", "Pratt Mario",
@@ -1548,14 +1717,26 @@ export const TOPICS: Topic[] = [
     name: "Franchise",
     value: "Sales",
     metric: "Copies sold (millions)",
-    universeCategories: ["Video game franchises"],
+    // Coverage audit: the top category alone missed Warcraft, Fortnite, League of Legends and The Last of Us; its
+    // franchises sit in the "introduced in" year categories.
+    universeCategories: [
+      "Video game franchises",
+      // Wikipedia has these years (none for 1970, 1972-1977, 2020, 2021, 2024 or 2025).
+      ...[1971, ...range(1978, 2019), 2022, 2023].map((y) => `Video game franchises introduced in ${y}`),
+    ],
     // A spin-off article, and sub-series counted in Mario and Final Fantasy (intent.ts gives the series their names).
     skip: [
       "Educational games in the Sonic the Hedgehog series", "Mario Party", "Mario Kart", "Compilation of Final Fantasy VII",
       "Final Fantasy Crystal Chronicles", "Fabula Nova Crystallis Final Fantasy",
     ],
     // Famous franchises the category misses ("uncharted" was corrected to Uncharted Waters, "pacman" to Rayman).
-    more: { Uncharted: [], "Pac-Man": ["Pacman", "Pac Man"] },
+    // Free-to-play series sell no copies, so no category or table here has them (coverage audit): answers, unranked.
+    more: {
+      Uncharted: [], "Pac-Man": ["Pacman", "Pac Man"], Fortnite: [], "League of Legends": [], Valorant: [],
+      "Rocket League": [], "Fall Guys": [], "Among Us": [], "Genshin Impact": ["Genshin"], "Apex Legends": ["Apex"],
+      Roblox: [], "Candy Crush": ["Candy Crush Saga"], "Space Invaders": [], "Elden Ring": [], "Dota": ["Dota 2"],
+      "PUBG": ["PlayerUnknown's Battlegrounds"], "Clash of Clans": [], "Overwatch": [],
+    },
     junkAliases: [
       "Kamek", "King Boo", "Boo", "Boo Diddley", "E. Gadd", "I have fury!", "Caety Sagoian", "Catey Sagoian", "Mario Clock",
       "Mario Calculator", "POW Block", "Pokemon types", "Pokémon types", "Poke Ball", "Poké Ball", "Pokedex", "Pokédex",
@@ -1601,6 +1782,21 @@ export const TOPICS: Topic[] = [
     keepOrder: true,
     lowerIsBetter: true,
     aliasCols: ["Domain"],
+    // Coverage audit: only social networks and search engines were answers, so "snapchat" was corrected to
+    // Stripchat and Discord, Spotify and the BBC were "not one of the websites here".
+    also: [{ page: "List of social platforms with at least 100 million active users", tables: [0, 1], name: "Name" }],
+    more: {
+      Snapchat: ["Snap Chat"], Discord: [], Spotify: [], IMDb: [], CNN: ["cnn.com"], BBC: ["BBC News", "bbc.co.uk", "bbc.com"],
+      "The New York Times": ["New York Times", "NYT", "nytimes.com"], PayPal: [], AliExpress: [], Shein: [], Quora: [],
+      OnlyFans: [], "Walmart.com": ["Walmart"], DeepSeek: [], MSN: ["msn.com"], Gmail: [], Tumblr: [], "4chan": [],
+      "9GAG": [], Roblox: [], Steam: [], Etsy: [], Craigslist: [], Airbnb: [], "Booking.com": ["Booking"], Tripadvisor: [],
+      "Stack Overflow": [], Imgur: [], Hulu: [], "Disney+": ["Disney Plus"], "Google Maps": [], "Google Translate": [],
+      "Google Drive": [], "Google Docs": [], "Yahoo Mail": [], Dropbox: [], Indeed: [], "Fox News": [], "Daily Mail": [],
+      "The Guardian": ["Guardian"], "The Washington Post": ["Washington Post"], Threads: [], Perplexity: [],
+      "Character.ai": ["Character AI"], "Microsoft Copilot": ["Copilot"], Wordle: [], Duolingo: [], Shopify: [],
+      Zillow: [], Grok: [], "Prime Video": ["Amazon Prime Video"], "Apple Music": [], SoundCloud: [], Vimeo: [],
+      Medium: [], "WordPress.com": ["WordPress"], Wix: [], Flipkart: [], Rakuten: [], "Mercado Libre": [], Zalando: [],
+    },
     universeCategories: ["Social networking services", "Internet search engines"],
     // The categories also hold articles about the field ("Search engine bias", "Anchor text") and protocols.
     categoryNames: true,
@@ -1859,6 +2055,18 @@ export const TOPICS: Topic[] = [
     aliases: { "Second French colonial empire": ["French Empire", "French colonial empire"] },
     // Two Xiongnu rows: the smaller is the western state; "Xiongnu" means the empire (intent.ts).
     rename: { Xiongnu: "Western Xiongnu" },
+    // Coverage audit: the Soviet Union, a common guess, is only in the page's table of each era's largest state, not
+    // ranked as an empire: an answer with that figure, saying it isn't ranked. Nazi Germany has none on the page.
+    also: [
+      {
+        tables: [2],
+        name: "Empire",
+        value: "Million km",
+        where: { col: "Empire", match: /^Soviet Union$/ },
+        dated: { source: "not ranked here", unit: " million km²", perYear: { col: "Approximate period" } },
+      },
+    ],
+    more: { "Nazi Germany": ["Third Reich", "Greater German Reich"] },
     junkAliases: ["Empire", "British occupation", "British Asia"],
   },
   {
@@ -1896,6 +2104,12 @@ export const TOPICS: Topic[] = [
     metric: "Visitors per year",
     // Not the Paris galleries category: commercial galleries with no visitor figures.
     universeCategories: ["Museums in London", "Museums in New York City"],
+    // Coverage audit: "palace museum" was corrected to Taipei's National Palace Museum (#46). The source leaves
+    // palaces out on purpose (Beijing's Palace Museum, Versailles): answers, unranked, with no figure here.
+    more: {
+      "Palace Museum": ["Forbidden City", "Palace Museum Beijing", "Beijing Palace Museum"],
+      "Palace of Versailles": ["Versailles", "Chateau de Versailles"],
+    },
     junkAliases: [
       "Suzanne Brenner", "Sloane library", "British Museum Publications", "The British Museum Press",
       "Www.britishmuseum.org", "Sainsbury African Galleries", "Carre gallery", "Salle des etats", "National 9", "11 Museum",
@@ -1992,14 +2206,14 @@ export const TOPICS: Topic[] = [
       "Two Sigma": ["Two Sigma Investments", "2 Sigma"],
       // The natural reading on a hedge fund list: Goldman's hedge fund arm.
       "Goldman Sachs Asset Management": ["Goldman Sachs", "Goldman", "GSAM"],
-      "Renaissance Technologies": ["RenTech", "Ren Tech", "Renaissance", "Renaissance Tech", "Medallion Fund"],
+      "Renaissance Technologies": ["RenTech", "Ren Tech", "Renaissance", "Renaissance Tech", "Medallion Fund", "Medallion", "Renaissance Medallion"],
       PIMCO: ["Pacific Investment Management Company", "Pacific Investment Management"],
       "Wellington Management": ["Wellington Management Company", "Wellington Management Group"],
       "Davidson Kempner Capital Management": ["Davidson Kempner"],
       "Capula Investment Management": ["Capula"],
       "GoldenTree Asset Management": ["GoldenTree"],
       Ruffer: ["Ruffer Investment Company", "Ruffer LLP"],
-      "D1 Capital Partners": ["D1 Capital"],
+      "D1 Capital Partners": ["D1 Capital", "D1"],
     },
     // "Man Group" without "Group" is the word. Citadel Securities is a market maker of its own (a free guess), and
     // the other redirects are a co-founder, a venture arm and a fraternity.
@@ -2062,7 +2276,34 @@ export const TOPICS: Topic[] = [
         skip: DECEASED_BILLIONAIRES,
         rename: { "Jacques Saadé, jr.": "Jacques Saadé Jr." },
       },
+      // Coverage audit: Jack Ma, Ma Huateng and Zhong Shanshan were "not one of the people here". The 2022 Forbes
+      // list for China gives each one's world rank that year (its W# column).
+      {
+        page: "List of Chinese by net worth",
+        tables: [0],
+        name: "Name",
+        value: "Net worth",
+        dated: { rank: "W#", label: "2022", prefix: "$", unit: " billion" },
+        skip: DECEASED_BILLIONAIRES,
+      },
+      {
+        page: "List of Japanese by net worth",
+        tables: [0],
+        name: "Name",
+        value: "Net Worth",
+        dated: { rank: "#", label: "Japan, 2022", prefix: "$" },
+        skip: DECEASED_BILLIONAIRES,
+      },
     ],
+    // The famous living billionaires a casual player names first, on no table here (coverage audit): answers,
+    // unranked, with a figure where a country's ranking above has one.
+    more: {
+      "Donald Trump": ["Trump"], "Oprah Winfrey": ["Oprah"], "Taylor Swift": [], "Jay-Z": ["Jay Z"],
+      "Kim Kardashian": [], "Michael Jordan": [], "Phil Knight": [], "MacKenzie Scott": [], "George Soros": ["Soros"],
+      "Peter Thiel": ["Thiel"], "Mark Cuban": ["Cuban"], "Rupert Murdoch": ["Murdoch"], Rihanna: [],
+      "Steven Spielberg": ["Spielberg"], "George Lucas": [], "Tyler Perry": [], "Magic Johnson": [],
+      "Changpeng Zhao": ["CZ"], "Richard Branson": ["Branson"], "Jack Dorsey": [], "Evan Spiegel": [],
+    },
     dataAsOf: "2026",
     // Relatives, organizations and jokes among the redirects to the top 10.
     junkAliases: [
@@ -2153,8 +2394,14 @@ export const TOPICS: Topic[] = [
     value: "IMF",
     metric: "GDP per capita (US$)",
     universe: "countries",
-    // Monaco, Bermuda and the other rows with no IMF figure are free: famous rich places with no rank here.
-    unrankedRowsFree: true,
+    // Coverage audit: Monaco, Bermuda and the other rows with no IMF figure were free, but Monaco is the guess
+    // everyone makes. They are answers now, showing the World Bank's figure (its year, if the cell gives one).
+    also: [
+      { tables: [0], name: "Country/Territory", value: "World Bank", where: { col: "World Bank", match: /\(\d{4}\)/ }, dated: { source: "World Bank", perYear: { col: "World Bank" } } },
+      { tables: [0], name: "Country/Territory", value: "World Bank", where: { col: "World Bank", match: /^[\d,.]+$/ }, dated: { label: "2025", source: "World Bank" } },
+    ],
+    // An event and a motto among the redirects.
+    junkAliases: ["Liberation from the Alberoni Occupation", "Mother Colony of the West Indies"],
   },
   {
     id: "population-density",
@@ -2302,54 +2549,6 @@ export const TOPICS: Topic[] = [
     ],
   },
   {
-    id: "theme-parks",
-    category: "Entertainment",
-    title: "Most visited theme parks",
-    noun: "theme parks",
-    placesIn: "world",
-    prompt: "Name the 10 most visited theme parks in the world (2024)",
-    page: "List of amusement park rankings",
-    tables: [1],
-    name: "Amusement park",
-    value: "2024",
-    metric: "Visitors (2024)",
-    // The regional tables have the same 2024 figures for parks outside the world top 25 (Knott's Berry Farm, Cedar
-    // Point), so those show and score theirs (all 46 have one).
-    also: [{ tables: [2, 3, 4, 5], name: "Amusement park", value: "2024" }],
-    universeCategories: ["Walt Disney Parks and Resorts", "Operating amusement parks", "Amusement parks in the United States"],
-    // Resorts (a guess at "Tokyo Disney" means its parks: intent.ts), companies, services and events are no parks.
-    skip: [
-      "Tokyo Disney Resort", "Shanghai Disney Resort", "Disneyland Resort", "Hong Kong Disneyland Resort",
-      "Disney Vacation Club", "Disney PhotoPass", "Virtual queue systems at Disney Parks", "Give a Day, Get a Disney Day",
-      "Disneyland, Inc.", "Euro Disney S.A.S.", "Disney's Fairy Tale Weddings & Honeymoons",
-      "Disneyland Resort Paris 15th Anniversary", "Disney Dream Portrait Series", "Disney Live Entertainment",
-      "Disney Regional Entertainment", "Disney Experiences", "Adventures by Disney", "Disney Magic Kingdoms", "Club Disney",
-      "World of Disney", "Downtown Disney", "Walt Disney Attractions Japan", "Universal Kids Resort",
-      "Hale's Tours of the World", "Port Disney", "Universal Beijing",
-      // Category members that are no park: a racist carnival game, rides, lands, services, events, never-opened parks.
-      "African dodger", "CircusTrix", "Great Old Amusement Parks", "Trolley park", "Behind the Attraction", "E ticket",
-      "Go Away Green", "Hidden Mickey", "MagicBand", "MyMagic+", "Omnimover", "Virtual Magic Kingdom",
-      "Vista-United Telecommunications", "Wild About Safety", "Mickey's Magical Party", "Mickey's Very Merry Christmas Party",
-      "Summer Nightastic!", "Celebration in the Air", "Golden Pass", "Ellen's Energy Adventure", "Pleasure Island",
-      "Adventureland", "Disney's America", "Walt Disney's Riverfront Square", "Disneyland in Australia", "WestCOT",
-      "Disneyland Abu Dhabi", "The Wizarding World of Harry Potter", "20th Century Fox World", "PlayPlace",
-      "Margaritaville Resort Orlando",
-      // Category titles skip by their exact text, qualifier included (Adventureland (Iowa) is a real park).
-      "Golden Pass (Disney)", "Pleasure Island (Walt Disney World)", "20th Century Fox World (Dubai)",
-    ],
-    // #10 is the Paris park; "Disneyland Park" reads like #2.
-    rename: { "Disneyland Park": "Disneyland Paris" },
-    junkAliases: [
-      "It's a Small World", "Find Stitch!", "Tokyo Disney Resort Fireworks", "Villain's Mix and Mingle",
-      "Magic Kingdom Parade", "Disney's Dreams Come True Parade", "Hard Rock Cafe Osaka",
-      "Hard Rock Cafe Universal CityWalk Osaka", "Universal CityWalk Osaka", "Team Disney Anaheim",
-      "DisneySea Transit Steamer Line", "Hollywood Hills Amphitheater", "Disney's Doug Live!", "Chante, C'est Noel",
-      "Epcot '94", "Epcot '95", "America", "USA Pavilion", "Epcot Pavilion", "World Showcase pavilion",
-      "Superstar Television", "The Spirit of Pocahontas", "Streets of America", "Pixar Place", "Critter Country",
-      "Disneyland Heliport", "Walt disney project", "Mickey's Soundsational Parade",
-    ],
-  },
-  {
     id: "us-metros",
     category: "Geography",
     title: "Largest US metro areas",
@@ -2463,7 +2662,24 @@ export const TOPICS: Topic[] = [
     also: [
       { tables: [5], name: "Artist" },
       { page: "List of best-selling music artists", tables: [0, 1, 2, 3, 4, 5], name: "Artist" },
+      // Coverage audit: Sabrina Carpenter, Morgan Wallen, Rosé and Avicii were "not one of the artists here". The
+      // page's yearly top fives and monthly number ones widen it.
+      ...range(1, 5).map((c) => ({ tables: [0], name: c })),
+      ...range(1, 12).map((c) => ({ tables: [6], name: c })),
     ],
+    // Big on Spotify (the lead artists of the most-streamed songs, among others), and on no table here. Their song
+    // tables' artist cells glue several names together ("Mark Ronson and Bruno Mars"), so they are listed by hand.
+    more: {
+      "Twenty One Pilots": ["21 Pilots"], "The Neighbourhood": [], "Lewis Capaldi": [], "Vance Joy": [], "Glass Animals": [],
+      "Tom Odell": [], "James Arthur": [], "The Killers": [], "Tones and I": [], "John Legend": [], Toto: [], "A-ha": [],
+      Passenger: [], "Kate Bush": [], Joji: [], "Lil Nas X": [], Måneskin: ["Maneskin"], "DJ Snake": [], "Major Lazer": [],
+      Khalid: [], "Daft Punk": [], "Lord Huron": [], "Goo Goo Dolls": [], "Luis Fonsi": [], "Mark Ronson": [],
+      "Morgan Wallen": ["Wallen"], Future: [], "Chappell Roan": [], "Benson Boone": [], "Peso Pluma": [],
+      "Metro Boomin": [], "21 Savage": [], "J. Cole": ["J Cole"], "Tyler, the Creator": ["Tyler the Creator"],
+      "Frank Ocean": [], "Playboi Carti": ["Carti"], "Rosé": ["Rose"], Radiohead: [], "Marshmello": [], Kygo: [],
+      "Cardi B": [], "Charlie Puth": [], "Camila Cabello": [], Hozier: [], "Lewis Capaldi": [], OneRepublic: [],
+      "Tate McRae": [], "Teddy Swims": [], "Sabrina Carpenter": [], "Avicii": [], "The Chainsmokers": ["Chainsmokers"],
+    },
     junkAliases: [
       "Starboy", "King Of The Fall", "We're Alone Together", "Monologue Song", "Lady Gaga as a gay icon",
       "Lady Gaga as gay icon", "Coldplay.com", "Pectoralz", "Los Unidades", "Big Fat Noises", "Shakira Bio",
@@ -2719,7 +2935,10 @@ export const TOPICS: Topic[] = [
     category: "Oddball",
     title: "Most common passwords",
     noun: "passwords",
-    prompt: "Name the 10 most common passwords (NordPass 2025)",
+    // A player: "did not specify the number of characters, 88888888 is a popular password but its not even a valid
+    // guess". The ranking is NordPass's count of accounts in 2025 leaks, and an answer is one exact string: 888888
+    // (SplashData) is accepted, 88888888 is on no table here.
+    prompt: "Name the 10 passwords found on the most accounts in NordPass's 2025 study of leaks, exactly as typed",
     page: "List of the most common passwords",
     tables: [0],
     name: "Password",
@@ -2774,6 +2993,18 @@ export const TOPICS: Topic[] = [
         dated: { perYear: { col: "$100 million+" }, figure: "$100 million+" },
       },
     ],
+    // Coverage audit: "alcaraz" was corrected to Canelo (#2), and Tiger Woods, Federer and Mayweather were "not one of
+    // the athletes here". Past stars stay free on purpose (above), but as known names: every older Forbes top 10 on
+    // the page, and today's stars who never made one.
+    knownOnly: [{ tables: range(3, 18), name: "Name" }],
+    knownNames: [
+      "Carlos Alcaraz", "Alcaraz", "Jannik Sinner", "Scottie Scheffler", "Max Verstappen", "Erling Haaland",
+      "Patrick Mahomes", "Jake Paul", "Anthony Joshua", "Rory McIlroy", "Serena Williams", "Virat Kohli", "Mohamed Salah",
+      "Naomi Osaka", "Aryna Sabalenka", "Coco Gauff", "Iga Świątek", "Shai Gilgeous-Alexander", "Victor Wembanyama",
+      "Luka Dončić", "Jayson Tatum", "Caitlin Clark", "Simone Biles", "Usain Bolt", "Kylian Mbappe", "Vinícius Júnior",
+      "Jude Bellingham", "Aaron Judge", "Josh Allen", "Joe Burrow", "Travis Kelce", "Novak Djokovic", "Rafael Nadal",
+      "Tom Brady", "Michael Jordan", "Kobe Bryant", "Tiger Woods", "Roger Federer", "Floyd Mayweather",
+    ],
     // Fights, relatives, staff, companies, pets and jokes among the redirects: CELEBRITY_JUNK, shared with the
     // career lists, where these stars rank too.
   },
@@ -2803,6 +3034,17 @@ export const TOPICS: Topic[] = [
       // Each class's best seller (Mustang, Prius, MX-5).
       { tables: [4], name: "Automobile", value: "Units sold", rename: { "Iso/BMW/VELAM/Romi Isetta": "Isetta" } },
     ],
+    // Coverage audit: famous best-sellers the page lists only as their brand's second (RAV4, CR-V, Escort, Focus,
+    // Silverado): answers, unranked, no figure here. "rav4" read as junk; "altima" was corrected to the Sunny.
+    more: {
+      "Toyota RAV4": ["RAV4", "Rav 4"], "Honda CR-V": ["CR-V", "CRV"], "Chevrolet Silverado": ["Silverado"],
+      "Ram Pickup": ["Ram 1500", "Dodge Ram"], "Ford Escort": ["Escort"], "Ford Focus": ["Focus"],
+      "Toyota Land Cruiser": ["Land Cruiser"], "Toyota Yaris": ["Yaris"], "Ford Explorer": ["Explorer"],
+      "Ford Transit": ["Transit"], "Ford Ranger": ["Ranger"], "Tesla Model 3": ["Model 3"], "Tesla Model Y": ["Model Y"],
+      "Fiat 500": [], "Opel Astra": ["Vauxhall Astra"], "Volkswagen Polo": ["VW Polo", "Polo"],
+      "Volkswagen Jetta": ["VW Jetta", "Jetta"], "Suzuki Swift": [], "Jeep Cherokee": ["Cherokee"],
+      "Chevrolet Corvette": ["Corvette"], "Chevrolet Camaro": ["Camaro"], "Nissan Altima": ["Altima"], "Mini": ["Mini Cooper"],
+    },
     // Platforms, concepts, a lawsuit, maintenance and plain words ("Bug", "Rabbit": "vw bug" still works) among the
     // redirects.
     junkAliases: [
@@ -3121,7 +3363,6 @@ export const TOPICS: Topic[] = [
     // Groups are named by their stores: Schwarz is Lidl and Kaufland, Inditex is Zara, Seven & I is 7-Eleven.
     aliases: {
       "Schwarz Group": ["Lidl", "Kaufland", "Schwarz Gruppe", "Schwarz"],
-      Aldi: ["Aldi Nord", "Aldi Süd", "Aldi Sud"],
       Kroger: ["The Kroger Company", "Kroger Co"],
       "Walgreens Boots Alliance": ["Walgreens", "Boots", "Walgreens Boots"],
       "CVS Health": ["CVS", "CVS Pharmacy"],
@@ -3130,6 +3371,38 @@ export const TOPICS: Topic[] = [
       Inditex: ["Zara"],
       "Seven & I Holdings": ["7-Eleven", "Seven Eleven", "7 Eleven"],
       "Fast Retailing": ["Uniqlo"],
+      // Coverage audit: the stores people shop at, under the group Deloitte ranks (Whole Foods is Amazon's, Trader
+      // Joe's Aldi Nord's, TJ Maxx TJX's).
+      Walmart: ["Sam's Club", "Sams Club", "Flipkart", "Bodega Aurrera"],
+      Amazon: ["Whole Foods", "Whole Foods Market", "Wholefoods"],
+      Aldi: ["Aldi Nord", "Aldi Süd", "Aldi Sud", "Trader Joe's", "Trader Joes"],
+      "TJX Companies": ["TJX", "TJ Maxx", "T.J. Maxx", "TJMaxx", "TK Maxx", "Marshalls", "HomeGoods", "Winners"],
+      Albertsons: ["Safeway", "Vons", "Jewel-Osco", "Shaw's"],
+      "Ahold Delhaize": ["Food Lion", "Stop & Shop", "Albert Heijn", "Hannaford", "Giant Food", "Delhaize", "Ahold"],
+      LVMH: ["Sephora", "Louis Vuitton", "Dior", "Moët Hennessy Louis Vuitton"],
+      Kering: ["Gucci", "Saint Laurent", "Yves Saint Laurent", "Balenciaga", "Bottega Veneta"],
+      "Marks & Spencer": ["M&S", "Marks and Spencer", "Marks & Sparks"],
+      "BJ's Wholesale Club": ["BJ's", "BJs"],
+      "O'Reilly Automotive": ["O'Reilly Auto Parts", "O'Reilly"],
+      "H&M": ["Hennes & Mauritz", "H and M", "Hennes and Mauritz"],
+      "Woolworths Group": ["Woolies"],
+      Gap: ["Old Navy", "Banana Republic"],
+      "Dollar Tree": ["Family Dollar"],
+      "Alimentation Couche-Tard": ["Circle K", "Couche-Tard"],
+      "Sainsbury's": ["Argos", "Sainsburys"],
+      Wesfarmers: ["Bunnings", "Kmart Australia", "Officeworks"],
+      "Loblaw Companies": ["Loblaw", "Loblaws", "Shoppers Drug Mart", "No Frills"],
+      Ceconomy: ["MediaMarkt", "Media Markt"],
+      "Wm Morrison Supermarkets": ["Morrisons", "Morrison's"],
+      "AS Watson Group": ["Watsons", "Superdrug"],
+      "Dirk Rossmann GmbH": ["Rossmann"],
+      "Dick's Sporting Goods": ["Dick's", "Dicks"],
+      "Ross Stores": ["Ross Dress for Less"],
+      "Macy’s": ["Macy's", "Macys"],
+      "Lowe's": ["Lowes"],
+      "Kohl's": ["Kohls"],
+      "John Lewis Partnership": ["Waitrose", "John Lewis"],
+      "The Home Depot": ["Home Depot"],
     },
     // Programs, subsidiaries' products, imprints, short links, a map line and a saint among the redirects.
     junkAliases: [
@@ -3138,6 +3411,16 @@ export const TOPICS: Topic[] = [
       "Amazon Software Download", "Amazon Live", "Amazon Devices", "A.co", "Amzn.to", "Amazon Logistics", "AMZL",
       "AMZL US", "Amazon Affiliates", "AmazonWireless", "Amazon Local", "AmazonLocal", "St. Vitus", "Aldi equator",
       "Aldi-Äquator", "3.cn", "CVS Lookbook",
+      // "kmart" was corrected to Walmart by this redirect (coverage audit).
+      "WMart",
+    ],
+    // Famous retailers outside Deloitte's top 100 (marketplaces and brands aren't counted, the rest are under the
+    // cut): free, and real names. Kmart is the US chain's (Kmart Australia is Wesfarmers', above).
+    knownNames: [
+      "Kmart", "eBay", "Temu", "Apple Store", "Adidas", "Primark", "Rite Aid", "Sears", "Lululemon", "Wayfair",
+      "Wegmans", "Etsy", "AliExpress", "Rakuten", "Mercado Libre", "Zalando", "Burlington", "Bed Bath & Beyond",
+      "Big Lots", "JCPenney", "Dillard's", "Barnes & Noble", "GameStop", "Petco", "PetSmart", "Ulta Beauty",
+      "Foot Locker", "Victoria's Secret", "Sports Direct", "Currys",
     ],
   },
   {
@@ -3233,6 +3516,13 @@ export const TOPICS: Topic[] = [
     aliases: {
       "Law & Order: Special Victims Unit": ["SVU", "Law & Order SVU"],
       "M*A*S*H": ["MASH"],
+      // Coverage audit: the short forms fans write ("ncis la" was corrected to NCIS, #5).
+      "NCIS: Los Angeles": ["NCIS LA", "NCIS Los Angeles"],
+      "9-1-1": ["911", "Nine-One-One"],
+      "How I Met Your Mother": ["HIMYM"],
+      "The Big Bang Theory": ["TBBT", "Big Bang Theory"],
+      "The X-Files": ["X Files", "XFiles"],
+      "Law & Order": ["Law n Order", "L&O", "Law and Order"],
     },
     // Ads, jokes, coming seasons, characters, a lawsuit, a theme song and DVDs among the redirects; a spin-off's city
     // ("los angeles", "miami") names no series.
@@ -3260,6 +3550,13 @@ export const TOPICS: Topic[] = [
       "Breaking Bad", "Better Call Saul", "The Sopranos", "Stranger Things", "The Crown", "Yellowstone", "Euphoria",
       "Doctor Who", "Coronation Street", "EastEnders", "Emmerdale", "Neighbours", "Home and Away", "Top Gear",
       "Futurama", "Rick and Morty", "Archer", "BoJack Horseman",
+      // Coverage audit: shorter spin-offs, which were read as their parent ("law and order criminal intent" was Law &
+      // Order, "ncis hawaii" NCIS), and famous cable dramas the cable table leaves out.
+      "Law & Order: Criminal Intent", "Law and Order: Criminal Intent", "Law & Order: Organized Crime",
+      "Law and Order: Organized Crime", "Law & Order: Trial by Jury", "Law & Order: LA", "Law & Order True Crime",
+      "Law & Order Toronto: Criminal Intent", "NCIS: Hawaiʻi", "NCIS Hawaii", "NCIS: Sydney", "NCIS: Origins",
+      "NCIS: Tony & Ziva", "CSI: Vegas", "CSI: Cyber", "FBI: Most Wanted", "FBI: International", "Chicago Justice",
+      "The Walking Dead", "Pretty Little Liars", "SNL",
     ],
   },
   // Nov 5: the owner's geography picks (docs/OWNER_PICKS.md). Future dailies first, then two for free play only.
@@ -3277,8 +3574,15 @@ export const TOPICS: Topic[] = [
     name: "City",
     value: "No. of skyscrapers",
     metric: "Skyscrapers (150 m+)",
-    also: CITIES,
+    // The metro-area table's "Cities included" give the cities below the main table's cut their own counts (judge:
+    // Taipei 16, Tel Aviv 24, Jersey City 22, Sharjah 26 cost a life with no figure). First, so its figures win.
+    // Singapore keeps the main table's 140 (the metro and height tables say 100): its linked list of tallest
+    // buildings has 141 of 150 m or more.
+    // San Juan (Metro Manila) and Anyang (Seoul's) are named like the pool's Puerto Rican and Chinese cities.
+    also: [{ tables: [1], name: "Cities included", counts: true, skip: ["San Juan", "Anyang"] }, ...CITIES],
     universe: "capitals",
+    // Coverage audit: the island and the borough that hold nearly all of their city's towers.
+    aliases: { "New York City": ["Manhattan"], "Hong Kong": ["Kowloon", "Hong Kong Island"] },
     // The source counts Manila's cities one by one, so "manila" names none of them: free, rather than a costly miss
     // for a region whose 16 cities together have 215 (the page's height table).
     skip: ["Manila", "Metro Manila"],
@@ -3287,6 +3591,9 @@ export const TOPICS: Topic[] = [
       "Petronas Towers", "Petronas Twin Towers", "Petronas", "Burj Khalifa", "Burj Al Arab", "Empire State Building",
       "Chrysler Building", "One World Trade Center", "World Trade Center", "Willis Tower", "Sears Tower", "CN Tower",
       "Eiffel Tower", "The Shard", "Space Needle", "Merdeka 118", "Jeddah Tower", "Abraj Al Bait", "Lotte World Tower",
+      // Skylines under the page's cut of 30 that no city table here lists (coverage audit): free, and real names.
+      "Brisbane", "Gold Coast", "Perth", "Adelaide", "Jeddah", "Monterrey", "Kaohsiung", "Taichung", "Rotterdam",
+      "Benidorm", "La Défense", "Yekaterinburg", "Cebu City", "Sapporo", "Gurugram", "Brooklyn",
     ],
   },
   {
@@ -3520,11 +3827,24 @@ export const TOPICS: Topic[] = [
       Bundesliga: ["German Bundesliga", "Fussball-Bundesliga"],
       "Serie A": ["Italian Serie A"],
       MLS: ["Major League Soccer"],
-      "Ligue 1": ["French Ligue 1", "Ligue Un"],
-      "Campeonato Brasileiro Série A": ["Brasileirão", "Brasileirao", "Brazilian Serie A"],
+      "Ligue 1": ["French Ligue 1", "Ligue Un", "Ligue Une"],
+      "Campeonato Brasileiro Série A": ["Brasileirão", "Brasileirao", "Brazilian Serie A", "Serie A Brazil", "Brazil Serie A"],
+      // Coverage audit: the names fans use for the leagues past #10 (they have no redirects of their own).
+      Eredivisie: ["Dutch Eredivisie"],
+      "Primeira Liga": ["Liga Portugal", "Portuguese Primeira Liga", "Liga NOS"],
+      "Belgian Pro League": ["Jupiler Pro League", "Jupiler League", "Belgian First Division A"],
+      "2. Bundesliga": ["Bundesliga 2", "Second Bundesliga", "German 2. Bundesliga"],
+      "Minor League Baseball": ["MiLB"],
+      "Chinese Basketball Association": ["CBA"],
+      "Indian Super League": ["ISL"],
+      "National Basketball League (Australia)": ["NBL", "Australian NBL"],
+      "J1 League": ["J1", "J.League", "J-League"],
+      "Scottish Premiership": ["SPFL", "Scottish Premier League"],
+      // "A-League" reads as "league" (normalize drops a leading "a"): only the forms that keep it.
+      "A-League Men": ["Aleague", "Australian A-League"],
       "Indian Premier League": ["IPL"],
       "Nippon Professional Baseball": ["NPB"],
-      "Australian Football League": ["AFL"],
+      "Australian Football League": ["AFL", "Aussie rules", "Australian rules football"],
       "EFL Championship": ["English Championship", "EFL"],
       WNBA: ["Women's National Basketball Association"],
       "Kontinental Hockey League": ["KHL"],
@@ -3534,7 +3854,7 @@ export const TOPICS: Topic[] = [
       "KBO League": ["KBO"],
       "Big Bash League": ["Big Bash", "BBL"],
       "Chinese Super League": ["CSL"],
-      "Saudi Professional League": ["Saudi Pro League", "SPL"],
+      "Saudi Professional League": ["Saudi Pro League", "SPL", "Roshn Saudi League", "Saudi League"],
       "Women's Super League": ["WSL"],
       "Swiss National League": ["Swiss hockey league"],
     },
@@ -3558,7 +3878,8 @@ export const TOPICS: Topic[] = [
       "UEFA Champions League", "Champions League", "Europa League", "NCAA", "College football", "March Madness",
       "Super Bowl", "FIFA World Cup", "World Cup", "Olympics", "Olympic Games", "Tour de France", "MotoGP", "IndyCar",
       "Six Nations", "Copa Libertadores", "Ryder Cup", "Wimbledon", "XFL", "UFL", "American League", "National League",
-      "Big Ten",
+      "Big Ten", "LPGA", "LPGA Tour", "USFL", "NCAA basketball", "College basketball", "SEC", "Premier Lacrosse League",
+      "Grand Slam", "World Series", "Stanley Cup", "NBA Finals",
     ],
   },
   {
@@ -3738,6 +4059,11 @@ export const TOPICS: Topic[] = [
       "Beans", "Chickpeas", "Almonds", "Cashews", "Walnuts", "Pistachios", "Coconuts", "Vanilla", "Cinnamon",
       "Black pepper", "Melons", "Cantaloupe", "Honeydew", "Pumpkins", "Broccoli", "Cauliflower", "Carrot", "Wine",
       "Beer", "Bread", "Pasta", "Tofu", "Hops", "Wool", "Flax", "Hemp", "Grains", "Cereals",
+      // Coverage audit: "hay" was corrected to Pork (its "ham"), "sheep milk" to Lamb and mutton, "meat" to Goat meat
+      // and "fruit" to Oil palm fruit. Other milks, fodder and kinds of product are real names, free.
+      "Hay", "Alfalfa", "Silage", "Sheep milk", "Sheep's milk", "Goat milk", "Goat's milk", "Camel milk", "Meat",
+      "Fruit", "Fruits", "Vegetables", "Veg", "Grain", "Dairy", "Poultry", "Livestock", "Crops", "Nuts", "Berries",
+      "Avocado", "Coconut", "Lemon", "Pineapple", "Pear", "Cherry", "Pumpkin",
     ],
   },
 ];

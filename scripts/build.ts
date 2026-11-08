@@ -30,6 +30,10 @@ const LINK = new WeakMap<Entry, string | undefined>();
 /** Aliases an unranked entry takes from other columns (the artist of a tour): names of something else, so they never
  * make it the same thing as another entry. */
 const COLUMN_ALIASES = new WeakMap<Entry, Set<string>>();
+/** Aliases an unranked entry only has as short forms cut from its name ("Demon Slayer"), not as a name its cell says. */
+const SHORT = new WeakMap<Entry, Set<string>>();
+/** Entries from a topic's categories, whose ARTICLE is the member's own title. */
+const FROM_CATEGORY = new WeakSet<Entry>();
 const ownForms = (e: Entry) => [e.name, ...e.aliases.filter((a) => !COLUMN_ALIASES.get(e)?.has(a))];
 
 const SPELLED_OUT: Record<string, string> = { st: "saint", ste: "sainte", mt: "mount", ft: "fort" };
@@ -77,6 +81,28 @@ interface Row {
   tag?: string;
   /** The name it shares with such a namesake ("The Lion King" for "The Lion King (1994)"). */
   plain?: string;
+  /** The countries the row is in (`countryCol`), as the country lists name them. */
+  country?: string[];
+}
+
+/** An entry as built: the puzzle format, plus the countries a place is in where the topic reads them. */
+type BuiltEntry = Entry & { country?: string | string[] };
+
+/**
+ * The countries a cell names, one per line, as the countries universe names them: "Republic of Ireland" is Ireland,
+ * "Danish Realm" Denmark, "Timor-Leste" East Timor. Asides ("(Kingdom of Denmark)") and unknown names are left out;
+ * the unknown ones are listed for gazetteer.ts or COUNTRY_FORMS.
+ */
+export function cellCountries(cell: Pick<Cell, "lines" | "text"> | undefined, unknown?: Set<string>): string[] {
+  const out: string[] = [];
+  for (const line of cell?.lines.length ? cell.lines : [cell?.text ?? ""]) {
+    const name = cleanName(line);
+    if (!name) continue;
+    const c = countryOf(name)?.name;
+    if (!c) unknown?.add(name);
+    else if (!out.includes(c)) out.push(c);
+  }
+  return out;
 }
 
 function column(header: string[], spec: string | number): number {
@@ -327,6 +353,8 @@ export function rankRows<R extends Pick<Row, "value" | "tiebreak">>(topic: Pick<
 export async function readRows(topic: Topic): Promise<Row[]> {
   const rows: Row[] = [];
   const members = topic.canonical ? [topic.universe ?? []].flat().flatMap((u) => UNIVERSES[u]()) : [];
+  /** `countryCol` cells that name no known country. */
+  const unknownCountries = new Set<string>();
   for (const source of rankedSources(topic)) {
     const $ = await fetchPage(source.page);
     const tables = wikitables($);
@@ -340,6 +368,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
       const fromCol = topic.fallback ? column(header, topic.fallback.from) : -1;
       const yc = header.findIndex((h) => /^(year|released?|release date)\b/i.test(h));
       const pc = topic.part === undefined ? -1 : column(header, topic.part);
+      const ccol = topic.countryCol === undefined ? -1 : column(header, topic.countryCol);
       if (!topic.fallback) checkNumbers(topic, header, body, vc);
       for (const r of body) {
         const nameCell = r[nc];
@@ -417,6 +446,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
           link: nameCell.link,
           tag: rowTag(yc >= 0 ? r[yc] : undefined, nameCell.link),
           ...(numbered ? { part: { base, link: r[pc]?.link } } : {}),
+          ...(ccol >= 0 ? { country: cellCountries(r[ccol], unknownCountries) } : {}),
         });
       }
     }
@@ -424,6 +454,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
   for (const name of Object.keys(topic.overrides ?? {})) {
     if (!rows.some((r) => r.name === (topic.rename?.[name] ?? name))) console.log(`warn ${topic.id}: override for "${name}", which is not a row`);
   }
+  if (unknownCountries.size) console.log(`warn ${topic.id}: country cells naming no known country (gazetteer.ts): ${[...unknownCountries].join(", ")}`);
   rankRows(topic, rows);
   lowerParts(rows);
   // "3.2 million" among "6,301,972"s reads as another unit: write it out like the rest, keeping its currency sign
@@ -567,6 +598,16 @@ export function rankOf(text: string | undefined): number | undefined {
   return n > 0 ? n : undefined;
 }
 
+/**
+ * The names and figures a cell lists (`counts` in topics.ts): "New York City (324), Jersey City (22), Fort Lee (2)",
+ * "Burnaby (17), Vancouver (7), Coquitlam (4). New Westminster (1)".
+ */
+export function countedNames(text: string): { name: string; figure: string }[] {
+  return [...text.matchAll(/([^,;()]+?)\s*\((\d[\d,]*(?:\.\d+)?)\)/g)]
+    .map((m) => ({ name: m[1].replace(/^[\s.]+/, "").trim(), figure: m[2] }))
+    .filter((c) => c.name);
+}
+
 /** A figure at the end of a name cell: "Tencent 688,000", "ExxonMobil 356,548.7". */
 const FIGURE_END = /\s+(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+)\s*$/;
 
@@ -594,10 +635,18 @@ function adoptDated(owner: Entry, e: Entry): void {
   const year = DATED.get(e);
   if (year === undefined || owner.rank !== 0 || owner.n !== undefined) return;
   const had = DATED.get(owner);
-  if (owner.value !== undefined && (had === undefined || had >= year)) return;
+  // `largest` tables: of two figures from the same year, the bigger.
+  const [mine, theirs] = [LARGEST.get(owner), LARGEST.get(e)];
+  const bigger = had === year && mine !== undefined && theirs !== undefined && theirs > mine;
+  if (owner.value !== undefined && (had === undefined || had >= year) && !bigger) return;
   owner.value = e.value;
   DATED.set(owner, year);
+  if (theirs !== undefined) LARGEST.set(owner, theirs);
+  else LARGEST.delete(owner);
 }
+
+/** The figure of an entry from a `largest` dated table, to compare with another one's. */
+const LARGEST = new WeakMap<Entry, number>();
 
 /** A table's column naming each row's country. */
 const COUNTRY_COLUMN = /^(country|member state|sovereign state)\b/i;
@@ -772,6 +821,21 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const cell = r[nc];
         if (!cell || (cell.isHeader && !cell.text)) continue;
         if (src.where && !src.where.match.test(r[column(header, src.where.col)]?.text ?? "")) continue;
+        if (src.counts) {
+          if (topic.region) throw new Error(`${topic.id}: \`counts\` sources can't be kept to a region`);
+          for (const c of countedNames(cell.text)) {
+            const name = src.rename?.[c.name] ?? c.name;
+            if (!normalize(name) || skipName(name) || topic.skip?.includes(name) || src.skip?.includes(name)) continue;
+            const entry: Entry = { rank: 0, name, aliases: [] };
+            const v = parseValue(c.figure);
+            if (v && v.value > 0 && v.value < limit) {
+              entry.value = (topic.prefix ?? "") + v.display + (topic.unit ?? "");
+              entry.n = statNumber(v.value);
+            }
+            out.push(entry);
+          }
+          continue;
+        }
         let where: Where | undefined = typeof placed === "number" ? undefined : placed;
         if (cc >= 0) {
           const country = cleanName(r[cc]?.text ?? "");
@@ -817,6 +881,7 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
           if (shown) {
             entry.value = shown;
             DATED.set(entry, labelYear(label));
+            if (d.largest && v) LARGEST.set(entry, v.value);
           }
         } else if (!src.dated && v && v.value > 0 && v.value < limit) {
           entry.value = (topic.prefix ?? "") + v.display + (topic.unit ?? "");
@@ -825,6 +890,9 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         ARTICLE.set(entry, family ? name : redirectTarget(name, cell, hasCountries(topic)));
         LINK.set(entry, cell.link);
         COLUMN_ALIASES.set(entry, new Set(others.map(cleanName).filter((a) => a && !lines.map(cleanName).includes(a))));
+        // Compared normalized: "Lion King" cut from "The Lion King" is the name itself.
+        const said = new Set([name, ...lines, cell.linkText ?? ""].map((s) => normalize(cleanName(s))));
+        SHORT.set(entry, new Set(shortForms(name, topic.stripWords).map(cleanName).filter((s) => s && !said.has(normalize(s)))));
         out.push(entry);
       }
     }
@@ -834,8 +902,11 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
   if (shared.length) console.log(`     ${topic.id}: ${shared.length} places outside ${topic.region} named like one inside left out (free): ${shared.join(", ")}`);
   if (unknown.size) console.log(`warn ${topic.id}: rows in no known country left out (gazetteer.ts): ${[...unknown].join(", ")}`);
   for (const cat of topic.universeCategories ?? []) {
-    const titles = await fetchCategory(cat, topic.categoryDepth ?? 0, CATEGORY_CAP);
+    const cap = topic.categoryCap ?? CATEGORY_CAP;
+    const titles = await fetchCategory(cat, topic.categoryDepth ?? 0, cap);
     if (!titles.length) console.log(`warn ${topic.id}: category "${cat}" is empty or missing`);
+    const cut = capWarning(topic.id, cat, titles, cap);
+    if (cut) console.log(cut);
     for (const title of titles) {
       if (CATEGORY_SKIP.test(title) || topic.categorySkip?.test(title) || topic.skip?.includes(title)) continue;
       if (topic.categoryNames && !looksLikeName(baseTitle(title))) continue;
@@ -846,6 +917,7 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       // member keeps its title as an alias, unless that is junk here ("Pointer" is a type of dog, not one breed).
       const entry: Entry = { rank: 0, name, aliases: [baseTitle(title)].filter((a) => a !== name && !topic.junkAliases?.includes(a)) };
       ARTICLE.set(entry, title);
+      FROM_CATEGORY.add(entry);
       out.push(entry);
     }
   }
@@ -888,8 +960,17 @@ function looksLikeName(title: string): boolean {
   return ws.slice(1).every((w) => !/^\p{Ll}/u.test(w) || NAME_PARTICLES.has(w) || /['’.]/.test(w));
 }
 
-/** Most titles taken from a topic's categories. */
-const CATEGORY_CAP = 3000;
+/** Most titles taken from each of a topic's categories, unless it sets `categoryCap`. */
+export const CATEGORY_CAP = 3000;
+
+/**
+ * A warning when a category filled its cap: it reads alphabetically, so the pool stopped at a letter (Premier League
+ * players at "Mb", leaving out Rashford, Saka and Solskjaer). Undefined when it didn't.
+ */
+export function capWarning(id: string, cat: string, titles: string[], cap: number): string | undefined {
+  if (titles.length < cap) return undefined;
+  return `warn ${id}: category "${cat}" hit the cap of ${cap} titles at "${titles.at(-1)}": raise \`categoryCap\``;
+}
 /** Category members that are not things a player would name: lists, overviews, years, other namespaces. */
 const CATEGORY_SKIP =
   /^((lists?|index|outline|history|timeline|glossary|bibliography|discography|filmography) of\b|\d{3,4}\b|(category|template|wikipedia|portal|file|help|draft|module):)|\(disambiguation\)$/i;
@@ -1065,6 +1146,58 @@ function applyIntent(topic: Topic, entries: Entry[]): void {
   }
 }
 
+/**
+ * Words English writes several ways, any of them in any name: "makkah royal clock tower" is the Mecca Royal Clock
+ * Tower (owner, on buildings: "Mecca/Makkah spellings in general").
+ */
+const SPELLINGS = [
+  ["Mecca", "Makkah", "Makka", "Mekka", "Mekkah"],
+  ["Medina", "Madinah", "Madina"],
+];
+
+/**
+ * Letters no accent-stripping turns into the ones on an English keyboard: "solskjaer" is Ole Gunnar Solskjær,
+ * "odegaard" Martin Ødegaard (coverage audit, Premier League scorers).
+ */
+const FOLDS: Record<string, string> = {
+  ø: "o", Ø: "O", æ: "ae", Æ: "Ae", ð: "d", Ð: "D", þ: "th", Þ: "Th", ł: "l", Ł: "L", đ: "d", Đ: "D", œ: "oe", Œ: "Oe",
+  ß: "ss", ı: "i",
+};
+const FOLDABLE = `[${Object.keys(FOLDS).join("")}]`;
+
+/** A name written with each other spelling of a SPELLINGS word in it, and with keyboard letters (FOLDS). */
+export function spellingVariants(form: string): string[] {
+  const out: string[] = [];
+  if (new RegExp(FOLDABLE).test(form)) out.push(form.replace(new RegExp(FOLDABLE, "g"), (c) => FOLDS[c]));
+  for (const set of SPELLINGS) {
+    for (const w of set) {
+      const re = new RegExp(`\\b${w}\\b`, "gi");
+      if (re.test(form)) for (const v of set) if (v !== w) out.push(form.replace(re, v));
+    }
+  }
+  return out;
+}
+
+/**
+ * Every entry's names in the other spellings (SPELLINGS, FOLDS), unless another entry goes by that form. On a list of
+ * people, a surname that changes too ("Solskjaer", "Hojlund") comes along: a surname alone is how people name a
+ * player, and the name's own one wasn't typeable.
+ */
+function addSpellings(entries: Entry[], people = false): void {
+  const owner = new Map<string, Entry>();
+  for (const e of entries) for (const f of [e.name, ...e.aliases]) if (!owner.has(normalize(f))) owner.set(normalize(f), e);
+  for (const e of entries) {
+    const own = normalize(e.name.split(" ").at(-1)!);
+    const surnames = people ? spellingVariants(e.name).map(surname).filter((s): s is string => !!s && normalize(s) !== own) : [];
+    for (const v of [...[e.name, ...e.aliases].flatMap(spellingVariants), ...surnames]) {
+      const n = normalize(v);
+      if (owner.has(n)) continue;
+      owner.set(n, e);
+      e.aliases.push(v);
+    }
+  }
+}
+
 const FACTS_DIR = join(import.meta.dirname, "facts");
 
 /**
@@ -1147,6 +1280,17 @@ function logDrop(id: string, rank: number, name: string, alias: string, why: str
  */
 type BuiltPuzzle = Puzzle & { category: Topic["category"]; lowerIsBetter?: true };
 
+/**
+ * Whether a form two entries share is no evidence that they are one: it is a short form cut from either one's name
+ * ("Demon Slayer" of "Demon Slayer: Kimetsu no Yaiba Mugen Train", "Star Wars" of "Star Wars: Episode I – The Phantom
+ * Menace") and they link different articles. Then they stay apart and share the alias, and the game asks which one.
+ * `forms`: the shared form, normalized and as a sameKey.
+ */
+export function shortFormOnly(forms: string[], short: Set<string>, otherShort: Set<string>, article?: string, otherArticle?: string): boolean {
+  if (!article || !otherArticle || article === otherArticle) return false;
+  return forms.some((f) => short.has(f) || otherShort.has(f));
+}
+
 async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   const rows = (await readRows(topic)).slice(0, MAX_ROWS);
   if (rows.length < 10) throw new Error(`only ${rows.length} rows`);
@@ -1203,14 +1347,18 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     // World, not #21. Each top-10 slot keeps its own rank (a tie at #10/#11 is rejected above), and a table kept in
     // its own order has broken its ties already.
     const tied = i >= 10 && !topic.keepOrder && sameValue(row, rows[i - 1]);
-    entries.push({
+    const entry: BuiltEntry = {
       rank: tied ? entries[i - 1].rank : i + 1,
       name: row.name,
       aliases: [...aliases],
       value: (topic.prefix ?? "") + row.valueText + (topic.unit ?? ""),
       ...(Number.isFinite(row.value) ? { n: statNumber(row.value) } : {}),
       ...(i < 10 ? { article: row.redirectTarget } : {}),
-    });
+    };
+    // One country as a string, several (an island shared by countries) as a list.
+    if (row.country?.length) entry.country = row.country.length === 1 ? row.country[0] : row.country;
+    SHORT.set(entry, new Set(shortForms(row.name, topic.stripWords).filter((s) => normalize(s) !== normalize(row.name))));
+    entries.push(entry);
   }
   const top = entries.slice(0, 10);
   const factKeys = matchFacts(facts, top);
@@ -1264,27 +1412,38 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       ...(topic.people || /\b(accounts|pages)\b/.test(topic.noun) ? CELEBRITY_JUNK : []),
     ].map(normalize),
   );
-  // Every form an entry so far is known by, and that entry: a later namesake is the same answer.
+  // A junk alias is no name of the thing: the redirect "Pointer" doesn't make the article "Pointer (dog breed)" the
+  // German Shorthaired Pointer, nor No Way Home's junk "Spider-Man 3" the film Spider-Man 3 (agent B, films-gross).
+  const real = (e: Entry) => e.aliases.filter((a) => !junk.has(normalize(a)));
+  // Every form an entry so far is known by, junk left out, and that entry: a later namesake is the same answer.
   const taken = new Map<string, Entry>();
   const take = (form: string, e: Entry) => taken.has(normalize(form)) || taken.set(normalize(form), e);
-  for (const e of entries) for (const f of [e.name, ...e.aliases]) take(f, e);
+  for (const e of entries) for (const f of [e.name, ...real(e)]) take(f, e);
   // The same thing written another way ("St. Lawrence River" for the ranked Saint Lawrence, the table's link
   // "Javary River" for Javari) is one entry: the other spelling becomes an alias instead of a second, unranked entry.
-  // A junk alias is no such spelling: the redirect "Pointer" doesn't make the article "Pointer (dog breed)" the
-  // German Shorthaired Pointer.
-  const real = (e: Entry) => e.aliases.filter((a) => !junk.has(normalize(a)));
   const owner = new Map<string, Entry>();
   const own = (e: Entry, forms: (string | undefined)[]) => {
     for (const f of forms) if (f && sameKey(f) && !owner.has(sameKey(f))) owner.set(sameKey(f), e);
   };
   for (const [i, e] of entries.entries()) own(e, [e.name, ...real(e), rows[i].redirectTarget, rows[i].link]);
+  // The article a row's name cell links, or a category member's title: not an article guessed from a cell's text,
+  // which can't tell "Rogue One" from "Rogue One: A Star Wars Story".
+  const linked = new Map(entries.map((e, i) => [e, rows[i].link]));
+  const linkedArticle = (x: Entry) => linked.get(x) ?? LINK.get(x) ?? (FROM_CATEGORY.has(x) ? ARTICLE.get(x) : undefined);
+  const shortOf = (x: Entry) => new Set([...(SHORT.get(x) ?? [])].flatMap((s) => [normalize(s), sameKey(s)]));
+  // Entries by their own name: a later row of that very name is that entry, whoever else has the name as a short form
+  // (six "Star Wars" rows are the 1977 film, not six entries beside The Force Awakens).
+  const named = new Map<string, Entry>();
+  for (const e of entries) if (!named.has(normalize(e.name))) named.set(normalize(e.name), e);
   for (const e of extra) {
     const forms = ownForms(e).map(normalize).filter(Boolean);
     if (countryMembers.has(e)) forms.push(...countryNames(forms));
-    const known = forms.find((f) => taken.has(f));
+    const cut = (f: string, x: Entry) => shortFormOnly([normalize(f), sameKey(f)], shortOf(e), shortOf(x), linkedArticle(e), linkedArticle(x));
+    const namesake = named.get(normalize(e.name));
+    const known = namesake ? normalize(e.name) : forms.find((f) => taken.has(f) && !cut(f, taken.get(f)!));
     if (known) {
       // A team row by the member's own name first: the Orioles' cell also names their 1901 self, "Milwaukee Brewers".
-      const into = (nicknamed.has(e) && entries.find((x) => normalize(x.name) === normalize(e.name))) || taken.get(known)!;
+      const into = (nicknamed.has(e) && entries.find((x) => normalize(x.name) === normalize(e.name))) || namesake || taken.get(known)!;
       // A team the table names in full ("Chicago Cubs") is typed by its nickname too: the universe's "Cubs", "Nats"
       // (judge, cycle 6: only the teams missing from the table had them).
       if (nicknamed.has(e)) {
@@ -1303,7 +1462,12 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     // Add-ons of an entry already listed ("Skyrim – Dragonborn" next to Skyrim) only blur what its name means.
     const base = e.name.split(" – ")[0];
     if (base !== e.name && taken.has(normalize(base))) continue;
-    const same = [...ownForms(e), ARTICLE.get(e), LINK.get(e)].map((f) => f && owner.get(sameKey(f))).find(Boolean);
+    const same = [...ownForms(e), ARTICLE.get(e), LINK.get(e)]
+      .map((f) => {
+        const x = f ? owner.get(sameKey(f)) : undefined;
+        return x && !cut(f!, x) ? x : undefined;
+      })
+      .find(Boolean);
     if (same) {
       if (!same.aliases.includes(e.name)) same.aliases.push(e.name);
       if (same.n === undefined && e.n !== undefined) Object.assign(same, { value: e.value, n: e.n });
@@ -1315,6 +1479,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     }
     entries.push(e);
     take(e.name, e);
+    if (!named.has(normalize(e.name))) named.set(normalize(e.name), e);
     own(e, [e.name, ARTICLE.get(e), LINK.get(e)]);
   }
   for (const [name, shown] of zeroRows(topic)) {
@@ -1347,6 +1512,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   }
   pruneAliases(entries, namesakes, lower);
   applyIntent(topic, entries);
+  addSpellings(entries, topic.people);
   // Whatever the source (redirect, cell, universe), a slur never ships.
   for (const e of entries) e.aliases = e.aliases.filter((a) => !blockedAlias(a, [e.name]));
   // Nor text decoded in the wrong code page: "Eugčne Henri Paul Gauguin" (painters' judge). validate.ts fails a name
@@ -1433,7 +1599,7 @@ async function main(): Promise<void> {
       index.push({ id: p.id, title: p.title, category: topic.category, blitz: !!p.blitz, ...debutFlag(topic) });
       console.log(`ok   ${p.id.padEnd(24)} ${p.answers.map((a) => a.name).join(", ")}`);
     } catch (err) {
-      console.log(`FAIL ${topic.id.padEnd(24)} ${(err as Error).message}`);
+      console.log(`FAIL ${topic.id.padEnd(24)} ${(err as Error).message}`, process.env.STACK ? (err as Error).stack : "");
     }
   }
   const indexFile = join(OUT_DIR, "index.json");

@@ -7,6 +7,7 @@ import { TOPICS, type Topic } from "./topics";
 import {
   checkPuzzle,
   COUNTRY_TWICE_FROM,
+  countryFieldIssues,
   countryTwice,
   elsewhereErrors,
   FACTS_REQUIRED_FROM,
@@ -431,5 +432,33 @@ describe("validate: facts on lists of places say where", () => {
       const built: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${t.id}.json`), "utf8"));
       expect(factsWithoutPlace(built, t), t.id).toEqual([]);
     }
+  });
+});
+
+describe("an entry's country", () => {
+  // Owner, on islands: typing "japan" should offer Honshu, Okinawa. The matcher reads `country`, so it must be
+  // written the way the country lists write the country.
+  const entry = (country: unknown) => ({ rank: 1, name: "Borneo", aliases: [], country }) as Entry & { country?: unknown };
+  it("takes the country lists' names, one as a string and several as a list", () => {
+    expect(countryFieldIssues(entry("Japan"))).toEqual([]);
+    expect(countryFieldIssues(entry(["Brunei", "Indonesia", "Malaysia"]))).toEqual([]);
+    expect(countryFieldIssues({ rank: 1, name: "Honshu", aliases: [] })).toEqual([]);
+  });
+
+  it("fails a name no country list uses, a repeat, or a list of one", () => {
+    expect(countryFieldIssues(entry("Danish Realm"))).toHaveLength(1);
+    expect(countryFieldIssues(entry(["Japan", "Japan"]))).toHaveLength(1);
+    expect(countryFieldIssues(entry(["Japan"]))).toHaveLength(1);
+    expect(countryFieldIssues(entry(42))).toHaveLength(1);
+  });
+
+  it("is on the built islands", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", "islands.json"), "utf8"));
+    const country = (name: string) => ([...p.answers, ...p.extras].find((e) => e.name === name) as { country?: unknown } | undefined)?.country;
+    expect(country("Honshu")).toBe("Japan");
+    expect(country("Borneo")).toEqual(["Brunei", "Indonesia", "Malaysia"]);
+    expect(country("Greenland")).toBe("Denmark");
+    const japan = [...p.answers, ...p.extras].filter((e) => (e as { country?: unknown }).country === "Japan").map((e) => e.name);
+    expect(japan).toEqual(expect.arrayContaining(["Honshu", "Hokkaido", "Kyushu", "Shikoku", "Okinawa Island"]));
   });
 });

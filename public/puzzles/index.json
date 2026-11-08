@@ -450,12 +450,6 @@
   "blitz": true
  },
  {
-  "id": "theme-parks",
-  "title": "Most visited theme parks",
-  "category": "Entertainment",
-  "blitz": true
- },
- {
   "id": "us-metros",
   "title": "Largest US metro areas",
   "category": "Geography",

@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import { normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import {
+  capWarning,
+  countedNames,
   countryNames,
   datedLabel,
   datedValue,
@@ -23,7 +25,9 @@ import {
   regionColumn,
   sameKey,
   scaledFigure,
+  shortFormOnly,
   skipName,
+  spellingVariants,
 } from "./build";
 import { inRegion, UNIVERSES, whereIs } from "./gazetteer";
 import { COUNTRY_FORMS } from "./intent";
@@ -169,6 +173,98 @@ describe("matchFacts", () => {
       expect(p.answers.map((e) => e.fact ?? null), p.id).toEqual(keys.map((k) => (k ? facts[k] : null)));
     }
     expect(lists).toBeGreaterThan(50);
+  });
+});
+
+describe("spelling variants", () => {
+  // Owner, on buildings: "makkah royal clock tower" should count (Mecca/Makkah spellings in general).
+  it("write a name with each other spelling of Mecca or Medina", () => {
+    expect(spellingVariants("Mecca Royal Clock Tower")).toEqual(
+      expect.arrayContaining(["Makkah Royal Clock Tower", "Makka Royal Clock Tower", "Mekka Royal Clock Tower"]),
+    );
+    expect(spellingVariants("Makkah")).toEqual(expect.arrayContaining(["Mecca"]));
+    expect(spellingVariants("Al-Madinah")).toEqual(expect.arrayContaining(["Al-Medina"]));
+    expect(spellingVariants("Burj Khalifa")).toEqual([]);
+    // A whole word only: "Meccano" is no Mecca.
+    expect(spellingVariants("Meccano")).toEqual([]);
+  });
+
+  // Coverage audit: "solskjaer" and "odegaard" found nothing; "hojlund" was corrected to Haaland.
+  it("write a name with keyboard letters for the ones accents don't cover", () => {
+    expect(spellingVariants("Ole Gunnar Solskjær")).toEqual(["Ole Gunnar Solskjaer"]);
+    expect(spellingVariants("Martin Ødegaard")).toEqual(["Martin Odegaard"]);
+    expect(spellingVariants("Łukasz Fabiański")).toEqual(["Lukasz Fabiański"]);
+    expect(spellingVariants("Eiður Guðjohnsen")).toEqual(["Eidur Gudjohnsen"]);
+    expect(spellingVariants("Pascal Groß")).toEqual(["Pascal Gross"]);
+  });
+});
+
+describe("category cap", () => {
+  // Coverage audit: "Premier League players" stopped at "Mb" under the cap of 3,000, so Rashford, Saka, Palmer and
+  // Solskjaer were "not one of the players here". A category that fills its cap now warns.
+  it("warns when a category fills its cap, naming where it stopped", () => {
+    const titles = Array.from({ length: 3 }, (_, i) => `Player ${i}`);
+    expect(capWarning("premier-league-goals", "Premier League players", titles, 3)).toMatch(/hit the cap of 3 titles at "Player 2"/);
+    expect(capWarning("premier-league-goals", "Premier League players", titles, 4)).toBeUndefined();
+  });
+
+  it("reads every Premier League player", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", "premier-league-goals.json"), "utf8"));
+    const names = new Set(p.extras.map((e) => e.name));
+    for (const name of ["Marcus Rashford", "Bukayo Saka", "Cole Palmer", "Ole Gunnar Solskjær", "Fernando Torres", "Ollie Watkins"]) {
+      expect(names).toContain(name);
+    }
+  });
+});
+
+describe("merging unranked answers", () => {
+  // Coverage audit and agent B: Mugen Train vanished into Infinity Castle through "Demon Slayer", The Phantom Menace
+  // into The Force Awakens through "Star Wars", the 1981 Frogger into "Frogger: He's Back!".
+  it("never merges two entries through a short form cut from either name when they link different articles", () => {
+    const s = (...f: string[]) => new Set(f);
+    expect(shortFormOnly(["demon slayer"], s("demon slayer"), s(), "Mugen Train (film)", "Infinity Castle (film)")).toBe(true);
+    expect(shortFormOnly(["frogger"], s(), s("frogger"), "Frogger", "Frogger: He's Back!")).toBe(true);
+    // The same article: one thing ("PUBG" for PUBG: Battlegrounds).
+    expect(shortFormOnly(["pubg"], s("pubg"), s(), "PUBG: Battlegrounds", "PUBG: Battlegrounds")).toBe(false);
+    // A real name both have, or no article to tell them apart: the usual merge.
+    expect(shortFormOnly(["the lion king"], s("lion king"), s(), "The Lion King", "The Lion King (2019 film)")).toBe(false);
+    expect(shortFormOnly(["star wars"], s("star wars"), s(), undefined, "Star Wars: The Force Awakens")).toBe(false);
+  });
+
+  it("keeps the films and games it used to swallow", () => {
+    const names = (id: string) => {
+      const p: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${id}.json`), "utf8"));
+      return new Set([...p.answers, ...p.extras].map((e) => e.name));
+    };
+    expect(names("animated-films")).toContain("Demon Slayer: Kimetsu no Yaiba Mugen Train");
+    expect(names("video-games")).toContain("Frogger");
+    const films = names("films-gross");
+    expect([...films].some((n) => /Phantom Menace/.test(n))).toBe(true);
+    expect(films).toContain("Spider-Man 3");
+  });
+});
+
+describe("counted names", () => {
+  // Judge, skyscraper-cities: Taipei, Tel Aviv, Jersey City and Sharjah cost a life with no figure, though the
+  // metro-area table's "Cities included" counts each one.
+  it("read each name and its figure from a cell that lists several", () => {
+    expect(countedNames("New York City (324), Jersey City (22), Fort Lee (2)")).toEqual([
+      { name: "New York City", figure: "324" },
+      { name: "Jersey City", figure: "22" },
+      { name: "Fort Lee", figure: "2" },
+    ]);
+    // A full stop where a comma belongs.
+    expect(countedNames("Burnaby (17), Vancouver (7), Coquitlam (4). New Westminster (1)").map((c) => c.name)).toEqual([
+      "Burnaby", "Vancouver", "Coquitlam", "New Westminster",
+    ]);
+    expect(countedNames("Hong Kong (569)")).toEqual([{ name: "Hong Kong", figure: "569" }]);
+    expect(countedNames("no figures here")).toEqual([]);
+  });
+
+  it("show them on the built list", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", "skyscraper-cities.json"), "utf8"));
+    const value = (name: string) => p.extras.find((e) => e.name === name)?.value;
+    expect([value("Taipei"), value("Tel Aviv"), value("Jersey City"), value("Sharjah")]).toEqual(["16", "24", "22", "26"]);
   });
 });
 
