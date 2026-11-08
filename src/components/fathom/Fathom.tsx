@@ -47,7 +47,7 @@ import {
 } from "../../game/fathom-name";
 import type { Lexicon } from "../../game/junk";
 import { loadLexicon } from "../../game/puzzles";
-import { submitFathomGuess, useFathomCrowd } from "../../net";
+import { compareRound, submitFathomGuess, useFathomCrowd } from "../../net";
 import { Loading } from "../Game";
 import { CountUp } from "../motion/effects";
 import { END_FOCUS_MS, reducedMotion, ScreenHead, SwapLabel } from "../pixel";
@@ -505,7 +505,7 @@ function siteOf(url: string): string {
 
 /** How real players guessed on a number question (with a backend, from 20 of them); nothing until then. */
 function Players({ q, guess }: { q: FathomQuestion; guess: number }) {
-  const crowd = useFathomCrowd(q.id, guess, q.answer);
+  const crowd = useFathomCrowd(q.id, guess, q.answer, compareRound(q));
   const players = playersLine(crowd, q.unit, roundOf(q));
   if (!players || !crowd) return null;
   return (
