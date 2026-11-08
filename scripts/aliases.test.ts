@@ -371,6 +371,14 @@ describe("aliases as built: what players type", () => {
     expect(par["premier-league-goals"].par).toBeLessThanOrEqual(4);
   });
 
+  it("passwords: the prompt names the ranking and says an answer is exact (player note on 88888888)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "passwords.json"), "utf8"));
+    expect(p.prompt).toMatch(/NordPass/);
+    expect(p.prompt).toMatch(/exactly/);
+    expect(lands("passwords", "888888")).toBe("888888");
+    expect(lands("passwords", "i love you")).toBe("iloveyou");
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

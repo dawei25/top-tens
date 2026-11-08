@@ -1413,6 +1413,10 @@ export const INTENT: Record<string, Intent> = {
       "Fox Terrier": ["Wire Fox Terrier", "Smooth Fox Terrier"],
     },
   },
+  passwords: {
+    // Coverage audit: spacing never matters elsewhere ("i love you" reads its "i" as the numeral 1).
+    same: { iloveyou: ["i love you", "I love u", "iloveu"] },
+  },
   retailers: {
     // All digits, so the automatic aliases drop them as numbers (coverage audit: "7 11" was not 7-Eleven).
     same: { "Seven & I Holdings": ["7-11", "711", "7/11"] },

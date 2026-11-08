@@ -2628,7 +2628,10 @@ export const TOPICS: Topic[] = [
     category: "Oddball",
     title: "Most common passwords",
     noun: "passwords",
-    prompt: "Name the 10 most common passwords (NordPass 2025)",
+    // A player: "did not specify the number of characters, 88888888 is a popular password but its not even a valid
+    // guess". The ranking is NordPass's count of accounts in 2025 leaks, and an answer is one exact string: 888888
+    // (SplashData) is accepted, 88888888 is on no table here.
+    prompt: "Name the 10 passwords found on the most accounts in NordPass's 2025 study of leaks, exactly as typed",
     page: "List of the most common passwords",
     tables: [0],
     name: "Password",
