@@ -162,10 +162,10 @@
   {
    "id": "a380-capacity",
    "kind": "everyday",
-   "question": "How many passengers is an Airbus A380 certified to carry?",
+   "question": "How many passengers can an Airbus A380, the biggest airliner, carry?",
    "unit": "passengers",
    "answer": 853,
-   "definition": "maximum",
+   "definition": "certified maximum",
    "fact": "In the evacuation test, everyone got out in 78 seconds with half the exits blocked.",
    "source": {
     "title": "Airbus A380",
@@ -233,27 +233,12 @@
    "easy": true
   },
   {
-   "id": "phantom-performances",
-   "kind": "culture",
-   "question": "How many performances did The Phantom of the Opera give on Broadway?",
-   "unit": "performances",
-   "answer": 13981,
-   "definition": "original run, 1988 to 2023",
-   "fact": "It is Broadway's longest-running show, by over 3,500 performances.",
-   "source": {
-    "title": "The Phantom of the Opera (1986 musical)",
-    "url": "https://en.wikipedia.org/wiki/The_Phantom_of_the_Opera_(1986_musical)"
-   },
-   "typical": 5,
-   "easy": false
-  },
-  {
    "id": "czech-beer",
    "kind": "lists",
-   "question": "How much beer does the Czech Republic drink per person each year?",
+   "question": "How much beer do Czechs, the world's top beer drinkers, get through a year?",
    "unit": "litres",
    "answer": 126,
-   "definition": "2024",
+   "definition": "per person, 2024",
    "fact": "That's about 250 half-litre glasses for every Czech, children included, and no country drinks more.",
    "source": {
     "title": "List of countries by beer consumption per capita",
@@ -413,7 +398,7 @@
   {
    "id": "woodstock-crowd",
    "kind": "culture",
-   "question": "How many people came to the Woodstock festival in 1969?",
+   "question": "How many people came to Woodstock, the 1969 music festival?",
    "unit": "people",
    "answer": 500000,
    "definition": "high estimate",
@@ -627,7 +612,7 @@
    "id": "us-penny-cost",
    "round": "estimate",
    "kind": "everyday",
-   "question": "How much did it cost the US Mint to make one penny?",
+   "question": "How much did one US penny, the 1-cent coin, cost to make?",
    "unit": "cents",
    "answer": 3.69,
    "definition": "2024",
@@ -643,7 +628,7 @@
    "id": "concorde-speed",
    "round": "estimate",
    "kind": "everyday",
-   "question": "How fast did Concorde fly?",
+   "question": "How fast did Concorde, the supersonic passenger jet, fly?",
    "unit": "kilometres per hour",
    "answer": 2150,
    "definition": "average cruising speed",
@@ -672,21 +657,6 @@
    "easy": false
   },
   {
-   "id": "chess-first-moves",
-   "round": "estimate",
-   "kind": "culture",
-   "question": "How many positions are possible after one move by each chess player?",
-   "unit": "positions",
-   "answer": 400,
-   "fact": "White and Black each have 20 first moves, and after five moves each there are over 69 trillion possible games.",
-   "source": {
-    "title": "Shannon number",
-    "url": "https://en.wikipedia.org/wiki/Shannon_number"
-   },
-   "verified": true,
-   "easy": false
-  },
-  {
    "id": "football-pitch-length",
    "round": "estimate",
    "kind": "sports",
@@ -706,7 +676,7 @@
    "id": "tour-de-france-distance",
    "round": "estimate",
    "kind": "sports",
-   "question": "How far does a Tour de France rider cycle in all?",
+   "question": "How far does a rider cycle in the Tour de France, the three-week race?",
    "unit": "kilometres",
    "answer": 3498,
    "definition": "2024 race",
@@ -1020,10 +990,9 @@
    "id": "wild-mammals-share",
    "round": "percent",
    "kind": "animals",
-   "question": "What share of all mammals on Earth, by weight, are wild?",
+   "question": "What share of Earth's mammals, by weight, are wild, not people or farm animals?",
    "unit": "percent",
    "answer": 4,
-   "definition": "the rest are people and livestock",
    "fact": "On land it's under 2%: nearly all the rest is people and farm animals.",
    "source": {
     "title": "Biomass (ecology)",
@@ -1125,22 +1094,6 @@
    "easy": false
   },
   {
-   "id": "ordinary-matter-share",
-   "round": "percent",
-   "kind": "space",
-   "question": "What share of the universe is ordinary matter, like stars and people?",
-   "unit": "percent",
-   "answer": 4.9,
-   "definition": "by mass and energy",
-   "fact": "The rest is dark energy, about 68%, and dark matter, about 27%.",
-   "source": {
-    "title": "Universe",
-    "url": "https://en.wikipedia.org/wiki/Universe"
-   },
-   "verified": true,
-   "easy": false
-  },
-  {
    "id": "avocado-fat-share",
    "round": "percent",
    "kind": "food",
@@ -1176,7 +1129,7 @@
    "id": "ring-of-fire-earthquakes",
    "round": "percent",
    "kind": "nature",
-   "question": "What share of the world's earthquakes happen along the Pacific Ring of Fire?",
+   "question": "What share of the world's earthquakes hit the Ring of Fire, around the Pacific's edge?",
    "unit": "percent",
    "answer": 90,
    "fact": "The belt runs about 40,000 km around the Pacific, and holds about two thirds of the world's volcanoes too.",
@@ -1288,21 +1241,6 @@
    "source": {
     "title": "Titanic",
     "url": "https://en.wikipedia.org/wiki/Titanic"
-   },
-   "easy": true,
-   "verified": true
-  },
-  {
-   "id": "first-powered-flight",
-   "round": "year",
-   "kind": "science",
-   "question": "When did the Wright brothers make the first powered aeroplane flight?",
-   "unit": "year",
-   "answer": 1903,
-   "fact": "It lasted 12 seconds and covered 37 m; by the day's fourth flight they managed 59 seconds.",
-   "source": {
-    "title": "Wright Flyer",
-    "url": "https://en.wikipedia.org/wiki/Wright_Flyer"
    },
    "easy": true,
    "verified": true
@@ -1428,21 +1366,6 @@
    "easy": false
   },
   {
-   "id": "sydney-opera-house-opening",
-   "round": "year",
-   "kind": "landmarks",
-   "question": "When did the Sydney Opera House open?",
-   "unit": "year",
-   "answer": 1973,
-   "fact": "It opened ten years late, at more than 14 times its first budget.",
-   "source": {
-    "title": "Sydney Opera House",
-    "url": "https://en.wikipedia.org/wiki/Sydney_Opera_House"
-   },
-   "verified": true,
-   "easy": false
-  },
-  {
    "id": "coca-cola-invented",
    "round": "year",
    "kind": "food",
@@ -1471,21 +1394,6 @@
    },
    "verified": true,
    "easy": false
-  },
-  {
-   "id": "first-youtube-video",
-   "round": "year",
-   "kind": "culture",
-   "question": "When was the first video uploaded to YouTube?",
-   "unit": "year",
-   "answer": 2005,
-   "fact": "It's 19 seconds of co-founder Jawed Karim at San Diego Zoo, talking about elephants.",
-   "source": {
-    "title": "Me at the zoo",
-    "url": "https://en.wikipedia.org/wiki/Me_at_the_zoo"
-   },
-   "easy": true,
-   "verified": true
   },
   {
    "id": "name-country-1m-people",

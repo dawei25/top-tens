@@ -185,9 +185,9 @@
     "judgedAt": "2026-11-07"
   },
   "a380-capacity": {
-    "verdict": "keep",
-    "why": "Picture rows of seats on two decks. 853 is more than any airline fits, and the evacuation test is how that maximum was certified.",
-    "judgedAt": "2026-11-07"
+    "verdict": "fix",
+    "why": "familiarity (owner: label it, do not cut): a short label in the question",
+    "judgedAt": "2026-11-08"
   },
   "olympic-pool-volume": {
     "verdict": "fix",
@@ -225,14 +225,14 @@
     "judgedAt": "2026-11-07"
   },
   "phantom-performances": {
-    "verdict": "fix",
-    "why": "test 2: Without its dates nobody can reason to it. With them, 35 years at about eight shows a week gets you close, and the reveal is that it really did play nearly every night. Dates and line checked on the cached source (opened 26 Jan 1988, closed 16 Apr 2023).",
-    "judgedAt": "2026-11-07"
+    "verdict": "drop",
+    "why": "familiarity: even labelled, the number of nights a 1980s Broadway show ran is a theatre-buff stat no 20-year-old cares about",
+    "judgedAt": "2026-11-08"
   },
   "czech-beer": {
     "verdict": "fix",
-    "why": "test 3: Familiar, and you can reason from your own glasses, but the fact (Austria is second) doesn't make 126 litres mean anything. Restating it in glasses does.",
-    "judgedAt": "2026-11-07"
+    "why": "familiarity (owner: label it, do not cut): a short label in the question",
+    "judgedAt": "2026-11-08"
   },
   "turkey-tea": {
     "verdict": "drop",
@@ -490,9 +490,9 @@
     "judgedAt": "2026-11-07"
   },
   "woodstock-crowd": {
-    "verdict": "keep",
-    "why": "Yardstick: today's big festivals, or Joni Mitchell's 'half a million strong'. Ten times the 50,000 the organisers promised teaches.",
-    "judgedAt": "2026-11-07"
+    "verdict": "fix",
+    "why": "familiarity (owner: label it, do not cut): a short label in the question",
+    "judgedAt": "2026-11-08"
   },
   "nile-length": {
     "verdict": "drop",
@@ -581,13 +581,13 @@
   },
   "us-penny-cost": {
     "verdict": "fix",
-    "why": "3.69 cents (2024) as stated; the page says the November 2025 halt was largely due to cost, so 'is why' became 'is largely why'.",
-    "judgedAt": "2026-11-06"
+    "why": "familiarity (owner: label it, do not cut): a short label in the question",
+    "judgedAt": "2026-11-08"
   },
   "concorde-speed": {
     "verdict": "fix",
-    "why": "2,179 km/h is its maximum speed, not cruising: now the page's average cruise speed, 2,150 km/h, and the fact the source's: more than twice other airliners, the Atlantic in just under 3.5 hours.",
-    "judgedAt": "2026-11-06"
+    "why": "familiarity (owner: label it, do not cut): a short label in the question",
+    "judgedAt": "2026-11-08"
   },
   "youtube-new-video": {
     "verdict": "fix",
@@ -595,9 +595,9 @@
     "judgedAt": "2026-11-06"
   },
   "chess-first-moves": {
-    "verdict": "fix",
-    "why": "400 positions after two plies, from the page's table; the 16 pawn and 4 knight moves aren't on it: fact now 20 first moves each and 69 trillion games after five moves each.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "familiarity: chess is known, but counting 'positions after one move each' is a maths puzzle that needs the rules in your head; no label fixes that",
+    "judgedAt": "2026-11-08"
   },
   "football-pitch-length": {
     "verdict": "fix",
@@ -606,8 +606,8 @@
   },
   "tour-de-france-distance": {
     "verdict": "fix",
-    "why": "The 2024 race was 3,498 km, not 3,492; 21 stages and two rest days confirmed; reasoned from three weeks of riding.",
-    "judgedAt": "2026-11-06"
+    "why": "familiarity (owner: label it, do not cut): a short label in the question",
+    "judgedAt": "2026-11-08"
   },
   "f1-fastest-pit-stop": {
     "verdict": "fix",
@@ -726,8 +726,8 @@
   },
   "wild-mammals-share": {
     "verdict": "fix",
-    "why": "4% as stated; the 60/36 split isn't on the page: fact now the land figure, wild mammals under 2%, the rest people and farm animals.",
-    "judgedAt": "2026-11-06"
+    "why": "familiarity (owner: label it, do not cut): a short label in the question",
+    "judgedAt": "2026-11-08"
   },
   "internet-users-share": {
     "verdict": "fix",
@@ -760,9 +760,9 @@
     "judgedAt": "2026-11-06"
   },
   "ordinary-matter-share": {
-    "verdict": "fix",
-    "why": "Page gives 4.9% (dark matter 26.8, dark energy 68.3): answer 4.9; question shortened; 'nobody has seen them' isn't on the page, so it's gone.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "familiarity: needs cosmology: 'ordinary matter' only means something if you know dark matter and dark energy; no way to reason it",
+    "judgedAt": "2026-11-08"
   },
   "avocado-fat-share": {
     "verdict": "keep",
@@ -776,8 +776,8 @@
   },
   "ring-of-fire-earthquakes": {
     "verdict": "fix",
-    "why": "About 90% as stated; 'horseshoe of colliding plates' isn't on the page: fact now 40,000 km long with two thirds of the world's volcanoes.",
-    "judgedAt": "2026-11-06"
+    "why": "familiarity (owner: label it, do not cut): a short label in the question",
+    "judgedAt": "2026-11-08"
   },
   "left-handed-share": {
     "verdict": "drop",
@@ -820,9 +820,9 @@
     "judgedAt": "2026-11-06"
   },
   "first-powered-flight": {
-    "verdict": "keep",
-    "why": "17 December 1903; 12 seconds and 37 m, 59 seconds on the fourth flight, as stated.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "familiarity: the first plane is taught in school (duplicate of wright-first-flight-year: keep one)",
+    "judgedAt": "2026-11-08"
   },
   "sputnik-launch": {
     "verdict": "keep",
@@ -865,9 +865,9 @@
     "judgedAt": "2026-11-06"
   },
   "sydney-opera-house-opening": {
-    "verdict": "keep",
-    "why": "20 October 1973; ten years late and 1,357% over budget ($7 million to $102 million), as stated.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "familiarity: they know the building from photos, but its opening is no moment they'd want to place; a label can't add interest",
+    "judgedAt": "2026-11-08"
   },
   "coca-cola-invented": {
     "verdict": "fix",
@@ -880,9 +880,9 @@
     "judgedAt": "2026-11-06"
   },
   "first-youtube-video": {
-    "verdict": "keep",
-    "why": "'Me at the zoo', 23 April 2005, 19 seconds of Jawed Karim before two elephants, as stated.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "familiarity: YouTube is daily life (duplicate of first-youtube-video-year: keep one)",
+    "judgedAt": "2026-11-08"
   },
   "air-oxygen-share": {
     "verdict": "keep",

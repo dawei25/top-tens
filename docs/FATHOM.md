@@ -161,6 +161,12 @@ Write our own questions from facts. Never copy one from another estimation game.
   of people who are left-handed).
 - **`verified`** (optional): true once a judge has opened the source and confirmed the figure. The game ignores it.
 
+**A label for a less familiar subject.** The test is a 20-year-old today: would they know what it is the moment they
+read it? When they'd know it in a few words, say those words in the question rather than drop it: "How fast did
+Concorde, the supersonic passenger jet, fly?" (the owner: "i wouldnt mind the concorde question if you maybe added -
+the supersonic aircraft"). The label says only what anyone who knows the thing knows, never the number. Drop a
+question a label can't make interesting or reasonable (counting chess positions, "ordinary matter").
+
 **A percent question** (`round: "percent"`, unit `percent`): a share of a whole everyone can picture (the air, the
 Moon's face, people), answered 0 to 100 as the source states it (20.95 is fine; the game shows "20.95%"). Ask "How
 much of...?" or "What share of...?", never "What percent of...?" (the "%" is beside the field). The way in is the

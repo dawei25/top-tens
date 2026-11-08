@@ -450,9 +450,12 @@ export function checkBank(bank: unknown, lists: ListSource = fileLists()): strin
   }
 
   if (qs.length < MIN_QUESTIONS) out.push(`${qs.length} questions; the bank needs at least ${MIN_QUESTIONS}`);
-  const counts = kindCounts(valid);
+  // Name-it questions are places by nature and each game draws one of them on its own, so the kind mix (variety among
+  // the other four rounds) leaves them out.
+  const mixed = valid.filter((q) => q.round !== "name");
+  const counts = kindCounts(mixed);
   if (counts.size < MIN_KINDS) out.push(`${counts.size} kinds; the bank needs at least ${MIN_KINDS}`);
-  const cap = maxPerKind(qs.length);
+  const cap = maxPerKind(mixed.length);
   for (const [kind, n] of counts) if (n > cap) out.push(`${n} questions of kind ${kind}; at most ${cap}`);
   const easy = valid.filter((q) => q.easy === true).length;
   if (easy < MIN_EASY) out.push(`${easy} easy openers; the bank needs at least ${MIN_EASY}`);
