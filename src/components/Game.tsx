@@ -43,6 +43,7 @@ import { listShare } from "./share";
 import { FloatNote } from "./Note";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
+import { MoreRanks } from "./MoreRanks";
 import { ParBlock, usePar } from "./par";
 import { reportList } from "../net";
 import { RateList } from "./rate/RateList";
@@ -546,7 +547,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               );
             })}
           </ol>
-          {/* Under the board: GIVE UP while playing. */}
+          {/* Under the board: GIVE UP while playing; once over, ranks 11 to 20 behind a key, the guessed ones marked. */}
+          {over && <MoreRanks puzzle={puzzle} guessed={new Set(misses.map((m) => m.rank))} />}
           {!over && (
             <div className="board-foot">
               <button

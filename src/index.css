@@ -1602,6 +1602,26 @@ a {
 .slot.missed .value {
   color: var(--muted);
 }
+/* Ranks 11 to 20 under a finished board (MoreRanks): rows like the missed ones, below their key; the ones the player
+   guessed (a life each) in the misses' pink, on the chips' tint. */
+.more-ranks {
+  border-top: 1px dashed var(--hairline);
+  margin-top: 6px;
+  padding-top: 2px;
+}
+.slot.extra .rank,
+.slot.extra .name,
+.slot.extra .value {
+  color: var(--muted);
+}
+.slot.extra.guessed {
+  background: rgba(255, 93, 143, 0.08);
+}
+.slot.extra.guessed .rank,
+.slot.extra.guessed .name,
+.slot.extra.guessed .value {
+  color: var(--pink);
+}
 
 .type-cursor {
   color: transparent;
