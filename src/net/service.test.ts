@@ -238,6 +238,19 @@ describe("Fathom guesses", () => {
     expect(JSON.parse(store.get("top-tens:fathom-outbox")!)).toEqual({ pending: [], sent: ["eiffel-tower-height"] });
   });
 
+  it("sends a name-it round's figure, 0 (an island's land borders) included", async () => {
+    queue([
+      { questionId: "name-country-6-borders", guess: 0, at: Date.now() },
+      { questionId: "name-country-50m-people", guess: 52_890_000, at: Date.now() },
+    ]);
+    const svc = await import("./service");
+    await svc.flushFathom();
+    expect(sentGuesses()).toEqual([
+      { p_question_id: "name-country-6-borders", p_guess: 0, p_client_id: store.get("top-tens:client-id") },
+      { p_question_id: "name-country-50m-people", p_guess: 52_890_000, p_client_id: store.get("top-tens:client-id") },
+    ]);
+  });
+
   it("drops a guess the server refuses for good, or that it doesn't know yet (the migration not run: 404)", async () => {
     queue([{ questionId: "moon-distance", guess: 384_000, at: Date.now() }]);
     fake.answers.rpc = () => ({ data: null, error: { message: "not found" }, status: 404 });
@@ -246,17 +259,33 @@ describe("Fathom guesses", () => {
     expect(JSON.parse(store.get("top-tens:fathom-outbox")!).pending).toEqual([]);
   });
 
-  it("asks fathom_compare (a read, GET) with the answer shown and this browser's id, once, and reads its answer", async () => {
+  it("asks fathom_compare (a read, GET) with the round, the answer shown and this browser's id, once, and reads its answer", async () => {
     fake.answers.rpc = (fn) => (fn === "fathom_compare" ? { data: { n: 37, median: 4, further_off: 0.72 }, error: null, status: 200 } : { data: true, error: null, status: 200 });
     const svc = await import("./service");
-    const a = await svc.fathomCompare("blood-volume", 5, 5.5);
-    expect(await svc.fathomCompare("blood-volume", 5, 5.5)).toBe(a);
+    const a = await svc.fathomCompare("blood-volume", 5, 5.5, "estimate");
+    expect(await svc.fathomCompare("blood-volume", 5, 5.5, "estimate")).toBe(a);
     expect(a).toEqual({ n: 37, median: 4, furtherOff: 0.72 });
-    expect(fake.calls.rpc).toEqual([
-      ["fathom_compare", { p_question_id: "blood-volume", p_guess: 5, p_answer: 5.5, p_client_id: store.get("top-tens:client-id") }, { get: true }],
-    ]);
+    const id = store.get("top-tens:client-id");
+    expect(fake.calls.rpc).toEqual([["fathom_compare", { p_question_id: "blood-volume", p_round: "estimate", p_guess: 5, p_answer: 5.5, p_client_id: id }, { get: true }]]);
     fake.answers.rpc = () => ({ data: null, error: { message: "boom" }, status: 404 });
-    expect(await svc.fathomCompare("blood-volume", 6, 5.5)).toBeNull();
+    expect(await svc.fathomCompare("blood-volume", 6, 5.5, "estimate")).toBeNull();
+  });
+
+  it("asks a percent, a year and a name-it round on their own scale, each its own question to the server", async () => {
+    fake.answers.rpc = (fn, args) =>
+      fn === "fathom_compare" ? { data: { n: 25, median: args.p_round === "year" ? 1959 : 0, further_off: 0.2 }, error: null, status: 200 } : { data: true, error: null, status: 200 };
+    const svc = await import("./service");
+    expect(await svc.fathomCompare("plastic-recycled", 0, 9, "percent")).toEqual({ n: 25, median: 0, furtherOff: 0.2 });
+    expect(await svc.fathomCompare("moon-landing", 1979, 1969, "year")).toEqual({ n: 25, median: 1959, furtherOff: 0.2 });
+    await svc.fathomCompare("name-country-6-borders", 0, 6, "name-steps");
+    // The same question and numbers on another scale is another answer.
+    await svc.fathomCompare("plastic-recycled", 0, 9, "estimate");
+    expect(fake.calls.rpc.map(([, args]) => [(args as { p_question_id: string }).p_question_id, (args as { p_round: string }).p_round])).toEqual([
+      ["plastic-recycled", "percent"],
+      ["moon-landing", "year"],
+      ["name-country-6-borders", "name-steps"],
+      ["plastic-recycled", "estimate"],
+    ]);
   });
 });
 

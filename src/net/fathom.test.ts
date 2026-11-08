@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { compareArgs, FATHOM_GUESSES, guessArgs, invalidGuess, MAX_GUESS, parseCompare, type FathomGuess } from "./fathom";
+import { COMPARE_ROUNDS, compareArgs, compareKey, compareRound, FATHOM_GUESSES, guessArgs, invalidGuess, MAX_GUESS, parseCompare, type FathomGuess } from "./fathom";
 import { enqueue, Outbox, type OutboxData, type SendResult } from "./outbox";
 
 const T = Date.UTC(2026, 10, 5, 12);
@@ -11,9 +11,14 @@ describe("a Fathom guess", () => {
     expect(invalidGuess(guess())).toBeNull();
     expect(invalidGuess(guess({ guess: 0.0025 }))).toBeNull();
     expect(invalidGuess(guess({ guess: 2.5e12 }))).toBeNull();
+    // 0% is a fair percent, and 0 land borders a fair name-it figure.
+    expect(invalidGuess(guess({ questionId: "plastic-recycled", guess: 0 }))).toBeNull();
+    expect(invalidGuess(guess({ questionId: "name-country-6-borders", guess: 0 }))).toBeNull();
     expect(invalidGuess(guess({ questionId: "Bad Id" }))).toBe("question id");
     expect(invalidGuess(guess({ questionId: "x".repeat(65) }))).toBe("question id");
-    for (const bad of [0, -5, NaN, Infinity, MAX_GUESS, "300" as unknown as number]) expect(invalidGuess(guess({ guess: bad })), String(bad)).toBe("guess");
+    for (const bad of [-5, -1e-9, -Infinity, NaN, Infinity, MAX_GUESS, "300" as unknown as number, null as unknown as number]) {
+      expect(invalidGuess(guess({ guess: bad })), String(bad)).toBe("guess");
+    }
     expect(invalidGuess(guess({ at: NaN }))).toBe("at");
   });
 
@@ -21,14 +26,40 @@ describe("a Fathom guess", () => {
     expect(guessArgs(guess({ guess: 1.5e9 }), "c-1")).toEqual({ p_question_id: "eiffel-tower-height", p_guess: 1.5e9, p_client_id: "c-1" });
   });
 
-  it("asks fathom_compare with the answer shown and this browser's id (left out of the crowd)", () => {
-    expect(compareArgs("eiffel-tower-height", 300, 330, "c-1")).toEqual({ p_question_id: "eiffel-tower-height", p_guess: 300, p_answer: 330, p_client_id: "c-1" });
+  it("asks fathom_compare with the round, the answer shown and this browser's id (left out of the crowd)", () => {
+    expect(compareArgs("eiffel-tower-height", "estimate", 300, 330, "c-1")).toEqual({
+      p_question_id: "eiffel-tower-height",
+      p_round: "estimate",
+      p_guess: 300,
+      p_answer: 330,
+      p_client_id: "c-1",
+    });
+    expect(compareArgs("name-country-6-borders", "name-steps", 0, 6, "c-1")).toMatchObject({ p_round: "name-steps", p_guess: 0, p_answer: 6 });
   });
 
-  it("has the limits the database has (supabase/migrations, fathom_guesses)", () => {
+  it("names each question's round as fathom_compare measures it: a name-it round by its list's scoring", () => {
+    expect(compareRound({})).toBe("estimate");
+    expect(compareRound({ round: "estimate" })).toBe("estimate");
+    expect(compareRound({ round: "percent" })).toBe("percent");
+    expect(compareRound({ round: "year" })).toBe("year");
+    const nameIt = { list: "land-borders", noun: "country", nounPlural: "countries" };
+    expect(compareRound({ round: "name", nameIt: { ...nameIt, scoring: "steps" } })).toBe("name-steps");
+    expect(compareRound({ round: "name", nameIt: { ...nameIt, scoring: "ratio" } })).toBe("name-ratio");
+    // As the game scores one without its list's scoring: by the estimate's rule.
+    expect(compareRound({ round: "name" })).toBe("name-ratio");
+  });
+
+  it("keeps each round's comparison apart in the cache", () => {
+    expect(compareKey("q", "percent", 30, 20)).not.toBe(compareKey("q", "estimate", 30, 20));
+    expect(compareKey("q", "year", 1979, 1969)).toBe("fathom:year:q:1979:1969");
+  });
+
+  it("has the limits and the rounds the database has (supabase/migrations, fathom_guesses)", () => {
     const sql = readFileSync(new URL("../../supabase/migrations/20261105130000_fathom_guesses.sql", import.meta.url), "utf8");
     expect(sql).toContain("check (question_id ~ '^[a-z0-9-]{1,64}$')");
-    expect(sql).toContain(`guess > 0 and guess < ${MAX_GUESS.toExponential().replace("+", "")}`);
+    expect(sql).toContain(`check (guess >= 0 and guess < ${MAX_GUESS.toExponential().replace("+", "")})`);
+    expect(sql).toContain(`not (p_guess >= 0 and p_guess < ${MAX_GUESS.toExponential().replace("+", "")})`);
+    expect(sql).toContain(`p_round not in (${COMPARE_ROUNDS.map((r) => `'${r}'`).join(", ")})`);
   });
 });
 
@@ -47,7 +78,10 @@ describe("the guesses outbox", () => {
       ["eiffel-tower-height", 300],
       ["moon-distance", 384_000],
     ]);
-    expect(enqueue(store, FATHOM_GUESSES, guess({ guess: -1 }), T)).toBe(false);
+    expect(enqueue(store, FATHOM_GUESSES, guess({ questionId: "plastic-recycled", guess: -1 }), T)).toBe(false);
+    // A name-it round's figure, 0 land borders (an island) included.
+    expect(enqueue(store, FATHOM_GUESSES, guess({ questionId: "name-country-6-borders", guess: 0 }), T)).toBe(true);
+    expect(store.data.pending.at(-1)).toEqual({ questionId: "name-country-6-borders", guess: 0, at: T });
   });
 
   it("sends them in order, waits while offline, and remembers what went", async () => {
@@ -82,6 +116,8 @@ describe("how real players guessed", () => {
     expect(parseCompare({ n: 37, median: 4, further_off: 0.72 })).toEqual({ n: 37, median: 4, furtherOff: 0.72 });
     expect(parseCompare('{"n": 37, "median": 4, "further_off": "0.7200"}')).toEqual({ n: 37, median: 4, furtherOff: 0.72 });
     expect(parseCompare({ n: 0, median: null, further_off: null })).toEqual({ n: 0, median: null, furtherOff: null });
+    // Most players said 0% (or named an island on a land-borders round).
+    expect(parseCompare({ n: 25, median: 0, further_off: 0.12 })).toEqual({ n: 25, median: 0, furtherOff: 0.12 });
     for (const bad of [null, "nope", [], { n: -1 }, { n: "x" }, { n: 2, median: -4, further_off: 0.5 }, { n: 2, median: 4, further_off: 2 }]) {
       expect(parseCompare(bad), JSON.stringify(bad)).toBeNull();
     }

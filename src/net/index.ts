@@ -4,7 +4,7 @@ import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import { accountsOn, backendOn } from "./config";
 import type { CrowdStats, ListAverages } from "./crowd";
-import { FATHOM_GUESSES, type FathomCrowd, type FathomGuess } from "./fathom";
+import { compareKey, FATHOM_GUESSES, type CompareRound, type FathomCrowd, type FathomGuess } from "./fathom";
 import { cleanNote, FEEDBACK, type Feedback } from "./feedback";
 import { enqueue, localOutboxStore } from "./outbox";
 import { invalidRating, ratingKey, withRating, type Rating, type RatingMode, type RatingReason } from "./ratings";
@@ -28,6 +28,7 @@ import {
  */
 
 export { accountsOn, backendOn } from "./config";
+export { compareRound, type CompareRound } from "./fathom";
 export type { AccountState } from "./store";
 
 type Service = typeof import("./service");
@@ -181,10 +182,11 @@ export function submitFeedback(listId: string, mode: RatingMode, text: string, r
 }
 
 /**
- * Fathom: a guess just locked in on a question. Only with a backend: without one this sends and stores nothing. Queued
- * in its own outbox at once (like a note: it survives the backend code failing to download offline, or a reload), then
- * sent and retried while offline. One per question: once a question's guess is queued or sent, a later game's guess on
- * it adds nothing (the server keeps a browser's first). False when nothing was queued.
+ * Fathom: a guess just locked in on a question, 0 or more; on a name-it round, the figure of the thing named (its
+ * population, its land borders). Only with a backend: without one this sends and stores nothing. Queued in its own
+ * outbox at once (like a note: it survives the backend code failing to download offline, or a reload), then sent and
+ * retried while offline. One per question: once a question's guess is queued or sent, a later game's guess on it adds
+ * nothing (the server keeps a browser's first). False when nothing was queued.
  */
 export function submitFathomGuess(questionId: string, guess: number): boolean {
   if (!backendOn) return false;
@@ -256,9 +258,11 @@ export function useListAverages(): ListAverages | null {
 }
 
 /**
- * How real players guessed on a Fathom question, against this guess and the answer shown; null without a backend,
- * while loading, or if the server can't say (crowdLine in ./fathom decides whether there are enough of them to show).
+ * How real players guessed on a Fathom question, against this guess and the answer shown, "further off" measured on
+ * the scale of the question's round (`compareRound(q)`: points off for a percent, years for a year, steps on a steps
+ * list, how many times off otherwise); null without a backend, while loading, or if the server can't say (playersLine
+ * in src/game/fathom.ts decides whether there are enough of them to show).
  */
-export function useFathomCrowd(questionId: string, guess: number, answer: number): FathomCrowd | null {
-  return useLoaded(`fathom:${questionId}:${guess}:${answer}`, (s) => s.fathomCompare(questionId, guess, answer));
+export function useFathomCrowd(questionId: string, guess: number, answer: number, round: CompareRound = "estimate"): FathomCrowd | null {
+  return useLoaded(compareKey(questionId, round, guess, answer), (s) => s.fathomCompare(questionId, guess, answer, round));
 }
