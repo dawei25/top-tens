@@ -886,8 +886,11 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
   if (shared.length) console.log(`     ${topic.id}: ${shared.length} places outside ${topic.region} named like one inside left out (free): ${shared.join(", ")}`);
   if (unknown.size) console.log(`warn ${topic.id}: rows in no known country left out (gazetteer.ts): ${[...unknown].join(", ")}`);
   for (const cat of topic.universeCategories ?? []) {
-    const titles = await fetchCategory(cat, topic.categoryDepth ?? 0, CATEGORY_CAP);
+    const cap = topic.categoryCap ?? CATEGORY_CAP;
+    const titles = await fetchCategory(cat, topic.categoryDepth ?? 0, cap);
     if (!titles.length) console.log(`warn ${topic.id}: category "${cat}" is empty or missing`);
+    const cut = capWarning(topic.id, cat, titles, cap);
+    if (cut) console.log(cut);
     for (const title of titles) {
       if (CATEGORY_SKIP.test(title) || topic.categorySkip?.test(title) || topic.skip?.includes(title)) continue;
       if (topic.categoryNames && !looksLikeName(baseTitle(title))) continue;
@@ -940,8 +943,17 @@ function looksLikeName(title: string): boolean {
   return ws.slice(1).every((w) => !/^\p{Ll}/u.test(w) || NAME_PARTICLES.has(w) || /['’.]/.test(w));
 }
 
-/** Most titles taken from a topic's categories. */
-const CATEGORY_CAP = 3000;
+/** Most titles taken from each of a topic's categories, unless it sets `categoryCap`. */
+export const CATEGORY_CAP = 3000;
+
+/**
+ * A warning when a category filled its cap: it reads alphabetically, so the pool stopped at a letter (Premier League
+ * players at "Mb", leaving out Rashford, Saka and Solskjaer). Undefined when it didn't.
+ */
+export function capWarning(id: string, cat: string, titles: string[], cap: number): string | undefined {
+  if (titles.length < cap) return undefined;
+  return `warn ${id}: category "${cat}" hit the cap of ${cap} titles at "${titles.at(-1)}": raise \`categoryCap\``;
+}
 /** Category members that are not things a player would name: lists, overviews, years, other namespaces. */
 const CATEGORY_SKIP =
   /^((lists?|index|outline|history|timeline|glossary|bibliography|discography|filmography) of\b|\d{3,4}\b|(category|template|wikipedia|portal|file|help|draft|module):)|\(disambiguation\)$/i;
@@ -1126,9 +1138,20 @@ const SPELLINGS = [
   ["Medina", "Madinah", "Madina"],
 ];
 
-/** A name written with each other spelling of a SPELLINGS word in it. */
+/**
+ * Letters no accent-stripping turns into the ones on an English keyboard: "solskjaer" is Ole Gunnar Solskjær,
+ * "odegaard" Martin Ødegaard (coverage audit, Premier League scorers).
+ */
+const FOLDS: Record<string, string> = {
+  ø: "o", Ø: "O", æ: "ae", Æ: "Ae", ð: "d", Ð: "D", þ: "th", Þ: "Th", ł: "l", Ł: "L", đ: "d", Đ: "D", œ: "oe", Œ: "Oe",
+  ß: "ss", ı: "i",
+};
+const FOLDABLE = `[${Object.keys(FOLDS).join("")}]`;
+
+/** A name written with each other spelling of a SPELLINGS word in it, and with keyboard letters (FOLDS). */
 export function spellingVariants(form: string): string[] {
   const out: string[] = [];
+  if (new RegExp(FOLDABLE).test(form)) out.push(form.replace(new RegExp(FOLDABLE, "g"), (c) => FOLDS[c]));
   for (const set of SPELLINGS) {
     for (const w of set) {
       const re = new RegExp(`\\b${w}\\b`, "gi");
@@ -1138,12 +1161,18 @@ export function spellingVariants(form: string): string[] {
   return out;
 }
 
-/** Every entry's names in the other spellings (SPELLINGS), unless another entry goes by that form. */
-function addSpellings(entries: Entry[]): void {
+/**
+ * Every entry's names in the other spellings (SPELLINGS, FOLDS), unless another entry goes by that form. On a list of
+ * people, a surname that changes too ("Solskjaer", "Hojlund") comes along: a surname alone is how people name a
+ * player, and the name's own one wasn't typeable.
+ */
+function addSpellings(entries: Entry[], people = false): void {
   const owner = new Map<string, Entry>();
   for (const e of entries) for (const f of [e.name, ...e.aliases]) if (!owner.has(normalize(f))) owner.set(normalize(f), e);
   for (const e of entries) {
-    for (const v of [e.name, ...e.aliases].flatMap(spellingVariants)) {
+    const own = normalize(e.name.split(" ").at(-1)!);
+    const surnames = people ? spellingVariants(e.name).map(surname).filter((s): s is string => !!s && normalize(s) !== own) : [];
+    for (const v of [...[e.name, ...e.aliases].flatMap(spellingVariants), ...surnames]) {
       const n = normalize(v);
       if (owner.has(n)) continue;
       owner.set(n, e);
@@ -1437,7 +1466,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   }
   pruneAliases(entries, namesakes, lower);
   applyIntent(topic, entries);
-  addSpellings(entries);
+  addSpellings(entries, topic.people);
   // Whatever the source (redirect, cell, universe), a slur never ships.
   for (const e of entries) e.aliases = e.aliases.filter((a) => !blockedAlias(a, [e.name]));
   // Nor text decoded in the wrong code page: "Eugčne Henri Paul Gauguin" (painters' judge). validate.ts fails a name

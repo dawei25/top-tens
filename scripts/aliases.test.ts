@@ -350,6 +350,27 @@ describe("aliases as built: what players type", () => {
     expect(lands("islands", "hawaii island")).toBe("Hawaiʻi");
   });
 
+  it.each([
+    // Coverage audit: the category stopped at "Mb", and some surnames are plain words or untypeable letters.
+    ["rashford", "Marcus Rashford"],
+    ["cole palmer", "Cole Palmer"],
+    ["palmer", "Cole Palmer"],
+    ["fernando torres", "Fernando Torres"],
+    ["solskjaer", "Ole Gunnar Solskjær"],
+    ["odegaard", "Martin Ødegaard"],
+    ["hojlund", "Rasmus Højlund"],
+    ["hazard", "Eden Hazard"],
+    ["bale", "Gareth Bale"],
+    ["declan rice", "Declan Rice"],
+  ])("premier-league-goals: %s -> %s", (guess, name) => {
+    expect(lands("premier-league-goals", guess)).toBe(name);
+  });
+
+  it("premier-league-goals: the owner's note, the players' average is lower (par 4, not 5)", () => {
+    const par = JSON.parse(readFileSync(join(dir, "par.json"), "utf8"));
+    expect(par["premier-league-goals"].par).toBeLessThanOrEqual(4);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

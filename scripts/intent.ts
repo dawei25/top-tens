@@ -766,6 +766,12 @@ export const INTENT: Record<string, Intent> = {
       "Alan Shearer": ["Shearer"],
       "Harry Kane": ["Kane"],
       "Wayne Rooney": ["Rooney", "Wazza"],
+      // Coverage audit: surnames that are plain words, which a word of a name alone never matches. The famous one
+      // of each (Micky Hazard and four other Palmers also played).
+      "Eden Hazard": ["Hazard"],
+      "Gareth Bale": ["Bale"],
+      "Cole Palmer": ["Palmer"],
+      "Ivan Toney": ["Toney"],
     },
   },
   "nfl-passing-yards": {

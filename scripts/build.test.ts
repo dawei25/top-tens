@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import {
+  capWarning,
   countedNames,
   countryNames,
   datedLabel,
@@ -185,6 +186,33 @@ describe("spelling variants", () => {
     expect(spellingVariants("Burj Khalifa")).toEqual([]);
     // A whole word only: "Meccano" is no Mecca.
     expect(spellingVariants("Meccano")).toEqual([]);
+  });
+
+  // Coverage audit: "solskjaer" and "odegaard" found nothing; "hojlund" was corrected to Haaland.
+  it("write a name with keyboard letters for the ones accents don't cover", () => {
+    expect(spellingVariants("Ole Gunnar Solskjær")).toEqual(["Ole Gunnar Solskjaer"]);
+    expect(spellingVariants("Martin Ødegaard")).toEqual(["Martin Odegaard"]);
+    expect(spellingVariants("Łukasz Fabiański")).toEqual(["Lukasz Fabiański"]);
+    expect(spellingVariants("Eiður Guðjohnsen")).toEqual(["Eidur Gudjohnsen"]);
+    expect(spellingVariants("Pascal Groß")).toEqual(["Pascal Gross"]);
+  });
+});
+
+describe("category cap", () => {
+  // Coverage audit: "Premier League players" stopped at "Mb" under the cap of 3,000, so Rashford, Saka, Palmer and
+  // Solskjaer were "not one of the players here". A category that fills its cap now warns.
+  it("warns when a category fills its cap, naming where it stopped", () => {
+    const titles = Array.from({ length: 3 }, (_, i) => `Player ${i}`);
+    expect(capWarning("premier-league-goals", "Premier League players", titles, 3)).toMatch(/hit the cap of 3 titles at "Player 2"/);
+    expect(capWarning("premier-league-goals", "Premier League players", titles, 4)).toBeUndefined();
+  });
+
+  it("reads every Premier League player", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", "premier-league-goals.json"), "utf8"));
+    const names = new Set(p.extras.map((e) => e.name));
+    for (const name of ["Marcus Rashford", "Bukayo Saka", "Cole Palmer", "Ole Gunnar Solskjær", "Fernando Torres", "Ollie Watkins"]) {
+      expect(names).toContain(name);
+    }
   });
 });
 

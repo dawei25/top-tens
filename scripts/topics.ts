@@ -126,6 +126,12 @@ export interface Topic {
    */
   universeCategories?: string[];
   categoryDepth?: number;
+  /**
+   * Most titles taken from each of the topic's categories (default build.ts CATEGORY_CAP). A category reads in
+   * alphabetical order, so a cap it reaches cuts the pool off at a letter ("Premier League players" stopped at "Mb":
+   * no Rashford, Saka or Solskjaer); the build warns when one does.
+   */
+  categoryCap?: number;
   /** Display names for category members, by article title ("Dalmatian dog" is shown as "Dalmatian"); the title stays an alias. */
   categoryRename?: Record<string, string>;
   /** Extra aliases by entry name, for well-known short forms Wikipedia has no redirect for. */
@@ -1251,6 +1257,9 @@ export const TOPICS: Topic[] = [
       { page: "Ballon d'Or", tables: [2], name: "Player" },
     ],
     universeCategories: ["First Division/Premier League top scorers", "Premier League Hall of Fame inductees", "English Football Hall of Fame inductees", "Premier League players"],
+    // Every Premier League player: the default cap of 3,000 stopped the category at "Mb" (coverage audit: no
+    // Rashford, Saka, Palmer, Solskjaer or Fernando Torres).
+    categoryCap: 12000,
     junkAliases: ["Elen Rivas", "Nicole Merry", "Tommy Rooney", "Sergioaguero.com"],
   },
   {
