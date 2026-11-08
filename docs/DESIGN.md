@@ -89,10 +89,12 @@ approves it: five estimation questions a game, scored by plain closeness, one ru
    Blitz key there, owner Nov 8: "for simplicity"); lives; 10 rank slots, each empty one with a
    clue magnifier; feedback line; chips for life-costing misses.
    Blitz's title card shows the prompt only when it adds words beyond the title, "name as many <noun> as you can", and
-   its scoring rule ("#1 gets 100, smaller numbers get less, down to 10"), repeated on the results. Once a found row
-   has a fact, "facts: tap a name." sits under the board.
-3. **Results:** score, the average and histogram (where you stand), full list with values, source link, share, Roll
-   again (a new random game).
+   its scoring rule ("#1 gets 100, smaller numbers get less, down to 10"), repeated on the results. A found row opens
+   its fact on a tap; no caption says so (owner, Nov 8).
+3. **Results:** score, the average and histogram (where you stand), full list with values, a quiet "See 11 to 20" key
+   under the board that opens the next ten ranks with their figures (life-costing guesses in pink; "See 11 to 15" when
+   the list stops sooner; none on Blitz), source link, share, Roll new list (a new random game), and Play Blitz on a
+   list's results. A Blitz's results never offer its own list as a list game: it's spoiled (UX 15).
    A finished daily offers Today's Blitz and Random list instead. The archive is a table, one row per date: number and
    date, then a List cell and a Blitz cell (title, and score or "not played" under it), with "List" and "Blitz" named
    once at the top; each cell opens its own one-try game.
@@ -188,4 +190,8 @@ The squid leaves the header and lives in a deep-ocean world behind the whole app
 - Reactions: its limbs light for answers found; a find makes it dart and glow; a lost life inks
   where it is and darts away; a perfect 10 does loops; Blitz momentum makes it swim faster and glow brighter; idle,
   it sinks and dozes.
-- Later (not in the MVP): a seafloor that grows from your history, a lanternfish school for the streak, tap tricks.
+- A find also gives a quick wiggle in time with the limb's flash (bigger for a top 3; half size for a Blitz hit outside
+  the top 10). A tap on the squid's own pixels makes it blush, wave and pop a pixel heart; three taps in a row, a spin,
+  a ring of sparks and an ink puff as it darts off (a small sound when sound is on). It never takes a tap meant for a
+  control, and with reduced motion it only blushes.
+- Later: a seafloor that grows from your history, a lanternfish school for the streak.
