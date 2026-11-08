@@ -2629,7 +2629,24 @@ export const TOPICS: Topic[] = [
     also: [
       { tables: [5], name: "Artist" },
       { page: "List of best-selling music artists", tables: [0, 1, 2, 3, 4, 5], name: "Artist" },
+      // Coverage audit: Sabrina Carpenter, Morgan Wallen, Rosé and Avicii were "not one of the artists here". The
+      // page's yearly top fives and monthly number ones widen it.
+      ...range(1, 5).map((c) => ({ tables: [0], name: c })),
+      ...range(1, 12).map((c) => ({ tables: [6], name: c })),
     ],
+    // Big on Spotify (the lead artists of the most-streamed songs, among others), and on no table here. Their song
+    // tables' artist cells glue several names together ("Mark Ronson and Bruno Mars"), so they are listed by hand.
+    more: {
+      "Twenty One Pilots": ["21 Pilots"], "The Neighbourhood": [], "Lewis Capaldi": [], "Vance Joy": [], "Glass Animals": [],
+      "Tom Odell": [], "James Arthur": [], "The Killers": [], "Tones and I": [], "John Legend": [], Toto: [], "A-ha": [],
+      Passenger: [], "Kate Bush": [], Joji: [], "Lil Nas X": [], Måneskin: ["Maneskin"], "DJ Snake": [], "Major Lazer": [],
+      Khalid: [], "Daft Punk": [], "Lord Huron": [], "Goo Goo Dolls": [], "Luis Fonsi": [], "Mark Ronson": [],
+      "Morgan Wallen": ["Wallen"], Future: [], "Chappell Roan": [], "Benson Boone": [], "Peso Pluma": [],
+      "Metro Boomin": [], "21 Savage": [], "J. Cole": ["J Cole"], "Tyler, the Creator": ["Tyler the Creator"],
+      "Frank Ocean": [], "Playboi Carti": ["Carti"], "Rosé": ["Rose"], Radiohead: [], "Marshmello": [], Kygo: [],
+      "Cardi B": [], "Charlie Puth": [], "Camila Cabello": [], Hozier: [], "Lewis Capaldi": [], OneRepublic: [],
+      "Tate McRae": [], "Teddy Swims": [], "Sabrina Carpenter": [], "Avicii": [], "The Chainsmokers": ["Chainsmokers"],
+    },
     junkAliases: [
       "Starboy", "King Of The Fall", "We're Alone Together", "Monologue Song", "Lady Gaga as a gay icon",
       "Lady Gaga as gay icon", "Coldplay.com", "Pectoralz", "Los Unidades", "Big Fat Noises", "Shakira Bio",

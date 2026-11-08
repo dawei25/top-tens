@@ -835,6 +835,18 @@ describe("aliases as built: what players type", () => {
     expect(junk("africa-cities", "oujda")).toBe(false);
   });
 
+  it.each([
+    // Coverage audit: today's big streaming artists were "not one of the artists here".
+    ["sabrina carpenter", "Sabrina Carpenter"],
+    ["morgan wallen", "Morgan Wallen"],
+    ["peso pluma", "Peso Pluma"],
+    ["rose", "Rosé"],
+    ["avicii", "Avicii"],
+    ["radiohead", "Radiohead"],
+  ])("spotify-artists: %s -> %s", (guess, name) => {
+    expect(lands("spotify-artists", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");
