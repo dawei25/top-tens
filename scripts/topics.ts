@@ -292,6 +292,11 @@ export interface Dated {
   /** The name cell ends with the figure ("Tencent 688,000"): the number is the figure, the rest the name. */
   figureInName?: boolean;
   /**
+   * Between this table's figure and one of the same year from another `largest` table, the bigger wins, not the
+   * first listed: a game's own platform, not a re-release ("Super Mario Bros. 3": NES, not the Wii's 1.0 million).
+   */
+  largest?: boolean;
+  /**
    * A table with one row per year (each year's top tour, the record as it grew): `col` holds the row's year (the
    * latest, if it lists several), which fills "{year}" in the label row by row, and `rank` is the rank every row
    * held that year: "#1 in 2025
@@ -841,7 +846,8 @@ export const TOPICS: Topic[] = [
       "Titanic DVD Release", "Titanic DVD", "Titanic VHS", "Titanic 5 Disc", "Titanic Blu-ray", "Titanic 3D",
       "The Super Mario Bros. Movie 3", "Pratt Mario",
     ],
-    skip: ["Harry Potter and the Sorcerer's Stone"],
+    // The cost table's short title for #50, Rogue One: A Star Wars Story (whose cell links a redirect).
+    skip: ["Harry Potter and the Sorcerer's Stone", "Rogue One"],
   },
   {
     id: "youtube-channels",
@@ -926,10 +932,29 @@ export const TOPICS: Topic[] = [
     value: "Sales",
     metric: "Copies sold (millions)",
     works: true,
+    // Coverage audit: the table stops near 25 million and the categories skip classic best-sellers (Nintendogs,
+    // Brain Age, Super Mario World, Diablo III). Each platform's best-seller list gives them its figure, saying
+    // which platform it counts ("24.0 million (on Nintendo DS)"); the platform with the most wins.
+    also: (
+      [
+        ["List of best-selling Nintendo Switch video games", 0, "Title", "Copies sold", "Nintendo Switch"],
+        ["List of best-selling Nintendo DS video games", 0, "Game", "Copies sold", "Nintendo DS"],
+        ["List of best-selling Wii video games", 1, "Game", "Copies sold", "Wii"],
+        ["List of best-selling PlayStation 4 video games", 0, "Game", "Copies sold", "PlayStation 4"],
+        ["List of best-selling PlayStation 2 video games", 0, "Game", "Copies sold", "PlayStation 2"],
+        ["List of best-selling PC games", 0, "Game", "Total copies sold", "PC"],
+        ["List of best-selling Xbox 360 video games", 0, "Game", "Copies sold", "Xbox 360"],
+        ["List of best-selling Nintendo Entertainment System video games", 1, "Game", "Sales", "NES"],
+        ["List of best-selling Super Nintendo Entertainment System video games", 1, "Game", "Sales", "SNES"],
+        ["List of best-selling Game Boy video games", 1, "Game", "Sales", "Game Boy"],
+      ] as const
+    ).map(([page, t, name, value, on]) => ({ page, tables: [t], name, value, dated: { label: `on ${on}`, scale: 1e6, unit: " million", largest: true } })),
     universeCategories: ["The Game Awards winners", "Golden Joystick Award for Game of the Year winners", "Spike Video Game Awards Game of the Year winners", "Video games adapted into films", "Open-world video games", "Namco arcade games", "Arcade video games"],
-    // People, teams, studios and a show among the award categories.
+    // The 1997 game by its year: "grand theft auto" means the series (intent.ts offers its games).
+    categoryRename: { "Grand Theft Auto (video game)": "Grand Theft Auto (1997)" },
+    // People, teams, studios and a show among the award categories; the Grand Theft Auto series' article.
     skip: [
-      "Ludwig Ahgren", "Laura Bailey", "Greg Miller", "Amir Satvat", "Carol Shaw", "Boogie2988", "Bugha", "Chovy", "SonicFox",
+      "Grand Theft Auto", "Ludwig Ahgren", "Laura Bailey", "Greg Miller", "Amir Satvat", "Carol Shaw", "Boogie2988", "Bugha", "Chovy", "SonicFox",
       "Cloud9", "G2 Esports", "Ninjas in Pyjamas", "CD Projekt Red", "Arcane",
     ],
     junkAliases: [

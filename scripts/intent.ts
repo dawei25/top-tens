@@ -584,6 +584,11 @@ export const INTENT: Record<string, Intent> = {
       "PUBG: Battlegrounds": ["PlayerUnknown's Battlegrounds", "PUBG"],
       "The Elder Scrolls V: Skyrim": ["Skyrim", "Elder Scrolls Skyrim"],
       "The Witcher 3: Wild Hunt": ["Witcher 3", "The Witcher 3"],
+      // Coverage audit: as GTA V has "GTA V".
+      "Grand Theft Auto IV": ["GTA IV", "GTA 4"],
+      "Red Dead Redemption": ["RDR", "Red Dead 1"],
+      "Super Mario Bros. 3": ["SMB3", "Mario 3"],
+      "Brain Age: Train Your Brain in Minutes a Day!": ["Brain Age", "Brain Training"],
     },
     groups: {
       CoD: ["Call of Duty: Black Ops III", "Call of Duty: Modern Warfare", "Call of Duty: Black Ops Cold War", "Call of Duty: Modern Warfare 3"],

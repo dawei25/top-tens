@@ -25,6 +25,7 @@ import {
   regionColumn,
   sameKey,
   scaledFigure,
+  shortFormOnly,
   skipName,
   spellingVariants,
 } from "./build";
@@ -213,6 +214,33 @@ describe("category cap", () => {
     for (const name of ["Marcus Rashford", "Bukayo Saka", "Cole Palmer", "Ole Gunnar Solskjær", "Fernando Torres", "Ollie Watkins"]) {
       expect(names).toContain(name);
     }
+  });
+});
+
+describe("merging unranked answers", () => {
+  // Coverage audit and agent B: Mugen Train vanished into Infinity Castle through "Demon Slayer", The Phantom Menace
+  // into The Force Awakens through "Star Wars", the 1981 Frogger into "Frogger: He's Back!".
+  it("never merges two entries through a short form cut from either name when they link different articles", () => {
+    const s = (...f: string[]) => new Set(f);
+    expect(shortFormOnly(["demon slayer"], s("demon slayer"), s(), "Mugen Train (film)", "Infinity Castle (film)")).toBe(true);
+    expect(shortFormOnly(["frogger"], s(), s("frogger"), "Frogger", "Frogger: He's Back!")).toBe(true);
+    // The same article: one thing ("PUBG" for PUBG: Battlegrounds).
+    expect(shortFormOnly(["pubg"], s("pubg"), s(), "PUBG: Battlegrounds", "PUBG: Battlegrounds")).toBe(false);
+    // A real name both have, or no article to tell them apart: the usual merge.
+    expect(shortFormOnly(["the lion king"], s("lion king"), s(), "The Lion King", "The Lion King (2019 film)")).toBe(false);
+    expect(shortFormOnly(["star wars"], s("star wars"), s(), undefined, "Star Wars: The Force Awakens")).toBe(false);
+  });
+
+  it("keeps the films and games it used to swallow", () => {
+    const names = (id: string) => {
+      const p: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${id}.json`), "utf8"));
+      return new Set([...p.answers, ...p.extras].map((e) => e.name));
+    };
+    expect(names("animated-films")).toContain("Demon Slayer: Kimetsu no Yaiba Mugen Train");
+    expect(names("video-games")).toContain("Frogger");
+    const films = names("films-gross");
+    expect([...films].some((n) => /Phantom Menace/.test(n))).toBe(true);
+    expect(films).toContain("Spider-Man 3");
   });
 });
 

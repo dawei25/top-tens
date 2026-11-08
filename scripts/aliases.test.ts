@@ -518,6 +518,34 @@ describe("aliases as built: what players type", () => {
     expect(lands("fiction-authors", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: classic best-sellers outside the table, with their platform's figure.
+    ["nintendogs", "Nintendogs"],
+    ["diablo 3", "Diablo III"],
+    ["brain age", "Brain Age: Train Your Brain in Minutes a Day!"],
+    ["super mario world", "Super Mario World"],
+    ["mario kart ds", "Mario Kart DS"],
+    ["gta 4", "Grand Theft Auto IV"],
+    ["rdr", "Red Dead Redemption"],
+  ])("video-games: %s -> %s", (guess, name) => {
+    expect(lands("video-games", guess)).toBe(name);
+  });
+
+  it("video-games: a game shows its own platform's figure, not a re-release's", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "video-games.json"), "utf8"));
+    expect(p.extras.find((e) => e.name === "Super Mario Bros. 3")?.value).toMatch(/\(on NES\)$/);
+  });
+
+  it.each([
+    // Agent B: these merged into other films through a short form ("Star Wars") or a junk alias ("Spider-Man 3").
+    ["the phantom menace", "Star Wars: Episode I – The Phantom Menace"],
+    ["spider-man 3", "Spider-Man 3"],
+    ["the two towers", "The Lord of the Rings: The Two Towers"],
+    ["rogue one", "Rogue One: A Star Wars Story"],
+  ])("films-gross: %s -> %s", (guess, name) => {
+    expect(lands("films-gross", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");
