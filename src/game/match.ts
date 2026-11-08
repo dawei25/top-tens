@@ -34,11 +34,16 @@ export function normalize(s: string): string {
 
 const CODE = /^[A-Z0-9]{2,4}$/;
 
-const NUMBER_WORDS: Record<string, string> = Object.fromEntries(
-  "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty"
-    .split(" ")
-    .map((w, i) => [w, String(i + 1)]),
-);
+const NUMBER_WORDS: Record<string, string> = {
+  ...Object.fromEntries(
+    "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty"
+      .split(" ")
+      .map((w, i) => [w, String(i + 1)]),
+  ),
+  // The tens too: "50 shades of grey" is Fifty Shades of Grey.
+  ...Object.fromEntries("thirty forty fifty sixty seventy eighty ninety".split(" ").map((w, i) => [w, String(30 + 10 * i)])),
+  hundred: "100",
+};
 
 /** Number words as digits, so "frozen two" meets "Frozen II" (normalized "frozen 2"). */
 /** Ordinals count as their digits too: "squid game second season" is Season 2. */
@@ -147,8 +152,8 @@ const formsCache = new WeakMap<Entry, Forms>();
 
 /**
  * An entry's forms, normalized once. Besides the name and aliases: each part of a slash-joined name ("The Fame / The
- * Fame Monster": "The Fame", "The Fame Monster"), and "&" between single letters as players type it ("Texas A&M":
- * "texas am", "H&M": "hm").
+ * Fame Monster": "The Fame", "The Fame Monster"), "&" between single letters as players type it ("Texas A&M":
+ * "texas am", "H&M": "hm"), and a "the" inside a name left out ("Republic of the Congo": "republic of congo").
  */
 function formsOf(entry: Entry): Forms {
   let f = formsCache.get(entry);
@@ -162,8 +167,10 @@ function formsOf(entry: Entry): Forms {
   const codes = raw.map((r) => CODE.test(r));
   for (const s of [...forms]) {
     const joined = s.replace(/(^| )([a-z0-9]) and ([a-z0-9])(?= |$)/g, "$1$2$3");
-    if (joined !== s) {
-      forms.push(joined);
+    const theless = s.replace(/ the (?=\S)/g, " ");
+    for (const v of [joined, theless]) {
+      if (v === s || forms.includes(v)) continue;
+      forms.push(v);
       codes.push(false);
     }
   }
@@ -261,7 +268,7 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
       // Spacing never matters: "spiderman" is "Spider-Man", "psone" PS One. Words both sides share ("mount", "canyon")
       // aren't evidence of a typo: only the rest is compared, so "mount whitney" is not a misspelling of "mount lhotse".
       // Number words count as their digits: "frozen two" is Frozen II.
-      const spacing = written.replace(/ /g, "") === compactGuess || (numGuess !== guess && numbersAsDigits(written) === numGuess);
+      const spacing = written.replace(/ /g, "") === compactGuess || numbersAsDigits(written) === numGuess;
       const unnumbered = !spacing && !guessDigits && formDigits ? numbersAsDigits(written).split(" ").filter((w) => !/^\d+$/.test(w)).join(" ") : written;
       if (!unnumbered) continue;
       const f = unnumbered;
@@ -522,11 +529,12 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
   const partial = plain ? [] : wordMatches(guess, candidates);
   if (partial.length > 0) return fits(partial, true);
 
+  // A name of its own, however it's spaced ("golden doodle" is the Goldendoodle, not Golden Retriever).
+  const ownName = !!lex && (isKnownName(raw, lex) || (guess.includes(" ") && isKnownName(guess.replace(/ /g, ""), lex)));
+
   // An answer's full name with more words after it, usually who made it ("perfect ed sheeran", "stay justin bieber"):
   // that answer, put in the box to confirm. The longest name that starts the guess wins. Not when the whole guess is a
   // name of its own: "saudi aramco" is the company, not Saudi Arabia; "mexico city" is not Mexico.
-  // A name of its own, however it's spaced ("golden doodle" is the Goldendoodle, not Golden Retriever).
-  const ownName = !!lex && (isKnownName(raw, lex) || (guess.includes(" ") && isKnownName(guess.replace(/ /g, ""), lex)));
   const lead = ownName ? undefined : leadingName(guess, puzzle, lex);
   if (lead) {
     const c = candidates.find((x) => x.entry === lead);
@@ -558,6 +566,8 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
     // another word: "hay" is not "ham" (Pork), "car" not "ČR".
     if (plain) return c.dist <= 1 && c.sameStart && c.entry.rank > 0 && guess.length >= 5;
     const notable = c.entry.rank > 0 || c.entry.value !== undefined;
+    // A slip on one word of an obscure name is no reading of it: "holes" is not Better Homes and Gardens New Cook Book.
+    if (c.viaWord && !notable) return false;
     // The third edit of a slip in the middle needs the same sounds: "korean" is not Kushan, "catalan" not Castilian.
     const budget = typoBudget(len) + (notable && c.ends && c.sounds && len >= 6 && len <= 7 ? 1 : 0);
     return c.dist <= Math.max(budget, c.besideShared ? 1 : 0) && (notable || c.ends);

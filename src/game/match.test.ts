@@ -771,6 +771,19 @@ describe("coverage audit readings", () => {
     expect(judgeGuess("isaiah thomas", nba, new Set([10]))).toMatchObject({ kind: "near", entry: { name: "Isaiah Thomas" } });
   });
 
+  it("tens in words, a 'the' left out, and no slip on a word of an obscure name", () => {
+    const books: Puzzle = {
+      ...puzzle,
+      id: "books11",
+      extras: [v(108, "Fifty Shades of Grey"), v(140, "Republic of the Congo"), v(23, "The Phantom of the Opera"), e(0, "Better Homes and Gardens New Cook Book")],
+    };
+    expect(judgeGuess("50 shades of grey", books, new Set())).toMatchObject({ kind: "near", corrected: false, entry: { rank: 108 } });
+    expect(judgeGuess("republic of congo", books, new Set())).toMatchObject({ kind: "near", corrected: false, entry: { rank: 140 } });
+    expect(judgeGuess("phantom of opera", books, new Set())).toMatchObject({ kind: "near", corrected: false, entry: { rank: 23 } });
+    expect(judgeGuess("holes", books, new Set()).kind).toBe("unknown");
+    // A slip on a word of a name with a rank still lands: "kareen" (above).
+  });
+
   it("a country's name offers its islands (owner, islands list)", () => {
     const isl = (rank: number, name: string, country: string | string[], aliases: string[] = []): Entry => ({ rank, name, aliases, value: "1 km²", country });
     const islands: Puzzle = {
