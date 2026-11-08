@@ -2966,6 +2966,18 @@ export const TOPICS: Topic[] = [
         dated: { perYear: { col: "$100 million+" }, figure: "$100 million+" },
       },
     ],
+    // Coverage audit: "alcaraz" was corrected to Canelo (#2), and Tiger Woods, Federer and Mayweather were "not one of
+    // the athletes here". Past stars stay free on purpose (above), but as known names: every older Forbes top 10 on
+    // the page, and today's stars who never made one.
+    knownOnly: [{ tables: range(3, 18), name: "Name" }],
+    knownNames: [
+      "Carlos Alcaraz", "Alcaraz", "Jannik Sinner", "Scottie Scheffler", "Max Verstappen", "Erling Haaland",
+      "Patrick Mahomes", "Jake Paul", "Anthony Joshua", "Rory McIlroy", "Serena Williams", "Virat Kohli", "Mohamed Salah",
+      "Naomi Osaka", "Aryna Sabalenka", "Coco Gauff", "Iga Świątek", "Shai Gilgeous-Alexander", "Victor Wembanyama",
+      "Luka Dončić", "Jayson Tatum", "Caitlin Clark", "Simone Biles", "Usain Bolt", "Kylian Mbappe", "Vinícius Júnior",
+      "Jude Bellingham", "Aaron Judge", "Josh Allen", "Joe Burrow", "Travis Kelce", "Novak Djokovic", "Rafael Nadal",
+      "Tom Brady", "Michael Jordan", "Kobe Bryant", "Tiger Woods", "Roger Federer", "Floyd Mayweather",
+    ],
     // Fights, relatives, staff, companies, pets and jokes among the redirects: CELEBRITY_JUNK, shared with the
     // career lists, where these stars rank too.
   },

@@ -1795,7 +1795,12 @@ export const INTENT: Record<string, Intent> = {
   },
   "athletes-earnings": {
     // The usual spelling of the name, and a typo of it (judge, cycle 5).
-    same: { "Jon Rahm": ["John Rahm", "Jhon Rahm"] },
+    same: {
+      "Jon Rahm": ["John Rahm", "Jhon Rahm"],
+      // Coverage audit: how fans write them.
+      Neymar: ["Neymar Jr", "Neymar Jr."],
+      "Dak Prescott": ["Dak"],
+    },
   },
   // Coverage audit, Nov 8: what players typed that found nothing, or found the wrong answer.
   "pixar-films": {

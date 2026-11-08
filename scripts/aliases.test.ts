@@ -860,6 +860,18 @@ describe("aliases as built: what players type", () => {
     expect(lands("museums", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: "alcaraz" was corrected to Canelo (#2); past stars are free on purpose, and never read as
+    // another athlete.
+    ["alcaraz", "unknown"],
+    ["tiger woods", "unknown"],
+    ["mayweather", "unknown"],
+    ["neymar jr", "Neymar"],
+    ["dak", "Dak Prescott"],
+  ])("athletes-earnings: %s -> %s", (guess, name) => {
+    expect(lands("athletes-earnings", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");
