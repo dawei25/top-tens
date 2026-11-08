@@ -3034,7 +3034,6 @@ export const TOPICS: Topic[] = [
     // Groups are named by their stores: Schwarz is Lidl and Kaufland, Inditex is Zara, Seven & I is 7-Eleven.
     aliases: {
       "Schwarz Group": ["Lidl", "Kaufland", "Schwarz Gruppe", "Schwarz"],
-      Aldi: ["Aldi Nord", "Aldi Süd", "Aldi Sud"],
       Kroger: ["The Kroger Company", "Kroger Co"],
       "Walgreens Boots Alliance": ["Walgreens", "Boots", "Walgreens Boots"],
       "CVS Health": ["CVS", "CVS Pharmacy"],
@@ -3043,6 +3042,38 @@ export const TOPICS: Topic[] = [
       Inditex: ["Zara"],
       "Seven & I Holdings": ["7-Eleven", "Seven Eleven", "7 Eleven"],
       "Fast Retailing": ["Uniqlo"],
+      // Coverage audit: the stores people shop at, under the group Deloitte ranks (Whole Foods is Amazon's, Trader
+      // Joe's Aldi Nord's, TJ Maxx TJX's).
+      Walmart: ["Sam's Club", "Sams Club", "Flipkart", "Bodega Aurrera"],
+      Amazon: ["Whole Foods", "Whole Foods Market", "Wholefoods"],
+      Aldi: ["Aldi Nord", "Aldi Süd", "Aldi Sud", "Trader Joe's", "Trader Joes"],
+      "TJX Companies": ["TJX", "TJ Maxx", "T.J. Maxx", "TJMaxx", "TK Maxx", "Marshalls", "HomeGoods", "Winners"],
+      Albertsons: ["Safeway", "Vons", "Jewel-Osco", "Shaw's"],
+      "Ahold Delhaize": ["Food Lion", "Stop & Shop", "Albert Heijn", "Hannaford", "Giant Food", "Delhaize", "Ahold"],
+      LVMH: ["Sephora", "Louis Vuitton", "Dior", "Moët Hennessy Louis Vuitton"],
+      Kering: ["Gucci", "Saint Laurent", "Yves Saint Laurent", "Balenciaga", "Bottega Veneta"],
+      "Marks & Spencer": ["M&S", "Marks and Spencer", "Marks & Sparks"],
+      "BJ's Wholesale Club": ["BJ's", "BJs"],
+      "O'Reilly Automotive": ["O'Reilly Auto Parts", "O'Reilly"],
+      "H&M": ["Hennes & Mauritz", "H and M", "Hennes and Mauritz"],
+      "Woolworths Group": ["Woolies"],
+      Gap: ["Old Navy", "Banana Republic"],
+      "Dollar Tree": ["Family Dollar"],
+      "Alimentation Couche-Tard": ["Circle K", "Couche-Tard"],
+      "Sainsbury's": ["Argos", "Sainsburys"],
+      Wesfarmers: ["Bunnings", "Kmart Australia", "Officeworks"],
+      "Loblaw Companies": ["Loblaw", "Loblaws", "Shoppers Drug Mart", "No Frills"],
+      Ceconomy: ["MediaMarkt", "Media Markt"],
+      "Wm Morrison Supermarkets": ["Morrisons", "Morrison's"],
+      "AS Watson Group": ["Watsons", "Superdrug"],
+      "Dirk Rossmann GmbH": ["Rossmann"],
+      "Dick's Sporting Goods": ["Dick's", "Dicks"],
+      "Ross Stores": ["Ross Dress for Less"],
+      "Macy’s": ["Macy's", "Macys"],
+      "Lowe's": ["Lowes"],
+      "Kohl's": ["Kohls"],
+      "John Lewis Partnership": ["Waitrose", "John Lewis"],
+      "The Home Depot": ["Home Depot"],
     },
     // Programs, subsidiaries' products, imprints, short links, a map line and a saint among the redirects.
     junkAliases: [
@@ -3051,6 +3082,16 @@ export const TOPICS: Topic[] = [
       "Amazon Software Download", "Amazon Live", "Amazon Devices", "A.co", "Amzn.to", "Amazon Logistics", "AMZL",
       "AMZL US", "Amazon Affiliates", "AmazonWireless", "Amazon Local", "AmazonLocal", "St. Vitus", "Aldi equator",
       "Aldi-Äquator", "3.cn", "CVS Lookbook",
+      // "kmart" was corrected to Walmart by this redirect (coverage audit).
+      "WMart",
+    ],
+    // Famous retailers outside Deloitte's top 100 (marketplaces and brands aren't counted, the rest are under the
+    // cut): free, and real names. Kmart is the US chain's (Kmart Australia is Wesfarmers', above).
+    knownNames: [
+      "Kmart", "eBay", "Temu", "Apple Store", "Adidas", "Primark", "Rite Aid", "Sears", "Lululemon", "Wayfair",
+      "Wegmans", "Etsy", "AliExpress", "Rakuten", "Mercado Libre", "Zalando", "Burlington", "Bed Bath & Beyond",
+      "Big Lots", "JCPenney", "Dillard's", "Barnes & Noble", "GameStop", "Petco", "PetSmart", "Ulta Beauty",
+      "Foot Locker", "Victoria's Secret", "Sports Direct", "Currys",
     ],
   },
   {

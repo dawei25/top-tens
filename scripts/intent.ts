@@ -1422,6 +1422,10 @@ export const INTENT: Record<string, Intent> = {
       "Fox Terrier": ["Wire Fox Terrier", "Smooth Fox Terrier"],
     },
   },
+  retailers: {
+    // All digits, so the automatic aliases drop them as numbers (coverage audit: "7 11" was not 7-Eleven).
+    same: { "Seven & I Holdings": ["7-11", "711", "7/11"] },
+  },
   "athletes-earnings": {
     // The usual spelling of the name, and a typo of it (judge, cycle 5).
     same: { "Jon Rahm": ["John Rahm", "Jhon Rahm"] },

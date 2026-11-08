@@ -252,6 +252,34 @@ describe("aliases as built: what players type", () => {
     expect(lands("sports-leagues", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: stores people shop at count for the group Deloitte ranks, as Lidl does for Schwarz.
+    ["sam's club", "Walmart"],
+    ["flipkart", "Walmart"],
+    ["whole foods", "Amazon"],
+    ["trader joes", "Aldi"],
+    ["tj maxx", "TJX Companies"],
+    ["tk maxx", "TJX Companies"],
+    ["marshalls", "TJX Companies"],
+    ["safeway", "Albertsons"],
+    ["food lion", "Ahold Delhaize"],
+    ["sephora", "LVMH"],
+    ["gucci", "Kering"],
+    ["m&s", "Marks & Spencer"],
+    ["bjs", "BJ's Wholesale Club"],
+    ["7 11", "Seven & I Holdings"],
+    ["711", "Seven & I Holdings"],
+    ["old navy", "Gap"],
+    ["circle k", "Alimentation Couche-Tard"],
+    ["bunnings", "Wesfarmers"],
+    // Kmart was corrected to Walmart by a "WMart" redirect; famous retailers outside the 100 are free.
+    ["kmart", "unknown"],
+    ["ebay", "unknown"],
+    ["primark", "unknown"],
+  ])("retailers: %s -> %s", (guess, name) => {
+    expect(lands("retailers", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");
