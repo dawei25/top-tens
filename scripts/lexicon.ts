@@ -4,8 +4,9 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fnv, trainLexicon } from "../src/game/junk";
-import { normalize } from "../src/game/match";
+import { editDistance, normalize } from "../src/game/match";
 import { capitals, countries, usStates } from "./gazetteer";
+import { COUNTRY_FORMS } from "./intent";
 import { TOPICS } from "./topics";
 import type { Puzzle } from "../src/game/types";
 
@@ -61,23 +62,29 @@ export function bankNames(dir: string): Bank {
   /** Names of top-10 answers, and of every ranked person (lists with `people`). */
   const namesOfNote: string[] = [];
   const figured: string[] = [];
+  const people: string[] = [];
+  const slips: [string, string][] = [];
   // Passwords are keyboard mash on purpose: "qwerty" stays junk everywhere else.
   const notWords = new Set(TOPICS.filter((t) => t.notWords).map((t) => `${t.id}.json`));
   const peopleLists = new Set(TOPICS.filter((t) => t.people).map((t) => `${t.id}.json`));
   for (const f of readdirSync(dir)) {
     if (!f.endsWith(".json") || NOT_PUZZLES.has(f) || notWords.has(f)) continue;
     const p: Puzzle = JSON.parse(readFileSync(join(dir, f), "utf8"));
+    // Lists of people, and lists of names ("boys' names", "surnames"): every entry is someone's name.
+    const ofPeople = peopleLists.has(f) || /\bnames$/i.test(p.noun ?? "");
     for (const e of [...p.answers, ...p.extras]) {
       const forms = [e.name, ...e.aliases];
       all.push(...forms);
       if (e.rank > 0) ranked.push(...forms);
       if ((e.rank > 0 && e.rank <= 10) || (e.rank > 0 && peopleLists.has(f))) namesOfNote.push(e.name);
       if (e.rank > 0 || e.value) figured.push(e.name);
+      if (ofPeople) people.push(e.name);
+      slips.push(...misspellings(e.name, e.aliases));
     }
     const known = join(KNOWN_DIR, f);
     if (existsSync(known)) all.push(...(JSON.parse(readFileSync(known, "utf8")) as string[]));
   }
-  return { ranked, all, namesOfNote, figured };
+  return { ranked, all, namesOfNote, figured, people, slips };
 }
 
 export interface Bank {
@@ -86,6 +93,47 @@ export interface Bank {
   namesOfNote: string[];
   /** Names of entries that show a figure when named: ranked ones, and unranked ones with a value. */
   figured: string[];
+  /** Names on lists of people and lists of names. */
+  people?: string[];
+  /** Misspelling aliases with the name they misspell, normalized (`misspellings`). */
+  slips?: [string, string][];
+}
+
+/**
+ * An entry's aliases that misspell its own name, within two edits ("Afganistan" for Afghanistan, "Missisippi" for
+ * Mississippi), with that name; normalized. Spacing variants ("Spider Man") aren't misspellings. Such an alias is a
+ * known name (it's in the bank), yet typed on a list that lacks it, it is still that entry misspelled: the matcher
+ * lets it correct to an entry of that name (`isSlipOf` in src/game/junk.ts) and to nothing else.
+ */
+export function misspellings(name: string, aliases: string[]): [string, string][] {
+  const n = normalize(name);
+  const out: [string, string][] = [];
+  for (const a of aliases) {
+    const s = normalize(a);
+    if (!s || s === n || s.replace(/ /g, "") === n.replace(/ /g, "") || Math.abs(s.length - n.length) > 2) continue;
+    if (editDistance(s, n) <= 2) out.push([s, n]);
+  }
+  return out;
+}
+
+/**
+ * Words of people's names, four letters or more ("alcaraz", "jeremy", "johnston"): typed alone, someone's name. The
+ * matcher corrects such a word only by one slip, onto an entry whose own name is that close, and on a list of names
+ * not at all ("johnston" is not Johnson, "jeremy" not Jeffrey).
+ */
+export function personWords(names: string[]): string[] {
+  const out = new Set<string>();
+  for (const n of names) for (const w of normalize(n).split(" ")) if (w.length >= 4 && !/\d/.test(w)) out.add(w);
+  return [...out].sort();
+}
+
+/** Every usual form of a country with its name, normalized: "nippon" → "japan", "uk" → "united kingdom". */
+export function countryForms(): [string, string][] {
+  const out = new Map<string, string>();
+  for (const [name, ...forms] of COUNTRY_FORMS) for (const f of forms) out.set(normalize(f), normalize(name));
+  for (const c of countries()) for (const a of c.aliases) if (!out.has(normalize(a))) out.set(normalize(a), normalize(c.name));
+  for (const [f, n] of [...out]) if (!f || f === n) out.delete(f);
+  return [...out];
 }
 
 /**
@@ -150,11 +198,21 @@ export function writeLexicon(dir: string): string {
   }
   lex.names = [...known].join(" ");
   const plain = bankPlainWords(bank, regions, words);
-  // `words` is optional in the Lexicon format: older lexicons don't have it.
-  const out = { ...lex, words: plain.map((w) => fnv(w).toString(36)).join(" ") };
+  const h = (s: string) => fnv(s).toString(36);
+  const slips = [...new Set((bank.slips ?? []).map(([s, n]) => h(`${s}>${n}`)))];
+  const people = personWords(bank.people ?? []);
+  const forms = countryForms();
+  // `words`, `slips`, `people` and `countries` are optional in the Lexicon format: older lexicons don't have them.
+  const out = {
+    ...lex,
+    words: plain.map(h).join(" "),
+    slips: slips.join(" "),
+    people: people.map(h).join(" "),
+    countries: forms.map(([f, n]) => `${h(f)}:${h(n)}`).join(" "),
+  };
   writeFileSync(join(dir, "lexicon.json"), JSON.stringify(out));
   if (process.env.WORDS_LOG) writeFileSync(process.env.WORDS_LOG, plain.join("\n") + "\n");
-  return `${all.length + places.length} names, ${plain.length} plain words`;
+  return `${all.length + places.length} names, ${plain.length} plain words, ${slips.length} misspellings, ${people.length} people's words`;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

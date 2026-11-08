@@ -26,6 +26,11 @@ export interface Entry {
    * costs a life like any miss, shown as "Japan isn't in Europe." (`Puzzle.region`). Never ranked, never scored.
    */
   elsewhere?: true;
+  /**
+   * The country the entry is in, or the countries that share it (Borneo: Indonesia, Malaysia, Brunei), on lists of
+   * places within countries (islands). Typing a country's name offers its entries as choices. Optional.
+   */
+  country?: string | string[];
 }
 
 export interface Puzzle {

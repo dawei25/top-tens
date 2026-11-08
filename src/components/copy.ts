@@ -1,3 +1,4 @@
+import type { UnknownVerdict } from "../game/match";
 import { rankedDepth, shownValue } from "../game/state";
 import type { Entry, Puzzle } from "../game/types";
 
@@ -13,6 +14,36 @@ export function notOnList(puzzle: Pick<Puzzle, "noun" | "answers" | "extras">): 
   if (!puzzle.noun) return "Not on this list.";
   const count = puzzle.answers.length + puzzle.extras.length;
   return `Not one of the ${count.toLocaleString("en-US")} ${puzzle.noun}${NBSP}here.`;
+}
+
+/**
+ * A real name that isn't an answer here, as typed ("Point72 isn't in this ranking."): the game knows it, so it says so
+ * plainly rather than "Not one of the 151 firms here.", which reads as if it didn't (the owner, and the coverage audit).
+ */
+export function notInRanking(typed: string): string {
+  const name = typed.trim().replace(/\s+/g, " ");
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)} isn't in this ranking.`;
+}
+
+/** What "pass", "idk" or "no idea" get: never an answer, and nothing to judge. */
+export const NOT_A_GUESS = "Not a guess.";
+
+/**
+ * The line for a guess that costs nothing because it's no answer here, ending "No life lost.": part of several names
+ * ("More than one answer fits. Be more specific."), a way of giving up, keyboard mash, a real name the list doesn't
+ * rank, or a plain miss ("Not one of the 237 films here."; the noun copy is for a plain miss only).
+ */
+export function missLine(r: UnknownVerdict, puzzle: Pick<Puzzle, "noun" | "answers" | "extras">, typed: string): string {
+  const line = r.vague
+    ? "More than one answer fits. Be more specific."
+    : r.giveUp
+      ? NOT_A_GUESS
+      : r.junk
+        ? "That doesn't look like an answer."
+        : r.known
+          ? notInRanking(typed)
+          : notOnList(puzzle);
+  return `${line} ${NO_LIFE_LOST}`;
 }
 
 /** The clue key on an empty row: its tooltip and accessible label; once a letter shows, the next one. */

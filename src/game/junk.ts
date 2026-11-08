@@ -18,6 +18,19 @@ export interface Lexicon {
    * entry named exactly that still matches. Optional: older lexicons don't have it.
    */
   words?: string;
+  /**
+   * FNV-1a hashes of "misspelling>name" pairs: aliases the bank stores within two edits of their own entry's name
+   * ("Afganistan" on Afghanistan, "Missisippi" on Mississippi). Such a text is a known name, yet on a list where it
+   * isn't an alias it is still a slip of that entry, not a different real name (`isSlipOf`). Optional.
+   */
+  slips?: string;
+  /**
+   * FNV-1a hashes of the words of people's names on the bank's people lists ("alcaraz", "jeremy", "johnston"). Typed
+   * alone, such a word is someone's name: it is corrected only by one slip, and on a list of names not at all. Optional.
+   */
+  people?: string;
+  /** "form:country" pairs of FNV-1a hashes: a country's usual forms ("nippon", "uk") to its name. Optional. */
+  countries?: string;
 }
 
 export const ALPHABET = "^$ 0abcdefghijklmnopqrstuvwxyz";
@@ -97,31 +110,54 @@ function keyStep(a: string, b: string): number {
 }
 
 /**
- * "asdf", "lkjh", "qwerty", or a whole short string of neighbouring keys like "jkl" / "tgb".
- * The run must keep one direction, so back-and-forth like "popo" in Popocatepetl doesn't count.
+ * "asdf", "lkjh", "qwerty", or a whole short string of neighbouring keys like "jkl" / "tgb", one word at a time.
+ * The run must keep one direction, so back-and-forth like "popo" in Popocatepetl doesn't count, and it must be most
+ * of its word: "erty" in "Liberty" and "ytre" in "Skytree" are ordinary spelling (the audit, Nov 8).
  */
-function isKeyboardRun(letters: string): boolean {
-  if (KEY_COLUMNS.some((c) => letters === c || letters === [...c].reverse().join(""))) return true;
+function isKeyboardRun(word: string): boolean {
+  if (KEY_COLUMNS.some((c) => word === c || word === [...c].reverse().join(""))) return true;
   let run = 1;
   let best = 1;
   let dir = 0;
-  for (let i = 1; i < letters.length; i++) {
-    const step = keyStep(letters[i - 1], letters[i]);
+  for (let i = 1; i < word.length; i++) {
+    const step = keyStep(word[i - 1], word[i]);
     if (Math.abs(step) === 1 && (run === 1 || step === dir)) run++;
     else run = Math.abs(step) === 1 ? 2 : 1;
     dir = step;
     best = Math.max(best, run);
   }
-  return best >= 4 || (letters.length >= 3 && best === letters.length);
+  return best >= 5 || (best >= 4 && best >= word.length - 1) || (word.length >= 3 && best === word.length);
 }
 
-const NON_ANSWERS = new Set(
-  "lol lmao idk dunno pass skip test blah hmm hm um uh ok okay yes no nope hi hello help none nothing something anything no idea i dont know".split(
-    " ",
-  ),
-);
-NON_ANSWERS.add("no idea");
-NON_ANSWERS.add("i dont know");
+/**
+ * Whether a short run of letters is keyboard mash rather than a code: nearly all of it from one row of keys ("sjdhf",
+ * "bnmv", "pqpq"). Codes and acronyms spread over the keyboard: TMNT, CSGO, BNHA, FMAB, ASML, MKBHD.
+ */
+function oneRow(letters: string): boolean {
+  const rows = KEY_ROWS.slice(0, 3).map((row) => [...letters].filter((c) => row.includes(c)).length);
+  return Math.max(...rows) >= 0.8 * letters.length;
+}
+
+const NON_ANSWERS = new Set("lol lmao test blah hmm hm um uh ok okay yes hi hello help something anything".split(" "));
+
+/**
+ * What a player types to give up on a guess ("pass", "idk", "no idea"). Never an answer (`isGiveUp`): no life lost, a
+ * plain line. "pass" was read as "Pats" (the Patriots), "dunno" as Warrick Dunn, "no idea" as Nvidia (the audit).
+ */
+const GIVE_UP = [
+  ..."pass skip next dunno duno dno idk idek idc nope no none nothing unsure".split(" "),
+  "no idea", "i have no idea", "no clue", "not sure", "dont know", "i dont know", "i do not know", "give up",
+  "i give up", "giveup", "beats me", "who knows", "pass please", "skip this", "next one",
+];
+/** Normalized on first use ("i" reads as the numeral 1); normalize() isn't ready while this module loads. */
+let giveUpSet: Set<string> | null = null;
+
+/** Whether the text is a way of saying "I don't know" (or a bare question mark). */
+export function isGiveUp(text: string): boolean {
+  giveUpSet ??= new Set(GIVE_UP.map(normalize));
+  const s = normalize(text);
+  return giveUpSet.has(s) || (!s && /\?/.test(text));
+}
 
 export const JUNK_THRESHOLD = -6.8;
 
@@ -150,18 +186,68 @@ export function isKnownName(text: string, lex: Lexicon): boolean {
   return knownNames(lex).has(fnv(normalize(text)).toString(36));
 }
 
+const setCaches = new Map<string, { src: string; set: Set<string> }>();
+function hashSet(field: "slips" | "people", lex: Lexicon): Set<string> {
+  const src = lex[field] ?? "";
+  let c = setCaches.get(field);
+  if (c?.src !== src) setCaches.set(field, (c = { src, set: new Set(src.split(" ").filter(Boolean)) }));
+  return c.set;
+}
+
+/** Whether the bank stores the text as a misspelling alias of an entry with this name (`Lexicon.slips`). */
+export function isSlipOf(text: string, name: string, lex?: Lexicon): boolean {
+  return !!lex?.slips && hashSet("slips", lex).has(fnv(`${normalize(text)}>${normalize(name)}`).toString(36));
+}
+
+/** Whether the text is one word of a person's name in the bank, like "alcaraz" or "jeremy" (`Lexicon.people`). */
+export function isPersonWord(text: string, lex?: Lexicon): boolean {
+  const s = normalize(text);
+  return !!lex?.people && !s.includes(" ") && hashSet("people", lex).has(fnv(s).toString(36));
+}
+
+let countryCache: { src: string; map: Map<string, string> } | null = null;
+/** The hash of the country a text names by one of its usual forms ("nippon": Japan), or of the text itself. */
+export function countryKey(text: string, lex?: Lexicon): string {
+  const h = fnv(normalize(text)).toString(36);
+  const src = lex?.countries ?? "";
+  if (countryCache?.src !== src) countryCache = { src, map: new Map(src.split(" ").filter(Boolean).map((p) => p.split(":") as [string, string])) };
+  return countryCache.map.get(h) ?? h;
+}
+
+/** A web address: "bbc.co.uk", "x.com". */
+const DOMAIN = /^\s*(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,6}\/?\s*$/i;
+
+/**
+ * Whether the text doesn't look like an answer: keyboard mash ("asdf", "sjdhf"), a run of one letter, chat filler
+ * ("lol", "ok"). Known names never are ("hello" is Adele's, "help" the Beatles'), and neither are numbers ("4",
+ * "1989"), letter-digit codes (RAV4, 4chan, 6ix9ine), web addresses or short acronyms spread over the keyboard (TMNT,
+ * CSGO, MKBHD): the audit found all of those called junk (Nov 8).
+ */
 export function isJunk(text: string, lex?: Lexicon): boolean {
   const s = normalize(text);
   const letters = s.replace(/[^a-z0-9]/g, "");
-  if (letters.length < 2 || NON_ANSWERS.has(s)) return true;
+  if (/^\d{1,4}$/.test(letters)) return false;
+  if (letters.length < 2) return true;
   if (lex && isKnownName(text, lex)) return false;
+  if (NON_ANSWERS.has(s) || isGiveUp(text)) return true;
+  if (DOMAIN.test(text)) return false;
+  const words = s.split(" ").map((w) => w.replace(/[^a-z0-9]/g, "")).filter(Boolean);
   // Three of a letter in a row, within a word: across a break it is a real name ("Merrill Lynch", "Bell Labs").
-  if (s.split(" ").some((w) => /(.)\1\1/.test(w.replace(/[^a-z0-9]/g, "")))) return true;
+  if (words.some((w) => /(.)\1\1/.test(w))) return true;
   // "jfjfj", "sdfsdfsdf". Two repeats are left to the model: Nkunku, Coco and Bora Bora are real.
   if (/^(.{1,3})\1\1+/.test(letters)) return true;
-  if (isKeyboardRun(letters)) return true;
-  // Short all-consonant strings may be acronyms (BTS, KFC); longer ones aren't words.
-  if (letters.length > 4 && !/[aeiouy0-9]/.test(letters)) return true;
-  if (letters.length <= 3) return false;
-  return lex ? plausibility(s, lex) < JUNK_THRESHOLD : false;
+  if (words.some((w) => isKeyboardRun(w))) return true;
+  // Letters and digits together are a code or a handle: RAV4, 4chan, 9gag, 6ix9ine, PS5.
+  if (/[a-z]/.test(letters) && /\d/.test(letters)) return false;
+  // Long all-consonant strings aren't words; short ones may be acronyms (BTS, KFC, MKBHD).
+  if (letters.length > 5 && !/[aeiouy0-9]/.test(letters)) return true;
+  if (letters.length <= 3 || !lex) return false;
+  const reads = (w: string) => plausibility(w, lex) >= JUNK_THRESHOLD;
+  // Four or five letters the letter model can't place are a code unless they sit on one row of keys: the model can't
+  // tell TMNT or CSGO from mash, while mash comes off one row ("sjdhf", "bnmv"). Words on one row ("tower") read.
+  const short = (w: string) => w.length <= 5 && (!oneRow(w) || reads(w));
+  if (letters.length <= 5 && words.length === 1) return !short(letters);
+  if (reads(s)) return false;
+  // Several words, each of which reads on its own ("tj maxx": a short code and a short word), aren't mash.
+  return words.length < 2 || !words.every((w) => short(w) || reads(w));
 }

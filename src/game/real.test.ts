@@ -226,6 +226,142 @@ describe("new lists debut as dailies", () => {
   });
 });
 
+// The coverage audit (Nov 8) played all 112 lists before launch. A guess lands on an entry (corrected or not), is
+// offered among choices, or neither.
+const lands = (id: string, guess: string): string[] => {
+  const r = judge(id, guess);
+  return r.kind === "typo" ? r.suggestions : "entry" in r ? [r.entry.name] : [];
+};
+
+describe("coverage audit: matching rules", () => {
+  it("a real name that isn't an answer says so (hedge-funds: Point72)", () => {
+    for (const [id, g] of [["hedge-funds", "Point72"], ["hedge-funds", "Jane Street"], ["netflix-seasons", "ozark"], ["skyscraper-cities", "manila"]]) {
+      const r = judge(id, g);
+      // Free and plain ("Point72 isn't in this ranking."), or an answer once the data takes it in.
+      if (r.kind === "unknown") expect(r, `${id}: ${g}`).toMatchObject({ junk: false, known: true });
+      else expect(r.kind, `${id}: ${g}`).toBe("near");
+    }
+  });
+
+  it.each([
+    ["countries-population", "afganistan", "Afghanistan"],
+    ["countries-population", "irland", "Ireland"],
+    ["countries-population", "guatamala", "Guatemala"],
+    ["countries-area", "afganistan", "Afghanistan"],
+    ["countries-gdp", "irland", "Ireland"],
+    ["olympic-medals", "afganistan", "Afghanistan"],
+    ["countries-population", "columbia", "Colombia"],
+    ["rivers", "missisippi", "Mississippi"],
+    ["rivers", "mississipi", "Mississippi"],
+    ["rivers", "missisipi", "Mississippi"],
+  ])("%s: a misspelling stored as an alias elsewhere, %s, still finds %s", (id, guess, name) => {
+    expect(lands(id, guess)).toEqual([name]);
+  });
+
+  it.each([
+    ["farm-products", "hay", "Pork"],
+    ["landlocked-countries", "car", "Czech Republic"],
+    ["websites", "snapchat", "Stripchat"],
+    ["websites", "snapchat", "ShareChat"],
+    ["websites", "snap chat", "ShareChat"],
+    ["premier-league-goals", "fernando torres", "Fernando"],
+    ["spotify-songs", "seven nation army", "Seven"],
+    ["europe-cities", "praha", "Praia"],
+    ["athletes-earnings", "alcaraz", "Canelo Álvarez"],
+    ["retailers", "kmart", "Walmart"],
+    ["us-surnames", "johnston", "Johnson"],
+    ["us-surnames", "harrison", "Harris"],
+    ["us-surnames", "cohen", "Chen"],
+    ["us-surnames", "muller", "Miller"],
+    ["boys-names", "jeremy", "Jeffrey"],
+    ["girls-names", "christina", "Christine"],
+    ["girls-names", "marie", "Maria"],
+    ["video-games", "mario kart ds", "Mario Kart 8"],
+    ["video-games", "modern warfare 2", "Call of Duty: Modern Warfare"],
+    ["car-models", "vw bus", "Volkswagen Beetle"],
+    ["car-makers", "gac motor", "General Motors"],
+  ])("%s: %s is never %s", (id, guess, name) => {
+    expect(lands(id, guess)).not.toContain(name);
+  });
+
+  it.each([
+    ["super-bowl-wins", "pass"],
+    ["nfl-rushing-yards", "dunno"],
+    ["mlb-home-runs", "dunno"],
+    ["europe-cities", "dunno"],
+    ["companies-revenue", "no idea"],
+    ["countries-population", "idk"],
+  ])("%s: giving up (%s) is free and never an answer", (id, guess) => {
+    expect(judge(id, guess)).toEqual({ kind: "unknown", junk: false, giveUp: true });
+  });
+
+  it.each([
+    ["fast-food-chains", "pizza"],
+    ["fast-food-chains", "coffee"],
+    ["fast-food-chains", "burgers"],
+    ["sports-leagues", "football"],
+    ["sports-leagues", "basketball"],
+    ["sports-leagues", "baseball"],
+    ["sports-leagues", "hockey"],
+    ["sports-leagues", "rugby"],
+    ["farm-products", "meat"],
+    ["farm-products", "fruit"],
+  ])("%s: the category word %s asks for more", (id, guess) => {
+    expect(judge(id, guess)).toMatchObject({ kind: "unknown", vague: expect.any(Number) });
+  });
+
+  it.each([
+    ["mountains", "mt fuji", "Mount Fuji"],
+    ["mountains", "mt. kilimanjaro", "Mount Kilimanjaro"],
+    ["national-parks", "mt rainier", "Mount Rainier"],
+    ["super-bowl-wins", "la rams", "Los Angeles Rams"],
+    ["super-bowl-wins", "ny jets", "New York Jets"],
+    ["super-bowl-wins", "sf niners", "San Francisco 49ers"],
+    ["world-series-wins", "tb rays", "Tampa Bay Rays"],
+    ["world-series-wins", "chi sox", "Chicago White Sox"],
+    ["stadiums", "texas am", "Kyle Field"],
+    ["longest-running-tv", "law n order", "Law & Order"],
+    ["game-franchises", "sims 4", "The Sims"],
+    ["game-franchises", "fifa 23", "FIFA"],
+    ["game-franchises", "tetris 99", "Tetris"],
+    ["us-metros", "saint louis", "St. Louis"],
+    ["albums", "the fame", "The Fame / The Fame Monster"],
+    ["youtube-videos", "baby shark song", "Baby Shark Dance"],
+  ])("%s: the short form %s is %s", (id, guess, name) => {
+    expect(lands(id, guess)).toEqual([name]);
+  });
+
+  it("nba-assists: Isaiah Thomas offers Isiah Thomas (#10) too", () => {
+    expect(lands("nba-assists", "isaiah thomas")).toEqual(["Isaiah Thomas", "Isiah Thomas"]);
+  });
+
+  it.each([
+    ["media-franchises", "tmnt"],
+    ["game-franchises", "csgo"],
+    ["websites", "4chan"],
+    ["websites", "9gag"],
+    ["websites", "bbc.co.uk"],
+    ["music-artists", "6ix9ine"],
+    ["retailers", "tj maxx"],
+    ["retailers", "tk maxx"],
+    ["car-models", "rav4"],
+    ["market-cap-peak", "asml"],
+    ["manga", "bnha"],
+    ["manga", "fmab"],
+    ["youtube-channels", "mkbhd"],
+    ["national-parks", "statue of liberty"],
+    ["buildings", "tokyo skytree"],
+    ["albums", "4"],
+    ["youtube-videos", "hello"],
+    ["albums", "help"],
+    ["longest-running-tv", "himym"],
+    ["sports-leagues", "lpga"],
+  ])("%s: %s is a real name, never junk", (id, guess) => {
+    const r = judge(id, guess);
+    expect(r.kind === "unknown" && r.junk).toBe(false);
+  });
+});
+
 describe("every built list", () => {
   const index = read<{ id: string }[]>("index.json");
   // Typing what the list is about ("tour", "songs", "car") must never hand over a top-10 answer.
