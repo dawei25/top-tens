@@ -463,7 +463,11 @@ export const NICKNAMES: Record<string, string[]> = {
   "Vince Carter": ["Vinsanity", "Air Canada", "Half Man Half Amazing"],
   "Tracy McGrady": ["T-Mac"],
   "Gary Payton": ["The Glove"],
-  "Anthony Davis": ["The Brow"],
+  // "The Brow" is one plain word, so the rule below leaves it out here; the NBA lists give it in INTENT ("the brow"
+  // was corrected to LeBron's "Bron").
+  "Anthony Davis": ["The Brow", "AD"],
+  "Victor Wembanyama": ["Wemby"],
+  "Anthony Edwards": ["Ant-Man", "Ant Edwards"],
   "Kawhi Leonard": ["The Claw"],
   "Dominique Wilkins": ["The Human Highlight Film", "Nique"],
   "Paul George": ["PG13"],
@@ -482,6 +486,7 @@ export const NICKNAMES: Record<string, string[]> = {
   "O. J. Simpson": ["The Juice", "OJ", "OJ Simpson"],
   "Calvin Johnson": ["Megatron"],
   "Deion Sanders": ["Prime Time", "Neon Deion"],
+  "Dak Prescott": ["Dak"],
   // Baseball
   "Babe Ruth": ["The Babe", "The Bambino", "Sultan of Swat"],
   "Hank Aaron": ["Hammerin' Hank"],
@@ -510,6 +515,10 @@ export const NICKNAMES: Record<string, string[]> = {
   "Miguel Cabrera": ["Miggy"],
   "Honus Wagner": ["The Flying Dutchman"],
   "Shohei Ohtani": ["Shotime"],
+  "Ernie Banks": ["Mr. Cub"],
+  "Jimmie Foxx": ["Double X"],
+  "Nelson Cruz": ["Boomstick"],
+  "Pete Alonso": ["Polar Bear"],
   // Hockey
   "Wayne Gretzky": ["The Great One"],
   "Gordie Howe": ["Mr. Hockey"],
@@ -525,6 +534,8 @@ export const NICKNAMES: Record<string, string[]> = {
   "Joe Sakic": ["Burnaby Joe"],
   "Jarome Iginla": ["Iggy"],
   "Joe Thornton": ["Jumbo Joe"],
+  "Evgeni Malkin": ["Geno", "Geno Malkin"],
+  "Luc Robitaille": ["Lucky Luc"],
   // Football (soccer)
   "Wayne Rooney": ["Wazza", "Roo"],
   "Sergio Agüero": ["Kun Agüero", "Kun"],
@@ -803,6 +814,8 @@ export const INTENT: Record<string, Intent> = {
       "Wilt Chamberlain": ["Wilt", "Wilt the Stilt"],
       "Shaquille O'Neal": ["Shaq", "Shaquille"],
       "Victor Wembanyama": ["Wemby"],
+      // A plain word, but "the brow" was corrected to LeBron (#1) through "Bron" (data agent B, Nov 8).
+      "Anthony Davis": ["The Brow"],
     },
   },
   stadiums: {
@@ -853,19 +866,31 @@ export const INTENT: Record<string, Intent> = {
       "Kansas City Chiefs": ["KC Chiefs", "KC"],
       "Green Bay Packers": ["Green Bay"],
       "Pittsburgh Steelers": ["Pittsburgh"],
-      "Dallas Cowboys": ["Dallas"],
+      "Dallas Cowboys": ["Dallas", "America's Team"],
       "Denver Broncos": ["Denver"],
       // The only NFL team in Philadelphia, and former names fans still say (coverage audit, Nov 8).
       "Philadelphia Eagles": ["Philly", "Philly Eagles"],
       "Tennessee Titans": ["Houston Oilers", "Oilers", "Tennessee Oilers"],
       "Indianapolis Colts": ["Baltimore Colts"],
       "Los Angeles Rams": ["St. Louis Rams", "St Louis Rams"],
-      "Los Angeles Chargers": ["San Diego Chargers"],
+      "Los Angeles Chargers": ["San Diego Chargers", "San Diego"],
+      // Fans' nicknames that are no plain word (data agent B, Nov 8).
+      "New York Giants": ["G-Men", "Big Blue"],
+      "Miami Dolphins": ["Phins"],
+      "Minnesota Vikings": ["Vikes"],
+      "Chicago Bears": ["Da Bears", "Monsters of the Midway"],
+      "Atlanta Falcons": ["Dirty Birds"],
+    },
+    groups: {
+      // The city's teams now, Rams first (#11): the Raiders left in 1995, so "los angeles" no longer hands over the
+      // Raiders (#9) through their old name in the franchise cell, as "boston" is no longer the Braves.
+      "Los Angeles": ["Los Angeles Rams", "Los Angeles Chargers"],
     },
   },
   "world-series-wins": {
     same: {
-      "Los Angeles Dodgers": ["Brooklyn Dodgers", "LA Dodgers"],
+      // "bums" (Brooklyn's "Dem Bums") was corrected to the Pirates' "Bucs" (data agent B, Nov 8).
+      "Los Angeles Dodgers": ["Brooklyn Dodgers", "LA Dodgers", "Dem Bums", "Bums"],
       Athletics: ["Oakland Athletics", "Oakland A's", "A's", "Philadelphia Athletics", "Kansas City Athletics"],
       // "Boston" alone is the Red Sox: the Braves left in 1953, and their franchise cell's "Boston" offered both
       // (judge, cycle 7). "Boston Braves" still reaches the Braves.
@@ -887,8 +912,12 @@ export const INTENT: Record<string, Intent> = {
       "Miami Marlins": ["Florida Marlins"],
       "Tampa Bay Rays": ["Tampa Bay Devil Rays", "Devil Rays"],
       "Los Angeles Angels": ["Anaheim Angels", "California Angels", "Los Angeles Angels of Anaheim"],
-      "Chicago Cubs": ["Cubbies"],
+      "Chicago Cubs": ["Cubbies", "North Siders"],
       "Milwaukee Brewers": ["Brew Crew"],
+      // Fans' nicknames that are no plain word.
+      "Chicago White Sox": ["South Siders", "Pale Hose"],
+      "New York Mets": ["Amazins", "Amazin' Mets"],
+      "Cincinnati Reds": ["Big Red Machine"],
       // The only MLB team in Philadelphia (coverage audit, Nov 8).
       "Philadelphia Phillies": ["Philly", "Philly Phillies"],
     },
@@ -919,8 +948,9 @@ export const INTENT: Record<string, Intent> = {
       "Matt Ryan": ["Matty Ice"],
       "Dan Marino": ["Marino"],
       "Brett Favre": ["Favre"],
-      // "eli" found nothing; "manning" alone is Peyton (#3) first.
+      // "eli" found nothing; "manning" alone is Peyton (#3) first. "russ" was corrected to Russ Grimm, a lineman.
       "Eli Manning": ["Eli"],
+      "Russell Wilson": ["Russ", "Russ Wilson"],
     },
   },
   "nfl-rushing-yards": {
@@ -1297,6 +1327,8 @@ export const INTENT: Record<string, Intent> = {
       // Coverage audit, Nov 8. Not "The Glove" (Gary Payton): "glove" is a plain word.
       "Maurice Cheeks": ["Mo Cheeks"],
       "Kevin Johnson": ["KJ"],
+      // As on nba-points: "the brow" was corrected to LeBron.
+      "Anthony Davis": ["The Brow"],
     },
   },
   "nba-rebounds": {
@@ -1308,6 +1340,8 @@ export const INTENT: Record<string, Intent> = {
       "Tim Duncan": ["The Big Fundamental", "Duncan"],
       "Kevin Garnett": ["KG", "Garnett"],
       "Bill Russell": ["Russell"],
+      // As on nba-points: "the brow" was corrected to LeBron.
+      "Anthony Davis": ["The Brow"],
     },
   },
   "nhl-points": {
