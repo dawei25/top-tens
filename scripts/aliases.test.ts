@@ -295,6 +295,22 @@ describe("aliases as built: what players type", () => {
     expect(lands("landlocked-countries", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: only Hot 100 number ones were answers; billion-stream hits were "not one of the songs here",
+    // and real titles were corrected into other songs ("heathens" to Heartless, "seven nation army" to Seven).
+    ["levitating", "Levitating"],
+    ["shivers", "Shivers"],
+    ["gangnam style", "Gangnam Style"],
+    ["story of my life", "Story of My Life"],
+    ["heathens", "Heathens"],
+    ["seven nation army", "Seven Nation Army"],
+    ["here comes the sun", "Here Comes the Sun"],
+    ["mockingbird", "Mockingbird"],
+    ["shape of u", "Shape of You"],
+  ])("spotify-songs: %s -> %s", (guess, name) => {
+    expect(lands("spotify-songs", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

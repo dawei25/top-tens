@@ -1359,12 +1359,27 @@ export const TOPICS: Topic[] = [
     value: "Streams",
     metric: "Streams (billions)",
     works: true,
-    also: [{ tables: [4], name: "Song" }],
-    universeCategories: ["Billboard Hot 100 number-one singles"],
+    // Coverage audit: only Hot 100 number ones were answers, so "levitating", "shivers", "heathens" and most
+    // billion-stream hits were "not one of the songs here". The page's other song tables, every Billboard Year-End
+    // Hot 100 of the streaming era and the UK and Global 200 number ones widen it.
+    also: [
+      { tables: [2, 4, 6, 7, 9, 10, 12, 13, 15, 16, 17, 18], name: "Song" },
+      ...Array.from({ length: 26 }, (_, i) => ({ page: `Billboard Year-End Hot 100 singles of ${2000 + i}`, tables: [0], name: "Title" })),
+    ],
+    universeCategories: ["Billboard Hot 100 number-one singles", "UK singles chart number-one singles", "Billboard Global 200 number-one singles"],
+    // Classics and streaming staples no chart table here lists.
+    more: {
+      "Stairway to Heaven": [], "We Will Rock You": [], "Here Comes the Sun": [], "Fix You": [], "Seven Nation Army": [],
+      Rasputin: [], "Ocean Eyes": [], "Count on Me": [], Faded: [], Mockingbird: [], "Till I Collapse": [], Nights: [],
+      "Do I Wanna Know?": ["Do I Wanna Know"], "Smells Like Teen Spirit": [], "Mr. Brightside": ["Mr Brightside"],
+      "Don't Stop Me Now": [], "Wonderwall": [], "Hotel California": [], "Back in Black": [], "Sweet Caroline": [],
+      "Don't Stop Believin'": ["Dont Stop Believing", "Don't Stop Believing"], "Riptide": [], "Electric Feel": [],
+      "Somebody That I Used to Know": [],
+    },
     titleCase: true,
     // A phrasal verb keeps its capital (the article is "Take On Me").
     rename: { "Take on Me": "Take On Me" },
-    aliases: { "Sweet Child O' Mine": ["Sweet Child of Mine"], "7 Rings": ["Seven Rings"] },
+    aliases: { "Sweet Child O' Mine": ["Sweet Child of Mine"], "7 Rings": ["Seven Rings"], "Shape of You": ["Shape of U"] },
   },
   {
     id: "albums",
