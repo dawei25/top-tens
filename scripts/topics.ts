@@ -3034,6 +3034,17 @@ export const TOPICS: Topic[] = [
       // Each class's best seller (Mustang, Prius, MX-5).
       { tables: [4], name: "Automobile", value: "Units sold", rename: { "Iso/BMW/VELAM/Romi Isetta": "Isetta" } },
     ],
+    // Coverage audit: famous best-sellers the page lists only as their brand's second (RAV4, CR-V, Escort, Focus,
+    // Silverado): answers, unranked, no figure here. "rav4" read as junk; "altima" was corrected to the Sunny.
+    more: {
+      "Toyota RAV4": ["RAV4", "Rav 4"], "Honda CR-V": ["CR-V", "CRV"], "Chevrolet Silverado": ["Silverado"],
+      "Ram Pickup": ["Ram 1500", "Dodge Ram"], "Ford Escort": ["Escort"], "Ford Focus": ["Focus"],
+      "Toyota Land Cruiser": ["Land Cruiser"], "Toyota Yaris": ["Yaris"], "Ford Explorer": ["Explorer"],
+      "Ford Transit": ["Transit"], "Ford Ranger": ["Ranger"], "Tesla Model 3": ["Model 3"], "Tesla Model Y": ["Model Y"],
+      "Fiat 500": [], "Opel Astra": ["Vauxhall Astra"], "Volkswagen Polo": ["VW Polo", "Polo"],
+      "Volkswagen Jetta": ["VW Jetta", "Jetta"], "Suzuki Swift": [], "Jeep Cherokee": ["Cherokee"],
+      "Chevrolet Corvette": ["Corvette"], "Chevrolet Camaro": ["Camaro"], "Nissan Altima": ["Altima"], "Mini": ["Mini Cooper"],
+    },
     // Platforms, concepts, a lawsuit, maintenance and plain words ("Bug", "Rabbit": "vw bug" still works) among the
     // redirects.
     junkAliases: [

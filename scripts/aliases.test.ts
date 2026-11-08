@@ -884,6 +884,20 @@ describe("aliases as built: what players type", () => {
     expect(lands("richest-people", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: famous nameplates the page lists only as a brand's second, the model alone, the VW Bus.
+    ["rav4", "Toyota RAV4"],
+    ["cr-v", "Honda CR-V"],
+    ["ford focus", "Ford Focus"],
+    ["miata", "Mazda MX-5"],
+    ["911", "Porsche 911"],
+    ["2cv", "Citroën 2CV"],
+    ["vw bus", "Volkswagen Type 2"],
+    ["altima", "Nissan Altima"],
+  ])("car-models: %s -> %s", (guess, name) => {
+    expect(lands("car-models", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

@@ -1454,6 +1454,18 @@ export const INTENT: Record<string, Intent> = {
     // Model names that are plain words ("mustang", "impala") aren't read as part of a longer name: say them here.
     same: {
       "Ford Model T": ["Model T", "Tin Lizzie"],
+      // Coverage audit: the model alone, as people say it (under four letters, it is never read as a word of the
+      // name), and the VW Bus ("vw bus" was corrected to the Beetle).
+      "Mazda MX-5": ["MX-5", "MX5", "Miata", "Mazda Miata"],
+      "Mazda RX-7": ["RX-7", "RX7"],
+      "Porsche 911": ["911"],
+      "Citroën 2CV": ["2CV", "Citroen 2CV"],
+      "Audi A4": ["A4"],
+      "Peugeot 206": ["206"],
+      "BMW 3 Series": ["3 Series", "BMW 3"],
+      "Mercedes-Benz C-Class": ["C-Class", "C Class", "Mercedes C-Class"],
+      "Volkswagen Type 2": ["VW Bus", "Volkswagen Bus", "Kombi", "Microbus", "VW Camper", "VW Transporter", "Type 2"],
+      "Volkswagen Beetle": ["Fusca", "Vocho"],
       "Ford Mustang": ["Mustang"],
       "Chevrolet Impala": ["Impala", "Chevy Impala"],
       "Jeep Wrangler": ["Wrangler"],
