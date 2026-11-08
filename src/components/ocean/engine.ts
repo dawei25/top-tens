@@ -16,10 +16,11 @@
  * input for idling: after IDLE_MS without a key or a tap, the squid sinks to the seabed and dozes until the next one.
  * With reduced motion it draws one still frame: the squid parked in open water, its limbs at rest, lit.
  *
- * The easter egg: a tap or click on the squid's own pixels (never on a control over it, never while a dialog is
- * open) makes it blush, flinch and wave a tentacle, with a pixel heart; a third tap in a row and it spins, squirts a
- * puff of ink and darts off. With reduced motion it only blushes for a moment. The layer still takes no pointer
- * itself: the taps are read on the window, passively, and the page under the finger gets them as ever.
+ * The easter egg: a tap or click on the squid's own pixels (never on a control over it, nor one the browser hands
+ * the tap's click to, never while a dialog is open) makes it blush, flinch and wave a tentacle, with a pixel heart; a
+ * third tap in a row and it spins, squirts a puff of ink and darts off. With reduced motion it only blushes for a
+ * moment. The layer still takes no pointer itself: the taps are read on the window, passively, and the page under the
+ * finger gets them as ever.
  */
 import { onPlay, type PlayEvent } from "../../game/events";
 import { reducedMotion } from "../pixel";
@@ -85,6 +86,8 @@ const TAP_TOL_MOUSE = 0.75;
 /** A tap moves less than this (CSS px) and lifts within this (ms); a drag or a scroll is no tap. */
 const TAP_SLOP = 12;
 const TAP_MS = 600;
+/** How long a tap waits for its click (ms) before the squid takes it anyway (no click came: a bare-page tap). */
+const CLICK_WAIT_MS = 250;
 /** Taps closer together than this (ms) make a streak; the third in a row is the trick. */
 const STREAK_MS = 900;
 const TRICK_TAPS = 3;
@@ -1077,18 +1080,24 @@ export function startOcean(els: OceanEls): Ocean {
 
   /** A press that landed on the squid, waiting to see if it lifts as a tap. */
   let down: { id: number; x: number; y: number; at: number } | null = null;
+  /** A tap on the squid, waiting for its click: the browser may hand that click to a control nearby (a phone's touch
+   *  adjustment snaps a tap to a key within the finger's reach), and then the tap was the control's. */
+  let tapped: { x: number; timer: ReturnType<typeof setTimeout> } | null = null;
   let streak = 0;
   let lastPoke = -Infinity;
 
+  /** A control, or inside one, or anything that looks pressable (a row with a click handler, a note's label). */
+  function pressable(el: Element) {
+    if (el.closest(CONTROL)) return true;
+    const cursor = getComputedStyle(el).cursor;
+    return cursor === "pointer" || cursor === "help";
+  }
   /** The squid takes this press: it is on its own pixels, and on nothing the player could mean instead. */
   function onSquid(e: PointerEvent) {
     const tol = e.pointerType === "mouse" ? TAP_TOL_MOUSE : TAP_TOL_TOUCH;
     if (!body.hits(e.clientX / px, e.clientY / px, tol)) return false;
     const el = e.target instanceof Element ? e.target : null;
-    if (!el || el.closest(CONTROL) || document.querySelector('dialog[open], [aria-modal="true"]')) return false;
-    // Anything that looks pressable is a control too (a row with a click handler, a note's label).
-    const cursor = getComputedStyle(el).cursor;
-    return cursor !== "pointer" && cursor !== "help";
+    return !!el && !document.querySelector('dialog[open], [aria-modal="true"]') && !pressable(el);
   }
   function onDown(e: PointerEvent) {
     down = null;
@@ -1100,7 +1109,20 @@ export function startOcean(els: OceanEls): Ocean {
     down = null;
     if (!d || e.pointerId !== d.id || performance.now() - d.at > TAP_MS) return;
     if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > TAP_SLOP) return;
-    poke(e.clientX / px);
+    if (tapped) clearTimeout(tapped.timer);
+    // Its click follows at once; a browser that sends none for a tap on bare page (Safari, outside the app) gets the
+    // reaction a beat later anyway.
+    tapped = { x: e.clientX / px, timer: setTimeout(() => settleTap(true), CLICK_WAIT_MS) };
+  }
+  function onClick(e: MouseEvent) {
+    if (tapped) settleTap(!(e.target instanceof Element && pressable(e.target)));
+  }
+  function settleTap(ours: boolean) {
+    const tap = tapped;
+    tapped = null;
+    if (!tap) return;
+    clearTimeout(tap.timer);
+    if (ours) poke(tap.x);
   }
   const onCancel = () => (down = null);
 
@@ -1144,8 +1166,12 @@ export function startOcean(els: OceanEls): Ocean {
     const right = body.limbAt(2, 1);
     const id = Math.abs(left.x - tapX) <= Math.abs(right.x - tapX) ? 1 : 2;
     body.wave(id, t, 1, id === 1 ? -1 : 1);
+    // The heart pops over its head when it is upright-ish, else beside its mantle (never among its arms).
     const p = here();
-    fx.heart(p.x + (tapX < p.x ? -5 : 5), p.y - 11);
+    const side = tapX < p.x ? -1 : 1;
+    const a = swimmer.tilt * RAD;
+    if (Math.cos(a) > 0.5) fx.heart(p.x + Math.sin(a) * 11 + side * 3, p.y - Math.cos(a) * 11 - 3);
+    else fx.heart(p.x + side * 14, p.y - 3);
     reactFor("boop", 1);
   }
 
@@ -1206,6 +1232,7 @@ export function startOcean(els: OceanEls): Ocean {
   addEventListener("pointerdown", onDown, { passive: true, capture: true });
   addEventListener("pointerup", onUp, { passive: true, capture: true });
   addEventListener("pointercancel", onCancel, { passive: true, capture: true });
+  addEventListener("click", onClick, { passive: true, capture: true });
   document.addEventListener("pointerover", onOver);
   document.addEventListener("pointerout", onOut);
   const offPlay = onPlay(onEvent);
@@ -1232,7 +1259,9 @@ export function startOcean(els: OceanEls): Ocean {
       removeEventListener("pointerdown", onDown, { capture: true });
       removeEventListener("pointerup", onUp, { capture: true });
       removeEventListener("pointercancel", onCancel, { capture: true });
+      removeEventListener("click", onClick, { capture: true });
       clearTimeout(stillTimer);
+      if (tapped) clearTimeout(tapped.timer);
       document.removeEventListener("pointerover", onOver);
       document.removeEventListener("pointerout", onOut);
       offPlay();
