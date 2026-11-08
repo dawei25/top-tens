@@ -298,8 +298,14 @@ for (const vp of VIEWPORTS) {
       await page.clock.runFor(1500);
       await replay(null);
       assert.equal((await reaction(page)).pokes, 1, "the squid didn't wait for the click");
-      await page.clock.runFor(400);
-      assert.equal((await reaction(page)).pokes, 2, "no click at all (Safari on bare page): the squid takes it a beat later");
+      // A beat later (250 ms) the squid takes a tap no click followed. Stepped, not one jump: under load the frame
+      // that reads the timer can land after a single runFor (flaked once, Nov 8).
+      let pokes = 1;
+      for (let i = 0; i < 20 && pokes < 2; i++) {
+        await page.clock.runFor(100);
+        pokes = (await reaction(page)).pokes;
+      }
+      assert.equal(pokes, 2, "no click at all (Safari on bare page): the squid takes it a beat later");
       await page.clock.runFor(1500);
       await recordClicks(page);
     }
