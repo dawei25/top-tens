@@ -1166,11 +1166,13 @@ export function startOcean(els: OceanEls): Ocean {
     const right = body.limbAt(2, 1);
     const id = Math.abs(left.x - tapX) <= Math.abs(right.x - tapX) ? 1 : 2;
     body.wave(id, t, 1, id === 1 ? -1 : 1);
-    // The heart pops over its head when it is upright-ish, else beside its mantle (never among its arms).
+    // The heart pops clear of its arms: over its head when it is upright-ish, straight above its mantle when it lies on
+    // its side (the arms trail sideways), beside its mantle when it is head-down (the arms are above it).
     const p = here();
     const side = tapX < p.x ? -1 : 1;
     const a = swimmer.tilt * RAD;
     if (Math.cos(a) > 0.5) fx.heart(p.x + Math.sin(a) * 11 + side * 3, p.y - Math.cos(a) * 11 - 3);
+    else if (Math.cos(a) > -0.5) fx.heart(p.x + Math.sin(a) * 3, p.y - 12);
     else fx.heart(p.x + side * 14, p.y - 3);
     reactFor("boop", 1);
   }
