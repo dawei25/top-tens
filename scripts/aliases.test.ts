@@ -432,6 +432,21 @@ describe("aliases as built: what players type", () => {
     expect(lands("websites", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: franchises outside the top category, free-to-play series, and what players call them.
+    ["warcraft", "Warcraft"],
+    ["world of warcraft", "Warcraft"],
+    ["fortnite", "Fortnite"],
+    ["lol", "League of Legends"],
+    ["the last of us", "The Last of Us"],
+    ["angry birds", "Angry Birds"],
+    ["csgo", "Counter-Strike"],
+    ["pes", "Pro Evolution Soccer"],
+    ["sims 4", "The Sims"],
+  ])("game-franchises: %s -> %s", (guess, name) => {
+    expect(lands("game-franchises", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

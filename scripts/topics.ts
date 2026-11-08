@@ -1623,14 +1623,26 @@ export const TOPICS: Topic[] = [
     name: "Franchise",
     value: "Sales",
     metric: "Copies sold (millions)",
-    universeCategories: ["Video game franchises"],
+    // Coverage audit: the top category alone missed Warcraft, Fortnite, League of Legends and The Last of Us; its
+    // franchises sit in the "introduced in" year categories.
+    universeCategories: [
+      "Video game franchises",
+      // Wikipedia has these years (none for 1970, 1972-1977, 2020, 2021, 2024 or 2025).
+      ...[1971, ...range(1978, 2019), 2022, 2023].map((y) => `Video game franchises introduced in ${y}`),
+    ],
     // A spin-off article, and sub-series counted in Mario and Final Fantasy (intent.ts gives the series their names).
     skip: [
       "Educational games in the Sonic the Hedgehog series", "Mario Party", "Mario Kart", "Compilation of Final Fantasy VII",
       "Final Fantasy Crystal Chronicles", "Fabula Nova Crystallis Final Fantasy",
     ],
     // Famous franchises the category misses ("uncharted" was corrected to Uncharted Waters, "pacman" to Rayman).
-    more: { Uncharted: [], "Pac-Man": ["Pacman", "Pac Man"] },
+    // Free-to-play series sell no copies, so no category or table here has them (coverage audit): answers, unranked.
+    more: {
+      Uncharted: [], "Pac-Man": ["Pacman", "Pac Man"], Fortnite: [], "League of Legends": [], Valorant: [],
+      "Rocket League": [], "Fall Guys": [], "Among Us": [], "Genshin Impact": ["Genshin"], "Apex Legends": ["Apex"],
+      Roblox: [], "Candy Crush": ["Candy Crush Saga"], "Space Invaders": [], "Elden Ring": [], "Dota": ["Dota 2"],
+      "PUBG": ["PlayerUnknown's Battlegrounds"], "Clash of Clans": [], "Overwatch": [],
+    },
     junkAliases: [
       "Kamek", "King Boo", "Boo", "Boo Diddley", "E. Gadd", "I have fury!", "Caety Sagoian", "Catey Sagoian", "Mario Clock",
       "Mario Calculator", "POW Block", "Pokemon types", "Pokémon types", "Poke Ball", "Poké Ball", "Pokedex", "Pokédex",

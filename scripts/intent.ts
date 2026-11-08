@@ -912,6 +912,14 @@ export const INTENT: Record<string, Intent> = {
       "Resident Evil": ["Biohazard", "Resident Evil 4", "RE4"],
       "Final Fantasy": ["FF", "Final Fantasy VII", "FF7", "FFVII"],
       "Assassin's Creed": ["AC"],
+      // Coverage audit: the names players use ("lol" and "csgo" read as junk, "pes" found nothing).
+      Warcraft: ["World of Warcraft", "WoW"],
+      Yakuza: ["Like a Dragon"],
+      "Counter-Strike": ["CSGO", "CS:GO", "CS GO", "CS2", "Counter Strike"],
+      "Pro Evolution Soccer": ["PES", "eFootball", "Winning Eleven"],
+      "Tony Hawk's": ["Tony Hawk's Pro Skater", "Tony Hawk", "THPS"],
+      "League of Legends": ["LoL"],
+      "The Sims": ["Sims 4", "The Sims 4", "Sims"],
     },
   },
   websites: {
