@@ -260,8 +260,8 @@ export function useListAverages(): ListAverages | null {
 /**
  * How real players guessed on a Fathom question, against this guess and the answer shown, "further off" measured on
  * the scale of the question's round (`compareRound(q)`: points off for a percent, years for a year, steps on a steps
- * list, how many times off otherwise); null without a backend, while loading, or if the server can't say (playersLine
- * in src/game/fathom.ts decides whether there are enough of them to show).
+ * list, how many times off otherwise; an estimate's when not given); null without a backend, while loading, or if the
+ * server can't say (playersLine in src/game/fathom.ts decides whether there are enough of them to show).
  */
 export function useFathomCrowd(questionId: string, guess: number, answer: number, round: CompareRound = "estimate"): FathomCrowd | null {
   return useLoaded(compareKey(questionId, round, guess, answer), (s) => s.fathomCompare(questionId, guess, answer, round));
