@@ -89,7 +89,7 @@ approves it: five estimation questions a game, scored by plain closeness, one ru
    Blitz key; lives; 10 rank slots, each empty one with a
    clue magnifier; feedback line; chips for life-costing misses.
    Blitz's title card shows the prompt only when it adds words beyond the title, "name as many <noun> as you can", and
-   its scoring rule ("bigger numbers score more."), repeated on the results. Once a found row
+   its scoring rule ("#1 gets 100, smaller numbers get less, down to 10"), repeated on the results. Once a found row
    has a fact, "facts: tap a name." sits under the board.
 3. **Results:** score, the average and histogram (where you stand), full list with values, source link, share, Roll
    again (a new random game).

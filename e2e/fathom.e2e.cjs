@@ -467,7 +467,8 @@ describe("Fathom", { concurrency: true }, () => {
       assert.match(nums[2], /\b1994\b.*\b1997\b/);
       assert.doesNotMatch(nums[2], /1,99/);
       // Every round's rule again, once each.
-      assert.deepEqual(await page.getByTestId("fathom-rule").evaluateAll((els) => els.map((el) => el.dataset.round)), ["estimate", "percent", "year"]);
+      // One rule for every round now (the owner: "closer the guess the more points"): the results say it once.
+      assert.deepEqual(await page.getByTestId("fathom-rule").evaluateAll((els) => els.map((el) => el.dataset.round)), ["estimate"]);
       assert.equal(await noHScroll(page), true);
       if (vp.name === "desktop") {
         await page.getByTestId("fathom-copy").click();

@@ -187,8 +187,9 @@ export function blitzPromptShown(title: string, prompt: string): string | undefi
 }
 
 /**
- * How Blitz scores, in one plain line (the owner, Nov 8: keep scoring lines simple). It is true on every Blitz list: a
- * bigger number never scores less (src/game/blitz.ts `points`; copy.test.ts checks it on every list). The title card
- * says it after the metric ("scored by length: bigger numbers score more."), the results under the score.
+ * How Blitz scores, in words that agree with the numbers (src/game/blitz.ts `points`: #1 scores 100, a smaller number
+ * never scores more, and nothing scores under 10; copy.test.ts checks it on every Blitz list). The title card says it
+ * after the metric ("scored by length: #1 gets 100, ..."), the results under the score. The owner kept this one as it
+ * is (Nov 8) when Fathom's rule became one plain sentence.
  */
-export const BLITZ_SCORING = "bigger numbers score more.";
+export const BLITZ_SCORING = "#1 gets 100, smaller numbers get less, down to 10.";

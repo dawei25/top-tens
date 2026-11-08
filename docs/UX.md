@@ -80,11 +80,11 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 
 ## Scores
 
-21. **A score says how it works in one plain line, and no more.** "The closer your guess, the more points." (Fathom)
-    and "bigger numbers score more." (Blitz). No formulas, multiples or examples on screen: the owner on "Half or
-    double the answer scores about 50. Ten times off scores 0.": "keep it simle just saw closer the guess the more
-    points you get". The line must be true (a closer guess never scores less; tests check it on every round and every
-    Blitz list), and never a number someone made up: Fathom once scored against a judge's guess of how far off people
+21. **A score says how it works in one plain line.** Fathom: "The closer your guess, the more points.", with no
+    formulas, multiples or examples on screen: the owner on "Half or double the answer scores about 50. Ten times off
+    scores 0.": "keep it simle just saw closer the guess the more points you get". Blitz keeps "#1 gets 100, smaller
+    numbers get less, down to 10." (the owner: "dont change the blitz"). The line must be true (a closer guess never
+    scores less; tests check it on every round and every Blitz list), and never a number someone made up: Fathom once scored against a judge's guess of how far off people
     usually are ("most people miss by about 1.3x"), and the owner: "feels made up". Whatever reads "spot on" scores
     100, and a miss reads plainly ("30% low", "3x too high"). Other players come in only as real players, once there
     are 20 of them on a question. (`src/game/fathom.test.ts`, `src/components/copy.test.ts`.)
