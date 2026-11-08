@@ -338,6 +338,13 @@ describe("aliases as built: what players type", () => {
     ["stadiums", "texas am", "Kyle Field"],
     ["stadiums", "happy valley", "Beaver Stadium"],
     ["stadiums", "rungrado may day", "Rungrado 1st of May Stadium"],
+    ["stadiums", "bird's nest", "Beijing National Stadium"],
+    ["stadiums", "principality stadium", "Millennium Stadium"],
+    ["stadiums", "el monumental", "Estadio Monumental"],
+    ["albums", "mmlp", "The Marshall Mathers LP"],
+    ["albums", "titanic soundtrack", "Titanic: Music from the Motion Picture"],
+    ["banks", "jpm", "JPMorgan Chase"],
+    ["consoles", "original xbox", "Xbox"],
     // Sports: short forms, former names, city abbreviations.
     ["nba-assists", "mo cheeks", "Maurice Cheeks"],
     ["nba-assists", "kj", "Kevin Johnson"],

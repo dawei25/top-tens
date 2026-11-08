@@ -746,6 +746,7 @@ export const INTENT: Record<string, Intent> = {
       "Game Boy": ["Gameboy", "Game Boy Color", "GBC", "Gameboy Color"],
       Wii: ["Nintendo Wii"],
       "Xbox 360": ["X360", "360"],
+      Xbox: ["Original Xbox", "Xbox Original"],
       "PlayStation Vita": ["PS Vita", "PSV"],
       "Family Computer/Nintendo Entertainment System": ["NES", "Famicom", "Nintendo Entertainment System"],
       "Super Famicom/Super Nintendo Entertainment System": ["SNES", "Super Nintendo", "Super Famicom"],
@@ -840,6 +841,10 @@ export const INTENT: Record<string, Intent> = {
       "FNB Stadium": ["Soccer City"],
       "Signal Iduna Park": ["Westfalenstadion"],
       "Rungrado 1st of May Stadium": ["Rungrado May Day"],
+      "Beijing National Stadium": ["Bird's Nest", "The Bird's Nest"],
+      "Millennium Stadium": ["Principality Stadium"],
+      // River Plate's, in Buenos Aires: "monumental" alone offers the four Monumentales.
+      "Estadio Monumental": ["El Monumental", "Monumental de Núñez", "Estadio Más Monumental"],
     },
   },
   "companies-revenue": {
@@ -1004,6 +1009,9 @@ export const INTENT: Record<string, Intent> = {
       Bad: ["Michael Jackson Bad"],
       "Legend: The Best of Bob Marley & The Wailers": ["Bob Marley Legend", "Legend Bob Marley"],
       "The Fame / The Fame Monster": ["The Fame", "The Fame Monster", "Fame Monster"],
+      "The Marshall Mathers LP": ["MMLP"],
+      "Titanic: Music from the Motion Picture": ["Titanic Soundtrack", "Titanic OST"],
+      "Led Zeppelin IV": ["Zeppelin IV", "Led Zep IV", "Led Zeppelin 4"],
     },
   },
   "concert-tours": {
@@ -1247,7 +1255,8 @@ export const INTENT: Record<string, Intent> = {
       "Agricultural Bank of China": ["ABC", "Agricultural Bank"],
       "China Construction Bank": ["CCB"],
       "Bank of America": ["BofA", "BoA"],
-      "JPMorgan Chase": ["JP Morgan", "Chase", "JPMorgan"],
+      "JPMorgan Chase": ["JP Morgan", "Chase", "JPMorgan", "JPM"],
+      "Deutsche Bank": ["DB"],
       "BNP Paribas": ["BNP"],
       "Postal Savings Bank of China": ["Postal Savings Bank", "PSBC"],
       // Short names and former names (coverage audit, Nov 8): NatWest Group was the RBS Group until 2020.
