@@ -2,8 +2,9 @@
  * Fathom (beta, #fathom): five questions, about two minutes, no timer, no lives. Four ask for a number and one asks the
  * player to name a thing whose figure is close to a target (the name-it round, src/game/fathom-name.ts reads the name).
  * Each scores by how close it is, on one curve (`curve`) with a distance for each round: an estimate by how many times
- * off, a percent by how many times off on the answer's side of 50, a year by how many times off how long ago it was, a
- * name-it round by its list's figure against the target (a ratio, or steps off). On screen, one plain line (ruleFor).
+ * off, a percent by points off and how many times off on the answer's side of 50 (the average), a year by how many
+ * times off how long ago it was, a name-it round by its list's figure against the target (a ratio, or steps off). On
+ * screen, one plain line (ruleFor).
  *
  * Pure functions only: reading numbers, scoring, the draw, the share text, and the save (its own localStorage key,
  * never the game's save: Fathom touches no record, stat or streak; with a backend, each guess is also sent, see
@@ -31,10 +32,10 @@ export const TYPICALS = [1.3, 1.5, 2, 3, 5, 10, 30] as const;
 
 /**
  * How a question is asked and scored. An estimate (the default) is a number in a unit, scored by how many times off;
- * a percent is 0 to 100 (unit "percent"), scored by how many times off its share (or, past 50, its complement) is; a
- * year is an AD year (unit "year"), scored by how many times off how long ago it was; a name-it round asks for a thing
- * from a list ("Name a country with about 50 million people"), scored by that thing's figure against the target.
- * `kind` is the topic, apart from this.
+ * a percent is 0 to 100 (unit "percent"), scored by points off and how many times off its share (or, past 50, its
+ * complement) is; a year is an AD year (unit "year"), scored by how many times off how long ago it was; a name-it
+ * round asks for a thing from a list ("Name a country with about 50 million people"), scored by that thing's figure
+ * against the target. `kind` is the topic, apart from this.
  */
 export const ROUNDS = ["estimate", "percent", "year", "name"] as const;
 export type Round = (typeof ROUNDS)[number];
@@ -146,26 +147,35 @@ export function percentOff(guess: number, answer: number): number {
   return answer > 50 ? Math.log10(share(100 - answer) / share(100 - guess)) : Math.log10(share(guess) / share(answer));
 }
 
+/** Points a percent's points-off half loses for each point off (so about 33 points off scores 0 there). */
+export const PER_POINT = 3;
+
+/** A percent's points-off half: 100 - 3 x points off, rounded, never under 0. */
+const pointsHalf = (guess: number, answer: number): number =>
+  Math.max(0, Math.round(POINTS_PER_QUESTION - PER_POINT * Math.abs(guess - answer)));
+
 /**
- * Points for a percent guess: the curve on percentOff. Within half a point is spot on, 100. 20 for 25 scores 82, 30
- * for 25 85, 5 for 2.5 49, 10 for 25 36, 0.8 for 25 0 (a share that small is 30x off).
+ * Points for a percent guess: the average of two scores, rounded. One counts points off (100 - 3 a point, never under
+ * 0); the other how many times off (the curve on percentOff), so a small share's miss counts for more than a big one's
+ * of the same points. Within half a point is spot on, 100; a miss at most 99. 20 for 25 scores 84, 5 for 2.5 71, 10
+ * for 2.5 47, 0.8 for 25 14, 90 for 71 36.
  */
 export function percentScore(guess: number, answer: number): number {
   if (percentSpotOn(guess, answer)) return POINTS_PER_QUESTION;
-  return Math.min(MISS_MAX, curve(percentOff(guess, answer)));
+  return Math.min(MISS_MAX, Math.round((pointsHalf(guess, answer) + curve(percentOff(guess, answer))) / 2));
 }
 
 /** The current calendar year: a year round measures how long ago from it. */
 export const currentYear = (): number => new Date().getFullYear();
 
-/** How many times a year's distance counts against an estimate's: 3, so the edge is about 2.15x off in time ago. */
-export const YEAR_STRETCH = 3;
+/** How many times a year's distance counts against an estimate's: 2, so the edge is about 3.2x off in time ago. */
+export const YEAR_STRETCH = 2;
 
 /** Years before `now`, at least 1 (this year and later count as last year, so the ratio stays finite). */
 const ago = (year: number, now: number): number => Math.max(1, now - year);
 
 /**
- * How far off a year guess is, by how long ago it was: 3 x log10(ago(answer) / ago(guess)), positive when the guess is
+ * How far off a year guess is, by how long ago it was: 2 x log10(ago(answer) / ago(guess)), positive when the guess is
  * later. Ten years off an event 20 years ago is far; ten years off one 300 years ago is close. `now` is this year.
  */
 export function yearOff(guess: number, answer: number, now: number = currentYear()): number {
@@ -176,8 +186,8 @@ export function yearOff(guess: number, answer: number, now: number = currentYear
 const yearSpotOn = (guess: number, answer: number): boolean => Math.round(Math.abs(guess - answer)) === 0;
 
 /**
- * Points for a year guess: the curve on yearOff. The exact year is 100. With now 2026: 1984 for 1967 scores 31, 1960
- * for 1967 73, 2010 for 2007 60, 2010 for 2005 42, 1880 for 1903 60.
+ * Points for a year guess: the curve on yearOff. The exact year is 100. With now 2026: 1984 for 1967 scores 50, 1960
+ * for 1967 81, 2010 for 2007 72, 2000 for 2007 53, 1850 for 1903 47.
  */
 export function yearScore(guess: number, answer: number, now: number = currentYear()): number {
   if (yearSpotOn(guess, answer)) return POINTS_PER_QUESTION;
@@ -330,11 +340,11 @@ export function missText(q: Pick<FathomQuestion, "round" | "answer" | "unit" | "
 const STEPS_EDGE = POINTS_PER_QUESTION / PER_STEP;
 
 /**
- * How far off a guess is on its round's scale, from -1 (too low or early) to 1 (too high or late), 1 where the score
- * reaches 0: the distance each round scores by. Powers of ten for an estimate (10x off) and a name-it round on a ratio
- * list; for a percent, powers of ten on the answer's side of 50 (percentOff: 10x off its share or its complement); for
- * a year, yearOff (about 2.15x off how long ago); steps for a name-it round on a steps list (100 / 30). The sonar
- * places the squid by it, so it agrees with the points.
+ * How far off a guess is on its round's scale, from -1 (too low or early) to 1 (too high or late): the distance each
+ * round scores by, 1 where its curve reaches 0. Powers of ten for an estimate (10x off) and a name-it round on a ratio
+ * list; for a percent, powers of ten on the answer's side of 50 (percentOff: 10x off its share or what's left, where
+ * its times-off half reaches 0); for a year, yearOff (about 3.2x off how long ago); steps for a name-it round on a
+ * steps list (100 / 30). The sonar places the squid by it: further out on either side never scores more.
  */
 export function offAxis(round: Round, guess: number, answer: number, scoring?: NameScoring, now: number = currentYear()): number {
   const d =

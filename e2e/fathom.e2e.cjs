@@ -10,8 +10,8 @@
 //   and a build without a backend sends and queues nothing.
 // - A percent round and a year round on phone and desktop: each one's rule in view before its answer (and all three on
 //   the results), the field (a decimal keypad and "%" for a percent, 0 to 100; a number pad for a year, never grouped
-//   as "2,007"), the points by each round's distance (a share, or past 50 what's left; how long ago a year was), the
-//   miss in points or years, the sonar on the distance the points come from, the
+//   as "2,007"), the points by each round's rule (a percent by points off and times off its share, or past 50 what's
+//   left; a year by how long ago it was), the miss in points or years, the sonar on the distance the points come from, the
 //   results and the share text; at 320px every message on one line, no sideways scroll, and every control 44px.
 // - A unit with a scale word ("million people"): the short number typed, and the whole amount read back in the unit.
 // - A reload picks the game up where it was, the results included.
@@ -79,16 +79,19 @@ function openFathom(vp, { save, serve = bank(), setup, ...opts } = {}) {
 const curve = (d) => Math.round(100 * Math.max(0, 1 - Math.abs(d)) ** 2);
 const points = (guess, answer) => (Math.abs(guess - answer) <= answer * 0.01 ? 100 : Math.min(99, curve(Math.log10(guess / answer))));
 /**
- * A percent and a year on the same curve, by their own distance (the sonar places the squid by it too). A percent: powers
- * of ten on the answer's side of 50 (past 50, what's left), each share kept to 0.5 to 99.5; within half a point, 100.
- * A year: 3 x the powers of ten in how long ago it was (from this year, at least 1); the year itself, 100.
+ * A percent: the average of points off (100 - 3 a point, never under 0) and the curve on how many powers of ten off it
+ * is on the answer's side of 50 (past 50, what's left; each share kept to 0.5 to 99.5), the sonar's distance; within
+ * half a point, 100. A year: the curve on 2 x the powers of ten in how long ago it was (from this year, at least 1),
+ * the sonar's distance too; the year itself, 100.
  */
 const share = (p) => Math.min(99.5, Math.max(0.5, p));
 const percentOff = (guess, answer) => (answer > 50 ? Math.log10(share(100 - answer) / share(100 - guess)) : Math.log10(share(guess) / share(answer)));
-const percentPoints = (guess, answer) => (Math.abs(guess - answer) < 0.5 ? 100 : Math.min(99, curve(percentOff(guess, answer))));
+const byPoints = (guess, answer) => Math.max(0, Math.round(100 - 3 * Math.abs(guess - answer)));
+const percentPoints = (guess, answer) =>
+  Math.abs(guess - answer) < 0.5 ? 100 : Math.min(99, Math.round((byPoints(guess, answer) + curve(percentOff(guess, answer))) / 2));
 const THIS_YEAR = new Date().getFullYear();
 const ago = (year, now) => Math.max(1, now - year);
-const yearOff = (guess, answer, now = THIS_YEAR) => 3 * Math.log10(ago(answer, now) / ago(guess, now));
+const yearOff = (guess, answer, now = THIS_YEAR) => 2 * Math.log10(ago(answer, now) / ago(guess, now));
 const yearPoints = (guess, answer, now = THIS_YEAR) => (guess === answer ? 100 : Math.min(99, curve(yearOff(guess, answer, now))));
 
 /** A real percent question and a real year question (as in public/fathom/questions.json), for the new rounds. */
@@ -364,8 +367,8 @@ describe("Fathom", { concurrency: true }, () => {
     await ctx.close();
   });
 
-  // The owner's revamp: a percent round and a year round beside the estimates, on the estimate's curve by their own
-  // distance (a share on its side of 50; how long ago a year was: the owner's calibration, Nov 8).
+  // The owner's revamp: a percent round and a year round beside the estimates (the owner's calibration, Nov 8): a
+  // percent by points off and times off its share, a year by how many times off how long ago it was.
   // Each says its own rule before its answer (UX 21), and its field fits a phone (UX 20).
   for (const vp of VIEWPORTS) {
     test(`a percent round and a year round: the rule, the field, the points, the sonar, the results (${vp.name})`, async () => {
@@ -415,10 +418,10 @@ describe("Fathom", { concurrency: true }, () => {
         assert.equal(await attr(page, "fathom-echo", "data-tone"), "error", `"${bad}" is refused`);
         assert.equal(await page.getByTestId("fathom-reveal").count(), 0);
       }
-      // 6 points low: 47 left against 41, 1.15x off.
+      // 6 points low (82), and 47 left against 41, 1.15x off (88).
       await lockIn(page, "53");
       const percentWant = percentPoints(53, PERCENT.answer);
-      assert.equal(percentWant, 88);
+      assert.equal(percentWant, 85);
       assert.equal(Number(await attr(page, "fathom-reveal", "data-points")), percentWant);
       assert.equal(Number(await attr(page, "fathom-guess", "data-value")), 53);
       assert.equal((await page.getByTestId("fathom-answer").textContent()).trim(), "59%");
@@ -447,9 +450,9 @@ describe("Fathom", { concurrency: true }, () => {
         assert.equal(await attr(page, "fathom-echo", "data-tone"), "error", `"${bad}" is refused`);
         assert.equal(await page.getByTestId("fathom-reveal").count(), 0);
       }
-      // 3 years early: 32 years ago against 29 (in 2026), 1.1x off, scores 76.
+      // 3 years early: 32 years ago against 29 (in 2026), 1.1x off, scores 84.
       await lockIn(page, "1994");
-      assert.equal(yearPoints(1994, YEAR.answer, 2026), 76);
+      assert.equal(yearPoints(1994, YEAR.answer, 2026), 84);
       const yearWant = yearPoints(1994, YEAR.answer);
       assert.equal(Number(await attr(page, "fathom-reveal", "data-points")), yearWant);
       assert.equal((await page.getByTestId("fathom-answer").textContent()).trim(), "1997");

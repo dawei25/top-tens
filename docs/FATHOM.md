@@ -9,36 +9,39 @@ The questions live in `public/fathom/questions.json`; the name-it round's lists 
 
 A question's `round` says how it is asked and scored (absent means an estimate). `kind` is its topic, apart from this.
 
-| Round | The player types | Points | The rule on screen | The miss |
-|---|---|---|---|---|
-Every round scores on one curve (`curve`): 100 x max(0, 1 - \|d\|)^2, rounded, with d the round's own distance, 0
-from \|d\| = 1. A miss scores at most 99: only spot on is 100.
+The rounds share one curve (`curve`): 100 x max(0, 1 - \|d\|)^2, rounded, with d a distance that is 1 where the curve
+reaches 0. A miss scores at most 99: only spot on is 100.
 
 | Round | The player types | Points | The rule on screen | The miss |
 |---|---|---|---|---|
 | `estimate` | a number in the question's unit | the curve, d = log10(guess / answer); within 1% spot on, 100. 25% off 82, half or double 49, 3x 27, 10x 0 | "The closer your guess, the more points." | "30% low", "3x too high" |
-| `percent` | 0 to 100: "71", "71%", "71.5" | the curve, d = how many powers of ten off on the answer's side of 50: up to 50 the shares (log10(guess / answer)), past 50 what's left (log10((100 - answer) / (100 - guess))), each kept to 0.5 to 99.5; within half a point spot on, 100. 20 for 25 82, 5 for 2.5 49, 0.8 for 25 0; 90 for 99 scores as 10 for 1 | "The closer your guess, the more points." | "6 points low" |
-| `year` | an AD year, up to four digits: "2007" | the curve, d = 3 x log10(ago(answer) / ago(guess)), ago(y) = max(1, this year - y); the exact year 100. In 2026: 1984 for 1967 31, 2010 for 2007 60, 2010 for 2005 42, 1880 for 1903 60 | "The closer your guess, the more points." | "3 years early" |
+| `percent` | 0 to 100: "71", "71%", "71.5" | the average, rounded, of two scores: points off (100 - 3 x points off, never under 0) and times off (the curve, d = how many powers of ten off on the answer's side of 50: up to 50 the shares, log10(guess / answer), past 50 what's left, log10((100 - answer) / (100 - guess)), each kept to 0.5 to 99.5); within half a point spot on, 100. 20 for 25 84, 5 for 2.5 71, 10 for 2.5 47, 0.8 for 25 14, 90 for 71 36; 90 for 99 scores as 10 for 1 | "The closer your guess, the more points." | "6 points low" |
+| `year` | an AD year, up to four digits: "2007" | the curve, d = 2 x log10(ago(answer) / ago(guess)), ago(y) = max(1, this year - y); the exact year 100. In 2026: 1984 for 1967 50, 1960 for 1967 81, 2010 for 2007 72, 2000 for 2007 53, 1850 for 1903 47 | "The closer your guess, the more points." | "3 years early" |
 | `name` | a name from the question's list: "Colombia" for "Name a country with about 50 million people" | the thing's figure against the target: a `ratio` list by the estimate's rule, a `steps` list 100 - 30 x steps off (one off 70, two 40) | "The closer to the target, the more points." | "6% more people", "2x too many people", "2% low" (an area, a unit of measure), "3 land borders too many" |
 
 Why these: the owner played and found "0.8% for 25%" (the beetles' share of animals) scoring 27 while "1984 for 1967"
 (the first heart transplant) scored 15: "theres no way my second guess was considered worse". The old rules (100 - 3 a
 point, 100 - 5 a year) counted every point and every year the same, wherever they were. He then filled a calibration
 sheet (Nov 8): 15 pairs of guesses (which is better, or about the same) and 5 ratings. The old rules agreed with 6 of
-his pairs and 2 of his ratings; these agree with 12 and all 5 (`fathom.test.ts`, "the owner's calibration (Nov 8)",
-asserts each one and lists the 3 misses). What he goes by: a share is off by how many times, as an estimate is (0.8% is
-30x too small a share of 25%), and past 50 it is what's left that counts (90% for 99% leaves 10x too much); a year is
-off by how long ago it was, so 17 years off an event 59 years ago is far, and the same off one 120 years ago is closer.
-The year's 3 makes it steep for recent events (2017 for 2007 scores 0), so the bank's years are at least 10 years ago
-(`check.ts`). The miss still reads in points and years ("6 points low", "3 years early").
+his pairs and 2 of his ratings. A first try, a percent by times off alone and a year with 3 x log10, agreed with 12
+and all 5, but was too harsh: "i would give some points for 0.8, not 0, 2.5 for 5 isnt that bad id give 60-75 points,
+in general a lot of these were fine before". These rules agree with 14 of his pairs and 4 of his ratings
+(`fathom.test.ts`, "the owner's calibration (Nov 8)", asserts each one, and his two notes; the misses: pair 6, 2000 for
+1992 at 59 against 20 for 8.8 at 41, which he called the same, and 1880 for 1903 at 72, which he rated Ok, 25 to 65).
+What he goes by: a share is off partly by how many times, as an estimate is (0.8% is 30x too small a share of 25%), and
+past 50 it is what's left that counts (90% for 99% leaves 10x too much), with points off keeping a near miss in points
+worth something; a year is off by how long ago it was, so 17 years off an event 59 years ago is far, and the same off
+one 120 years ago is closer. That is steep for recent events (2017 for 2007 scores 12), so the bank's years are at
+least 10 years ago (`check.ts`). The miss still reads in points and years ("6 points low", "3 years early").
 
 On screen every round says only "The closer your guess, the more points." (UX.md 21; the owner: keep it simple); on
 each side of the answer a closer guess never scores less (`fathom.test.ts`). It shows on the first question of its
 round in a game, before the answer (under LOCK IN when a phone has little height), and the results say it once.
 Whatever reads "spot on" scores 100, in every round. The bands, the sonar, the share text, the sound and the
-celebration work the same for every round. The sonar places the squid by the same distance the points come from
-(`offAxis`), its edges where the round scores 0: 10x off for an estimate, 10x off the share (or what's left) for a
-percent, \|d\| = 1 for a year (about 2.15x off how long ago).
+celebration work the same for every round. The sonar places the squid by the distance the points come from
+(`offAxis`), its edges where the round's curve reaches 0: 10x off for an estimate, \|d\| = 1 for a year (about 3.2x off
+how long ago), and 10x off the share (or what's left) for a percent, where its points-off half may still score (0.8 for
+25 sits at the edge with 14). On either side, further out never scores more.
 
 The field: a decimal keypad for an estimate and a percent ("%" beside it for a percent), a plain number pad for a year,
 which never groups its digits ("2007", not "2,007"). A percent of 0 is a fair guess; past 100 says "0 to 100, please."
@@ -270,10 +273,10 @@ The judge checks, in this order, and stops at the first fail:
    - *Familiar subject?* Would almost everyone have seen it or heard of it? A specific obscure case of a familiar
      thing fails ("a bank card's height": everyone has one, nobody pictures its size; a named rare animal). Drop.
    - *A way in?* Write the reasoning a curious player would use, from what they already know, to land within about 3x
-     (an estimate; a percent's share, or what's left past 50) or about 1.5x of how long ago (a year: some 20 years of
-     an event 60 years ago), each about 25 points' worth. If there is none, it is a
-     know-it-or-don't question: drop ("How long is the Trans-Siberian Railway?": a famous name, but nothing to reason
-     from; an atom's width; an obscure count). Fame of the subject is not a way in.
+     (an estimate), about 20 to 30 points (a percent: 20 on a small share, 30 near the middle) or about 1.8x of how
+     long ago (a year: some 25 years after or 45 before an event 60 years ago), each about 25 points' worth. If there
+     is none, it is a know-it-or-don't question: drop ("How long is the Trans-Siberian Railway?": a famous name, but
+     nothing to reason from; an atom's width; an obscure count). Fame of the subject is not a way in.
    - *A reveal worth it?* Does the answer surprise or teach, and does the fact explain the number? A fact beside the
      point is a fix (from the source); a dull administrative number is a drop.
 2. **One clear answer.** The question, definition and unit pin down a single number, and the source states it (or
