@@ -212,6 +212,19 @@ describe("aliases as built: what players type", () => {
     ["tower research", "unknown"],
     // "Man" is a word, not Man Group.
     ["man", "unknown"],
+    // Player notes: Point72 and the other real hedge funds the page leaves out are answers (SAC became Point72).
+    ["point72", "Point72 Asset Management"],
+    ["sac capital", "Point72 Asset Management"],
+    ["baupost", "Baupost Group"],
+    ["tiger management", "Tiger Management"],
+    ["ltcm", "Long-Term Capital Management"],
+    ["melvin capital", "Melvin Capital"],
+    // Coverage audit: what finance people call them.
+    ["soros", "Quantum Fund"],
+    ["medallion", "Renaissance Technologies"],
+    ["greenlight", "Greenlight Capital"],
+    ["scion", "Scion Asset Management"],
+    ["d1", "D1 Capital Partners"],
   ])("hedge-funds: %s -> %s", (guess, name) => {
     expect(lands("hedge-funds", guess)).toBe(name);
   });

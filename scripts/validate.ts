@@ -461,6 +461,7 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
       ...Object.keys(INTENT[p.id]?.groups ?? {}),
       ...Object.values(topic?.aliases ?? {}).flat(),
       ...Object.values(topic?.cited ?? {}).flatMap((c) => c.aliases),
+      ...Object.values(topic?.more ?? {}).flat(),
       ...SHARED_FORMS,
     ].map(normalize),
   );
