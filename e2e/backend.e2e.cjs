@@ -610,7 +610,12 @@ test("Home: the account is a key in the header, never a row; nothing comes betwe
       });
       assert.equal(between.next, "free play", `${tag}: Free play comes right after Today`);
       assert.ok(between.key, `${tag}: the account key in Home's header keys`);
-      const tops = (p) => Promise.all(["today-blitz", "free-play"].map((id) => p.getByTestId(id).evaluate((el) => Math.round(el.getBoundingClientRect().top))));
+      // Measured once the fonts are in and layout has settled: under load the plain build's page was measured while the
+      // title still had its fallback font, 49px shorter (two flaky runs, Nov 7 and Nov 8).
+      const tops = async (p) => {
+        await p.evaluate(() => document.fonts.ready.then(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))));
+        return Promise.all(["today-blitz", "free-play"].map((id) => p.getByTestId(id).evaluate((el) => Math.round(el.getBoundingClientRect().top))));
+      };
       const here = await tops(page);
       assert.ok(await noHScroll(page), tag);
       if (plain) {
