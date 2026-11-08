@@ -606,6 +606,13 @@ describe("coverage audit readings", () => {
     // A real name stays itself: "australia" is not corrected into Austria, and a slip of Kyiv is not one of Kiel.
     expect(judgeGuess("australia", countries, new Set(), lex)).toMatchObject({ kind: "unknown", known: true });
     expect(judgeGuess("kiev", countries, new Set(), lex)).toMatchObject({ kind: "unknown" });
+    // A stored misspelling is still as ambiguous as it looks: "Irak" offers Iran and Iraq (Fathom's name-it e2e), and
+    // a closer different name never wins over the entry it misspells.
+    const gulf: Puzzle = { ...puzzle, id: "gulf9", extras: [v(17, "Iran"), v(36, "Iraq"), v(0, "Kyiv"), v(0, "Kiel")] };
+    const lex2 = lexOf({ names: ["irak", "kiev"], slips: [["irak", "iraq"], ["kiev", "kyiv"]] });
+    expect(judgeGuess("irak", gulf, new Set(), lex2)).toEqual({ kind: "typo", suggestions: ["Iran", "Iraq"] });
+    // Kiel is one slip from "kiev", Kyiv (the entry it misspells) two: Kiel never wins.
+    expect(judgeGuess("kiev", gulf, new Set(), lex2)).toMatchObject({ kind: "unknown", known: true });
   });
 
   it("one slip on an ordinary word needs five letters or more (class 3)", () => {

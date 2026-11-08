@@ -580,9 +580,14 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
   // outside a regional list's region is only ever named exactly: "praha" is not Praia.
   const person = !ownName && isPersonWord(raw, lex);
   const ofNames = /names$/.test(normalize(puzzle.noun ?? ""));
+  // A stored misspelling lifts the veto for the readings as close as its own entry, so it stays as ambiguous as it
+  // looks ("irak": Iran or Iraq) and a closer different name never wins ("kiev" is Kyiv, not Kiel).
+  const slipDist = ownName
+    ? Math.min(...candidates.filter((c) => c.dist <= 2 && [c.entry.name, ...c.entry.aliases].some((n) => isSlipOf(guess, n, lex))).map((c) => c.dist))
+    : Infinity;
   const close = candidates.filter((c) => {
     if (c.entry.elsewhere) return false;
-    if (ownName && !(c.dist <= 2 && [c.entry.name, ...c.entry.aliases].some((n) => isSlipOf(guess, n, lex)))) return false;
+    if (ownName && c.dist !== slipDist) return false;
     if (person && !(ofNames ? sameName(guess, normalize(c.entry.name)) : oneSlipOfName(guess, c.entry))) return false;
     // An ordinary word was typed on purpose: one slip at most, keeping its first letter, onto a ranked answer ("hungry"
     // is Hungary; "barrel" is not Brazil, "rice" not the pool's Nice, "doodle" not Poodle). A short word slipped is
