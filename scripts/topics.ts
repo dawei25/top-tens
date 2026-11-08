@@ -1676,6 +1676,21 @@ export const TOPICS: Topic[] = [
     keepOrder: true,
     lowerIsBetter: true,
     aliasCols: ["Domain"],
+    // Coverage audit: only social networks and search engines were answers, so "snapchat" was corrected to
+    // Stripchat and Discord, Spotify and the BBC were "not one of the websites here".
+    also: [{ page: "List of social platforms with at least 100 million active users", tables: [0, 1], name: "Name" }],
+    more: {
+      Snapchat: ["Snap Chat"], Discord: [], Spotify: [], IMDb: [], CNN: ["cnn.com"], BBC: ["BBC News", "bbc.co.uk", "bbc.com"],
+      "The New York Times": ["New York Times", "NYT", "nytimes.com"], PayPal: [], AliExpress: [], Shein: [], Quora: [],
+      OnlyFans: [], "Walmart.com": ["Walmart"], DeepSeek: [], MSN: ["msn.com"], Gmail: [], Tumblr: [], "4chan": [],
+      "9GAG": [], Roblox: [], Steam: [], Etsy: [], Craigslist: [], Airbnb: [], "Booking.com": ["Booking"], Tripadvisor: [],
+      "Stack Overflow": [], Imgur: [], Hulu: [], "Disney+": ["Disney Plus"], "Google Maps": [], "Google Translate": [],
+      "Google Drive": [], "Google Docs": [], "Yahoo Mail": [], Dropbox: [], Indeed: [], "Fox News": [], "Daily Mail": [],
+      "The Guardian": ["Guardian"], "The Washington Post": ["Washington Post"], Threads: [], Perplexity: [],
+      "Character.ai": ["Character AI"], "Microsoft Copilot": ["Copilot"], Wordle: [], Duolingo: [], Shopify: [],
+      Zillow: [], Grok: [], "Prime Video": ["Amazon Prime Video"], "Apple Music": [], SoundCloud: [], Vimeo: [],
+      Medium: [], "WordPress.com": ["WordPress"], Wix: [], Flipkart: [], Rakuten: [], "Mercado Libre": [], Zalando: [],
+    },
     universeCategories: ["Social networking services", "Internet search engines"],
     // The categories also hold articles about the field ("Search engine bias", "Anchor text") and protocols.
     categoryNames: true,

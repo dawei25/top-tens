@@ -418,6 +418,20 @@ describe("aliases as built: what players type", () => {
     expect(value("Allianz")).toMatch(/^\$\d+ billion \(Fortune Global 500, 2026\)$/);
   });
 
+  it.each([
+    // Coverage audit: "snapchat" was corrected to Stripchat; big sites outside the two categories found nothing.
+    ["snapchat", "Snapchat"],
+    ["discord", "Discord"],
+    ["spotify", "Spotify"],
+    ["bbc", "BBC"],
+    ["tumblr", "Tumblr"],
+    ["hotmail", "Outlook.com"],
+    ["office", "Microsoft 365"],
+    ["google gemini", "Gemini"],
+  ])("websites: %s -> %s", (guess, name) => {
+    expect(lands("websites", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

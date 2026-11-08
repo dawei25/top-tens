@@ -922,6 +922,11 @@ export const INTENT: Record<string, Intent> = {
       "Microsoft Bing": ["Bing"],
       Instagram: ["IG", "Insta"],
       WhatsApp: ["Whats App"],
+      // Coverage audit: what people call the sites ("office" was corrected to Virtual Office Website, "google
+      // gemini" to Google Search).
+      "Outlook.com": ["Outlook", "Hotmail", "Microsoft Outlook"],
+      "Microsoft 365": ["Office", "Office 365", "office.com", "Microsoft Office"],
+      Gemini: ["Google Gemini", "Bard", "Google Bard"],
     },
   },
   "europe-cities": {
