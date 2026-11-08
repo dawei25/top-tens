@@ -41,7 +41,14 @@ approve or disapprove ... I'll tell you which specific ones to swap out ... effi
    not a verdict: anyone can send them, so a judge still decides.
    **Read the players' notes** ("add a note" under "Good list?"): `list_feedback(p_reader => '', p_since => <last
    cycle>)` with the public key; the environment's proxy adds the reader key as a header (docs/BACKEND.md, Running it) returns every note since the last cycle, the owner's
-   first. **The owner's notes are requests, not signals: act on each one this cycle.** Then group everyone's notes
+   first. **The owner's notes are requests, not signals: act on each one this cycle.** **Everyone else's notes get a
+   humane judgement, not obedience** (owner, Nov 8: "dont just do whatever players say blindly ... take that into
+   account and then make a humane judgement"). A note that points at something checkable (a fair answer not
+   accepted, a spelling, a wrong figure, a missing fact, a confusing prompt) is checked, and fixed with a guard when
+   it holds, even if one player sent it: "88888888 isn't accepted on passwords" needs one note, not ten. A note about
+   taste or difficulty ("boring", "too hard", "remove this") moves a list only when ratings or several players agree,
+   and never against one of the owner's calls (docs/OWNER_PICKS.md). Every note gets a line in the cycle's log: what
+   it said (paraphrased), checked or not, done or not, and why. Then group everyone's notes
    into themes (a detail missing from the facts, a wrong figure, an answer that should count, a confusing title, too
    hard or too easy, more lists like this), each with its lists, mode and how many notes back it. Each actionable
    theme becomes a fix with a guard, routed like ratings: data and facts to the data agent, matching and aliases to
