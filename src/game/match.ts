@@ -136,8 +136,31 @@ interface Candidate {
   besideShared: boolean;
   /** The best form starts with the same letter as the guess. */
   sameStart: boolean;
-  /** The best form sounds like the guess: the same consonants (`skeleton`), "hungary" / "hungray". */
-  sounds: boolean;
+  /** The guess and the best form, as compared (shared words dropped): for `sounds`. */
+  pair: [string, string];
+}
+
+/** Whether the best form sounds like the guess: the same consonants (`skeleton`), "hungary" / "hungray". */
+const sounds = (c: Candidate) => skeleton(c.pair[0]) === skeleton(c.pair[1]);
+
+/** A normalized form's spacing and numbers, worked out once per form. */
+interface Shape {
+  compact: string;
+  /** Number words as digits ("frozen two": "frozen 2"). */
+  numbered: string;
+  digits: string;
+  /** Without its numbers that stand as words ("harry potter 1": "harry potter"). */
+  unnumbered: string;
+}
+const shapes = new Map<string, Shape>();
+function shapeOf(s: string): Shape {
+  let x = shapes.get(s);
+  if (!x) {
+    const numbered = numbersAsDigits(s);
+    const unnumbered = numbered.split(" ").filter((w) => !/^\d+$/.test(w)).join(" ");
+    shapes.set(s, (x = { compact: s.replace(/ /g, ""), numbered, digits: digitsOf(numbered), unnumbered }));
+  }
+  return x;
 }
 
 interface Forms {
@@ -252,30 +275,30 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
     let ends = false;
     let besideShared = false;
     let sameStart = false;
-    let sounds = false;
+    let pair: [string, string] = ["", ""];
     const { forms, words: nameWordForms, codes } = formsOf(entry);
     const words = useWords ? nameWordForms : [];
     // Words of the name count as forms too, so a misspelled first name ("kareen") lands on its own entry.
     for (const [i, written] of [...forms, ...words].entries()) {
       const isWord = i >= forms.length;
+      const shape = shapeOf(written);
       // Numbers are identity, not spelling: GTA 6 is not GTA 5, Mario Kart 7 is not Mario Kart.
-      const formDigits = digitsOf(numbersAsDigits(written));
-      if (guessDigits && formDigits !== guessDigits) continue;
+      if (guessDigits && shape.digits !== guessDigits) continue;
+      // Spacing never matters: "spiderman" is "Spider-Man", "psone" PS One. Words both sides share ("mount", "canyon")
+      // aren't evidence of a typo: only the rest is compared, so "mount whitney" is not a misspelling of "mount lhotse".
+      // Number words count as their digits: "frozen two" is Frozen II, "50 shades of grey" Fifty Shades of Grey.
+      const spacing = shape.compact === compactGuess || shape.numbered === numGuess;
       // A number standing as a word of the name isn't spelled by a guess without one: such a guess is only a
       // misspelling of the rest ("harry poter" for "Harry Potter 1"), never the name itself, and never a word put in the
       // number's place ("mario kart ds" is not "Mariokart 8"). One glued to letters is part of a code: "j league" is
       // one slip from "J1 League".
-      // Spacing never matters: "spiderman" is "Spider-Man", "psone" PS One. Words both sides share ("mount", "canyon")
-      // aren't evidence of a typo: only the rest is compared, so "mount whitney" is not a misspelling of "mount lhotse".
-      // Number words count as their digits: "frozen two" is Frozen II.
-      const spacing = written.replace(/ /g, "") === compactGuess || numbersAsDigits(written) === numGuess;
-      const unnumbered = !spacing && !guessDigits && formDigits ? numbersAsDigits(written).split(" ").filter((w) => !/^\d+$/.test(w)).join(" ") : written;
-      if (!unnumbered) continue;
-      const f = unnumbered;
+      const f = !spacing && !guessDigits && shape.digits ? shape.unnumbered : written;
+      if (!f) continue;
       const [g, rest] = spacing ? [guess, f] : withoutSharedWords(guess, f);
       // Matching a numbered name without its number is weaker than matching a name as written: "avatr" is Avatar, not a
-      // tie with "Avatar 2".
-      const dist = spacing ? 0 : editDistance(g, rest) + (f !== written ? 0.5 : 0);
+      // tie with "Avatar 2". Lengths far apart are no slip at all (no budget reaches 5), so the distance isn't worked out.
+      const gap = Math.abs(g.length - rest.length);
+      const dist = spacing ? 0 : (gap > 5 ? gap : editDistance(g, rest)) + (f !== written ? 0.5 : 0);
       if (dist === 0 && f !== written) continue;
       // Codes (ATL, EDDF, PRC) match exactly or not at all; fuzzy they catch keyboard mash like "asdf".
       if (dist > 0 && !isWord && codes[i]) continue;
@@ -303,10 +326,10 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
         // another word ("vw bus" is not "VW Bug"), though a code's number left off is not ("j league": J1 League).
         besideShared = g !== guess && g[0] === rest[0] && (g.length >= 4 || /^\d+$/.test(rest.slice(g.length)) && rest.startsWith(g));
         sameStart = g[0] === rest[0];
-        sounds = skeleton(g) === skeleton(rest);
+        pair = [g, rest];
       }
     }
-    return { entry, inTop10, dist: best, len, fullName, viaWord, ends, besideShared, sameStart, sounds };
+    return { entry, inTop10, dist: best, len, fullName, viaWord, ends, besideShared, sameStart, pair };
   });
 }
 
@@ -569,7 +592,7 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
     // A slip on one word of an obscure name is no reading of it: "holes" is not Better Homes and Gardens New Cook Book.
     if (c.viaWord && !notable) return false;
     // The third edit of a slip in the middle needs the same sounds: "korean" is not Kushan, "catalan" not Castilian.
-    const budget = typoBudget(len) + (notable && c.ends && c.sounds && len >= 6 && len <= 7 ? 1 : 0);
+    const budget = typoBudget(len) + (notable && c.ends && len >= 6 && len <= 7 && sounds(c) ? 1 : 0);
     return c.dist <= Math.max(budget, c.besideShared ? 1 : 0) && (notable || c.ends);
   });
   if (close.length > 0) {
