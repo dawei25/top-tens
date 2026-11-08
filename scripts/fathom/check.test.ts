@@ -12,6 +12,7 @@ import {
   listMisses,
   loadBank,
   MIN_QUESTIONS,
+  MIN_YEARS_AGO,
   sameSubject,
   subjectWords,
   type ListSource,
@@ -299,11 +300,18 @@ describe("rounds", () => {
     expect(errs(percent({ question: "What percentage of Earth's surface is ocean?" }))).toEqual([]);
   });
 
-  it(`wants a whole year of four digits, no later than this year (${thisYear})`, () => {
-    expect(errs(year({ answer: thisYear }))).toEqual([]);
+  // A year scores by how many times off how long ago it was, steep for something recent: at least 10 years ago.
+  it(`wants a whole year of four digits, at least ${MIN_YEARS_AGO} years ago (${thisYear - MIN_YEARS_AGO} at the latest)`, () => {
+    expect(MIN_YEARS_AGO).toBe(10);
+    const latest = thisYear - MIN_YEARS_AGO;
+    expect(errs(year({ answer: latest }))).toEqual([]);
     expect(errs(year({ answer: 1066 }))).toEqual([]);
-    expect(errs(year({ answer: 2007.5 }))).toEqual(["iphone-year: a year's answer is a whole year of four digits (1000 to " + thisYear + "), not 2007.5"]);
+    expect(errs(year({ answer: 2007.5 }))).toEqual([
+      `iphone-year: a year's answer is a whole year of four digits, at least 10 years ago (1000 to ${latest}), not 2007.5`,
+    ]);
     expect(errs(year({ answer: 800 }))[0]).toMatch(/whole year of four digits/);
+    expect(errs(year({ answer: latest + 1 }))[0]).toMatch(/at least 10 years ago/);
+    expect(errs(year({ answer: thisYear }))[0]).toMatch(/at least 10 years ago/);
     expect(errs(year({ answer: thisYear + 1 }))[0]).toMatch(/whole year of four digits/);
   });
 
