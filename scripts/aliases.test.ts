@@ -477,6 +477,21 @@ describe("aliases as built: what players type", () => {
     expect(lands("gdp-per-capita", "lichtenstein")).toBe("Liechtenstein");
   });
 
+  it.each([
+    // Coverage audit: common guesses and spellings ("sassanids" was corrected to the Umayyads, #8).
+    ["ussr", "Soviet Union"],
+    ["nazi germany", "Nazi Germany"],
+    ["rome", "Roman Empire"],
+    ["sassanids", "Sasanian Empire"],
+    ["mogul empire", "Mughal Empire"],
+    ["byzantium", "Byzantine Empire"],
+    ["golden horde", "Jochi Khanate"],
+    ["austria-hungary", "Austro-Hungarian Empire"],
+    ["england", "British Empire"],
+  ])("empires: %s -> %s", (guess, name) => {
+    expect(lands("empires", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

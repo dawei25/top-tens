@@ -1938,6 +1938,18 @@ export const TOPICS: Topic[] = [
     aliases: { "Second French colonial empire": ["French Empire", "French colonial empire"] },
     // Two Xiongnu rows: the smaller is the western state; "Xiongnu" means the empire (intent.ts).
     rename: { Xiongnu: "Western Xiongnu" },
+    // Coverage audit: the Soviet Union, a common guess, is only in the page's table of each era's largest state, not
+    // ranked as an empire: an answer with that figure, saying it isn't ranked. Nazi Germany has none on the page.
+    also: [
+      {
+        tables: [2],
+        name: "Empire",
+        value: "Million km",
+        where: { col: "Empire", match: /^Soviet Union$/ },
+        dated: { source: "not ranked here", unit: " million km²", perYear: { col: "Approximate period" } },
+      },
+    ],
+    more: { "Nazi Germany": ["Third Reich", "Greater German Reich"] },
     junkAliases: ["Empire", "British occupation", "British Asia"],
   },
   {

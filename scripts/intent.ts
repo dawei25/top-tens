@@ -997,7 +997,16 @@ export const INTENT: Record<string, Intent> = {
       "Xiongnu Empire": ["Xiongnu"],
       "Achaemenid Empire": ["Persian Empire", "Persia", "Persian", "First Persian Empire"],
       "Empire of Japan": ["Japanese Empire", "Imperial Japan"],
-      "British Empire": ["British", "Britain"],
+      "British Empire": ["British", "Britain", "UK", "United Kingdom", "England", "English Empire"],
+      // Coverage audit: the usual English spellings and names ("sassanids" was corrected to the Umayyads, #8, and
+      // "mogul empire" to the Mongols, #2).
+      "Roman Empire": ["Rome", "Ancient Rome"],
+      "Sasanian Empire": ["Sassanid", "Sassanid Empire", "Sassanids", "Sassanian Empire", "Sasanians", "Sassanian"],
+      "Mughal Empire": ["Mogul Empire", "Moghul Empire", "Mogul", "Moghul", "Moguls", "Mughals"],
+      "Byzantine Empire": ["Byzantium", "Eastern Roman Empire", "Byzantines"],
+      "Jochi Khanate": ["Golden Horde", "Ulus of Jochi"],
+      "Austro-Hungarian Empire": ["Austria-Hungary", "Austria Hungary", "Austro-Hungary"],
+      "Soviet Union": ["USSR", "Soviet Empire", "Soviets", "U.S.S.R."],
       "Mongol Empire": ["Mongols", "Mongolian Empire"],
       "Russian Empire": ["Russia", "Tsarist Russia", "Imperial Russia"],
       "Qing dynasty": ["Qing", "Qing Empire", "Qing China"],
