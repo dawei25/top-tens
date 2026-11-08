@@ -630,12 +630,25 @@ function suite(exposeNewTables: boolean) {
     const rows = (question: string) =>
       db.query<Row>("select question_id, guess, user_id, client_id from public.fathom_guesses where question_id = $1 order by id", [question]);
     type Compare = { n: number; median: number | null; further_off: number | null };
-    const compare = async (question: string, guess: number, answer: number, asker: string | null = ASKER, user: string | null = null) =>
+    type Round = "estimate" | "percent" | "year" | "name-ratio" | "name-steps";
+    /** fathom_compare as the game asks it: an estimate by default, from ASKER's browser, signed out. */
+    const compare = async (
+      question: string,
+      guess: number,
+      answer: number,
+      { round = "estimate", asker = ASKER, user = null }: { round?: Round | string | null; asker?: string | null; user?: string | null } = {},
+    ) =>
       (
         await as(user ? "authenticated" : "anon", user, () =>
-          db.query<{ c: Compare }>("select public.fathom_compare($1, $2, $3, $4) as c", [question, guess, answer, asker]),
+          db.query<{ c: Compare }>("select public.fathom_compare($1, $2, $3, $4, $5) as c", [question, round, guess, answer, asker]),
         )
       ).rows[0].c;
+    /** Players' first guesses on a question, [how many, their guess] each, from fresh browsers numbered from `from`. */
+    const crowd = (question: string, from: number, groups: [count: number, guess: number][]) =>
+      as("anon", null, async () => {
+        let i = from;
+        for (const [count, guess] of groups) for (let k = 0; k < count; k++) await fathomGuess({ question, guess, client: client(i++) });
+      });
 
     beforeAll(async () => {
       await db.query("insert into auth.users (id, email) values ($1, 'f@example.com'), ($2, 'g@example.com'), ($3, 'h@example.com')", [F, G, H]);
@@ -679,8 +692,8 @@ function suite(exposeNewTables: boolean) {
           { question: "Bad Id" },
           { question: "x".repeat(65) },
           { question: null },
-          { guess: 0 },
           { guess: -5 },
+          { guess: -1e-9 },
           { guess: null },
           { guess: "NaN" },
           { guess: "Infinity" },
@@ -691,6 +704,26 @@ function suite(exposeNewTables: boolean) {
         for (const args of bad) expect(await code(fathomGuess({ question: "fq-bad", client: client(1504), ...args })), JSON.stringify(args)).toBe("22023");
       });
       expect((await rows("fq-bad")).rows).toEqual([]);
+    });
+
+    it("takes 0 (0% is a fair percent, 0 land borders a fair name-it figure), never below it", async () => {
+      await as("anon", null, async () => {
+        expect((await fathomGuess({ question: "fq-zero", guess: 0, client: client(1506) })).rows[0].ok).toBe(true);
+        // A -0 from a script is a 0.
+        expect((await fathomGuess({ question: "fq-zero", guess: "-0", client: client(1507) })).rows[0].ok).toBe(true);
+        expect(await code(fathomGuess({ question: "fq-zero", guess: -1e-300, client: client(1508) }))).toBe("22023");
+      });
+      const kept = (await rows("fq-zero")).rows;
+      expect(kept.map((r) => [r.client_id, r.guess])).toEqual([
+        [client(1506), 0],
+        [client(1507), 0],
+      ]);
+      expect(Object.is(kept[1].guess, 0)).toBe(true);
+      // The table holds the same line (23514: check_violation).
+      const insert = (guess: number) => db.query("insert into public.fathom_guesses (question_id, guess, client_id) values ('fq-zero', $1, $2)", [guess, client(1509)]);
+      expect(await code(insert(-1))).toBe("23514");
+      expect(await code(insert(1e300))).toBe("23514");
+      expect(await code(insert(0))).toBeUndefined();
     });
 
     it("gives players no direct access to the table", async () => {
@@ -735,21 +768,98 @@ function suite(exposeNewTables: boolean) {
 
     it("leaves the player asking out: their browser, and their account on every device", async () => {
       // Without a browser to leave out, the asker's own 100 is in the crowd.
-      expect((await compare("fq-cmp", 120, 100, null)).n).toBe(27);
+      expect((await compare("fq-cmp", 120, 100, { asker: null })).n).toBe(27);
       // F signed in on a third browser: neither of F's guesses counts (and the other asker's 100 does).
-      expect((await compare("fq-cmp", 120, 100, client(1103), F)).n).toBe(26);
+      expect((await compare("fq-cmp", 120, 100, { asker: client(1103), user: F })).n).toBe(26);
+    });
+
+    it("measures an estimate (and a name-it ratio list) in how many times off, with 0 the furthest of all", async () => {
+      // "How much is 1000?": five say 0, ten 10 (100x low), ten 1990 (1.99x high).
+      await crowd("fq-ratio", 1701, [
+        [5, 0],
+        [10, 10],
+        [10, 1990],
+      ]);
+      // 500 is 2x low: closer than the 0s and the 10s, not the 1990s (1.99x high). By plain distance, 500 against their
+      // 990, it would be closer than everyone.
+      expect(await compare("fq-ratio", 500, 1000)).toEqual({ n: 25, median: 10, further_off: 0.6 });
+      expect(await compare("fq-ratio", 500, 1000, { round: "name-ratio" })).toEqual({ n: 25, median: 10, further_off: 0.6 });
+      // 0 is as far off as the other 0s (a tie is not further), and further than anyone else.
+      expect((await compare("fq-ratio", 0, 1000)).further_off).toBe(0);
+      expect((await compare("fq-ratio", 1, 1000)).further_off).toBe(0.2);
+    });
+
+    it("measures a percent in points off, not times off", async () => {
+      // "What percent is 20?": ten say 10 (10 points off, 2x), ten 32 (12 off, 1.6x), five 0 (20 off).
+      await crowd("fq-percent", 1731, [
+        [10, 10],
+        [10, 32],
+        [5, 0],
+      ]);
+      // 31 is 11 points off: further are the 32s and the 0s (on a times-off scale it would be closer than everyone).
+      expect(await compare("fq-percent", 31, 20, { round: "percent" })).toEqual({ n: 25, median: 10, further_off: 0.6 });
+      expect((await compare("fq-percent", 31, 20)).further_off).toBe(1);
+      // 30 is 10 points off, a tie with the 10s (not further): points high and low weigh the same.
+      expect((await compare("fq-percent", 30, 20, { round: "percent" })).further_off).toBe(0.6);
+      // A guess of 0% is 20 points off: as far as the other 0s, closer than nobody.
+      expect((await compare("fq-percent", 0, 20, { round: "percent" })).further_off).toBe(0);
+      // An answer of 0% works too: 10 and 0 points off for the 10s and the 0s, 32 for the 32s.
+      expect((await compare("fq-percent", 12, 0, { round: "percent" })).further_off).toBe(0.4);
+    });
+
+    it("measures a year in years off, not times off", async () => {
+      // "When was 1969?": ten say 1959 (10 years early), ten 1970, five 1900.
+      await crowd("fq-year", 1761, [
+        [10, 1959],
+        [10, 1970],
+        [5, 1900],
+      ]);
+      // 1979 is 10 years late: as far off as 1959, further only for the 1900s. (As a ratio 1959 is a hair further off
+      // than 1979, so a times-off scale would count the ten 1959s too.)
+      expect(await compare("fq-year", 1979, 1969, { round: "year" })).toEqual({ n: 25, median: 1959, further_off: 0.2 });
+      expect((await compare("fq-year", 1979, 1969)).further_off).toBe(0.6);
+      expect((await compare("fq-year", 1969, 1969, { round: "year" })).further_off).toBe(1);
+    });
+
+    it("measures a name-it steps list in steps off (0 land borders a fair figure), and its median can be 0", async () => {
+      // "Name a country with 2 land borders": thirteen name an island (0), nine a country with 3, three one with 9.
+      await crowd("fq-steps", 1791, [
+        [13, 0],
+        [9, 3],
+        [3, 9],
+      ]);
+      // A country with 4 is 2 steps off: a tie with the islands, closer than the 9s. (As a ratio 4 is 2x off and an
+      // island infinitely, so the islands would count as further too.)
+      expect(await compare("fq-steps", 4, 2, { round: "name-steps" })).toEqual({ n: 25, median: 0, further_off: 0.12 });
+      expect((await compare("fq-steps", 4, 2, { round: "name-ratio" })).further_off).toBe(0.64);
+      // An island (0) on a list whose target is 0: spot on, closer than everyone but the other islands.
+      expect((await compare("fq-steps", 0, 0, { round: "name-steps" })).further_off).toBe(0.48);
+    });
+
+    it("refuses a round it doesn't know (invalid_parameter_value), so a guess is never measured on the wrong scale", async () => {
+      for (const round of [null, "", "name", "Percent", "steps", "estimate "]) {
+        expect(await code(compare("fq-cmp", 120, 100, { round })), String(round)).toBe("22023");
+      }
     });
 
     it("answers the public key, with nothing for a question nobody answered, and keeps its signature", async () => {
       expect(await compare("fq-none", 10, 100)).toEqual({ n: 0, median: null, further_off: null });
-      const short = await as("anon", null, () => db.query<{ c: Compare }>("select public.fathom_compare('fq-cmp', 120, 100) as c"));
+      expect(await compare("fq-none", 0, 0, { round: "percent" })).toEqual({ n: 0, median: null, further_off: null });
+      // Without a guess or an answer on the scale, still how many and their median, but no share.
+      expect(await compare("fq-cmp", -1, 100)).toEqual({ n: 26, median: 200, further_off: null });
+      expect(await compare("fq-cmp", 120, -1)).toEqual({ n: 26, median: 200, further_off: null });
+      const short = await as("anon", null, () => db.query<{ c: Compare }>("select public.fathom_compare('fq-cmp', 'estimate', 120, 100) as c"));
       expect(short.rows[0].c.n).toBe(27);
       const sig = await db.query<{ name: string; args: string; result: string }>(
         `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
          from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('fathom_compare', 'submit_fathom_guess') order by 1`,
       );
       expect(sig.rows).toEqual([
-        { name: "fathom_compare", args: "p_question_id text, p_guess double precision, p_answer double precision, p_client_id uuid", result: "json" },
+        {
+          name: "fathom_compare",
+          args: "p_question_id text, p_round text, p_guess double precision, p_answer double precision, p_client_id uuid",
+          result: "json",
+        },
         { name: "submit_fathom_guess", args: "p_question_id text, p_guess double precision, p_client_id uuid", result: "boolean" },
       ]);
     });
