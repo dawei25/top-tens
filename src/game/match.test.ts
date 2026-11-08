@@ -575,3 +575,230 @@ describe("cycle 6 readings", () => {
     expect(judgeGuess("story", shows, new Set(), lex).kind).toBe("unknown");
   });
 });
+
+// Coverage audit (Nov 8): 112 lists played, about 6,000 guesses. These are the matching rules that misfired across
+// many lists; each case below failed before its rule.
+describe("coverage audit readings", () => {
+  const h = (...ws: string[]) => ws.map((w) => fnv(w).toString(36)).join(" ");
+  const lexOf = (l: { names?: string[]; words?: string[]; slips?: [string, string][]; people?: string[]; countries?: [string, string][] }) => ({
+    alphabet: "",
+    table: "",
+    names: h(...(l.names ?? [])),
+    words: h(...(l.words ?? [])),
+    slips: h(...(l.slips ?? []).map(([a, b]) => `${a}>${b}`)),
+    people: h(...(l.people ?? [])),
+    countries: (l.countries ?? []).map(([f, c]) => `${fnv(f).toString(36)}:${fnv(c).toString(36)}`).join(" "),
+  });
+  const v = (rank: number, name: string, aliases: string[] = [], value = "1"): Entry => ({ rank, name, aliases, value });
+
+  it("a known real name that isn't an answer says so (class 1)", () => {
+    const funds: Puzzle = { ...puzzle, id: "funds9", noun: "firms", answers: [e(1, "Bridgewater Associates"), ...puzzle.answers.slice(1)], extras: [] };
+    const lex = lexOf({ names: ["point72"] });
+    expect(judgeGuess("Point72", funds, new Set(), lex)).toEqual({ kind: "unknown", junk: false, known: true });
+    expect(judgeGuess("Pointy McPoint", funds, new Set(), lex)).toEqual({ kind: "unknown", junk: false });
+  });
+
+  it("a misspelling another list stores as an alias still corrects to its own entry (class 2)", () => {
+    const countries: Puzzle = { ...puzzle, id: "countries9", extras: [v(40, "Afghanistan"), v(120, "Ireland"), v(150, "Austria"), v(0, "Kiel")] };
+    const lex = lexOf({ names: ["afganistan", "irland", "australia", "kiev"], slips: [["afganistan", "afghanistan"], ["irland", "ireland"], ["kiev", "kyiv"]] });
+    expect(judgeGuess("afganistan", countries, new Set(), lex)).toMatchObject({ kind: "near", corrected: true, entry: { name: "Afghanistan" } });
+    expect(judgeGuess("irland", countries, new Set(), lex)).toMatchObject({ kind: "near", corrected: true, entry: { name: "Ireland" } });
+    // A real name stays itself: "australia" is not corrected into Austria, and a slip of Kyiv is not one of Kiel.
+    expect(judgeGuess("australia", countries, new Set(), lex)).toMatchObject({ kind: "unknown", known: true });
+    expect(judgeGuess("kiev", countries, new Set(), lex)).toMatchObject({ kind: "unknown" });
+  });
+
+  it("one slip on an ordinary word needs five letters or more (class 3)", () => {
+    const farm: Puzzle = { ...puzzle, id: "farm9", answers: [e(1, "Rice"), e(2, "Pork", ["ham"]), ...puzzle.answers.slice(2)], extras: [e(29, "Czech Republic", ["ČR"]), e(40, "Hungary")] };
+    const lex = lexOf({ words: ["hay", "car", "hungry"] });
+    expect(judgeGuess("hay", farm, new Set(), lex).kind).toBe("unknown");
+    expect(judgeGuess("car", farm, new Set(), lex).kind).toBe("unknown");
+    expect(judgeGuess("hungry", farm, new Set(), lex)).toMatchObject({ kind: "near", corrected: true, entry: { name: "Hungary" } });
+  });
+
+  it("giving up is never an answer, and costs nothing (class 4)", () => {
+    const nfl: Puzzle = {
+      ...puzzle,
+      id: "nfl9",
+      answers: [e(1, "New England Patriots", ["Pats"]), e(2, "Nvidia"), ...puzzle.answers.slice(2)],
+      extras: [v(24, "Warrick Dunn"), v(0, "Next Group")],
+    };
+    for (const g of ["pass", "dunno", "no idea", "idk", "skip", "next", "I don't know", "no clue", "?"]) {
+      expect(judgeGuess(g, nfl, new Set()), g).toEqual({ kind: "unknown", junk: false, giveUp: true });
+    }
+    // Unless the list has an answer called exactly that: "whatever" is a password.
+    const passwords: Puzzle = { ...puzzle, id: "passwords9", extras: [v(0, "whatever")] };
+    expect(judgeGuess("whatever", passwords, new Set())).toMatchObject({ kind: "near", entry: { name: "whatever" } });
+  });
+
+  it("a correction never swaps a whole word the player typed for another (class 5)", () => {
+    const sites: Puzzle = { ...puzzle, id: "sites9", extras: [v(39, "Stripchat"), e(0, "ShareChat"), v(50, "Pakistan Today")] };
+    expect(judgeGuess("snapchat", sites, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("snap chat", sites, new Set()).kind).toBe("unknown");
+    // Real slips still land, however far: a letter swapped, letters dropped, a vowel spelled by ear.
+    expect(judgeGuess("stripchta", sites, new Set())).toMatchObject({ kind: "near", entry: { name: "Stripchat" } });
+    expect(judgeGuess("Packeestan", puzzle, new Set())).toMatchObject({ kind: "correct", entry: { name: "Pakistan" } });
+    const rivers: Puzzle = { ...puzzle, id: "rivers9", answers: [e(1, "Nile"), e(4, "Mississippi"), ...puzzle.answers.slice(2)], extras: [] };
+    expect(judgeGuess("missisipi", rivers, new Set())).toMatchObject({ kind: "correct", entry: { name: "Mississippi" } });
+  });
+
+  it("a whole surname added to a one-word name is someone else (class 5)", () => {
+    const pl: Puzzle = { ...puzzle, id: "pl9", extras: [v(0, "Fernando"), v(0, "José Torres", ["Torres"]), v(70, "Seven"), v(3, "Perfect")] };
+    const lex = lexOf({ names: ["ed sheeran", "torres", "adele"] });
+    expect(judgeGuess("fernando torres", pl, new Set(), lex).kind).toBe("unknown");
+    expect(judgeGuess("seven nation army", pl, new Set(), lex).kind).toBe("unknown");
+    // A title followed by who made it still reads as the title.
+    expect(judgeGuess("perfect ed sheeran", pl, new Set(), lex)).toMatchObject({ kind: "near", entry: { name: "Perfect" } });
+    expect(judgeGuess("perfect adele", pl, new Set(), lex)).toMatchObject({ kind: "near", entry: { name: "Perfect" } });
+  });
+
+  it("a typed real name isn't corrected into a different answer (class 6)", () => {
+    const athletes: Puzzle = {
+      ...puzzle,
+      id: "athletes9",
+      answers: [e(1, "Cristiano Ronaldo"), e(2, "Canelo Álvarez", ["Álvarez", "Canelo"]), e(3, "Michael Jordan", ["Jordan"]), ...puzzle.answers.slice(3)],
+      extras: [v(29, "Jeffrey")],
+    };
+    const lex = lexOf({ people: ["alcaraz", "jeremy", "jordon"] });
+    expect(judgeGuess("alcaraz", athletes, new Set(), lex)).toMatchObject({ kind: "unknown", known: true });
+    expect(judgeGuess("jeremy", athletes, new Set(), lex)).toMatchObject({ kind: "unknown" });
+    // One slip from an answer's own name is still a slip, even when the slip is someone's name too.
+    expect(judgeGuess("jordon", athletes, new Set(), lex)).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Michael Jordan" } });
+    // On a list of names, every name is its own: "Johnston" is not a slip of Johnson.
+    const surnames: Puzzle = { ...puzzle, id: "surnames9", noun: "surnames", answers: [e(1, "Smith"), e(2, "Johnson"), ...puzzle.answers.slice(2)], extras: [] };
+    expect(judgeGuess("johnston", surnames, new Set(), lexOf({ people: ["johnston"] })).kind).toBe("unknown");
+    expect(judgeGuess("jonhson", surnames, new Set(), lexOf({ people: ["johnston"] }))).toMatchObject({ kind: "correct", entry: { name: "Johnson" } });
+  });
+
+  it("a misspelling isn't corrected into a place outside the region, or by a different first letter (class 6)", () => {
+    const europe: Puzzle = { ...puzzle, id: "europe9", answers: [e(1, "Istanbul"), ...puzzle.answers.slice(1)], extras: [{ rank: 0, name: "Praia", aliases: [], elsewhere: true }] };
+    expect(judgeGuess("praha", europe, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("praia", europe, new Set())).toMatchObject({ kind: "near", entry: { name: "Praia" } });
+    const retail: Puzzle = { ...puzzle, id: "retail9", answers: [e(1, "Walmart", ["WMart"]), e(2, "Canada"), ...puzzle.answers.slice(2)], extras: [] };
+    expect(judgeGuess("kmart", retail, new Set()).kind).toBe("unknown");
+    // A first letter that sounds the same is still a slip.
+    expect(judgeGuess("kanada", retail, new Set())).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Canada" } });
+  });
+
+  it("a category word is 'be more specific', never one answer (class 7)", () => {
+    const food: Puzzle = {
+      ...puzzle,
+      id: "food9",
+      noun: "fast food chains",
+      answers: [e(1, "McDonald's"), e(4, "Luckin Coffee"), e(9, "Pizza Hut"), e(10, "Burger King"), ...puzzle.answers.slice(4)],
+      extras: [v(13, "Hunt Brothers Pizza"), v(22, "Goat meat"), v(23, "Oil palm fruit"), v(44, "Coffee Beans Inc")],
+    };
+    for (const g of ["pizza", "coffee", "burgers", "burger", "meat", "fruit"]) expect(judgeGuess(g, food, new Set()), g).toMatchObject({ kind: "unknown", vague: expect.any(Number) });
+    // A word no answer carries is a plain miss, and an answer named exactly that still counts.
+    expect(judgeGuess("pizza", puzzle, new Set())).toEqual({ kind: "unknown", junk: false });
+    const farm: Puzzle = { ...puzzle, id: "farm10", extras: [v(44, "Coffee"), v(2, "Pork")] };
+    expect(judgeGuess("coffee", farm, new Set())).toMatchObject({ kind: "near", entry: { name: "Coffee" } });
+    const leagues: Puzzle = {
+      ...puzzle,
+      id: "leagues9",
+      noun: "sports leagues",
+      answers: [e(1, "National Football League", ["NFL"]), ...puzzle.answers.slice(1)],
+      extras: [v(14, "Australian Football League"), v(21, "Chinese Basketball Association")],
+    };
+    expect(judgeGuess("basketball", leagues, new Set())).toMatchObject({ kind: "unknown", vague: expect.any(Number) });
+    expect(judgeGuess("football", leagues, new Set())).toMatchObject({ kind: "unknown", vague: expect.any(Number) });
+  });
+
+  it("short forms people type (class 8)", () => {
+    const places: Puzzle = {
+      ...puzzle,
+      id: "places9",
+      answers: [
+        e(1, "Mount Everest"), e(2, "Mount Fuji"), e(3, "Los Angeles Rams"), e(4, "New York Jets"), e(5, "Law & Order"),
+        e(6, "Kyle Field", ["Texas A&M"]), e(7, "St. Louis"), e(8, "Saint Paul"), e(9, "In-N-Out Burger"), e(10, "La Liga"),
+      ],
+      extras: [v(0, "The Fame / The Fame Monster"), v(0, "San Francisco 49ers", ["San Francisco Niners", "Niners"]), v(0, "Tampa Bay Rays", ["Rays"])],
+    };
+    const j = (g: string) => judgeGuess(g, places, new Set());
+    expect(j("mt fuji")).toMatchObject({ kind: "correct", entry: { name: "Mount Fuji" } });
+    expect(j("mt. everest")).toMatchObject({ kind: "correct", entry: { name: "Mount Everest" } });
+    expect(j("la rams")).toMatchObject({ kind: "correct", entry: { name: "Los Angeles Rams" } });
+    expect(j("ny jets")).toMatchObject({ kind: "correct", entry: { name: "New York Jets" } });
+    expect(j("sf niners")).toMatchObject({ kind: "near", entry: { name: "San Francisco 49ers" } });
+    expect(j("tb rays")).toMatchObject({ kind: "near", entry: { name: "Tampa Bay Rays" } });
+    expect(j("la liga")).toMatchObject({ kind: "correct", entry: { name: "La Liga" } });
+    expect(j("law n order")).toMatchObject({ kind: "correct", entry: { name: "Law & Order" } });
+    expect(j("in and out burger")).toMatchObject({ kind: "correct", entry: { name: "In-N-Out Burger" } });
+    expect(j("texas am")).toMatchObject({ kind: "correct", entry: { name: "Kyle Field" } });
+    expect(j("saint louis")).toMatchObject({ kind: "correct", entry: { name: "St. Louis" } });
+    expect(j("st paul")).toMatchObject({ kind: "correct", entry: { name: "Saint Paul" } });
+    expect(j("the fame")).toMatchObject({ kind: "near", entry: { name: "The Fame / The Fame Monster" } });
+    expect(j("the fame monster")).toMatchObject({ kind: "near", entry: { name: "The Fame / The Fame Monster" } });
+  });
+
+  it("a franchise and a number is the franchise, on a list of franchises (class 8)", () => {
+    const franchises: Puzzle = {
+      ...puzzle,
+      id: "franchises9",
+      noun: "video game franchises",
+      answers: [e(1, "Mario"), e(2, "Tetris"), e(7, "FIFA"), ...puzzle.answers.slice(3)],
+      extras: [v(13, "The Sims")],
+    };
+    expect(judgeGuess("sims 4", franchises, new Set())).toMatchObject({ kind: "near", entry: { name: "The Sims" } });
+    expect(judgeGuess("the sims 4", franchises, new Set())).toMatchObject({ kind: "near", entry: { name: "The Sims" } });
+    expect(judgeGuess("fifa 23", franchises, new Set())).toMatchObject({ kind: "correct", entry: { name: "FIFA" } });
+    // On a list of games, a number names a different game.
+    const games: Puzzle = { ...franchises, id: "games9", noun: "video games" };
+    expect(judgeGuess("fifa 23", games, new Set()).kind).toBe("unknown");
+  });
+
+  it("small bugs the audit reproduced (class 10)", () => {
+    const games: Puzzle = {
+      ...puzzle,
+      id: "games10",
+      answers: [e(1, "Minecraft"), e(6, "Mario Kart 8", ["Mario Kart", "Mariokart 8"]), ...puzzle.answers.slice(2)],
+      extras: [v(20, "Call of Duty: Modern Warfare", ["Modern Warfare", "Modern Warfare 2019"])],
+    };
+    expect(judgeGuess("mario kart ds", games, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("modern warfare 2", games, new Set()).kind).toBe("unknown");
+    expect(judgeGuess("modern warfare 2019", games, new Set())).toMatchObject({ kind: "near", entry: { rank: 20 } });
+    const videos: Puzzle = {
+      ...puzzle,
+      id: "videos10",
+      answers: [e(1, "Baby Shark Dance", ["Baby Shark"]), ...puzzle.answers.slice(1)],
+      extras: [e(0, "Baby", ["Justin Bieber"])],
+    };
+    expect(judgeGuess("baby shark song", videos, new Set())).toMatchObject({ kind: "correct", entry: { name: "Baby Shark Dance" } });
+    expect(judgeGuess("baby shark official video", videos, new Set())).toMatchObject({ kind: "correct", entry: { name: "Baby Shark Dance" } });
+    const nba: Puzzle = { ...puzzle, id: "nba10", answers: [...puzzle.answers.slice(0, 9), v(10, "Isiah Thomas", ["Thomas"])], extras: [e(0, "Isaiah Thomas")] };
+    expect(judgeGuess("isaiah thomas", nba, new Set())).toEqual({ kind: "typo", suggestions: ["Isaiah Thomas", "Isiah Thomas"] });
+    expect(judgeGuess("isaiah thomas", nba, new Set([10]))).toMatchObject({ kind: "near", entry: { name: "Isaiah Thomas" } });
+  });
+
+  it("a country's name offers its islands (owner, islands list)", () => {
+    const isl = (rank: number, name: string, country: string | string[], aliases: string[] = []): Entry => ({ rank, name, aliases, value: "1 km²", country });
+    const islands: Puzzle = {
+      ...puzzle,
+      id: "islands9",
+      noun: "islands",
+      answers: [
+        isl(1, "Greenland", "Denmark"), isl(2, "New Guinea", ["Indonesia", "Papua New Guinea"]), isl(3, "Borneo", ["Indonesia", "Malaysia", "Brunei"]),
+        isl(4, "Madagascar", "Madagascar"), isl(5, "Baffin Island", "Canada"), isl(6, "Sumatra", "Indonesia"), isl(7, "Honshu", "Japan"),
+        isl(8, "Victoria Island", "Canada"), isl(9, "Great Britain", "United Kingdom", ["UK", "Britain"]), isl(10, "Ellesmere Island", "Canada"),
+      ],
+      extras: [
+        isl(11, "Sulawesi", "Indonesia"), isl(13, "Java", "Indonesia"), isl(21, "Hokkaido", "Japan"), isl(36, "Kyushu", "Japan"), isl(50, "Shikoku", "Japan"),
+        isl(292, "Okinawa Island", "Japan", ["Okinawa"]), isl(16, "Cuba", "Cuba"), isl(22, "Sri Lanka", "Sri Lanka"), isl(250, "Isle of Wight", "United Kingdom"),
+        isl(300, "Kauai", "United States"),
+      ],
+    };
+    const lex = lexOf({ countries: [["nippon", "japan"], ["usa", "united states"], ["america", "united states"], ["uk", "united kingdom"]] });
+    const j = (g: string, found: number[] = []) => judgeGuess(g, islands, new Set(found), lex);
+    expect(j("japan")).toEqual({ kind: "typo", suggestions: ["Hokkaido", "Honshu", "Kyushu", "Shikoku"] });
+    expect(j("nippon")).toEqual({ kind: "typo", suggestions: ["Hokkaido", "Honshu", "Kyushu", "Shikoku"] });
+    expect(j("japan", [7])).toEqual({ kind: "typo", suggestions: ["Hokkaido", "Kyushu", "Okinawa Island", "Shikoku"] });
+    expect(j("indonesia")).toEqual({ kind: "typo", suggestions: ["Borneo", "New Guinea", "Sulawesi", "Sumatra"] });
+    expect(j("malaysia")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Borneo" } });
+    expect(j("america")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Kauai" } });
+    // An island named that, or one the list says the name means, is that island.
+    expect(j("cuba")).toMatchObject({ kind: "near", corrected: false, entry: { name: "Cuba" } });
+    expect(j("uk")).toMatchObject({ kind: "correct", corrected: false, entry: { name: "Great Britain" } });
+    // A picked choice is that island.
+    expect(judgeGuess("Honshu", islands, new Set(), lex, ["Hokkaido", "Honshu", "Kyushu", "Shikoku"])).toMatchObject({ kind: "correct", entry: { name: "Honshu" } });
+  });
+});
