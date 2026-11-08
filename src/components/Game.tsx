@@ -29,7 +29,6 @@ import {
   CLUE_LABEL,
   CLUE_NEXT_LABEL,
   confirmGuess,
-  FACT_CUE,
   GUESS_HINT,
   lifeCostLine,
   metricLabel,
@@ -322,8 +321,6 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     });
 
   const hints = game.hints ?? [];
-  // A revealed row with a fact opens it on a tap: a caption under the board says so, since a phone has no hover look.
-  const factShown = puzzle.answers.some((a) => a.fact && (over || game.found.includes(a.rank)));
   // Roll new list before play: a rolled list shows it in its own box right of the guess panel until anything
   // happens (no guess, no clue, nothing said in the feedback line). Then it fades out and the panel takes its room.
   const rerollSlot = !!rolled && !daily;
@@ -553,27 +550,20 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               );
             })}
           </ol>
-          {/* Under the board: the facts cue once a row has one, and GIVE UP while playing. */}
-          {(!over || factShown) && (
+          {/* Under the board: GIVE UP while playing. */}
+          {!over && (
             <div className="board-foot">
-              {factShown && (
-                <p className="caption fact-cue" data-testid="fact-cue">
-                  {FACT_CUE}
-                </p>
-              )}
-              {!over && (
-                <button
-                  type="button"
-                  className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
-                  onClick={quit}
-                  data-testid="give-up"
-                  data-confirm={confirmQuit || undefined}
-                  onBlur={() => setConfirmQuit(false)}
-                >
-                  {/* The key keeps GIVE UP's width while it asks, so the second press lands where the first did. */}
-                  <SwapLabel off="Give up" on="Sure?" active={confirmQuit} />
-                </button>
-              )}
+              <button
+                type="button"
+                className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
+                onClick={quit}
+                data-testid="give-up"
+                data-confirm={confirmQuit || undefined}
+                onBlur={() => setConfirmQuit(false)}
+              >
+                {/* The key keeps GIVE UP's width while it asks, so the second press lands where the first did. */}
+                <SwapLabel off="Give up" on="Sure?" active={confirmQuit} />
+              </button>
             </div>
           )}
         </section>
