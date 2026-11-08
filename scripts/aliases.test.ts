@@ -872,6 +872,18 @@ describe("aliases as built: what players type", () => {
     expect(lands("athletes-earnings", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: China's and Japan's richest and the famous US billionaires were "not one of the people here".
+    ["jack ma", "Jack Ma"],
+    ["pony ma", "Ma Huateng"],
+    ["zhong shanshan", "Zhong Shanshan"],
+    ["tadashi yanai", "Tadashi Yanai"],
+    ["oprah", "Oprah Winfrey"],
+    ["donald trump", "Donald Trump"],
+  ])("richest-people: %s -> %s", (guess, name) => {
+    expect(lands("richest-people", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

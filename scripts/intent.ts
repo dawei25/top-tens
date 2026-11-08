@@ -1338,6 +1338,9 @@ export const INTENT: Record<string, Intent> = {
   "richest-people": {
     same: {
       "S. Robson Walton": ["Rob Walton", "Robson Walton"],
+      // Coverage audit: the names the West uses.
+      "Ma Huateng": ["Pony Ma"],
+      "Jack Ma": ["Ma Yun"],
       "Elon Musk": ["Elon"],
       "Mark Zuckerberg": ["Zuck"],
       "Jensen Huang": ["Jensen"],

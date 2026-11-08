@@ -2276,7 +2276,34 @@ export const TOPICS: Topic[] = [
         skip: DECEASED_BILLIONAIRES,
         rename: { "Jacques Saadé, jr.": "Jacques Saadé Jr." },
       },
+      // Coverage audit: Jack Ma, Ma Huateng and Zhong Shanshan were "not one of the people here". The 2022 Forbes
+      // list for China gives each one's world rank that year (its W# column).
+      {
+        page: "List of Chinese by net worth",
+        tables: [0],
+        name: "Name",
+        value: "Net worth",
+        dated: { rank: "W#", label: "2022", prefix: "$", unit: " billion" },
+        skip: DECEASED_BILLIONAIRES,
+      },
+      {
+        page: "List of Japanese by net worth",
+        tables: [0],
+        name: "Name",
+        value: "Net Worth",
+        dated: { rank: "#", label: "Japan, 2022", prefix: "$" },
+        skip: DECEASED_BILLIONAIRES,
+      },
     ],
+    // The famous living billionaires a casual player names first, on no table here (coverage audit): answers,
+    // unranked, with a figure where a country's ranking above has one.
+    more: {
+      "Donald Trump": ["Trump"], "Oprah Winfrey": ["Oprah"], "Taylor Swift": [], "Jay-Z": ["Jay Z"],
+      "Kim Kardashian": [], "Michael Jordan": [], "Phil Knight": [], "MacKenzie Scott": [], "George Soros": ["Soros"],
+      "Peter Thiel": ["Thiel"], "Mark Cuban": ["Cuban"], "Rupert Murdoch": ["Murdoch"], Rihanna: [],
+      "Steven Spielberg": ["Spielberg"], "George Lucas": [], "Tyler Perry": [], "Magic Johnson": [],
+      "Changpeng Zhao": ["CZ"], "Richard Branson": ["Branson"], "Jack Dorsey": [], "Evan Spiegel": [],
+    },
     dataAsOf: "2026",
     // Relatives, organizations and jokes among the redirects to the top 10.
     junkAliases: [
