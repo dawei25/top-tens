@@ -492,6 +492,19 @@ describe("aliases as built: what players type", () => {
     expect(lands("empires", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: the rest of the Harry Potter series, and famous single books the page leaves out.
+    ["goblet of fire", "Harry Potter and the Goblet of Fire"],
+    ["deathly hallows", "Harry Potter and the Deathly Hallows"],
+    ["the lion the witch and the wardrobe", "The Lion, the Witch and the Wardrobe"],
+    ["1984", "Nineteen Eighty-Four"],
+    // Religious texts and series are outside the prompt: free.
+    ["the bible", "unknown"],
+    ["lord of the rings", "unknown"],
+  ])("books: %s -> %s", (guess, name) => {
+    expect(lands("books", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

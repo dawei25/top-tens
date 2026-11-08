@@ -976,6 +976,24 @@ export const TOPICS: Topic[] = [
     metric: "Copies sold (approx.)",
     // A half-translated Japanese title with a stray parenthesis.
     also: [{ tables: [9, 10, 11, 12], name: "Book", skip: ["六星占術によるあなたの運命 Tells Your Fortune)"] }],
+    // Coverage audit: players who find Philosopher's Stone try the rest of the series, and the page lists only the
+    // first two. Single books no table here has: answers, unranked.
+    more: {
+      "Harry Potter and the Prisoner of Azkaban": ["Prisoner of Azkaban"],
+      "Harry Potter and the Goblet of Fire": ["Goblet of Fire"],
+      "Harry Potter and the Order of the Phoenix": ["Order of the Phoenix"],
+      "Harry Potter and the Half-Blood Prince": ["Half-Blood Prince", "Half Blood Prince"],
+      "Harry Potter and the Deathly Hallows": ["Deathly Hallows"],
+      "The Lion, the Witch and the Wardrobe": ["The Lion the Witch and the Wardrobe"],
+      "Animal Farm": [], "Nineteen Eighty-Four": ["1984"], "The Great Gatsby": [], "To Kill a Mockingbird": [],
+      "Pride and Prejudice": [], "The Hunger Games": [], "Twilight": [], "The Fault in Our Stars": [],
+    },
+    // Series and religious or political texts are outside the prompt: free, and still real names.
+    knownOnly: [{ tables: [4, 5, 6, 7, 8], name: "Book series" }],
+    knownNames: [
+      "The Bible", "Bible", "Quran", "Koran", "Quotations from Chairman Mao Tse-tung", "Little Red Book",
+      "The Lord of the Rings", "LOTR", "Narnia", "Harry Potter series",
+    ],
     works: true,
     junkAliases: [
       "The Da Vinci Code paintings", "Lord of the Rings Prequel", "Vengeance", "Roger Cly", "Mrs. Cruncher",

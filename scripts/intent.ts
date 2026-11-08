@@ -631,6 +631,8 @@ export const INTENT: Record<string, Intent> = {
       "Harry Potter and the Philosopher's Stone": ["Harry Potter and the Sorcerer's Stone", "Philosopher's Stone", "Sorcerer's Stone"],
       "Alice's Adventures in Wonderland": ["Alice in Wonderland"],
       "The Little Prince": ["Le Petit Prince"],
+      // All digits, so the automatic aliases drop it as a number.
+      "Nineteen Eighty-Four": ["1984"],
     },
     groups: {
       HP: ["Harry Potter and the Philosopher's Stone", "Harry Potter and the Chamber of Secrets"],
