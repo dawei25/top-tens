@@ -64,12 +64,14 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("blitz-clock").getAttribute("data-started"), "false");
     assert.equal((await store(page)).blitzDaily[TODAY].score, first);
 
-    // Once Today's list is done, the locked round's list key opens its own list again.
+    // Once Today's list is done, the locked round offers no list at all: never its own (the owner, Nov 8: "if someone
+    // played blitz no point to give them option to play the same list since its alr spoiled").
     await go(page, `#daily-${TODAY}`);
     await giveUp(page);
     await go(page, `#dailyblitz-${TODAY}`);
     await results.waitFor();
-    assert.equal(await page.getByTestId("blitz-list").getAttribute("href"), `#p-${id}`);
+    assert.equal(await page.getByTestId("blitz-list").count(), 0);
+    assert.equal(await results.locator(`a[href="#p-${id}"]`).count(), 0, "the Blitz results offer their own list");
     await ctx.close();
   });
 }

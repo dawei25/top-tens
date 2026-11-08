@@ -179,7 +179,12 @@ export const DEMONYMS: Record<string, string[]> = {
  */
 const BASE_COUNTRY_FORMS: string[][] = [
   ["United States", "USA", "US", "U.S.", "U.S.A.", "America", "United States of America", "the States"],
-  ["United Kingdom", "UK", "U.K.", "Britain", "Great Britain", "GB", "England", "Scotland", "Wales", "Team GB", "British"],
+  // Northern Ireland is part of the UK, as England, Scotland and Wales are: "northern ireland" found nothing on every
+  // country list (coverage audit, Nov 8). Lists where the home nations play as themselves skip the whole line.
+  [
+    "United Kingdom", "UK", "U.K.", "Britain", "Great Britain", "GB", "England", "Scotland", "Wales", "Northern Ireland",
+    "Team GB", "British",
+  ],
   ["China", "PRC", "People's Republic of China", "Mainland China", "Zhongguo"],
   ["Australia", "Aussie", "Aussies"],
   ["Switzerland", "Swiss", "Swiss Confederation"],
@@ -192,7 +197,7 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["South Korea", "Korea", "Republic of Korea", "ROK", "S. Korea"],
   ["North Korea", "DPRK", "Democratic People's Republic of Korea", "N. Korea"],
   ["DR Congo", "Democratic Republic of the Congo", "DRC", "Congo-Kinshasa", "Zaire", "Congo DR", "DR of Congo"],
-  ["Republic of the Congo", "Congo-Brazzaville", "Congo Republic"],
+  ["Republic of the Congo", "Congo-Brazzaville", "Congo Republic", "Republic of Congo"],
   ["Ivory Coast", "Côte d'Ivoire", "Cote d'Ivoire"],
   ["Czech Republic", "Czechia", "Czech"],
   ["Turkey", "Türkiye", "Turkiye"],
@@ -215,7 +220,7 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["Trinidad and Tobago", "Trinidad"],
   ["Papua New Guinea", "PNG"],
   ["New Zealand", "NZ", "Aotearoa"],
-  ["Philippines", "The Philippines"],
+  ["Philippines", "The Philippines", "Phillipines", "Philipines"],
   ["Bahamas", "The Bahamas"],
   ["Gambia", "The Gambia"],
   ["Hong Kong", "HK"],
@@ -226,10 +231,9 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["Palestine", "State of Palestine", "Palestinian territories"],
   ["São Tomé and Príncipe", "Sao Tome and Principe", "Sao Tome"],
   ["Kyrgyzstan", "Kyrgyz Republic", "Kyrgyz", "Kirghizia"],
-  // Coverage audit (landlocked countries): initials, a common misspelling and former names. "car" was corrected to
-  // Czechia by its "ČR".
+  // Coverage audit (landlocked countries): initials and former names ("car" was corrected to the Czech Republic by
+  // its "ČR"); Liechtenstein's misspelling is with the others below.
   ["Central African Republic", "CAR", "C.A.R.", "Central African Rep"],
-  ["Liechtenstein", "Lichtenstein"],
   // The islands table's name for the kingdom (Greenland, Zealand, Funen).
   ["Denmark", "Kingdom of Denmark", "Danish Realm"],
   ["Belarus", "Byelorussia", "Belorussia"],
@@ -244,6 +248,16 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ],
   ["Saint Lucia", "St Lucia", "St. Lucia"],
   ["Antigua and Barbuda", "Antigua"],
+  // The usual misspellings (coverage audit, Nov 8). Each is a real name somewhere else ("Columbia" the river and
+  // the university, Roy Lichtenstein) or an alias on another list, so the matcher won't correct it as a typo: on a
+  // country list it is that country. "Brasil" is how Brazil writes itself.
+  ["Colombia", "Columbia"],
+  ["Liechtenstein", "Lichtenstein"],
+  ["Afghanistan", "Afganistan"],
+  ["Guatemala", "Guatamala"],
+  ["Kazakhstan", "Kazakstan"],
+  ["Libya", "Lybia"],
+  ["Brazil", "Brasil"],
 ];
 
 export const COUNTRY_FORMS: string[][] = [
@@ -264,18 +278,22 @@ export const CITY_FORMS: string[][] = [
   ["San Francisco", "SF", "San Fran", "Frisco"],
   ["Washington, D.C.", "Washington", "Washington DC", "DC", "D.C."],
   ["Philadelphia", "Philly"],
-  ["Las Vegas", "Vegas"],
+  ["Las Vegas", "Vegas", "Sin City"],
   ["New Orleans", "NOLA", "Big Easy", "The Big Easy"],
   ["Indianapolis", "Indy"],
   ["St. Louis", "Saint Louis", "St Louis", "STL"],
-  ["Chicago", "Chi-Town", "Chitown"],
+  ["Chicago", "Chi-Town", "Chitown", "Windy City", "The Windy City"],
+  ["Detroit", "Motor City", "Motown"],
+  ["Houston", "H-Town"],
+  ["Boston", "Beantown"],
   ["Atlanta", "ATL"],
   ["Oklahoma City", "OKC"],
   ["Salt Lake City", "SLC"],
   ["Jacksonville", "Jax"],
-  ["Rio de Janeiro", "Rio"],
+  ["Rio de Janeiro", "Rio", "RJ"],
   ["São Paulo", "SP", "Sampa"],
   ["Belo Horizonte", "BH"],
+  ["Florianópolis", "Floripa"],
   ["Mexico City", "CDMX", "Ciudad de México"],
   ["Kuala Lumpur", "KL"],
   ["Ho Chi Minh City", "HCMC", "Saigon"],
@@ -292,13 +310,103 @@ export const CITY_FORMS: string[][] = [
   ["Kolkata", "Calcutta"],
   ["Bengaluru", "Bangalore"],
   ["Pune", "Poona"],
+  // India's renamed cities by the names players still use, and the new official ones where the table has the old
+  // (coverage audit, Nov 8: "allahabad" was corrected to Ahmedabad, "calicut" to Kolkata, "mangaluru" to Bengaluru).
+  ["Prayagraj", "Allahabad", "Prayag"],
+  ["Kozhikode", "Calicut"],
+  ["Mangalore", "Mangaluru"],
+  ["Vadodara", "Baroda"],
+  ["Visakhapatnam", "Vizag", "Vishakhapatnam", "Vishakapatnam"],
+  ["Thiruvananthapuram", "Trivandrum"],
+  ["Gurgaon", "Gurugram"],
+  ["Kochi", "Cochin"],
+  ["Varanasi", "Benares", "Banaras", "Benaras"],
+  ["Tiruchirappalli", "Trichy", "Tiruchi"],
+  ["Kalaburagi", "Gulbarga"],
+  ["Navi Mumbai", "New Bombay"],
+  ["Mysore", "Mysuru"],
+  ["Belgaum", "Belagavi"],
+  ["Bellary", "Ballari"],
+  ["Bijapur", "Vijayapura"],
+  ["Shivamogga", "Shimoga"],
+  ["Tumkur", "Tumakuru"],
+  ["Hospet", "Hosapete"],
+  ["Puducherry", "Pondicherry", "Pondy"],
+  ["Thoothukudi", "Tuticorin"],
+  ["Guwahati", "Gauhati"],
+  ["Bhubaneswar", "Bhubaneshwar"],
+  ["Rajamahendravaram", "Rajahmundry"],
+  ["Vijayanagaram", "Vizianagaram"],
+  ["Ahilyanagar", "Ahmednagar"],
+  ["Osmanabad", "Dharashiv"],
+  ["Kancheepuram", "Kanchipuram"],
+  ["Morvi", "Morbi"],
+  ["Mahesana", "Mehsana"],
+  // Kerala's and Tamil Nadu's old names ("trichur" was corrected to Tiruchirappalli), Karnataka's new ones.
+  ["Thrissur", "Trichur"],
+  ["Thanjavur", "Tanjore"],
+  ["Alappuzha", "Alleppey"],
+  ["Kollam", "Quilon"],
+  ["Hubli–Dharwad", "Hubballi", "Hubballi-Dharwad"],
+  ["Vijayawada", "Bezawada"],
+  ["Kanpur", "Cawnpore"],
+  ["Mira-Bhayandar", "Mira Road", "Mira Bhayandar"],
   ["Beijing", "Peking"],
   ["Guangzhou", "Canton"],
   ["Xi'an", "Xian"],
   ["Chongqing", "Chungking"],
   ["Tianjin", "Tientsin"],
   ["Qingdao", "Tsingtao"],
+  // China's cities in the old postal spellings ("nanking" offered Nanjing or Nanning; "amoy" found nothing).
+  ["Nanjing", "Nanking"],
+  ["Xiamen", "Amoy"],
+  ["Suzhou", "Soochow"],
+  ["Fuzhou", "Foochow"],
+  ["Shenyang", "Mukden"],
+  ["Hangzhou", "Hangchow"],
+  ["Shantou", "Swatow"],
+  ["Guilin", "Kweilin"],
+  ["Chengdu", "Chengtu"],
+  ["Jinan", "Tsinan"],
+  ["Ningbo", "Ningpo"],
+  ["Lanzhou", "Lanchow"],
+  ["Dalian", "Dairen"],
+  ["Xining", "Sining"],
+  ["Guiyang", "Kweiyang"],
+  ["Baotou", "Paotow"],
   ["Kyiv", "Kiev"],
+  // Europe's cities by their own names and their older English ones ("praha" was corrected to Praia, Cape Verde:
+  // "Praia isn't in Europe."; "munchen", "wien" and "odessa" found nothing).
+  ["Prague", "Praha"],
+  ["Vienna", "Wien"],
+  ["Munich", "München", "Muenchen"],
+  ["Cologne", "Köln", "Koeln"],
+  ["Nuremberg", "Nürnberg"],
+  ["Hanover", "Hannover"],
+  ["Naples", "Napoli"],
+  ["Turin", "Torino"],
+  ["Milan", "Milano"],
+  ["Florence", "Firenze"],
+  ["Venice", "Venezia"],
+  ["Genoa", "Genova"],
+  ["Brussels", "Bruxelles", "Brussel"],
+  ["The Hague", "Den Haag"],
+  ["Lisbon", "Lisboa"],
+  ["Seville", "Sevilla"],
+  ["Copenhagen", "København", "Kobenhavn"],
+  ["Warsaw", "Warszawa"],
+  ["Kraków", "Cracow"],
+  ["Gdańsk", "Danzig"],
+  // The matcher drops letters with no plain-letter base (ł, ø, ß): "Łódź" reads as "odz", so "lodz" found nothing.
+  ["Wrocław", "Breslau", "Wroclaw"],
+  ["Łódź", "Lodz"],
+  ["Geneva", "Genève", "Geneve", "Genf"],
+  ["Vilnius", "Vilna"],
+  ["Odesa", "Odessa"],
+  ["Kharkiv", "Kharkov"],
+  ["Lviv", "Lvov"],
+  ["Dnipro", "Dnipropetrovsk", "Dnepropetrovsk"],
+  ["Zaporizhzhia", "Zaporozhye", "Zaporizhia"],
   ["Istanbul", "Constantinople"],
   ["Dhaka", "Dacca"],
   ["Yangon", "Rangoon"],
@@ -306,6 +414,12 @@ export const CITY_FORMS: string[][] = [
   ["Macau", "Macao"],
   ["Dar es Salaam", "Dar"],
   ["Johannesburg", "Joburg", "Jozi", "Jo'burg"],
+  // Renamed in 2021.
+  ["Gqeberha", "Port Elizabeth"],
+  // Its names since 1961 ("akmola" was corrected to Asmara).
+  ["Astana", "Nur-Sultan", "Nursultan", "Akmola", "Tselinograd"],
+  ["Pretoria", "Tshwane"],
+  ["Jakarta", "Batavia"],
 ];
 
 /**
@@ -353,7 +467,11 @@ export const NICKNAMES: Record<string, string[]> = {
   "Vince Carter": ["Vinsanity", "Air Canada", "Half Man Half Amazing"],
   "Tracy McGrady": ["T-Mac"],
   "Gary Payton": ["The Glove"],
-  "Anthony Davis": ["The Brow"],
+  // "The Brow" is one plain word, so the rule below leaves it out here; the NBA lists give it in INTENT ("the brow"
+  // was corrected to LeBron's "Bron").
+  "Anthony Davis": ["The Brow", "AD"],
+  "Victor Wembanyama": ["Wemby"],
+  "Anthony Edwards": ["Ant-Man", "Ant Edwards"],
   "Kawhi Leonard": ["The Claw"],
   "Dominique Wilkins": ["The Human Highlight Film", "Nique"],
   "Paul George": ["PG13"],
@@ -372,6 +490,7 @@ export const NICKNAMES: Record<string, string[]> = {
   "O. J. Simpson": ["The Juice", "OJ", "OJ Simpson"],
   "Calvin Johnson": ["Megatron"],
   "Deion Sanders": ["Prime Time", "Neon Deion"],
+  "Dak Prescott": ["Dak"],
   // Baseball
   "Babe Ruth": ["The Babe", "The Bambino", "Sultan of Swat"],
   "Hank Aaron": ["Hammerin' Hank"],
@@ -400,6 +519,10 @@ export const NICKNAMES: Record<string, string[]> = {
   "Miguel Cabrera": ["Miggy"],
   "Honus Wagner": ["The Flying Dutchman"],
   "Shohei Ohtani": ["Shotime"],
+  "Ernie Banks": ["Mr. Cub"],
+  "Jimmie Foxx": ["Double X"],
+  "Nelson Cruz": ["Boomstick"],
+  "Pete Alonso": ["Polar Bear"],
   // Hockey
   "Wayne Gretzky": ["The Great One"],
   "Gordie Howe": ["Mr. Hockey"],
@@ -415,6 +538,8 @@ export const NICKNAMES: Record<string, string[]> = {
   "Joe Sakic": ["Burnaby Joe"],
   "Jarome Iginla": ["Iggy"],
   "Joe Thornton": ["Jumbo Joe"],
+  "Evgeni Malkin": ["Geno", "Geno Malkin"],
+  "Luc Robitaille": ["Lucky Luc"],
   // Football (soccer)
   "Wayne Rooney": ["Wazza", "Roo"],
   "Sergio Agüero": ["Kun Agüero", "Kun"],
@@ -480,14 +605,18 @@ export const INTENT: Record<string, Intent> = {
       Ob: ["Ob River", "Irtysh", "Ob-Irtysh"],
       "Río de la Plata": ["Parana", "Paraná", "River Plate", "Parana River"],
       Congo: ["Congo River", "Zaire River"],
-      Mississippi: ["Mississippi River", "Mississippi-Missouri", "Missouri", "Missouri River"],
+      // The three usual misspellings, names elsewhere (redirects on the state lists), so never corrected as typos.
+      Mississippi: ["Mississippi River", "Mississippi-Missouri", "Missouri", "Missouri River", "Missisippi", "Mississipi", "Missisipi"],
       Ganges: ["Padma", "Ganga", "Ganges River", "River Ganges"],
       "Saint Lawrence": ["St. Lawrence", "St Lawrence", "Saint Lawrence River", "St. Lawrence River"],
       "Shatt al-Arab": ["Euphrates"],
       Murray: ["Murray-Darling", "Darling"],
       Amur: ["Amur River", "Heilong Jiang"],
       Nile: ["Nile River", "River Nile", "White Nile"],
-      Amazon: ["Amazon River", "River Amazon"],
+      // Its Brazilian name, a state's name elsewhere, so the matcher won't correct it (coverage audit, Nov 8).
+      Amazon: ["Amazon River", "River Amazon", "Amazonas"],
+      // The matcher drops the dotless ı: "Kızıl" reads as "k z l".
+      "Kızıl River": ["Kizil River", "Kizilirmak", "Kizil Irmak"],
     },
   },
   lakes: {
@@ -535,12 +664,20 @@ export const INTENT: Record<string, Intent> = {
       "Like Nastya": ["Nastya"],
       "Cocomelon - Nursery Rhymes": ["CoComelon"],
       MrBeast: ["Mr Beast", "Jimmy Donaldson"],
+      // What fans call them (coverage audit, Nov 8: "mkbhd" read as junk, "pewds" and "ryan kaji" found nothing).
+      "Marques Brownlee": ["MKBHD"],
+      PewDiePie: ["Pewds", "Felix Kjellberg"],
+      "Ryan's World": ["Ryan Kaji", "Ryan ToysReview", "Ryan Toys Review"],
+    },
+    groups: {
+      // SET India's name doesn't say Sony, so "sony" offered only Sony's smaller channels.
+      Sony: ["SET India", "Sony SAB", "Sony Music India", "Sony Pal"],
     },
   },
   "youtube-videos": {
     same: {
-      // Uploaders and artists who name the video: "psy" is Gangnam Style.
-      "Baby Shark Dance": ["Baby Shark", "Baby Shark Pinkfong", "Pinkfong"],
+      // Uploaders and artists who name the video: "psy" is Gangnam Style. "baby shark song" was read as Bieber's Baby.
+      "Baby Shark Dance": ["Baby Shark", "Baby Shark Pinkfong", "Pinkfong", "Baby Shark Song"],
       Despacito: ["Luis Fonsi", "Fonsi"],
       "See You Again": ["Wiz Khalifa"],
       "Uptown Funk": ["Mark Ronson", "Bruno Mars"],
@@ -617,7 +754,9 @@ export const INTENT: Record<string, Intent> = {
       "Nintendo Switch": ["Switch"],
       "Game Boy": ["Gameboy", "Game Boy Color", "GBC", "Gameboy Color"],
       Wii: ["Nintendo Wii"],
-      "Xbox 360": ["X360"],
+      "Xbox 360": ["X360", "360"],
+      Xbox: ["Original Xbox", "Xbox Original"],
+      "PlayStation Vita": ["PS Vita", "PSV"],
       "Family Computer/Nintendo Entertainment System": ["NES", "Famicom", "Nintendo Entertainment System"],
       "Super Famicom/Super Nintendo Entertainment System": ["SNES", "Super Nintendo", "Super Famicom"],
       "Nintendo 64": ["N64"],
@@ -646,14 +785,16 @@ export const INTENT: Record<string, Intent> = {
   languages: {
     same: {
       "Iranian Persian": ["Farsi", "Persian"],
-      "Yue Chinese": ["Cantonese"],
+      "Yue Chinese": ["Cantonese", "Yue"],
       Tagalog: ["Filipino"],
       "Wu Chinese": ["Shanghainese"],
-      "Standard German": ["German"],
+      "Standard German": ["German", "Deutsch"],
       "Mandarin Chinese": ["Mandarin", "Chinese", "Putonghua"],
       "Modern Standard Arabic": ["Arabic"],
       Bengali: ["Bangla"],
-      Indonesian: ["Bahasa Indonesia"],
+      // Not built yet: languages is protected until after Nov 10 16:00 HKT (docs/REBUILD_QUEUE.md). "bahasa" was
+      // corrected to Bengali (coverage audit, Nov 8); "deutsch" and "yue" found nothing.
+      Indonesian: ["Bahasa Indonesia", "Bahasa"],
       Spanish: ["Castilian", "Español"],
     },
   },
@@ -688,6 +829,9 @@ export const INTENT: Record<string, Intent> = {
       "Dirk Nowitzki": ["Dirk"],
       "Wilt Chamberlain": ["Wilt", "Wilt the Stilt"],
       "Shaquille O'Neal": ["Shaq", "Shaquille"],
+      "Victor Wembanyama": ["Wemby"],
+      // A plain word, but "the brow" was corrected to LeBron (#1) through "Bron" (data agent B, Nov 8).
+      "Anthony Davis": ["The Brow"],
     },
   },
   stadiums: {
@@ -698,14 +842,24 @@ export const INTENT: Record<string, Intent> = {
       "Ohio Stadium": ["The Horseshoe", "Ohio State"],
       "Tiger Stadium": ["Death Valley", "LSU Tiger Stadium", "LSU"],
       "Darrell K Royal–Texas Memorial Stadium": ["Texas Memorial Stadium", "DKR"],
-      "Beaver Stadium": ["Penn State"],
-      "Kyle Field": ["Texas A&M"],
+      "Beaver Stadium": ["Penn State", "Happy Valley"],
+      // "texas am" (the & dropped) found nothing.
+      "Kyle Field": ["Texas A&M", "Texas AM"],
       "Neyland Stadium": ["Tennessee"],
       "Bryant–Denny Stadium": ["Alabama"],
       "Melbourne Cricket Ground": ["MCG"],
       "Camp Nou": ["Nou Camp", "Spotify Camp Nou"],
       "Bernabéu": ["Santiago Bernabéu", "Santiago Bernabeu", "Estadio Santiago Bernabéu"],
-      "AT&T Stadium": ["ATT Stadium", "AT and T Stadium"],
+      // Its name from 2009 to 2013, and its nickname (coverage audit, Nov 8).
+      "AT&T Stadium": ["ATT Stadium", "AT and T Stadium", "Cowboys Stadium", "Jerry World"],
+      // Former names and nicknames fans still use. Not "The Swamp" (Ben Hill Griffin): "swamp" is a plain word.
+      "FNB Stadium": ["Soccer City"],
+      "Signal Iduna Park": ["Westfalenstadion"],
+      "Rungrado 1st of May Stadium": ["Rungrado May Day"],
+      "Beijing National Stadium": ["Bird's Nest", "The Bird's Nest"],
+      "Millennium Stadium": ["Principality Stadium"],
+      // River Plate's, in Buenos Aires: "monumental" alone offers the four Monumentales.
+      "Estadio Monumental": ["El Monumental", "Monumental de Núñez", "Estadio Más Monumental"],
     },
   },
   "companies-revenue": {
@@ -738,17 +892,35 @@ export const INTENT: Record<string, Intent> = {
       "New England Patriots": ["Pats", "Boston Patriots", "New England"],
       "Washington Commanders": ["Washington Redskins", "Redskins", "Washington Football Team", "Washington"],
       "Las Vegas Raiders": ["Oakland Raiders", "Los Angeles Raiders", "LA Raiders"],
-      "San Francisco 49ers": ["Niners", "SF 49ers"],
+      "San Francisco 49ers": ["Niners", "SF 49ers", "Forty Niners"],
       "Kansas City Chiefs": ["KC Chiefs", "KC"],
       "Green Bay Packers": ["Green Bay"],
       "Pittsburgh Steelers": ["Pittsburgh"],
-      "Dallas Cowboys": ["Dallas"],
+      "Dallas Cowboys": ["Dallas", "America's Team"],
       "Denver Broncos": ["Denver"],
+      // The only NFL team in Philadelphia, and former names fans still say (coverage audit, Nov 8).
+      "Philadelphia Eagles": ["Philly", "Philly Eagles"],
+      "Tennessee Titans": ["Houston Oilers", "Oilers", "Tennessee Oilers"],
+      "Indianapolis Colts": ["Baltimore Colts"],
+      "Los Angeles Rams": ["St. Louis Rams", "St Louis Rams"],
+      "Los Angeles Chargers": ["San Diego Chargers", "San Diego"],
+      // Fans' nicknames that are no plain word (data agent B, Nov 8).
+      "New York Giants": ["G-Men", "Big Blue"],
+      "Miami Dolphins": ["Phins"],
+      "Minnesota Vikings": ["Vikes"],
+      "Chicago Bears": ["Da Bears", "Monsters of the Midway"],
+      "Atlanta Falcons": ["Dirty Birds"],
+    },
+    groups: {
+      // The city's teams now, Rams first (#11): the Raiders left in 1995, so "los angeles" no longer hands over the
+      // Raiders (#9) through their old name in the franchise cell, as "boston" is no longer the Braves.
+      "Los Angeles": ["Los Angeles Rams", "Los Angeles Chargers"],
     },
   },
   "world-series-wins": {
     same: {
-      "Los Angeles Dodgers": ["Brooklyn Dodgers", "LA Dodgers"],
+      // "bums" (Brooklyn's "Dem Bums") was corrected to the Pirates' "Bucs" (data agent B, Nov 8).
+      "Los Angeles Dodgers": ["Brooklyn Dodgers", "LA Dodgers", "Dem Bums", "Bums"],
       Athletics: ["Oakland Athletics", "Oakland A's", "A's", "Philadelphia Athletics", "Kansas City Athletics"],
       // "Boston" alone is the Red Sox: the Braves left in 1953, and their franchise cell's "Boston" offered both
       // (judge, cycle 7). "Boston Braves" still reaches the Braves.
@@ -756,7 +928,8 @@ export const INTENT: Record<string, Intent> = {
       "San Francisco Giants": ["New York Giants", "SF Giants"],
       "Atlanta Braves": ["Boston Braves", "Milwaukee Braves"],
       "St. Louis Cardinals": ["Cards", "St Louis Cardinals"],
-      "New York Yankees": ["Yanks", "Bronx Bombers"],
+      // "yankee" found nothing (coverage audit, Nov 8).
+      "New York Yankees": ["Yanks", "Bronx Bombers", "Yankee"],
       "Pittsburgh Pirates": ["Bucs"],
       // The Cardinals' 1880s name redirects to them, but it is the Orioles' (1902-1953) that people mean.
       "Baltimore Orioles": ["St. Louis Browns", "O's"],
@@ -769,8 +942,19 @@ export const INTENT: Record<string, Intent> = {
       "Miami Marlins": ["Florida Marlins"],
       "Tampa Bay Rays": ["Tampa Bay Devil Rays", "Devil Rays"],
       "Los Angeles Angels": ["Anaheim Angels", "California Angels", "Los Angeles Angels of Anaheim"],
-      "Chicago Cubs": ["Cubbies"],
+      "Chicago Cubs": ["Cubbies", "North Siders"],
       "Milwaukee Brewers": ["Brew Crew"],
+      // Fans' nicknames that are no plain word.
+      "Chicago White Sox": ["South Siders", "Pale Hose"],
+      "New York Mets": ["Amazins", "Amazin' Mets"],
+      "Cincinnati Reds": ["Big Red Machine"],
+      // The only MLB team in Philadelphia (coverage audit, Nov 8).
+      "Philadelphia Phillies": ["Philly", "Philly Phillies"],
+    },
+    groups: {
+      // Two franchises were the Washington Senators: the Twins (until 1960, World Series 1924) and the Rangers
+      // (1961-1971). "washington senators" already offers both; the nickname alone does too.
+      Senators: ["Minnesota Twins", "Texas Rangers"],
     },
   },
   "premier-league-goals": {
@@ -800,6 +984,9 @@ export const INTENT: Record<string, Intent> = {
       "Matt Ryan": ["Matty Ice"],
       "Dan Marino": ["Marino"],
       "Brett Favre": ["Favre"],
+      // "eli" found nothing; "manning" alone is Peyton (#3) first. "russ" was corrected to Russ Grimm, a lineman.
+      "Eli Manning": ["Eli"],
+      "Russell Wilson": ["Russ", "Russ Wilson"],
     },
   },
   "nfl-rushing-yards": {
@@ -845,6 +1032,17 @@ export const INTENT: Record<string, Intent> = {
       "Greatest Hits (Queen)": ["Queen Greatest Hits", "Queen's Greatest Hits"],
       "Greatest Hits (Journey)": ["Journey Greatest Hits", "Journey's Greatest Hits"],
       "Greatest Hits (Elton John)": ["Elton John Greatest Hits", "Elton John's Greatest Hits"],
+      // What everyone calls them, and short titles with the artist (coverage audit, Nov 8: "black album", "abba gold",
+      // "adele 21" and "the fame" found nothing).
+      Metallica: ["The Black Album", "Black Album", "Metallica Black Album"],
+      "Gold: Greatest Hits": ["ABBA Gold", "ABBA Greatest Hits"],
+      "21": ["Adele 21", "21 Adele"],
+      Bad: ["Michael Jackson Bad"],
+      "Legend: The Best of Bob Marley & The Wailers": ["Bob Marley Legend", "Legend Bob Marley"],
+      "The Fame / The Fame Monster": ["The Fame", "The Fame Monster", "Fame Monster"],
+      "The Marshall Mathers LP": ["MMLP"],
+      "Titanic: Music from the Motion Picture": ["Titanic Soundtrack", "Titanic OST"],
+      "Led Zeppelin IV": ["Zeppelin IV", "Led Zep IV", "Led Zeppelin 4"],
     },
   },
   "concert-tours": {
@@ -896,7 +1094,17 @@ export const INTENT: Record<string, Intent> = {
       "Winnie-the-Pooh": ["Winnie the Pooh", "Pooh"],
       "Disney Princess": ["Disney Princesses"],
       "Call of Duty": ["COD"],
-      "Marvel Cinematic Universe": ["MCU", "Marvel"],
+      "Marvel Cinematic Universe": ["MCU", "Marvel", "Marvel Comics"],
+      // Short forms and the characters that name them (coverage audit, Nov 8: "007", "dc" and "pikachu" found nothing,
+      // "tmnt" read as junk, "sanrio" was corrected to Sanrio Boys). Not "Snoopy" or "Potter": plain words.
+      "James Bond": ["007", "Bond 007", "James Bond 007"],
+      // Its sub-series, which game-franchises counts in Mario too.
+      Mario: ["Mario Kart", "Mario Party", "Super Mario", "Super Mario Bros", "Super Mario Bros."],
+      "Teenage Mutant Ninja Turtles": ["TMNT", "Ninja Turtles"],
+      Peanuts: ["Charlie Brown", "Charlie Brown and Snoopy"],
+      "DC Extended Universe": ["DCEU", "DC", "DC Universe"],
+      Pokémon: ["Pikachu"],
+      "Hello Kitty": ["Sanrio"],
     },
     groups: {
       Disney: ["Mickey Mouse & Friends", "Disney Princess"],
@@ -957,8 +1165,14 @@ export const INTENT: Record<string, Intent> = {
       Mumbai: ["Bombay"],
       Chennai: ["Madras"],
       Kolkata: ["Calcutta"],
-
       Pune: ["Poona"],
+      // The Maharashtra city players mean (1.2 million, renamed in 2023), not Bihar's Aurangabad (#339, renamed
+      // "Aurangabad, Bihar" in topics.ts). Kashi is Varanasi's old name (and Kashgar's Chinese one, so not shared).
+      "Chhatrapati Sambhajinagar": ["Aurangabad", "Aurangabad, Maharashtra"],
+      Varanasi: ["Kashi"],
+      // "ndmc" read as junk. Faizabad is in Ayodhya's municipal corporation (2017) and district (2018).
+      "New Delhi Municipal Council": ["NDMC"],
+      Faizabad: ["Ayodhya"],
     },
   },
   "china-cities": {
@@ -968,6 +1182,8 @@ export const INTENT: Record<string, Intent> = {
       "Xi'an": ["Xian"],
       Chongqing: ["Chungking"],
       Tianjin: ["Tientsin"],
+      // Kashgar's Chinese name (not shared: it is Varanasi's old name on India's lists).
+      Kashgar: ["Kashi"],
     },
   },
   "canada-cities": {
@@ -978,10 +1194,20 @@ export const INTENT: Record<string, Intent> = {
   },
   deserts: {
     same: {
-      "Great Australian Desert": ["Outback", "Australian Outback", "Australian deserts", "The Outback", "Australian Desert", "Australian Outback deserts"],
+      "Great Australian Desert": [
+        "Outback", "Australian Outback", "Australian deserts", "The Outback", "Australian Desert", "Australian Outback deserts",
+        // Its parts (topics.ts skips them as rows: their area is counted here), as Rub' al Khali is the Arabian
+        // Desert's: a player naming Australia's biggest desert means this one (coverage audit, Nov 8).
+        "Great Victoria Desert", "Great Victoria", "Great Sandy Desert", "Great Sandy", "Tanami Desert", "Tanami",
+        "Simpson Desert", "Gibson Desert", "Little Sandy Desert", "Strzelecki Desert",
+      ],
       "Arabian Desert": ["Rub' al Khali", "Rub al Khali", "Empty Quarter", "The Empty Quarter", "Arabia"],
       "Sahara Desert": ["Sahara"],
       "Patagonian Desert": ["Patagonia"],
+      // Local names.
+      "Great Salt Desert": ["Dasht-e Kavir", "Dasht-i Kavir", "Kavir"],
+      "Lut Desert": ["Dasht-e Lut", "Dasht-i Lut"],
+      "Thar Desert": ["Great Indian Desert"],
     },
   },
   "city-visitors": {
@@ -990,13 +1216,15 @@ export const INTENT: Record<string, Intent> = {
       "Kuala Lumpur": ["KL"],
       Macau: ["Macao"],
       "Hong Kong": ["HK"],
+      // Euromonitor counts Bali's arrivals under Denpasar, its capital (coverage audit, Nov 8).
+      Denpasar: ["Bali"],
     },
   },
   "national-parks": {
     same: {
       "Great Smoky Mountains": ["Smoky Mountains", "Smokies", "Great Smokies"],
       "Grand Teton": ["Tetons", "Grand Tetons"],
-      "Rocky Mountain": ["Rocky Mountain NP", "Rocky Mtn"],
+      "Rocky Mountain": ["Rocky Mountain NP", "Rocky Mtn", "Rockies"],
     },
   },
   empires: {
@@ -1052,6 +1280,15 @@ export const INTENT: Record<string, Intent> = {
       "Saudi Aramco": ["Aramco"],
       ExxonMobil: ["Exxon", "Exxon Mobil", "Mobil"],
       Samsung: ["Samsung Electronics"],
+      // Tickers and everyday names (coverage audit, Nov 8: each found nothing).
+      "General Electric": ["GE"],
+      "Johnson & Johnson": ["J&J", "JNJ"],
+      "Procter & Gamble": ["P&G"],
+      "American International Group": ["AIG"],
+      Citigroup: ["Citi", "Citibank"],
+      AMD: ["Advanced Micro Devices"],
+      Toyota: ["Toyota Motor", "Toyota Motor Corporation"],
+      Tesla: ["Tesla Motors"],
     },
   },
   banks: {
@@ -1071,9 +1308,19 @@ export const INTENT: Record<string, Intent> = {
       "Agricultural Bank of China": ["ABC", "Agricultural Bank"],
       "China Construction Bank": ["CCB"],
       "Bank of America": ["BofA", "BoA"],
-      "JPMorgan Chase": ["JP Morgan", "Chase", "JPMorgan"],
+      "JPMorgan Chase": ["JP Morgan", "Chase", "JPMorgan", "JPM"],
+      "Deutsche Bank": ["DB"],
       "BNP Paribas": ["BNP"],
       "Postal Savings Bank of China": ["Postal Savings Bank", "PSBC"],
+      // Short names and former names (coverage audit, Nov 8): NatWest Group was the RBS Group until 2020.
+      "NatWest Group": ["RBS", "Royal Bank of Scotland", "RBS Group"],
+      "State Bank of India": ["SBI"],
+      "Commonwealth Bank": ["CBA", "CommBank", "Commonwealth Bank of Australia"],
+      "National Australia Bank": ["NAB"],
+      "Bank of Montreal": ["BMO"],
+      "Société Générale": ["SocGen", "Soc Gen"],
+      "Lloyds Banking Group": ["Lloyds Bank", "Lloyds TSB"],
+      "Bank of China": ["BOC"],
     },
     groups: {
       Sumitomo: ["SMBC Group", "Sumitomo Mitsui Trust Holdings"],
@@ -1103,17 +1350,30 @@ export const INTENT: Record<string, Intent> = {
       "Les Misérables": ["Les Mis", "Les Miz"],
       "Mamma Mia!": ["Mama Mia"],
       "The Book of Mormon": ["Book of Mormon musical"],
+      // Coverage audit, Nov 8: "mj" and "six the musical" found nothing.
+      "MJ the Musical": ["MJ", "MJ Musical"],
+      Six: ["Six the Musical"],
     },
   },
   manga: {
     same: {
       "Hunter × Hunter": ["Hunter x Hunter", "HxH"],
-      "Spy × Family": ["Spy x Family", "Spy Family"],
+      "Spy × Family": ["Spy x Family", "Spy Family", "SxF"],
       "Case Closed / Detective Conan": ["Detective Conan", "Case Closed", "Conan"],
       "Demon Slayer: Kimetsu no Yaiba": ["Demon Slayer", "Kimetsu no Yaiba"],
       "Jujutsu Kaisen": ["JJK"],
       "KochiKame: Tokyo Beat Cops": ["KochiKame", "Kochira Katsushika-ku Kameari Kōen-mae Hashutsujo"],
       "Dragon Ball": ["Dragonball", "Dragon Ball Z", "DBZ"],
+      // What fans call them: abbreviations and Japanese titles (coverage audit, Nov 8).
+      "JoJo's Bizarre Adventure": ["JoJo", "JJBA"],
+      "Attack on Titan": ["AoT", "SnK", "Shingeki no Kyojin"],
+      "My Hero Academia": ["MHA", "BNHA", "Boku no Hero Academia"],
+      "Fullmetal Alchemist": ["FMA", "FMAB", "Fullmetal Alchemist: Brotherhood", "Fullmetal Alchemist Brotherhood"],
+      "Ranma ½": ["Ranma 1/2", "Ranma One Half"],
+      "Fist of the North Star": ["Hokuto no Ken"],
+      "Kuroko's Basketball": ["Kuroko no Basket", "Kuroko no Basuke"],
+      "One-Punch Man": ["OPM"],
+      "Chainsaw Man": ["CSM"],
     },
   },
   "nba-assists": {
@@ -1126,6 +1386,11 @@ export const INTENT: Record<string, Intent> = {
       "LeBron James": ["LeBron", "King James", "LBJ"],
       "Russell Westbrook": ["Russ", "Westbrook"],
       "John Stockton": ["Stockton"],
+      // Coverage audit, Nov 8. Not "The Glove" (Gary Payton): "glove" is a plain word.
+      "Maurice Cheeks": ["Mo Cheeks"],
+      "Kevin Johnson": ["KJ"],
+      // As on nba-points: "the brow" was corrected to LeBron.
+      "Anthony Davis": ["The Brow"],
     },
   },
   "nba-rebounds": {
@@ -1137,6 +1402,8 @@ export const INTENT: Record<string, Intent> = {
       "Tim Duncan": ["The Big Fundamental", "Duncan"],
       "Kevin Garnett": ["KG", "Garnett"],
       "Bill Russell": ["Russell"],
+      // As on nba-points: "the brow" was corrected to LeBron.
+      "Anthony Davis": ["The Brow"],
     },
   },
   "nhl-points": {
@@ -1209,8 +1476,15 @@ export const INTENT: Record<string, Intent> = {
       "Volkswagen Group": ["Audi", "Porsche", "Skoda", "Škoda", "SEAT", "Cupra", "Bentley", "Lamborghini", "VW", "Volkswagen"],
       Toyota: ["Lexus", "Daihatsu"],
       Honda: ["Acura"],
-      Geely: ["Volvo", "Volvo Cars", "Polestar", "Lotus", "Zeekr"],
-      "SAIC Motor": ["MG", "SAIC"],
+      // China's brands by their group, as Volvo is Geely's (coverage audit, Nov 8: each found nothing). SAIC's count
+      // includes SAIC-GM-Wuling (Wuling, Baojun).
+      Geely: ["Volvo", "Volvo Cars", "Polestar", "Lotus", "Zeekr", "Lynk & Co", "Lynk and Co"],
+      "SAIC Motor": ["MG", "SAIC", "Roewe", "Wuling", "Baojun", "SGMW", "SAIC-GM-Wuling"],
+      "Great Wall": ["Great Wall Motor", "Great Wall Motors", "GWM", "Haval"],
+      Chery: ["Omoda", "Jaecoo", "Jetour"],
+      // The names people say: "proton" and "lucid" are words, so they aren't read as part of the longer name.
+      "Proton Holdings": ["Proton"],
+      "Lucid Motors": ["Lucid"],
       Ford: ["Lincoln"],
       Nissan: ["Infiniti", "Datsun"],
       Suzuki: ["Maruti Suzuki", "Maruti"],
@@ -1226,15 +1500,29 @@ export const INTENT: Record<string, Intent> = {
     same: {
       "San Francisco–Oakland–Fremont": ["Bay Area", "San Francisco Bay Area", "SF Bay Area", "SF"],
       "Minneapolis–St. Paul–Bloomington": ["Twin Cities"],
-      "New York–Newark–Jersey City": ["NYC", "New York City", "New York metro", "Tri-State Area"],
+      // A player who types Manhattan or a borough means New York (coverage audit, Nov 8: "manhattan" cost a life as
+      // Manhattan, Kansas, renamed "Manhattan, Kansas" in topics.ts).
+      "New York–Newark–Jersey City": [
+        "NYC", "New York City", "New York metro", "Tri-State Area", "NY", "Big Apple", "The Big Apple", "Manhattan",
+        "Brooklyn", "The Bronx", "Bronx", "Staten Island", "Long Island",
+      ],
+      "Riverside–San Bernardino–Ontario": ["Inland Empire"],
+      "Tampa–St. Petersburg–Clearwater": ["Tampa Bay", "Tampa Bay Area"],
+      "St. Louis": ["Saint Louis", "St Louis", "STL"],
+      "San Jose–Sunnyvale–Santa Clara": ["Silicon Valley", "San Jose"],
+      "New Orleans–Metairie": ["NOLA", "Big Easy", "The Big Easy"],
+      "Salt Lake City–Murray": ["SLC"],
+      "Atlanta–Sandy Springs–Roswell": ["Metro Atlanta", "ATL"],
+      "Kansas City": ["KC"],
+      "Detroit–Warren–Dearborn": ["Motor City", "Metro Detroit"],
+      "Las Vegas–Henderson–North Las Vegas": ["Vegas", "Sin City"],
+      "Chicago–Naperville–Elgin": ["Chicagoland", "Windy City"],
       "Los Angeles–Long Beach–Anaheim": ["LA", "Greater Los Angeles"],
       "Dallas–Fort Worth–Arlington": ["DFW", "Dallas-Fort Worth", "Metroplex"],
       "Washington–Arlington–Alexandria": ["DC", "Washington DC", "Washington, D.C."],
       "Miami–Fort Lauderdale–West Palm Beach": ["South Florida"],
       "Philadelphia–Camden–Wilmington": ["Philly"],
-      "Houston–Pasadena–The Woodlands": ["Greater Houston"],
-      "Atlanta–Sandy Springs–Roswell": ["Metro Atlanta"],
-      "Chicago–Naperville–Elgin": ["Chicagoland"],
+      "Houston–Pasadena–The Woodlands": ["Greater Houston", "H-Town"],
     },
   },
   "us-box-office": {
@@ -1243,8 +1531,15 @@ export const INTENT: Record<string, Intent> = {
       "Avatar: Fire and Ash": ["Avatar 3"],
       "Avengers: Infinity War": ["Infinity Wars"],
       "Harry Potter and the Sorcerer's Stone": ["Harry Potter and the Philosopher's Stone", "Philosopher's Stone", "Sorcerer's Stone"],
+      // Sequels by number (coverage audit, Nov 8): Brand New Day is Tom Holland's fourth Spider-Man film.
+      "Black Panther: Wakanda Forever": ["Black Panther 2"],
+      "Spider-Man: Brand New Day": ["Spider-Man 4"],
+      "Furious 7": ["Fast & Furious 7", "Fast and Furious 7", "Fast 7"],
+      "The Fate of the Furious": ["Fast & Furious 8", "Fast and Furious 8", "Fast 8", "F8", "Furious 8"],
     },
     groups: {
+      // The franchise's name: its films here (Furious 7 is ranked).
+      "Fast and Furious": ["Furious 7", "The Fate of the Furious"],
       LOTR: ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers"],
       "Lord of the Rings": ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers"],
       HP: ["Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Sorcerer's Stone", "Harry Potter and the Goblet of Fire"],
@@ -1256,6 +1551,10 @@ export const INTENT: Record<string, Intent> = {
       "Avatar: Fire and Ash": ["Avatar 3"],
       "The Lord of the Rings: The Return of the King": ["LOTR", "Lord of the Rings", "Return of the King", "ROTK"],
       "Harry Potter and the Philosopher's Stone": ["Harry Potter and the Sorcerer's Stone", "Sorcerer's Stone", "Philosopher's Stone"],
+      // Coverage audit, Nov 8: "e.t." and "fast 7" found nothing.
+      "E.T. the Extra-Terrestrial": ["E.T.", "ET"],
+      "Furious 7": ["Fast & Furious 7", "Fast and Furious 7", "Fast 7"],
+      "The Fate of the Furious": ["Fast & Furious 8", "Fast and Furious 8", "Fast 8", "F8", "Furious 8"],
     },
     groups: {
       HP: ["Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Philosopher's Stone", "Harry Potter and the Goblet of Fire", "Harry Potter and the Half-Blood Prince"],
@@ -1266,6 +1565,8 @@ export const INTENT: Record<string, Intent> = {
   "expensive-films": {
     same: {
       "Harry Potter and the Philosopher's Stone": ["Harry Potter and the Sorcerer's Stone", "Sorcerer's Stone", "Philosopher's Stone"],
+      // As on the box-office lists ("avatar 3" found nothing here).
+      "Avatar: Fire and Ash": ["Avatar 3"],
     },
     groups: {
       "Fast and Furious": ["Fast X", "Furious 7", "The Fate of the Furious"],
@@ -1282,6 +1583,16 @@ export const INTENT: Record<string, Intent> = {
       Germany: ["West Germany"],
       // England plays as itself here, so the United Kingdom's forms skip this list.
       England: ["English"],
+    },
+    groups: {
+      // The home nations with a winner (Wales has none); the United Kingdom has no team of its own (coverage audit,
+      // Nov 8: "uk" and "britain" found nothing).
+      "United Kingdom": ["England", "Scotland", "Northern Ireland"],
+      UK: ["England", "Scotland", "Northern Ireland"],
+      Britain: ["England", "Scotland", "Northern Ireland"],
+      "Great Britain": ["England", "Scotland", "Northern Ireland"],
+      GB: ["England", "Scotland", "Northern Ireland"],
+      British: ["England", "Scotland", "Northern Ireland"],
     },
   },
   "nobel-countries": {
@@ -1323,6 +1634,10 @@ export const INTENT: Record<string, Intent> = {
       "Costa Coffee": ["Costa"],
       "Panera Bread": ["Panera"],
       "Hey Tea": ["Heytea"],
+      // Coverage audit, Nov 8. "mcdonald" is a surname elsewhere, so the slip isn't corrected. Hungry Jack's is
+      // Burger King in Australia, counted in its locations.
+      "McDonald's": ["McDonald", "McDo", "Golden Arches"],
+      "Burger King": ["Hungry Jack's", "Hungry Jacks"],
     },
   },
   airports: {
@@ -1419,12 +1734,16 @@ export const INTENT: Record<string, Intent> = {
       "Bernese Mountain Dog": ["Berner", "Bernese"],
       "Miniature Schnauzer": ["Mini Schnauzer"],
       "Bichon Frisé": ["Bichon"],
-      "West Highland White Terrier": ["Westie", "West Highland Terrier"],
+      "West Highland White Terrier": ["Westie", "West Highland Terrier", "Westy", "Westies"],
       "Cavalier King Charles Spaniel": ["Cavalier", "Cavalier King Charles"],
       Dalmatian: ["Dalmatians"],
-      Pomeranian: ["Pom"],
+      Pomeranian: ["Pom", "Poms", "Pomeranians"],
       Newfoundland: ["Newfie"],
-      "St. Bernard": ["Saint Bernard"],
+      "St. Bernard": ["Saint Bernard", "St Bernards", "St. Bernards", "Saint Bernards"],
+      // Coverage audit, Nov 8: each found nothing.
+      "Scottish Terrier": ["Scottie", "Scotty", "Scotties"],
+      "Irish Wolfhound": ["Wolfhound", "Wolfhounds"],
+      "Border Collie": ["Border Collies"],
       "Belgian Shepherd": ["Belgian Malinois", "Malinois", "Belgian Sheepdog", "Belgian Tervuren", "Tervuren"],
       "Staffordshire Bull Terrier": ["Staffy", "Staffie"],
       "Chow Chow": ["Chow"],
@@ -1450,6 +1769,11 @@ export const INTENT: Record<string, Intent> = {
     groups: {
       Schnauzer: ["Miniature Schnauzer", "Standard Schnauzer", "Giant Schnauzer"],
       "Fox Terrier": ["Wire Fox Terrier", "Smooth Fox Terrier"],
+      // "cocker" and "springer" found nothing: the game asks which (coverage audit, Nov 8).
+      Cocker: ["American Cocker Spaniel", "English Cocker Spaniel"],
+      Cockers: ["American Cocker Spaniel", "English Cocker Spaniel"],
+      Springer: ["English Springer Spaniel", "Welsh Springer Spaniel"],
+      "Springer Spaniel": ["English Springer Spaniel", "Welsh Springer Spaniel"],
     },
   },
   passwords: {
@@ -1463,5 +1787,30 @@ export const INTENT: Record<string, Intent> = {
   "athletes-earnings": {
     // The usual spelling of the name, and a typo of it (judge, cycle 5).
     same: { "Jon Rahm": ["John Rahm", "Jhon Rahm"] },
+  },
+  // Coverage audit, Nov 8: what players typed that found nothing, or found the wrong answer.
+  "pixar-films": {
+    same: { Lightyear: ["Buzz Lightyear"] },
+  },
+  "population-density": {
+    // The table counts the Gaza Strip (5,950/km² in the page's note) and the West Bank as Palestine (#13), the
+    // famous dense place players name ("gaza" found nothing).
+    same: { Palestine: ["Gaza", "Gaza Strip", "West Bank"] },
+  },
+  instagram: {
+    // Only one Kim and one Leo here; three letters are below the matcher's word-of-a-name minimum.
+    same: { "Kim Kardashian": ["Kim"], "Lionel Messi": ["Leo"] },
+  },
+  "football-club-revenue": {
+    same: { Lyon: ["Olympique Lyonnais", "OL"], Marseille: ["OM"] },
+  },
+  "smallest-countries": {
+    // Monaco's best-known district, which players name for the country.
+    same: { Monaco: ["Monte Carlo"] },
+  },
+  "music-artists": {
+    // Not built yet: music-artists is protected until after Nov 10 16:00 HKT (docs/REBUILD_QUEUE.md). His legal
+    // name since 2021.
+    same: { "Kanye West": ["Ye"] },
   },
 };

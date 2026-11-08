@@ -112,6 +112,14 @@ const SCREENS = [
     },
   },
   {
+    // Ranks 11 to 20 open under the board: its key (now Hide) and the rows hold still through every state.
+    name: "list game over, ranks 11 to 20 open",
+    setup: async (page) => {
+      await page.getByTestId("more-ranks-toggle").click();
+      await page.getByTestId("more-rank").first().waitFor();
+    },
+  },
+  {
     // "Good list?": after a thumbs down the reasons float over the result card; nothing in or around them moves.
     name: "list game over, rating reasons open",
     scope: '[data-testid="rate-reasons"]',

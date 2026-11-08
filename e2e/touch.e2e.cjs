@@ -5,7 +5,7 @@
 // - Every control is at least 44px to the finger, its keycap's base included.
 // - The clue's question shows its cost whole; the guess box shows its whole placeholder; long answers keep their
 //   words whole and Blitz names get the row's width.
-// - A found row's fact is announced by a caption under the board, not only by a hover look.
+// - A found row's fact opens on a tap, not only on a hover look (with no caption under the board: the owner cut it).
 // - Nothing a player reads or taps sits under a notch or the home indicator (faked over CDP).
 // - With the keyboard up on a small phone, the board still shows above the guess box.
 // - Home's account key (a build with accounts, served here) takes quick taps, reaches 44px, keeps no hover look after
@@ -184,16 +184,15 @@ test("the clue's question shows its cost whole, and the last life says why there
   }
 });
 
-// Launch audit (Nov 6): a found row opens its fact on a tap, but the only cue was a desktop hover look (UX 12). Once a
-// row has a fact, a caption under the board says so, whole on one line, without moving GIVE UP; a tap opens the fact.
-test("a found row's fact is announced without hover (phones)", async () => {
+// Launch audit (Nov 6): a found row opens its fact on a tap, not only on a desktop hover look (UX 12). A caption under
+// the board said so ("facts: tap a name."), until the owner cut it (Nov 8: "remove this blurb abt facts"): a tap still
+// opens the fact, during play and on the revealed board after the end, GIVE UP keeps its place, and no caption is back.
+test("a found row's fact opens on a tap, with no caption under the board (phones)", async () => {
   for (const width of [320, 390]) {
     const { ctx, page } = await open(browser, phone(width), "#p-mountains", undefined, { reducedMotion: "reduce" });
     await page.getByLabel("Your guess").waitFor();
-    const cue = page.getByTestId("fact-cue");
-    assert.equal(await cue.count(), 0, `${width}px: no cue before a row has a fact`);
-    // GIVE UP's place in the strip under the board, and that strip's height (the rows above grow as answers are
-    // found, and the page may scroll as the dock's feedback line changes).
+    // Anything under the board but its keys (GIVE UP; once over, See 11 to 20): the caption, or a line in its place.
+    const extras = () => page.locator(".board .board-foot > :not([data-testid='give-up'], [data-testid='more-ranks-toggle'])").count();
     const onBoard = () =>
       page.getByTestId("give-up").evaluate((el) => {
         const [k, f] = [el.getBoundingClientRect(), el.parentElement.getBoundingClientRect()];
@@ -201,23 +200,21 @@ test("a found row's fact is announced without hover (phones)", async () => {
       });
     const give = await onBoard();
     const p = await puzzle(page, "mountains");
-    const first = p.answers.find((a) => a.fact);
+    const [first, second] = p.answers.filter((a) => a.fact);
     await guess(page, first.name);
-    await cue.waitFor();
-    const fit = await cue.evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      const board = el.closest(".board").getBoundingClientRect();
-      return { lines: Math.round(r.height / parseFloat(getComputedStyle(el).lineHeight)), inside: r.left >= board.left && r.right <= board.right, text: el.textContent };
-    });
-    assert.equal(fit.lines, 1, `${width}px: "${fit.text}" takes one line`);
-    assert.ok(fit.inside, `${width}px: the cue sits on the board`);
-    assert.deepEqual(await onBoard(), give, `${width}px: GIVE UP stays where it was`);
     const row = page.locator(`[data-testid="slot"][data-rank="${first.rank}"]`);
+    await row.locator(".fact").waitFor({ state: "attached" });
+    assert.equal(await extras(), 0, `${width}px: nothing but GIVE UP under the board`);
+    assert.deepEqual(await onBoard(), give, `${width}px: GIVE UP stays where it was`);
     await row.tap();
     await page.locator(`[data-testid="slot"][data-rank="${first.rank}"].fact-open`).waitFor();
-    // And after the end, under the revealed board.
+    // And after the end, on the revealed board: a missed row's fact opens on a tap too, and no caption is under it.
     await giveUp(page);
-    await cue.waitFor();
+    // Past the end's second beat (the results scroll into view), so the tap lands where it was aimed.
+    await page.clock.runFor(3000);
+    await page.locator(`[data-testid="slot"][data-rank="${second.rank}"]`).tap();
+    await page.locator(`[data-testid="slot"][data-rank="${second.rank}"].fact-open`).waitFor();
+    assert.equal(await extras(), 0, `${width}px: a caption under the revealed board`);
     await ctx.close();
   }
 });

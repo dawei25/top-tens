@@ -45,6 +45,26 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       in the shared country junk list (13 country lists); infobox values never replace a stat from a table (lists
       using `values`).
 
+- [ ] **Coverage audit (Nov 8) fixes for the protected lists, after Nov 10 16:00 HKT.** The code is in (data agent
+      B); only the rebuild of these four is left. Add each guard to scripts/aliases.test.ts once built.
+      - **languages:** intent.ts gives Indonesian "Bahasa" ("bahasa" was corrected to Bengali), Standard German
+        "Deutsch" and Yue Chinese "Yue" (both found nothing). Guards: "bahasa" → Indonesian, "deutsch" → Standard
+        German, "yue" → Yue Chinese. Still open, a source for agent A: the ranked table stops near #38, so Polish,
+        Dutch, Greek and 60 more well-known languages are unknown, and Sindhi, Catalan and Aramaic are corrected
+        into Hindi, Spanish and Arabic.
+      - **music-artists:** intent.ts gives Kanye West "Ye" (his legal name); knownNames "6ix9ine" (read as junk).
+        Guards: "ye" → Kanye West, "6ix9ine" not junk. Still open: today's chart artists (BTS, Bad Bunny, Billie
+        Eilish, Kendrick Lamar...) need an `also` such as "List of most-streamed artists on Spotify".
+      - **coffee-countries:** the new COUNTRY_FORMS lines (Columbia, Brasil, Guatamala, Lichtenstein...) apply.
+      - **canada-cities:** the new CITY_FORMS lines apply. Still open: provincial and territorial capitals below the
+        top 100 (Charlottetown, Whitehorse, Yellowknife) need an `also` source.
+
+- [ ] **Coverage audit (Nov 8) shared forms on agent A's lists** (apply at each list's next rebuild): COUNTRY_FORMS
+      (Columbia, Lichtenstein, Afganistan, Guatamala, Lybia, Kazakstan, Phillipines, Brasil, Republic of Congo, and
+      Northern Ireland as the United Kingdom) on billionaire-countries, nobel-countries, gdp-per-capita,
+      mcdonalds-countries, landlocked-countries, world-heritage-countries and islands; CITY_FORMS (India's renamed
+      cities, China's postal spellings, Europe's own names, US nicknames) on skyscraper-cities.
+
 - [ ] **Cycle 3 pipeline changes not yet on every list** (apply at each list's next rebuild): intent groups wait for
       all their entries, `stripWords` patterns, short forms ending in a little word dropped, new athletes' junk in
       the shared celebrity list and their cached redirects. Also: the French billionaires table links Tanya Saadé

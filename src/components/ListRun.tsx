@@ -7,7 +7,8 @@ import { load } from "../game/storage";
 import { runTime } from "./Blitz";
 import { Loading } from "./Game";
 import { ParBlock, usePar } from "./par";
-import { FACT_CUE, metricLabel } from "./copy";
+import { metricLabel } from "./copy";
+import { MoreRanks } from "./MoreRanks";
 import { formatAsOf, ordinal, ScreenHead, sourceSite } from "./pixel";
 import { RateList } from "./rate/RateList";
 import { ClassicSquid } from "./squid";
@@ -42,7 +43,12 @@ export function ListRun({ id, meta, startedAt, onBack, onHome, onReplay }: Props
   const replayRef = useRef<HTMLButtonElement>(null);
   const backRef = useRef<HTMLButtonElement>(null);
   const parFile = usePar();
-  const run = load().listRuns?.find((r) => r.id === id && r.startedAt === startedAt);
+  const saved = load();
+  const run = saved.listRuns?.find((r) => r.id === id && r.startedAt === startedAt);
+  // A run keeps no guesses; while its game is still saved (the list's latest, or its daily's one try), that has them:
+  // the life-costing ones mark ranks 11 to 20.
+  const game = [saved.games[id], ...Object.values(saved.dailyGames ?? {})].find((g) => g?.puzzleId === id && g.startedAt === startedAt);
+  const guessed = new Set(game?.log.flatMap((l) => (l.result.kind === "near" ? [l.result.entry.rank] : [])) ?? []);
 
   useEffect(() => {
     loadPuzzle(id)
@@ -162,14 +168,7 @@ export function ListRun({ id, meta, startedAt, onBack, onHome, onReplay }: Props
               );
             })}
           </ol>
-          {/* A phone has no hover look: the cue that a name opens its fact. */}
-          {puzzle.answers.some((a) => a.fact) && (
-            <div className="board-foot">
-              <p className="caption fact-cue" data-testid="fact-cue">
-                {FACT_CUE}
-              </p>
-            </div>
-          )}
+          <MoreRanks puzzle={puzzle} guessed={guessed} />
         </section>
       </div>
 

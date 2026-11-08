@@ -81,6 +81,10 @@ export const KEYS = {
   feedbackOutbox: "top-tens:feedback-outbox",
   /** Fathom guesses waiting to be sent (one per question). */
   fathomOutbox: "top-tens:fathom-outbox",
+  /** Guesses the game didn't take, waiting to be sent (one per list, mode and text). */
+  missOutbox: "top-tens:miss-outbox",
+  /** The random id missed guesses carry: their own, never the one plays, ratings and notes carry (./misses). */
+  missId: "top-tens:miss-id",
   /** The account this device's save was last synced with. */
   owner: "top-tens:sync-owner",
   /** A save set aside for its account (`${stash}${user id}`) when someone else signed in on this device. */

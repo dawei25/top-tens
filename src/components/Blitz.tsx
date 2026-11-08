@@ -21,7 +21,7 @@ import {
   type BlitzRun,
   type BlitzState,
 } from "../game/blitz";
-import { dailyGame, entryForDate, localDate, todayEntry, type DailyEntry } from "../game/daily";
+import { dailyGame, localDate, todayEntry, type DailyEntry } from "../game/daily";
 import type { Lexicon } from "../game/junk";
 import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { load, save } from "../game/storage";
@@ -35,7 +35,7 @@ import { blitzShare, dailyBlitzShare } from "./share";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
 import { BlitzCrowdLine } from "./account";
-import { reportBlitz } from "../net";
+import { reportBlitz, reportGuess } from "../net";
 import { RateList } from "./rate/RateList";
 
 interface Props {
@@ -454,6 +454,8 @@ export function Blitz({
     e.preventDefault();
     // Judged against the real clock: a guess sent after 0 doesn't count, even before the screen catches up.
     const { state: next, result } = blitzGuess(startBlitz(state), puzzle, input, lexicon, feedback?.suggestions);
+    // A guess the game didn't take, for the improvement loop (src/net/misses.ts); a no-op otherwise or without a backend.
+    reportGuess(puzzle.id, "blitz", input, result);
     setState(next);
     if (result.kind === "over" || isOver(next)) return setEndedHere(true);
     if (result.kind === "scored") {
@@ -495,23 +497,13 @@ export function Blitz({
   const best = saved.blitzBest?.[id];
   const pastRuns = <PastRuns runs={runs} best={best} open={runsOpen} onToggle={setRunsOpen} onOpen={openRun} />;
   const viewRun = openAt ? runs.find((r) => r.startedAt === openAt) : undefined;
-  // The list key on the results. A date's Blitz on that date's own list goes to that daily (one try, and where the rest
-  // of the answers wait while it's unfinished). A date's Blitz otherwise offers Today's list while that is unplayed, as
-  // a daily's results offer Today's Blitz: never the same list as a top 10 right after the results showed its whole top
-  // 10. Otherwise "Play the list", but never when that would be today's daily, still unplayed.
+  // The list key on the results: never this round's own list (the owner, Nov 8: "if someone played blitz no point to
+  // give them option to play the same list since its alr spoiled... list -> blitz still makes sense tho"). A date's
+  // Blitz offers Today's list, a different list, while that is unplayed, as a daily's results offer Today's Blitz.
   const todays = todayEntry(schedule, today);
   const todayOpen = !!todays && (dailyGame(saved, todays)?.status ?? "playing") === "playing";
-  const liveDaily = todayOpen && todays.id === puzzle.id;
-  const ownDaily = dailyBlitz && (entryForDate(schedule, dailyBlitz.date) ?? todayEntry(schedule, dailyBlitz.date));
   const waitFor = hold && (hold === todays ? "today's list" : `daily #${hold.n}`);
-  const theList =
-    ownDaily && ownDaily.id === puzzle.id
-      ? { href: `#daily-${ownDaily.date}`, label: ownDaily === todays ? "Today's list" : "Play the list", next: !!hold }
-      : dailyBlitz && todayOpen
-        ? { href: `#daily-${todays.date}`, label: "Today's list", next: true }
-        : liveDaily
-          ? undefined
-          : { href: `#p-${puzzle.id}`, label: "Play the list", next: false };
+  const todaysList = dailyBlitz && todayOpen && todays.id !== puzzle.id ? `#daily-${todays.date}` : undefined;
   // A new best needs an old one to beat: never on a list's first round.
   const newBest = !!record?.best && score > 0 && record.previous !== undefined;
 
@@ -703,21 +695,16 @@ export function Blitz({
               <SwapLabel off="Share" on="Copied" active={copied} />
             </button>
           )}
-          {/* The daily still to play (the one holding the rest of these answers, or Today's list) is the next thing. */}
-          {theList?.next && (
-            <a className="key key-pink" data-testid="blitz-list" href={theList.href}>
-              {theList.label}
+          {/* Today's list, still to play, is the next thing. */}
+          {todaysList && (
+            <a className="key key-pink" data-testid="blitz-list" href={todaysList}>
+              Today's list
             </a>
           )}
           {dailyBlitz && onRoll && (
             <button className="key" data-testid="blitz-roll" onClick={onRoll}>
               Random Blitz
             </button>
-          )}
-          {theList && !theList.next && (
-            <a className="key" data-testid="blitz-list" href={theList.href}>
-              {theList.label}
-            </a>
           )}
         </div>
         {!onRoll && <p className="caption">no other lists are open for blitz yet.</p>}

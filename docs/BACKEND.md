@@ -1,15 +1,16 @@
-# Backend: score stats, list ratings, notes and accounts
+# Backend: score stats, list ratings, notes, missed guesses and accounts
 
 TENtacle stays a static site. A backend is optional and off until you set two env vars; without them the game sends
 nothing, stores nothing beyond the browser, and never downloads the backend code (`e2e/backend.e2e.cjs` checks it).
 
 ## How it fits together
 
-- **Supabase** (Postgres + Auth, free plan) holds five tables: `plays` (one row per finished game, anonymous),
+- **Supabase** (Postgres + Auth, free plan) holds six tables: `plays` (one row per finished game, anonymous),
   `ratings` (a thumbs up or down per player, list and mode, anonymous), `feedback` (notes on lists, free text, read
-  only with a private key), `fathom_guesses` (the Fathom beta's guesses, one per browser and question, anonymous) and
-  `saves` (one row per signed-in player: their save), plus `owners` (the owner's account, so his notes come first).
-  Schema and functions: `supabase/migrations/`.
+  only with a private key), `fathom_guesses` (the Fathom beta's guesses, one per browser and question, anonymous),
+  `missed_guesses` (what players type that the game doesn't take, linked to nobody, read only with the same private
+  key) and `saves` (one row per signed-in player: their save), plus `owners` (the owner's account, so his notes come
+  first). Schema and functions: `supabase/migrations/`.
 - **The client** is `src/net/`. The screens only touch a tiny facade (`src/net/index.ts`); the real work and
   `@supabase/supabase-js` (pinned) live in `src/net/service.ts`, loaded with a dynamic `import()` only in a build with
   the env vars, and only when there's work: a finished game, a stats view, a stored session, a sign-in.
@@ -55,6 +56,19 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   From 20 players on a question (`MIN_PLAYERS`, `src/game/fathom.ts`) it says "Players' typical guess: 4 litres · you
   were closer than 72%"; below that, nothing; a name-it reveal never asks. Never in the save, never synced. See Switch
   it on (2.8).
+- **Missed guesses** (owner, Nov 8: "real data instead of agents guessing what people type"). Where a list or Blitz
+  guess is judged (`Game.tsx`, `Blitz.tsx`), the facade's `reportGuess` gets what was typed and the result
+  (`src/net/misses.ts`). A guess the game didn't take goes into its own outbox (`top-tens:miss-outbox`): `unknown` (not
+  an answer here, a vague one included) or `junk` ("That doesn't look like an answer", kept so false junk calls can be
+  found). Never an accepted answer, a near miss (a real answer outside the top 10, or outside a regional list's
+  region), a "did you mean" choice, an answer Blitz can't score, or anything from Fathom. The text is normalized
+  (`cleanMiss`: lowercase, NFC, every run of blanks one space, trimmed), 1 to 40 characters, and text that looks like an
+  email address, a phone number or a link is never queued (`EMAIL`, `PHONE`, `LINK`: the database checks the same
+  strings). Once per list, mode and text per browser. It goes to `submit_miss` with plain `fetch` and the public key
+  alone, never the player's session and no cookies, carrying a random id of its own (`top-tens:miss-id`), not the one
+  plays, ratings, notes and Fathom guesses carry, so a miss can't be joined to anyone's rows; offline it waits and is
+  retried like plays. Never in the save, never synced. The loop reads `list_misses` (Running it). See Switch it on
+  (2.9).
 - **Accounts.** Sign-in methods come from `VITE_SIGN_IN`: Google, an email and password (`password`: nothing is
   emailed), or a link by email (`email`, PKCE; the email also carries a code for another device). Google is our own
   key (our keycap, Google's G, "Continue with Google"). With `VITE_GOOGLE_CLIENT_ID` set (`src/net/google.ts`), it
@@ -81,7 +95,8 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
 
 What's personal: only with an account, the email (plus name and picture with Google; a password only as Supabase's
 hash) and the save. `plays`, `ratings`, `feedback` and `fathom_guesses` hold a random per-browser id, never an IP
-address. A note is
+address. `missed_guesses` holds a second one, used for nothing else, and no account even for a signed-in player. A
+note is
 whatever the player typed, so only the owner reads notes, and the privacy page asks players to leave personal details
 out. Nothing comes from Google until the player presses Continue with Google. The in-game `#privacy` page says this.
 
@@ -168,6 +183,13 @@ says less about this one), so a few strong regulars can't lift every average.
       `fathom_guesses` has a row, and `select fathom_compare('eiffel-tower-height', 'estimate', 300, 330);` returns
       `{"n": ..., "median": ..., "further_off": ...}`. (The file was changed in place on Nov 8, before it first ran: a
       guess of 0 is taken, and `fathom_compare` takes the round. It is still run once, on a project that never had it.)
+   9. `supabase/migrations/20261108120000_missed_guesses.sql` (after 5 and 6; run once, before the public launch):
+      what players type that the game doesn't take. Adds the `missed_guesses` table (players can't read or touch it,
+      and no row is anyone's, so account deletion has nothing to do there), `submit_miss` and `list_misses`, which
+      answers only to the reader key from step 5, the same key as notes. The game works before it runs: until then
+      `submit_miss` answers 404 and those misses are dropped. Check it took: type a word that isn't an answer (`pizza`
+      on the mountains list); the network tab shows `rpc/submit_miss` answering `true`, and in the SQL Editor
+      `select * from list_misses('<your reader key>');` has a row `mountains | list | unknown | pizza | 1 | <now>`.
 
    Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the one-time steps above still go
    in the SQL Editor). Stats alone only need the first.
@@ -214,12 +236,12 @@ says less about this one), so a few strong regulars can't lift every average.
    - `email` (a link): Authentication > Emails > Templates > Magic Link: add `<p>Or type this code in the game:
      {{ .Token }}</p>`. Custom SMTP (Authentication > Emails > SMTP Settings) is **needed for real players**: the
      built-in sender only delivers to your team's addresses, a couple an hour.
-5. **Data API**: nothing to expose by hand. The game calls eight functions (`submit_play`, `list_stats`,
-   `list_averages`, `rate_list`, `list_ratings`, `submit_feedback`, `submit_fathom_guess`, `fathom_compare`) and reads
-   and writes only its own `saves` row; the migrations grant exactly that (`ratings`, `feedback`, `fathom_guesses`,
-   `owners` and `stats_excluded`, like `plays`, have no grants for players at all, and the `private` schema isn't in
-   the API's exposed schemas: leave it out). `list_feedback` is
-   for the loop and refuses anyone without the reader key.
+5. **Data API**: nothing to expose by hand. The game calls nine functions (`submit_play`, `list_stats`,
+   `list_averages`, `rate_list`, `list_ratings`, `submit_feedback`, `submit_fathom_guess`, `fathom_compare`,
+   `submit_miss`) and reads and writes only its own `saves` row; the migrations grant exactly that (`ratings`,
+   `feedback`, `fathom_guesses`, `missed_guesses`, `owners` and `stats_excluded`, like `plays`, have no grants for
+   players at all, and the `private` schema isn't in the API's exposed schemas: leave it out). `list_feedback` and
+   `list_misses` are for the loop and refuse anyone without the reader key.
 6. **Env vars in Vercel** (Project > Settings > Environment Variables, Production and Preview):
    - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` = the publishable key (`VITE_SUPABASE_PUBLISHABLE_KEY` works
      too). **Public**: built into the JavaScript, which is what they're for; RLS and the functions decide what anyone
@@ -257,6 +279,9 @@ says less about this one), so a few strong regulars can't lift every average.
    - Signed in, add a note on a list's results: the network tab shows `rpc/submit_feedback` answering `true`, and
      `select * from list_feedback('<your reader key>');` lists it first, `from_owner` true. With the public key and a
      wrong key, the curl in Running it answers 401 or 403 (`wrong reader key`), never notes.
+   - Signed in, type `Pizza  Hut` on a list: the network tab shows `rpc/submit_miss` with `p_text` `pizza hut` and no
+     user id, its `authorization` the publishable key (not your session's token), answering `true`; typing it again
+     sends nothing. `select * from list_misses('<your reader key>');` lists it with `browsers` 1.
    - Home > the account key > delete account: the `saves` row and the user (Authentication > Users) are gone.
    - A build without the env vars (`npx vite --port 5100`, no `.env.local`) makes no requests to Supabase and shows no
      account key.
@@ -323,6 +348,23 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
 
   Elsewhere, pass the key as `p_reader` instead. In the SQL Editor: `select * from list_feedback('<your reader
   key>');`. A new key (`set_feedback_reader` again) replaces the old one at once; update the network secret with it.
+- **Missed guesses for the improvement loop**: `list_misses(p_reader text, p_since timestamptz default null)` returns
+  one row per `list_id`, `mode`, `kind` (`unknown` or `junk`) and `text`, with `browsers` (how many browsers typed it:
+  distinct random ids, never the ids themselves) and `last_seen`, most browsers first, then the most recent. `p_since`
+  keeps only misses typed since then (a browser counts from its first time). Same reader key, same rules as
+  `list_feedback`: as `p_reader`, or when that is empty from the `X-Feedback-Reader` header; anything else raises
+  (`wrong reader key`). The proxy adds the header only on the paths its network secret names: if that secret was saved
+  with the path prefix `/rest/v1/rpc/list_feedback`, change the prefix to `/rest/v1/rpc/list_` (both functions; the
+  other `list_` functions ignore the header), or add the same secret again for `/rest/v1/rpc/list_misses`. Then:
+
+  ```bash
+  curl -s "$VITE_SUPABASE_URL/rest/v1/rpc/list_misses" -H "apikey: $VITE_SUPABASE_ANON_KEY" \
+    -H "authorization: Bearer $VITE_SUPABASE_ANON_KEY" -H "content-type: application/json" \
+    -d '{"p_reader": "", "p_since": "2026-11-08T00:00:00Z"}'
+  ```
+
+  In the SQL Editor: `select * from list_misses('<your reader key>') where browsers > 1;`. Players' text, and the repo
+  is public: paraphrase it in logs and commits (docs/IMPROVE.md, step 0).
 - **Abuse**: anyone can call `submit_play` with the public key. It checks shapes and ranges, counts each player once
   per list, and ignores a browser past 120 games an hour, but a determined script with fresh ids can still skew a
   quiet list. If that happens, find the ids (`select client_id, count(*) from plays group by 1 order by 2 desc`) and
@@ -332,7 +374,12 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   browser past 20 notes an hour; spam is cleaned up the same way in `feedback`. Notes are never shown to players, so
   junk only costs the loop a read. `submit_fathom_guess` checks the shape (a question id, a number from 0 up to
   1e300), keeps a browser's first guess on each question, and ignores a browser past 120 guesses an hour; the median
-  and the share resist a few wild guesses, and junk is cleaned up the same way in `fathom_guesses`.
+  and the share resist a few wild guesses, and junk is cleaned up the same way in `fathom_guesses`. `submit_miss`
+  checks the shape (a list id, `list` or `blitz`, `unknown` or `junk`, 1 to 40 characters once normalized), refuses
+  text that looks like an email address, a phone number or a link (400), keeps a browser's text on a list and mode
+  once, and ignores a browser past 60 misses an hour. A script with fresh ids can make a text look common: the loop
+  checks a miss against the list before acting on it, and spam is deleted the same way in `missed_guesses` (by
+  `client_id`).
 - **Local development**: `.env.local` with the URL and publishable key, `npx vite --port 5100`, and that URL in
   Supabase's Redirect URLs. `/api/delete-account` only runs on Vercel (`npx vercel dev` locally). Google sign-in
   needs `http://localhost:5100` among the client's Authorized JavaScript origins and
@@ -348,13 +395,18 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   included: no player reads a note, a wrong reader key raises, the key by header, the owner's notes come first, the
   rate limits, deletion, the owners and `stats_excluded` left out of the stats and of `fathom_compare`, signed in or
   not; a browser's first guess kept, 0 taken and negatives refused, one per player, the asker left out, ties not
-  further off, each round on its own scale: times off, points, years, steps). `src/net/crowd.test.ts` pins
-  the blend (n = 0 is the estimate exactly, 30 weigh equally, 300 are ~91% real, no cliff, Blitz, a list without an
-  estimate). `npm run e2e` runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating on the results, and no
-  note option), plus `e2e/backend.e2e.cjs`, which builds a copy with fake env vars (`e2e/backend-env.cjs`, every
-  sign-in method on) and mocks Supabase (blended results above and below 30 players, `rate_list` and
+  further off, each round on its own scale: times off, points, years, steps; a miss normalized as the game normalizes
+  it, once per browser and text, 60 an hour, emails, phone numbers and links refused, no account column, and
+  `list_misses` only with the reader key, totals by distinct browsers). `src/net/misses.test.ts` pins which judged
+  guesses are misses (the real matcher and Blitz included) and that the patterns match the migration's.
+  `src/net/crowd.test.ts` pins the blend (n = 0 is the estimate exactly, 30 weigh equally, 300 are ~91% real, no cliff,
+  Blitz, a list without an estimate). `npm run e2e` runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating
+  on the results, and no note option), plus `e2e/backend.e2e.cjs`, which builds a copy with fake env vars
+  (`e2e/backend-env.cjs`, every sign-in method on) and mocks Supabase (blended results above and below 30 players, `rate_list` and
   `submit_feedback` included; Fathom's guesses sent once and waiting offline, `fathom_compare` asked with the round,
-  the players' line with 37 players and none with 12, a name-it round's figure sent, 0 land borders included),
+  the players' line with 37 players and none with 12, a name-it round's figure sent, 0 land borders included; a missed
+  guess sent once as lowercase text with the public key alone, signed in, on a list and in Blitz, waiting offline,
+  never an answer, a near miss or an email address),
   `e2e/note.e2e.cjs` on the same
   copy ("add a note": the exact arguments sent, offline waiting, Escape and Enter, the phone keyboard;
   `e2e/states.e2e.cjs` walks it too), and `e2e/backend-google.e2e.cjs`, a copy with a Google client ID against a fake

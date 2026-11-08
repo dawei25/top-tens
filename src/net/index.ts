@@ -1,11 +1,13 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { BlitzState } from "../game/blitz";
+import type { BlitzResult, BlitzState } from "../game/blitz";
 import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
+import type { GuessResult } from "../game/types";
 import { accountsOn, backendOn } from "./config";
 import type { CrowdStats, ListAverages } from "./crowd";
 import { compareKey, FATHOM_GUESSES, type CompareRound, type FathomCrowd, type FathomGuess } from "./fathom";
 import { cleanNote, FEEDBACK, type Feedback } from "./feedback";
+import { cleanMiss, missKind, MISSES, type Miss } from "./misses";
 import { enqueue, localOutboxStore } from "./outbox";
 import { invalidRating, ratingKey, withRating, type Rating, type RatingMode, type RatingReason } from "./ratings";
 import type { SyncSave } from "./sync/merge";
@@ -79,7 +81,9 @@ let throttleUntil = 0;
  */
 export function startNet(): void {
   if (!backendOn) return;
-  const pending = [KEYS.outbox, KEYS.ratingOutbox, KEYS.feedbackOutbox, KEYS.fathomOutbox].some((k) => /"pending":\[\{/.test(stored(k) ?? ""));
+  const pending = [KEYS.outbox, KEYS.ratingOutbox, KEYS.feedbackOutbox, KEYS.fathomOutbox, KEYS.missOutbox].some((k) =>
+    /"pending":\[\{/.test(stored(k) ?? ""),
+  );
   const session = accountsOn && (!!stored(KEYS.auth) || authCallback());
   // A stored session names its player, so Home can show them at once; the backend code confirms it a moment later.
   let user: AccountUser | undefined;
@@ -105,6 +109,7 @@ export function startNet(): void {
       void s.flushRatings();
       void s.flushFeedback();
       void s.flushFathom();
+      void s.flushMisses();
     }),
   );
   // Coming back to the tab: catch up with other devices (at most every 30 s).
@@ -200,6 +205,32 @@ export function submitFathomGuess(questionId: string, guess: number): boolean {
   withService((s) => {
     s.start();
     void s.flushFathom();
+  });
+  return true;
+}
+
+/**
+ * A list or Blitz guess was just judged: pass what was typed and the result. A guess the game didn't take (unknown, or
+ * junk) is kept as short lowercase text linked to nobody, so the improvement loop can teach the game the answers
+ * players expect (./misses); anything it took or offered (an answer, a near miss, a "did you mean") is not, nor is
+ * text that looks like an email address, a phone number or a link. Only with a backend: without one this sends and
+ * stores nothing. Queued in its own outbox at once (like a note), then sent and retried while offline, once per list,
+ * mode and text. Never kept in the save, never synced. True when it was queued.
+ */
+export function reportGuess(listId: string, mode: RatingMode, typed: string, result: GuessResult | BlitzResult): boolean {
+  if (!backendOn) return false;
+  const kind = missKind(result);
+  if (!kind) return false;
+  const miss: Miss = { listId, mode, kind, text: cleanMiss(typed), at: Date.now() };
+  try {
+    if (!enqueue(localOutboxStore<Miss>(globalThis.localStorage, KEYS.missOutbox), MISSES, miss, miss.at)) return false;
+  } catch {
+    // No storage at all (blocked): nothing can wait to be sent.
+    return false;
+  }
+  withService((s) => {
+    s.start();
+    void s.flushMisses();
   });
   return true;
 }

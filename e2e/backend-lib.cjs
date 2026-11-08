@@ -90,7 +90,7 @@ const REFUSED_SUB = "refuse-me";
  * A Google ID token signs Dana in, unless its `sub` is REFUSED_SUB.
  */
 async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
-  const calls = { submit: [], rate: [], feedback: [], stats: [], fathom: [], compare: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
+  const calls = { submit: [], rate: [], feedback: [], stats: [], fathom: [], compare: [], miss: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
   let row = save;
   const cors = {
     "access-control-allow-origin": "*",
@@ -120,6 +120,10 @@ async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
         return json(200, averages);
       case "/rest/v1/rpc/submit_fathom_guess":
         calls.fathom.push(req.postDataJSON());
+        return json(200, true);
+      case "/rest/v1/rpc/submit_miss":
+        // The headers too: a miss goes with the public key alone, never the player's session.
+        calls.miss.push({ args: req.postDataJSON(), headers: req.headers() });
         return json(200, true);
       case "/rest/v1/rpc/fathom_compare": {
         const args = Object.fromEntries(url.searchParams);

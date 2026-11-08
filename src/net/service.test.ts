@@ -289,6 +289,91 @@ describe("Fathom guesses", () => {
   });
 });
 
+describe("missed guesses", () => {
+  const queue = (items: object[]) => store.set("top-tens:miss-outbox", JSON.stringify({ pending: items, sent: [] }));
+  const at = Date.now();
+  /** fetch as the browser has it: answers `status` (or fails, offline), and records each request. */
+  function fakeFetch(status: () => number | "offline" = () => 200) {
+    const requests: { url: string; method?: string; headers: Record<string, string>; body: unknown; credentials?: string }[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init: RequestInit) => {
+        requests.push({
+          url: String(url),
+          method: init.method,
+          headers: Object.fromEntries(new Headers(init.headers).entries()),
+          body: JSON.parse(String(init.body)),
+          credentials: init.credentials,
+        });
+        const s = status();
+        if (s === "offline") throw new TypeError("Failed to fetch");
+        return new Response(JSON.stringify(s < 300), { status: s, headers: { "content-type": "application/json" } });
+      }),
+    );
+    return requests;
+  }
+
+  it("sends each miss to submit_miss with the public key alone and its own random id, never the player's", async () => {
+    const requests = fakeFetch();
+    // Signed in, with a session supabase-js would send.
+    fake.client.auth.getSession.mockImplementation(async () => ({ data: { session: { access_token: "the-players-token", user: { id: "u-1" } } } }) as never);
+    const svc = await import("./service");
+    svc.reportList(finished());
+    await vi.waitFor(() => expect(store.get("top-tens:client-id")).toBeTruthy());
+    queue([
+      { listId: "mountains", mode: "list", kind: "unknown", text: "pizza", at },
+      { listId: "airports", mode: "blitz", kind: "junk", text: "xqzzvkw", at: at + 1 },
+    ]);
+    await svc.flushMisses();
+    const id = store.get("top-tens:miss-id");
+    expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    expect(id).not.toBe(store.get("top-tens:client-id"));
+    expect(requests.map((r) => r.body)).toEqual([
+      { p_list_id: "mountains", p_mode: "list", p_kind: "unknown", p_text: "pizza", p_client_id: id },
+      { p_list_id: "airports", p_mode: "blitz", p_kind: "junk", p_text: "xqzzvkw", p_client_id: id },
+    ]);
+    for (const r of requests) {
+      expect(r.url).toBe("https://example.supabase.co/rest/v1/rpc/submit_miss");
+      expect(r.method).toBe("POST");
+      expect(r.headers).toEqual({ apikey: "anon-key", authorization: "Bearer anon-key", "content-type": "application/json" });
+      expect(r.credentials).toBe("omit");
+    }
+    // Never through the signed-in client.
+    expect(fake.calls.rpc.filter(([fn]) => fn === "submit_miss")).toEqual([]);
+    expect(JSON.parse(store.get("top-tens:miss-outbox")!)).toEqual({ pending: [], sent: ["list:mountains:pizza", "blitz:airports:xqzzvkw"] });
+  });
+
+  it("keeps a miss while offline (or the server is busy) and sends it when the connection is back", async () => {
+    let answer: number | "offline" = "offline";
+    const requests = fakeFetch(() => answer);
+    queue([{ listId: "mountains", mode: "list", kind: "unknown", text: "pizza", at }]);
+    const svc = await import("./service");
+    await svc.flushMisses();
+    expect(JSON.parse(store.get("top-tens:miss-outbox")!).pending).toHaveLength(1);
+    answer = 503;
+    await svc.flushMisses();
+    expect(JSON.parse(store.get("top-tens:miss-outbox")!).pending).toHaveLength(1);
+    answer = 200;
+    await svc.flushMisses();
+    expect(requests).toHaveLength(3);
+    expect(JSON.parse(store.get("top-tens:miss-outbox")!)).toEqual({ pending: [], sent: ["list:mountains:pizza"] });
+  });
+
+  it("drops a miss the server refuses for good, or doesn't know yet (the migration not run: 404), and anything malformed", async () => {
+    const requests = fakeFetch(() => 404);
+    queue([
+      { listId: "mountains", mode: "list", kind: "unknown", text: "pizza", at },
+      // Broken in storage: never sent.
+      { listId: "mountains", mode: "list", kind: "near", text: "broad peak", at },
+      { listId: "mountains", mode: "list", kind: "unknown", text: "dana@example.com", at },
+    ]);
+    const svc = await import("./service");
+    await svc.flushMisses();
+    expect(requests.map((r) => (r.body as { p_text: string }).p_text)).toEqual(["pizza"]);
+    expect(JSON.parse(store.get("top-tens:miss-outbox")!).pending).toEqual([]);
+  });
+});
+
 describe("stats", () => {
   it("asks once per list and mode (with GET, it's a read), then answers from the cache", async () => {
     const svc = await import("./service");

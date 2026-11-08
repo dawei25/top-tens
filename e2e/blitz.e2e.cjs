@@ -1,5 +1,6 @@
 // Blitz: the clock waits for the first keystroke, a hit scores, a guess after 0 doesn't count, the round is
-// recorded, and its past run opens and closes with Back. A list's Play Blitz keys (title card, results) open it.
+// recorded, and its past run opens and closes with Back; neither offers its own list. A list's results open its
+// Blitz (its title card has no Blitz key).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, hash, puzzle, noHScroll, guess } = require("./helpers.cjs");
@@ -9,6 +10,14 @@ before(async () => (browser = await chromium.launch()));
 after(() => browser.close());
 
 const LIST = "mountains"; // a past daily, so open for Blitz
+
+/** Keys in a panel that open `list` as a list game: its free game, or the daily that ran it (by date). */
+const ownListKeys = (page, panel, list) =>
+  page.getByTestId(panel).evaluate(async (el, list) => {
+    const days = await (await fetch("puzzles/daily.json")).json();
+    const dates = new Set(days.filter((d) => d.id === list).map((d) => `#daily-${d.date}`));
+    return [...el.querySelectorAll("a[href]")].map((a) => a.getAttribute("href")).filter((h) => h === `#p-${list}` || dates.has(h));
+  }, list);
 
 for (const vp of VIEWPORTS) {
   test(`Blitz round and past run (${vp.name})`, async () => {
@@ -45,12 +54,16 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByLabel("Your guess").count(), 0);
     assert.ok(await noHScroll(page));
     await page.clock.resume();
+    // The results never offer this round's own list as a list game (the owner, Nov 8: "its alr spoiled").
+    assert.deepEqual(await ownListKeys(page, "blitz-results", LIST), []);
 
-    // Its past run: opens at its own address; Back returns to the list's Blitz screen with past runs open.
+    // Its past run: opens at its own address; Back returns to the list's Blitz screen with past runs open. No key
+    // there to its own list either.
     await page.getByTestId("past-runs-toggle").click();
     await page.getByTestId("past-run").first().click();
     await page.getByTestId("run-view").waitFor();
     assert.match(await hash(page), new RegExp(`^#blitz-${LIST}/run-\\d+$`));
+    assert.deepEqual(await ownListKeys(page, "run-view", LIST), []);
     await page.getByTestId("nav-back").click();
     await page.getByTestId("past-runs").waitFor();
     assert.equal(await hash(page), `#blitz-${LIST}`);
@@ -59,29 +72,30 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 
-  test(`a list's Play Blitz keys open a round on that list (${vp.name})`, async () => {
+  // The owner (Nov 8): "for simplicity remove the play blitz button for lists" (the title card's, beside the score);
+  // list -> Blitz still makes sense on the results. So a list game in play offers no Blitz at all, its title card
+  // keeps only the score, and the results' Play Blitz opens a round on that list.
+  test(`a list's results offer its Blitz, and its title card doesn't (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp, `#p-${LIST}`);
-    // On the title card, next to the score, inside the card even on a phone.
-    const key = page.getByTestId("title-blitz");
-    await key.waitFor();
-    const card = await page.getByTestId("title-card").boundingBox();
-    const box = await key.boundingBox();
-    assert.ok(box.x >= card.x && box.x + box.width <= card.x + card.width, "the key stays inside the title card");
+    await page.getByLabel("Your guess").waitFor();
+    const card = page.getByTestId("title-card");
+    // Nothing to press on the card but its source link.
+    const keys = await card.evaluate((el) => [...el.querySelectorAll("a, button")].filter((k) => !k.closest(".asof")).length);
+    assert.equal(keys, 0, "a key on the title card");
+    assert.equal(await page.locator('[href^="#blitz-"]').count(), 0, "a Blitz key during play");
+    // The score keeps its place at the card's top right.
+    const [c, score] = await Promise.all([card.boundingBox(), card.locator(".count").boundingBox()]);
+    assert.ok(c.x + c.width - (score.x + score.width) < 30, "the score sits at the card's right end");
     assert.ok(await noHScroll(page));
-    await key.click();
-    await page.getByTestId("blitz-clock").waitFor();
-    assert.equal(await hash(page), `#blitz-${LIST}`);
-    assert.equal(await page.getByTestId("blitz-screen").getAttribute("data-list"), LIST);
 
-    // Back on the list, the results offer the same round once the game is over (the title card's key is gone then).
-    await page.getByTestId("nav-back").click();
     await page.getByTestId("give-up").click();
     await page.getByTestId("give-up").click();
     await page.getByTestId("results").waitFor();
-    assert.equal(await page.getByTestId("title-blitz").count(), 0);
+    assert.equal(await card.locator('[href^="#blitz-"]').count(), 0);
     await page.getByTestId("blitz-key").click();
     await page.getByTestId("blitz-clock").waitFor();
     assert.equal(await hash(page), `#blitz-${LIST}`);
+    assert.equal(await page.getByTestId("blitz-screen").getAttribute("data-list"), LIST);
     await ctx.close();
   });
 }
