@@ -11,13 +11,20 @@
  * panel comes over it (a result card, a new screen, a scroll), it swims out to the nearest free water. Where there is
  * no such room (phones, narrow strips), it roams behind the glass as before.
  *
- * It listens to play events for the reactions (a find: the limb flashes and shimmers, a glow pulse, a quick hop; a
- * lost life inks and flees; a perfect 10 loops and bursts; Blitz hits) and to input for idling: after IDLE_MS
- * without a key or a tap, the squid sinks to the seabed and dozes until the next one. With reduced motion it draws
- * one still frame: the squid parked in open water, its limbs at rest, lit.
+ * It listens to play events for the reactions (a find: the limb flashes and shimmers, a glow pulse, a happy wiggle
+ * and, in open water, a quick hop; a lost life inks and flees; a perfect 10 loops and bursts; Blitz hits) and to
+ * input for idling: after IDLE_MS without a key or a tap, the squid sinks to the seabed and dozes until the next one.
+ * With reduced motion it draws one still frame: the squid parked in open water, its limbs at rest, lit.
+ *
+ * The easter egg: a tap or click on the squid's own pixels (never on a control over it, nor one the browser hands
+ * the tap's click to, never while a dialog is open) makes it blush, flinch and wave a tentacle, with a pixel heart; a
+ * third tap in a row and it spins, squirts a puff of ink and darts off. With reduced motion it only blushes for a
+ * moment. The layer still takes no pointer itself: the taps are read on the window, passively, and the page under the
+ * finger gets them as ever.
  */
 import { onPlay, type PlayEvent } from "../../game/events";
 import { reducedMotion } from "../pixel";
+import { squidSound } from "../sound/squid";
 import { limbColor } from "../squid/colors";
 import { SquidBody, type Motion } from "./body";
 import { Fx } from "./fx";
@@ -64,6 +71,43 @@ const DOCK_FALLBACK = ".guess-row";
 /** The heading check (dev stats): travel faster than this (CSS px/s) must be within OFF_DEG of the heading. */
 const CHECK_SPEED = 15;
 const OFF_DEG = 30;
+
+/**
+ * The tap easter egg. Anything under the finger that is (or is inside) a control, or looks pressable, keeps the tap
+ * to itself: the squid only answers taps on bare page or glass.
+ */
+const CONTROL =
+  'a[href], button, input, select, textarea, label, summary, dialog, [role="button"], [role="link"], [role="switch"], ' +
+  '[role="checkbox"], [role="radio"], [role="tab"], [role="menuitem"], [role="option"], [role="slider"], [role="dialog"], ' +
+  '[contenteditable]:not([contenteditable="false"]), [tabindex]:not([tabindex^="-"]), .slot.has-fact, .slot.hintable';
+/** How near the squid's pixels a tap counts (sprite px): a fingertip gets more room than a mouse pointer. */
+const TAP_TOL_TOUCH = 2.5;
+const TAP_TOL_MOUSE = 0.75;
+/** A tap moves less than this (CSS px) and lifts within this (ms); a drag or a scroll is no tap. */
+const TAP_SLOP = 12;
+const TAP_MS = 600;
+/** How long a tap waits for its click (ms) before the squid takes it anyway (no click came: a bare-page tap). */
+const CLICK_WAIT_MS = 250;
+/** Taps closer together than this (ms) make a streak; the third in a row is the trick. */
+const STREAK_MS = 900;
+const TRICK_TAPS = 3;
+/** Reduced motion: a tap only blushes it, this long (ms). */
+const STILL_BLUSH_MS = 600;
+const RAD = Math.PI / 180;
+
+/**
+ * A render-only move on top of the swim: it changes how the squid is drawn, never where it is or where it heads.
+ * `wob` rocks it side to side (rad), `boing` squashes and stretches the mantle, `flare` spreads the arms, `spin` turns
+ * it once round (+1 or -1).
+ */
+interface Flourish {
+  at: number;
+  dur: number;
+  wob: number;
+  boing: number;
+  flare: number;
+  spin: number;
+}
 
 /** Debug numbers for frame-time and motion checks, exposed as window.__ocean in dev when the URL has ?oceanstats. */
 interface Stats {
@@ -146,6 +190,14 @@ export function startOcean(els: OceanEls): Ocean {
   const bornAt = performance.now();
   const timers: { at: number; fn: () => void }[] = [];
   const later = (s: number, fn: () => void) => timers.push({ at: t + s, fn });
+  /** Render-only moves playing now (a find's wiggle, a tap's flinch, the trick's spin). */
+  let flourishes: Flourish[] = [];
+  /** Blushing until then (swim time): full, then fading over its last 0.3 s. Reduced motion: on or off. */
+  let blushUntil = -1;
+  let stillBlush = 0;
+  let stillTimer: ReturnType<typeof setTimeout> | undefined;
+  /** The trick plays until then (swim time): taps meanwhile are ignored. */
+  let trickUntil = -1;
 
   // Dev only: production builds drop this (and the hooks below) entirely, unless built with VITE_OCEANSTATS=1 (for
   // frame-time checks of a production build).
@@ -217,21 +269,44 @@ export function startOcean(els: OceanEls): Ocean {
   /** Canvas px of a viewport point. */
   const cv = (p: Pt) => ({ x: p.x / px, y: p.y / px });
 
+  /** The flourishes playing now, summed: an extra turn (rad), a squash (+ wider and shorter, - narrower and longer), arm spread. */
+  function flourish() {
+    let turn = 0;
+    let squash = 0;
+    let flare = 0;
+    for (const f of flourishes) {
+      const u = (t - f.at) / f.dur;
+      if (u < 0 || u >= 1) continue;
+      const fade = 1 - u;
+      turn += f.wob * Math.sin(u * Math.PI * 4) * fade;
+      // A full turn, eased in and out (it ends where it began).
+      if (f.spin) turn += f.spin * Math.PI * 2 * (u < 0.5 ? 2 * u * u : 1 - (2 - 2 * u) ** 2 / 2);
+      squash += f.boing * Math.sin(u * Math.PI * 3) * fade;
+      flare += f.flare * Math.sin(u * Math.PI);
+    }
+    return { turn, squash, flare };
+  }
+
   const motion = (): Motion => ({
     jetAge: swimmer.jetAge,
     inflating: swimmer.inflating,
     hovering: swimmer.hovering,
     asleep: swimmer.asleep,
+    flare: flourish().flare,
   });
 
-  /** The squid's pose on the canvas: the swim's (its idle surge is part of the swim, along its heading). */
+  /**
+   * The squid's pose on the canvas: the swim's (its idle surge is part of the swim, along its heading), with any
+   * flourish drawn on top.
+   */
   function pose() {
+    const f = flourish();
     body.pose = {
       x: swimmer.x / px,
       y: swimmer.y / px,
-      angle: (swimmer.tilt * Math.PI) / 180,
-      sx: swimmer.sx,
-      sy: swimmer.sy,
+      angle: swimmer.tilt * RAD + f.turn,
+      sx: swimmer.sx * (1 + f.squash),
+      sy: swimmer.sy * (1 - 0.8 * f.squash),
     };
     squidAt.x = swimmer.x;
     squidAt.y = swimmer.y;
@@ -306,6 +381,7 @@ export function startOcean(els: OceanEls): Ocean {
       mood: state?.mood ?? "play",
       heat,
       doze: swimmer.behaviour === "doze",
+      blush: still ? stillBlush : Math.max(0, Math.min(1, (blushUntil - t) / 0.3)),
     });
     fx.drawFront(fctx);
   }
@@ -347,6 +423,7 @@ export function startOcean(els: OceanEls): Ocean {
     for (let i = timers.length - 1; i >= 0; i--) {
       if (timers[i].at <= t) timers.splice(i, 1)[0].fn();
     }
+    if (flourishes.length) flourishes = flourishes.filter((f) => t - f.at < f.dur);
     const r0 = stats ? performance.now() : 0;
     refreshRoom(false);
     if (stats) stats.readMs = Math.max(stats.readMs, performance.now() - r0);
@@ -834,8 +911,8 @@ export function startOcean(els: OceanEls): Ocean {
 
   /**
    * A limb comes on (a find, a Blitz top-10 hit): it flashes white-hot and a shimmer runs down it, its tip throws a
-   * few sparks, the squid glows; in open water it gives a quick hop (bigger for the feeding tentacles, #1 and #2).
-   * About half a second, all of it in the ocean.
+   * few sparks, the squid glows and gives a happy wiggle; in open water it also gives a quick hop (bigger for the
+   * feeding tentacles, #1 and #2). About half a second, all of it in the ocean.
    */
   function lightUp(rank: number, hop: boolean) {
     const big = rank <= 2;
@@ -846,7 +923,33 @@ export function startOcean(els: OceanEls): Ocean {
       const p = body.limbAt(rank, 1);
       fx.sparksAt(p.x, p.y, big ? 12 : 7, big ? 9 : 6, [color, WHITE]);
     });
+    wiggle(rank);
     if (hop && room) swimmer.hop(big);
+  }
+
+  /** Reactions are counted, and the one playing named, on the squid's DOM stand-in (for tests and tools). */
+  let reacting = 0;
+  const count = (k: "finds" | "pokes") => (squid.dataset[k] = String(Number(squid.dataset[k] ?? 0) + 1));
+  function reactFor(kind: string, s: number, still = false) {
+    const id = ++reacting;
+    squid.dataset.react = kind;
+    const done = () => id === reacting && delete squid.dataset.react;
+    if (still) setTimeout(done, s * 1000);
+    else later(s, done);
+  }
+
+  /**
+   * An answer found, alongside its limb lighting (with the flash, well under a second): the squid rocks side to side,
+   * its mantle squashes and springs back and its arms flare out. A little bigger for a top-3 answer; a Blitz hit
+   * outside the top 10 (`rank` null) gets a smaller one.
+   */
+  function wiggle(rank: number | null) {
+    const top3 = rank !== null && rank <= 3;
+    const k = rank === null ? 0.5 : top3 ? 1.4 : 1;
+    const dur = top3 ? 0.55 : 0.45;
+    flourishes.push({ at: t, dur, wob: 0.14 * k, boing: 0.07 * k, flare: 0.3 * k, spin: 0 });
+    count("finds");
+    reactFor(rank === null ? "hit" : top3 ? "find-top3" : "find", dur);
   }
 
   /**
@@ -905,7 +1008,10 @@ export function startOcean(els: OceanEls): Ocean {
         const top = e.rank >= 1 && e.rank <= 10;
         if (room) {
           if (top) lightUp(e.rank, true);
-          else glow(CYAN, 0.8, 0.05);
+          else {
+            glow(CYAN, 0.8, 0.05);
+            wiggle(null);
+          }
           break;
         }
         // Behind the glass: over to the newest hit row (drawn after this event: read it on the next frame).
@@ -915,6 +1021,7 @@ export function startOcean(els: OceanEls): Ocean {
         });
         if (top) body.flash(e.rank, t);
         glow(e.rank === 1 ? GOLD : CYAN, top ? 1.2 + heat * 0.15 : 0.8, 0.1);
+        wiggle(top ? e.rank : null);
         break;
       }
       default:
@@ -969,11 +1076,142 @@ export function startOcean(els: OceanEls): Ocean {
     if (swimmer.behaviour === "perk") swimmer.perk(null);
   }
 
+  /* ---------------- the tap easter egg ---------------- */
+
+  /** A press that landed on the squid, waiting to see if it lifts as a tap. */
+  let down: { id: number; x: number; y: number; at: number } | null = null;
+  /** A tap on the squid, waiting for its click: the browser may hand that click to a control nearby (a phone's touch
+   *  adjustment snaps a tap to a key within the finger's reach), and then the tap was the control's. */
+  let tapped: { x: number; timer: ReturnType<typeof setTimeout> } | null = null;
+  let streak = 0;
+  let lastPoke = -Infinity;
+
+  /** A control, or inside one, or anything that looks pressable (a row with a click handler, a note's label). */
+  function pressable(el: Element) {
+    if (el.closest(CONTROL)) return true;
+    const cursor = getComputedStyle(el).cursor;
+    return cursor === "pointer" || cursor === "help";
+  }
+  /** The squid takes this press: it is on its own pixels, and on nothing the player could mean instead. */
+  function onSquid(e: PointerEvent) {
+    const tol = e.pointerType === "mouse" ? TAP_TOL_MOUSE : TAP_TOL_TOUCH;
+    if (!body.hits(e.clientX / px, e.clientY / px, tol)) return false;
+    const el = e.target instanceof Element ? e.target : null;
+    return !!el && !document.querySelector('dialog[open], [aria-modal="true"]') && !pressable(el);
+  }
+  function onDown(e: PointerEvent) {
+    down = null;
+    if (!e.isPrimary || e.button > 0) return;
+    if (onSquid(e)) down = { id: e.pointerId, x: e.clientX, y: e.clientY, at: performance.now() };
+  }
+  function onUp(e: PointerEvent) {
+    const d = down;
+    down = null;
+    if (!d || e.pointerId !== d.id || performance.now() - d.at > TAP_MS) return;
+    if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > TAP_SLOP) return;
+    if (tapped) clearTimeout(tapped.timer);
+    // Its click follows at once; a browser that sends none for a tap on bare page (Safari, outside the app) gets the
+    // reaction a beat later anyway.
+    tapped = { x: e.clientX / px, timer: setTimeout(() => settleTap(true), CLICK_WAIT_MS) };
+  }
+  function onClick(e: MouseEvent) {
+    if (tapped) settleTap(!(e.target instanceof Element && pressable(e.target)));
+  }
+  function settleTap(ours: boolean) {
+    const tap = tapped;
+    tapped = null;
+    if (!tap) return;
+    clearTimeout(tap.timer);
+    if (ours) poke(tap.x);
+  }
+  const onCancel = () => (down = null);
+
+  /** Tapped: a boop, or (the third tap in a row) the trick; with reduced motion, only a blush. */
+  function poke(tapX: number) {
+    const now = performance.now();
+    streak = now - lastPoke < STREAK_MS ? streak + 1 : 1;
+    lastPoke = now;
+    if (still) {
+      // A short colour change, nothing moves: the parked frame, blushing, then the same frame again.
+      count("pokes");
+      squidSound("boop");
+      stillBlush = 1;
+      draw(false);
+      clearTimeout(stillTimer);
+      stillTimer = setTimeout(() => {
+        stillBlush = 0;
+        if (still) draw(false);
+      }, STILL_BLUSH_MS);
+      reactFor("blush", STILL_BLUSH_MS / 1000, true);
+      return;
+    }
+    if (t < trickUntil) return;
+    count("pokes");
+    if (streak >= TRICK_TAPS && swimmer.behaviour !== "loop") {
+      streak = 0;
+      trick();
+    } else boop(tapX);
+    if (stats) stats.seen.poke = (stats.seen.poke ?? 0) + 1;
+  }
+
+  /**
+   * A boop: it blushes, flinches (a squash and a little jolt, the arms flicking out) and waves the tentacle nearer the
+   * tap, and a pixel heart pops up over its head. About a second, in place.
+   */
+  function boop(tapX: number) {
+    squidSound("boop");
+    blushUntil = t + 1.2;
+    flourishes.push({ at: t, dur: 0.5, wob: 0.1, boing: 0.16, flare: 0.4, spin: 0 });
+    const left = body.limbAt(1, 1);
+    const right = body.limbAt(2, 1);
+    const id = Math.abs(left.x - tapX) <= Math.abs(right.x - tapX) ? 1 : 2;
+    body.wave(id, t, 1, id === 1 ? -1 : 1);
+    // The heart pops clear of its arms: over its head when it is upright-ish, straight above its mantle when it lies on
+    // its side (the arms trail sideways), beside its mantle when it is head-down (the arms are above it).
+    const p = here();
+    const side = tapX < p.x ? -1 : 1;
+    const a = swimmer.tilt * RAD;
+    if (Math.cos(a) > 0.5) fx.heart(p.x + Math.sin(a) * 11 + side * 3, p.y - Math.cos(a) * 11 - 3);
+    else if (Math.cos(a) > -0.5) fx.heart(p.x + Math.sin(a) * 3, p.y - 12);
+    else fx.heart(p.x + side * 14, p.y - 3);
+    reactFor("boop", 1);
+  }
+
+  /**
+   * The trick, for a few taps in a row: it spins once on the spot (where it has room to turn round), throwing sparks,
+   * then squirts a little puff of ink and darts off. Under a second and a half.
+   */
+  function trick() {
+    squidSound("trick");
+    const SPIN = 0.55;
+    trickUntil = t + SPIN + 0.35;
+    blushUntil = t + SPIN + 0.6;
+    const p = here();
+    const turn = !room || room.free(swimmer.x, swimmer.y) >= 0;
+    swimmer.pause(SPIN);
+    flourishes.push(
+      turn
+        ? { at: t, dur: SPIN, wob: 0, boing: 0.1, flare: 0.6, spin: Math.random() < 0.5 ? 1 : -1 }
+        : { at: t, dur: SPIN, wob: 0.22, boing: 0.2, flare: 0.6, spin: 0 },
+    );
+    fx.sparksAt(p.x, p.y, 14, 7, [CYAN, GOLD, PINK, WHITE], 0.05);
+    fx.ring(p.x, p.y, 4, 14, CYAN, 0.5);
+    later(SPIN, () => {
+      const q = here();
+      fx.ink(q.x, q.y, Math.min(scene.w, scene.h) * 0.08, false, 7);
+      swimmer.flee();
+    });
+    reactFor("trick", SPIN + 0.6);
+  }
+
   /* ---------------- wiring ---------------- */
 
   const mq = typeof matchMedia === "function" ? matchMedia("(prefers-reduced-motion: reduce)") : null;
   const onMotion = () => {
     still = !!mq?.matches;
+    flourishes = [];
+    blushUntil = -1;
+    stillBlush = 0;
     if (still) {
       pause();
       delete squid.dataset.doze;
@@ -992,6 +1230,11 @@ export function startOcean(els: OceanEls): Ocean {
   document.addEventListener("visibilitychange", onVis);
   mq?.addEventListener("change", onMotion);
   for (const ev of inputs) addEventListener(ev, onInput, { passive: true, capture: true });
+  // The easter egg reads taps on the window, passively: it never takes one from the page.
+  addEventListener("pointerdown", onDown, { passive: true, capture: true });
+  addEventListener("pointerup", onUp, { passive: true, capture: true });
+  addEventListener("pointercancel", onCancel, { passive: true, capture: true });
+  addEventListener("click", onClick, { passive: true, capture: true });
   document.addEventListener("pointerover", onOver);
   document.addEventListener("pointerout", onOut);
   const offPlay = onPlay(onEvent);
@@ -1015,6 +1258,12 @@ export function startOcean(els: OceanEls): Ocean {
       document.removeEventListener("visibilitychange", onVis);
       mq?.removeEventListener("change", onMotion);
       for (const ev of inputs) removeEventListener(ev, onInput, { capture: true });
+      removeEventListener("pointerdown", onDown, { capture: true });
+      removeEventListener("pointerup", onUp, { capture: true });
+      removeEventListener("pointercancel", onCancel, { capture: true });
+      removeEventListener("click", onClick, { capture: true });
+      clearTimeout(stillTimer);
+      if (tapped) clearTimeout(tapped.timer);
       document.removeEventListener("pointerover", onOver);
       document.removeEventListener("pointerout", onOut);
       offPlay();

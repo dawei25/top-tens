@@ -3,7 +3,8 @@
  * - ink: pixel ink blobs that swell, drift and fade out through dither steps (in front of the squid);
  * - rings and sparks: the glow pulse of a find, the perfect-10 burst, the personal-best flare (in front);
  * - blooms: soft light behind the squid (behind it);
- * - bubbles: a dozing squid's breath (in front).
+ * - bubbles: a dozing squid's breath (in front);
+ * - hearts: a tapped squid's (in front).
  * All behind the UI: the canvases are part of the ocean layer.
  */
 import { glowSprite } from "./scene";
@@ -57,6 +58,17 @@ interface Bubble {
   life: number;
   phase: number;
 }
+interface Heart {
+  x: number;
+  y: number;
+  t: number;
+  life: number;
+  phase: number;
+}
+
+/** A 5 x 4 pixel heart (the tap easter egg): pink, with a white glint. */
+const HEART = [".#.#.", "#####", ".###.", "..#.."];
+const HEART_PINK = "#ff5d8f";
 
 /** Ink: deep indigo, a lighter violet, a flat shadow; with a pink gloss pixel on top. */
 const INK = ["#1a0f36", "#2a1650", "#0d0720"];
@@ -75,11 +87,12 @@ export class Fx {
   private sparks: Spark[] = [];
   private blooms: Bloom[] = [];
   private bubbles: Bubble[] = [];
+  private hearts: Heart[] = [];
   private patterns = new Map<string, CanvasPattern | null>();
   private sprites = new Map<string, HTMLCanvasElement>();
 
   get front() {
-    return this.blobs.length + this.rings.length + this.sparks.length + this.bubbles.length > 0;
+    return this.blobs.length + this.rings.length + this.sparks.length + this.bubbles.length + this.hearts.length > 0;
   }
 
   get back() {
@@ -92,11 +105,11 @@ export class Fx {
     this.sparks = [];
     this.blooms = [];
     this.bubbles = [];
+    this.hearts = [];
   }
 
-  /** An ink cloud at (x, y); `size` is the cloud's reach in canvas px. */
-  ink(x: number, y: number, size: number, big: boolean) {
-    const n = big ? 34 : 14;
+  /** An ink cloud at (x, y); `size` is the cloud's reach in canvas px; `n` blobs (a puff has a few). */
+  ink(x: number, y: number, size: number, big: boolean, n = big ? 34 : 14) {
     for (let k = 0; k < n; k++) {
       const a = Math.random() * Math.PI * 2;
       const d = Math.random() ** 0.7;
@@ -137,6 +150,11 @@ export class Fx {
     this.bubbles.push({ x, y, t: 0, life: 2.6, phase: Math.random() * 6 });
   }
 
+  /** A little pixel heart that pops up at (x, y) and floats away. */
+  heart(x: number, y: number) {
+    this.hearts.push({ x, y, t: 0, life: 1.1, phase: Math.random() * 6 });
+  }
+
   step(dt: number) {
     const keep = <T extends { t: number; life: number; delay?: number }>(list: T[]) =>
       list.filter((p) => (p.t += dt) < p.life + (p.delay ?? 0));
@@ -157,11 +175,14 @@ export class Fx {
       s.y += s.vy * dt;
     }
     for (const b of this.bubbles) b.y -= 7 * dt;
+    // A heart pops up quickly, then drifts.
+    for (const h of this.hearts) h.y -= (h.t < 0.15 ? 30 : 7) * dt;
     this.blobs = keep(this.blobs);
     this.rings = keep(this.rings);
     this.sparks = keep(this.sparks);
     this.blooms = keep(this.blooms);
     this.bubbles = keep(this.bubbles);
+    this.hearts = keep(this.hearts);
   }
 
   /** Behind the squid: blooms. */
@@ -220,6 +241,18 @@ export class Fx {
         ctx.fillRect(x + 1, y, 1, 1);
         ctx.fillRect(x, y + 1, 1, 1);
       } else ctx.fillRect(x, y, 1, 1);
+    }
+    for (const h of this.hearts) {
+      const s = h.t / h.life;
+      // Solid, then blinking out in its last third, like an arcade pickup.
+      if (s > 0.66 && Math.floor(h.t * 16) % 2) continue;
+      const x0 = Math.round(h.x + Math.sin(h.t * 5 + h.phase) * 0.8) - 2;
+      const y0 = Math.round(h.y) - 2;
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = HEART_PINK;
+      HEART.forEach((row, j) => [...row].forEach((c, i) => c === "#" && ctx.fillRect(x0 + i, y0 + j, 1, 1)));
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(x0 + 1, y0 + 1, 1, 1);
     }
     ctx.globalAlpha = 1;
   }

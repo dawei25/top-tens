@@ -29,7 +29,6 @@ import {
   CLUE_LABEL,
   CLUE_NEXT_LABEL,
   confirmGuess,
-  FACT_CUE,
   GUESS_HINT,
   lifeCostLine,
   metricLabel,
@@ -44,6 +43,7 @@ import { listShare } from "./share";
 import { FloatNote } from "./Note";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
+import { MoreRanks } from "./MoreRanks";
 import { ParBlock, usePar } from "./par";
 import { reportList } from "../net";
 import { RateList } from "./rate/RateList";
@@ -322,8 +322,6 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     });
 
   const hints = game.hints ?? [];
-  // A revealed row with a fact opens it on a tap: a caption under the board says so, since a phone has no hover look.
-  const factShown = puzzle.answers.some((a) => a.fact && (over || game.found.includes(a.rank)));
   // Roll new list before play: a rolled list shows it in its own box right of the guess panel until anything
   // happens (no guess, no clue, nothing said in the feedback line). Then it fades out and the panel takes its room.
   const rerollSlot = !!rolled && !daily;
@@ -337,9 +335,10 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     dailyStreak = streak(sv);
   }
   const mode = !daily ? "Random list" : daily.date === today ? `Daily #${daily.n}` : `Archive #${daily.n}`;
-  // The list's own Blitz key. Never on a daily: Blitz shows every answer, and a round there would be a practice run
-  // at the day's one-try Blitz (a finished daily offers Today's Blitz instead). Nor on Today's Blitz list until that
-  // round is played. Count this game in before the save effect runs, so finishing a list opens its Blitz at once.
+  // The list's own Blitz key, on its results. Never on a daily: Blitz shows every answer, and a round there would be a
+  // practice run at the day's one-try Blitz (a finished daily offers Today's Blitz instead). Nor on Today's Blitz list
+  // until that round is played. Count this game in before the save effect runs, so finishing a list opens its Blitz at
+  // once.
   const heldBlitz = todaysBlitz === puzzle.id;
   const blitzOpen =
     !daily &&
@@ -386,17 +385,12 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-            {/* The score, then the list's Blitz key; on a narrow card the key drops under the score. The players'
-                average waits for the results, where it says how you did. */}
+            {/* The score alone (the owner: no Play Blitz here, "for simplicity"; the results offer the list's Blitz).
+                The players' average waits for the results, where it says how you did. */}
             <span className="prompt-end">
               <span className="count" aria-label={`${game.found.length} of 10 found`}>
                 <b>{game.found.length}</b>/10
               </span>
-              {blitzOpen && !over && (
-                <a className="key key-xs key-blitz-sm" data-testid="title-blitz" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
-                  Play Blitz
-                </a>
-              )}
             </span>
           </div>
           <h1>{puzzle.title}</h1>
@@ -553,27 +547,21 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               );
             })}
           </ol>
-          {/* Under the board: the facts cue once a row has one, and GIVE UP while playing. */}
-          {(!over || factShown) && (
+          {/* Under the board: GIVE UP while playing; once over, ranks 11 to 20 behind a key, the guessed ones marked. */}
+          {over && <MoreRanks puzzle={puzzle} guessed={new Set(misses.map((m) => m.rank))} />}
+          {!over && (
             <div className="board-foot">
-              {factShown && (
-                <p className="caption fact-cue" data-testid="fact-cue">
-                  {FACT_CUE}
-                </p>
-              )}
-              {!over && (
-                <button
-                  type="button"
-                  className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
-                  onClick={quit}
-                  data-testid="give-up"
-                  data-confirm={confirmQuit || undefined}
-                  onBlur={() => setConfirmQuit(false)}
-                >
-                  {/* The key keeps GIVE UP's width while it asks, so the second press lands where the first did. */}
-                  <SwapLabel off="Give up" on="Sure?" active={confirmQuit} />
-                </button>
-              )}
+              <button
+                type="button"
+                className={`key key-xs ${confirmQuit ? "key-danger" : ""}`}
+                onClick={quit}
+                data-testid="give-up"
+                data-confirm={confirmQuit || undefined}
+                onBlur={() => setConfirmQuit(false)}
+              >
+                {/* The key keeps GIVE UP's width while it asks, so the second press lands where the first did. */}
+                <SwapLabel off="Give up" on="Sure?" active={confirmQuit} />
+              </button>
             </div>
           )}
         </section>

@@ -1602,6 +1602,26 @@ a {
 .slot.missed .value {
   color: var(--muted);
 }
+/* Ranks 11 to 20 under a finished board (MoreRanks): rows like the missed ones, below their key; the ones the player
+   guessed (a life each) in the misses' pink, on the chips' tint. */
+.more-ranks {
+  border-top: 1px dashed var(--hairline);
+  margin-top: 6px;
+  padding-top: 2px;
+}
+.slot.extra .rank,
+.slot.extra .name,
+.slot.extra .value {
+  color: var(--muted);
+}
+.slot.extra.guessed {
+  background: rgba(255, 93, 143, 0.08);
+}
+.slot.extra.guessed .rank,
+.slot.extra.guessed .name,
+.slot.extra.guessed .value {
+  color: var(--pink);
+}
 
 .type-cursor {
   color: transparent;
@@ -1743,17 +1763,6 @@ a {
   gap: 10px;
   padding: 6px 16px 2px;
   border-top: 1px dashed var(--hairline);
-}
-/* "facts: tap a name.": the only cue a phone gets that a found row opens its fact (no hover there). Left of GIVE UP,
-   one quiet line; it comes in with the first row that has a fact, without moving the key. */
-.fact-cue {
-  margin: 0 auto 0 0;
-  font-size: 17px;
-  line-height: 1.3;
-}
-.board-foot:has(.fact-cue:only-child) {
-  padding-top: 8px;
-  padding-bottom: 6px;
 }
 .text-btn {
   min-height: 36px;
@@ -2421,8 +2430,8 @@ a {
   }
 }
 /* A small phone with its keyboard up (320 x 318, 375 x 387): the board's first rows stay in view above the guess
-   box. The title card comes down to its title, and the board to its rows (the score is on the board itself; Play
-   Blitz is back with the keyboard down). */
+   box. The title card comes down to its title, and the board to its rows (the score is back with the keyboard
+   down). */
 @media (max-height: 560px) and (max-width: 420px) {
   .game .prompt .prompt-top,
   .game .board-head {
@@ -2543,22 +2552,6 @@ a {
   box-shadow:
     inset 0 0 0 1px rgba(255, 209, 102, 0.55),
     0 5px 0 var(--key-shadow);
-}
-.key-blitz-sm {
-  align-self: center;
-  white-space: nowrap;
-  color: var(--gold);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 209, 102, 0.55),
-    0 3px 0 var(--key-shadow);
-}
-/* Phones: a tighter key, so it usually still fits beside the score. */
-@media (max-width: 420px) {
-  .key-blitz-sm {
-    padding: 0 10px;
-    font-size: 16px;
-    letter-spacing: 0.12em;
-  }
 }
 .blitz-none {
   margin: -4px 2px 0;
@@ -3218,10 +3211,7 @@ a.arch-cell:active .arch-name {
 }
 
 /* ---------- Players' average (par.json) ---------- */
-/*
- * The title card's right end: the score, then PLAY BLITZ. It takes the room the category leaves; when both don't
- * fit there (a long category, a narrow phone), the key wraps under the score, still on the right.
- */
+/* The title card's right end: the score, in the room the category leaves, on the right. */
 .prompt-end {
   flex: 1 1 auto;
   display: flex;

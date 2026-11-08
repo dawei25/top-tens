@@ -239,9 +239,10 @@ test("a Blitz on its day's own list holds the rest until that list is done", asy
   assert.equal(await page.getByTestId("blitz-rest-hidden").count(), 1);
   assert.equal(await page.getByTestId("blitz-missed-row").count(), 0);
 
-  // "Today's list" from there; once it's done, the locked round shows everything.
-  assert.equal(await page.getByTestId("blitz-list").getAttribute("href"), `#daily-${DAY}`);
-  await page.getByTestId("blitz-list").click();
+  // No list key there, not even to its daily: a Blitz never offers its own list (the owner, Nov 8). Once that daily is
+  // done (from its address here), the locked round shows everything.
+  assert.equal(await page.getByTestId("blitz-list").count(), 0);
+  await go(page, `#daily-${DAY}`);
   await page.getByTestId("give-up").click();
   await page.getByTestId("give-up").click();
   await page.getByTestId("results").waitFor();
