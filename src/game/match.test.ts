@@ -730,6 +730,9 @@ describe("coverage audit readings", () => {
     expect(j("st paul")).toMatchObject({ kind: "correct", entry: { name: "Saint Paul" } });
     expect(j("the fame")).toMatchObject({ kind: "near", entry: { name: "The Fame / The Fame Monster" } });
     expect(j("the fame monster")).toMatchObject({ kind: "near", entry: { name: "The Fame / The Fame Monster" } });
+    // A city shortened after the name too: "ncis la" is NCIS: Los Angeles, not NCIS.
+    const tv: Puzzle = { ...puzzle, id: "tv9", answers: [e(5, "NCIS"), ...puzzle.answers.slice(1)], extras: [v(18, "NCIS: Los Angeles")] };
+    expect(judgeGuess("ncis la", tv, new Set())).toMatchObject({ kind: "near", corrected: false, entry: { name: "NCIS: Los Angeles" } });
   });
 
   it("a franchise and a number is the franchise, on a list of franchises (class 8)", () => {

@@ -610,7 +610,8 @@ function oneSlipOfName(guess: string, entry: Entry): boolean {
 
 /**
  * Common categories of things lists rank: foods and drinks, sports, kinds of produce. Typed alone such a word names a
- * kind of answer ("pizza", "basketball", "meat"), so it never picks the one answer that happens to carry it.
+ * kind of answer ("pizza", "basketball", "meat"), so it never picks the one answer that happens to carry it. Not
+ * continents: "africa" puts South Africa in the box to confirm, as part of its name (match.test.ts).
  */
 const CATEGORIES = new Set(
   (
@@ -693,7 +694,7 @@ const SHORT_FORMS: Record<string, string[]> = {
   and: ["n"],
   u: ["you"],
 };
-/** Cities as teams' fans shorten them, first word only: "la rams", "ny jets", "tb rays", "chi sox". */
+/** Cities as people shorten them beside another word: "la rams", "ny jets", "tb rays", "chi sox", "ncis la". */
 const CITY_SHORT: Record<string, string> = {
   la: "los angeles",
   ny: "new york",
@@ -722,7 +723,7 @@ const DESCRIPTORS = new Set("song songs video videos mv lyrics lyric audio offic
  */
 export function readings(guess: string, puzzle: Pick<Puzzle, "noun">): { text: string; exact: boolean }[] {
   const words = guess.split(" ");
-  const options = words.map((w, i) => [w, ...(SHORT_FORMS[w] ?? []), ...(i === 0 && words.length > 1 && CITY_SHORT[w] ? [CITY_SHORT[w]] : [])]);
+  const options = words.map((w) => [w, ...(SHORT_FORMS[w] ?? []), ...(words.length > 1 && CITY_SHORT[w] ? [CITY_SHORT[w]] : [])]);
   const out: { text: string; exact: boolean }[] = [];
   const add = (text: string, exact: boolean) => {
     if (text && text !== guess && !out.some((r) => r.text === text)) out.push({ text, exact });
