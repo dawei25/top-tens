@@ -2229,8 +2229,14 @@ export const TOPICS: Topic[] = [
     value: "IMF",
     metric: "GDP per capita (US$)",
     universe: "countries",
-    // Monaco, Bermuda and the other rows with no IMF figure are free: famous rich places with no rank here.
-    unrankedRowsFree: true,
+    // Coverage audit: Monaco, Bermuda and the other rows with no IMF figure were free, but Monaco is the guess
+    // everyone makes. They are answers now, showing the World Bank's figure (its year, if the cell gives one).
+    also: [
+      { tables: [0], name: "Country/Territory", value: "World Bank", where: { col: "World Bank", match: /\(\d{4}\)/ }, dated: { source: "World Bank", perYear: { col: "World Bank" } } },
+      { tables: [0], name: "Country/Territory", value: "World Bank", where: { col: "World Bank", match: /^[\d,.]+$/ }, dated: { label: "2025", source: "World Bank" } },
+    ],
+    // An event and a motto among the redirects.
+    junkAliases: ["Liberation from the Alberoni Occupation", "Mother Colony of the West Indies"],
   },
   {
     id: "population-density",

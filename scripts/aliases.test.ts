@@ -470,6 +470,13 @@ describe("aliases as built: what players type", () => {
     ]);
   });
 
+  it("gdp-per-capita: Monaco and the other rows with no IMF figure are answers with the World Bank's (coverage audit)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "gdp-per-capita.json"), "utf8"));
+    expect(lands("gdp-per-capita", "monaco")).toBe("Monaco");
+    expect(p.extras.find((e) => e.name === "Monaco")?.value).toMatch(/World Bank, 20\d\d\)$/);
+    expect(lands("gdp-per-capita", "lichtenstein")).toBe("Liechtenstein");
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");
