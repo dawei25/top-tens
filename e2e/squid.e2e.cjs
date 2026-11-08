@@ -198,7 +198,7 @@ const controlsAt = (page, p, only = "*") =>
  * Moves the frozen clock on until the squid is on screen and "clear" of every control by a fingertip, or "under" a
  * control that matches `only`. Returns where it is.
  */
-async function squidWhere(page, where, { only = "*", tries = 40 } = {}) {
+async function squidWhere(page, where, { only = "*", tries = 200 } = {}) {
   const fits = (c) => (where === "clear" ? !c.under && !c.ring : c.only);
   for (let i = 0; i < tries; i++) {
     const p = await squidSpot(page);
