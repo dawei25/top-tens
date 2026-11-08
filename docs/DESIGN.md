@@ -85,8 +85,8 @@ approves it: five estimation questions a game, scored by plain closeness, one ru
 1. **Home:** Today's list and Blitz, then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ). Home never names today's list or
    Blitz: the topic is the surprise (owner, Nov 7).
-2. **Game:** title card with the prompt, score (no average during play: it's revealed on the results) and a Play
-   Blitz key; lives; 10 rank slots, each empty one with a
+2. **Game:** title card with the prompt and score (no average during play: it's revealed on the results; no Play
+   Blitz key there, owner Nov 8: "for simplicity"); lives; 10 rank slots, each empty one with a
    clue magnifier; feedback line; chips for life-costing misses.
    Blitz's title card shows the prompt only when it adds words beyond the title, "name as many <noun> as you can", and
    its scoring rule ("#1 gets 100, smaller numbers get less, down to 10"), repeated on the results. Once a found row
