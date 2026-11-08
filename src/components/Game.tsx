@@ -45,7 +45,7 @@ import { FloatNote } from "./Note";
 import { CountUp } from "./motion/effects";
 import { ClassicSquid, ResultsSquid, SquidFx } from "./squid";
 import { ParBlock, usePar } from "./par";
-import { reportList } from "../net";
+import { reportGuess, reportList } from "../net";
 import { RateList } from "./rate/RateList";
 
 interface Props {
@@ -252,6 +252,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
       return;
     }
     const { state, result } = applyGuess(game, puzzle, text, lexicon, offered);
+    // A guess the game didn't take, for the improvement loop (src/net/misses.ts); a no-op otherwise or without a backend.
+    reportGuess(puzzle.id, "list", text, result);
     const fb = describe(result, puzzle);
     if (!fb) return;
     setHintAsk(null);

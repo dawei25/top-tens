@@ -35,7 +35,7 @@ import { blitzShare, dailyBlitzShare } from "./share";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
 import { BlitzCrowdLine } from "./account";
-import { reportBlitz } from "../net";
+import { reportBlitz, reportGuess } from "../net";
 import { RateList } from "./rate/RateList";
 
 interface Props {
@@ -454,6 +454,8 @@ export function Blitz({
     e.preventDefault();
     // Judged against the real clock: a guess sent after 0 doesn't count, even before the screen catches up.
     const { state: next, result } = blitzGuess(startBlitz(state), puzzle, input, lexicon, feedback?.suggestions);
+    // A guess the game didn't take, for the improvement loop (src/net/misses.ts); a no-op otherwise or without a backend.
+    reportGuess(puzzle.id, "blitz", input, result);
     setState(next);
     if (result.kind === "over" || isOver(next)) return setEndedHere(true);
     if (result.kind === "scored") {
