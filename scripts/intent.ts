@@ -230,6 +230,8 @@ const BASE_COUNTRY_FORMS: string[][] = [
   // Czechia by its "ČR".
   ["Central African Republic", "CAR", "C.A.R.", "Central African Rep"],
   ["Liechtenstein", "Lichtenstein"],
+  // The islands table's name for the kingdom (Greenland, Zealand, Funen).
+  ["Denmark", "Kingdom of Denmark", "Danish Realm"],
   ["Belarus", "Byelorussia", "Belorussia"],
   ["Burkina Faso", "Upper Volta", "Burkina"],
   ["Ireland", "Republic of Ireland", "Eire"],

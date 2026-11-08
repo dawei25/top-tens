@@ -37,7 +37,24 @@ const isPlaceList = (p: Puzzle) => {
 };
 const topicNoun = (id: string) => TOPICS.find((t) => t.id === id)?.noun;
 /** The fields of an entry in the puzzle format (src/game/types.ts `Entry`). */
-const ENTRY_FIELDS = new Set(["rank", "name", "aliases", "value", "n", "article", "fact", "elsewhere"]);
+const ENTRY_FIELDS = new Set(["rank", "name", "aliases", "value", "n", "article", "fact", "elsewhere", "country"]);
+/** The countries universe's names: an entry's `country` (topics.ts `countryCol`) is written the way they are. */
+const COUNTRY_NAMES = new Set(UNIVERSES.countries().map((c) => normalize(c.name)));
+
+/**
+ * An entry's `country` problems: a name the country lists don't use ("Danish Realm"), the same country twice, or a
+ * one-country list (one country is a string).
+ */
+export function countryFieldIssues(e: Entry & { country?: unknown }): string[] {
+  if (e.country === undefined) return [];
+  const list = Array.isArray(e.country) ? e.country : [e.country];
+  const out: string[] = [];
+  if (!list.length || list.some((c) => typeof c !== "string")) return [`"${e.name}": country must be a name or a list of names`];
+  for (const c of list as string[]) if (!COUNTRY_NAMES.has(normalize(c))) out.push(`"${e.name}": country "${c}" is not how the country lists name a country`);
+  if (new Set(list).size !== list.length) out.push(`"${e.name}": a country twice`);
+  if (Array.isArray(e.country) && list.length < 2) out.push(`"${e.name}": one country is a string, not a list`);
+  return out;
+}
 /** Below this many accepted answers, wrong-but-real guesses are likely to be free. */
 const MIN_ACCEPTED = 30;
 /**
@@ -509,9 +526,11 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   const regionRequired = (p.source?.asOf ?? "") >= REGION_REQUIRED_FROM;
   for (const m of regionGaps(p, topic)) (regionRequired ? err : warn)(m);
   // Only the puzzle format's fields ship: a build-only field (a capital's `country`) is noise in every download.
+  // `country` ships only where the topic reads it (`countryCol`): a capital's build-only one is noise.
   for (const e of all) {
-    const extra = Object.keys(e).filter((k) => !ENTRY_FIELDS.has(k));
+    const extra = Object.keys(e).filter((k) => !ENTRY_FIELDS.has(k) || (k === "country" && !topic?.countryCol));
     if (extra.length) err(`"${e.name}": fields outside the puzzle format: ${extra.join(", ")}`);
+    else for (const m of countryFieldIssues(e)) err(m);
   }
 
   // Blitz scores `n`: it must be present on the top 10, follow the ranking, and share one unit across entries.

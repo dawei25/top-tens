@@ -77,6 +77,28 @@ interface Row {
   tag?: string;
   /** The name it shares with such a namesake ("The Lion King" for "The Lion King (1994)"). */
   plain?: string;
+  /** The countries the row is in (`countryCol`), as the country lists name them. */
+  country?: string[];
+}
+
+/** An entry as built: the puzzle format, plus the countries a place is in where the topic reads them. */
+type BuiltEntry = Entry & { country?: string | string[] };
+
+/**
+ * The countries a cell names, one per line, as the countries universe names them: "Republic of Ireland" is Ireland,
+ * "Danish Realm" Denmark, "Timor-Leste" East Timor. Asides ("(Kingdom of Denmark)") and unknown names are left out;
+ * the unknown ones are listed for gazetteer.ts or COUNTRY_FORMS.
+ */
+export function cellCountries(cell: Pick<Cell, "lines" | "text"> | undefined, unknown?: Set<string>): string[] {
+  const out: string[] = [];
+  for (const line of cell?.lines.length ? cell.lines : [cell?.text ?? ""]) {
+    const name = cleanName(line);
+    if (!name) continue;
+    const c = countryOf(name)?.name;
+    if (!c) unknown?.add(name);
+    else if (!out.includes(c)) out.push(c);
+  }
+  return out;
 }
 
 function column(header: string[], spec: string | number): number {
@@ -327,6 +349,8 @@ export function rankRows<R extends Pick<Row, "value" | "tiebreak">>(topic: Pick<
 export async function readRows(topic: Topic): Promise<Row[]> {
   const rows: Row[] = [];
   const members = topic.canonical ? [topic.universe ?? []].flat().flatMap((u) => UNIVERSES[u]()) : [];
+  /** `countryCol` cells that name no known country. */
+  const unknownCountries = new Set<string>();
   for (const source of rankedSources(topic)) {
     const $ = await fetchPage(source.page);
     const tables = wikitables($);
@@ -340,6 +364,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
       const fromCol = topic.fallback ? column(header, topic.fallback.from) : -1;
       const yc = header.findIndex((h) => /^(year|released?|release date)\b/i.test(h));
       const pc = topic.part === undefined ? -1 : column(header, topic.part);
+      const ccol = topic.countryCol === undefined ? -1 : column(header, topic.countryCol);
       if (!topic.fallback) checkNumbers(topic, header, body, vc);
       for (const r of body) {
         const nameCell = r[nc];
@@ -417,6 +442,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
           link: nameCell.link,
           tag: rowTag(yc >= 0 ? r[yc] : undefined, nameCell.link),
           ...(numbered ? { part: { base, link: r[pc]?.link } } : {}),
+          ...(ccol >= 0 ? { country: cellCountries(r[ccol], unknownCountries) } : {}),
         });
       }
     }
@@ -424,6 +450,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
   for (const name of Object.keys(topic.overrides ?? {})) {
     if (!rows.some((r) => r.name === (topic.rename?.[name] ?? name))) console.log(`warn ${topic.id}: override for "${name}", which is not a row`);
   }
+  if (unknownCountries.size) console.log(`warn ${topic.id}: country cells naming no known country (gazetteer.ts): ${[...unknownCountries].join(", ")}`);
   rankRows(topic, rows);
   lowerParts(rows);
   // "3.2 million" among "6,301,972"s reads as another unit: write it out like the rest, keeping its currency sign
@@ -1263,14 +1290,17 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     // World, not #21. Each top-10 slot keeps its own rank (a tie at #10/#11 is rejected above), and a table kept in
     // its own order has broken its ties already.
     const tied = i >= 10 && !topic.keepOrder && sameValue(row, rows[i - 1]);
-    entries.push({
+    const entry: BuiltEntry = {
       rank: tied ? entries[i - 1].rank : i + 1,
       name: row.name,
       aliases: [...aliases],
       value: (topic.prefix ?? "") + row.valueText + (topic.unit ?? ""),
       ...(Number.isFinite(row.value) ? { n: statNumber(row.value) } : {}),
       ...(i < 10 ? { article: row.redirectTarget } : {}),
-    });
+    };
+    // One country as a string, several (an island shared by countries) as a list.
+    if (row.country?.length) entry.country = row.country.length === 1 ? row.country[0] : row.country;
+    entries.push(entry);
   }
   const top = entries.slice(0, 10);
   const factKeys = matchFacts(facts, top);

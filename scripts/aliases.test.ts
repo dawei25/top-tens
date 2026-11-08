@@ -345,6 +345,11 @@ describe("aliases as built: what players type", () => {
     expect(lands("buildings", guess)).toBe(name);
   });
 
+  it("islands: what Hawaii calls its biggest island (coverage audit)", () => {
+    expect(lands("islands", "big island")).toBe("Hawaiʻi");
+    expect(lands("islands", "hawaii island")).toBe("Hawaiʻi");
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

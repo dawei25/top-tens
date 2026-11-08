@@ -52,6 +52,12 @@ export interface Topic {
    * that isn't numbered ("Limited Series") is named like the thing. `rename` takes "Monster (Season 1)" too.
    */
   part?: string | number;
+  /**
+   * Header text or column index naming the country (or countries) each ranked row is in. It becomes the entry's
+   * `country`, as the country lists name it ("Japan"; ["Brunei", "Indonesia", "Malaysia"] for Borneo), so a typed
+   * country can offer its islands to choose from (owner, on islands: "typing japan should offer Honshu, Okinawa").
+   */
+  countryCol?: string | number;
   /** Take names from cell text instead of the first link's text. */
   nameFromText?: boolean;
   /** Take names from the first link's article title ("Nokia 1100" for a cell showing "1100"). */
@@ -713,6 +719,10 @@ export const TOPICS: Topic[] = [
     value: "Area",
     metric: "Area",
     unit: " km²",
+    // Each island's country, for the matcher: "japan" offers Honshu, Hokkaido, Okinawa to choose from (owner).
+    countryCol: "Nation",
+    // Coverage audit: what Hawaii's people call the island.
+    aliases: { "Hawaiʻi": ["Big Island", "Hawaii Island", "Big Island of Hawaii"] },
     values: { kind: "area" },
     universe: "countries",
     also: [{ page: "List of archipelagos", tables: [0], name: 0 }],
