@@ -7,6 +7,8 @@ import {
   BAND_CHARS,
   bandLabel,
   bandOf,
+  currentYear,
+  curve,
   drawQuestions,
   editField,
   FATHOM_KEY,
@@ -165,8 +167,13 @@ describe("the rule on screen", () => {
 const pct = (id: string, kind: FathomKind, extra: Partial<FathomQuestion> = {}) => q(id, kind, { round: "percent", unit: "percent", answer: 71, ...extra });
 const yr = (id: string, kind: FathomKind, extra: Partial<FathomQuestion> = {}) => q(id, kind, { round: "year", unit: "year", answer: 2007, ...extra });
 
-// The owner's revamp: two new rounds beside the estimate. A percent is scored by points off, a year by years off: a
-// ratio means nothing there (65% for 71% is 9% off but 6 points; 2004 for 2007 is 0.06% off).
+/** The year the tests score a year round from (the owner's calibration was in 2026). */
+const NOW = 2026;
+
+// The owner's revamp: two new rounds beside the estimate. They were scored by points off and years off, until the owner
+// played: "0.8% for 25% (beetles)" scored 27 and "1984 for 1967 (first heart transplant)" 15, "theres no way my second
+// guess was considered worse". Now both score on the estimate's curve by how many times off they are, in the terms
+// that make sense for each: a share on its side of 50 (or its complement past it), a year by how long ago it was.
 describe("rounds", () => {
   it("a question without a round is an estimate", () => {
     expect(roundOf(q("a", "body"))).toBe("estimate");
@@ -174,57 +181,83 @@ describe("rounds", () => {
     expect(roundOf(yr("y", "body"))).toBe("year");
   });
 
-  it("percent: each point off costs 3, spot on (within half a point) 100", () => {
+  it("is one curve: 100 x (1 - |d|)^2, rounded, 0 from |d| = 1", () => {
+    expect([0, 0.1, -0.1, 0.3, 0.5, 1, -1, 2].map(curve)).toEqual([100, 81, 81, 49, 25, 0, 0, 0]);
+    for (const r of [1.1, 2, 3, 9.9]) expect(fathomScore(100 * r, 100)).toBe(curve(Math.log10(r)));
+  });
+
+  it("percent: how many times off on the answer's side of 50, spot on (within half a point) 100", () => {
     expect(percentScore(71, 71)).toBe(100);
     expect(percentScore(71.4, 71)).toBe(100);
     expect(percentScore(70.6, 71)).toBe(100);
-    expect(percentScore(70, 71)).toBe(97);
-    expect(percentScore(65, 71)).toBe(82);
-    expect(percentScore(77, 71)).toBe(82);
-    expect(percentScore(61, 71)).toBe(70);
-    expect(percentScore(81, 71)).toBe(70);
-    expect(percentScore(38, 71)).toBe(1);
-    expect(percentScore(37, 71)).toBe(0);
-    expect(percentScore(0, 71)).toBe(0);
+    // Up to 50, the shares themselves: 20 for 25 is 1.25x low.
+    expect(percentScore(20, 25)).toBe(fathomScore(20, 25));
+    expect([0.8, 5, 10, 15, 20, 30, 40, 50].map((g) => percentScore(g, 25))).toEqual([0, 9, 36, 61, 82, 85, 63, 49]);
+    expect([1, 5, 10].map((g) => percentScore(g, 2.5))).toEqual([36, 49, 16]);
+    // Past 50, what's left: 65 for 71 is 35 left against 29.
+    expect(percentScore(65, 71)).toBe(fathomScore(35, 29));
+    expect([50, 60, 65, 70, 80, 90].map((g) => percentScore(g, 71))).toEqual([58, 74, 84, 97, 70, 29]);
+    // Either side of 50 alike: 90 for 99 is 10 for 1, 10x off, 0.
+    expect(percentScore(90, 99)).toBe(percentScore(10, 1));
+    expect(percentScore(90, 99)).toBe(0);
+    expect(percentScore(80, 75)).toBe(percentScore(20, 25));
+    // 0 and 100 are fair guesses, taken as 0.5 and 99.5.
+    expect(percentScore(0, 71)).toBe(22);
+    expect(percentScore(100, 71)).toBe(0);
     expect(percentScore(100, 2)).toBe(0);
-    // Half a point is not spot on: 98.5, and only spot on is 100.
-    expect(percentScore(71.5, 71)).toBe(99);
+    expect(percentScore(0, 2)).toBe(16);
+    // Half a point is not spot on, and only spot on is 100.
+    expect(percentScore(71.5, 71)).toBe(98);
+    expect(percentScore(50.5, 50)).toBeLessThan(100);
   });
 
-  it("year: each year off costs 5, the exact year 100", () => {
-    expect(yearScore(2007, 2007)).toBe(100);
-    expect(yearScore(2006, 2007)).toBe(95);
-    expect(yearScore(2009, 2007)).toBe(90);
-    expect(yearScore(2005, 2007)).toBe(90);
-    expect(yearScore(1997, 2007)).toBe(50);
-    expect(yearScore(2017, 2007)).toBe(50);
-    expect(yearScore(1988, 2007)).toBe(5);
-    expect(yearScore(1987, 2007)).toBe(0);
-    expect(yearScore(1066, 2007)).toBe(0);
+  it("year: how many times off how long ago it was, the exact year 100", () => {
+    expect(yearScore(2007, 2007, NOW)).toBe(100);
+    expect([1984, 1980, 1960, 1950, 2000, 1900].map((g) => yearScore(g, 1967, NOW))).toEqual([31, 46, 73, 45, 0, 0]);
+    expect([2005, 2006, 2008, 2010, 2000, 1995].map((g) => yearScore(g, 2007, NOW))).toEqual([76, 87, 86, 60, 35, 13]);
+    expect([1920, 1950, 1880, 1850].map((g) => yearScore(g, 1903, NOW))).toEqual([65, 14, 60, 28]);
+    expect(yearScore(2010, 2005, NOW)).toBe(42);
+    expect(yearScore(2000, 1992, NOW)).toBe(42);
+    // Ten years off is far for something 19 years ago and close for something 1,000 years ago.
+    expect(yearScore(2017, 2007, NOW)).toBe(0);
+    expect(yearScore(1076, 1066, NOW)).toBeGreaterThan(90);
+    expect(yearScore(1066, 2007, NOW)).toBe(0);
+    // This year and later count as a year ago: still finite, still not full marks.
+    expect(yearScore(NOW, NOW - 1, NOW)).toBe(99);
+    expect(yearScore(NOW + 50, 1967, NOW)).toBe(yearScore(NOW - 1, 1967, NOW));
+    // Measured from this year when no year is given.
+    expect(yearScore(1984, 1967)).toBe(yearScore(1984, 1967, currentYear()));
   });
 
   it("scores each question by its round's rule", () => {
     expect(scoreFor(q("a", "body"), 200)).toBe(fathomScore(200, 100));
-    expect(scoreFor(pct("p", "body"), 65)).toBe(82);
-    expect(scoreFor(yr("y", "body"), 2004)).toBe(85);
+    expect(scoreFor(pct("p", "body"), 65)).toBe(84);
+    expect(scoreFor(yr("y", "body"), 2004, NOW)).toBe(65);
+    expect(scoreFor(yr("y", "body"), 2004)).toBe(yearScore(2004, 2007));
     const bank = [q("a", "body"), pct("p", "food"), yr("y", "space")];
     const g = [200, 65, 2004].reduce((game, guess) => nextQuestion(lockIn(game, guess)), newGame(["a", "p", "y"]));
-    expect(scoreGame(g, bank).map((s) => s.points)).toEqual([49, 82, 85]);
+    expect(scoreGame(g, bank).map((s) => s.points)).toEqual([49, 84, yearScore(2004, 2007)]);
   });
 
-  it("never goes up as a guess gets further off, either way", () => {
-    for (const [score, answer, step] of [
-      [percentScore, 50, 0.25],
-      [yearScore, 1900, 1],
-    ] as const) {
-      let up = 101;
-      let down = 101;
-      for (let off = 0; off <= 40; off += step) {
-        expect(score(answer + off, answer)).toBeLessThanOrEqual(up);
-        expect(score(answer - off, answer)).toBeLessThanOrEqual(down);
-        expect(score(answer + off, answer)).toBe(score(answer - off, answer));
-        up = score(answer + off, answer);
-        down = score(answer - off, answer);
+  it("never goes up as a guess gets further off, on either side", () => {
+    const walks: [string, (g: number) => number, number, number, number, number][] = [
+      ["percent 25", (g) => percentScore(g, 25), 25, 0, 100, 0.25],
+      ["percent 50", (g) => percentScore(g, 50), 50, 0, 100, 0.25],
+      ["percent 71", (g) => percentScore(g, 71), 71, 0, 100, 0.25],
+      ["percent 2.5", (g) => percentScore(g, 2.5), 2.5, 0, 100, 0.25],
+      ["year 1903", (g) => yearScore(g, 1903, NOW), 1903, 1000, NOW + 5, 1],
+      ["year 2007", (g) => yearScore(g, 2007, NOW), 2007, 1000, NOW + 5, 1],
+    ];
+    for (const [name, score, answer, low, high, step] of walks) {
+      let last = 101;
+      for (let g = answer; g <= high; g += step) {
+        expect(score(g), `${name}: ${g}`).toBeLessThanOrEqual(last);
+        last = score(g);
+      }
+      last = 101;
+      for (let g = answer; g >= low; g -= step) {
+        expect(score(g), `${name}: ${g}`).toBeLessThanOrEqual(last);
+        last = score(g);
       }
     }
   });
@@ -234,12 +267,12 @@ describe("rounds", () => {
     expect(RULES.estimate).toBe(RULE);
     expect(RULES.percent).toBe(RULE);
     expect(RULES.year).toBe(RULE);
-    expect(percentScore(60, 50)).toBe(70);
-    expect(percentScore(40, 50)).toBe(70);
-    expect(percentScore(51, 50)).toBe(97);
-    expect(yearScore(1910, 1900)).toBe(50);
-    expect(yearScore(1890, 1900)).toBe(50);
-    expect(yearScore(1901, 1900)).toBe(95);
+    expect(percentScore(60, 50)).toBe(85);
+    expect(percentScore(40, 50)).toBe(82);
+    expect(percentScore(51, 50)).toBe(98);
+    expect(yearScore(1910, 1900, NOW)).toBe(80);
+    expect(yearScore(1890, 1900, NOW)).toBe(81);
+    expect(yearScore(1901, 1900, NOW)).toBe(98);
     for (const rule of Object.values(RULES)) {
       expect(rule).not.toMatch(/—|\p{Extended_Pictographic}/u);
       expect(rule.length).toBeLessThanOrEqual(70);
@@ -281,15 +314,105 @@ describe("rounds", () => {
     expect(offAxis("estimate", 200, 100)).toBeCloseTo(Math.log10(2));
     expect(offAxis("estimate", 1, 100)).toBe(-1);
     expect(offAxis("estimate", 1e9, 100)).toBe(1);
-    expect(offAxis("percent", 81, 71)).toBeCloseTo(0.3);
-    expect(offAxis("percent", 61, 71)).toBeCloseTo(-0.3);
-    expect(offAxis("percent", 0, 71)).toBe(-1);
-    expect(offAxis("year", 2017, 2007)).toBeCloseTo(0.5);
-    expect(offAxis("year", 1950, 2007)).toBe(-1);
-    // The edge is where the round scores 0.
-    expect(percentScore(71 + 100 / 3, 71)).toBe(0);
-    expect(yearScore(2027, 2007)).toBe(0);
+    // A percent: powers of ten on the answer's side of 50, higher to the right.
+    expect(offAxis("percent", 30, 25)).toBeCloseTo(Math.log10(30 / 25));
+    expect(offAxis("percent", 81, 71)).toBeCloseTo(Math.log10(29 / 19));
+    expect(offAxis("percent", 61, 71)).toBeCloseTo(Math.log10(29 / 39));
+    expect(offAxis("percent", 2.5, 25)).toBeCloseTo(-1);
+    expect(offAxis("percent", 0, 25)).toBe(-1);
+    expect(offAxis("percent", 0, 71)).toBeCloseTo(Math.log10(29 / 99.5));
+    // A year: three times the powers of ten in how long ago, later to the right.
+    expect(offAxis("year", 2010, 2007, undefined, NOW)).toBeCloseTo(3 * Math.log10(19 / 16));
+    expect(offAxis("year", 1960, 1967, undefined, NOW)).toBeCloseTo(3 * Math.log10(59 / 66));
+    expect(offAxis("year", 2017, 2007, undefined, NOW)).toBeCloseTo(3 * Math.log10(19 / 9));
+    expect(offAxis("year", 1066, 2007, undefined, NOW)).toBe(-1);
+    // The edge is where the round scores 0, and the squid's distance is the one the points come from.
+    expect(percentScore(2.5, 25)).toBe(0);
+    expect(percentScore(100 - 2.9, 71)).toBe(0);
+    const early = 1967 - Math.round(59 * (10 ** (1 / 3) - 1));
+    expect(offAxis("year", early, 1967, undefined, NOW)).toBeCloseTo(-1, 1);
+    expect(yearScore(early, 1967, NOW)).toBe(0);
+    for (const [guess, answer] of [[20, 25], [5, 2.5], [65, 71], [90, 99], [53, 59]])
+      expect(percentScore(guess, answer), `${guess} for ${answer}`).toBe(Math.min(99, curve(offAxis("percent", guess, answer))));
+    for (const [guess, answer] of [[1984, 1967], [2010, 2005], [1880, 1903], [1994, 1997]])
+      expect(yearScore(guess, answer, NOW), `${guess} for ${answer}`).toBe(Math.min(99, curve(offAxis("year", guess, answer, undefined, NOW))));
   });
+});
+
+// The owner's calibration sheet, Nov 8: after "0.8% for 25%" outscored "1984 for 1967", he judged pairs of guesses
+// (which one is better, or about the same) and rated a few. Scored with now = 2026, an estimate by its rule and a steps
+// list 100 - 30 per step. A pair agrees when the scores are within 15 points, or the one he picked scores higher; a
+// rating when the score is in his band (Great 80 and up, Good 45 to 80, Ok 25 to 65, Way off under 25). The old scores
+// (100 - 3 a point, 100 - 5 a year) agreed with 6 of his 15 pairs and 2 of his 5 ratings.
+describe("the owner's calibration (Nov 8)", () => {
+  type Guess = readonly ["percent" | "year" | "estimate" | "steps", number, number];
+  const points = ([round, guess, answer]: Guess): number =>
+    round === "percent"
+      ? percentScore(guess, answer)
+      : round === "year"
+        ? yearScore(guess, answer, NOW)
+        : round === "steps"
+          ? stepsScore(guess, answer)
+          : fathomScore(guess, answer);
+  const agrees = (a: number, b: number, pick: "A" | "B" | "Same") =>
+    Math.abs(a - b) <= 15 || (pick === "A" && a > b) || (pick === "B" && b > a);
+  const PAIRS: readonly [number, Guess, Guess, "A" | "B" | "Same"][] = [
+    [1, ["percent", 0.8, 25], ["year", 1984, 1967], "B"],
+    [2, ["percent", 10, 2.5], ["year", 1940, 1903], "Same"],
+    [3, ["percent", 1, 10], ["estimate", 500, 330], "B"],
+    [4, ["percent", 40, 60], ["year", 1960, 1928], "Same"],
+    [5, ["percent", 50, 74], ["year", 1975, 1953], "B"],
+    [6, ["year", 2000, 1992], ["estimate", 20, 8.8], "Same"],
+    [7, ["year", 1990, 1971], ["estimate", 100, 206], "Same"],
+    [8, ["percent", 15, 32], ["year", 2010, 2005], "Same"],
+    [9, ["percent", 50, 59], ["estimate", 80, 104], "A"],
+    [10, ["year", 1950, 1967], ["year", 1984, 1967], "Same"],
+    [11, ["percent", 1, 2.5], ["percent", 5, 2.5], "Same"],
+    [12, ["estimate", 150, 330], ["estimate", 700, 330], "Same"],
+    [13, ["estimate", 123, 50], ["estimate", 18, 50], "Same"],
+    [14, ["steps", 4, 6], ["steps", 9, 6], "A"],
+    [15, ["estimate", 84, 50], ["year", 1985, 1992], "Same"],
+  ];
+  // Known misses (3 of 15), where the scores and he disagree:
+  //  4. percent 40 for 60 scores 68, year 1960 for 1928 24: he said the same (the year scores lower).
+  //  5. percent 50 for 74 scores 51, year 1975 for 1953 28: he picked the year.
+  //  7. year 1990 for 1971 scores 20, estimate 100 for 206 47: he said the same (the year scores lower).
+  const MISSES = [4, 5, 7];
+
+  for (const [n, a, b, pick] of PAIRS) {
+    if (MISSES.includes(n)) continue;
+    it(`pair ${n}: ${a.join(" ")} against ${b.join(" ")}, he said ${pick}`, () => {
+      const [pa, pb] = [points(a), points(b)];
+      expect(agrees(pa, pb, pick), `${pa} against ${pb}`).toBe(true);
+    });
+  }
+
+  it("agrees with at least 12 of his 15 pairs", () => {
+    const agreed = PAIRS.filter(([, a, b, pick]) => agrees(points(a), points(b), pick));
+    expect(agreed.length).toBeGreaterThanOrEqual(12);
+  });
+
+  // What he played: the beetles' share scores 0, the heart transplant's year 31.
+  it("scores 0.8% for 25% below 1984 for 1967", () => {
+    expect(points(["percent", 0.8, 25])).toBe(0);
+    expect(points(["year", 1984, 1967])).toBe(31);
+  });
+
+  const BANDS = { Great: [80, 100], Good: [45, 80], Ok: [25, 65], "Way off": [0, 24] } as const;
+  const RATINGS: readonly [Guess, keyof typeof BANDS][] = [
+    [["year", 1984, 1967], "Ok"],
+    [["percent", 20, 25], "Great"],
+    [["percent", 5, 2.5], "Good"],
+    [["year", 1880, 1903], "Ok"],
+    [["estimate", 250, 330], "Good"],
+  ];
+  for (const [guess, band] of RATINGS) {
+    it(`rates ${guess.join(" ")} ${band}`, () => {
+      const [lo, hi] = BANDS[band];
+      const p = points(guess);
+      expect(p >= lo && p <= hi, `${p} is not ${band} (${lo} to ${hi})`).toBe(true);
+    });
+  }
 });
 
 describe("reading a guess, by round", () => {
