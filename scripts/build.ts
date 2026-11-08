@@ -1429,7 +1429,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   // The article a row's name cell links, or a category member's title: not an article guessed from a cell's text,
   // which can't tell "Rogue One" from "Rogue One: A Star Wars Story".
   const linked = new Map(entries.map((e, i) => [e, rows[i].link]));
-  const articleOf = (x: Entry) => linked.get(x) ?? LINK.get(x) ?? (FROM_CATEGORY.has(x) ? ARTICLE.get(x) : undefined);
+  const linkedArticle = (x: Entry) => linked.get(x) ?? LINK.get(x) ?? (FROM_CATEGORY.has(x) ? ARTICLE.get(x) : undefined);
   const shortOf = (x: Entry) => new Set([...(SHORT.get(x) ?? [])].flatMap((s) => [normalize(s), sameKey(s)]));
   // Entries by their own name: a later row of that very name is that entry, whoever else has the name as a short form
   // (six "Star Wars" rows are the 1977 film, not six entries beside The Force Awakens).
@@ -1438,7 +1438,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   for (const e of extra) {
     const forms = ownForms(e).map(normalize).filter(Boolean);
     if (countryMembers.has(e)) forms.push(...countryNames(forms));
-    const cut = (f: string, x: Entry) => shortFormOnly([normalize(f), sameKey(f)], shortOf(e), shortOf(x), articleOf(e), articleOf(x));
+    const cut = (f: string, x: Entry) => shortFormOnly([normalize(f), sameKey(f)], shortOf(e), shortOf(x), linkedArticle(e), linkedArticle(x));
     const namesake = named.get(normalize(e.name));
     const known = namesake ? normalize(e.name) : forms.find((f) => taken.has(f) && !cut(f, taken.get(f)!));
     if (known) {
@@ -1599,7 +1599,7 @@ async function main(): Promise<void> {
       index.push({ id: p.id, title: p.title, category: topic.category, blitz: !!p.blitz, ...debutFlag(topic) });
       console.log(`ok   ${p.id.padEnd(24)} ${p.answers.map((a) => a.name).join(", ")}`);
     } catch (err) {
-      console.log(`FAIL ${topic.id.padEnd(24)} ${(err as Error).message}`);
+      console.log(`FAIL ${topic.id.padEnd(24)} ${(err as Error).message}`, process.env.STACK ? (err as Error).stack : "");
     }
   }
   const indexFile = join(OUT_DIR, "index.json");
