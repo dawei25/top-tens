@@ -217,7 +217,7 @@ worth), nothing that changes month to month, nothing gory or political. A dated 
 `definition` ("2023").
 
 **The bank's mix:** at least 40 questions (judging drops weak ones) over at least 8 kinds, no kind more than 9 in 50,
-at least 12 easy openers, and a spread of estimate magnitudes from under 1 to billions (counting the unit's scale word:
+at least 12 easy openers, and a spread of estimate magnitudes from under 10 to billions (counting the unit's scale word:
 86 billion neurons is in the billions; a percent or a year is no magnitude). No more than one in five how tall / how
 heavy (a warning for now). Each game plays one percent, one year and one name-it round, and holds back the last 3
 games' questions while the bank has others, so aim for at least 10 of each round; with fewer, the same ones come back

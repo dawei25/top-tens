@@ -9,7 +9,7 @@ const assert = require("node:assert/strict");
 const { PNG } = require("pngjs");
 
 const URL = process.env.E2E_URL || "http://localhost:5101/";
-const SITE = "https://toptentacle.vercel.app/";
+const SITE = "https://toptentacle.io/";
 
 /** The content of every <meta> in the page, by its property or name. */
 function metas(html) {
@@ -51,7 +51,7 @@ test("the built page carries the share card's tags, with absolute URLs", async (
   assert.equal(m["og:url"], SITE);
   assert.ok(m["og:description"], "og:description");
   assert.equal(m["og:description"], m.description, "the share card says what the page's description says");
-  assert.match(m["og:image"] ?? "", /^https:\/\/toptentacle\.vercel\.app\/[\w.-]+\.png$/, "og:image is an absolute URL");
+  assert.match(m["og:image"] ?? "", /^https:\/\/toptentacle\.io\/[\w.-]+\.png$/, "og:image is an absolute URL");
   assert.equal(m["og:image:width"], "1200");
   assert.equal(m["og:image:height"], "630");
   assert.ok(m["og:image:alt"], "og:image:alt");

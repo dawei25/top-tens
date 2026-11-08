@@ -188,11 +188,11 @@ describe("checkBank", () => {
     expect(checkBank(hard)).toEqual(["11 easy openers; the bank needs at least 12"]);
 
     const flat = bank();
-    flat.questions[0].answer = 3;
-    flat.questions[1].answer = 4;
+    flat.questions[0].answer = 30;
+    flat.questions[1].answer = 40;
     flat.questions[1].unit = "metres";
     expect(checkBank(flat)).toEqual([
-      "no answer under 1: the bank needs a spread of magnitudes",
+      "no answer under 10: the bank needs a spread of magnitudes",
       "no answer in the billions: the bank needs a spread of magnitudes",
     ]);
     // The billions are counted with the unit's scale word: 2 billion metres is, 2 metres isn't.
@@ -339,7 +339,7 @@ describe("rounds", () => {
     const b = bank();
     // The only answer under 1 was question-1's 0.5 metres: a 0.5% share doesn't stand in for it.
     b.questions[0] = percent({ id: "question-1", answer: 0.5, question: "How much of Earth's water is fresh and liquid?" });
-    expect(checkBank(b)).toEqual(["no answer under 1: the bank needs a spread of magnitudes"]);
+    expect(checkBank(b)).toEqual(["no answer under 10: the bank needs a spread of magnitudes"]);
   });
 
   // In one game, a year that another question's text states gives the year question away.
