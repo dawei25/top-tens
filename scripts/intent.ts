@@ -713,6 +713,16 @@ export const INTENT: Record<string, Intent> = {
       "State Grid Corporation of China": ["State Grid"],
       "Saudi Aramco": ["Aramco"],
       ExxonMobil: ["Exxon", "Exxon Mobil", "Mobil"],
+      // Coverage audit: the short forms of the answers past the ranking, which have no redirects.
+      "Volkswagen Group": ["VW", "Volkswagen"],
+      "Johnson & Johnson": ["J&J"],
+      "Procter & Gamble": ["P&G"],
+      "General Electric": ["GE"],
+      "Walt Disney": ["Disney", "The Walt Disney Company", "Walt Disney Company"],
+      "United Parcel Service": ["UPS"],
+      "Ingka Group": ["IKEA"],
+      "Verizon Communications": ["Verizon"],
+      "Coca-Cola": ["Coke", "Coca Cola Company"],
     },
   },
   "super-bowl-wins": {

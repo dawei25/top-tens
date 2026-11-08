@@ -392,6 +392,32 @@ describe("aliases as built: what players type", () => {
     expect(lands("passwords", "i love you")).toBe("iloveyou");
   });
 
+  it.each([
+    // Coverage audit: only 75 companies were answers; the companies a casual player names first were "not one of
+    // the companies here".
+    ["home depot", "The Home Depot"],
+    ["coca cola", "Coca-Cola"],
+    ["sony", "Sony"],
+    ["allianz", "Allianz"],
+    ["ups", "United Parcel Service"],
+    ["disney", "Walt Disney"],
+    ["ikea", "Ingka Group"],
+    ["vw", "Volkswagen Group"],
+    ["j&j", "Johnson & Johnson"],
+    ["p&g", "Procter & Gamble"],
+    // A plain word is no company of the S&P 500 ("Ball Corporation").
+    ["ball", "unknown"],
+  ])("companies-revenue: %s -> %s", (guess, name) => {
+    expect(lands("companies-revenue", guess)).toBe(name);
+  });
+
+  it("companies-revenue: a miss shows its revenue from the US or European ranking", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "companies-revenue.json"), "utf8"));
+    const value = (name: string) => p.extras.find((e) => e.name === name)?.value;
+    expect(value("The Home Depot")).toMatch(/^\$\d+ billion \(Fortune 500, 2025\)$/);
+    expect(value("Allianz")).toMatch(/^\$\d+ billion \(Fortune Global 500, 2026\)$/);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

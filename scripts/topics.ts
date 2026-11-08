@@ -230,6 +230,8 @@ export interface Also {
   name: string | number;
   nameFromText?: boolean;
   nameFromLink?: boolean;
+  /** Removed from names, as on a topic: the S&P 500's ", Inc." */
+  nameStrip?: RegExp;
   skip?: string[];
   /** Other columns that also name the row (the artist of a tour), as on a topic. */
   aliasCols?: (string | number)[];
@@ -1144,7 +1146,50 @@ export const TOPICS: Topic[] = [
       { page: "List of public corporations by market capitalization", tables: [0], name: "Company", skip: MARKET_CAP_SKIP },
       { page: "List of public corporations by market capitalization", tables: range(1, 27), name: 2, skip: MARKET_CAP_SKIP },
       { page: "List of public corporations by market capitalization", tables: range(1, 27), name: 4, skip: MARKET_CAP_SKIP },
+      // Coverage audit: only 75 companies were answers, so Home Depot, Coca-Cola and Sony were "not one of the
+      // companies here". The US (Fortune 500) and European (Fortune Global 500) revenue rankings give misses a dated
+      // figure, without their regional rank (it would read as the world's); the S&P 500 adds the household names.
+      {
+        page: "List of largest companies in the United States by revenue",
+        tables: [0],
+        name: "Name",
+        value: "Revenue",
+        dated: { label: "2025", source: "Fortune 500", scale: 1e3, prefix: "$", unit: " billion" },
+      },
+      {
+        page: "List of largest companies in the United States by revenue",
+        tables: [1],
+        name: "Name",
+        value: "Revenue",
+        dated: { label: "2025", source: "Forbes, private", prefix: "$", unit: " billion" },
+      },
+      {
+        page: "List of largest companies in Europe by revenue",
+        tables: [1],
+        name: "Company",
+        value: "Revenue",
+        dated: { label: "2026", source: "Fortune Global 500", scale: 1, prefix: "$", unit: " billion" },
+      },
+      {
+        page: "List of S&P 500 companies",
+        tables: [0],
+        name: "Security",
+        nameStrip: /,?\s+(Inc\.?|Incorporated|Corporation|Corp\.|plc|N\.V\.)$/,
+        // The revenue table's names for the same companies; and full names for those a plain word names ("ball").
+        rename: {
+          "TJX Companies": "TJX", "Capital One": "Capital One Financial", Verizon: "Verizon Communications",
+          Ball: "Ball Corporation", Dover: "Dover Corporation", Waters: "Waters Corporation", Coherent: "Coherent Corp",
+          Block: "Block Inc", Tapestry: "Tapestry Inc",
+        },
+      },
     ],
+    // Famous companies no table here lists (coverage audit): answers, unranked. Siemens is in the European table.
+    more: {
+      Huawei: [], Honda: ["Honda Motor"], "Hyundai Motor Company": ["Hyundai", "Hyundai Motor"], Sony: ["Sony Group"],
+      Pemex: [], "JD.com": ["JD"], BYD: ["BYD Auto"], LVMH: ["Louis Vuitton Moët Hennessy"], Xiaomi: [], Nintendo: [],
+      Nissan: [], Panasonic: [], Hitachi: [], "Tata Group": ["Tata"], "Reliance Industries": ["Reliance"],
+      "Mitsubishi Corporation": ["Mitsubishi"],
+    },
     // Junk among the redirects: COMPANY_JUNK in scripts/aliases.ts, shared by every company list.
     webNames: true,
   },
