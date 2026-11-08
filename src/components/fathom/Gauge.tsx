@@ -5,9 +5,10 @@ import { BUOY, placed, SQUID } from "./sprites";
 /**
  * The reveal's sonar: the answer (a name-it round's target) is the gold buoy in the middle, and the squid sits left of
  * it (too low, or early) or right of it (too high, or late) by how far off the guess was, on the round's own scale with
- * its edges where the score reaches 0 (offAxis: 10x off for an estimate and a ratio list, 33 points for a percent, 20
- * years for a year, 3.3 steps for a steps list), with the miss written under it ("30% low", "6 points low", "3 years
- * early", "3 land borders too many"). The stretch of track from the buoy to the squid is lit in the
+ * its edges where the round's curve reaches 0 (offAxis, the distance the points come from: 10x off for an estimate and
+ * a ratio list, 10x off the share or what's left for a percent, about 3.2x off how long ago for a year, 3.3 steps for a
+ * steps list), with the miss written under it ("30% low", "6 points low", "3 years early", "3 land borders too many"). The
+ * stretch of track from the buoy to the squid is lit in the
  * band's colour. No bands, no numbers on the scale: just where you landed. A Dead on or Close guess makes the squid hop
  * among sparkles (not with reduced motion; fathom.css).
  *

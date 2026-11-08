@@ -119,6 +119,11 @@ const ASKS_NAME = /^Name an? \S/;
 
 /** The earliest year a year question may answer: four digits, as the player types it. */
 export const MIN_YEAR = 1000;
+/**
+ * How many years before this one a year question's answer must be, at least. A year scores by how many times off how
+ * long ago it was (yearScore), steep for something recent: a year off something 3 years ago would be far.
+ */
+export const MIN_YEARS_AGO = 10;
 /** A year question asks for one plainly. */
 const ASKS_YEAR = /^(?:In (?:what|which) year|When)\b/;
 /** No more than one in five of the bank asks how tall or how heavy (a warning for now: bankWarnings). */
@@ -361,9 +366,9 @@ export function checkQuestion(q: unknown, i: number, lists: ListSource = fileLis
       bad(`answer ${answer} has more than ${MAX_DIGITS} digits before the decimal point: use a bigger unit (kilometres, million people)`);
     if (scale > 1 && answer < 1) bad(`answer ${answer} is under 1 ${unit}: use the unit without "${unit.split(" ")[0]}"`);
     if (round === "percent" && answer > 100) bad(`a percent's answer is 0 to 100, not ${answer}`);
-    const thisYear = new Date().getFullYear();
-    if (round === "year" && !(Number.isInteger(answer) && answer >= MIN_YEAR && answer <= thisYear))
-      bad(`a year's answer is a whole year of four digits (${MIN_YEAR} to ${thisYear}), not ${answer}`);
+    const latest = new Date().getFullYear() - MIN_YEARS_AGO;
+    if (round === "year" && !(Number.isInteger(answer) && answer >= MIN_YEAR && answer <= latest))
+      bad(`a year's answer is a whole year of four digits, at least ${MIN_YEARS_AGO} years ago (${MIN_YEAR} to ${latest}), not ${answer}`);
   }
 
   checkWords(o, bad, true);
