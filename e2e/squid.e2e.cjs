@@ -179,8 +179,7 @@ const squidSpot = (page) =>
 
 /**
  * The controls around a point: `under` (the one right under it, if any: its test id, or its tag and classes) and
- * whether it matches the selector `only`; `ring`, how many controls are within a fingertip (16px) of it, and
- * whether they all match `only`.
+ * whether it matches the selector `only`; `ring`, how many controls are within a fingertip (16px) of it.
  */
 const controlsAt = (page, p, only = "*") =>
   page.evaluate(
@@ -190,19 +189,17 @@ const controlsAt = (page, p, only = "*") =>
       const el = at(0, 0);
       const offsets = [[16, 0], [-16, 0], [0, 16], [0, -16], [11, 11], [-11, 11], [11, -11], [-11, -11], [8, 0], [-8, 0], [0, 8], [0, -8]];
       const ring = offsets.map(([x, y]) => at(x, y)).filter(Boolean);
-      return { under: el ? name(el) : null, only: !!el?.matches(only), ring: ring.length, ringOnly: ring.every((r) => r.matches(only)) };
+      return { under: el ? name(el) : null, only: !!el?.matches(only), ring: ring.length };
     },
     { p, CONTROL, only },
   );
 
 /**
- * Moves the frozen clock on until the squid is on screen and: "clear" of every control by a fingertip, "under" a
- * control that matches `only`, or "near" (not under any control, but within a fingertip of controls that all match
- * `only`). Returns where it is.
+ * Moves the frozen clock on until the squid is on screen and "clear" of every control by a fingertip, or "under" a
+ * control that matches `only`. Returns where it is.
  */
 async function squidWhere(page, where, { only = "*", tries = 40 } = {}) {
-  const fits = (c) =>
-    where === "clear" ? !c.under && !c.ring : where === "under" ? c.only : !c.under && c.ring > 0 && c.ringOnly;
+  const fits = (c) => (where === "clear" ? !c.under && !c.ring : c.only);
   for (let i = 0; i < tries; i++) {
     const p = await squidSpot(page);
     if (p && fits(await controlsAt(page, p, only))) return p;
@@ -275,14 +272,34 @@ for (const vp of VIEWPORTS) {
       assert.ok(clicks.length === 1 && clicks[0].includes(control), `the control over the squid (${control}) got the tap: ${JSON.stringify(clicks)}`);
       assert.deepEqual(await reaction(page), { react: null, pokes: 0, finds: 0 }, "the squid took a control's tap");
       await page.keyboard.press("Escape");
-      // Just beside a control, the browser may hand the tap to it (touch adjustment): then it's the control's, or else
-      // the squid's, never both.
-      await recordClicks(page);
-      const q = await squidWhere(page, "near", { only: ROWS });
-      await tapAt(page, vp, q);
-      const [n, pokes] = [(await controlClicks(page)).length, (await reaction(page)).pokes];
-      assert.ok(n + pokes === 1, `a tap beside a control: ${n} control clicks and ${pokes} squid reactions`);
+
+      // Beside a control, a phone hands the tap's click to it (touch adjustment: in Chromium a touch 4px above row 1,
+      // on the board's head, clicks row 1). The press and lift land on the squid, the click on the row: the row's
+      // alone. Replayed as events (the squid can't be put there), with each click: on the row, on bare glass, none.
+      const q = await squidWhere(page, "clear");
+      const replay = (click) =>
+        page.evaluate(
+          ({ q, click }) => {
+            const el = document.elementFromPoint(q.x, q.y);
+            const at = { bubbles: true, clientX: q.x, clientY: q.y, pointerId: 7, isPrimary: true, pointerType: "touch" };
+            el.dispatchEvent(new PointerEvent("pointerdown", at));
+            el.dispatchEvent(new PointerEvent("pointerup", at));
+            if (click === "row") document.querySelector('.slot.hintable[data-rank="10"]').click();
+            if (click === "glass") el.click();
+          },
+          { q, click },
+        );
+      await replay("row");
+      await page.clock.runFor(400);
+      assert.equal((await reaction(page)).pokes, 0, "the squid took a tap the browser gave a row");
       await page.keyboard.press("Escape");
+      await replay("glass");
+      assert.equal((await reaction(page)).pokes, 1, "a tap on the squid, clicked on bare glass, is the squid's");
+      await page.clock.runFor(1500);
+      await replay(null);
+      assert.equal((await reaction(page)).pokes, 1, "the squid didn't wait for the click");
+      await page.clock.runFor(400);
+      assert.equal((await reaction(page)).pokes, 2, "no click at all (Safari on bare page): the squid takes it a beat later");
       await page.clock.runFor(1500);
       await recordClicks(page);
     }
