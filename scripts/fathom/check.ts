@@ -462,7 +462,7 @@ export function checkBank(bank: unknown, lists: ListSource = fileLists()): strin
   // Magnitudes by the amount, its unit's scale word counted (86 billion neurons is in the billions): estimates only, as
   // a percent or a year is no magnitude.
   const answers = valid.filter((q) => typeof q.answer === "number" && (q.round ?? "estimate") === "estimate").map(amountOf);
-  if (!answers.some((a) => a < 1)) out.push("no answer under 1: the bank needs a spread of magnitudes");
+  if (!answers.some((a) => a < 10)) out.push("no answer under 10: the bank needs a spread of magnitudes");
   if (!answers.some((a) => a >= 1e9)) out.push("no answer in the billions: the bank needs a spread of magnitudes");
   return out;
 }
