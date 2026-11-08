@@ -644,7 +644,8 @@ describe("coverage audit readings", () => {
 
   it("a whole surname added to a one-word name is someone else (class 5)", () => {
     const pl: Puzzle = { ...puzzle, id: "pl9", extras: [v(0, "Fernando"), v(0, "José Torres", ["Torres"]), v(70, "Seven"), v(3, "Perfect")] };
-    const lex = lexOf({ names: ["ed sheeran", "torres", "adele"] });
+    // "nation" and "army" are ordinary words (the lexicon's plain words), so they make a longer title, not who made it.
+    const lex = lexOf({ names: ["ed sheeran", "torres", "adele"], words: ["nation", "army"] });
     expect(judgeGuess("fernando torres", pl, new Set(), lex).kind).toBe("unknown");
     expect(judgeGuess("seven nation army", pl, new Set(), lex).kind).toBe("unknown");
     // A title followed by who made it still reads as the title.

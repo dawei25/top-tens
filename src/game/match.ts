@@ -131,6 +131,8 @@ interface Candidate {
   besideShared: boolean;
   /** The best form starts with the same letter as the guess. */
   sameStart: boolean;
+  /** The best form sounds like the guess: the same consonants (`skeleton`), "hungary" / "hungray". */
+  sounds: boolean;
 }
 
 interface Forms {
@@ -152,7 +154,8 @@ function formsOf(entry: Entry): Forms {
   let f = formsCache.get(entry);
   if (f) return f;
   const written = [entry.name, ...entry.aliases];
-  const parts = entry.name.split(/\s*\/\s*/);
+  // A spaced slash only: "Mega Drive/Genesis Mini" is the Mini of both names, not "Mega Drive" and "Genesis Mini".
+  const parts = entry.name.split(/\s+\/\s+/);
   const slashed = parts.length > 1 && parts.every((p) => p.replace(/[^\p{L}]/gu, "").length >= 3) ? parts : [];
   const raw = [...written, ...slashed];
   const forms = raw.map(normalize);
@@ -173,14 +176,22 @@ function formsOf(entry: Entry): Forms {
 const SOUNDS_ALIKE = ["ckqs", "gj", "iye", "sz", "vw"];
 const soundAlike = (a: string, b: string) => a === b || SOUNDS_ALIKE.some((s) => s.includes(a) && s.includes(b));
 
-/** A word as it sounds, roughly: consonants only, c/k/q as k, z as s, ph as f, doubles once ("cincinatti": knknt). */
+/**
+ * A word as it sounds, roughly: consonants only, with c/k/q as k (s before e, i, y), z as s, ph as f, sh and th as s
+ * and t, an h after a consonant dropped, doubles once ("cincinatti": knknt, "patrisha" and "patricia": ptrs).
+ */
 function skeleton(s: string): string {
   return s
-    .replace(/ph/g, "f")
     .replace(/[^a-z]/g, "")
-    .replace(/[aeiouy]/g, "")
+    .replace(/ph/g, "f")
+    .replace(/sh/g, "s")
+    .replace(/th/g, "t")
+    .replace(/c(?=[eiy])/g, "s")
+    .replace(/([^aeiouy])h/g, "$1")
     .replace(/[cq]/g, "k")
+    .replace(/x/g, "ks")
     .replace(/z/g, "s")
+    .replace(/[aeiouy]/g, "")
     .replace(/(.)\1+/g, "$1");
 }
 
@@ -205,7 +216,8 @@ function swapsWord(a: string, b: string): boolean {
   if (Math.max(p, s) < 4) return false;
   const xm = x.slice(p, x.length - s);
   const ym = y.slice(p, y.length - s);
-  if (!xm || !ym || isSubsequence(xm, ym) || isSubsequence(ym, xm)) return false;
+  // A single letter is a slip, however it's replaced ("arnaud" / "Arnault").
+  if (Math.min(xm.length, ym.length) < 2 || isSubsequence(xm, ym) || isSubsequence(ym, xm)) return false;
   const d = editDistance(xm, ym);
   return d >= 2 && d > autoCorrectBudget(Math.min(xm.length, ym.length)) && skeleton(x) !== skeleton(y);
 }
@@ -233,22 +245,31 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
     let ends = false;
     let besideShared = false;
     let sameStart = false;
+    let sounds = false;
     const { forms, words: nameWordForms, codes } = formsOf(entry);
     const words = useWords ? nameWordForms : [];
     // Words of the name count as forms too, so a misspelled first name ("kareen") lands on its own entry.
-    for (const [i, f] of [...forms, ...words].entries()) {
+    for (const [i, written] of [...forms, ...words].entries()) {
       const isWord = i >= forms.length;
-      // Numbers are identity, not spelling: GTA 6 is not GTA 5, Mario Kart 7 is not Mario Kart. A name with a number
-      // is no misspelling of a guess without one either: "mario kart ds" is not "Mariokart 8".
-      const formDigits = digitsOf(numbersAsDigits(f));
+      // Numbers are identity, not spelling: GTA 6 is not GTA 5, Mario Kart 7 is not Mario Kart.
+      const formDigits = digitsOf(numbersAsDigits(written));
       if (guessDigits && formDigits !== guessDigits) continue;
-      // Spacing never matters: "spiderman" is "Spider-Man". Words both sides share ("mount", "canyon") aren't
-      // evidence of a typo: only the rest is compared, so "mount whitney" is not a misspelling of "mount lhotse".
+      // A number standing as a word of the name isn't spelled by a guess without one: such a guess is only a
+      // misspelling of the rest ("harry poter" for "Harry Potter 1"), never the name itself, and never a word put in the
+      // number's place ("mario kart ds" is not "Mariokart 8"). One glued to letters is part of a code: "j league" is
+      // one slip from "J1 League".
+      // Spacing never matters: "spiderman" is "Spider-Man", "psone" PS One. Words both sides share ("mount", "canyon")
+      // aren't evidence of a typo: only the rest is compared, so "mount whitney" is not a misspelling of "mount lhotse".
       // Number words count as their digits: "frozen two" is Frozen II.
-      const spacing = f.replace(/ /g, "") === compactGuess || (numGuess !== guess && numbersAsDigits(f) === numGuess);
+      const spacing = written.replace(/ /g, "") === compactGuess || (numGuess !== guess && numbersAsDigits(written) === numGuess);
+      const unnumbered = !spacing && !guessDigits && formDigits ? numbersAsDigits(written).split(" ").filter((w) => !/^\d+$/.test(w)).join(" ") : written;
+      if (!unnumbered) continue;
+      const f = unnumbered;
       const [g, rest] = spacing ? [guess, f] : withoutSharedWords(guess, f);
-      const dist = spacing ? 0 : editDistance(g, rest);
-      if (dist > 0 && formDigits && !guessDigits) continue;
+      // Matching a numbered name without its number is weaker than matching a name as written: "avatr" is Avatar, not a
+      // tie with "Avatar 2".
+      const dist = spacing ? 0 : editDistance(g, rest) + (f !== written ? 0.5 : 0);
+      if (dist === 0 && f !== written) continue;
       // Codes (ATL, EDDF, PRC) match exactly or not at all; fuzzy they catch keyboard mash like "asdf".
       if (dist > 0 && !isWord && codes[i]) continue;
       // A name with whole words added or dropped isn't a misspelling of it: "neptune" is not "Neptune I", "cars" is not
@@ -275,9 +296,10 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
         // another word ("vw bus" is not "VW Bug").
         besideShared = g !== guess && g[0] === rest[0] && g.length >= 4;
         sameStart = g[0] === rest[0];
+        sounds = skeleton(g) === skeleton(rest);
       }
     }
-    return { entry, inTop10, dist: best, len, fullName, viaWord, ends, besideShared, sameStart };
+    return { entry, inTop10, dist: best, len, fullName, viaWord, ends, besideShared, sameStart, sounds };
   });
 }
 
@@ -318,10 +340,13 @@ export function judgeGuess(
   // franchises). One that names an answer exactly beats a correction of the reading as typed ("ncis la" is NCIS: Los
   // Angeles, not NCIS); any beats nothing.
   let fallback: Verdict | undefined;
-  for (const alt of readings(guess, puzzle)) {
+  for (const { text: alt, exact } of readings(guess, puzzle)) {
     const r = judgeReading(alt, alt, puzzle, found, lex, offered);
     if (definite(r)) return r;
-    if (r.kind !== "unknown") fallback ??= r;
+    // Short forms spelled out may also correct or offer, when the answer carries the words: "chi sox" is the Chicago
+    // White Sox, but "la defense" is not Los Angeles.
+    if (exact || r.kind === "unknown" || r.kind === "empty") continue;
+    if (r.kind === "typo" || carries(r.entry, alt.split(" ").filter((w) => !GENERIC.has(w)))) fallback ??= r;
   }
   if (first.kind !== "unknown") return first;
   if (fallback) return fallback;
@@ -332,6 +357,12 @@ export function judgeGuess(
     return { kind: "unknown", junk: false, known: true };
   }
   return { kind: "unknown", junk: !literal && isJunk(raw, lex) && !sharesWord(guess, puzzle) };
+}
+
+/** Whether every one of the words is a word of the entry's name or aliases. */
+function carries(entry: Entry, words: string[]): boolean {
+  const own = new Set(formsOf(entry).forms.flatMap((f) => f.split(" ")));
+  return words.every((w) => own.has(w));
 }
 
 /** An exact answer: not a correction to confirm, not choices, not nothing. */
@@ -513,20 +544,22 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
   // What was typed may itself be a real name, and then it is never corrected into a different answer ("Austria" is not
   // Australia), except that a misspelling the bank stores as an alias still finds its own entry ("afganistan" is
   // Afghanistan on every list: `isSlipOf`). Someone's name ("jeremy", "alcaraz") is only corrected by one slip of an
-  // answer's own name ("jordon" is Jordan), and on a list of names not at all ("johnston" is not Johnson). A place
+  // answer's own name ("jordon" is Jordan), and on a list of names only to the same name spelled another way
+  // ("micheal", "mathew", "erik"), never to a different one ("johnston" is not Johnson, "marie" not Maria). A place
   // outside a regional list's region is only ever named exactly: "praha" is not Praia.
   const person = !ownName && isPersonWord(raw, lex);
   const ofNames = /names$/.test(normalize(puzzle.noun ?? ""));
   const close = candidates.filter((c) => {
     if (c.entry.elsewhere) return false;
     if (ownName && !(c.dist <= 2 && [c.entry.name, ...c.entry.aliases].some((n) => isSlipOf(guess, n, lex)))) return false;
-    if (person && (ofNames || !oneSlipOfName(guess, c.entry))) return false;
+    if (person && !(ofNames ? sameName(guess, normalize(c.entry.name)) : oneSlipOfName(guess, c.entry))) return false;
     // An ordinary word was typed on purpose: one slip at most, keeping its first letter, onto a ranked answer ("hungry"
     // is Hungary; "barrel" is not Brazil, "rice" not the pool's Nice, "doodle" not Poodle). A short word slipped is
     // another word: "hay" is not "ham" (Pork), "car" not "ČR".
     if (plain) return c.dist <= 1 && c.sameStart && c.entry.rank > 0 && guess.length >= 5;
     const notable = c.entry.rank > 0 || c.entry.value !== undefined;
-    const budget = typoBudget(len) + (notable && c.ends && len >= 6 && len <= 7 ? 1 : 0);
+    // The third edit of a slip in the middle needs the same sounds: "korean" is not Kushan, "catalan" not Castilian.
+    const budget = typoBudget(len) + (notable && c.ends && c.sounds && len >= 6 && len <= 7 ? 1 : 0);
     return c.dist <= Math.max(budget, c.besideShared ? 1 : 0) && (notable || c.ends);
   });
   if (close.length > 0) {
@@ -540,6 +573,23 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
   }
 
   return { kind: "unknown", junk: false, ...(category ? {} : { open: true as const }) };
+}
+
+/** Whether `a` is `b` with two neighbouring letters swapped ("micheal" / "michael"). */
+function transposed(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  const diff = [...a].flatMap((c, i) => (c === b[i] ? [] : [i]));
+  return diff.length === 2 && diff[1] === diff[0] + 1 && a[diff[0]] === b[diff[1]] && a[diff[1]] === b[diff[0]];
+}
+
+/**
+ * Whether two given names are one name spelled two ways: two letters swapped ("micheal"), or the same sounds with the
+ * consonants spelled differently ("mathew" / Matthew, "nicolas" / Nicholas, "erik" / Eric, "catherine" / Katherine).
+ * Another vowel or consonant is another name: Marie is not Maria, Muller not Miller, Johnston not Johnson.
+ */
+function sameName(a: string, b: string): boolean {
+  const vowels = (s: string) => s.replace(/[^aeiouy]/g, "").replace(/(.)\1+/g, "$1");
+  return transposed(a, b) || (skeleton(a) === skeleton(b) && vowels(a) === vowels(b));
 }
 
 /** Whether the word is one slip from an entry's own name, or from a word of it ("jordon": Michael Jordan). */
@@ -657,23 +707,26 @@ const DESCRIPTORS = new Set("song songs video videos mv lyrics lyric audio offic
  * Other ways to read a guess, in order: short forms spelled out ("mt fuji" as "mount fuji", "saint louis" as "st
  * louis", "law n order" as "law and order", "la rams" as "los angeles rams"), descriptors dropped ("baby shark song"),
  * and on a list of franchises, a number dropped ("sims 4" is The Sims, "fifa 23" FIFA). The game tries them when the
- * guess as typed names nothing exactly; normalize() stays as it is (it is the puzzles' contract).
+ * guess as typed names nothing exactly; normalize() stays as it is (it is the puzzles' contract). `exact`: the reading
+ * counts only when it names an answer exactly ("black album" is not read as "black").
  */
-export function readings(guess: string, puzzle: Pick<Puzzle, "noun">): string[] {
+export function readings(guess: string, puzzle: Pick<Puzzle, "noun">): { text: string; exact: boolean }[] {
   const words = guess.split(" ");
   const options = words.map((w, i) => [w, ...(SHORT_FORMS[w] ?? []), ...(i === 0 && words.length > 1 && CITY_SHORT[w] ? [CITY_SHORT[w]] : [])]);
-  const out: string[] = [];
-  const add = (s: string) => {
-    if (s && s !== guess && !out.includes(s)) out.push(s);
+  const out: { text: string; exact: boolean }[] = [];
+  const add = (text: string, exact: boolean) => {
+    if (text && text !== guess && !out.some((r) => r.text === text)) out.push({ text, exact });
   };
   // Every combination of the short forms, capped: "mt st helens" as "mount st helens" and "mount saint helens".
   let combos: string[][] = [[]];
   for (const o of options) combos = combos.flatMap((c) => o.map((w) => [...c, w])).slice(0, 32);
-  for (const c of combos) add(c.join(" "));
+  for (const c of combos) add(c.join(" "), false);
+  // "mt denali", "mount denali": the peak goes by its name alone.
+  if (words.length > 1 && ["mt", "mount", "mtn"].includes(words[0])) add(words.slice(1).join(" "), true);
   const bare = words.filter((w) => !DESCRIPTORS.has(w));
-  if (bare.length && bare.length < words.length) add(bare.join(" "));
+  if (bare.length && bare.length < words.length) add(bare.join(" "), true);
   if (/\bfranchises?$/.test(normalize(puzzle.noun ?? "")) && words.length > 1 && /^\d+$/.test(numbersAsDigits(words[words.length - 1]))) {
-    add(words.slice(0, -1).join(" "));
+    add(words.slice(0, -1).join(" "), true);
   }
   return out;
 }
@@ -801,6 +854,8 @@ function leadingName(guess: string, puzzle: Puzzle, lex?: Lexicon): Entry | unde
   const words = guess.split(" ");
   const forms = (e: Entry) => [e.name, ...e.aliases].map(normalize);
   const numbersOf = (s: string) => digitsOf(numbersAsDigits(s)).split(" ");
+  // What the list is about says nothing about who made it: "french language", "citadel hedge fund", "wicked broadway".
+  const subject = subjectWords(puzzle.noun);
   for (let k = words.length - 1; k >= 1; k--) {
     const head = words.slice(0, k).join(" ");
     if (words.slice(0, k).every((w) => GENERIC.has(w))) continue;
@@ -809,7 +864,7 @@ function leadingName(guess: string, puzzle: Puzzle, lex?: Lexicon): Entry | unde
     // A number after the name names a different one: "frozen 3" is not Frozen, "bridgerton 2" not its first season,
     // "modern warfare 2" not Modern Warfare (2019). Whole numbers: 2 is not in 2019.
     const restDigits = digitsOf(numbersAsDigits(words.slice(k).join(" ")));
-    const rest = words.slice(k).filter((w) => w.length >= 2 && !GENERIC.has(w) && !DESCRIPTORS.has(w));
+    const rest = words.slice(k).filter((w) => w.length >= 2 && !GENERIC.has(w) && !DESCRIPTORS.has(w) && !subject.has(w));
     // Part of a name followed by something that isn't in it is someone or something else: "charli xcx" is not Charli
     // D'Amelio, "stranger things final season" not Season 4. A whole name followed by who made it still reads.
     const elsewhere = (e: Entry) => {
@@ -824,15 +879,22 @@ function leadingName(guess: string, puzzle: Puzzle, lex?: Lexicon): Entry | unde
     );
     if (hits.length === 0) continue;
     const named = hits.filter((e) => forms(e).some((f) => rest.every((w) => f.split(" ").includes(w))));
-    if (k === 1 && rest.length && !restDigits && !named.length) {
-      const maker = words.slice(1).filter((w, i) => !(i === 0 && w === "by")).join(" ");
+    // The rest misspelling the name's own words is the name: "harry poter" is Harry Potter.
+    const ownWords = (e: Entry) => normalize(e.name).split(" ");
+    const spelled = hits.some((e) => rest.every((w) => ownWords(e).some((x) => x.length >= 4 && editDistance(w, x) <= 1)));
+    if (k === 1 && rest.length && !restDigits && !named.length && !spelled) {
+      const maker = rest.filter((w, i) => !(i === 0 && w === "by")).join(" ");
       const compact = maker.replace(/ /g, "");
-      // Another answer here goes by it, or by a name with it in: "torres" is José Torres's.
+      // Another answer here goes by it, or by a name with it in ("torres" is José Torres's; an ordinary word such as
+      // "motor" or "terrier" names no one). Ordinary words that name nothing together are a longer title, not who made
+      // it: "seven nation army", "lassie come home" ("sunflower spider-man" is the song from Spider-Man).
+      const phrase = maker.split(" ");
+      const plainPhrase = !!lex && phrase.every((w) => isPlainWord(w, lex));
       const other = entries.some((e) => {
         const f = formsOf(e).forms;
-        return !hits.includes(e) && (f.includes(maker) || hasWordSpan(f[0].split(" "), compact));
+        return !hits.includes(e) && (f.includes(maker) || (!plainPhrase && hasWordSpan(f[0].split(" "), compact)));
       });
-      if (other || (lex && !isKnownName(maker, lex))) continue;
+      if (other || (plainPhrase && phrase.length > 1 && !isKnownName(maker, lex))) continue;
     }
     if (short) {
       if (rest.length && named.length) return mostProminent(named);
