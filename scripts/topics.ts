@@ -508,8 +508,10 @@ export const TOPICS: Topic[] = [
     rankedOnly: true,
     universe: "countries",
     region: "Africa",
-    // "Congo" is the Republic of the Congo here; the bare name offers both Congos (build.ts).
-    rename: { Congo: "Republic of the Congo" },
+    // "Congo" is the Republic of the Congo here; the bare name offers both Congos (build.ts). "DR Congo" goes by its
+    // full name, as on the other country lists: the matcher reads "congo" as the one whose name it is once
+    // qualifiers are dropped, and "dr" is none (coverage audit, Nov 8: "congo" cost a life as the Republic).
+    rename: { Congo: "Republic of the Congo", "DR Congo": "Democratic Republic of the Congo" },
   },
   {
     id: "asia-population",
@@ -827,6 +829,8 @@ export const TOPICS: Topic[] = [
     also: [{ tables: [1, 2], name: 0 }],
     universeCategories: ["YouTube channels", "YouTubers"],
     categoryDepth: 2,
+    // Articles about YouTube and YouTubers, not channels ("youtube" offered three of them, coverage audit, Nov 8).
+    categorySkip: /^(YouTube (in education|Original Channel Initiative)|(Beauty )?YouTubers?( film)?)$/,
     junkAliases: ["Hindi", "Nursery Rhymes", "Track 5"],
     // A table footnote ("As of October 2026 UTC").
     skip: ["UTC"],
@@ -880,6 +884,8 @@ export const TOPICS: Topic[] = [
     aliasCols: ["Username"],
     people: true,
     also: CELEBRITIES,
+    // A famous account with no figure here: free, not junk (coverage audit, Nov 8).
+    knownNames: ["9GAG"],
     // Instagram's own features, users and studies (Stories, Live, "Instagrammer") and the stars' relatives and songs
     // are in CELEBRITY_JUNK (scripts/aliases.ts), shared with the Facebook list, which has an Instagram page too.
   },
@@ -1654,9 +1660,26 @@ export const TOPICS: Topic[] = [
     value: "2011",
     metric: "Population (2011 census)",
     skip: ["India"],
-    // The NDMC row is the New Delhi council area; a player typing "New Delhi" means Delhi (#2).
-    rename: { "New Delhi": "New Delhi Municipal Council" },
+    // The NDMC row is the New Delhi council area; a player typing "New Delhi" means Delhi (#2). "Aurangabad" is
+    // the Maharashtra city (#32, Chhatrapati Sambhajinagar since 2023; intent.ts), not Bihar's (#339).
+    rename: { "New Delhi": "New Delhi Municipal Council", Aurangabad: "Aurangabad, Bihar" },
     junkAliases: [
+      // Grounds, gardens, temples, markets, schools and neighbourhoods among the top 10's redirects (coverage audit,
+      // Nov 8: Surat had "Baroda Rayon Corporation Ground").
+      "Inderpura", "Ukaidam", "Vaheval", "Vastadevdi", "Ubhrat Beach", "Ubhrat", "Blues Adventures",
+      "Rander Islam Gymkhana Ground", "Police Parade Ground", "Maganbhai Thakordas Balmukundas College Ground",
+      "Baroda Rayon Corporation Ground", "Sneh Rashmi Botanical Garden", "Ambika Niketan Temple", "Gandhi Buag",
+      "Gandhi Baag", "Chwok Bazar", "Navinchandra Mafatlal Garden", "Chintamani Jain Temple", "Hope Pool", "U Turn Surat",
+      "Hazrat Khwaja Dana Dargah", "Raam Madhi", "Khsetrapal Temple", "Kantareshwar Mahadev Temple",
+      "Ambaji- Balaji Temple", "M.T.B Arts College", "Vanita Vishram Ground",
+      "Surat International Exhibition and Convention Centre", "Gandhi Smruti Bhavan", "Sardar Patel Smriti Bhavan",
+      "Zampa Bazaar", "Kasturba Garden", "Jawaharlal Nehru Garden", "Althan National Park", "Bharthana National Park",
+      "Shabri Dham", "Sifat International", "The Grand Bhagvati", "Sanjeev Kumar Auditorium", "Shaniwari Bazaar",
+      "Sarthana", "Sarsana", "Surat City Police", "JP Narain park", "JP Park", "Jayaprakash Narayan National Park",
+      "Venkatapathy Nayakudu", "Shasthri Nagar", "Kathirvedu", "Kadhirvedu", "Royapettah College", "Lady Andal",
+      "Nutan Bal Shala", "Diwan ballu bhai", "Girdharnagar", "Shri Damubhai Shukla Shaikshanik Sankul",
+      "Shri Damubhai Shaikshanik Sankul", "Jamia Moin-ul-Uloom Sarkare Kalan", "Dighi Hills", "Ganeshkhind",
+      "Hyderabad M.Corp", "Hyderabadi", "Kolkatan", "South Kolkata", "South Calcutta", "South Kolkata, West Bengal",
       "St. Xavier's High School Loyola Hall", "Prakash Higher Secondary School", "Phss", "Prakash school",
       "Tilak Public School", "Evergreen School", "Rawat Public School", "Rajhans Balvatika",
       "Shri Navinchandra Popatlal Kapadia High School", "Lady Andal Venkatasubbarao MHSS", "Momin High School",
@@ -1731,6 +1754,12 @@ export const TOPICS: Topic[] = [
       "Little Sandy Desert", "Strzelecki Desert",
     ],
     junkAliases: ["Ecoregion PA1314", "Desert of the Gobi", "Arctics"],
+    // Real deserts the page leaves out, free: "great salt lake desert" was read as Iran's Great Salt Desert
+    // (coverage audit, Nov 8).
+    knownNames: [
+      "Great Salt Lake Desert", "Black Rock Desert", "Painted Desert", "Death Valley", "Negev", "Negev Desert",
+      "Sinai Desert", "Libyan Desert", "Nubian Desert", "Ordos Desert", "Kara Kum",
+    ],
   },
   {
     id: "city-visitors",
@@ -1781,6 +1810,13 @@ export const TOPICS: Topic[] = [
       "Gray Wolf Pass", "Graywolf Pass", "Daniel J. Evans Wilderness", "Glacier National Park Act of 1914",
       "Disappearing Glaciers in Glacier National Park", "Crown of the Continent Ecosystem",
       "Establishment of Grand Teton National Park", "Clark",
+    ],
+    // Park Service sites that aren't national parks: free, but real names, not junk ("statue of liberty" read as
+    // junk, coverage audit, Nov 8).
+    knownNames: [
+      "Statue of Liberty", "Mount Rushmore", "Blue Ridge Parkway", "Golden Gate National Recreation Area", "Golden Gate",
+      "Lincoln Memorial", "Washington Monument", "Independence Hall", "Liberty Bell", "Alcatraz", "Muir Woods",
+      "Devils Tower", "Lake Mead", "Cape Cod National Seashore", "Natchez Trace Parkway", "Gettysburg",
     ],
   },
   {
@@ -1875,6 +1911,9 @@ export const TOPICS: Topic[] = [
     ],
     // Junk among the redirects: COMPANY_JUNK in scripts/aliases.ts, shared by every company list.
     webNames: true,
+    // Companies the page never ranked, free but real names ("asml" read as junk, coverage audit, Nov 8). The Dutch
+    // East India Company, the usual trivia answer, has no market value on record.
+    knownNames: ["ASML", "ASML Holding", "Dutch East India Company", "VOC"],
   },
   {
     id: "banks",
@@ -2299,6 +2338,8 @@ export const TOPICS: Topic[] = [
     metric: "Population (2025 est.)",
     nameFromText: true,
     nameStrip: /,\s*[A-Z]{2}(-[A-Z]{2})*,?\s+MSA$/,
+    // "Manhattan" is New York (intent.ts); the Kansas metro (#295) goes by its state.
+    rename: { Manhattan: "Manhattan, Kansas" },
   },
   {
     id: "capitals",
@@ -2315,8 +2356,13 @@ export const TOPICS: Topic[] = [
     // Only capitals are answers: Istanbul, Lagos or Sydney is free ("not one of the capital cities here"), not a
     // life. New Delhi stays as the table has it (the New Delhi council area, 249,998), so "delhi" ranks #148.
     universe: "capitals",
-    // Hong Kong is no national capital; its "City of Victoria" in the capitals universe isn't either.
-    skip: ["Hong Kong", "City of Victoria"],
+    // Hong Kong is no national capital; its "City of Victoria" in the capitals universe isn't either, nor is
+    // Tristan da Cunha's village ("edinburgh" was corrected to it, coverage audit, Nov 8).
+    skip: ["Hong Kong", "City of Victoria", "Edinburgh of the Seven Seas"],
+    // Capitals the table's one-per-country leaves out: Bolivia's seat of government, and South Africa's legislative
+    // and judicial capitals (coverage audit, Nov 8: "la paz" was corrected to Equatorial Guinea's Ciudad de la Paz).
+    // Answers like the universe's other second capitals (Colombo, Malabo), with no figure.
+    more: { "La Paz": ["La Paz, Bolivia"], "Cape Town": [], Bloemfontein: [] },
     // The capitals universe spells these cities its own way: the same city, not a second (unranked) answer.
     aliases: { Ulaanbaatar: ["Ulan Bator"], "Luxembourg City": ["Luxembourg"], "Djibouti City": ["Djibouti"], Tarawa: ["South Tarawa"] },
     // The table still has the 2011 census.
@@ -2413,8 +2459,9 @@ export const TOPICS: Topic[] = [
     metric: "Ballon d'Or wins",
     noFigures: "every other country has no Ballon d'Or",
     universe: "countries",
-    // Yashin's win counts for the Soviet Union; "Russia" is half right, so it is free rather than a costly miss.
-    skip: ["Russia"],
+    // Yashin's win counts for the Soviet Union; "Russia" is half right, so it is free rather than a costly miss. The
+    // United Kingdom has no team: its name offers the home nations with winners (intent.ts).
+    skip: ["Russia", "United Kingdom"],
   },
   {
     id: "island-countries",
@@ -2504,6 +2551,9 @@ export const TOPICS: Topic[] = [
       "Toyota Baltic", "BYD Toyota EV Technology", "GAC BYD", "BYD TianShen", "BYD Dual Mode", "Geely GC2",
       "Geely-Kandi Panda", "General Motors in motorsport",
     ],
+    // Groups the page's tables leave out, free but real names: "gac motor" was corrected to General Motors (coverage
+    // audit, Nov 8). They need a figure from their articles to be answers.
+    knownNames: ["GAC Group", "GAC", "GAC Motor", "GAC Aion", "Aion", "Nio", "XPeng", "Li Auto", "Xiaomi Auto", "Leapmotor"],
   },
   // Oddball: fun lists anyone can throw guesses at, with a surprise or two.
   {
@@ -2537,6 +2587,12 @@ export const TOPICS: Topic[] = [
       "Italian Taco", "The Burger King Kids Club Gang", "Big Kids Meal", "Be Your Way", "King Jr Meal", "King Deals",
       "Zesty sauce", "Taste is king",
     ],
+    // Chains the page's table leaves out, free but real names: "chatime" was corrected to Chagee and "harveys" to
+    // Hardee's (coverage audit, Nov 8).
+    knownNames: [
+      "Chatime", "Harvey's", "Harveys", "In-N-Out Burger", "In-N-Out", "In N Out", "Wingstop", "White Castle",
+      "Pret a Manger", "Pret", "Gong Cha", "Lotteria", "Jollibee",
+    ],
   },
   {
     id: "us-surnames",
@@ -2551,6 +2607,15 @@ export const TOPICS: Topic[] = [
     metric: "People (2020 census)",
     noRedirects: true,
     skip: ["First 20"],
+    // Other real surnames a letter or two from a ranked one, which the matcher corrected into it: "johnston" to
+    // Johnson (#2), "muller" to Miller (#7), "cohen" to Chen, "harrison" to Harris (coverage audit, Nov 8). Free, as
+    // the census past the page's 100 isn't on Wikipedia.
+    knownNames: [
+      "Johnston", "Johnstone", "Harrison", "Cohen", "Muller", "Mueller", "Müller", "Gonzales", "Andersen", "Petersen",
+      "Davies", "Browne", "Jonas", "Grey", "Smyth", "Smythe", "Lopes", "Dias", "Gomes", "Martins", "Stuart", "Reid",
+      "Brookes", "Holmes", "Tucker", "Hawkins", "Williamson", "Wilkinson", "Hale", "Morrison", "Nielsen", "Nelsen",
+      "Walters", "Jameson", "Whyte", "Parkes", "Rossi", "Lang", "Hull", "Thomson", "Kelley",
+    ],
     // Canada's, Mexico's and Central America's common surnames: real surnames, all outside the US top 10.
     also: [
       { tables: [0, 2, 3, 4, 5, 6, 7, 8], name: "Surname" },
@@ -2929,6 +2994,10 @@ export const TOPICS: Topic[] = [
       "Golden Mountain Doodle", "Mini Goldendoodle", "Mini Labradoodle", "Pomsky", "Pitsky", "Shorkie", "Peekapoo",
       "Bordoodle", "Newfypoo", "Saint Berdoodle", "Boxador", "Frenchton", "Cavapoochon", "Maltipom", "Huskydoodle",
       "Doxiepoo", "Shepadoodle",
+      // Neither the AKC nor the FCI registers the pit bull or the American Bully, so they are free, but they are the
+      // most-typed breeds missing here (coverage audit, Nov 8): real names, never junk or a typo of a listed breed.
+      "Pit Bull", "Pitbull", "Pit Bull Terrier", "American Pit Bull Terrier", "Pittie", "Pitty", "American Bully",
+      "XL Bully",
     ],
     noFigures: "the AKC's ranks past 10 aren't on Wikipedia; breeds from its earlier top 10s show their last rank",
     // How owners say them.
@@ -3349,6 +3418,8 @@ export const TOPICS: Topic[] = [
     rankedOnly: true,
     unrankedRowsFree: true,
     universe: "countries",
+    // Micronations, free but real names: "sealand" offered Eswatini or the United Kingdom (coverage audit, Nov 8).
+    knownNames: ["Sealand", "Principality of Sealand", "Liberland", "Seborga", "Hutt River"],
   },
   {
     id: "africa-cities",
@@ -3370,6 +3441,12 @@ export const TOPICS: Topic[] = [
     // Africa's cities and capitals are answers; Mumbai or Rio costs a life as "Mumbai isn't in Africa.". Egypt's
     // cities beyond the page's 100 stay free (Egypt reaches Asia).
     region: "Africa",
+    // African cities below the page's 100, free but real: "constantine" was corrected to Istanbul (through
+    // "Constantinople"), "annaba" to Ankara, "soweto" to Sokoto; "oujda" read as junk (coverage audit, Nov 8).
+    knownNames: [
+      "Constantine", "Annaba", "Soweto", "Oujda", "Bulawayo", "Benghazi", "Bloemfontein", "East London", "Kisumu",
+      "Luxor", "Aswan", "Sfax", "Timbuktu",
+    ],
   },
   // Nov 6: debut lists of other kinds for the week of Nov 9, which is heavy on geography and business.
   {

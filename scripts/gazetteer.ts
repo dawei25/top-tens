@@ -284,6 +284,19 @@ const TEAM_SHORT: Record<string, string[]> = {
   "San Francisco Giants": ["SF Giants"],
   "San Diego Padres": ["SD Padres"],
   "Kansas City Royals": ["KC Royals"],
+  // "tb rays", "chi sox", "la rams", "ny jets", "sf niners" found nothing (coverage audit, Nov 8).
+  "Tampa Bay Rays": ["TB Rays"],
+  "Chicago White Sox": ["Chi Sox", "ChiSox"],
+  "Los Angeles Rams": ["LA Rams"],
+  "Los Angeles Chargers": ["LA Chargers"],
+  "New York Jets": ["NY Jets"],
+  "New York Giants": ["NY Giants"],
+  "San Francisco 49ers": ["SF 49ers", "SF Niners"],
+  "Tampa Bay Buccaneers": ["TB Bucs"],
+  "Green Bay Packers": ["GB Packers"],
+  "New England Patriots": ["NE Patriots"],
+  "Las Vegas Raiders": ["LV Raiders"],
+  "Kansas City Chiefs": ["KC Chiefs"],
 };
 
 function teams(league: keyof typeof TEAMS): Place[] {
