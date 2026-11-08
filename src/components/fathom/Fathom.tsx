@@ -206,12 +206,11 @@ export default function Fathom({ onBack, onHome }: Props) {
     saveFathom({ ...loadFathom(), game: next });
   };
   // LOCK IN: a click, the ping and the band's sound (with sound on), the guess sent (with a backend), then the reveal.
-  // A name-it round's guess is the figure of the thing named, kept with its name; it isn't sent (the players' typical
-  // guess means nothing there).
+  // A name-it round's guess is the figure of the thing named, kept with its name, and that figure is what's sent.
   const lock = (value: number, pick?: string) => {
     playFathom({ kind: "lock" });
     playFathom({ kind: "reveal", band: bandOf(scoreFor(question, value)) });
-    if (pick === undefined) submitFathomGuess(question.id, value);
+    submitFathomGuess(question.id, value);
     update(lockIn(game, value, pick));
   };
   // From a tap on NEXT, the next question's box takes focus inside the tap itself, so a phone opens its keyboard. The
