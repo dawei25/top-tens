@@ -1514,8 +1514,22 @@ export const TOPICS: Topic[] = [
     name: "Franchise",
     value: "Total revenue",
     metric: "Total revenue (US$)",
-    universeCategories: ["Media franchises"],
-    skip: ["Media franchise"],
+    // Video game franchises are media franchises too ("zelda", "tetris" and "fifa" found nothing, coverage audit,
+    // Nov 8); the sub-series game-franchises counts in Mario and Final Fantasy stay out, as there.
+    universeCategories: ["Media franchises", "Video game franchises"],
+    skip: [
+      "Media franchise", "Educational games in the Sonic the Hedgehog series", "Mario Party", "Mario Kart",
+      "Compilation of Final Fantasy VII", "Final Fantasy Crystal Chronicles", "Fabula Nova Crystallis Final Fantasy",
+    ],
+    // Famous franchises the page and the categories miss, no figure ("one piece" and "game of thrones" found
+    // nothing; "bluey" was corrected to Blue's Clues, coverage audit, Nov 8).
+    more: {
+      "One Piece": [], "A Song of Ice and Fire": ["Game of Thrones", "House of the Dragon"], "Peppa Pig": [], Bluey: [],
+      "Doctor Who": [], "The Walking Dead": [], "The Muppets": [], "Attack on Titan": ["AoT"],
+      "Detective Conan": ["Case Closed"], Doraemon: [], "Hot Wheels": [],
+      // The category has FIFA Manager but not the series itself ("fifa" was corrected to it).
+      FIFA: ["EA Sports FC", "EA FC", "FIFA series"],
+    },
     junkAliases: [
       "Joe Merrick", "Serebii", "Fubata town", "Foento City", "Japan Pokemon", "Pokemon Fans", "Pokémon Fans", "Winnie- -Pooh",
       "Winnie Sanders", "Nova 6", "Urzikstan", "Russell Adler", "Captain Marvel", "Gamora", "A Mini Marvel",

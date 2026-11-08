@@ -1004,6 +1004,8 @@ export const INTENT: Record<string, Intent> = {
       // Short forms and the characters that name them (coverage audit, Nov 8: "007", "dc" and "pikachu" found nothing,
       // "tmnt" read as junk, "sanrio" was corrected to Sanrio Boys). Not "Snoopy" or "Potter": plain words.
       "James Bond": ["007", "Bond 007", "James Bond 007"],
+      // Its sub-series, which game-franchises counts in Mario too.
+      Mario: ["Mario Kart", "Mario Party", "Super Mario", "Super Mario Bros", "Super Mario Bros."],
       "Teenage Mutant Ninja Turtles": ["TMNT", "Ninja Turtles"],
       Peanuts: ["Charlie Brown", "Charlie Brown and Snoopy"],
       "DC Extended Universe": ["DCEU", "DC", "DC Universe"],
@@ -1682,6 +1684,11 @@ export const INTENT: Record<string, Intent> = {
   // Coverage audit, Nov 8: what players typed that found nothing, or found the wrong answer.
   "pixar-films": {
     same: { Lightyear: ["Buzz Lightyear"] },
+  },
+  "population-density": {
+    // The table counts the Gaza Strip (5,950/km² in the page's note) and the West Bank as Palestine (#13), the
+    // famous dense place players name ("gaza" found nothing).
+    same: { Palestine: ["Gaza", "Gaza Strip", "West Bank"] },
   },
   instagram: {
     // Only one Kim and one Leo here; three letters are below the matcher's word-of-a-name minimum.
