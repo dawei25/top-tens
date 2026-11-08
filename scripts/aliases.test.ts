@@ -211,6 +211,18 @@ describe("aliases as built: what players type", () => {
     expect(lands("hedge-funds", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: the borough and the peninsula that hold their city's towers.
+    ["manhattan", "New York City"],
+    ["kowloon", "Hong Kong"],
+    // Real skylines under the page's cut: free, never corrected into another city.
+    ["brisbane", "unknown"],
+    ["jeddah", "unknown"],
+    ["monterrey", "unknown"],
+  ])("skyscraper-cities: %s -> %s", (guess, name) => {
+    expect(lands("skyscraper-cities", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

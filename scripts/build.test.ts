@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import {
+  countedNames,
   countryNames,
   datedLabel,
   datedValue,
@@ -169,6 +170,30 @@ describe("matchFacts", () => {
       expect(p.answers.map((e) => e.fact ?? null), p.id).toEqual(keys.map((k) => (k ? facts[k] : null)));
     }
     expect(lists).toBeGreaterThan(50);
+  });
+});
+
+describe("counted names", () => {
+  // Judge, skyscraper-cities: Taipei, Tel Aviv, Jersey City and Sharjah cost a life with no figure, though the
+  // metro-area table's "Cities included" counts each one.
+  it("read each name and its figure from a cell that lists several", () => {
+    expect(countedNames("New York City (324), Jersey City (22), Fort Lee (2)")).toEqual([
+      { name: "New York City", figure: "324" },
+      { name: "Jersey City", figure: "22" },
+      { name: "Fort Lee", figure: "2" },
+    ]);
+    // A full stop where a comma belongs.
+    expect(countedNames("Burnaby (17), Vancouver (7), Coquitlam (4). New Westminster (1)").map((c) => c.name)).toEqual([
+      "Burnaby", "Vancouver", "Coquitlam", "New Westminster",
+    ]);
+    expect(countedNames("Hong Kong (569)")).toEqual([{ name: "Hong Kong", figure: "569" }]);
+    expect(countedNames("no figures here")).toEqual([]);
+  });
+
+  it("show them on the built list", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", "skyscraper-cities.json"), "utf8"));
+    const value = (name: string) => p.extras.find((e) => e.name === name)?.value;
+    expect([value("Taipei"), value("Tel Aviv"), value("Jersey City"), value("Sharjah")]).toEqual(["16", "24", "22", "26"]);
   });
 });
 

@@ -567,6 +567,16 @@ export function rankOf(text: string | undefined): number | undefined {
   return n > 0 ? n : undefined;
 }
 
+/**
+ * The names and figures a cell lists (`counts` in topics.ts): "New York City (324), Jersey City (22), Fort Lee (2)",
+ * "Burnaby (17), Vancouver (7), Coquitlam (4). New Westminster (1)".
+ */
+export function countedNames(text: string): { name: string; figure: string }[] {
+  return [...text.matchAll(/([^,;()]+?)\s*\((\d[\d,]*(?:\.\d+)?)\)/g)]
+    .map((m) => ({ name: m[1].replace(/^[\s.]+/, "").trim(), figure: m[2] }))
+    .filter((c) => c.name);
+}
+
 /** A figure at the end of a name cell: "Tencent 688,000", "ExxonMobil 356,548.7". */
 const FIGURE_END = /\s+(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+)\s*$/;
 
@@ -772,6 +782,21 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         const cell = r[nc];
         if (!cell || (cell.isHeader && !cell.text)) continue;
         if (src.where && !src.where.match.test(r[column(header, src.where.col)]?.text ?? "")) continue;
+        if (src.counts) {
+          if (topic.region) throw new Error(`${topic.id}: \`counts\` sources can't be kept to a region`);
+          for (const c of countedNames(cell.text)) {
+            const name = src.rename?.[c.name] ?? c.name;
+            if (!normalize(name) || skipName(name) || topic.skip?.includes(name) || src.skip?.includes(name)) continue;
+            const entry: Entry = { rank: 0, name, aliases: [] };
+            const v = parseValue(c.figure);
+            if (v && v.value > 0 && v.value < limit) {
+              entry.value = (topic.prefix ?? "") + v.display + (topic.unit ?? "");
+              entry.n = statNumber(v.value);
+            }
+            out.push(entry);
+          }
+          continue;
+        }
         let where: Where | undefined = typeof placed === "number" ? undefined : placed;
         if (cc >= 0) {
           const country = cleanName(r[cc]?.text ?? "");

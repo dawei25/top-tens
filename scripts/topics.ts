@@ -238,6 +238,13 @@ export interface Also {
    */
   value?: string | number;
   /**
+   * The `name` column lists several answers, each with its own figure in the list's unit: "New York City (324),
+   * Jersey City (22), Fort Lee (2)" (a metro area's cities). Each one named there is an unranked answer showing its
+   * figure (below the last ranked row's, as with `value`); the row itself adds nothing. List such a source before
+   * the others, so its figures win over a namesake with none.
+   */
+  counts?: boolean;
+  /**
    * These tables rank the same thing for another year or by another source (the 2024 top 10 on a 2025 list, a 2016
    * survey): an unranked answer shows its latest rank and figure from them, labelled so it can't pass for the
    * list's own: "#6 in 2024 (16.5 million)", a rank alone "#3 in 2019", a figure alone "2.98 million (2016)". It
@@ -3183,8 +3190,15 @@ export const TOPICS: Topic[] = [
     name: "City",
     value: "No. of skyscrapers",
     metric: "Skyscrapers (150 m+)",
-    also: CITIES,
+    // The metro-area table's "Cities included" give the cities below the main table's cut their own counts (judge:
+    // Taipei 16, Tel Aviv 24, Jersey City 22, Sharjah 26 cost a life with no figure). First, so its figures win.
+    // Singapore keeps the main table's 140 (the metro and height tables say 100): its linked list of tallest
+    // buildings has 141 of 150 m or more.
+    // San Juan (Metro Manila) and Anyang (Seoul's) are named like the pool's Puerto Rican and Chinese cities.
+    also: [{ tables: [1], name: "Cities included", counts: true, skip: ["San Juan", "Anyang"] }, ...CITIES],
     universe: "capitals",
+    // Coverage audit: the island and the borough that hold nearly all of their city's towers.
+    aliases: { "New York City": ["Manhattan"], "Hong Kong": ["Kowloon", "Hong Kong Island"] },
     // The source counts Manila's cities one by one, so "manila" names none of them: free, rather than a costly miss
     // for a region whose 16 cities together have 215 (the page's height table).
     skip: ["Manila", "Metro Manila"],
@@ -3193,6 +3207,9 @@ export const TOPICS: Topic[] = [
       "Petronas Towers", "Petronas Twin Towers", "Petronas", "Burj Khalifa", "Burj Al Arab", "Empire State Building",
       "Chrysler Building", "One World Trade Center", "World Trade Center", "Willis Tower", "Sears Tower", "CN Tower",
       "Eiffel Tower", "The Shard", "Space Needle", "Merdeka 118", "Jeddah Tower", "Abraj Al Bait", "Lotte World Tower",
+      // Skylines under the page's cut of 30 that no city table here lists (coverage audit): free, and real names.
+      "Brisbane", "Gold Coast", "Perth", "Adelaide", "Jeddah", "Monterrey", "Kaohsiung", "Taichung", "Rotterdam",
+      "Benidorm", "La Défense", "Yekaterinburg", "Cebu City", "Sapporo", "Gurugram", "Brooklyn",
     ],
   },
   {
