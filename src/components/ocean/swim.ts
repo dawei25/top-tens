@@ -492,6 +492,16 @@ export class Swimmer {
     this.target = this.waypoint();
   }
 
+  /** Stop on the spot for about `s` seconds, on its fins (a trick in place): the glide braked away, no jet. */
+  pause(s: number) {
+    if (this.behaviour === "loop") return;
+    this.wakeUp();
+    this.behaviour = "roam";
+    this.vx *= 0.2;
+    this.vy *= 0.2;
+    this.hold(s);
+  }
+
   /** Jet hard away from where it is (it just inked): the direction with the most room, nearest the way it faces. */
   flee() {
     if (this.behaviour === "loop") return;

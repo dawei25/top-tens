@@ -47,6 +47,8 @@ export interface Look {
   mood: SquidMood;
   heat: number;
   doze: boolean;
+  /** 0-1: blushing (it was tapped): pink cheeks under the eyes, the rim and the spots flushed pink. */
+  blush?: number;
 }
 
 /** What the limbs are doing this frame, from the swim. */
@@ -57,6 +59,8 @@ export interface Motion {
   inflating: number;
   hovering: boolean;
   asleep: boolean;
+  /** The arms flared out this much wider than at rest (a find's happy wiggle, a tap's flinch). */
+  flare?: number;
 }
 
 interface Limb {
@@ -144,6 +148,16 @@ FIN_FRAMES[0].forEach((tone, i) => tone && MANTLE_PTS.push((i % W) + 0.5 - PIVOT
 /** The top row of each eye, closed over when the lids are down. */
 const LID = new Set<number>();
 for (let y = 1; y < H; y++) for (let x = 0; x < W; x++) if ("ep".includes(BODY[y][x]) && BODY[y - 1][x] === "#") LID.add(y * W + x);
+/** The cheeks, blushing: a row of pixels under each eye, one pixel out from it (toward the mantle's edge). */
+const CHEEKS = new Set<number>();
+for (let y = 1; y < H; y++) {
+  for (let x = 0; x < W; x++) {
+    if (!"ep".includes(BODY[y - 1][x]) || BODY[y][x] === "e" || BODY[y][x] === "p") continue;
+    const outer = x < W / 2 ? x - 1 : x + 1;
+    if (BODY[y][outer] === "#") CHEEKS.add(y * W + outer);
+  }
+}
+const BLUSH = "#ff5d8f";
 
 const rgba = (hex: string) => {
   const n = parseInt(hex.slice(1), 16);
@@ -313,6 +327,24 @@ export class SquidBody {
     return { x: x + u * sx * c - v * sy * s, y: y + u * sx * s + v * sy * c };
   }
 
+  /**
+   * Is (x, y) on the squid (canvas px, as drawn last frame)? Within `tol` px of a limb's pixels or the mantle's: for
+   * the tap easter egg, so only the squid's own pixels take a tap.
+   */
+  hits(x: number, y: number, tol: number) {
+    let hit = false;
+    this.eachPoint((px, py, r) => {
+      if (!hit && Math.hypot(px - x, py - y) <= r + tol) hit = true;
+    });
+    return hit;
+  }
+
+  /** Wave limb `id` (a tentacle, hello) for `dur` seconds from `t`, lifting it out to the squid's `side` (-1 left). */
+  wave(id: number, t: number, dur: number, side: number) {
+    this.waving = { id, at: t, dur, side };
+  }
+  private waving: { id: number; at: number; dur: number; side: number } | null = null;
+
   /** The rest pose of limb `l`'s node j: its heading from straight down, in body space. */
   private heading(l: Limb, j: number, t: number, m: Motion) {
     const s = j / (l.n - 1);
@@ -320,11 +352,25 @@ export class SquidBody {
     let spread = 1 - 0.85 * Math.exp(-m.jetAge * 1.7);
     spread *= 1 + 0.4 * m.inflating;
     if (m.asleep) spread = 1.5;
+    spread *= 1 + (m.flare ?? 0);
     const swimming = m.jetAge < 1.2;
     const amp = (m.asleep ? 0.1 : swimming ? 0.22 : 0.3) * (l.tentacle ? 0.8 : 1);
     const wave = amp * s * Math.sin(t * (m.hovering ? 1.6 : 2.6) - j * 0.55 + l.phase);
     const curl = l.curl * s * s * Math.sign(l.rest || 1) * (0.6 + 0.4 * Math.sin(t * 0.6 + l.phase));
-    return l.rest * spread + curl + wave;
+    return l.rest * spread + curl + wave + this.hello(l, s, j, t);
+  }
+
+  /** The waving limb: lifted out to one side, its lower half flicking back and forth (a travelling wave). */
+  private hello(l: Limb, s: number, j: number, t: number) {
+    const w = this.waving;
+    if (!w || w.id !== l.id) return 0;
+    const u = (t - w.at) / w.dur;
+    if (u < 0 || u >= 1) return 0;
+    const env = Math.sin(Math.PI * Math.min(1, u * 1.6)) * (u > 0.7 ? (1 - u) / 0.3 : 1);
+    // Headings are from straight down in body space: a positive one leans to the squid's right (like LIMB_ROOTS).
+    const out = w.side * 0.55 * s;
+    const flick = 0.85 * s ** 1.4 * Math.sin((t - w.at) * Math.PI * 2 * 2.4 - j * 0.45);
+    return env * (out + flick);
   }
 
   /** Put every limb in its rest pose at once (first frame, a resize, reduced motion). */
@@ -503,14 +549,22 @@ export class SquidBody {
   private sprite(look: Look, dim: number): Uint32Array {
     const { key, pal } = this.palette(look, dim);
     const lids = look.doze || look.mood === "lost" || look.mood === "gave-up";
-    const id = `${key}|${this.fin}|${lids}`;
+    // Blushing, in four steps (so it fades in whole pixels, and the cache stays small).
+    const blush = Math.round(Math.min(1, Math.max(0, look.blush ?? 0)) * 4) / 4;
+    const id = `${key}|${this.fin}|${lids}|${blush}`;
     let s = this.cache.get(id);
     if (!s) {
       const tones = FIN_FRAMES[this.fin];
       const grid = new Uint32Array(W * H);
       tones.forEach((tone, i) => {
         if (!tone) return;
-        grid[i] = rgba(pal[lids && LID.has(i) ? "lid" : tone]);
+        let c = pal[lids && LID.has(i) ? "lid" : tone];
+        if (blush) {
+          // Pink cheeks under the eyes; the rim and the spots flush pink too, so it reads at phone size.
+          if (CHEEKS.has(i)) c = mix(c, BLUSH, 0.9 * blush);
+          else if (tone === "rim" || tone === "spot") c = mix(c, BLUSH, 0.45 * blush);
+        }
+        grid[i] = rgba(c);
       });
       s = scale2x(grid, W, H);
       this.cache.set(id, s);
