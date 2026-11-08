@@ -2260,54 +2260,6 @@ export const TOPICS: Topic[] = [
     ],
   },
   {
-    id: "theme-parks",
-    category: "Entertainment",
-    title: "Most visited theme parks",
-    noun: "theme parks",
-    placesIn: "world",
-    prompt: "Name the 10 most visited theme parks in the world (2024)",
-    page: "List of amusement park rankings",
-    tables: [1],
-    name: "Amusement park",
-    value: "2024",
-    metric: "Visitors (2024)",
-    // The regional tables have the same 2024 figures for parks outside the world top 25 (Knott's Berry Farm, Cedar
-    // Point), so those show and score theirs (all 46 have one).
-    also: [{ tables: [2, 3, 4, 5], name: "Amusement park", value: "2024" }],
-    universeCategories: ["Walt Disney Parks and Resorts", "Operating amusement parks", "Amusement parks in the United States"],
-    // Resorts (a guess at "Tokyo Disney" means its parks: intent.ts), companies, services and events are no parks.
-    skip: [
-      "Tokyo Disney Resort", "Shanghai Disney Resort", "Disneyland Resort", "Hong Kong Disneyland Resort",
-      "Disney Vacation Club", "Disney PhotoPass", "Virtual queue systems at Disney Parks", "Give a Day, Get a Disney Day",
-      "Disneyland, Inc.", "Euro Disney S.A.S.", "Disney's Fairy Tale Weddings & Honeymoons",
-      "Disneyland Resort Paris 15th Anniversary", "Disney Dream Portrait Series", "Disney Live Entertainment",
-      "Disney Regional Entertainment", "Disney Experiences", "Adventures by Disney", "Disney Magic Kingdoms", "Club Disney",
-      "World of Disney", "Downtown Disney", "Walt Disney Attractions Japan", "Universal Kids Resort",
-      "Hale's Tours of the World", "Port Disney", "Universal Beijing",
-      // Category members that are no park: a racist carnival game, rides, lands, services, events, never-opened parks.
-      "African dodger", "CircusTrix", "Great Old Amusement Parks", "Trolley park", "Behind the Attraction", "E ticket",
-      "Go Away Green", "Hidden Mickey", "MagicBand", "MyMagic+", "Omnimover", "Virtual Magic Kingdom",
-      "Vista-United Telecommunications", "Wild About Safety", "Mickey's Magical Party", "Mickey's Very Merry Christmas Party",
-      "Summer Nightastic!", "Celebration in the Air", "Golden Pass", "Ellen's Energy Adventure", "Pleasure Island",
-      "Adventureland", "Disney's America", "Walt Disney's Riverfront Square", "Disneyland in Australia", "WestCOT",
-      "Disneyland Abu Dhabi", "The Wizarding World of Harry Potter", "20th Century Fox World", "PlayPlace",
-      "Margaritaville Resort Orlando",
-      // Category titles skip by their exact text, qualifier included (Adventureland (Iowa) is a real park).
-      "Golden Pass (Disney)", "Pleasure Island (Walt Disney World)", "20th Century Fox World (Dubai)",
-    ],
-    // #10 is the Paris park; "Disneyland Park" reads like #2.
-    rename: { "Disneyland Park": "Disneyland Paris" },
-    junkAliases: [
-      "It's a Small World", "Find Stitch!", "Tokyo Disney Resort Fireworks", "Villain's Mix and Mingle",
-      "Magic Kingdom Parade", "Disney's Dreams Come True Parade", "Hard Rock Cafe Osaka",
-      "Hard Rock Cafe Universal CityWalk Osaka", "Universal CityWalk Osaka", "Team Disney Anaheim",
-      "DisneySea Transit Steamer Line", "Hollywood Hills Amphitheater", "Disney's Doug Live!", "Chante, C'est Noel",
-      "Epcot '94", "Epcot '95", "America", "USA Pavilion", "Epcot Pavilion", "World Showcase pavilion",
-      "Superstar Television", "The Spirit of Pocahontas", "Streets of America", "Pixar Place", "Critter Country",
-      "Disneyland Heliport", "Walt disney project", "Mickey's Soundsational Parade",
-    ],
-  },
-  {
     id: "us-metros",
     category: "Geography",
     title: "Largest US metro areas",

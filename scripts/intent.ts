@@ -1120,33 +1120,6 @@ export const INTENT: Record<string, Intent> = {
       "Hank Aaron": ["Hammerin' Hank"],
     },
   },
-  "theme-parks": {
-    same: {
-      "Disneyland Paris": ["Disneyland Park Paris", "Euro Disney", "Euro Disneyland", "Disney Paris", "Paris Disneyland"],
-      "Disney Adventure World": ["Walt Disney Studios", "Walt Disney Studios Park"],
-      "Shanghai Disneyland": ["Shanghai Disney", "Disneyland Shanghai"],
-      "Hong Kong Disneyland": ["Hong Kong Disney", "HK Disneyland", "Disneyland Hong Kong"],
-      "Universal Studios Florida": ["Universal Studios Orlando"],
-      "Chimelong Ocean Kingdom": ["Ocean Kingdom"],
-      "Universal Studios Beijing": ["Universal Beijing"],
-      "Magic Kingdom": ["Walt Disney World", "Disney World"],
-      Disneyland: ["Disneyland California", "Disneyland Anaheim"],
-      "Universal Studios Japan": ["USJ", "Universal Japan"],
-      "Disney's Hollywood Studios": ["Hollywood Studios", "MGM Studios", "Disney-MGM Studios"],
-      // Without these, "universal hollywood" read as the "Universal" alias plus words: Universal Studios Japan.
-      "Universal Studios Hollywood": ["Universal Hollywood"],
-      "Ocean Park Hong Kong": ["Ocean Park"],
-    },
-    groups: {
-      // Universal Orlando Resort's two parks.
-      "Universal Orlando": ["Universal Studios Florida", "Universal Islands of Adventure"],
-      // No top-10 park has "Disney" in its name: the guess offers the four Disney parks of the top 10.
-      Disney: ["Magic Kingdom", "Disneyland", "Tokyo Disneyland", "Shanghai Disneyland"],
-      "Universal Studios": ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
-      Universal: ["Universal Studios Japan", "Universal Studios Beijing", "Universal Studios Florida", "Universal Studios Hollywood"],
-      "Tokyo Disney": ["Tokyo Disneyland", "Tokyo DisneySea"],
-    },
-  },
   "car-models": {
     // Model names that are plain words ("mustang", "impala") aren't read as part of a longer name: say them here.
     same: {
