@@ -190,6 +190,70 @@ test("a rating goes to rate_list: the latest per list and mode, with this browse
   await ctx.close();
 });
 
+// What players type that the game doesn't take goes to submit_miss (owner: "real data instead of agents guessing what
+// people type"), as short lowercase text linked to nobody: no user id, a random id of its own (not the one plays carry),
+// and the public key alone, signed in or not. Once per text on a list and mode; junk too; never an answer, a near
+// miss, or an email address; offline it waits.
+test("a guess the game doesn't take goes to submit_miss once, lowercase, linked to nobody even signed in (desktop)", async () => {
+  const KEY = BACKEND_ENV.VITE_SUPABASE_ANON_KEY;
+  const { ctx, page, calls } = await open(desktop, "#p-mountains", { ...FRESH, "top-tens:auth": SESSION }, { save: { data: { games: {}, daily: {}, seenHelp: true }, version: 1 } });
+  const plays = [];
+  page.on("request", (r) => new URL(r.url()).pathname === "/rest/v1/rpc/submit_play" && plays.push(r.headers()));
+  await page.getByLabel("Your guess").waitFor();
+
+  await guess(page, "  Pizza   HUT ");
+  await until(() => calls.miss.length === 1);
+  const [first] = calls.miss;
+  assert.match(first.args.p_client_id, UUID);
+  assert.deepEqual(first.args, { p_list_id: "mountains", p_mode: "list", p_kind: "unknown", p_text: "pizza hut", p_client_id: first.args.p_client_id });
+  // The public key, not the signed-in player's token.
+  assert.equal(first.headers.apikey, KEY);
+  assert.equal(first.headers.authorization, `Bearer ${KEY}`);
+  assert.equal(first.headers.cookie, undefined);
+
+  // The same text again: once. Junk goes too (false junk calls get found). An answer, a near miss (#12, a life) and an
+  // email address never do.
+  await guess(page, "PIZZA HUT");
+  await guess(page, "xqzzvkw");
+  await until(() => calls.miss.length === 2);
+  assert.deepEqual({ ...calls.miss[1].args }, { ...first.args, p_kind: "junk", p_text: "xqzzvkw" });
+  for (const text of ["Everest", "Broad Peak", "dana@example.com"]) await guess(page, text);
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("results").waitFor();
+  await until(() => calls.submit.length === 1);
+  await settle();
+  assert.equal(calls.miss.length, 2);
+  // The game itself went with the player's session and the plays id; the misses with neither.
+  assert.equal(plays[0].authorization, `Bearer ${TOKEN}`);
+  assert.notEqual(first.args.p_client_id, calls.submit[0].p_client_id);
+
+  // A Blitz round: its own mode. A hit sends nothing. Offline, a miss waits and goes when the connection is back.
+  await page.goto(base + "#blitz-airports");
+  await page.getByTestId("blitz-clock").waitFor();
+  await guess(page, "Dubai");
+  await guess(page, "Pizza Hut");
+  await until(() => calls.miss.length === 3);
+  assert.deepEqual(calls.miss[2].args, { ...first.args, p_list_id: "airports", p_mode: "blitz" });
+  const rpc = `${SUPA}/rest/v1/rpc/submit_miss`;
+  await page.route(rpc, (route) => route.abort("internetdisconnected"));
+  await guess(page, "Gatwick Express");
+  await settle();
+  assert.equal(calls.miss.length, 3);
+  const waiting = (await page.evaluate(() => JSON.parse(localStorage.getItem("top-tens:miss-outbox")))).pending;
+  assert.deepEqual(waiting.map((m) => [m.listId, m.mode, m.kind, m.text]), [["airports", "blitz", "unknown", "gatwick express"]]);
+  await page.unroute(rpc);
+  await page.evaluate(() => dispatchEvent(new Event("online")));
+  await until(() => calls.miss.length === 4);
+  assert.equal(calls.miss[3].args.p_text, "gatwick express");
+  assert.equal(calls.miss[3].args.p_client_id, first.args.p_client_id);
+
+  // The privacy page says so.
+  await page.goto(base + "#privacy");
+  await page.getByTestId("privacy-misses").waitFor();
+  await ctx.close();
+});
+
 // Fathom (the estimation beta) on its fixture bank: each locked-in guess goes to submit_fathom_guess once (offline it
 // waits), and a reveal says how real players guessed once 20 of them have answered that question; below 20, nothing.
 test("Fathom: each guess is sent once, and a reveal says how players guessed from 20 of them (phone)", async () => {
@@ -490,6 +554,8 @@ test("a build without the env vars sends nothing anywhere and offers no sign-in"
   await page.clock.install({ time: NOW });
   const url = process.env.E2E_URL;
   await page.goto(url + "#p-mountains");
+  // A guess the game doesn't take: nowhere to send it, so nothing is kept either.
+  await guess(page, "pizza");
   await page.getByTestId("give-up").click();
   await page.getByTestId("give-up").click();
   await page.locator('[data-testid="results"] [data-testid="par"][data-source="estimate"]').waitFor();

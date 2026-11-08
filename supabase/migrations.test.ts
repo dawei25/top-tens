@@ -2,14 +2,16 @@ import { PGlite } from "@electric-sql/pglite";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
+import { cleanMiss, looksPersonal } from "../src/net/misses";
 
 /**
  * The migrations, run in PGlite (Postgres in WebAssembly) against small stand-ins for what Supabase provides: the
  * anon, authenticated and service_role roles, auth.users and auth.uid(). Checks the contract the game relies on: who
- * can touch what, what submit_play, rate_list, submit_feedback and submit_fathom_guess accept, what the stats, ratings
- * and Fathom comparison functions return (the owners and stats_excluded left out of the stats and the comparison), that
- * notes are read only with the reader key (list_feedback), the save's version check, and what account deletion
- * (api/delete-account.ts, as service_role) needs.
+ * can touch what, what submit_play, rate_list, submit_feedback, submit_fathom_guess and submit_miss accept, what the
+ * stats, ratings and Fathom comparison functions return (the owners and stats_excluded left out of the stats and the
+ * comparison), that notes and missed guesses are read only with the reader key (list_feedback, list_misses), that a
+ * miss is normalized as the game normalizes it and linked to nobody, the save's version check, and what account
+ * deletion (api/delete-account.ts, as service_role) needs.
  *
  * Everything runs twice: once as older projects set up public (every new table and function handed to the API roles,
  * which the migrations must take back), once with "Automatically expose new tables" off (nothing handed out, as in
@@ -82,6 +84,15 @@ function suite(exposeNewTables: boolean) {
       args.mode ?? "list",
       args.rating === undefined ? null : args.rating,
       args.text === undefined ? "a note" : args.text,
+      args.client === undefined ? client(1) : args.client,
+    ]);
+
+  const miss = (args: { list?: string | null; mode?: string | null; kind?: string | null; text?: string | null; client?: string | null }) =>
+    db.query<{ ok: boolean }>("select public.submit_miss($1, $2, $3, $4, $5) as ok", [
+      args.list === undefined ? "mountains" : args.list,
+      args.mode === undefined ? "list" : args.mode,
+      args.kind === undefined ? "unknown" : args.kind,
+      args.text === undefined ? "mount fuji" : args.text,
       args.client === undefined ? client(1) : args.client,
     ]);
 
@@ -872,6 +883,260 @@ function suite(exposeNewTables: boolean) {
       await db.query("delete from auth.users where id = $1", [F]);
       expect((await db.query("select * from public.fathom_guesses where user_id = $1", [F])).rows).toEqual([]);
       expect((await db.query<{ n: number }>("select count(*)::int as n from public.fathom_guesses where user_id is null")).rows[0].n).toBe(anonymous.rows[0].n);
+    });
+  });
+
+  describe("missed guesses", () => {
+    /** Someone who signs in, misses, and deletes their account. */
+    const M = "56565656-5656-4565-8565-565656565656";
+    type Row ={ list_id: string; mode: string; kind: string; text: string; client_id: string };
+    const rows = (list: string) =>
+      db.query<Row>("select list_id, mode, kind, text, client_id from public.missed_guesses where list_id = $1 order by id", [list]);
+    type Read = { list_id: string; mode: string; kind: string; text: string; browsers: number; last_seen: Date };
+    /** The reader key notes are read with (set_feedback_reader): misses are read with the same one. */
+    const KEY = "a-long-random-reader-key-for-misses-0123";
+    /** list_misses as the loop calls it with the public key (anon). */
+    const read = (reader: string | null, since?: string) =>
+      as("anon", null, () =>
+        since === undefined
+          ? db.query<Read>("select * from public.list_misses($1)", [reader])
+          : db.query<Read>("select * from public.list_misses($1, $2)", [reader, since]),
+      );
+
+    beforeAll(async () => {
+      await db.query("select public.set_feedback_reader($1)", [KEY]);
+    });
+
+    it("keeps a guess the game didn't take as its normalized text, linked to nobody: a browser counts once per text", async () => {
+      await as("anon", null, async () => {
+        expect((await miss({ list: "m-peaks", text: "  Mount  EVEREST\t", client: client(2000) })).rows[0].ok).toBe(true);
+        // The same text from the same browser again (a retry, a later game, another kind): kept once.
+        expect((await miss({ list: "m-peaks", text: "mount everest", client: client(2000) })).rows[0].ok).toBe(false);
+        expect((await miss({ list: "m-peaks", kind: "junk", text: "MOUNT EVEREST", client: client(2000) })).rows[0].ok).toBe(false);
+        // Blitz, another browser, another text: each its own.
+        expect((await miss({ list: "m-peaks", mode: "blitz", text: "mount everest", client: client(2000) })).rows[0].ok).toBe(true);
+        expect((await miss({ list: "m-peaks", text: "mount everest", client: client(2001) })).rows[0].ok).toBe(true);
+        expect((await miss({ list: "m-peaks", kind: "junk", text: "asdfgh", client: client(2001) })).rows[0].ok).toBe(true);
+      });
+      // Signed in: still linked to nobody.
+      await as("authenticated", A, () => miss({ list: "m-peaks", text: "k two", client: client(2002) }));
+      expect((await rows("m-peaks")).rows).toEqual([
+        { list_id: "m-peaks", mode: "list", kind: "unknown", text: "mount everest", client_id: client(2000) },
+        { list_id: "m-peaks", mode: "blitz", kind: "unknown", text: "mount everest", client_id: client(2000) },
+        { list_id: "m-peaks", mode: "list", kind: "unknown", text: "mount everest", client_id: client(2001) },
+        { list_id: "m-peaks", mode: "list", kind: "junk", text: "asdfgh", client_id: client(2001) },
+        { list_id: "m-peaks", mode: "list", kind: "unknown", text: "k two", client_id: client(2002) },
+      ]);
+      // No column could say whose a miss is.
+      const cols = await db.query<{ column_name: string }>(
+        "select column_name from information_schema.columns where table_schema = 'public' and table_name = 'missed_guesses' order by ordinal_position",
+      );
+      expect(cols.rows.map((c) => c.column_name)).toEqual(["id", "list_id", "mode", "kind", "text", "client_id", "created_at"]);
+    });
+
+    it("normalizes the text the way the game does (src/net/misses.ts), and keeps what the game sends as it is", async () => {
+      const typed = ["  Mount  EVEREST\t", "Mont\u00a0Blanc", "e\u0301cole", "ÉCOLE", "K2\r\n", "a\u3000b\u2003c", "\u200a x \ufeff", "São  Paulo", "x".repeat(40)];
+      for (const [i, text] of typed.entries()) await as("anon", null, () => miss({ list: "m-clean", text, client: client(2010 + i) }));
+      expect((await rows("m-clean")).rows.map((r) => r.text)).toEqual(typed.map(cleanMiss));
+      expect(typed.map(cleanMiss).slice(0, 4)).toEqual(["mount everest", "mont blanc", "école", "école"]);
+      // The game's own lowercasing (final sigma, the dotted I) is kept as it came.
+      const sent = ["ΣΑΣ", "İstanbul"].map(cleanMiss);
+      for (const [i, text] of sent.entries()) await as("anon", null, () => miss({ list: "m-sent", text, client: client(2030 + i) }));
+      expect((await rows("m-sent")).rows.map((r) => r.text)).toEqual(sent);
+    });
+
+    it("refuses malformed misses with invalid_parameter_value (a 400 from the API)", async () => {
+      await as("anon", null, async () => {
+        const bad = [
+          { list: "Bad Id" },
+          { list: "x".repeat(65) },
+          { list: null },
+          { mode: "classic" },
+          { mode: null },
+          // Only unknown and junk: never an accepted answer, a near miss or a choice.
+          { kind: "near" },
+          { kind: "correct" },
+          { kind: "typo" },
+          { kind: null },
+          { text: null },
+          { text: "" },
+          { text: " \t\n\u00a0 " },
+          { text: "x".repeat(41) },
+          { text: `  ${"é".repeat(41)} ` },
+          { client: null },
+        ];
+        for (const args of bad) expect(await code(miss({ list: "m-bad", client: client(2040), ...args })), JSON.stringify(args)).toBe("22023");
+        // 40 characters is fine, counted after normalizing (and in characters, not bytes).
+        expect((await miss({ list: "m-bad", client: client(2040), text: `  ${"É".repeat(40)}\n` })).rows[0].ok).toBe(true);
+      });
+      expect((await rows("m-bad")).rows.map((r) => r.text)).toEqual(["é".repeat(40)]);
+    });
+
+    it("refuses text that looks like an email address, a phone number or a link, as the game does", async () => {
+      const personal = [
+        "dana@example.com",
+        " Dana.Scully@FBI.gov ",
+        "write to me: x@y.co",
+        "+1 (555) 123-4567",
+        "555-1234",
+        "07700 900123",
+        "0044 20 7946 0958",
+        "1400000000",
+        "https://example.com",
+        "HTTP://x.co",
+        "ftp://files",
+        "www.example.com",
+        "see WWW.example.org",
+        "example.com/me",
+        "youtube.com/@dana",
+        "t.me/dana",
+      ];
+      // Answers people really type, with digits, dots, slashes and at signs: kept.
+      const fine = [
+        "mount everest",
+        "432 park avenue",
+        "1984",
+        "2001: a space odyssey",
+        "google.com",
+        "booking.com",
+        "@cristiano",
+        "st. louis",
+        "ac/dc",
+        "w.a.s.p.",
+        "7-eleven",
+        "1,000,000",
+        "10 downing street",
+        "covid-19",
+        "route 66",
+        "1 2 3 4 5 6",
+      ];
+      for (const text of personal) {
+        expect(looksPersonal(cleanMiss(text)), text).toBe(true);
+        expect(await code(as("anon", null, () => miss({ list: "m-private", text, client: client(2050) }))), text).toBe("22023");
+      }
+      for (const text of fine) {
+        expect(looksPersonal(cleanMiss(text)), text).toBe(false);
+        expect((await as("anon", null, () => miss({ list: "m-fine", text, client: client(2051) }))).rows[0].ok, text).toBe(true);
+      }
+      expect((await rows("m-private")).rows).toEqual([]);
+      expect((await rows("m-fine")).rows).toHaveLength(fine.length);
+    });
+
+    it("ignores a browser past 60 misses an hour", async () => {
+      await as("anon", null, async () => {
+        for (let i = 0; i < 60; i++) expect((await miss({ list: `m-spam-${i % 3}`, text: `spam ${i}`, client: client(2060) })).rows[0].ok).toBe(true);
+        expect((await miss({ list: "m-spam-x", text: "one more", client: client(2060) })).rows[0].ok).toBe(false);
+        // Another browser is fine.
+        expect((await miss({ list: "m-spam-x", text: "one more", client: client(2061) })).rows[0].ok).toBe(true);
+      });
+      expect((await rows("m-spam-x")).rows.map((r) => r.client_id)).toEqual([client(2061)]);
+      // An hour on, the first browser counts again.
+      await db.query("update public.missed_guesses set created_at = now() - interval '61 minutes' where client_id = $1", [client(2060)]);
+      expect((await as("anon", null, () => miss({ list: "m-spam-x", text: "one more", client: client(2060) }))).rows[0].ok).toBe(true);
+    });
+
+    it("gives players no direct access to the table", async () => {
+      for (const [role, user] of [["anon", null], ["authenticated", A]] as const) {
+        await as(role, user, async () => {
+          expect(await code(db.query("select * from public.missed_guesses"))).toBe("42501");
+          expect(await code(db.query("insert into public.missed_guesses (list_id, mode, kind, text, client_id) values ('x', 'list', 'unknown', 'hi', $1)", [client(2070)]))).toBe("42501");
+          expect(await code(db.query("update public.missed_guesses set text = 'x'"))).toBe("42501");
+          expect(await code(db.query("delete from public.missed_guesses"))).toBe("42501");
+        });
+      }
+    });
+
+    it("lists the misses only with the reader key, as list_feedback (in the body or the X-Feedback-Reader header)", async () => {
+      for (const wrong of ["anything", KEY.toUpperCase(), `${KEY} `, "", null]) expect(await code(read(wrong)), String(wrong)).toBe("42501");
+      await as("authenticated", A, async () => {
+        expect(await code(db.query("select * from public.list_misses($1)", ["anything"]))).toBe("42501");
+      });
+      expect((await read(KEY)).rows.length).toBeGreaterThan(0);
+      // The same key still reads the notes.
+      expect(await code(as("anon", null, () => db.query("select * from public.list_feedback($1)", [KEY])))).toBeUndefined();
+      // The cloud environment's proxy adds the key as a header; the agent sends an empty p_reader.
+      const viaHeader = async (header: string | null, reader: string | null = "") => {
+        await db.query("select set_config('request.headers', $1, false)", [header === null ? "" : JSON.stringify({ "x-feedback-reader": header })]);
+        try {
+          return await read(reader);
+        } finally {
+          await db.query("select set_config('request.headers', '', false)");
+        }
+      };
+      expect((await viaHeader(KEY)).rows.length).toBeGreaterThan(0);
+      expect((await viaHeader(KEY, null)).rows.length).toBeGreaterThan(0);
+      for (const wrong of ["anything", "", `${KEY} `]) expect(await code(viaHeader(wrong)), wrong).toBe("42501");
+      expect(await code(viaHeader(null))).toBe("42501");
+      // A wrong key in the body beside a right header: refused (the body wins when given).
+      expect(await code(viaHeader(KEY, "anything"))).toBe("42501");
+      await db.query("select set_config('request.headers', 'not json', false)");
+      try {
+        expect(await code(read(""))).toBe("42501");
+      } finally {
+        await db.query("select set_config('request.headers', '', false)");
+      }
+    });
+
+    it("totals each text by the browsers that typed it, most first, never a client id; p_since keeps only newer ones", async () => {
+      await as("anon", null, async () => {
+        // "mt everest" from three browsers (one of them twice), "everest mountain" from two, junk from one; Blitz apart.
+        for (const c of [2080, 2081, 2082]) await miss({ list: "m-agg", text: "Mt Everest", client: client(c) });
+        await miss({ list: "m-agg", text: "mt everest", client: client(2080) });
+        for (const c of [2083, 2084]) await miss({ list: "m-agg", text: "everest mountain", client: client(c) });
+        await miss({ list: "m-agg", kind: "junk", text: "qwerty", client: client(2085) });
+        await miss({ list: "m-agg", mode: "blitz", text: "mt everest", client: client(2086) });
+      });
+      const at = (c: number, hoursAgo: number) =>
+        db.query("update public.missed_guesses set created_at = now() - make_interval(hours => $2) where list_id = 'm-agg' and client_id = $1", [client(c), hoursAgo]);
+      await at(2083, 72);
+      await at(2084, 5);
+      await at(2085, 2);
+      await at(2086, 1);
+
+      const all = (await read(KEY)).rows;
+      // Most browsers first, across every list.
+      expect(all.map((r) => r.browsers)).toEqual(all.map((r) => r.browsers).sort((a, b) => b - a));
+      const agg = all.filter((r) => r.list_id === "m-agg");
+      expect(agg.map((r) => Object.keys(r))).toEqual(Array(4).fill(["list_id", "mode", "kind", "text", "browsers", "last_seen"]));
+      expect(agg.map(({ last_seen, ...r }) => (expect(last_seen).toBeInstanceOf(Date), r))).toEqual([
+        { list_id: "m-agg", mode: "list", kind: "unknown", text: "mt everest", browsers: 3 },
+        { list_id: "m-agg", mode: "list", kind: "unknown", text: "everest mountain", browsers: 2 },
+        // The same count: the latest first.
+        { list_id: "m-agg", mode: "blitz", kind: "unknown", text: "mt everest", browsers: 1 },
+        { list_id: "m-agg", mode: "list", kind: "junk", text: "qwerty", browsers: 1 },
+      ]);
+      // last_seen is the latest browser's.
+      const mountain = agg.find((r) => r.text === "everest mountain")!;
+      expect(Math.abs(mountain.last_seen.getTime() - (Date.now() - 5 * 3_600_000))).toBeLessThan(60_000);
+      // Since yesterday: the browser from three days ago is left out.
+      const recent = (await read(KEY, new Date(Date.now() - 86_400_000).toISOString())).rows.filter((r) => r.list_id === "m-agg");
+      expect(recent.find((r) => r.text === "everest mountain")?.browsers).toBe(1);
+      expect(recent).toHaveLength(4);
+      // Nothing a client id could be read from.
+      expect(JSON.stringify(all)).not.toContain(client(2080));
+    });
+
+    it("keeps its signatures", async () => {
+      const sig = await db.query<{ name: string; args: string; result: string }>(
+        `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
+         from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('submit_miss', 'list_misses') order by 1`,
+      );
+      expect(sig.rows).toEqual([
+        {
+          name: "list_misses",
+          args: "p_reader text, p_since timestamp with time zone",
+          result: "TABLE(list_id text, mode text, kind text, text text, browsers integer, last_seen timestamp with time zone)",
+        },
+        { name: "submit_miss", args: "p_list_id text, p_mode text, p_kind text, p_text text, p_client_id uuid", result: "boolean" },
+      ]);
+    });
+
+    it("stays when an account is deleted: nothing in it is anyone's", async () => {
+      const before = (await db.query<{ n: number }>("select count(*)::int as n from public.missed_guesses")).rows[0].n;
+      await db.query("insert into auth.users (id, email) values ($1, 'm@example.com')", [M]);
+      await as("authenticated", M, () => miss({ list: "m-gone", text: "from m", client: client(2090) }));
+      await db.query("delete from auth.users where id = $1", [M]);
+      expect((await db.query<{ n: number }>("select count(*)::int as n from public.missed_guesses")).rows[0].n).toBe(before + 1);
     });
   });
 

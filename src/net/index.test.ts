@@ -188,6 +188,14 @@ describe("without a backend (no env)", () => {
     expect([...store.keys()]).toEqual(["top-tens:v1"]);
     expect(imported).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();
+
+    // A guess the game didn't take, on a list or a Blitz round: nothing sent, nothing queued, no id made.
+    expect(net.reportGuess("mountains", "list", "pizza", { kind: "unknown", junk: false })).toBe(false);
+    expect(net.reportGuess("airports", "blitz", "xqzzvkw", { kind: "none", junk: true })).toBe(false);
+    await new Promise((r) => setTimeout(r, 10));
+    expect([...store.keys()]).toEqual(["top-tens:v1"]);
+    expect(imported).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
 
@@ -336,6 +344,89 @@ describe("with a backend", () => {
     await vi.waitFor(() => expect(svc.start).toHaveBeenCalled());
     handlers.get("online")!();
     await vi.waitFor(() => expect(svc.flushFathom).toHaveBeenCalled());
+  });
+
+  it("queues a guess the game didn't take in its own outbox before the backend code loads; never one it took or offered", async () => {
+    configure();
+    let release!: () => void;
+    const loaded = new Promise<void>((r) => (release = r));
+    const svc = { start: vi.fn(), flushMisses: vi.fn() };
+    vi.doMock("./service", async () => (await loaded, svc));
+    const { store } = fakeBrowser();
+    const now = Date.UTC(2026, 10, 8, 12);
+    vi.useFakeTimers({ now, toFake: ["Date"] });
+    try {
+      const net = await import("./index");
+      const entry = { rank: 12, name: "Broad Peak", aliases: [] };
+      // Taken or offered: an answer (corrected or not), a repeat, a near miss, a "did you mean", an empty box; on Blitz
+      // a hit, a repeat, the choices, a place outside the region and an answer without a figure (both on the list).
+      const taken: [string, Parameters<typeof net.reportGuess>[3]][] = [
+        ["Broad Peak", { kind: "correct", entry, corrected: false }],
+        ["brod peak", { kind: "correct", entry, corrected: true }],
+        ["Broad Peak", { kind: "duplicate", entry }],
+        ["Broad Peak", { kind: "near", entry, corrected: false }],
+        ["brod", { kind: "typo", suggestions: ["Broad Peak", "Bride Peak"] }],
+        ["", { kind: "empty" }],
+        ["Broad Peak", { kind: "scored", hit: { name: "Broad Peak", rank: 12, n: 8051, points: 40 }, corrected: false }],
+        ["Broad Peak", { kind: "duplicate", name: "Broad Peak" }],
+        ["brod", { kind: "choices", suggestions: ["Broad Peak", "Bride Peak"] }],
+        ["Japan", { kind: "none", junk: false, elsewhere: "Japan" }],
+        ["Confessions", { kind: "none", junk: false, unscored: "Confessions" }],
+        ["Broad Peak", { kind: "over" }],
+      ];
+      for (const [text, result] of taken) {
+        expect(net.reportGuess("mountains", "list", text, result), result.kind).toBe(false);
+        expect(net.reportGuess("mountains", "blitz", text, result), result.kind).toBe(false);
+      }
+      expect(store.get("top-tens:miss-outbox")).toBeUndefined();
+
+      // Not taken: queued as short lowercase text, junk too (to find false junk calls), a vague guess too.
+      expect(net.reportGuess("mountains", "list", "  Pizza   HUT ", { kind: "unknown", junk: false })).toBe(true);
+      expect(net.reportGuess("mountains", "list", "xqzzvkw", { kind: "unknown", junk: true })).toBe(true);
+      expect(net.reportGuess("mountains", "list", "Gasherbrum", { kind: "unknown", junk: false, vague: 4 })).toBe(true);
+      expect(net.reportGuess("airports", "blitz", "Heathrow Express", { kind: "none", junk: false })).toBe(true);
+      expect(net.reportGuess("airports", "blitz", "qqqq", { kind: "none", junk: true })).toBe(true);
+      // The same text again on that list and mode: once.
+      expect(net.reportGuess("mountains", "list", "pizza hut", { kind: "unknown", junk: false })).toBe(false);
+      // Someone's details, or too long: never.
+      expect(net.reportGuess("mountains", "list", "dana@example.com", { kind: "unknown", junk: true })).toBe(false);
+      expect(net.reportGuess("mountains", "list", "call me 555 123 4567", { kind: "unknown", junk: false })).toBe(false);
+      expect(net.reportGuess("mountains", "list", "https://example.com/dana", { kind: "unknown", junk: true })).toBe(false);
+      expect(net.reportGuess("mountains", "list", "x".repeat(41), { kind: "unknown", junk: true })).toBe(false);
+      expect(net.reportGuess("mountains", "list", " \t ", { kind: "unknown", junk: true })).toBe(false);
+      // Waiting already, though the backend code hasn't arrived (offline, it may never).
+      expect(JSON.parse(store.get("top-tens:miss-outbox")!).pending).toEqual([
+        { listId: "mountains", mode: "list", kind: "unknown", text: "pizza hut", at: now },
+        { listId: "mountains", mode: "list", kind: "junk", text: "xqzzvkw", at: now },
+        { listId: "mountains", mode: "list", kind: "unknown", text: "gasherbrum", at: now },
+        { listId: "airports", mode: "blitz", kind: "unknown", text: "heathrow express", at: now },
+        { listId: "airports", mode: "blitz", kind: "junk", text: "qqqq", at: now },
+      ]);
+      expect(svc.flushMisses).not.toHaveBeenCalled();
+      release();
+      await vi.waitFor(() => expect(svc.flushMisses).toHaveBeenCalledTimes(5));
+      expect(svc.start).toHaveBeenCalled();
+      // Never in the save, and no id is made until one is sent.
+      expect(store.get("top-tens:v1")).toBeUndefined();
+      expect([...store.keys()]).toEqual(["top-tens:miss-outbox"]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("loads the backend code at startup when misses are waiting, and sends them when the browser comes online", async () => {
+    configure();
+    const svc = { start: vi.fn(), flushPlays: vi.fn(), flushRatings: vi.fn(), flushFeedback: vi.fn(), flushFathom: vi.fn(), flushMisses: vi.fn() };
+    vi.doMock("./service", () => svc);
+    const { store } = fakeBrowser();
+    const handlers = new Map<string, () => void>();
+    vi.stubGlobal("addEventListener", (type: string, fn: () => void) => handlers.set(type, fn));
+    store.set("top-tens:miss-outbox", JSON.stringify({ pending: [{ listId: "mountains", mode: "list", kind: "unknown", text: "pizza", at: 1 }], sent: [] }));
+    const net = await import("./index");
+    net.startNet();
+    await vi.waitFor(() => expect(svc.start).toHaveBeenCalled());
+    handlers.get("online")!();
+    await vi.waitFor(() => expect(svc.flushMisses).toHaveBeenCalled());
   });
 
   it("loads the backend code at startup when notes are waiting, and sends them when the browser comes online", async () => {

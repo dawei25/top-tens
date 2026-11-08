@@ -7,6 +7,7 @@ import { parseAverages, parseStats, type CrowdStats, type ListAverages } from ".
 import { compareArgs, compareKey, FATHOM_GUESSES, guessArgs, parseCompare, type CompareRound, type FathomCrowd, type FathomGuess } from "./fathom";
 import { FEEDBACK, feedbackArgs, type Feedback } from "./feedback";
 import { takeGoogleReturn, type GoogleOutcome } from "./google";
+import { missArgs, missClientId, MISSES, type Miss } from "./misses";
 import { localOutboxStore, Outbox, retryDelay, type SendResult } from "./outbox";
 import { blitzPlay, clientId, listPlay, rpcArgs, type Play } from "./plays";
 import { RATINGS, rateArgs, ratingKey, type Rating } from "./ratings";
@@ -15,9 +16,9 @@ import { syncSave, type SaveRemote } from "./sync/engine";
 import { mergeSaves, type SyncSave } from "./sync/merge";
 
 /**
- * Everything that talks to the backend: score stats, ratings, notes, Fathom guesses, sign-in and save sync. Loaded with a dynamic
- * import, and only in builds with a backend (see ./index.ts), so players of a build without one never download it or
- * Supabase's client. Nothing here may break the game: every call catches its own failures.
+ * Everything that talks to the backend: score stats, ratings, notes, Fathom guesses, missed guesses, sign-in and save
+ * sync. Loaded with a dynamic import, and only in builds with a backend (see ./index.ts), so players of a build without
+ * one never download it or Supabase's client. Nothing here may break the game: every call catches its own failures.
  */
 
 let client: SupabaseClient | null = null;
@@ -187,6 +188,58 @@ export async function flushFathom(): Promise<void> {
   }
 }
 
+// ---------- Missed guesses ----------
+
+/**
+ * A database function called with the public key alone: never the player's session (supabase-js would send it while
+ * signed in) and no cookies, so the request says nothing about whose it is. For missed guesses, which are linked to
+ * nobody.
+ */
+async function publicRpc(name: string, args: object): Promise<SendResult> {
+  if (!BACKEND) return "drop";
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND.url}/rest/v1/rpc/${name}`, {
+      method: "POST",
+      headers: { apikey: BACKEND.anonKey, authorization: `Bearer ${BACKEND.anonKey}`, "content-type": "application/json" },
+      body: JSON.stringify(args),
+      credentials: "omit",
+    });
+  } catch {
+    // Offline: no answer at all.
+    return "retry";
+  }
+  return sendResult(res.status, res.ok ? null : res.status);
+}
+
+/**
+ * Guesses the game didn't take, waiting to be sent, once per list, mode and text, retried like plays. The facade
+ * (./index.ts) queues them in this store before this code has even loaded; this only sends, with their own random id.
+ */
+const missBox = new Outbox<Miss>(
+  localOutboxStore<Miss>(globalThis.localStorage, KEYS.missOutbox),
+  (m) => publicRpc("submit_miss", missArgs(m, missClientId())),
+  Date.now,
+  MISSES,
+);
+
+let missRetries = 0;
+let missTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Send the misses waiting, with the same backoff as plays. */
+export async function flushMisses(): Promise<void> {
+  clearTimeout(missTimer);
+  try {
+    if ((await missBox.flush()) === "retry") {
+      missRetries++;
+      clearTimeout(missTimer);
+      missTimer = setTimeout(() => void flushMisses(), retryDelay(missRetries));
+    } else missRetries = 0;
+  } catch {
+    // Never let misses get in the way.
+  }
+}
+
 // ---------- Stats ----------
 
 const STATS_TTL = 5 * 60_000;
@@ -301,6 +354,7 @@ export async function start(): Promise<void> {
   void flushRatings();
   void flushFeedback();
   void flushFathom();
+  void flushMisses();
   if (!accountsOn) return;
   try {
     const hadVerifier = verifierWaiting();

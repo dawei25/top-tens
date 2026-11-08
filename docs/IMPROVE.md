@@ -55,6 +55,16 @@ approve or disapprove ... I'll tell you which specific ones to swap out ... effi
    the coordinator, titles and difficulty to a judge. A theme on two or more lists is a method fix (step 7). Log the
    themes with their counts and what was done, even when nothing was. Notes are players' free text and this repo is
    public: paraphrase them in logs and commits, never paste them.
+   **Read the missed guesses** (what players typed that the game didn't take; owner, Nov 8: "real data instead of
+   agents guessing what people type"): `list_misses(p_reader => '', p_since => <last check>)` with the public key, the
+   proxy adding the reader key as for notes (docs/BACKEND.md, Running it), gives per list, mode and text how many
+   browsers typed it and whether it was judged `unknown` or `junk`. Judge each text again with today's matcher first
+   (a fix since may take it already). Texts typed by several browsers on one list are fixed first, each with a guard:
+   an alias or short form an answer should have, a missing answer (the source has it, the build dropped it), a better
+   "isn't in this ranking" line for a real thing the list doesn't rank, or a `junk` call on a real word or name (a
+   false "That doesn't look like an answer"). The same kind of miss on two or more lists is a method fix (step 7). A
+   single browser's miss is a hint, not a fix. Log the top misses with their counts and what was done; they are
+   players' typing and this repo is public: paraphrase them in logs and commits, never paste them.
 1. **Pick the work** (a budget of 4 judges and 1 data agent per cycle):
    - Judge 4 lists: verdicts judged longest ago first (`judgedAt`), then lists whose `fixes` a rebuild has since
      addressed. Skip today's and the next two days' dailies.

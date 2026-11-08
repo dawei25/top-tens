@@ -102,7 +102,8 @@ export function rpcArgs(p: Play, clientId: string) {
 
 const CLIENT_KEY = "top-tens:client-id";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-let fallbackId: string | undefined;
+/** Ids for the page's lifetime, by storage key, when storage keeps nothing. */
+const fallbackIds = new Map<string, string>();
 
 export function uuid(): string {
   if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
@@ -116,17 +117,20 @@ export function uuid(): string {
 
 /**
  * This browser's random id: only there so the same game isn't counted twice. Its own storage key, never synced.
- * Without storage it lasts for the page's lifetime.
+ * Without storage it lasts for the page's lifetime. `key` keeps another random id of this browser's, unrelated to
+ * this one (missed guesses carry their own: ./misses).
  */
-export function clientId(storage: Pick<Storage, "getItem" | "setItem"> | undefined = globalThis.localStorage): string {
+export function clientId(storage: Pick<Storage, "getItem" | "setItem"> | undefined = globalThis.localStorage, key = CLIENT_KEY): string {
   try {
-    const id = storage?.getItem(CLIENT_KEY);
+    const id = storage?.getItem(key);
     if (id && UUID.test(id)) return id;
     const fresh = uuid();
-    storage?.setItem(CLIENT_KEY, fresh);
-    if (storage?.getItem(CLIENT_KEY) === fresh) return fresh;
+    storage?.setItem(key, fresh);
+    if (storage?.getItem(key) === fresh) return fresh;
   } catch {
     // Private mode or storage blocked.
   }
-  return (fallbackId ??= uuid());
+  let id = fallbackIds.get(key);
+  if (!id) fallbackIds.set(key, (id = uuid()));
+  return id;
 }
