@@ -191,8 +191,8 @@ test("a found row's fact opens on a tap, with no caption under the board (phones
   for (const width of [320, 390]) {
     const { ctx, page } = await open(browser, phone(width), "#p-mountains", undefined, { reducedMotion: "reduce" });
     await page.getByLabel("Your guess").waitFor();
-    // Anything under the board other than GIVE UP (the caption, or any other line back in its place).
-    const extras = () => page.locator(".board .board-foot > :not([data-testid='give-up'])").count();
+    // Anything under the board but its keys (GIVE UP; once over, See 11 to 20): the caption, or a line in its place.
+    const extras = () => page.locator(".board .board-foot > :not([data-testid='give-up'], [data-testid='more-ranks-toggle'])").count();
     const onBoard = () =>
       page.getByTestId("give-up").evaluate((el) => {
         const [k, f] = [el.getBoundingClientRect(), el.parentElement.getBoundingClientRect()];
@@ -208,13 +208,13 @@ test("a found row's fact opens on a tap, with no caption under the board (phones
     assert.deepEqual(await onBoard(), give, `${width}px: GIVE UP stays where it was`);
     await row.tap();
     await page.locator(`[data-testid="slot"][data-rank="${first.rank}"].fact-open`).waitFor();
-    // And after the end, on the revealed board: a missed row's fact opens on a tap too, and nothing is under it.
+    // And after the end, on the revealed board: a missed row's fact opens on a tap too, and no caption is under it.
     await giveUp(page);
     // Past the end's second beat (the results scroll into view), so the tap lands where it was aimed.
     await page.clock.runFor(3000);
     await page.locator(`[data-testid="slot"][data-rank="${second.rank}"]`).tap();
     await page.locator(`[data-testid="slot"][data-rank="${second.rank}"].fact-open`).waitFor();
-    assert.equal(await page.locator(".board .board-foot").count(), 0, `${width}px: no strip under the revealed board`);
+    assert.equal(await extras(), 0, `${width}px: a caption under the revealed board`);
     await ctx.close();
   }
 });
