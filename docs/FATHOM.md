@@ -71,8 +71,8 @@ register". **A fair answer must always register**, and one answer locks per roun
   on the list's scale (10x off at its edges on a ratio list, 3.3 steps on a steps list) with the miss under it, the
   best four answers on the list with their figures (by points, then closeness, then the list's order; the yardstick
   left out), the fact if the question has one, and the list's source with its date. The results' recap reads "you
-  Colombia 52.89 million · target 50 million people". A name-it guess isn't sent to the backend (the players' typical
-  guess means nothing there).
+  Colombia 52.89 million · target 50 million people". With a backend, the figure of the thing named is sent as the
+  guess (docs/BACKEND.md), but the reveal shows no players' line (their typical figure means little there).
 - **Its lists**: `{ id, noun, nounPlural, measure, scoring: "ratio" | "steps", source: { title, url }, asOf, entries: [{
   name, aliases, value }] }`, each complete for what it holds (every country). The game fetches the lists the bank's
   name-it questions use before it draws; a question whose list didn't load, or whose target leaves fewer than 3 good

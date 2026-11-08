@@ -300,13 +300,21 @@ describe("with a backend", () => {
       // The same question again (a later game drew it): the first guess is the one that counts.
       expect(net.submitFathomGuess("eiffel-tower-height", 350)).toBe(false);
       expect(net.submitFathomGuess("Bad Id", 3)).toBe(false);
+      // 0% is a fair percent; a name-it round sends the figure of the thing named (an island: 0 land borders).
+      expect(net.submitFathomGuess("plastic-recycled", 0)).toBe(true);
+      expect(net.submitFathomGuess("name-country-6-borders", 0)).toBe(true);
+      expect(net.submitFathomGuess("name-country-50m-people", 52_890_000)).toBe(true);
+      expect(net.submitFathomGuess("octopus-hearts", -1)).toBe(false);
       expect(JSON.parse(store.get("top-tens:fathom-outbox")!).pending).toEqual([
         { questionId: "eiffel-tower-height", guess: 300, at: now },
         { questionId: "moon-distance", guess: 1.5e6, at: now },
+        { questionId: "plastic-recycled", guess: 0, at: now },
+        { questionId: "name-country-6-borders", guess: 0, at: now },
+        { questionId: "name-country-50m-people", guess: 52_890_000, at: now },
       ]);
       expect(svc.flushFathom).not.toHaveBeenCalled();
       release();
-      await vi.waitFor(() => expect(svc.flushFathom).toHaveBeenCalledTimes(2));
+      await vi.waitFor(() => expect(svc.flushFathom).toHaveBeenCalledTimes(5));
       expect(svc.start).toHaveBeenCalled();
       // Not in the game's save, nor Fathom's.
       expect(store.get("top-tens:v1")).toBeUndefined();

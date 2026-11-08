@@ -4,7 +4,7 @@ import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import { accountsOn, BACKEND } from "./config";
 import { parseAverages, parseStats, type CrowdStats, type ListAverages } from "./crowd";
-import { compareArgs, FATHOM_GUESSES, guessArgs, parseCompare, type FathomCrowd, type FathomGuess } from "./fathom";
+import { compareArgs, compareKey, FATHOM_GUESSES, guessArgs, parseCompare, type CompareRound, type FathomCrowd, type FathomGuess } from "./fathom";
 import { FEEDBACK, feedbackArgs, type Feedback } from "./feedback";
 import { takeGoogleReturn, type GoogleOutcome } from "./google";
 import { localOutboxStore, Outbox, retryDelay, type SendResult } from "./outbox";
@@ -226,10 +226,13 @@ export function listAverages(): Promise<ListAverages | null> {
   });
 }
 
-/** How real players guessed on a Fathom question, against this guess and the answer shown (this browser left out). */
-export function fathomCompare(questionId: string, guess: number, answer: number): Promise<FathomCrowd | null> {
-  return cached(`fathom:${questionId}:${guess}:${answer}`, STATS_TTL, async () => {
-    const { data, error } = await sb().rpc("fathom_compare", compareArgs(questionId, guess, answer, clientId()), { get: true });
+/**
+ * How real players guessed on a Fathom question, against this guess and the answer shown, "further off" measured on
+ * the question's round's scale (this browser left out).
+ */
+export function fathomCompare(questionId: string, guess: number, answer: number, round: CompareRound): Promise<FathomCrowd | null> {
+  return cached(compareKey(questionId, round, guess, answer), STATS_TTL, async () => {
+    const { data, error } = await sb().rpc("fathom_compare", compareArgs(questionId, round, guess, answer, clientId()), { get: true });
     return error ? null : parseCompare(data);
   });
 }

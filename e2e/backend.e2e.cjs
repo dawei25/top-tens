@@ -2,7 +2,8 @@
 // answers Supabase's endpoints itself. Checks: each finished game is sent once with the right payload; results blend
 // real players into the estimate (named from 30 players, "(estimated)" below); a list rating goes to rate_list (and
 // waits while offline); a Fathom guess goes to submit_fathom_guess once (and waits while offline), and its reveal says
-// how real players guessed from 20 of them; Home's
+// how real players guessed from 20 of them (fathom_compare asked with the round); a name-it round sends the figure of
+// the thing named; Home's
 // account key in its header (signed out, signing in, signed in by name and never by address, the pink dot for sync
 // trouble, each in its icon, name and title; nothing between Today and Free play), the menu without an account
 // section and its Feedback, the sign-in sheet in both modes and privacy page; and a signed-in session syncing its save
@@ -14,6 +15,7 @@
 // and back).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 const path = require("node:path");
 const { VIEWPORTS, NOW, TODAY, guess, noHScroll } = require("./helpers.cjs");
 const { BACKEND_ENV } = require("./backend-env.cjs");
@@ -219,7 +221,7 @@ test("Fathom: each guess is sent once, and a reveal says how players guessed fro
     await players.evaluate((el) => ({ n: el.dataset.n, median: el.dataset.median, further: el.dataset.further })),
     { n: "37", median: "300", further: "0.7297" },
   );
-  assert.deepEqual(calls.compare[0], { p_question_id: "eiffel-tower-height", p_guess: "300", p_answer: "330", p_client_id: id });
+  assert.deepEqual(calls.compare[0], { p_question_id: "eiffel-tower-height", p_round: "estimate", p_guess: "300", p_answer: "330", p_client_id: id });
   assert.ok(await noHScroll(page));
 
   // 12 players on the bones: nothing about them.
@@ -253,6 +255,35 @@ test("Fathom: each guess is sent once, and a reveal says how players guessed fro
   // The privacy page says what a guess sends.
   await page.goto(base + "#privacy");
   await page.getByTestId("privacy-fathom").waitFor();
+  await ctx.close();
+});
+
+// A name-it round sends the figure of the thing named, like any guess (the owner will score questions by how real
+// players do): an island on a land-borders round is a 0. It asks for no players' line.
+test("Fathom: a name-it round sends the figure of the thing named, 0 land borders included (desktop)", async () => {
+  const fixtures = path.join(__dirname, "fixtures", "fathom");
+  const questionsIn = (file) => JSON.parse(fs.readFileSync(path.join(fixtures, file), "utf8")).questions;
+  const questions = [...questionsIn("questions.json"), ...questionsIn("name-questions.json")];
+  const ids = ["eiffel-tower-height", "name-country-6-borders", "adult-bones", "octopus-hearts", "piano-keys"];
+  const seed = { ...FRESH, "tentacle:fathom": { recent: [], game: { ids, guesses: [330], at: 1 } } };
+  const { ctx, page, calls } = await open(desktop, "#fathom", seed, undefined, async (c) => {
+    await c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ version: 1, questions }) }));
+    await c.route(/\/fathom\/lists\/[a-z0-9-]+\.json(\?.*)?$/, (route) => {
+      const file = path.join(fixtures, "lists", path.basename(new URL(route.request().url()).pathname));
+      return fs.existsSync(file) ? route.fulfill({ path: file, contentType: "application/json" }) : route.fulfill({ status: 404, body: "" });
+    });
+  });
+  await page.locator('[data-testid="fathom-ask"][data-round="name"]').waitFor();
+  await page.getByTestId("fathom-input").fill("Japan");
+  await page.getByTestId("fathom-lock").click();
+  await page.getByTestId("fathom-reveal").waitFor();
+  assert.equal(await page.getByTestId("fathom-guess").getAttribute("data-pick"), "Japan");
+  await until(() => calls.fathom.length === 1);
+  assert.deepEqual(calls.fathom[0], { p_question_id: "name-country-6-borders", p_guess: 0, p_client_id: calls.fathom[0].p_client_id });
+  assert.match(calls.fathom[0].p_client_id, UUID);
+  await settle();
+  assert.equal(await page.getByTestId("fathom-players").count(), 0);
+  assert.deepEqual(calls.compare, []);
   await ctx.close();
 });
 

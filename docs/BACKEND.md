@@ -42,12 +42,19 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
 - **Fathom guesses** (the estimation beta, `#fathom`). Each locked-in guess is queued at once by the facade in its own
   outbox (`top-tens:fathom-outbox`, one per question: a question drawn again in a later game adds nothing) and sent to
   `submit_fathom_guess` (the question id, the number, the random id; linked to the account while signed in), retried
-  like plays. The table keeps a browser's first guess on each question. The reveal asks `fathom_compare` (the
-  question, the guess, the answer it shows, since the questions live in the static site, and the random id; cached 5
-  min): how many players, their median guess, and the share further off than this guess (on the game's scale, how
-  many times off), one guess per player (their first), leaving out the owners, `stats_excluded` and the player asking.
+  like plays. A guess is a number, 0 or more (0% and 0 land borders are fair): an estimate, a percent, a year, or on a
+  name-it round the figure of the thing named (its population, its land borders). The table keeps a browser's first
+  guess on each question, so once a question has enough of them it can be scored by how far off real players are
+  (their median and spread). The reveal asks `fathom_compare` (the question, its round, the guess, the answer it
+  shows, since the questions live in the static site, and the random id; cached 5 min): how many players, their
+  median guess, and the share further off than this guess, one guess per player (their first), leaving out the
+  owners, `stats_excluded` and the player asking. "Further off" is on the round's scale (`p_round`, from
+  `compareRound` in `src/net/fathom.ts`): how many times off for an estimate and a name-it round on a ratio list
+  (`estimate`, `name-ratio`; a 0 counts as a tiny positive, so it is the furthest off), points, years or steps off for
+  a percent, a year and a name-it round on a steps list (`percent`, `year`, `name-steps`); any other round raises.
   From 20 players on a question (`MIN_PLAYERS`, `src/game/fathom.ts`) it says "Players' typical guess: 4 litres · you
-  were closer than 72%"; below that, nothing. Never in the save, never synced. See Switch it on (2.8).
+  were closer than 72%"; below that, nothing; a name-it reveal never asks. Never in the save, never synced. See Switch
+  it on (2.8).
 - **Accounts.** Sign-in methods come from `VITE_SIGN_IN`: Google, an email and password (`password`: nothing is
   emailed), or a link by email (`email`, PKCE; the email also carries a code for another device). Google is our own
   key (our keycap, Google's G, "Continue with Google"). With `VITE_GOOGLE_CLIENT_ID` set (`src/net/google.ts`), it
@@ -158,8 +165,9 @@ says less about this one), so a few strong regulars can't lift every average.
       leaves out the owners and `stats_excluded` like the score stats. The game works before it runs: until then
       `submit_fathom_guess` answers 404 and the game drops those guesses, and reveals show no players' line, as they
       don't anyway below 20 players on a question. Check it took: lock in a guess on `#fathom`; Table Editor >
-      `fathom_guesses` has a row, and `select fathom_compare('eiffel-tower-height', 300, 330);` returns
-      `{"n": ..., "median": ..., "further_off": ...}`.
+      `fathom_guesses` has a row, and `select fathom_compare('eiffel-tower-height', 'estimate', 300, 330);` returns
+      `{"n": ..., "median": ..., "further_off": ...}`. (The file was changed in place on Nov 8, before it first ran: a
+      guess of 0 is taken, and `fathom_compare` takes the round. It is still run once, on a project that never had it.)
 
    Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the one-time steps above still go
    in the SQL Editor). Stats alone only need the first.
@@ -322,7 +330,7 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   mode, a browser past 120 rated lists an hour ignored; clean up the same way in `ratings`. `submit_feedback` checks
   the shape (1 to 500 characters after trimming), keeps an exact repeat from the same browser once, and ignores a
   browser past 20 notes an hour; spam is cleaned up the same way in `feedback`. Notes are never shown to players, so
-  junk only costs the loop a read. `submit_fathom_guess` checks the shape (a question id, a number above 0 and under
+  junk only costs the loop a read. `submit_fathom_guess` checks the shape (a question id, a number from 0 up to
   1e300), keeps a browser's first guess on each question, and ignores a browser past 120 guesses an hour; the median
   and the share resist a few wild guesses, and junk is cleaned up the same way in `fathom_guesses`.
 - **Local development**: `.env.local` with the URL and publishable key, `npx vite --port 5100`, and that URL in
@@ -339,13 +347,15 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   (`supabase/migrations.test.ts`, in PGlite, with and without new tables exposed, ratings, notes and Fathom guesses
   included: no player reads a note, a wrong reader key raises, the key by header, the owner's notes come first, the
   rate limits, deletion, the owners and `stats_excluded` left out of the stats and of `fathom_compare`, signed in or
-  not; a browser's first guess kept, one per player, the asker left out, ties not further off). `src/net/crowd.test.ts` pins
+  not; a browser's first guess kept, 0 taken and negatives refused, one per player, the asker left out, ties not
+  further off, each round on its own scale: times off, points, years, steps). `src/net/crowd.test.ts` pins
   the blend (n = 0 is the estimate exactly, 30 weigh equally, 300 are ~91% real, no cliff, Blitz, a list without an
   estimate). `npm run e2e` runs the browser suite with no backend (`e2e/rate.e2e.cjs`: rating on the results, and no
   note option), plus `e2e/backend.e2e.cjs`, which builds a copy with fake env vars (`e2e/backend-env.cjs`, every
   sign-in method on) and mocks Supabase (blended results above and below 30 players, `rate_list` and
-  `submit_feedback` included; Fathom's guesses sent once and waiting offline, the players' line with 37 players and
-  none with 12), `e2e/note.e2e.cjs` on the same
+  `submit_feedback` included; Fathom's guesses sent once and waiting offline, `fathom_compare` asked with the round,
+  the players' line with 37 players and none with 12, a name-it round's figure sent, 0 land borders included),
+  `e2e/note.e2e.cjs` on the same
   copy ("add a note": the exact arguments sent, offline waiting, Escape and Enter, the phone keyboard;
   `e2e/states.e2e.cjs` walks it too), and `e2e/backend-google.e2e.cjs`, a copy with a Google client ID against a fake
   Google endpoint (it answers with a redirect to the callback page, a token in the fragment): the exact request, the
