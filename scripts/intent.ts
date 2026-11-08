@@ -251,6 +251,9 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["Kazakhstan", "Kazakstan"],
   ["Libya", "Lybia"],
   ["Brazil", "Brasil"],
+  // Its usual abbreviation ("car" was corrected to the Czech Republic) and Belarus's old names (data agent B, Nov 8).
+  ["Central African Republic", "CAR"],
+  ["Belarus", "Byelorussia", "Belorussia"],
 ];
 
 export const COUNTRY_FORMS: string[][] = [
@@ -305,7 +308,7 @@ export const CITY_FORMS: string[][] = [
   ["Pune", "Poona"],
   // India's renamed cities by the names players still use, and the new official ones where the table has the old
   // (coverage audit, Nov 8: "allahabad" was corrected to Ahmedabad, "calicut" to Kolkata, "mangaluru" to Bengaluru).
-  ["Prayagraj", "Allahabad"],
+  ["Prayagraj", "Allahabad", "Prayag"],
   ["Kozhikode", "Calicut"],
   ["Mangalore", "Mangaluru"],
   ["Vadodara", "Baroda"],
@@ -335,6 +338,15 @@ export const CITY_FORMS: string[][] = [
   ["Kancheepuram", "Kanchipuram"],
   ["Morvi", "Morbi"],
   ["Mahesana", "Mehsana"],
+  // Kerala's and Tamil Nadu's old names ("trichur" was corrected to Tiruchirappalli), Karnataka's new ones.
+  ["Thrissur", "Trichur"],
+  ["Thanjavur", "Tanjore"],
+  ["Alappuzha", "Alleppey"],
+  ["Kollam", "Quilon"],
+  ["Hubli–Dharwad", "Hubballi", "Hubballi-Dharwad"],
+  ["Vijayawada", "Bezawada"],
+  ["Kanpur", "Cawnpore"],
+  ["Mira-Bhayandar", "Mira Road", "Mira Bhayandar"],
   ["Beijing", "Peking"],
   ["Guangzhou", "Canton"],
   ["Xi'an", "Xian"],
@@ -354,6 +366,10 @@ export const CITY_FORMS: string[][] = [
   ["Jinan", "Tsinan"],
   ["Ningbo", "Ningpo"],
   ["Lanzhou", "Lanchow"],
+  ["Dalian", "Dairen"],
+  ["Xining", "Sining"],
+  ["Guiyang", "Kweiyang"],
+  ["Baotou", "Paotow"],
   ["Kyiv", "Kiev"],
   // Europe's cities by their own names and their older English ones ("praha" was corrected to Praia, Cape Verde:
   // "Praia isn't in Europe."; "munchen", "wien" and "odessa" found nothing).
@@ -377,7 +393,11 @@ export const CITY_FORMS: string[][] = [
   ["Warsaw", "Warszawa"],
   ["Kraków", "Cracow"],
   ["Gdańsk", "Danzig"],
-  ["Wrocław", "Breslau"],
+  // The matcher drops letters with no plain-letter base (ł, ø, ß): "Łódź" reads as "odz", so "lodz" found nothing.
+  ["Wrocław", "Breslau", "Wroclaw"],
+  ["Łódź", "Lodz"],
+  ["Geneva", "Genève", "Geneve", "Genf"],
+  ["Vilnius", "Vilna"],
   ["Odesa", "Odessa"],
   ["Kharkiv", "Kharkov"],
   ["Lviv", "Lvov"],
@@ -392,7 +412,10 @@ export const CITY_FORMS: string[][] = [
   ["Johannesburg", "Joburg", "Jozi", "Jo'burg"],
   // Renamed in 2021.
   ["Gqeberha", "Port Elizabeth"],
-  ["Astana", "Nur-Sultan", "Nursultan"],
+  // Its names since 1961 ("akmola" was corrected to Asmara).
+  ["Astana", "Nur-Sultan", "Nursultan", "Akmola", "Tselinograd"],
+  ["Pretoria", "Tshwane"],
+  ["Jakarta", "Batavia"],
 ];
 
 /**
@@ -577,6 +600,8 @@ export const INTENT: Record<string, Intent> = {
       Nile: ["Nile River", "River Nile", "White Nile"],
       // Its Brazilian name, a state's name elsewhere, so the matcher won't correct it (coverage audit, Nov 8).
       Amazon: ["Amazon River", "River Amazon", "Amazonas"],
+      // The matcher drops the dotless ı: "Kızıl" reads as "k z l".
+      "Kızıl River": ["Kizil River", "Kizilirmak", "Kizil Irmak"],
     },
   },
   lakes: {
@@ -1063,6 +1088,9 @@ export const INTENT: Record<string, Intent> = {
       // "Aurangabad, Bihar" in topics.ts). Kashi is Varanasi's old name (and Kashgar's Chinese one, so not shared).
       "Chhatrapati Sambhajinagar": ["Aurangabad", "Aurangabad, Maharashtra"],
       Varanasi: ["Kashi"],
+      // "ndmc" read as junk. Faizabad is in Ayodhya's municipal corporation (2017) and district (2018).
+      "New Delhi Municipal Council": ["NDMC"],
+      Faizabad: ["Ayodhya"],
     },
   },
   "china-cities": {
@@ -1072,6 +1100,8 @@ export const INTENT: Record<string, Intent> = {
       "Xi'an": ["Xian"],
       Chongqing: ["Chungking"],
       Tianjin: ["Tientsin"],
+      // Kashgar's Chinese name (not shared: it is Varanasi's old name on India's lists).
+      Kashgar: ["Kashi"],
     },
   },
   "canada-cities": {

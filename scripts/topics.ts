@@ -1663,6 +1663,9 @@ export const TOPICS: Topic[] = [
       "Londonise", "Londonize", "Four bridges on three lines", "Four bridges on three support", "Cahkt-Netep6ypr",
       "Kiyeff Kiev", "Gente di roma", "Rome, Republic and Empire",
     ],
+    // Real places the tables leave out, free: "salzburg" was corrected to Salisbury and "smyrna" (İzmir) to Samara
+    // (data agent B, Nov 8).
+    knownNames: ["Salzburg", "Smyrna", "Izmir", "İzmir"],
   },
   {
     id: "india-cities",
@@ -1707,6 +1710,8 @@ export const TOPICS: Topic[] = [
       "Western Presidency", "Kakamuchee", "Galajunkja", "Calixestra", "Dainik Vishwamitra", "Dili", "India", "Delhi",
       "Punjab", "DL", "DEL", "INDEL", "IN-DL", "Eastindians", "Delhiites",
     ],
+    // A Kerala city below the table's, free: "kannur" was corrected to Kanpur (data agent B, Nov 8).
+    knownNames: ["Kannur", "Cannanore"],
   },
   {
     id: "canada-cities",
@@ -1746,6 +1751,9 @@ export const TOPICS: Topic[] = [
     metric: "Population (2020 census)",
     also: [{ tables: [4], name: "City" }],
     junkAliases: ["Fuxingmen Inner Street", "Fuxingmen Outer Street", "Fuxing Road", "Sichuanese teahouse", "Chien Mei village"],
+    // Parts of Wuhan and Dalian by their old names, free: "hankow" was corrected to Haikou, "lushun" to Fushun (data
+    // agent B, Nov 8).
+    knownNames: ["Hankou", "Hankow", "Wuchang", "Hanyang", "Lüshun", "Lushun", "Lüshunkou", "Port Arthur"],
   },
   {
     id: "deserts",
