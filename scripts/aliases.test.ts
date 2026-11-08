@@ -274,6 +274,7 @@ describe("aliases as built: what players type", () => {
     ["africa-cities", "constantine", "unknown"],
     ["africa-cities", "annaba", "unknown"],
     ["africa-cities", "soweto", "unknown"],
+    ["africa-cities", "saint louis", "unknown"],
     ["brazil-cities", "rj", "Rio de Janeiro"],
     ["brazil-cities", "floripa", "Florianópolis"],
     ["capitals", "nur-sultan", "Astana"],

@@ -3466,6 +3466,9 @@ export const TOPICS: Topic[] = [
     // Africa's cities and capitals are answers; Mumbai or Rio costs a life as "Mumbai isn't in Africa.". Egypt's
     // cities beyond the page's 100 stay free (Egypt reaches Asia).
     region: "Africa",
+    // "saint louis" is Senegal's Saint-Louis here, not a costly "St. Louis isn't in Africa." (the US city's "Saint
+    // Louis" is a CITY_FORMS name): the US city is left free on this list (coverage audit, Nov 8).
+    skip: ["St. Louis"],
     // African cities below the page's 100, free but real: "constantine" was corrected to Istanbul (through
     // "Constantinople"), "annaba" to Ankara, "soweto" to Sokoto; "oujda" read as junk (coverage audit, Nov 8).
     knownNames: [
