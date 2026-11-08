@@ -51,19 +51,60 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
         "Deutsch" and Yue Chinese "Yue" (both found nothing). Guards: "bahasa" → Indonesian, "deutsch" → Standard
         German, "yue" → Yue Chinese. Still open, a source for agent A: the ranked table stops near #38, so Polish,
         Dutch, Greek and 60 more well-known languages are unknown, and Sindhi, Catalan and Aramaic are corrected
-        into Hindi, Spanish and Arabic.
+        into Hindi, Spanish and Arabic. **Fix (agent A, not built):** add
+        `{ page: "List of ISO 639 language codes", tables: [0], name: "ISO language names", nameFromLink: true,
+        nameStrip: / language$/ }` to `also` (cached; 183 languages with ISO 639-1 codes: Polish, Dutch, Greek,
+        Hebrew, Malay, Nepali, Welsh, Zulu, Latin, Catalan, Sindhi, Malayalam; the link gives "Catalan language" for
+        "Catalan, Valencian", so `nameStrip` leaves "Catalan"; `also` takes `nameStrip` since Nov 8). Aramaic has no
+        639-1 code: `more: { Aramaic: [] }`. Guards: "polish", "malayalam" → their entries, "sindhi" not Hindi.
       - **music-artists:** intent.ts gives Kanye West "Ye" (his legal name); knownNames "6ix9ine" (read as junk).
         Guards: "ye" → Kanye West, "6ix9ine" not junk. Still open: today's chart artists (BTS, Bad Bunny, Billie
-        Eilish, Kendrick Lamar...) need an `also` such as "List of most-streamed artists on Spotify".
+        Eilish, Kendrick Lamar...) need an `also` such as "List of most-streamed artists on Spotify". **Fix (agent
+        A, not built):** `also` from that page (cached), as spotify-artists reads it: tables [4, 5] by "Artist", the
+        yearly top fives (table 0, columns 1-5) and monthly number ones (table 6, columns 1-12); plus spotify-artists'
+        hand list (`more`: Morgan Wallen, Sabrina Carpenter, Chappell Roan, Peso Pluma...) and boy bands and girl
+        groups by hand (One Direction, NSYNC, TLC). Guards: "bts", "bad bunny", "billie eilish" → their entries.
       - **coffee-countries:** the new COUNTRY_FORMS lines (Columbia, Brasil, Guatamala, Lichtenstein...) apply.
       - **canada-cities:** the new CITY_FORMS lines apply. Still open: provincial and territorial capitals below the
-        top 100 (Charlottetown, Whitehorse, Yellowknife) need an `also` source.
+        top 100 (Charlottetown, Whitehorse, Yellowknife) need an `also` source. **Fix (agent A, not built):** no
+        capitals table exists ("List of Canadian provincial and territorial capital cities" is no article); add
+        `more: { Charlottetown: [], Whitehorse: [], Yellowknife: [], Iqaluit: [] }` (unranked, no figure).
 
 - [ ] **Coverage audit (Nov 8) shared forms on agent A's lists** (apply at each list's next rebuild): COUNTRY_FORMS
       (Columbia, Lichtenstein, Afganistan, Guatamala, Lybia, Kazakstan, Phillipines, Brasil, Republic of Congo, and
       Northern Ireland as the United Kingdom) on billionaire-countries, nobel-countries, gdp-per-capita,
       mcdonalds-countries, landlocked-countries, world-heritage-countries and islands; CITY_FORMS (India's renamed
       cities, China's postal spellings, Europe's own names, US nicknames) on skyscraper-cities.
+
+- [ ] **Nov 8 pipeline changes (data agent A) not yet on every list** (apply at each list's next rebuild):
+      - **Merging:** junk aliases no longer count as taken names, and a short form cut from either name never merges
+        two rows that link different articles (`shortFormOnly`); a row of an entry's own name is that entry. Before
+        it, films-gross had lost 19 films (The Phantom Menace, Spider-Man 3, The Two Towers), animated-films Mugen
+        Train, islands China (into Taiwan through its junk "China"). Every list with `also` or categories can gain
+        entries it had swallowed: diff each rebuild (a redirect-titled link can split one thing in two, as "Rogue
+        One" did: `skip` the short row).
+      - **Spellings:** every name with Mecca or Medina gets its other spellings (Makkah, Mekka...), and names with
+        letters accents don't cover get a keyboard spelling (Solskjaer, Odegaard, Gudjohnsen, Gross), with the
+        surname on lists of people (build.ts SPELLINGS, FOLDS).
+      - **Category caps:** a category that fills its cap warns. Still capped, needing `categoryCap` and a rebuild:
+        mountains ("Mountains of the Alps", 3,000) and youtube-channels ("YouTubers", 3,000).
+      - New options used so far only on their lists: `also.counts` (skyscraper-cities), `also.nameStrip`
+        (companies-revenue), `Dated.largest` (video-games), `countryCol` (islands; the matcher reads `country`).
+
+- [ ] **`normalize()` and ø, æ, ð, þ, ł, đ, œ, ß** (contract change, needs a full rebuild): accent-stripping leaves
+      them, so "odegaard" never meets Ødegaard. The build now adds keyboard spellings as aliases (FOLDS); folding
+      them in `normalize()` itself would cover every typed form and make FOLDS unnecessary.
+
+- [ ] **Coverage audit leftovers on agent A's free-play lists** (no rebuild needed until fixed):
+      - **girls-names, boys-names:** today's top names (Liam, Noah, Olivia, Sophia) and the century's top 100 need
+        a source with figures (the page has the century's top 50 only); nicknames (Mike, Bob, Liz) want a matcher
+        rule that offers the full name to confirm, not a silent alias.
+      - **netflix-seasons:** The Queen's Gambit, The Night Agent and Fool Me Once need a sourced views figure (`cited`)
+        from their articles; the other Netflix series are free known names already, only their message is left.
+      - Messages (UI/matcher): known names and `skip`ped rows still read "Not one of the N ... here" (cable shows on
+        longest-running-tv, Manila on skyscraper-cities, past stars on athletes-earnings, palaces on museums); sport
+        words on sports-leagues ("basketball") and kinds of product on farm-products ("meat") want the subject-word
+        rule; "88888888" on passwords reads as junk; "a-league" normalizes to "league" (the leading-"A" item above).
 
 - [ ] **Cycle 3 pipeline changes not yet on every list** (apply at each list's next rebuild): intent groups wait for
       all their entries, `stripWords` patterns, short forms ending in a little word dropped, new athletes' junk in
