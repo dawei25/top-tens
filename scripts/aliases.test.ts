@@ -311,6 +311,22 @@ describe("aliases as built: what players type", () => {
     expect(lands("spotify-songs", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit: spin-offs were read as their parent, and the short forms fans write found nothing.
+    ["ncis la", "NCIS: Los Angeles"],
+    ["ncis hawaii", "unknown"],
+    ["law and order criminal intent", "unknown"],
+    ["law & order: organized crime", "unknown"],
+    ["911", "9-1-1"],
+    ["himym", "How I Met Your Mother"],
+    ["tbbt", "The Big Bang Theory"],
+    ["xfiles", "The X-Files"],
+    ["l&o", "Law & Order"],
+    ["law n order", "Law & Order"],
+  ])("longest-running-tv: %s -> %s", (guess, name) => {
+    expect(lands("longest-running-tv", guess)).toBe(name);
+  });
+
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
     expect(lands("painters", "gogan")).toBe("Paul Gauguin");
     expect(lands("painters", "gauguin")).toBe("Paul Gauguin");

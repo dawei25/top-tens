@@ -3202,6 +3202,13 @@ export const TOPICS: Topic[] = [
     aliases: {
       "Law & Order: Special Victims Unit": ["SVU", "Law & Order SVU"],
       "M*A*S*H": ["MASH"],
+      // Coverage audit: the short forms fans write ("ncis la" was corrected to NCIS, #5).
+      "NCIS: Los Angeles": ["NCIS LA", "NCIS Los Angeles"],
+      "9-1-1": ["911", "Nine-One-One"],
+      "How I Met Your Mother": ["HIMYM"],
+      "The Big Bang Theory": ["TBBT", "Big Bang Theory"],
+      "The X-Files": ["X Files", "XFiles"],
+      "Law & Order": ["Law n Order", "L&O", "Law and Order"],
     },
     // Ads, jokes, coming seasons, characters, a lawsuit, a theme song and DVDs among the redirects; a spin-off's city
     // ("los angeles", "miami") names no series.
@@ -3229,6 +3236,13 @@ export const TOPICS: Topic[] = [
       "Breaking Bad", "Better Call Saul", "The Sopranos", "Stranger Things", "The Crown", "Yellowstone", "Euphoria",
       "Doctor Who", "Coronation Street", "EastEnders", "Emmerdale", "Neighbours", "Home and Away", "Top Gear",
       "Futurama", "Rick and Morty", "Archer", "BoJack Horseman",
+      // Coverage audit: shorter spin-offs, which were read as their parent ("law and order criminal intent" was Law &
+      // Order, "ncis hawaii" NCIS), and famous cable dramas the cable table leaves out.
+      "Law & Order: Criminal Intent", "Law and Order: Criminal Intent", "Law & Order: Organized Crime",
+      "Law and Order: Organized Crime", "Law & Order: Trial by Jury", "Law & Order: LA", "Law & Order True Crime",
+      "Law & Order Toronto: Criminal Intent", "NCIS: Hawaiʻi", "NCIS Hawaii", "NCIS: Sydney", "NCIS: Origins",
+      "NCIS: Tony & Ziva", "CSI: Vegas", "CSI: Cyber", "FBI: Most Wanted", "FBI: International", "Chicago Justice",
+      "The Walking Dead", "Pretty Little Liars", "SNL",
     ],
   },
   // Nov 5: the owner's geography picks (docs/OWNER_PICKS.md). Future dailies first, then two for free play only.
