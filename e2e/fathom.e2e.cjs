@@ -10,7 +10,8 @@
 //   and a build without a backend sends and queues nothing.
 // - A percent round and a year round on phone and desktop: each one's rule in view before its answer (and all three on
 //   the results), the field (a decimal keypad and "%" for a percent, 0 to 100; a number pad for a year, never grouped
-//   as "2,007"), the points by points off and by years off, the miss and the sonar on the round's own scale, the
+//   as "2,007"), the points by each round's distance (a share, or past 50 what's left; how long ago a year was), the
+//   miss in points or years, the sonar on the distance the points come from, the
 //   results and the share text; at 320px every message on one line, no sideways scroll, and every control 44px.
 // - A unit with a scale word ("million people"): the short number typed, and the whole amount read back in the unit.
 // - A reload picks the game up where it was, the results included.
@@ -75,11 +76,20 @@ function openFathom(vp, { save, serve = bank(), setup, ...opts } = {}) {
  * The scoring rule (src/game/fathom.ts), to check the screen against: plain closeness, the same for every question.
  * Spot on (within 1%) is 100, and only that; otherwise 100 x (1 - d)^2 with d the distance in powers of ten, 0 from 10x.
  */
-const points = (guess, answer) =>
-  Math.abs(guess - answer) <= answer * 0.01 ? 100 : Math.min(99, Math.round(100 * Math.max(0, 1 - Math.abs(Math.log10(guess / answer))) ** 2));
-/** A percent: each point off costs 3 (within half a point, 100). A year: each year off costs 5. */
-const percentPoints = (guess, answer) => (Math.abs(guess - answer) < 0.5 ? 100 : Math.min(99, Math.max(0, Math.round(100 - 3 * Math.abs(guess - answer)))));
-const yearPoints = (guess, answer) => Math.max(0, 100 - 5 * Math.abs(guess - answer));
+const curve = (d) => Math.round(100 * Math.max(0, 1 - Math.abs(d)) ** 2);
+const points = (guess, answer) => (Math.abs(guess - answer) <= answer * 0.01 ? 100 : Math.min(99, curve(Math.log10(guess / answer))));
+/**
+ * A percent and a year on the same curve, by their own distance (the sonar places the squid by it too). A percent: powers
+ * of ten on the answer's side of 50 (past 50, what's left), each share kept to 0.5 to 99.5; within half a point, 100.
+ * A year: 3 x the powers of ten in how long ago it was (from this year, at least 1); the year itself, 100.
+ */
+const share = (p) => Math.min(99.5, Math.max(0.5, p));
+const percentOff = (guess, answer) => (answer > 50 ? Math.log10(share(100 - answer) / share(100 - guess)) : Math.log10(share(guess) / share(answer)));
+const percentPoints = (guess, answer) => (Math.abs(guess - answer) < 0.5 ? 100 : Math.min(99, curve(percentOff(guess, answer))));
+const THIS_YEAR = new Date().getFullYear();
+const ago = (year, now) => Math.max(1, now - year);
+const yearOff = (guess, answer, now = THIS_YEAR) => 3 * Math.log10(ago(answer, now) / ago(guess, now));
+const yearPoints = (guess, answer, now = THIS_YEAR) => (guess === answer ? 100 : Math.min(99, curve(yearOff(guess, answer, now))));
 
 /** A real percent question and a real year question (as in public/fathom/questions.json), for the new rounds. */
 const PERCENT = {
@@ -354,7 +364,8 @@ describe("Fathom", { concurrency: true }, () => {
     await ctx.close();
   });
 
-  // The owner's revamp: a percent round (scored by points off) and a year round (by years off) beside the estimates.
+  // The owner's revamp: a percent round and a year round beside the estimates, on the estimate's curve by their own
+  // distance (a share on its side of 50; how long ago a year was: the owner's calibration, Nov 8).
   // Each says its own rule before its answer (UX 21), and its field fits a phone (UX 20).
   for (const vp of VIEWPORTS) {
     test(`a percent round and a year round: the rule, the field, the points, the sonar, the results (${vp.name})`, async () => {
@@ -404,16 +415,16 @@ describe("Fathom", { concurrency: true }, () => {
         assert.equal(await attr(page, "fathom-echo", "data-tone"), "error", `"${bad}" is refused`);
         assert.equal(await page.getByTestId("fathom-reveal").count(), 0);
       }
-      // 6 points low: 100 - 3 x 6.
+      // 6 points low: 47 left against 41, 1.15x off.
       await lockIn(page, "53");
       const percentWant = percentPoints(53, PERCENT.answer);
-      assert.equal(percentWant, 82);
+      assert.equal(percentWant, 88);
       assert.equal(Number(await attr(page, "fathom-reveal", "data-points")), percentWant);
       assert.equal(Number(await attr(page, "fathom-guess", "data-value")), 53);
       assert.equal((await page.getByTestId("fathom-answer").textContent()).trim(), "59%");
       assert.equal((await page.getByTestId("fathom-guess").textContent()).trim(), "53%");
       assert.match(await page.getByTestId("fathom-off").textContent(), /^6 points? low$/, "the miss in points");
-      assert.ok(Math.abs((await squidAt()) - -6 / (100 / 3)) < 0.05, "the squid left, by points off on a 33-point scale");
+      assert.ok(Math.abs((await squidAt()) - percentOff(53, PERCENT.answer)) < 0.05, "the squid left, by the distance the points come from");
       assert.equal(await page.getByTestId("fathom-rule").count(), 1, "the rule stays with the percent's reveal");
       assert.equal(Number(await attr(page, "fathom-running", "data-total")), 100 + percentWant, "the running total");
       assert.equal(await noHScroll(page), true);
@@ -436,15 +447,15 @@ describe("Fathom", { concurrency: true }, () => {
         assert.equal(await attr(page, "fathom-echo", "data-tone"), "error", `"${bad}" is refused`);
         assert.equal(await page.getByTestId("fathom-reveal").count(), 0);
       }
-      // 3 years early: 100 - 5 x 3.
+      // 3 years early: 32 years ago against 29 (in 2026), 1.1x off, scores 76.
       await lockIn(page, "1994");
+      assert.equal(yearPoints(1994, YEAR.answer, 2026), 76);
       const yearWant = yearPoints(1994, YEAR.answer);
-      assert.equal(yearWant, 85);
       assert.equal(Number(await attr(page, "fathom-reveal", "data-points")), yearWant);
       assert.equal((await page.getByTestId("fathom-answer").textContent()).trim(), "1997");
       assert.equal((await page.getByTestId("fathom-guess").textContent()).trim(), "1994");
       assert.match(await page.getByTestId("fathom-off").textContent(), /^3 years? early$/, "the miss in years");
-      assert.ok(Math.abs((await squidAt()) - -3 / 20) < 0.05, "the squid left, by years off on a 20-year scale");
+      assert.ok(Math.abs((await squidAt()) - yearOff(1994, YEAR.answer)) < 0.05, "the squid left, by the distance the points come from");
       assert.equal(await noHScroll(page), true);
 
       // Two estimates more, without a rule (the estimate's was on the first).
