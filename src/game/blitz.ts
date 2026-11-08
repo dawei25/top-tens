@@ -1,6 +1,6 @@
 import type { DailyEntry } from "./daily";
 import type { Lexicon } from "./junk";
-import { judgeGuess } from "./match";
+import { judgeGuess, type UnknownVerdict } from "./match";
 import type { DailyBlitzResult, Saved } from "./storage";
 import type { Entry, Puzzle } from "./types";
 
@@ -86,7 +86,7 @@ export type BlitzResult =
    * Scores nothing, costs nothing: not on this list (`junk` if it doesn't look like an answer at all), part of
    * several names (`vague`: how many fit, see GuessResult), or on the list without a stat to score (`unscored`).
    */
-  | { kind: "none"; junk: boolean; vague?: number; unscored?: string; elsewhere?: string }
+  | { kind: "none"; junk: boolean; vague?: number; unscored?: string; elsewhere?: string; known?: true; giveUp?: true }
   | { kind: "over" };
 
 export function newBlitz(puzzle: Puzzle): BlitzState {
@@ -136,7 +136,11 @@ export function blitzGuess(
   const r = judgeGuess(text, puzzle, new Set(), lex, offered);
   if (r.kind === "empty") return { state, result: r };
   if (r.kind === "typo") return { state, result: { kind: "choices", suggestions: r.suggestions } };
-  if (r.kind === "unknown") return { state, result: { kind: "none", junk: r.junk, vague: r.vague } };
+  if (r.kind === "unknown") {
+    // A real name the list doesn't rank, or a give-up word: said as plainly as on a list game (copy.ts missLine).
+    const u = r as UnknownVerdict;
+    return { state, result: { kind: "none", junk: r.junk, vague: r.vague, ...(u.known ? { known: true } : {}), ...(u.giveUp ? { giveUp: true } : {}) } };
+  }
   if (r.kind === "duplicate" || r.kind === "correct" || r.kind === "near") {
     const entry: Entry = r.entry;
     if (state.hits.some((h) => h.name === entry.name)) return { state, result: { kind: "duplicate", name: entry.name } };

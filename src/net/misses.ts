@@ -77,6 +77,8 @@ export function invalidMiss(m: Miss): string | null {
  * a place outside the region or an answer without a figure (both on the list).
  */
 export function missKind(r: GuessResult | BlitzResult): MissKind | null {
+  // A give-up word ("pass", "idk") is no miss to fix: left out of the feed.
+  if ((r.kind === "unknown" || r.kind === "none") && (r as { giveUp?: true }).giveUp) return null;
   if (r.kind === "unknown") return r.junk ? "junk" : "unknown";
   if (r.kind === "none" && !r.elsewhere && !r.unscored) return r.junk ? "junk" : "unknown";
   return null;

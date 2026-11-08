@@ -30,7 +30,7 @@ import { emitPlay } from "../game/events";
 import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
 import { END_FOCUS_MS, PHONE, RollBox, rollState, ScreenHead, SwapLabel, useMedia } from "./pixel";
-import { BLITZ_SCORING, blitzPromptShown, metricLabel, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT, ROLL_NEW } from "./copy";
+import { BLITZ_SCORING, blitzPromptShown, metricLabel, NOT_A_GUESS, notInRanking, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT, ROLL_NEW } from "./copy";
 import { blitzShare, dailyBlitzShare } from "./share";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
@@ -86,7 +86,7 @@ interface Feedback {
   key: number;
 }
 
-function describe(r: BlitzResult, puzzle: Puzzle): Omit<Feedback, "key"> | null {
+function describe(r: BlitzResult, puzzle: Puzzle, typed = ""): Omit<Feedback, "key"> | null {
   switch (r.kind) {
     case "scored":
       return { tone: "good", text: r.corrected ? `Counted as ${r.hit.name}. +${r.hit.points}` : `${r.hit.name}. +${r.hit.points}` };
@@ -98,7 +98,10 @@ function describe(r: BlitzResult, puzzle: Puzzle): Omit<Feedback, "key"> | null 
       if (r.vague) return { tone: "warn", text: "More than one fits. Be more specific." };
       if (r.elsewhere && puzzle.region) return { tone: "bad", text: `${r.elsewhere} isn't in ${puzzle.region}.` };
       if (r.unscored) return { tone: "warn", text: `${r.unscored} is on the list, but without a figure. No points.` };
-      // Plain misses only: "Not one of the 258 countries here." (or "Not on this list." without a noun).
+      if (r.giveUp) return { tone: "warn", text: NOT_A_GUESS };
+      // A real name the list doesn't rank: "Point72 isn't in this ranking." Plain misses: "Not one of the 258
+      // countries here." (or "Not on this list." without a noun).
+      if (r.known && !r.junk && typed.trim()) return { tone: "bad", text: notInRanking(typed) };
       return { tone: "bad", text: r.junk ? "Doesn't look like an answer." : notOnList(puzzle) };
     default:
       return null;
@@ -462,7 +465,7 @@ export function Blitz({
       keepLive(next);
       emitPlay({ kind: "blitz-hit", rank: result.hit.rank, points: result.hit.points, score: blitzScore(next), best: load().blitzBest?.[id] });
     } else if (result.kind === "none" || result.kind === "duplicate") emitPlay({ kind: "blitz-miss" });
-    const fb = describe(result, puzzle);
+    const fb = describe(result, puzzle, input);
     if (fb) setFeedback({ ...fb, key: Date.now() });
     if (result.kind !== "choices" && result.kind !== "empty") setInput("");
     inputRef.current?.focus();

@@ -196,3 +196,19 @@ describe("regional lists", () => {
     expect(result).toMatchObject({ kind: "none", elsewhere: "Japan" });
   });
 });
+
+describe("a Blitz miss says what the list game says", () => {
+  it("passes on a real name the list doesn't rank and a give-up word", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const dir = join(import.meta.dirname, "../../public/puzzles");
+    const lex = JSON.parse(readFileSync(join(dir, "lexicon.json"), "utf8"));
+    const puzzle = JSON.parse(readFileSync(join(dir, "countries-population.json"), "utf8"));
+    const s = newBlitz(puzzle);
+    const known = blitzGuess(s, puzzle, "elon musk", lex, undefined, 1).result;
+    expect(known).toMatchObject({ kind: "none", known: true });
+    const giveUp = blitzGuess(s, puzzle, "dunno", lex, undefined, 1).result;
+    expect(giveUp).toMatchObject({ kind: "none", giveUp: true });
+  });
+});
+
