@@ -1412,6 +1412,9 @@ export const TOPICS: Topic[] = [
       "Led Zeppelin": ["Led Zep"],
     },
     // Songs, albums, tours, labels, fans and relatives among the redirects: CELEBRITY_JUNK in scripts/aliases.ts.
+    // A real rapper the list doesn't have, read as junk (coverage audit, Nov 8). Not built yet: music-artists is
+    // protected until after Nov 10 16:00 HKT (docs/REBUILD_QUEUE.md).
+    knownNames: ["6ix9ine", "Tekashi 6ix9ine"],
   },
   {
     id: "concert-tours",
