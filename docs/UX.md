@@ -49,7 +49,9 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
     they stand are revealed on the results, the hook to see how they did (par was dropped from the game header).
 14. **One mental model per mode.** Dailies are one try; free play is endless and new every time (Play again rolled the
     same list).
-15. **Never spoil a daily.** Nothing shows a list's answers before its day: random play never lands on today's or a
+15. **Never offer what's already spoiled.** A Blitz's results show its whole list, so they never offer that list as a
+    list game ("if someone played blitz no point to give them option to play the same list since its alr spoiled");
+    a list's results may offer its Blitz, which a list game doesn't spoil. **Never spoil a daily.** Nothing shows a list's answers before its day: random play never lands on today's or a
     future day's list or Blitz (a random list landed on today's Blitz topic).
 16. **Generous, never unrelated.** Autocorrect helps partial knowledge ("shenzhen", "jordan") but never turns an
     unrelated word into an answer ("pope").
