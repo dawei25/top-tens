@@ -179,6 +179,11 @@ describe("aliases as built: what players type", () => {
     ["eggs", "Eggs"],
     ["chicken", "Chicken"],
     ["duck egg", "Other birds' eggs"],
+    // Coverage audit: other farm products were corrected into answers ("hay" to Pork by its "ham").
+    ["hay", "unknown"],
+    ["sheep milk", "unknown"],
+    ["goat milk", "unknown"],
+    ["cocoa", "unknown"],
   ])("farm-products: %s -> %s", (guess, name) => {
     expect(lands("farm-products", guess)).toBe(name);
   });
@@ -221,6 +226,30 @@ describe("aliases as built: what players type", () => {
     ["monterrey", "unknown"],
   ])("skyscraper-cities: %s -> %s", (guess, name) => {
     expect(lands("skyscraper-cities", guess)).toBe(name);
+  });
+
+  it.each([
+    // Coverage audit: what fans call the leagues past #10, which have no redirects of their own.
+    ["dutch eredivisie", "Eredivisie"],
+    ["liga portugal", "Primeira Liga"],
+    ["jupiler pro league", "Belgian Pro League"],
+    ["roshn saudi league", "Saudi Professional League"],
+    ["aussie rules", "Australian Football League"],
+    ["bundesliga 2", "2. Bundesliga"],
+    ["milb", "Minor League Baseball"],
+    ["cba", "Chinese Basketball Association"],
+    ["nbl", "National Basketball League (Australia)"],
+    ["j1", "J1 League"],
+    ["ligue une", "Ligue 1"],
+    ["serie a brazil", "Campeonato Brasileiro Série A"],
+    ["spfl", "Scottish Premiership"],
+    ["aleague", "A-League Men"],
+    // Tours, series and college sport are free, and never junk.
+    ["lpga", "unknown"],
+    ["usfl", "unknown"],
+    ["nascar", "unknown"],
+  ])("sports-leagues: %s -> %s", (guess, name) => {
+    expect(lands("sports-leagues", guess)).toBe(name);
   });
 
   it("painters: Gauguin by ear, and no van Gogh guess turned into him", () => {
