@@ -2410,8 +2410,8 @@ a {
   }
 }
 /* A small phone with its keyboard up (320 x 318, 375 x 387): the board's first rows stay in view above the guess
-   box. The title card comes down to its title, and the board to its rows (the score is on the board itself; Play
-   Blitz is back with the keyboard down). */
+   box. The title card comes down to its title, and the board to its rows (the score is back with the keyboard
+   down). */
 @media (max-height: 560px) and (max-width: 420px) {
   .game .prompt .prompt-top,
   .game .board-head {
@@ -2532,22 +2532,6 @@ a {
   box-shadow:
     inset 0 0 0 1px rgba(255, 209, 102, 0.55),
     0 5px 0 var(--key-shadow);
-}
-.key-blitz-sm {
-  align-self: center;
-  white-space: nowrap;
-  color: var(--gold);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 209, 102, 0.55),
-    0 3px 0 var(--key-shadow);
-}
-/* Phones: a tighter key, so it usually still fits beside the score. */
-@media (max-width: 420px) {
-  .key-blitz-sm {
-    padding: 0 10px;
-    font-size: 16px;
-    letter-spacing: 0.12em;
-  }
 }
 .blitz-none {
   margin: -4px 2px 0;
@@ -3207,10 +3191,7 @@ a.arch-cell:active .arch-name {
 }
 
 /* ---------- Players' average (par.json) ---------- */
-/*
- * The title card's right end: the score, then PLAY BLITZ. It takes the room the category leaves; when both don't
- * fit there (a long category, a narrow phone), the key wraps under the score, still on the right.
- */
+/* The title card's right end: the score, in the room the category leaves, on the right. */
 .prompt-end {
   flex: 1 1 auto;
   display: flex;

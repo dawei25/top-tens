@@ -334,9 +334,10 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     dailyStreak = streak(sv);
   }
   const mode = !daily ? "Random list" : daily.date === today ? `Daily #${daily.n}` : `Archive #${daily.n}`;
-  // The list's own Blitz key. Never on a daily: Blitz shows every answer, and a round there would be a practice run
-  // at the day's one-try Blitz (a finished daily offers Today's Blitz instead). Nor on Today's Blitz list until that
-  // round is played. Count this game in before the save effect runs, so finishing a list opens its Blitz at once.
+  // The list's own Blitz key, on its results. Never on a daily: Blitz shows every answer, and a round there would be a
+  // practice run at the day's one-try Blitz (a finished daily offers Today's Blitz instead). Nor on Today's Blitz list
+  // until that round is played. Count this game in before the save effect runs, so finishing a list opens its Blitz at
+  // once.
   const heldBlitz = todaysBlitz === puzzle.id;
   const blitzOpen =
     !daily &&
@@ -383,17 +384,12 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-            {/* The score, then the list's Blitz key; on a narrow card the key drops under the score. The players'
-                average waits for the results, where it says how you did. */}
+            {/* The score alone (the owner: no Play Blitz here, "for simplicity"; the results offer the list's Blitz).
+                The players' average waits for the results, where it says how you did. */}
             <span className="prompt-end">
               <span className="count" aria-label={`${game.found.length} of 10 found`}>
                 <b>{game.found.length}</b>/10
               </span>
-              {blitzOpen && !over && (
-                <a className="key key-xs key-blitz-sm" data-testid="title-blitz" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
-                  Play Blitz
-                </a>
-              )}
             </span>
           </div>
           <h1>{puzzle.title}</h1>
