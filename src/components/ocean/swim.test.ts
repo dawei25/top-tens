@@ -194,6 +194,57 @@ describe("ink comes with a dart, never in place", () => {
     }
   });
 
+  it("in a strip, tilted toward its edge with no room ahead or to turn: it flips to level and darts", () => {
+    // From the browser suite (Nov 9): only a heading near level had the room, and the flip tried every 30 degrees.
+    const y0 = 297.6;
+    const tight = Room.build(
+      [...DESKTOP_GLASS, { left: 0, top: 0, right: 1440, bottom: y0 }, { left: 0, top: y0 + 300, right: 1440, bottom: 900 }],
+      desktop.w,
+      desktop.h,
+      4,
+    )!;
+    const p = { x: 991, y: 472 };
+    expect(tight.fit(p.x, p.y, 146)).toBeGreaterThanOrEqual(0);
+    expect(tight.free(p.x, p.y)).toBeLessThan(0);
+    for (const seed of SEEDS) expectDart(flee(desktop, tight, p, 146, seed, (0.7 * 45 + 10) * 4), desktop, `strip, seed ${seed}`);
+  });
+
+  it("anywhere in a strip, after roaming a while and a trick's pause, it always has a dart (a lost life's cloud)", () => {
+    // Mid-strip, a two-width run once didn't fit either way (it had 185 px each way, less the margins), so no ink.
+    const roam: World = { ...desktop, prefer: () => null };
+    for (let seed = 1; seed <= 200; seed++) {
+      const r = seeded(seed * 7919);
+      const pick = seeded(seed * 104729);
+      const world = { ...roam, prefer: () => ({ x: 860 + pick() * 560, y: 340 + pick() * 220 }) };
+      const s = new Swimmer(world, seeded(seed));
+      s.setWorld(world);
+      s.setRoom(strip);
+      let p = { x: 0, y: 0 };
+      let tilt = 0;
+      do {
+        p = { x: 860 + r() * 560, y: 300 + r() * 300 };
+        tilt = (r() - 0.5) * 360;
+      } while (strip.fit(p.x, p.y, tilt) < 0);
+      s.place(p, tilt);
+      let t = 0;
+      for (const end = r() * 8; t < end; t += DT) s.step(DT, t);
+      s.pause(0.55);
+      for (const end = t + 0.55; t < end; t += DT) s.step(DT, t);
+      let ink: (Pt & { t: number }) | null = null;
+      const at = `seed ${seed} at ${s.x.toFixed(0)},${s.y.toFixed(0)} heading ${s.tilt.toFixed(0)}`;
+      expect(s.flee(() => (ink = { x: s.x, y: s.y, t }), (0.7 * 45 + 10) * 4), `${at}: no way out`).toBe(true);
+      const t0 = t;
+      let moved = 0;
+      for (; t < t0 + 2.5; t += DT) {
+        s.step(DT, t);
+        const k = ink as (Pt & { t: number }) | null;
+        if (k && t >= k.t + 0.7 - 1e-6 && !moved) moved = Math.hypot(s.x - k.x, s.y - k.y) / desktop.sw;
+      }
+      expect(ink, `${at}: no ink`).not.toBeNull();
+      expect(moved, `${at}: 0.7 s on`).toBeGreaterThan(1.2);
+    }
+  });
+
   it("a find meanwhile doesn't cut the dart short", () => {
     const s = new Swimmer(desktop, seeded(7));
     s.setWorld(desktop);

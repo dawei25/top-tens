@@ -428,10 +428,10 @@ const edgeDistance = (page, p) =>
 /**
  * Moves the frozen clock on until the squid is "open" (far from every edge: the viewport's, and on wide screens the
  * glass) or at an "edge". Left to roam, some runs it keeps off every edge for a minute and more, others it keeps near
- * one. So open is as far from every edge as it gets (2.2 of its widths, easing to 1.6 over the search), and an edge as
- * near one as it gets (1.2 widths, easing to 1.8); on wide screens panels come over it instead (panelOver), which is
- * sure to put it by one. The exact cases, in open water, hemmed in at the glass and in the corners, are pinned in
- * ocean/swim.test.ts.
+ * one. So open is the most open it shows (more than 2.2 of its widths from every edge, the bar easing to nothing over
+ * the search), and on a phone an edge the nearest one it comes (under 1.2 widths, the bar easing up likewise); on wide
+ * screens panels come over it instead (panelOver), which is sure to put it by one. The exact cases, in open water,
+ * hemmed in at the glass, in a strip and in the corners, are pinned in ocean/swim.test.ts.
  */
 async function squidAtEdge(page, where) {
   const phone = (await page.evaluate(() => innerWidth)) < 700;
@@ -443,8 +443,8 @@ async function squidAtEdge(page, where) {
     if (p) {
       const { w } = await inkFrame(page);
       const d = (await edgeDistance(page, p)) / w;
-      const s = i / TRIES;
-      if (where === "open" ? d > 2.2 - 0.6 * s : d < 1.2 + 0.6 * s) return p;
+      const s = (i + 1) / TRIES;
+      if (where === "open" ? d > 2.2 * (1 - s) : d < 1.2 / (1 - s + 1e-9)) return p;
       seen.push(d);
     }
     // A key now and then, so it never dozes off on the seabed (after 20 s without input).

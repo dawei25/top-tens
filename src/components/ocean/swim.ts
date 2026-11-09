@@ -79,13 +79,18 @@ const DRIFT = 12;
 const PIVOT_SPEED = 12;
 /** Confined: headings tried for that slow turn. */
 const PIVOT_HEADINGS = [30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180];
+/** Confined, hemmed in as it inks: headings tried for the flip, every 10 degrees round (in a strip only one near level
+ *  may have the room, Nov 9). */
+const FLIP_HEADINGS = Array.from({ length: 34 }, (_, i) => (i % 2 ? -1 : 1) * 10 * Math.ceil((i + 1) / 2)).concat(180);
 /** Confined: a glide stops this far short of the room it has ahead (CSS px). */
 const SHORT = 24;
 /** Confined: headings tried around the one it wants, nearest first; for a hop, only near its own. */
 const OFFSETS = [0, 12, -12, 25, -25, 40, -40, 60, -60, 90, -90, 120, -120, 150, -150, 180];
 const HOP_OFFSETS = [0, 15, -15, 30, -30, 50, -50];
-/** A flee from its ink goes at least this many of its widths, so the cloud is well behind it. */
+/** A flee from its ink goes at least this many of its widths, so the cloud is well behind it (confined, where open
+ *  water is tight, FLEE_LEAST). */
 const FLEE_MIN = 2;
+const FLEE_LEAST = 1.5;
 /** Confined and hemmed in as it inks: it flips round about its middle this fast (degrees a second), then flees. */
 const FLIP = 420;
 
@@ -602,17 +607,23 @@ export class Swimmer {
     if (this.room) {
       if (this.escaping) return false;
       // The heading with the most room, nearest the way it faces: past the cloud, or as near that as there is room for
-      // (at least FLEE_MIN widths).
-      const min = this.world.sw * FLEE_MIN;
-      const q0 = this.plan(this.tilt, L, Math.min(far, L), 1 / 400);
-      const q = q0 ?? this.plan(this.tilt, L, min, 1 / 400);
-      this.fleeMin = q0 ? Math.min(far, L) : min;
-      if (!q) return flip && this.flip(L, min);
-      this.target = {
+      // (FLEE_MIN widths, or FLEE_LEAST where open water is tight: mid-strip, say).
+      const mins = [Math.min(far, L), this.world.sw * FLEE_MIN, this.world.sw * FLEE_LEAST];
+      let q: ReturnType<Swimmer["plan"]> = null;
+      for (const m of mins) {
+        q = this.plan(this.tilt, L, m, 1 / 400);
+        this.fleeMin = m;
+        if (q) break;
+      }
+      if (!q) return flip && (this.flip(L, mins[1]) || this.flip(L, mins[2]));
+      // A dart (a hard jet, braking into the end of the run), so it is well clear of the cloud within half a second
+      // however short the run.
+      const end = {
         x: this.x + Math.sin(q.aim * RAD) * q.travel,
         y: this.y - Math.cos(q.aim * RAD) * q.travel,
       };
-      this.go(q.aim, q.travel * DRAG, 0.07, true, null, q.spin);
+      this.target = end;
+      this.go(q.aim, clamp(q.travel * 5, 300, 3200) * Math.max(1, this.speed * 0.9), 0.07, true, end, q.spin);
       return true;
     }
     // Behind the glass: headings at random and every 45 degrees round (so a corner always shows the way out), scored
@@ -651,7 +662,7 @@ export class Swimmer {
     const cy = this.y + Math.cos(this.tilt * RAD) * b;
     let best: number | null = null;
     let score = -Infinity;
-    for (const off of PIVOT_HEADINGS) {
+    for (const off of FLIP_HEADINGS) {
       const h = wrapDeg(this.tilt + off);
       const ahead = room.reach(cx + Math.sin(h * RAD) * b, cy - Math.cos(h * RAD) * b, h, L + SHORT) - SHORT;
       const k = Math.min(ahead, L) - Math.abs(off);
