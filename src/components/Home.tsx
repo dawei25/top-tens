@@ -15,8 +15,8 @@ import { todayStatus } from "./today";
 import { pickerCategories } from "./freeplay";
 
 /**
- * A home key: its status on top (right), the action below. Today's keys carry their mode's accent while unplayed
- * and settle once played; free-play keys stay quiet. The mode shows in the color, not in a tag.
+ * A home key: its status on top (right), the action below. Today's key carries its mode's accent while unplayed
+ * and settles once played; free-play keys stay quiet. The mode shows in the color, not in a tag.
  */
 function ModeKey({
   mode,
@@ -47,7 +47,7 @@ function ModeKey({
       disabled={disabled}
       data-testid={testId}
       data-done={done || undefined}
-      // Hovering a Today key selects it, so Enter (and the ENTER cap shown on hover) means this key.
+      // Hovering the Today key selects it, so Enter (and the ENTER cap shown on hover) means this key.
       onPointerEnter={today ? (e) => e.pointerType === "mouse" && e.currentTarget.focus({ preventScroll: true }) : undefined}
     >
       <span className="mode-key-top">
@@ -87,27 +87,9 @@ interface Props {
   /** Goes to a random Blitz-ready list (in the category, if given); false when there is none. */
   onBlitz: (category?: string) => Promise<boolean>;
   onArchive: () => void;
-  /** The player's local date. */
-  today: string;
-  /** Whether today has a Blitz list. */
-  hasDailyBlitz: boolean;
-  onDailyBlitz: () => void;
 }
 
-export function Home({
-  index,
-  blitzLists,
-  freeLists,
-  entry,
-  archiveCount,
-  onDaily,
-  onRoll,
-  onBlitz,
-  onArchive,
-  today,
-  hasDailyBlitz,
-  onDailyBlitz,
-}: Props) {
+export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDaily, onRoll, onBlitz, onArchive }: Props) {
   const [noBlitz, setNoBlitz] = useState(false);
   /** The open "by category" picker, if any (one at a time). */
   const [picker, setPicker] = useState<Pick | null>(null);
@@ -123,20 +105,14 @@ export function Home({
   const [help, setHelp] = useState(false);
   const helpKey = useRef<HTMLButtonElement>(null);
   const dailyRef = useRef<HTMLButtonElement>(null);
-  const blitzRef = useRef<HTMLButtonElement>(null);
-  const status = todayStatus(saved, entry, today);
-  const dailyDone = status.list.done;
-  const dailyBlitzDone = status.blitz.done;
-  // Keyboard-first: Enter starts today's list, or today's Blitz once the list is done. Focus without scrolling so
-  // the title stays in view. The focused today key is the one loud element on the screen.
+  const status = todayStatus(saved, entry);
+  // Keyboard-first: Enter starts (or reopens) today's list. Focus without scrolling so the title stays in view. The
+  // focused today key is the one loud element on the screen.
   // Touch screens have no Enter to press, so they get no auto focus (and no focus ring on a key nobody chose).
-  const focusDaily = () => {
-    if (typeof matchMedia === "function" && !matchMedia("(pointer: fine)").matches) return;
-    (dailyDone && hasDailyBlitz && !dailyBlitzDone ? blitzRef : dailyRef).current?.focus({ preventScroll: true });
-  };
   useEffect(() => {
     // Only on arrival.
-    focusDaily();
+    if (typeof matchMedia === "function" && !matchMedia("(pointer: fine)").matches) return;
+    dailyRef.current?.focus({ preventScroll: true });
   }, []);
   // Keyboard modality for the ENTER cap: a key press turns it on, any pointer press turns it off. It starts off on
   // arrival, so the auto-focused key doesn't show the cap until the player actually uses the keyboard here.
@@ -334,6 +310,7 @@ export function Home({
           </h2>
           <Countdown />
         </div>
+        {/* The one daily, across the whole card (UX 6: the main thing gets the most room). */}
         <div className="today-stack">
           <ModeKey
             mode="classic"
@@ -341,23 +318,11 @@ export function Home({
             btnRef={dailyRef}
             testId="today-list"
             title="Today's list"
-            status={status.list.status}
-            done={dailyDone}
+            status={status.status}
+            done={status.done}
             disabled={!entry}
             onClick={onDaily}
           />
-          {hasDailyBlitz && (
-            <ModeKey
-              mode="blitz"
-              today
-              btnRef={blitzRef}
-              testId="today-blitz"
-              title="Today's Blitz"
-              status={status.blitz.status}
-              done={dailyBlitzDone}
-              onClick={onDailyBlitz}
-            />
-          )}
         </div>
       </section>
 

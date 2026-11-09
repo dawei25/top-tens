@@ -67,7 +67,7 @@ export const PHONE = "(max-width: 699px)";
  * box right of the guess panel, outside it (owner, Nov 6), level with the guess row and no taller (the pill, on
  * phones; owner, Nov 7). The results' key for the same action has the same name (ROLL_NEW). It lives in the guess
  * form, which makes room for it while `on` (data-roll, index.css). When play starts it fades out and the guess panel
- * stretches into its room. Where it never shows (dailies, Today's Blitz, links, replays) there is none.
+ * stretches into its room. Where it never shows (dailies, links, replays) there is none.
  */
 export function RollBox({ slot, on, onRoll }: { slot: boolean; on: boolean; onRoll?: () => void }) {
   if (!slot) return null;

@@ -65,13 +65,6 @@ interface Props {
    * list beside the guess panel, to skip to another list; never once play starts, so a losing game can't be dodged.
    */
   rolled?: boolean;
-  /** Today's Blitz, while it's unplayed (a finished daily offers it). */
-  onDailyBlitz?: () => void;
-  /**
-   * Today's Blitz list while it's unplayed. A free Blitz of it would be a practice run at a one-try round, so this
-   * list offers Today's Blitz instead of its own Blitz key.
-   */
-  todaysBlitz?: string;
 }
 
 interface Feedback {
@@ -105,7 +98,7 @@ function describe(r: GuessResult, puzzle: Puzzle, typed: string): Omit<Feedback,
   }
 }
 
-export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, rolled, onDailyBlitz, todaysBlitz }: Props) {
+export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, rolled }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -333,19 +326,14 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     dailyStreak = streak(sv);
   }
   const mode = !daily ? "Random list" : daily.date === today ? `Daily #${daily.n}` : `Archive #${daily.n}`;
-  // The list's own Blitz key, on its results. Never on a daily: Blitz shows every answer, and a round there would be a
-  // practice run at the day's one-try Blitz (a finished daily offers Today's Blitz instead). Nor on Today's Blitz list
-  // until that round is played. Count this game in before the save effect runs, so finishing a list opens its Blitz at
-  // once.
-  const heldBlitz = todaysBlitz === puzzle.id;
-  const blitzOpen =
-    !daily &&
-    !heldBlitz &&
-    (() => {
-      const sv = load();
-      sv.games[id] = game;
-      return blitzAvailable(puzzle, schedule, today, sv);
-    })();
+  // The list's own Blitz key, on its results, dailies included: a free Blitz on the list just finished (a list game
+  // doesn't spoil its Blitz, UX 15). Count this game in before the save effect runs, so finishing today's list opens
+  // its Blitz at once.
+  const blitzOpen = (() => {
+    const sv = load();
+    sv.games[id] = game;
+    return blitzAvailable(puzzle, schedule, today, sv);
+  })();
 
   const missChips = misses.length > 0 && (
     <section className="misses" aria-label="Wrong guesses" data-glass>
@@ -656,13 +644,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button ref={shareRef} className={daily ? "key key-pink" : "key"} data-testid="share" onClick={share}>
                   <SwapLabel off="Share" on="Copied" active={copied} />
                 </button>
-                {/* A daily is one try: no replay, just somewhere else to go. Today's Blitz list offers that round. */}
-                {(daily || heldBlitz) && onDailyBlitz && (
-                  <button className="key key-blitz" data-testid="results-daily-blitz" onClick={onDailyBlitz}>
-                    Today's Blitz
-                  </button>
-                )}
-                {/* A daily already offers Today's Blitz; a second gold Blitz key there reads like the same thing. */}
+                {/* A daily is one try: no replay, just somewhere else to go: this list as a Blitz, or a random list. */}
                 {blitzOpen && (
                   <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
                     Play Blitz

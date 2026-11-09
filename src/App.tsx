@@ -15,7 +15,6 @@ import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } f
 import { freshBlitz } from "./game/blitz";
 import { freshList, lastPlayed } from "./game/history";
 import {
-  blitzHold,
   blitzOfTheDay,
   rollHoldouts,
   entryForDate,
@@ -44,6 +43,7 @@ type Route =
   | { screen: "privacy" }
   | { screen: "settings" }
   | { screen: "fathom" }
+  /** An old link to a date's Blitz (from before Nov 10, when each day also had one): replaced on arrival, see App. */
   | { screen: "dailyblitz"; date: string; runs: boolean; run?: number };
 
 function readHash(): Route {
@@ -57,7 +57,8 @@ function readHash(): Route {
   // The Blitz-only runs screen became Past runs, which lists list games and Blitz rounds together.
   if (h === "#blitz-history") history.replaceState(null, "", "#history");
   if (h === "#history" || h === "#blitz-history") return { screen: "history" };
-  // Blitz screens take a sub-view: /runs (past runs open) or /run-<startedAt> (one past run's results).
+  // Blitz screens take a sub-view: /runs (past runs open) or /run-<startedAt> (one past run's results). A date's
+  // Blitz (#dailyblitz-<date>, retired) takes them too, and becomes its list's #blitz-<id> once the schedule is in.
   const dailyBlitz = h.match(/^#dailyblitz-(\d{4}-\d{2}-\d{2})(\/runs|\/run-(\d+))?$/);
   if (dailyBlitz) {
     return { screen: "dailyblitz", date: dailyBlitz[1], runs: dailyBlitz[2] === "/runs", run: dailyBlitz[3] ? Number(dailyBlitz[3]) : undefined };
@@ -82,7 +83,7 @@ function readHash(): Route {
  * -> the archive; everything else -> home.
  */
 function parentOf(hash: string, today: string): string {
-  const run = hash.match(/^(#(?:blitz|dailyblitz)-[\w-]+?)\/run-\d+$/);
+  const run = hash.match(/^(#blitz-[\w-]+?)\/run-\d+$/);
   if (run) return `${run[1]}/runs`;
   if (/^#p-[\w-]+?\/run-\d+$/.test(hash)) return "#history";
   const daily = hash.match(/^#daily-(\d{4}-\d{2}-\d{2})$/);
@@ -211,6 +212,20 @@ function Screens() {
     return scrollWhenTall(y);
   }, [route]);
 
+  // An old link to a date's Blitz (a bookmark or a shared link from before Nov 10, when each day also had a Blitz;
+  // Past runs rows linked there too) opens that list's free Blitz: the list the player had that day if they played it,
+  // else the date's pick, with the same sub-view (/runs, /run-<startedAt>). The address becomes #blitz-<id> in place,
+  // before anything is drawn. A date with no list for it (a future one) goes home.
+  useLayoutEffect(() => {
+    if (route.screen !== "dailyblitz" || !index || !schedule) return;
+    const pick = route.date > today ? undefined : (load().blitzDaily?.[route.date]?.id ?? blitzOfTheDay(schedule, index, route.date));
+    const id = pick && index.some((m) => m.id === pick) ? pick : undefined;
+    const sub = route.runs ? "/runs" : route.run ? `/run-${route.run}` : "";
+    history.replaceState(null, "", `${location.pathname}${location.search}${id ? `#blitz-${id}${sub}` : ""}`);
+    trail.current[trail.current.length - 1] = location.hash;
+    setRoute(readHash());
+  }, [route, index, schedule, today]);
+
   useEffect(() => {
     const check = () => setToday(localDate());
     // Timers sleep with the tab or the laptop, so also check whenever the page comes back.
@@ -227,8 +242,7 @@ function Screens() {
   if (!index || !schedule) return <Loading />;
 
   // A roll is always a fresh game, even on a list played before (its result stays in Past runs). It never lands on
-  // today's list or Blitz, a future day's list or Blitz, or `leave` (the list on screen). A category with nothing
-  // else left widens to all.
+  // today's list, a future day's list, or `leave` (the list on screen). A category with nothing else left widens to all.
   const roll = (category?: string, leave?: string) => {
     const exclude = rollHoldouts(schedule, index, load(), today);
     if (leave) exclude.add(leave);
@@ -247,7 +261,7 @@ function Screens() {
     location.replace(`${location.pathname}${location.search}${parentOf(location.hash, today) || "#"}`);
   };
   // The lists open for a free Blitz right now (Home's counts and the Blitz roll use the same filter): never today's
-  // list or Blitz, or a future day's.
+  // list or a future day's.
   const openBlitz = (saved = load()) => openBlitzLists(schedule, index, saved, today);
   // Blitz a random list (optionally in a category): a uniformly random open Blitz list, never one of the last few
   // rolled (per category, like the classic roll), never `leave` (the list on screen), always a fresh round. A
@@ -276,7 +290,7 @@ function Screens() {
   const blitzAgain = (id: string, category?: string) =>
     blitzChoices(category, id).open.length > 0 ? () => void blitzRoll(category, id) : undefined;
   // Play again on a past run: a fresh free game on that same list (a roll, but of this list). Never on a list held
-  // right now (today's list or Blitz, or a future day's): it's back in free play after its day.
+  // right now (today's list or a future day's): it's back in free play after its day.
   const replay = (mode: "list" | "blitz", id: string) => {
     if (rollHoldouts(schedule, index, load(), today).has(id)) return undefined;
     const to = mode === "list" ? `#p-${id}` : `#blitz-${id}`;
@@ -288,29 +302,18 @@ function Screens() {
       location.hash = to;
     };
   };
-  // Today's Blitz, while it's still there to play (a list's results offer it). Until then its list has no free Blitz.
-  const todaysBlitz = blitzOfTheDay(schedule, index, today);
-  const dailyBlitzOpen = !!todaysBlitz && !load().blitzDaily?.[today];
-  const heldBlitz = dailyBlitzOpen ? todaysBlitz : undefined;
   const current = todayEntry(schedule, today);
 
-  // Today's Blitz list for a date: once played, the list that was played (the pick for an old date can move as the
-  // schedule and the lists grow); never a future one.
-  const dailyBlitzId = (date: string) =>
-    date > today ? undefined : (load().blitzDaily?.[date]?.id ?? blitzOfTheDay(schedule, index, date));
-
-  // The menu, in every screen's header: the screen on show, today's pair, and the same ways there as Home's keys. A
+  // The menu, in every screen's header: the screen on show, today's list, and the same ways there as Home's keys. A
   // roll from it never lands on the list or Blitz on screen.
-  const blitzOnScreen = route.screen === "blitz" ? route.id : route.screen === "dailyblitz" ? dailyBlitzId(route.date) : undefined;
+  const blitzOnScreen = route.screen === "blitz" ? route.id : undefined;
   const nav: MenuNav = {
-    current: menuScreen(route, today, current?.date),
+    current: menuScreen(route, current?.date),
     today,
     entry: current,
-    hasDailyBlitz: !!todaysBlitz,
     blitzOpen: openBlitz().length,
     blitzOnScreen,
     onDaily: () => current && (location.hash = `#daily-${current.date}`),
-    onDailyBlitz: () => (location.hash = `#dailyblitz-${today}`),
     onRoll: () => roll(undefined, route.screen === "game" ? route.id : undefined),
     onBlitz: () => void blitzRoll(undefined, blitzOnScreen),
   };
@@ -328,7 +331,6 @@ function Screens() {
           showRuns={route.runs}
           openRun={route.run}
           base={`#blitz-${route.id}`}
-          todaysBlitz={heldBlitz}
           onBack={back}
           onHome={home}
           onRoll={blitzAgain(route.id, rolledIn.current.get(`#blitz-${route.id}`))}
@@ -339,7 +341,7 @@ function Screens() {
     }
 
     if (route.screen === "history") {
-      return <History index={index} schedule={schedule} today={today} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;
+      return <History index={index} today={today} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;
     }
 
     if (route.screen === "listrun") {
@@ -366,32 +368,8 @@ function Screens() {
       return <Knowledge index={index} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;
     }
 
-    if (route.screen === "dailyblitz") {
-      // Today's Blitz: one list per date, the same for everyone; never a future one.
-      const saved = load();
-      const id = dailyBlitzId(route.date);
-      if (!id) return <NoList text={`There's no Blitz for ${shortDate(route.date, today)} yet.`} onHome={home} />;
-      const n = (entryForDate(schedule, route.date) ?? todayEntry(schedule, route.date))?.n ?? 0;
-      return (
-        <Blitz
-          key={`dailyblitz-${route.date}`}
-          id={id}
-          meta={index.find((p) => p.id === id)}
-          schedule={schedule}
-          today={today}
-          lexicon={lexicon}
-          dailyBlitz={{ date: route.date, n }}
-          hold={blitzHold(schedule, route.date, id, saved)}
-          base={`#dailyblitz-${route.date}`}
-          showRuns={route.runs}
-          openRun={route.run}
-          onBack={back}
-          onHome={home}
-          onRoll={blitzAgain(id)}
-          onReplay={replay("blitz", id)}
-        />
-      );
-    }
+    // An old date's-Blitz link, for the moment before it becomes its list's free Blitz (above).
+    if (route.screen === "dailyblitz") return <Loading />;
 
     if (route.screen === "archive") {
       return <Archive index={index} schedule={schedule} today={today} onBack={back} onHome={home} />;
@@ -419,8 +397,6 @@ function Screens() {
           // daily offers a plain random list instead.
           onRoll={() => roll(entry ? undefined : rolledIn.current.get(`#p-${id}`), id)}
           rolled={!entry && rolledIn.current.has(`#p-${id}`)}
-          onDailyBlitz={dailyBlitzOpen ? () => (location.hash = `#dailyblitz-${today}`) : undefined}
-          todaysBlitz={heldBlitz}
         />
       );
     }
@@ -431,9 +407,6 @@ function Screens() {
         entry={current}
         archiveCount={schedule.filter((e) => e.date <= today).length}
         onDaily={() => current && (location.hash = `#daily-${current.date}`)}
-        today={today}
-        hasDailyBlitz={!!blitzOfTheDay(schedule, index, today)}
-        onDailyBlitz={() => (location.hash = `#dailyblitz-${today}`)}
         onRoll={roll}
         onBlitz={blitzRoll}
         blitzLists={openBlitz()}
@@ -448,14 +421,12 @@ function Screens() {
 
 /**
  * The menu's tile for the screen on show, if it has one: today's list is the daily its tile opens (`dailyDate`, the
- * latest one up to today), today's Blitz only on today's date.
+ * latest one up to today).
  */
-function menuScreen(route: Route, today: string, dailyDate?: string): MenuScreen | undefined {
+function menuScreen(route: Route, dailyDate?: string): MenuScreen | undefined {
   switch (route.screen) {
     case "daily":
       return route.date === dailyDate ? "today-list" : undefined;
-    case "dailyblitz":
-      return route.date === today ? "today-blitz" : undefined;
     case "archive":
     case "history":
     case "stats":
