@@ -2,7 +2,7 @@
 // from the left over the dimmed page, a modal dialog. It opens without moving or scrolling the page; focus goes into it and stays
 // there; Escape, the close key or a press on the dimmed page close it, and focus comes back to the key (or to the
 // guess box while a game is under way). Every tile reaches its screen, the screen on show is marked, rolls never land
-// on today's pair, and there's no account section (the account is a key in Home's header: backend.e2e.cjs) and,
+// on today's list, and there's no account section (the account is a key in Home's header: backend.e2e.cjs) and,
 // without a contact address, no Feedback. Home's header keys, the account key among them, clear the logo.
 // Settings (#settings, from the menu): the sound switch and reset all progress (moved from Home's footer).
 const { test, before, after } = require("node:test");
@@ -74,8 +74,9 @@ for (const vp of VIEWPORTS) {
   });
 
   test(`the menu opens over the page and closes every way (${vp.name})`, async () => {
-    // The archive: a page taller than the screen at both sizes, so a scroll behind the menu would show.
-    const { ctx, page } = await open(browser, vp, "#archive", undefined, { reducedMotion: "reduce" });
+    // The archive: a page taller than the screen at both sizes, so a scroll behind the menu would show. Nov 9 has 21
+    // days in it (one row each since Nov 10's one-daily archive, short enough that ten fit a desktop window).
+    const { ctx, page } = await open(browser, vp, "#archive", undefined, { reducedMotion: "reduce", now: new Date("2026-11-09T12:00:00-05:00") });
     const card = page.getByTestId("archive-row").first();
     await card.waitFor();
     await freeze(page);
@@ -158,16 +159,14 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("menu-account").count(), 0);
     assert.equal(await page.getByTestId("menu-sign-in").count(), 0);
     assert.equal(await page.getByTestId("menu-feedback").count(), 0);
-    // Today's statuses read as Home's keys do; nothing marked on Home.
-    for (const id of ["today-list", "today-blitz"]) {
-      assert.equal(await page.getByTestId(`menu-${id}-status`).textContent(), await page.getByTestId(`${id}-status`).textContent());
-    }
+    // Today's list (the one daily since Nov 10) reads as Home's key does; nothing marked on Home.
+    assert.equal(await page.getByTestId("menu-today-list-status").textContent(), await page.getByTestId("today-list-status").textContent());
+    assert.equal(await page.getByTestId("menu-today-blitz").count(), 0);
     assert.equal(await page.locator('[data-testid="menu"] [aria-current]').count(), 0);
     await page.keyboard.press("Escape");
 
     const screens = [
       ["today-list", `#daily-${TODAY}`, "lives"],
-      ["today-blitz", `#dailyblitz-${TODAY}`, "blitz-screen"],
       ["archive", "#archive", "archive-row"],
       ["history", "#history", "nav-back"],
       ["stats", "#stats", "knowledge"],
@@ -211,7 +210,7 @@ for (const vp of VIEWPORTS) {
     const blitz = page.getByTestId("blitz-screen");
     await blitz.waitFor();
     assert.match(await hash(page), /^#blitz-/);
-    assert.notEqual(await blitz.getAttribute("data-list"), daily.blitz);
+    assert.notEqual(await blitz.getAttribute("data-list"), daily.id);
     assert.equal(await page.getByTestId("blitz-clock").getAttribute("data-started"), "false", "a fresh round");
     assert.ok(await noHScroll(page));
     await ctx.close();
@@ -355,8 +354,8 @@ test("a game under way: it resumes from the menu, the Blitz clock note, focus ba
   await page.getByLabel("Your guess").waitFor();
   assert.equal(await page.locator('[data-testid="slot"][data-state="found"]').count(), 1);
 
-  // Today's Blitz under way: the menu says the clock keeps running.
-  await choose(page, "today-blitz");
+  // A Blitz under way: the menu says the clock keeps running.
+  await choose(page, "random-blitz");
   const screen = page.getByTestId("blitz-screen");
   await screen.waitFor();
   await openMenu(page);

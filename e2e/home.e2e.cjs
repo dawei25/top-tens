@@ -185,7 +185,7 @@ for (const vp of VIEWPORTS) {
     assert.deepEqual(await edges("home-record"), await edges("today-group"));
     assert.deepEqual(await edges("home-foot"), await edges("today-group"));
     // A build without accounts has no account key (backend.e2e.cjs covers the key itself), and nothing comes between
-    // Today's pair and Free play (the account once took a row there).
+    // Today and Free play (the account once took a row there).
     assert.equal(await page.getByTestId("account-key").count(), 0);
     assert.ok(
       await page.getByTestId("today-group").evaluate((el) => !!el.nextElementSibling?.contains(document.querySelector('[data-testid="free-play"]'))),

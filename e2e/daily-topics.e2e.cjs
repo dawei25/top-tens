@@ -1,12 +1,13 @@
-// Today's list and Today's Blitz are separate topics: a day's Blitz is the list daily.json names in its `blitz`. The
-// archive is a table, one row per date: its list and its Blitz side by side, under List and Blitz headers named once
-// (one try each). Random rolls never land on today's list or Blitz, played or not, on a future day's list or Blitz,
-// or on a new list waiting for its debut as a daily.
-// The Blitz title card and a miss say what the list is made of (the puzzle's noun). The spoiler hold still guards a
-// Blitz on its day's own list.
+// One daily a day, Today's list; Blitz is free play only (owner, Nov 10). daily.json still names a `blitz` for each
+// day: an old link to that day's Blitz opens it as a free round, and those lists are in random play like any other.
+// The archive is a table of the daily lists, one row per date (one try each), with no Blitz column. Random rolls never
+// land on today's list, played or not, on a future day's list, or on a new list waiting for its debut as a daily (a
+// list first named as a day's Blitz joins on that day).
+// The Blitz title card and a miss say what the list is made of (the puzzle's noun). A Blitz on today's unfinished
+// list stays closed until that list is done, from a link of either kind.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, VIEWPORTS, open, go, hash, puzzle, store, noHScroll, guess } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, open, go, hash, puzzle, store, noHScroll, guess, giveUp } = require("./helpers.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -34,17 +35,14 @@ async function playRound(page, hit) {
 }
 
 for (const vp of VIEWPORTS) {
-  test(`Today's Blitz is its own list from the schedule (${vp.name})`, async () => {
-    const { ctx, page } = await open(browser, vp, "", SEED, at);
-    await page.getByTestId("today-blitz").waitFor();
-    const entry = (await schedule(page)).find((e) => e.date === DAY);
-    assert.ok(entry.blitz && entry.blitz !== entry.id, "the schedule gives the day a Blitz on another list");
-
-    await page.getByTestId("today-blitz").click();
+  test(`a day's old Blitz link opens a free round on the schedule's list (${vp.name})`, async () => {
+    const { ctx, page } = await open(browser, vp, `#dailyblitz-${DAY}`, SEED, at);
     const screen = page.getByTestId("blitz-screen");
-    await screen.waitFor();
-    assert.equal(await hash(page), `#dailyblitz-${DAY}`);
+    await page.getByTestId("blitz-clock").waitFor();
+    const entry = (await schedule(page)).find((e) => e.date === DAY);
+    assert.ok(entry.blitz && entry.blitz !== entry.id, "the schedule still names the day a Blitz on another list");
     assert.equal(await screen.getAttribute("data-list"), entry.blitz);
+    assert.equal(await hash(page), `#blitz-${entry.blitz}`);
 
     // The title card says what to name; a guess that isn't on the list says how many of what are.
     const p = await puzzle(page, entry.blitz);
@@ -54,107 +52,82 @@ for (const vp of VIEWPORTS) {
     const miss = await page.getByTestId("feedback").textContent();
     assert.ok(miss.includes(`${p.answers.length + p.extras.length} ${p.noun}`), miss);
 
-    // Another topic than today's list: the results show everything at once, with today's list still unplayed.
+    // Another topic than today's list: the results show everything, with today's list still unplayed. Free play: a
+    // round in the list's history, Roll new list after it, nothing kept as a daily.
     await playRound(page, p.answers[0].name);
     assert.equal(await page.getByTestId("blitz-hit").count(), 1);
-    assert.equal(await page.getByTestId("blitz-rest-hidden").count(), 0);
     assert.ok((await page.getByTestId("blitz-missed-row").count()) > 0);
+    assert.equal(await page.getByTestId("blitz-again").count(), 1);
     assert.ok(await noHScroll(page));
-    assert.equal((await store(page)).blitzDaily[DAY].id, entry.blitz);
+    const s = await store(page);
+    assert.equal(s.blitzRuns[entry.blitz].length, 1);
+    assert.equal(s.blitzDaily[DAY], undefined);
     await ctx.close();
   });
 
-  test(`the archive shows each day's list and Blitz side by side (${vp.name})`, async () => {
+  test(`the archive lists each day's list, one row per date, no Blitz (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp, "#archive", SEED, at);
-    const listRows = page.getByTestId("archive-row");
-    await listRows.first().waitFor();
+    const rows = page.getByTestId("archive-row");
+    await rows.first().waitFor();
     const days = (await schedule(page)).filter((e) => e.date <= DAY);
     const index = await indexOf(page);
     const title = (id) => index.find((m) => m.id === id).title;
 
-    // One row per date, newest first: the list's cell, then that date's Blitz cell. No old sub-line.
-    const order = await page
-      .locator('[data-testid="archive-row"], [data-testid="archive-blitz-row"]')
-      .evaluateAll((els) => els.map((e) => `${e.dataset.testid === "archive-row" ? "list" : "blitz"} ${e.dataset.date}`));
+    // One row per date, newest first, each the day's list; no Blitz cell, column or header anywhere (an old day whose
+    // Blitz was played included).
     const dates = days.map((e) => e.date).sort().reverse();
-    assert.deepEqual(order, dates.flatMap((d) => [`list ${d}`, `blitz ${d}`]));
+    assert.deepEqual(await rows.evaluateAll((els) => els.map((e) => e.dataset.date)), dates);
     assert.deepEqual(await page.getByTestId("archive-day").evaluateAll((els) => els.map((e) => e.dataset.date)), dates);
-    assert.equal(await page.getByTestId("archive-blitz").count(), 0);
-    const row = (date) => page.locator(`[data-testid="archive-row"][data-date="${date}"]`);
-    const blitzRow = (date) => page.locator(`[data-testid="archive-blitz-row"][data-date="${date}"]`);
-
-    // Two columns, each named once at the top: a day's Blitz sits beside its list, and every cell lines up under
-    // its column's header (phones too).
-    const head = { list: page.getByTestId("archive-col-list"), blitz: page.getByTestId("archive-col-blitz") };
-    assert.equal(await head.list.count(), 1);
-    assert.equal(await head.blitz.count(), 1);
-    const [hl, hb] = [await head.list.boundingBox(), await head.blitz.boundingBox()];
-    const [lb, bb] = [await row(DAY).boundingBox(), await blitzRow(DAY).boundingBox()];
-    assert.ok(Math.abs(bb.y - lb.y) <= 1 && bb.x >= lb.x + lb.width, "the Blitz cell sits beside its list cell");
-    assert.ok(hl.y + hl.height <= lb.y, "the headers sit above the first row");
-    for (const d of dates) {
-      const [l, b] = [await row(d).boundingBox(), await blitzRow(d).boundingBox()];
-      assert.ok(Math.abs(l.x - hl.x) <= 1 && Math.abs(b.x - hb.x) <= 1, `${d}: the cells line up under List and Blitz`);
+    for (const id of ["archive-blitz-row", "archive-blitz-none", "archive-col-list", "archive-col-blitz"]) {
+      assert.equal(await page.getByTestId(id).count(), 0, id);
     }
-
-    // Each Blitz cell is the schedule's pick, or the list that was played; it opens that date's Blitz.
+    assert.equal(await page.getByTestId("archive-day").locator("a").count(), dates.length, "one link a day");
     for (const e of days) {
-      const b = blitzRow(e.date);
-      const id = e.date === OLD.date ? OLD.blitz : e.blitz;
-      assert.equal(await b.getAttribute("data-list"), id);
-      assert.equal(await b.getAttribute("href"), `#dailyblitz-${e.date}`);
-      assert.ok((await b.textContent()).includes(title(id)));
-      assert.equal(await row(e.date).getAttribute("href"), `#daily-${e.date}`);
+      const row = page.locator(`[data-testid="archive-row"][data-date="${e.date}"]`);
+      assert.equal(await row.getAttribute("href"), `#daily-${e.date}`);
+      assert.ok((await row.textContent()).includes(title(e.id)));
     }
-    assert.equal(await blitzRow(OLD.date).getAttribute("data-score"), String(OLD.score));
-    assert.equal(await blitzRow(DAY).getAttribute("data-score"), null);
+    // The rows line up in one column, and nothing scrolls sideways.
+    const xs = await rows.evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().left)));
+    assert.equal(new Set(xs).size, 1, `the rows start at ${[...new Set(xs)].join(", ")}`);
     assert.ok(await noHScroll(page));
-
-    // An old date's Blitz from its cell: one round, locked after, its score on the cell.
-    const old = days.find((e) => e.date < DAY && e.date !== OLD.date);
-    await blitzRow(old.date).click();
-    await page.getByTestId("blitz-clock").waitFor();
-    assert.equal(await hash(page), `#dailyblitz-${old.date}`);
-    assert.equal(await page.getByTestId("blitz-screen").getAttribute("data-list"), old.blitz);
-    await playRound(page);
-    await page.getByTestId("nav-back").click();
-    await blitzRow(old.date).waitFor();
-    assert.equal(await blitzRow(old.date).getAttribute("data-score"), String((await store(page)).blitzDaily[old.date].score));
-    await blitzRow(old.date).click();
-    await page.getByTestId("blitz-results").waitFor();
-    assert.equal(await page.getByTestId("blitz-results").getAttribute("data-locked"), "true");
-    assert.equal(await page.getByLabel("Your guess").count(), 0);
     await ctx.close();
   });
 }
 
-test("free Blitz never lands on today's list or Blitz, or a future day's", async () => {
+test("free Blitz never lands on today's list or a future day's; the days' Blitz lists are free play", async () => {
   const { ctx, page } = await open(browser, VIEWPORTS[0], "", SEED, at);
   await page.getByTestId("random-blitz").waitFor();
   const days = await schedule(page);
   const index = await indexOf(page);
   const entry = days.find((e) => e.date === DAY);
   const future = days.filter((e) => e.date > DAY).map((e) => e.id);
-  const futureBlitz = days.filter((e) => e.date > DAY && e.blitz).map((e) => e.blitz);
-  // New lists (`debut`) wait out of random play until their first day as a daily has run.
-  const ran = new Set(days.filter((e) => e.date < DAY).flatMap((e) => [e.id, e.blitz]));
-  const debuts = index.filter((m) => m.debut && !ran.has(m.id)).map((m) => m.id);
-  const held = new Set([entry.id, ...future, ...futureBlitz, entry.blitz, ...debuts]);
-  const openCount = (extra = held) => index.filter((m) => m.blitz && !extra.has(m.id)).length;
+  // New lists (`debut`) wait out of random play until their first day as Today's list has run, or (named as a day's
+  // Blitz) until that day.
+  const out = new Set(days.flatMap((e) => [...(e.date < DAY ? [e.id] : []), ...(e.blitz && e.date <= DAY ? [e.blitz] : [])]));
+  const debuts = index.filter((m) => m.debut && !out.has(m.id)).map((m) => m.id);
+  const held = new Set([entry.id, ...future, ...debuts]);
+  const openCount = () => index.filter((m) => m.blitz && !held.has(m.id)).length;
   const blitzCount = async () => parseInt(await page.getByTestId("random-blitz-status").textContent(), 10);
   assert.equal(await blitzCount(), openCount());
 
-  // A link straight to any of them is closed; Today's Blitz points to its one round.
+  // A link straight to today's list or a future one is closed; today's points to its daily.
   const closed = async (id) => {
     await go(page, `#blitz-${id}`);
     await page.getByTestId("blitz-closed").waitFor();
   };
   await closed(entry.id);
+  assert.equal(await page.getByTestId("blitz-closed-go").getAttribute("href"), `#daily-${DAY}`);
   await closed(future.find((id) => index.find((m) => m.id === id)?.blitz));
-  await closed(entry.blitz);
-  assert.equal(await page.getByTestId("blitz-closed-go").getAttribute("href"), `#dailyblitz-${DAY}`);
+  // The day's Blitz list, and a later day's, open as free rounds.
+  const laterBlitz = days.find((e) => e.date > DAY && e.blitz && !held.has(e.blitz)).blitz;
+  for (const id of [entry.blitz, laterBlitz]) {
+    await go(page, `#blitz-${id}`);
+    await page.getByTestId("blitz-clock").waitFor();
+    assert.equal(await page.getByTestId("blitz-screen").getAttribute("data-list"), id);
+  }
 
-  // Random Blitz rolls stay clear of them.
+  // Random Blitz rolls stay clear of the held ones.
   for (let i = 0; i < 6; i++) {
     await go(page, "");
     await page.getByTestId("random-blitz").click();
@@ -163,33 +136,26 @@ test("free Blitz never lands on today's list or Blitz, or a future day's", async
     assert.ok(!held.has(id), `rolled ${id}`);
   }
 
-  // Today's list finished: its results offer Today's Blitz (no Blitz key of its own), and Home moves on to it.
+  // Today's list finished: its results offer its own Blitz, and Home keeps its focus on Today's list.
   await go(page, `#daily-${DAY}`);
-  await page.getByTestId("give-up").click();
-  await page.getByTestId("give-up").click();
-  await page.getByTestId("results").waitFor();
-  assert.equal(await page.getByTestId("results-daily-blitz").count(), 1);
-  assert.equal(await page.getByTestId("blitz-key").count(), 0);
+  await giveUp(page);
+  assert.equal(await page.getByTestId("results-daily-blitz").count(), 0);
+  assert.equal(await page.getByTestId("blitz-key").getAttribute("href"), `#blitz-${entry.id}`);
   await go(page, "");
-  await page.getByTestId("today-blitz").waitFor();
-  assert.equal(await page.evaluate(() => document.activeElement?.dataset.testid), "today-blitz");
+  await page.getByTestId("today-list").waitFor();
+  assert.equal(await page.evaluate(() => document.activeElement?.dataset.testid), "today-list");
 
-  // Played: rolls still skip today's pair for the rest of the day (its answers were just shown), but a link to
-  // Today's Blitz list opens a free round.
-  await page.keyboard.press("Enter");
-  await page.getByTestId("blitz-clock").waitFor();
-  await playRound(page);
-  await go(page, "");
-  await page.getByTestId("random-blitz").waitFor();
+  // Played: rolls still skip today's list for the rest of the day (its answers were just shown), but its own Blitz
+  // opens.
   assert.equal(await blitzCount(), openCount());
-  await go(page, `#blitz-${entry.blitz}`);
+  await go(page, `#blitz-${entry.id}`);
   await page.getByTestId("blitz-clock").waitFor();
   await ctx.close();
 });
 
-test("a date with no Blitz keeps its Blitz column, empty", async () => {
+test("an old link to a date with no Blitz list goes home", async () => {
   const NONE = "2026-10-25";
-  const { ctx, page } = await open(browser, VIEWPORTS[0], "#archive", SEED, {
+  const { ctx, page } = await open(browser, VIEWPORTS[0], `#dailyblitz-${NONE}`, SEED, {
     ...at,
     // No list can be a Blitz, and NONE has no pick of its own.
     setup: async (c) => {
@@ -203,25 +169,13 @@ test("a date with no Blitz keeps its Blitz column, empty", async () => {
       });
     },
   });
-  const cell = (id, date) => page.locator(`[data-testid="${id}"][data-date="${date}"]`);
-  await cell("archive-row", NONE).waitFor();
-  assert.equal(await cell("archive-blitz-row", NONE).count(), 0);
-  assert.equal(await cell("archive-blitz-row", DAY).count(), 1);
-
-  // Its Blitz cell is empty but holds the column: the same place and width as any Blitz cell, nothing to open, and
-  // its list cell is as wide as any other.
-  const none = cell("archive-blitz-none", NONE);
-  assert.equal(await none.count(), 1);
-  assert.equal(await none.getAttribute("href"), null);
-  const [nb, bb] = [await none.boundingBox(), await cell("archive-blitz-row", DAY).boundingBox()];
-  assert.ok(Math.abs(nb.x - bb.x) <= 1 && Math.abs(nb.width - bb.width) <= 1, "the empty cell sits in the Blitz column");
-  const [nl, dl] = [await cell("archive-row", NONE).boundingBox(), await cell("archive-row", DAY).boundingBox()];
-  assert.ok(Math.abs(nl.x - dl.x) <= 1 && Math.abs(nl.width - dl.width) <= 1, "its list cell lines up with the others");
+  await page.getByTestId("today-list").waitFor();
+  assert.equal(await hash(page), "");
   await ctx.close();
 });
 
-test("a Blitz on its day's own list holds the rest until that list is done", async () => {
-  // Not in the schedule any more, but still guarded: serve DAY with its own list as its Blitz.
+test("a Blitz on today's unfinished list stays closed until that list is done, from an old link too", async () => {
+  // Not in the schedule, but still guarded: serve DAY with its own list as its Blitz.
   let id;
   const { ctx, page } = await open(browser, VIEWPORTS[0], `#dailyblitz-${DAY}`, SEED, {
     ...at,
@@ -232,24 +186,17 @@ test("a Blitz on its day's own list holds the rest until that list is done", asy
         await route.fulfill({ response: res, json: days });
       }),
   });
+  await page.getByTestId("blitz-closed").waitFor();
+  assert.equal(await hash(page), `#blitz-${id}`);
+  assert.equal(await page.getByLabel("Your guess").count(), 0, "nothing of the list shows");
+  assert.equal(await page.getByTestId("blitz-closed-go").getAttribute("href"), `#daily-${DAY}`);
+
+  // Once the daily is done, the same link opens a round.
+  await page.getByTestId("blitz-closed-go").click();
+  await giveUp(page);
+  await go(page, `#dailyblitz-${DAY}`);
   await page.getByTestId("blitz-clock").waitFor();
   assert.equal(await page.getByTestId("blitz-screen").getAttribute("data-list"), id);
-  await playRound(page, (await puzzle(page, id)).answers[0].name);
-  assert.equal(await page.getByTestId("blitz-hit").count(), 1);
-  assert.equal(await page.getByTestId("blitz-rest-hidden").count(), 1);
-  assert.equal(await page.getByTestId("blitz-missed-row").count(), 0);
-
-  // No list key there, not even to its daily: a Blitz never offers its own list (the owner, Nov 8). Once that daily is
-  // done (from its address here), the locked round shows everything.
-  assert.equal(await page.getByTestId("blitz-list").count(), 0);
-  await go(page, `#daily-${DAY}`);
-  await page.getByTestId("give-up").click();
-  await page.getByTestId("give-up").click();
-  await page.getByTestId("results").waitFor();
-  await go(page, `#dailyblitz-${DAY}`);
-  await page.getByTestId("blitz-results").waitFor();
-  assert.equal(await page.getByTestId("blitz-results").getAttribute("data-locked"), "true");
-  assert.equal(await page.getByTestId("blitz-rest-hidden").count(), 0);
-  assert.ok((await page.getByTestId("blitz-missed-row").count()) > 0);
+  assert.equal(await hash(page), `#blitz-${id}`);
   await ctx.close();
 });

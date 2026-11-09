@@ -106,17 +106,17 @@ for (const vp of VIEWPORTS) {
   });
 }
 
-// Launch audit, Nov 6: "DAILY BLITZ #22" left "#22" alone on a second line at 390, and the Blitz screen calls the same
-// round "TODAY'S BLITZ #22". A daily's tag is one name, on one line, down to the narrowest phone.
-test("today's list and Blitz in Past runs: each tag on one line at 320 and 390", async () => {
+// Launch audit, Nov 6: "DAILY BLITZ #22" left "#22" alone on a second line at 390. A daily's tag is one name, on one
+// line, down to the narrowest phone; a Blitz round (free play only since Nov 10) is tagged "Blitz".
+test("today's list and its Blitz in Past runs: each tag on one line at 320 and 390", async () => {
   for (const width of [320, 390]) {
     const { ctx, page } = await open(browser, { viewport: { width, height: 844 }, isMobile: true, hasTouch: true });
     await page.getByTestId("today-list").click();
     await page.getByTestId("give-up").click();
     await page.getByTestId("give-up").click();
     await page.getByTestId("results").waitFor();
-    await go(page, "");
-    await page.getByTestId("today-blitz").click();
+    // The daily's results offer its list as a Blitz.
+    await page.getByTestId("blitz-key").click();
     const screen = page.getByTestId("blitz-screen");
     await screen.waitFor();
     const list = await page.evaluate(async (id) => (await fetch(`puzzles/${id}.json`)).json(), await screen.getAttribute("data-list"));

@@ -2803,6 +2803,12 @@ a.text-btn {
  * focus and press light the cell in the list's color (see the states below): color and shadow only, so nothing
  * moves. (Until Nov 10 each day also had a Blitz, in a second column; Blitz is free play only now.)
  */
+@media (min-width: 1100px) {
+  /* Wide screens: Home's width, so the header keys sit where Home has them. */
+  .past-dailies {
+    max-width: calc(880px + 2 * var(--gutter));
+  }
+}
 .arch-table {
   padding: 4px 10px 6px;
 }
