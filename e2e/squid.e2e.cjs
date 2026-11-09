@@ -196,13 +196,15 @@ const controlsAt = (page, p, only = "*") =>
 
 /**
  * Moves the frozen clock on until the squid is on screen and "clear" of every control by a fingertip, or "under" a
- * control that matches `only`. Returns where it is.
+ * control that matches `only`. Returns where it is. A key now and then keeps it awake: after 20 s without input it
+ * dozes on the seabed, which on a phone is behind the guess row, and it would never come clear (Nov 9, under load).
  */
 async function squidWhere(page, where, { only = "*", tries = 200 } = {}) {
   const fits = (c) => (where === "clear" ? !c.under && !c.ring : c.only);
   for (let i = 0; i < tries; i++) {
     const p = await squidSpot(page);
     if (p && fits(await controlsAt(page, p, only))) return p;
+    if (i % 40 === 39) await page.keyboard.press("Shift");
     await page.clock.runFor(200);
   }
   throw new Error(`the squid never showed ${where} a control`);
