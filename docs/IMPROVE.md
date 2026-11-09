@@ -11,13 +11,14 @@ the day after. Every Friday the coordinator sets the coming week (Monday to Sund
 2026-11-05: "set the next week's daily list and daily blitz topics, and then you send me a concise report ... I will
 approve or disapprove ... I'll tell you which specific ones to swap out ... efficient and organized"):
 
-1. **Pick the week:** 7 Today's lists and 7 Blitzes, within the variety rule (step 1 below), the schedule checks
-   (no category three days running, nothing twice) and his taste in `docs/OWNER_PICKS.md` (no two similar lists in
-   one week). Today's lists are new `debut` topics, or approved debut lists not yet run; a Blitz may be a new list or a
-   rerun of one that already ran. Keep 3 or 4 spares that are built and judged, ready for swaps.
+1. **Pick the week:** 7 Today's lists, within the variety rule (step 1 below), the schedule checks (no category three
+   days running, nothing twice) and his taste in `docs/OWNER_PICKS.md` (no two similar lists in one week). Today's lists
+   are new `debut` topics, or approved debut lists not yet run. There is no Today's Blitz (owner, Nov 9: "it was
+   confusing to begin with having 2 different dailies"); Blitz lives in free play, so new Blitz-ready lists simply join
+   free play. Keep 3 or 4 spares that are built and judged, ready for swaps.
 2. **Build and judge** every new list (data agent; a `list-judge` on each); drop any that fail and pick again.
 3. **Report** as one short Claude doc, "TENtacle lineup, week of <Monday>": a table with one row per day (date,
-   Today's list, Blitz, a one-line why, the judge's expected score for a casual player) and the spares. Send the link
+   Today's list, a one-line why, the judge's expected score for a casual player) and the spares. Send the link
    with a push notification.
 4. **He approves or names swaps.** If he hasn't answered by Sunday 18:00 Hong Kong time, schedule the lineup as
    proposed (owner, 2026-11-05); he can still swap any day after tomorrow. Swap from the spares (or build new ones), then

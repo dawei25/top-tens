@@ -12,6 +12,7 @@ automated. Judges read this file before scoring a candidate (docs/JUDGE.md).
 | 2026-11-04 | facebook-pages | dropped | a strictly worse version of the Instagram list, and not fun to play |
 | 2026-11-08 | theme-parks | dropped | all variations of Disney parks: nobody can be expected to know them apart (his note) |
 | 2026-11-09 | mlb-hits | free play only, lower average | career hits reward long-retired players; "not a great list for the casual", though a baseball fan might love it (his note) |
+| 2026-11-09 | Today's Blitz | removed; Blitz stays in free play | two dailies were confusing to keep track of, and Blitz has no stats or distribution to show how you did |
 | 2026-11-04 | national-parks | liked (rated well) | wanted each park's state in its fact |
 | 2026-11-05 | lakes | vetoed as a daily | not a great list; it had already been in free play; third Geography daily in a row |
 | 2026-11-05 | x-accounts | dropped | same problem as Facebook (follower counts) |
