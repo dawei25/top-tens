@@ -905,8 +905,15 @@ export function startOcean(els: OceanEls): Ocean {
 
   function ink(big: boolean) {
     const p = here();
-    fx.ink(p.x, p.y, Math.min(scene.w, scene.h) * (big ? 0.5 : 0.2), big);
+    puff(p, Math.min(scene.w, scene.h) * (big ? 0.5 : 0.2), big);
     swimmer.flee();
+  }
+
+  /** An ink cloud at p (canvas px), counted on the stand-in with its centre (CSS px), for tests and tools. */
+  function puff(p: Pt, size: number, big: boolean, n?: number) {
+    fx.ink(p.x, p.y, size, big, n);
+    count("inks");
+    squid.dataset.inkAt = `${Math.round(p.x * px)},${Math.round(p.y * px)}`;
   }
 
   /**
@@ -929,7 +936,7 @@ export function startOcean(els: OceanEls): Ocean {
 
   /** Reactions are counted, and the one playing named, on the squid's DOM stand-in (for tests and tools). */
   let reacting = 0;
-  const count = (k: "finds" | "pokes") => (squid.dataset[k] = String(Number(squid.dataset[k] ?? 0) + 1));
+  const count = (k: "finds" | "pokes" | "inks") => (squid.dataset[k] = String(Number(squid.dataset[k] ?? 0) + 1));
   function reactFor(kind: string, s: number, still = false) {
     const id = ++reacting;
     squid.dataset.react = kind;
@@ -1197,8 +1204,7 @@ export function startOcean(els: OceanEls): Ocean {
     fx.sparksAt(p.x, p.y, 14, 7, [CYAN, GOLD, PINK, WHITE], 0.05);
     fx.ring(p.x, p.y, 4, 14, CYAN, 0.5);
     later(SPIN, () => {
-      const q = here();
-      fx.ink(q.x, q.y, Math.min(scene.w, scene.h) * 0.08, false, 7);
+      puff(here(), Math.min(scene.w, scene.h) * 0.08, false, 7);
       swimmer.flee();
     });
     reactFor("trick", SPIN + 0.6);
