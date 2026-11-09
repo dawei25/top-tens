@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Lexicon } from "./junk";
 import { heldDebuts, localDate, rollHoldouts, type DailyEntry, type ListMeta } from "./daily";
-import { judgeGuess } from "./match";
+import { judgeGuess, peopleList } from "./match";
 import type { Puzzle } from "./types";
 
 const dir = join(import.meta.dirname, "../../public/puzzles");
@@ -79,6 +79,39 @@ describe("first names and partial names", () => {
     const kevin = judge("nba-points", "kevin");
     if (kevin.kind === "typo") expect(kevin.suggestions.length).toBeLessThanOrEqual(4);
     else expect(kevin).toMatchObject({ corrected: true });
+  });
+});
+
+describe("a lone surname on a list of people", () => {
+  // The owner (Nov 9): "robinson auto corrects into 3 options, none of them even jackie robinson which was my
+  // intention". It offered Brooks (#49), Frank (#36) and Robinson Canó (#80), whose first name it is.
+  it("mlb-hits: robinson offers the Robinsons, Jackie among them, and not Robinson Canó", () => {
+    expect(judge("mlb-hits", "robinson")).toEqual({
+      kind: "typo",
+      suggestions: ["Brooks Robinson", "Frank Robinson", "Jackie Robinson", "Wilbert Robinson"],
+    });
+  });
+  // "judge" put Joe Judge (#138, the 1920s) in the box, and Aaron Judge is what a player means.
+  it("mlb-hits: judge offers Aaron Judge beside Joe Judge (#138), rather than putting the deep one in the box", () => {
+    expect(judge("mlb-hits", "judge")).toEqual({ kind: "typo", suggestions: ["Aaron Judge", "Joe Judge"] });
+  });
+  // The same rules on other lists of people.
+  it("nba-points: russell is Bill Russell's surname too, not only Russell Westbrook's (#14) first name", () => {
+    expect(lands("nba-points", "russell")).toEqual(expect.arrayContaining(["Bill Russell", "Russell Westbrook"]));
+    // Thurman Thomas (#17) by his surname, rather than a choice with Thomas Jones (#27) by his first name.
+    expect(judge("nfl-rushing-yards", "thomas")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Thurman Thomas" } });
+  });
+  it("nba-rebounds: jordan offers Michael Jordan beside DeAndre Jordan (#33); fiction-authors: martin, George R. R. Martin", () => {
+    expect(judge("nba-rebounds", "jordan")).toEqual({ kind: "typo", suggestions: ["DeAndre Jordan", "Michael Jordan"] });
+    expect(lands("fiction-authors", "martin")).toEqual(expect.arrayContaining(["George R. R. Martin"]));
+    // Among the pool's namesakes, the ones with a figure come first: Magic Johnson, not an alphabetical sample.
+    expect(lands("nba-points", "johnson")).toContain("Magic Johnson");
+  });
+  it("keeps what already read well: a top-10 alias counts at once, a common first name stays a first name", () => {
+    expect(judge("spotify-artists", "taylor")).toMatchObject({ kind: "correct", corrected: false, entry: { name: "Taylor Swift" } });
+    // A first name the list has far more often than as a surname is a first name: "peter" is Peter Crouch (#30), not
+    // a reason to ask about Sergio Peter.
+    expect(judge("premier-league-goals", "peter")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Peter Crouch" } });
   });
 });
 
@@ -380,4 +413,15 @@ describe("every built list", () => {
     }
     expect(leaks).toEqual([]);
   }, 30_000);
+
+  // The surname rules (match.ts, `peopleList`) find the lists of people from the lexicon: a list of people the lexicon
+  // misses would quietly lose them ("robinson" on MLB hits).
+  it("reads a lone word as a surname on every list of people, and on no other", () => {
+    const people = /\b(players|people|artists|athletes|authors|painters|quarterbacks|accounts)$/i;
+    const wrong = index
+      .map(({ id }) => read<Puzzle>(`${id}.json`))
+      .filter((p) => peopleList(p, lex) !== people.test(p.noun ?? ""))
+      .map((p) => `${p.id} (${p.noun})`);
+    expect(wrong).toEqual([]);
+  });
 });
