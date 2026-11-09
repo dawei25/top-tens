@@ -298,7 +298,7 @@ export const PLACES: readonly Place[] = [
   }),
   ...partsOf(
     "islands",
-    { Spain: ["The Canary Islands", "Canaries", "The Balearic Islands", "Balearics"], Portugal: ["The Azores"], Ecuador: ["The Galápagos Islands"], "the UK": ["The Hebrides"] },
+    { Spain: ["The Canary Islands", "The Canaries", "The Balearic Islands", "The Balearics"], Portugal: ["The Azores"], Ecuador: ["The Galápagos Islands"], "the UK": ["The Hebrides"] },
     true,
   ),
   ...partsOf("region", {
@@ -552,10 +552,22 @@ const named = (name: string, fallback: string, max = NAME_IN_LINE) => (name.leng
 const sameWord = (a: string, b: string) => normalize(a) === normalize(b);
 
 /**
+ * The longest line that keeps to two lines at 320px (fathom-name.e2e.cjs measures the longest): past it, a line drops its
+ * "Try again." ("US Virgin Islands are a territory, not a country. Try again." took three).
+ */
+export const LINE_MAX = 58;
+
+/**
  * What the round says about a typed name that doesn't lock (nothing for `answer`; `choose` is followed by the names to
- * tap). Short and plain, two lines at most at 320px, "Try again." where nothing was lost and the player goes on.
+ * tap). Short and plain, two lines at most at 320px, "Try again." where nothing was lost and the player goes on (and
+ * the line has room for it).
  */
 export function nameLine(read: NameRead, list: Pick<NameList, "noun" | "nounPlural" | "entries">): string {
+  const line = lineFor(read, list);
+  return line.length > LINE_MAX ? line.replace(/ Try again\.$/, "") : line;
+}
+
+function lineFor(read: NameRead, list: Pick<NameList, "noun" | "nounPlural" | "entries">): string {
   switch (read.kind) {
     case "empty":
       return `Type ${withArticle(list.noun)} first.`;

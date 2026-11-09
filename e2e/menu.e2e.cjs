@@ -170,6 +170,7 @@ for (const vp of VIEWPORTS) {
       ["archive", "#archive", "archive-row"],
       ["history", "#history", "nav-back"],
       ["stats", "#stats", "knowledge"],
+      ["fathom", "#fathom", "fathom"],
       ["settings", "#settings", "settings"],
       ["privacy", "#privacy", "privacy"],
     ];
@@ -285,6 +286,13 @@ test("a short window: the menu scrolls inside itself, the page behind stays put"
   await page.mouse.wheel(0, 600);
   await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => scrollY), 0);
+  // The scroll keys scroll the menu too, never the page behind (with focus on the panel, End and PageDown scrolled the
+  // page once the menu outgrew a phone, Nov 9).
+  await page.keyboard.press("Home");
+  await page.waitForFunction(() => document.querySelector(".menu-body").scrollTop === 0);
+  for (const k of ["PageDown", "End"]) await page.keyboard.press(k);
+  await page.waitForFunction(() => document.querySelector(".menu-body").scrollTop > 0);
+  assert.equal(await page.evaluate(() => scrollY), 0, "the page behind stayed put");
   // The last tile came into view.
   const last = await page.getByTestId("menu-privacy").boundingBox();
   assert.ok(last.y + last.height <= 480, "the last tile scrolled into view");

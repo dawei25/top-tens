@@ -76,6 +76,7 @@ import {
   readList,
   readName,
   readNameQuestion,
+  LINE_MAX,
   PLACES,
   rewrites,
   withArticle,
@@ -1368,13 +1369,14 @@ describe("name-it: reading the name", () => {
     expect(line({ kind: "other", name: "The Galápagos Islands Archipelago", noun: "islands", partOf: "Ecuador", plural: true })).toBe(
       "They are part of Ecuador, not a country.",
     );
-    // Every place's line, on a country question and a city one, keeps to the longest a line gets: "US Virgin Islands are a territory, not a country. Try again." (60), two lines at 320px (fathom-name.e2e.cjs).
+    // Every place's line, on a country question and a city one, keeps to the longest a line gets: LINE_MAX (58), two lines at 320px
+    // (fathom-name.e2e.cjs measures the longest; "US Virgin Islands are a territory, not a country. Try again." took three).
     for (const p of PLACES)
       for (const name of p.names)
         for (const l of [POPULATION, CITIES]) {
           const r = readName(name, { ...l, entries: [{ name: "Nowhere", aliases: [], value: 1 }] }, []);
           expect(r.kind, name).toBe("other");
-          expect(nameLine(r, l).length, nameLine(r, l)).toBeLessThanOrEqual(60);
+          expect(nameLine(r, l).length, nameLine(r, l)).toBeLessThanOrEqual(LINE_MAX);
         }
     expect(line({ kind: "offList", name: "Bosnia Herzegovina" })).toBe(`That isn't one of our ${POPULATION.entries.length} countries. Try again.`);
     expect(line(read("UK", AREA, { except: ["United Kingdom"] }), AREA)).toBe("Any country but United Kingdom. Try again.");

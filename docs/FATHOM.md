@@ -1,9 +1,36 @@
 # Fathom
 
-An estimation mini-game (hidden at `#fathom`): each game shows 5 questions, the player types a number (or, in the
-name-it round, a name), and the score is plain closeness, by one rule for each round (`scoreFor`, `src/game/fathom.ts`).
-The questions live in `public/fathom/questions.json`; the name-it round's lists in `public/fathom/lists/<id>.json`
-(written by the data agent's pipeline).
+The estimation game (`#fathom`), a full game mode since Nov 9 (the owner: "ship it now"; no daily Fathom for now): each
+game shows 5 questions, the player types a number (or, in the name-it round, a name), and the score is plain closeness,
+by one rule for each round (`scoreFor`, `src/game/fathom.ts`), out of 500. Games are endless: NEW QUESTIONS draws
+another. The questions live in `public/fathom/questions.json`; the name-it round's lists in
+`public/fathom/lists/<id>.json` (built by `scripts/fathom/lists.ts`).
+
+## Where it lives
+
+- **Home**: a Fathom key in Free play, beside Random list and Random Blitz, the same keycap, its line "Guess the
+  number: 5 questions" where they count their lists (it has no categories, so no strip). Under them on a phone; the
+  row under the pair from 640px, one line high.
+- **The menu**: a Fathom tile in Play (a sonar's rings), marked while Fathom is on show.
+- **How to play**: rule 7, Fathom in the game's own words and its one scoring line.
+- **Stats**: a Fathom card under the lists' sections: games, avg / 500, best / 500 over every finished game; "0",
+  "--", "--" and a key to play before the first.
+- **Past runs**: each finished game under its day, tagged FATHOM, its five squares for a title and its total; the row
+  opens that game's results (`#fathom/run-<startedAt>`: the total, the squares, the rules, when it was played, the
+  recap of the questions still in the bank, COPY RESULT, and NEW QUESTIONS, or RESUME GAME while a game is under way).
+- **The share text** (COPY RESULT): "Fathom 312/500", the five squares as plain characters, and the link to `#fathom`,
+  each line but the last ending in two spaces so a Reddit comment keeps them (`pasteable`, src/components/share.ts).
+
+## The save and the sync
+
+The game on screen (its questions, guesses, picks and when it was drawn) is this browser's own (`tentacle:fathom`):
+a reload picks it up, results included. Everything else is in the player's save (`Saved.fathom`, `top-tens:v1`,
+`src/game/fathom-history.ts`), so it travels with an account like list games, with no new table (the account's save
+is one JSON object): every finished game (Past runs, the last 100, each question's points kept as scored), every
+finished game's total (Stats, never pruned), and the last 3 games drawn (held back from the next draw on every device).
+The sync merges two devices' copies as the union, one game per start (`mergeFathom`, called from
+`src/net/sync/merge.ts`), a reset on another device prunes it, and a game finished here asks for a sync
+(`reportFathom`). Settings' reset clears both.
 
 ## The rounds
 
@@ -60,13 +87,20 @@ register". **A fair answer must always register**, and one answer locks per roun
   "Congo"); a tap fills the box. Only a name on the list locks; nothing else costs anything.
 - **What isn't on the list** says why, and costs nothing: a thing on another of the game's lists ("Paris is a city, not
   a country. Try again.", read before any misspelling, so "Lagos" is the city, not Laos, and "Mexico City" not Mexico);
-  a place no list has (`PLACES`: territories, US states, continents, the UK's nations: "Greenland is a territory, not a
-  country.", "Northern Ireland is part of the UK."), never an answer and only when the list doesn't have the name
-  (Georgia is the country); a real name the list lacks, by the game's lexicon ("Berlin isn't one of our 85 cities.");
-  the question's own yardstick (`except`: "Any country but United Kingdom."); anything else, "Not one we know. Try
-  again." A name the lexicon knows elsewhere ("Irak", an alias in TENtacle's bank) is still read as a misspelling when
-  nothing else reads it: it needs a confirm or a tap either way. Each line keeps to two lines at 320px (a long name is
-  left out: "That is a territory, not a country.").
+  a place no list has (`PLACES`), never an answer, never corrected into one, read before any misspelling or near name
+  of another kind, and only when the list doesn't have the name (Georgia is the country): territories ("Greenland is
+  a territory, not a country."), US states, continents ("Africa is a continent, not a city.", not South Africa), the
+  UK's nations ("Scotland is part of the UK. Try again."), islands and regions of one country ("Tasmania is part of
+  Australia, not a country.": it was offered as Tanzania), a city's boroughs ("Brooklyn is part of New York City, not a
+  city."), regions of several ("Scandinavia is a region, not a country."), countries that no longer are ("Yugoslavia
+  is no longer a country."). Nothing disputed: a breakaway region or a claimed territory is left to the lexicon. A real
+  name the list lacks, by the game's lexicon ("Berlin isn't one of our 85 cities.", "Dubai" on a city question, not
+  Mumbai); a name the lexicon knows is offered as a misspelling only one slip from what it reads as ("Chili", "Perm"), or
+  when the game stores it as one ("Irak", Iraq's): "Abkhazia" is not Afghanistan. A name read before the lexicon has
+  loaded waits for it (a moment at most). A list's inverted and short forms read exactly ("Korea, North", "Gambia,
+  The", "Dominican Rep."). The question's own yardstick (`except`: "Any country but United Kingdom."); anything else,
+  "Not one we know. Try again." Each line keeps to two lines at 320px (`LINE_MAX`, 58 characters, measured: past it a
+  line drops its "Try again.", and a long name is left out: "That is a territory, not a country.").
 - **The reveal**: the target, what was named and its figure ("Colombia, 52.89 million people"), the points, the sonar
   on the list's scale (10x off at its edges on a ratio list, 3.3 steps on a steps list) with the miss under it, the
   best four answers on the list with their figures (by points, then closeness, then the list's order; the yardstick
@@ -74,7 +108,10 @@ register". **A fair answer must always register**, and one answer locks per roun
   Colombia 52.89 million · target 50 million people". With a backend, the figure of the thing named is sent as the
   guess (docs/BACKEND.md), but the reveal shows no players' line (their typical figure means little there).
 - **Its lists**: `{ id, noun, nounPlural, measure, scoring: "ratio" | "steps", source: { title, url }, asOf, entries: [{
-  name, aliases, value }] }`, each complete for what it holds (every country). The game fetches the lists the bank's
+  name, aliases, value }] }`, each complete for what it holds (every country). Built from the puzzles' forms, plus the
+  forms a judge found missing (`FORMS`: Kampuchea, Jibuti, Hindustan, Dakha...), less any alias that is a place of its
+  own (`PLACES`, and the nations' people: "England", "Scottish" once locked the whole UK) and redirects that are no
+  name (`NOT_A_NAME`: "Zambian sports"); `lists.test.ts` holds the committed files to both. The game fetches the lists the bank's
   name-it questions use before it draws; a question whose list didn't load, or whose target leaves fewer than 3 good
   answers on it (a list that changed), is left out, and the fifth round is an estimate.
 

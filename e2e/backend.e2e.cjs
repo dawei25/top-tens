@@ -765,6 +765,60 @@ test("a sign-in coming back: Home's key waits, then shows the dot, and its sheet
   await ctx.close();
 });
 
+// Fathom's games travel with the account the way list games do (Nov 9: out of beta): the save carries its finished
+// games, their totals and the last draws; a sync merges both devices' and writes the union back, and a game finished
+// here asks for a sync of its own.
+test("signed in: Fathom's games, totals and draws sync both ways, and a game finished here goes to the account (phone)", async () => {
+  const bank = path.join(__dirname, "fixtures", "fathom", "questions.json");
+  const fixture = JSON.parse(fs.readFileSync(bank, "utf8")).questions;
+  const ids = (from) => fixture.slice(from, from + 5).map((q) => q.id);
+  const game = (startedAt, from) => ({ startedAt, finishedAt: startedAt + 120_000, ids: ids(from), guesses: [1, 1, 1, 1, 1], points: [90, 80, 70, 60, 50] });
+  const mine = game(NOW.getTime() - 3_600_000, 0);
+  const theirs = game(NOW.getTime() - 86_400_000, 5);
+  const fathom = (g, drawn) => ({ runs: [g], totals: { [g.startedAt]: 350 }, recent: [{ startedAt: g.startedAt, ids: drawn }] });
+  const { ctx, page, calls, row } = await open(
+    phone,
+    "",
+    { "top-tens:v1": { games: {}, daily: {}, seenHelp: true, fathom: fathom(mine, mine.ids) }, "top-tens:auth": SESSION },
+    { save: { data: { games: {}, daily: {}, seenHelp: true, fathom: fathom(theirs, theirs.ids) }, version: 2 } },
+    (c) => c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: bank, contentType: "application/json" })),
+  );
+  await page.locator('[data-testid="account-key"][data-sync="synced"]').waitFor();
+  // The server got both games, both totals and both draws, newest first, over the version it read.
+  const first = calls.saves.find((c) => c.method === "PATCH");
+  assert.ok(first, "the merged save was written back");
+  assert.match(first.query, /version=eq\.2/);
+  assert.deepEqual(first.body.data.fathom.runs.map((r) => r.startedAt), [mine.startedAt, theirs.startedAt]);
+  assert.deepEqual(Object.keys(first.body.data.fathom.totals).sort(), [mine.startedAt, theirs.startedAt].map(String).sort());
+  assert.deepEqual(first.body.data.fathom.recent.map((d) => d.ids), [mine.ids, theirs.ids]);
+  // This device has the other device's game: in Past runs and in Stats.
+  await page.getByTestId("history-key").click();
+  await page.locator('[data-testid="history-row"][data-kind="fathom"]').nth(1).waitFor();
+  await page.getByTestId("nav-home").click();
+  await page.getByTestId("stats-key").click();
+  await page.getByTestId("know-fathom-games").filter({ hasText: "2" }).waitFor();
+
+  // A game here: none of the last draws' questions (on either device), and once it's over the account has it.
+  await page.evaluate(() => (location.hash = "#fathom"));
+  for (let i = 0; i < 5; i++) {
+    await page.getByTestId("fathom-input").waitFor();
+    await page.getByTestId("fathom-input").fill("42");
+    await page.getByTestId("fathom-lock").click();
+    await page.getByTestId("fathom-reveal").waitFor();
+    await page.getByTestId("fathom-next").click();
+  }
+  await page.getByTestId("fathom-results").waitFor();
+  await page.clock.runFor(2000);
+  await until(() => (row().data.fathom?.runs?.length ?? 0) === 3);
+  assert.equal(Object.keys(row().data.fathom.totals).length, 3);
+  // The draw held back both devices' last games: the two questions neither played are in this one.
+  const played = row().data.fathom.runs[0].ids;
+  assert.deepEqual(row().data.fathom.recent.map((d) => d.ids), [played, mine.ids, theirs.ids]);
+  for (const q of fixture.slice(10)) assert.ok(played.includes(q.id), `${q.id} drawn`);
+  assert.ok(row().version > 3);
+  await ctx.close();
+});
+
 test("signed in: the save syncs both ways; Home, the account sheet, players' averages, delete (desktop)", async () => {
   const mine = { id: "islands", startedAt: NOW.getTime() - 3_600_000, finishedAt: NOW.getTime() - 3_300_000, status: "lost", found: [1, 2, 3, 4], lives: 0, hints: 0 };
   const theirs = { id: "mountains", startedAt: NOW.getTime() - 86_400_000, finishedAt: NOW.getTime() - 86_000_000, status: "won", found: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], lives: 2, hints: 0 };
