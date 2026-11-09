@@ -437,12 +437,27 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
     return { kind: "typo", suggestions: names.slice(0, MAX_CHOICES) };
   };
 
+  // A lone word on a list of people: maybe someone's surname (`natural`, `nameRole`). It reads as a surname first when
+  // the list has it as a surname at least as often as a first name: "robinson" (four Robinsons, one Robinson Canó),
+  // not "peter" (29 Peters, one Sergio Peter).
+  const lone = !guess.includes(" ") && peopleList(puzzle, lex);
+  const asSurname = (cs: Candidate[]) => {
+    if (!lone) return false;
+    const roles = cs.map(nameRole);
+    const surnames = roles.filter((r) => r === "surname").length;
+    return surnames > 0 && surnames >= roles.filter((r) => r === "first").length;
+  };
+
   // An entry's full name beats other entries' aliases: "Avatar" is the 2009 film, not a choice of three.
   // A real name or alias beats a single word of another entry's name: "Britain" is Great Britain (alias),
-  // not a choice with New Britain. A name several entries share goes through `fits` below.
+  // not a choice with New Britain. A name several entries share goes through `fits` below. On a list of people a
+  // surname is as good as an alias, which the build gives only to people with a rank or a figure, and never when the
+  // surname is an English word ("judge"): "robinson" is Jackie Robinson's too, not only the alias of Frank and Brooks
+  // (the owner: "none of them even jackie robinson").
   const allExact = candidates.filter((c) => c.dist === 0);
   const strong = allExact.filter((c) => !c.viaWord);
-  const exact = strong.length ? strong : allExact;
+  const namesakes = lone && strong.length ? allExact.filter((c) => c.viaWord && nameRole(c) === "surname") : [];
+  const exact = strong.length ? [...strong, ...namesakes] : allExact;
   const named = exact.filter((c) => c.fullName);
   if (named.length === 1) {
     // An exact name counts ("MrBeast", "Avatar"), unless a more prominent answer also carries it and the exact one is
@@ -475,10 +490,26 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
    * is not the likelier reading, so the fits are offered, as "toy story" and "incredibles" already are. People and
    * teams keep the natural reading: a surname ("jordan") ends the name rather than starting it, and a first name or a
    * city ("drew", "new york") starts a name whose last word stands alone (`titleHead`).
+   *
+   * A lone word on a list of people (`nameRole`). Someone's surname ranked below FAMOUS_RANK doesn't stand out over
+   * namesakes in the wider pool, who may be the more famous: "judge" offers Joe Judge (#138, the 1920s) and Aaron
+   * Judge, rather than putting Joe in the box; "ryan" offers Nolan Ryan beside Jimmy Ryan (#102). Read as a surname
+   * (`asSurname`), whose first name it is comes after everyone with that surname, unless the list ranks that one high
+   * (within FAMOUS_RANK), and even then stands out over a namesake only from the top 10 ("taylor" is Taylor Swift,
+   * "russell" offers Russell Westbrook, #14, beside Bill Russell): "robinson" is Frank, Brooks and Jackie Robinson,
+   * not Robinson Canó (#80; the owner: "none of them even jackie robinson"). Among the pool's people, those with a
+   * figure (the likely ones) come first: "johnson" on NBA points offers Magic Johnson.
    */
   const natural = (cs: Candidate[], max: number, typed = false): Reading => {
+    const surname = asSurname(cs);
+    const ranksHigh = (c: Candidate) => c.entry.rank > 0 && c.entry.rank <= FAMOUS_RANK;
+    const later = (c: Candidate) => surname && !ranksHigh(c) && nameRole(c) === "first";
     const byProminence = (a: Candidate, b: Candidate) =>
-      prominence(a) - prominence(b) || nameWordCount(a) - nameWordCount(b) || a.entry.name.localeCompare(b.entry.name);
+      Number(later(a)) - Number(later(b)) ||
+      prominence(a) - prominence(b) ||
+      (lone ? Number(a.entry.value === undefined) - Number(b.entry.value === undefined) : 0) ||
+      nameWordCount(a) - nameWordCount(b) ||
+      a.entry.name.localeCompare(b.entry.name);
     const open = cs.filter((c) => !(c.inTop10 && found.has(c.entry.rank))).sort(byProminence);
     if (open.length === 0) return resolve([...cs].sort(byProminence)[0], false);
     // A word shared by three top-10 answers ("toyota" on car models, "china" on banks), or by a crowd with two or more
@@ -489,7 +520,13 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
     if (top10Fits >= 3 || (cs.length > VAGUE_ABOVE && top10Fits > 1)) return { kind: "unknown", junk: false, vague: cs.length };
     const [top, next] = open;
     if (!next) return resolve(top, true);
-    const standsOut = (top.inTop10 && !next.inTop10) || (top.entry.rank > 0 && next.entry.rank === 0);
+    // Someone in the pool with that surname keeps a surname match far down, or a first name, from standing out.
+    const topRole = nameRole(top);
+    const namesake =
+      lone &&
+      open.some((c) => c.entry.rank === 0 && nameRole(c) === "surname") &&
+      ((topRole === "surname" && top.entry.rank > FAMOUS_RANK) || (surname && topRole === "first"));
+    const standsOut = (top.inTop10 && !next.inTop10) || (top.entry.rank > 0 && next.entry.rank === 0 && !namesake);
     const franchise = typed && titleHead(guess, top) && open.some((c) => c !== top && notableNearMiss(c) && titleHead(guess, c));
     if (standsOut && !franchise) return resolve(top, true);
     if (top.entry.rank === 0 && open.length > VAGUE_ABOVE) return { kind: "unknown", junk: false, vague: open.length };
@@ -533,7 +570,14 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
     return { kind: "unknown", junk: false, ...(fit > 1 || (category && fit > 0) ? { vague: fit } : {}) };
   }
 
-  if (exact.length > 0) return fits(exact, !strong.length);
+  if (exact.length > 0) {
+    const r = fits(exact, !strong.length);
+    // A top-10 answer's own alias still counts at once when it is the reading ("russell" is Bill Russell on rebounds):
+    // the namesakes only matter once it's found, or when the reading could cost a life.
+    const own = strong.length === 1 && strong[0].inTop10 ? strong[0] : undefined;
+    if (own && namesakes.length && r.kind === "correct" && r.entry === own.entry) return resolve(own, false);
+    return r;
+  }
 
   // A country on a list whose entries say which country they're in (islands): that country's islands, offered, the most
   // prominent few (owner: "me typing japan should give me option of the different islands honshu, okinawa, etc.").
@@ -778,6 +822,11 @@ const MAX_TYPO_CHOICES = 2;
 const VAGUE_ABOVE = 8;
 /** A near miss this high, with a figure, is as likely a reading of a franchise's name as the top-10 title. */
 const NEAR_MISS_RANK = 20;
+/**
+ * On a list of people, a surname match ranked below this doesn't stand out over the pool's namesakes: "judge" is as
+ * likely Aaron Judge (unranked) as Joe Judge (#138).
+ */
+const FAMOUS_RANK = 20;
 
 function notableNearMiss(c: Candidate): boolean {
   return !c.inTop10 && c.entry.rank > 0 && c.entry.rank <= NEAR_MISS_RANK && c.entry.value !== undefined;
@@ -956,6 +1005,47 @@ function coreName(name: string): string {
     .split(" ")
     .filter((w) => !QUALIFIERS.has(w))
     .join(" ");
+}
+
+/**
+ * Whether the list ranks people: nearly every name of two words or more is made of words of people's names in the
+ * bank (`Lexicon.people`, the words of the lists of people). There a lone word may be someone's surname (`nameRole`).
+ */
+const peopleCache = new WeakMap<Puzzle, { src: string; people: boolean }>();
+export function peopleList(puzzle: Puzzle, lex?: Lexicon): boolean {
+  if (!lex?.people) return false;
+  const hit = peopleCache.get(puzzle);
+  if (hit?.src === lex.people) return hit.people;
+  let names = 0;
+  let ofPeople = 0;
+  for (const e of [...puzzle.answers, ...puzzle.extras]) {
+    const words = normalize(e.name).split(" ");
+    const long = words.filter((w) => w.length >= 4 && !/\d/.test(w));
+    if (words.length < 2 || !long.length) continue;
+    names++;
+    if (long.every((w) => isPersonWord(w, lex))) ofPeople++;
+  }
+  const people = names >= 5 && ofPeople >= 0.9 * names;
+  peopleCache.set(puzzle, { src: lex.people, people });
+  return people;
+}
+
+/** Generational suffixes after a surname, normalized: "Ken Griffey Jr.", "Robert Griffin III" ("3"). */
+const SUFFIXES = new Set(["jr", "sr", "2", "3", "4", "5"]);
+
+/**
+ * Where the one word a candidate matched (`Candidate.pair`) sits in a person's name: "first" when it is the first name
+ * ("robinson" in Robinson Canó), "surname" when it is the last word ("robinson" in Jackie Robinson, "griffey" in Ken
+ * Griffey Jr.); neither for a word between ("anthony" in Karl-Anthony Towns), a nickname or a one-word name.
+ */
+function nameRole(c: Candidate): "first" | "surname" | undefined {
+  const w = c.pair[1];
+  if (!w || w.includes(" ")) return undefined;
+  const words = normalize(c.entry.name).split(" ");
+  while (words.length > 2 && SUFFIXES.has(words[words.length - 1])) words.pop();
+  if (words.length < 2) return undefined;
+  if (words[words.length - 1] === w) return "surname";
+  return words[0] === w ? "first" : undefined;
 }
 
 /** Distinctive single words of a multi-word name: "Kareem Abdul-Jabbar" → kareem, abdul, jabbar. */

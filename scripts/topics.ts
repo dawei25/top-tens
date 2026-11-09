@@ -2543,6 +2543,8 @@ export const TOPICS: Topic[] = [
     people: true,
     also: [{ page: "List of Major League Baseball career home run leaders", tables: [1, 2, 3, 4], name: "Player" }],
     universeCategories: ["National Baseball Hall of Fame inductees"],
+    // Famous unranked hitters (likely.ts) take their career hits from their infoboxes.
+    values: { kind: "mlb-hits", below: "last" },
     junkAliases: [
       "Stan Musial Lifetime Achievement Award", "RE2PECT", "Isabella Pujols", "Cynthia Scurtis", "Boli",
       "Barry Bonds 714th home run", "D.Jeter",

@@ -826,3 +826,51 @@ describe("coverage audit readings", () => {
     expect(judgeGuess("Honshu", islands, new Set(), lex, ["Hokkaido", "Honshu", "Kyushu", "Shikoku"])).toMatchObject({ kind: "correct", entry: { name: "Honshu" } });
   });
 });
+
+// The owner on MLB career hits (Nov 9): "robinson auto corrects into 3 options, none of them even jackie robinson
+// which was my intention" (Brooks, Frank and Robinson Canó, whose first name it is), and "judge" put Joe Judge (#138)
+// in the box, not Aaron Judge.
+describe("a lone surname on a list of people", () => {
+  const v = (rank: number, name: string, aliases: string[] = []): Entry => ({ rank, name, aliases, value: "1" });
+  const hits: Puzzle = {
+    ...puzzle,
+    id: "hits12",
+    noun: "MLB players",
+    answers: [
+      v(1, "Pete Rose"), v(2, "Ty Cobb", ["Cobb"]), v(3, "Hank Aaron", ["Aaron"]), v(4, "Stan Musial", ["Musial"]),
+      v(5, "Tris Speaker", ["Speaker"]), v(6, "Derek Jeter", ["Jeter"]), v(7, "Cap Anson", ["Anson"]),
+      v(8, "Honus Wagner", ["Wagner"]), v(9, "Carl Yastrzemski", ["Yaz"]), v(10, "Paul Molitor", ["Molitor"]),
+    ],
+    extras: [
+      v(13, "Willie Mays", ["Mays"]), v(36, "Frank Robinson", ["Robinson"]), v(49, "Brooks Robinson", ["Robinson"]),
+      v(80, "Robinson Canó", ["Robinson", "Canó"]), v(138, "Joe Judge"),
+      e(0, "Jackie Robinson"), e(0, "Wilbert Robinson"), e(0, "Aaron Judge", ["Aaron"]), e(0, "Carl Mays"), e(0, "Billy Wagner"),
+    ],
+  };
+  // The bank's people lexicon: every word of four letters or more of the names on its lists of people.
+  const words = [...hits.answers, ...hits.extras].flatMap((x) => normalize(x.name).split(" ")).filter((w) => w.length >= 4);
+  const lex = { alphabet: "", table: "", names: "", people: words.map((w) => fnv(w).toString(36)).join(" ") };
+  const j = (g: string, p: Puzzle = hits, found: number[] = []) => judgeGuess(g, p, new Set(found), lex);
+
+  it("offers everyone with that surname, the pool's too, before whose first name it is", () => {
+    expect(j("robinson")).toEqual({ kind: "typo", suggestions: ["Brooks Robinson", "Frank Robinson", "Jackie Robinson", "Wilbert Robinson"] });
+    // With room in the choice, the first name comes last: after the Robinsons, not instead of one.
+    const fewer: Puzzle = { ...hits, id: "hits13", extras: hits.extras.filter((x) => x.name !== "Wilbert Robinson") };
+    expect(j("robinson", fewer)).toEqual({ kind: "typo", suggestions: ["Brooks Robinson", "Frank Robinson", "Jackie Robinson", "Robinson Canó"] });
+  });
+  it("a surname match far down the ranking doesn't win alone over a namesake in the pool", () => {
+    expect(j("judge")).toEqual({ kind: "typo", suggestions: ["Aaron Judge", "Joe Judge"] });
+    // Ranked high, it is still the reading, put in the box to confirm.
+    expect(j("mays")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Willie Mays" } });
+  });
+  it("keeps the natural reading of a top-10 surname, then the next one once it's found", () => {
+    expect(j("aaron")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Hank Aaron" } });
+    // A top-10 answer's own alias counts at once, as before, though namesakes in the pool carry the word.
+    expect(j("wagner")).toMatchObject({ kind: "correct", corrected: false, entry: { name: "Honus Wagner" } });
+    expect(j("aaron", hits, [3])).toMatchObject({ kind: "near", corrected: true, entry: { name: "Aaron Judge" } });
+  });
+  it("only on a list of people: without the people lexicon the readings stay as they were", () => {
+    expect(judgeGuess("judge", hits, new Set())).toMatchObject({ kind: "near", corrected: true, entry: { name: "Joe Judge" } });
+    expect(judgeGuess("robinson", hits, new Set())).toEqual({ kind: "typo", suggestions: ["Brooks Robinson", "Frank Robinson", "Robinson Canó"] });
+  });
+});
