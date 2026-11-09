@@ -34,7 +34,7 @@ function result(p: Play): { text: string; tone: string } {
 /**
  * Where a row leads: always its own run. A list game opens its run view, a Blitz round its run's results (on its
  * list's Blitz screen, which stays closed while that would spoil a daily). Rounds from the days of Today's Blitz
- * (before Nov 10) open the same way.
+ * (before Nov 9) open the same way.
  */
 function href(p: Play): string {
   if (p.kind === "blitz") return `#blitz-${p.id}/run-${p.run.startedAt}`;

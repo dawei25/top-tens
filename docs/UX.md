@@ -24,7 +24,9 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
    BLITZ).
 5. **Every element earns its place.** Info that doesn't help the next decision goes ("5 lives" and "90 s" boxes on
    free play read as random).
-6. **The main thing gets the most room.** Today's list is the main feature: two thirds of the row, Blitz one third.
+6. **The main thing gets the most room.** Today's list is the main feature: the one daily, its key across the whole
+   row (it once shared the row with Today's Blitz, two thirds to one; the owner retired Today's Blitz on Nov 9).
+   **Fewer modes beat more:** a second daily split attention; Blitz lives in free play.
 7. **Compact by default.** Keys no taller than their content needs; side by side when the width allows ("takes up
    too much space", "the height is still too tall"). A key beside a panel is as tall as the row it sits by, not the
    whole panel, and its label is short enough to read without squeezing: "Roll another list" stretched to the Blitz
@@ -52,7 +54,7 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 15. **Never offer what's already spoiled.** A Blitz's results show its whole list, so they never offer that list as a
     list game ("if someone played blitz no point to give them option to play the same list since its alr spoiled");
     a list's results may offer its Blitz, which a list game doesn't spoil. **Never spoil a daily.** Nothing shows a list's answers before its day: random play never lands on today's or a
-    future day's list or Blitz (a random list landed on today's Blitz topic).
+    future day's list (a random list once landed on the day's Blitz topic, when there was a Today's Blitz).
 16. **Generous, never unrelated.** Autocorrect helps partial knowledge ("shenzhen", "jordan") but never turns an
     unrelated word into an answer ("pope").
 

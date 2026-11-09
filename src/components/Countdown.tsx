@@ -4,7 +4,7 @@ import { BlinkColons } from "./motion/effects";
 
 /**
  * "new list in 05:12:09", ticking on the second. Only this line re-renders. One wording everywhere (Home, a daily's
- * results): at midnight Today's list changes, the one daily (until Nov 10 there were two, and it said "new lists").
+ * results): at midnight Today's list changes, the one daily (until Nov 9 there were two, and it said "new lists").
  */
 export function Countdown({ className = "", label = "new list in" }: { className?: string; label?: string }) {
   const [ms, setMs] = useState(msUntilNextDaily);

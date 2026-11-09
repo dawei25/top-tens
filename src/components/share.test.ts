@@ -48,7 +48,7 @@ describe("share text", () => {
   it("a Blitz round: its lines survive a Reddit paste", () => {
     const round: BlitzState = { puzzleId: "t", startedAt: 1, endedAt: 90_001, hits: [{ name: "A1", rank: 1, n: 100, points: 100 }] };
     keepsBreaks(blitzShare(round, board, "u"));
-    // Free play only (owner, Nov 10): no daily number on a Blitz.
+    // Free play only (owner, Nov 9): no daily number on a Blitz.
     expect(blitzShare(round, board, "u").startsWith("TENtacle Blitz: T  \n100 pts · 1 answer in 90s  \n")).toBe(true);
   });
 });
