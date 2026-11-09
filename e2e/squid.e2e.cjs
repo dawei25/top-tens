@@ -427,15 +427,19 @@ const edgeDistance = (page, p) =>
 
 /**
  * Moves the frozen clock on until the squid is clear of the controls and "open" (far from every edge) or at an "edge".
- * Wide screens: open is more than 2.2 of its widths from the viewport's edges and the glass. On a phone it shows clear
- * of the controls only in a band above the bottom edge, so open there is more than 1.8. An edge is as near one as it
- * comes: 1.3 widths (nose up to the glass) at first, up to 2 over the search (it roams; some runs it keeps off for a
- * minute and more). The exact cases, hemmed in at the glass and in the corners, are pinned in ocean/swim.test.ts.
+ * Left to roam, some runs it keeps off every edge for a minute and more, others it keeps near one. So, wide screens:
+ * open is as far from the viewport's edges and the glass as it gets (2.2 of its widths, easing to 1.6 over the
+ * search); for an edge, panels come over it (panelOver), which is sure to put it by one. On a phone it shows clear of
+ * the controls only in a band above the bottom edge: open from 1.8 widths (easing to 1.5), an edge under 1.8. The exact
+ * cases, in open water, hemmed in at the glass and in the corners, are pinned in ocean/swim.test.ts.
  */
 async function squidAtEdge(page, where) {
   const phone = (await page.evaluate(() => innerWidth)) < 700;
+  if (where === "edge" && !phone) return panelOver(page);
   const seen = [];
   const TRIES = 400;
+  // Open: as far from every edge as it gets, from 2.2 widths (1.8 on a phone) down to 1.6 (1.5) over the search.
+  const [far, near] = phone ? [1.8, 1.5] : [2.2, 1.6];
   for (let i = 0; i < TRIES; i++) {
     const p = await squidSpot(page);
     if (p) {
@@ -443,7 +447,7 @@ async function squidAtEdge(page, where) {
       const { w } = await inkFrame(page);
       const d = (await edgeDistance(page, p)) / w;
       if (!c.under && !c.ring) {
-        if (where === "open" ? d > (phone ? 1.8 : 2.2) : d < (phone ? 1.8 : 1.3 + (0.7 * i) / TRIES)) return p;
+        if (where === "open" ? d > far - ((far - near) * i) / TRIES : d < 1.8) return p;
         seen.push(d);
       }
     }
@@ -454,6 +458,50 @@ async function squidAtEdge(page, where) {
   const range = seen.length ? `${Math.min(...seen).toFixed(2)} to ${Math.max(...seen).toFixed(2)}` : "none";
   throw new Error(`the squid never showed ${where === "open" ? "in the open" : "next to an edge"} (clear of the controls ${seen.length} times, ${range} widths from an edge)`);
 }
+
+/**
+ * Wide screens: panels come over the squid above and below (test-only [data-glass] bands, taking no pointer, as a
+ * result card or a new screen would), leaving it a strip of open water 300 px (3.75 of its widths) tall: too thin to
+ * turn round in anywhere (where it once inked in place), and its eyes never much more than 2 widths from an edge.
+ * Returns where it is once inside the strip, a moment later. removePanels takes them away.
+ */
+async function panelOver(page) {
+  const p = await squidWhere(page, "clear");
+  await page.evaluate((p) => {
+    // The open water's top at the squid's column: the lowest glass above it there.
+    let top = 0;
+    for (const el of document.querySelectorAll("[data-glass]")) {
+      const r = el.getBoundingClientRect();
+      if (r.left <= p.x && r.right >= p.x && r.bottom <= p.y) top = Math.max(top, r.bottom);
+    }
+    const H = 300;
+    const y0 = Math.min(Math.max(top, p.y - H / 2), innerHeight - H);
+    for (const [id, a, b] of [["e2e-panel-top", 0, y0], ["e2e-panel-bottom", y0 + H, innerHeight]]) {
+      const d = document.createElement("div");
+      d.id = id;
+      d.className = "e2e-panel";
+      d.dataset.glass = "";
+      Object.assign(d.style, { position: "fixed", left: "0", width: "100%", top: `${a}px`, height: `${Math.max(0, b - a)}px`, pointerEvents: "none" });
+      document.body.append(d);
+    }
+  }, p);
+  const inStrip = (q) =>
+    page.evaluate((q) => {
+      const a = document.getElementById("e2e-panel-top").getBoundingClientRect().bottom;
+      const b = document.getElementById("e2e-panel-bottom").getBoundingClientRect().top;
+      return q.y > a && q.y < b;
+    }, q);
+  let settled = 0;
+  for (let i = 0; i < 100; i++) {
+    await page.clock.runFor(100);
+    const q = await squidSpot(page);
+    // Out from under the panels, and still there half a second on.
+    settled = q && (await inStrip(q)) ? settled + 1 : 0;
+    if (settled >= 5) return q;
+  }
+  throw new Error("the squid never swam out from under the panels");
+}
+const removePanels = (page) => page.evaluate(() => document.querySelectorAll(".e2e-panel").forEach((e) => e.remove()));
 
 /**
  * Steps `frames` frames, calling `each(i, frame)` before each step (to tap or guess), and returns every frame read,
@@ -522,6 +570,7 @@ for (const vp of VIEWPORTS) {
       // One trick at a time: taps during a trick and its dart start no second one.
       for (let j = 1; j < puffs.length; j++)
         assert.ok((puffs[j] - puffs[j - 1]) * FRAME_MS >= 1500, `${where}: a second trick ${(puffs[j] - puffs[j - 1]) * FRAME_MS} ms after the first`);
+      await removePanels(page);
       await page.clock.runFor(3000);
     }
     assert.deepEqual(await controlClicks(page), [], "a tap on the squid pressed a control");
@@ -540,6 +589,7 @@ for (const vp of VIEWPORTS) {
         if (i === 0) await guess(page, misses.shift());
       });
       assert.equal(assertDarts(frames, `${where} miss`).length, 1, `${where}: a lost life inked ${frames.at(-1).inks - frames[0].inks} times`);
+      await removePanels(page);
       await page.clock.runFor(2000);
     }
     // Two lives lost in quick succession: never a cloud on a squid that stays put.
