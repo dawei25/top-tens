@@ -17,8 +17,11 @@ another. The questions live in `public/fathom/questions.json`; the name-it round
   "--", "--" and a key to play before the first.
 - **Past runs**: each finished game under its day, tagged FATHOM, its five squares for a title and its total; the row
   opens that game's results (`#fathom/run-<startedAt>`: the total, the squares, the rules, when it was played, the
-  recap of the questions still in the bank, COPY RESULT, and NEW QUESTIONS, or RESUME GAME while a game is under way).
-- **The share text** (COPY RESULT): "Fathom 312/500", the five squares as plain characters, and the link to `#fathom`,
+  recap of the questions still in the bank, SHARE, and NEW QUESTIONS, or BACK TO YOUR GAME while a game is under way).
+  Home's key and the menu's tile start new questions once the last game is over (free play is new every time, UX 14),
+  and go back to a game under way; a reload on the results keeps them.
+- **The share text** (SHARE, as on lists and Blitz: the phone's share sheet, else a copy and "Copied"): "Fathom
+  312/500", the five squares in the results' colours (🟨 dead on, 🟦 close, 🟪 near, 🟥 far, ⬛ lost at sea), and the link to `#fathom`,
   each line but the last ending in two spaces so a Reddit comment keeps them (`pasteable`, src/components/share.ts).
 
 ## The save and the sync
@@ -42,7 +45,7 @@ reaches 0. A miss scores at most 99: only spot on is 100.
 | Round | The player types | Points | The rule on screen | The miss |
 |---|---|---|---|---|
 | `estimate` | a number in the question's unit | the curve, d = log10(guess / answer); within 1% spot on, 100. 25% off 82, half or double 49, 3x 27, 10x 0 | "The closer your guess, the more points." | "30% low", "3x too high" |
-| `percent` | 0 to 100: "71", "71%", "71.5" | the average, rounded, of two scores: points off (100 - 3 x points off, never under 0) and times off (the curve, d = how many powers of ten off on the answer's side of 50: up to 50 the shares, log10(guess / answer), past 50 what's left, log10((100 - answer) / (100 - guess)), each kept to 0.5 to 99.5); within half a point spot on, 100. 20 for 25 84, 5 for 2.5 71, 10 for 2.5 47, 0.8 for 25 14, 90 for 71 36; 90 for 99 scores as 10 for 1 | "The closer your guess, the more points." | "6 points low" |
+| `percent` | 0 to 100: "71", "71%", "71.5" | the average, rounded, of two scores: points off (100 - 3 x points off, never under 0) and times off (the curve, d = how many powers of ten off on the answer's side of 50: up to 50 the shares, log10(guess / answer), past 50 what's left, log10((100 - answer) / (100 - guess)), each kept to 0.5 to 99.5); within half a point spot on, 100. 20 for 25 84, 5 for 2.5 71, 10 for 2.5 47, 0.8 for 25 14, 90 for 71 36; 90 for 99 scores as 10 for 1 | "The closer your guess, the more points." | "6 too low" |
 | `year` | an AD year, up to four digits: "2007" | the curve, d = 2 x log10(ago(answer) / ago(guess)), ago(y) = max(1, this year - y); the exact year 100. In 2026: 1984 for 1967 50, 1960 for 1967 81, 2010 for 2007 72, 2000 for 2007 53, 1850 for 1903 47 | "The closer your guess, the more points." | "3 years early" |
 | `name` | a name from the question's list: "Colombia" for "Name a country with about 50 million people" | the thing's figure against the target: a `ratio` list by the estimate's rule, a `steps` list 100 - 30 x steps off (one off 70, two 40) | "The closer to the target, the more points." | "6% more people", "2x too many people", "2% low" (an area, a unit of measure), "3 land borders too many" |
 
@@ -59,18 +62,23 @@ What he goes by: a share is off partly by how many times, as an estimate is (0.8
 past 50 it is what's left that counts (90% for 99% leaves 10x too much), with points off keeping a near miss in points
 worth something; a year is off by how long ago it was, so 17 years off an event 59 years ago is far, and the same off
 one 120 years ago is closer. That is steep for recent events (2017 for 2007 scores 12), so the bank's years are at
-least 10 years ago (`check.ts`). The miss still reads in points and years ("6 points low", "3 years early").
+least 10 years ago (`check.ts`). The miss reads in percentage points, without the word (the reveal's points are the score: "6 too low"), and in
+years ("3 years early").
 
 On screen every round says only "The closer your guess, the more points." (UX.md 21; the owner: keep it simple); on
-each side of the answer a closer guess never scores less (`fathom.test.ts`). It shows on the first question of its
-round in a game, before the answer (under LOCK IN when a phone has little height), and the results say it once.
+each side of the answer a closer guess never scores less (`fathom.test.ts`). It shows once a game for each of its
+wordings, on the first question that has it (`ruleShownAt`: the estimate, the percent and the year say the same words,
+so only the first of them does; the name-it round has its own), before the answer (under LOCK IN when a phone has
+little height), and the results say each once.
 Whatever reads "spot on" scores 100, in every round. The bands, the sonar, the share text, the sound and the
 celebration work the same for every round. The sonar places the squid by the distance the points come from
 (`offAxis`), its edges where the round's curve reaches 0: 10x off for an estimate, \|d\| = 1 for a year (about 3.2x off
 how long ago), and 10x off the share (or what's left) for a percent, where its points-off half may still score (0.8 for
 25 sits at the edge with 14). On either side, further out never scores more.
 
-The field: a decimal keypad for an estimate and a percent ("%" beside it for a percent), a plain number pad for a year,
+The field: a decimal keypad for an estimate and a percent ("%" beside it for a percent), a plain number pad for a year
+(on a phone, to 420px, an estimate's unit goes on its own line under the number, inside the field, so the number has
+the whole width: "metres per second" once took two lines and cut the placeholder),
 which never groups its digits ("2007", not "2,007"). A percent of 0 is a fair guess; past 100 says "0 to 100, please."
 A year with a fraction says "A whole year, please.", five digits "A year has four digits." A name-it round has a text
 field ("your country") and no unit.
@@ -99,8 +107,9 @@ register". **A fair answer must always register**, and one answer locks per roun
   when the game stores it as one ("Irak", Iraq's): "Abkhazia" is not Afghanistan. A name read before the lexicon has
   loaded waits for it (a moment at most). A list's inverted and short forms read exactly ("Korea, North", "Gambia,
   The", "Dominican Rep."). The question's own yardstick (`except`: "Any country but United Kingdom."); anything else,
-  "Not one we know. Try again." Each line keeps to two lines at 320px (`LINE_MAX`, 58 characters, measured: past it a
-  line drops its "Try again.", and a long name is left out: "That is a territory, not a country.").
+  "Not one we know. Try again." Every line that costs nothing ends "Try again.", in two lines at 320px (`LINE_MAX`, 58
+  characters, measured): a longer one drops "not a country" from a part of something ("The Canary Islands are part
+  of Spain. Try again."), else leaves the name out ("They are a territory, not a country. Try again.").
 - **The reveal**: the target, what was named and its figure ("Colombia, 52.89 million people"), the points, the sonar
   on the list's scale (10x off at its edges on a ratio list, 3.3 steps on a steps list) with the miss under it, the
   best four answers on the list with their figures (by points, then closeness, then the list's order; the yardstick
