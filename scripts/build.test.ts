@@ -31,6 +31,7 @@ import {
 } from "./build";
 import { inRegion, UNIVERSES, whereIs } from "./gazetteer";
 import { COUNTRY_FORMS } from "./intent";
+import { readValue } from "./values";
 
 describe("regional lists", () => {
   it("keep a country to its continent, and a transcontinental one to where the page lists it", () => {
@@ -467,5 +468,23 @@ describe("mergeIndex", () => {
     const merged = mergeIndex([e("a"), e("b"), e("d", true)], [e("c", true)], topics);
     expect(merged).toEqual([e("a"), e("b", true), e("c", true), e("d")]);
     expect("debut" in merged[0]).toBe(false);
+  });
+});
+
+describe("infobox values", () => {
+  const box = (rows: string) => cheerio.load(`<div class="mw-parser-output"><table class="infobox">${rows}</table></div>`);
+  // Shohei Ohtani's infobox. The owner on MLB hits: "shohei arent even top"; a miss should say how many he has.
+  it("reads MLB career hits under MLB statistics, dated while the player is active, not Japan's NPB numbers", () => {
+    const ohtani = box(
+      "<tr><th colspan=2>NPB statistics (through 2017 season)</th></tr><tr><th>Hits</th><td>297</td></tr>" +
+        "<tr><th colspan=2>MLB statistics (through 2026 season)</th></tr><tr><th>Batting average</th><td>.281</td></tr>" +
+        "<tr><th>Hits</th><td>1,194</td></tr><tr><th>Home runs</th><td>310</td></tr>",
+    );
+    expect(readValue(ohtani, "mlb-hits")).toMatchObject({ display: "1,194", year: "2026", number: 1194 });
+    const retired = box("<tr><th colspan=2>MLB statistics</th></tr><tr><th>Hits</th><td>1,518</td></tr>");
+    expect(readValue(retired, "mlb-hits")).toMatchObject({ display: "1,518", number: 1518 });
+    expect(readValue(retired, "mlb-hits").year).toBeUndefined();
+    const japan = box("<tr><th colspan=2>NPB statistics</th></tr><tr><th>Hits</th><td>297</td></tr>");
+    expect(readValue(japan, "mlb-hits")).toMatchObject({ skip: "no MLB statistics" });
   });
 });

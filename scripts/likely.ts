@@ -134,6 +134,10 @@ export const LIKELY: Record<string, string[]> = {
     "Al Horford", "Deron Williams", "Andrei Kirilenko", "Peja Stojaković", "Hedo Türkoğlu", "Toni Kukoč",
     "Arvydas Sabonis", "Dražen Petrović", "Vlade Divac", "Detlef Schrempf", "Šarūnas Marčiulionis",
   ],
+  // The owner, Nov 9: "even big names like aaron judge shohei arent even top"; a miss should say how many hits.
+  // Only Ohtani's article was in the cache. Jackie Robinson (1,518), Aaron Judge, Mike Trout and the rest of the
+  // famous unranked hitters need their articles fetched: add them in a rebuild that may fetch.
+  "mlb-hits": ["Shohei Ohtani"],
   "youtube-channels": [
     "Smosh", "PewDiePie", "Markiplier", "Jacksepticeye", "KSI", "Logan Paul", "Jake Paul", "Ninja (gamer)",
     "Shane Dawson", "Jenna Marbles", "Casey Neistat", "Philip DeFranco", "Ray William Johnson", "Nigahiga",

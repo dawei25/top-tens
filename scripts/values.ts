@@ -10,7 +10,7 @@ import { FIXED_VALUE, NO_VALUE, pickLikely } from "./likely";
 import type { Topic } from "./topics";
 import { fetchPage, NotFound } from "./wiki";
 
-export type ValueKind = "elevation" | "area" | "nba-points" | "subscribers" | "passengers" | "length" | "gross";
+export type ValueKind = "elevation" | "area" | "nba-points" | "mlb-hits" | "subscribers" | "passengers" | "length" | "gross";
 
 export interface Reading {
   /** The number as shown, without the topic's unit: "4,478", "27.5 million". */
@@ -134,6 +134,22 @@ function nbaPoints(rows: Row[]): Reading {
   return { display: withCommas(n), number: n, raw: row.data };
 }
 
+/**
+ * MLB career hits: the Hits row under "MLB statistics" (Japan's "NPB statistics" are other games). An active player's
+ * header says "through 2026 season", and the figure says that year.
+ */
+function mlbHits(rows: Row[]): Reading {
+  const stats = rows.filter((r) => /^MLB statistics\b/i.test(r.header));
+  if (!stats.length) return { skip: "no MLB statistics" };
+  const row = stats.find((r) => /^hits$/i.test(r.label));
+  if (!row) return { skip: "no Hits row" };
+  const m = row.data.match(new RegExp("^" + NUM + String.raw`(?!\.)\b`));
+  if (!m || m[2]) return { skip: "Hits not a whole number", raw: row.data };
+  const n = parseInt(m[1].replace(/,/g, ""), 10);
+  const year = row.header.match(/\bthrough ((?:19|20)\d{2})\b/i)?.[1];
+  return { display: withCommas(n), year, number: n, raw: `${row.header} | ${row.label} | ${row.data}` };
+}
+
 /** A year in "Last updated: October 1, 2024" style rows. */
 function updatedYear(rows: Row[]): string | undefined {
   for (const r of rows) {
@@ -228,7 +244,7 @@ export function readValue($: CheerioAPI, kind: ValueKind, scale = 1, names: stri
   if ($("#disambigbox, .dmbox-disambig").length) return { skip: "disambiguation page" };
   const rows = infoboxRows($);
   if (!rows) return { skip: "no infobox" };
-  const read = { elevation, area, "nba-points": nbaPoints, subscribers, passengers, length, gross }[kind];
+  const read = { elevation, area, "nba-points": nbaPoints, "mlb-hits": mlbHits, subscribers, passengers, length, gross }[kind];
   const r = read(rows, names);
   if (r.number !== undefined) r.number /= scale;
   return r;
