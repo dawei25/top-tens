@@ -9,8 +9,9 @@ export interface DailyEntry {
   date: string;
   id: string;
   /**
-   * Today's Blitz list. The schedule names one for every day, a different topic from the day's list; without one,
-   * `blitzOfTheDay` falls back to a date-seeded pick on another list.
+   * The day's Blitz list, from when each day also had a Blitz (retired Nov 10: Blitz is free play only). Kept, but
+   * nothing shows it as a daily: an old link to a date's Blitz opens that list's free Blitz (`blitzOfTheDay`), and a
+   * new list first scheduled here joins free play on this day (`heldDebuts`).
    */
   blitz?: string;
 }
@@ -60,27 +61,33 @@ export interface ListMeta {
   debut?: boolean;
 }
 
-/** Lists that ran as a daily, Today's list or Today's Blitz, on a date before `date`. */
-function ranBefore(schedule: DailyEntry[], date: string): Set<string> {
-  return new Set(schedule.filter((e) => e.date < date).flatMap((e) => (e.blitz ? [e.id, e.blitz] : [e.id])));
+/**
+ * Lists past their debut wait on `date`: those that ran as Today's list on an earlier date, and those named as a day's
+ * Blitz on that date or before (a day's Blitz is free play now, so a list first scheduled as one joins on its day).
+ */
+function debuted(schedule: DailyEntry[], date: string): Set<string> {
+  const ids = new Set(schedule.filter((e) => e.date < date).map((e) => e.id));
+  for (const e of schedule) if (e.blitz && e.date <= date) ids.add(e.blitz);
+  return ids;
 }
 
 /**
  * New lists debut as dailies (owner): a list built with `debut` stays out of random play until its first day as
- * Today's list or Today's Blitz has run, a date before `today` in daily.json. The day after, it is in random play like
- * any other. A debut list that isn't scheduled yet, or is scheduled for today or later, is held.
+ * Today's list has run, a date before `today` in daily.json. The day after, it is in random play like any other. A
+ * list the schedule names as a day's Blitz instead joins random play on that day (owner, Nov 10: no Today's Blitz). A
+ * debut list that isn't scheduled yet, or is scheduled as Today's list for today or later, is held.
  */
 export function heldDebuts(schedule: DailyEntry[], lists: ListMeta[], today = localDate()): Set<string> {
-  const ran = ranBefore(schedule, today);
+  const ran = debuted(schedule, today);
   return new Set(lists.filter((l) => l.debut && !ran.has(l.id)).map((l) => l.id));
 }
 
 /**
- * Lists a random roll must not land on: today's daily (its save is today's result) and every future day's list and
- * Blitz (a roll shows the full list at the end, so it would spoil them).
+ * Lists a random roll must not land on: today's daily (its save is today's result) and every future day's list (a
+ * roll shows the full list at the end, so it would spoil them). A day's `blitz` is not held: it's free play.
  */
 export function dailyHoldouts(schedule: DailyEntry[], today = localDate()): Set<string> {
-  const ids = new Set(schedule.filter((e) => e.date > today).flatMap((e) => (e.blitz ? [e.id, e.blitz] : [e.id])));
+  const ids = new Set(schedule.filter((e) => e.date > today).map((e) => e.id));
   const current = todayEntry(schedule, today);
   if (current) ids.add(current.id);
   return ids;
@@ -155,8 +162,8 @@ function hash(s: string): number {
 }
 
 /**
- * Today's Blitz list, the same for everyone on a date. Today's list and Today's Blitz are separate topics: what makes
- * a good list (knowing the top 10 and its order) differs from what makes a good Blitz (lots of names that score).
+ * A date's Blitz list, the same for everyone, from when each day also had a Blitz (retired Nov 10). Only an old link
+ * to a date's Blitz (#dailyblitz-<date>) still asks, and opens this list's free Blitz.
  * - the schedule's own pick, if the entry names one (`scripts/schedule.ts` writes one for every day);
  * - otherwise (a day the schedule doesn't cover), a date-seeded pick among Blitz lists that isn't that date's daily
  *   (Blitz shows every answer, so it would spoil it), isn't scheduled as a later daily, and isn't a new list waiting
@@ -186,16 +193,12 @@ export function blitzHold(schedule: DailyEntry[], date: string, id: string, save
 }
 
 /**
- * Lists a random roll (list or Blitz) never lands on: today's list and Today's Blitz, played or not, and every future
- * day's list and Blitz (`dailyHoldouts`). Before the Blitz, a random list on its topic would show the full top 10 and
- * a free Blitz on it would be a practice run (Nov 3: a random list rolled the day's Blitz topic); after it, a roll on
- * it would replay answers just seen. They come back to random play the next day. New lists wait for their debut as a
- * daily (`heldDebuts`), scheduled or not.
+ * Lists a random roll (list or Blitz) never lands on: today's list, played or not, and every future day's list
+ * (`dailyHoldouts`). Today's list comes back to random play the next day. New lists wait for their debut as a daily
+ * (`heldDebuts`), scheduled or not. A day's Blitz is held no more: since Nov 10 there is no Today's Blitz to spoil.
  */
 export function rollHoldouts(schedule: DailyEntry[], lists: ListMeta[], _saved?: Saved, today = localDate()): Set<string> {
   const ids = dailyHoldouts(schedule, today);
-  const todays = blitzOfTheDay(schedule, lists, today);
-  if (todays) ids.add(todays);
   for (const id of heldDebuts(schedule, lists, today)) ids.add(id);
   return ids;
 }
