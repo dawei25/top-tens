@@ -42,7 +42,7 @@ type Route =
   | { screen: "stats" }
   | { screen: "privacy" }
   | { screen: "settings" }
-  | { screen: "fathom" }
+  | { screen: "fathom"; run?: number }
   /** An old link to a date's Blitz (from before Nov 10, when each day also had one): replaced on arrival, see App. */
   | { screen: "dailyblitz"; date: string; runs: boolean; run?: number };
 
@@ -52,8 +52,10 @@ function readHash(): Route {
   if (h === "#stats") return { screen: "stats" };
   if (h === "#privacy") return { screen: "privacy" };
   if (h === "#settings") return { screen: "settings" };
-  // Fathom, the estimation beta: only by its link (no tile anywhere).
+  // Fathom, the estimation game (Home's Free play, the menu), and one of its finished games from Past runs.
   if (h === "#fathom") return { screen: "fathom" };
+  const fathomRun = h.match(/^#fathom\/run-(\d+)$/);
+  if (fathomRun) return { screen: "fathom", run: Number(fathomRun[1]) };
   // The Blitz-only runs screen became Past runs, which lists list games and Blitz rounds together.
   if (h === "#blitz-history") history.replaceState(null, "", "#history");
   if (h === "#history" || h === "#blitz-history") return { screen: "history" };
@@ -79,13 +81,13 @@ function readHash(): Route {
 
 /**
  * One step up from a screen when there's no in-app previous screen to return to (a shared or reloaded link):
- * a past Blitz run -> that list's Blitz screen with its past runs open; a past list run -> Past runs; an old daily
- * -> the archive; everything else -> home.
+ * a past Blitz run -> that list's Blitz screen with its past runs open; a past list run or Fathom game -> Past runs; an
+ * old daily -> the archive; everything else -> home.
  */
 function parentOf(hash: string, today: string): string {
   const run = hash.match(/^(#blitz-[\w-]+?)\/run-\d+$/);
   if (run) return `${run[1]}/runs`;
-  if (/^#p-[\w-]+?\/run-\d+$/.test(hash)) return "#history";
+  if (/^#(?:p-[\w-]+?|fathom)\/run-\d+$/.test(hash)) return "#history";
   const daily = hash.match(/^#daily-(\d{4}-\d{2}-\d{2})$/);
   if (daily && daily[1] < today) return "#archive";
   return "";
@@ -361,7 +363,7 @@ function Screens() {
 
     if (route.screen === "settings") return <Settings onBack={back} onHome={home} />;
 
-    if (route.screen === "fathom") return <FathomScreen onBack={back} onHome={home} />;
+    if (route.screen === "fathom") return <FathomScreen onBack={back} onHome={home} run={route.run} />;
 
     if (route.screen === "stats") {
       return <Knowledge index={index} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;
@@ -411,6 +413,7 @@ function Screens() {
         blitzLists={openBlitz()}
         freeLists={rollableLists(schedule, index, load(), today)}
         onArchive={() => (location.hash = "#archive")}
+        onFathom={() => (location.hash = "#fathom")}
       />
     );
   };
@@ -432,6 +435,9 @@ function menuScreen(route: Route, dailyDate?: string): MenuScreen | undefined {
     case "settings":
     case "privacy":
       return route.screen;
+    // A game, not a past one (that is Past runs' row).
+    case "fathom":
+      return route.run === undefined ? "fathom" : undefined;
     default:
       return undefined;
   }

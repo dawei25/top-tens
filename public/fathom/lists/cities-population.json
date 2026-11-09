@@ -35,7 +35,8 @@
         "Jakarte",
         "Jakarta SCR",
         "Djakarta city",
-        "Jakartan"
+        "Jakartan",
+        "Batavia"
       ],
       "value": 41913860
     },
@@ -47,15 +48,12 @@
         "City of Mosques",
         "City of Rickshaws",
         "City of Rickshaw",
-        "Capital city of bangladesh",
-        "Capital of Bangladesh",
         "Dhaka City",
         "Dhakaia",
-        "Rickshaw Capital of the World",
-        "Provincial capital of East Bengal",
         "Dacca, Bangladesh",
         "Dhaka, East Pakistan",
-        "Dacca"
+        "Dacca",
+        "Dakha"
       ],
       "value": 36585479
     },
@@ -87,7 +85,6 @@
         "JP-13",
         "Metropolitan Tokyo",
         "Tōkyō Met.",
-        "Tōkyō, JP-13",
         "Dōngjīng",
         "Tokyo-Fu",
         "Tokyoh",
@@ -102,9 +99,7 @@
       "name": "Delhi",
       "aliases": [
         "Delhi, India",
-        "National Capital Territory of Delhi",
         "Dehli",
-        "National Capital Territory",
         "Dihli",
         "NCT of Delhi",
         "Delhi NCT",
@@ -115,12 +110,9 @@
         "City of Delhi",
         "NCT,India",
         "Dilhi",
-        "Delhi National Capital Territory",
         "Delhi City",
-        "National Capital Territory of India",
         "INDEL",
         "NCT Delhi",
-        "National Capital Territory of Delhi, India",
         "Union territory of Delhi",
         "DL",
         "DEL",
@@ -195,7 +187,6 @@
         "Xingwang fu",
         "Quongzhou",
         "Khanfu",
-        "Capital of Guangdong",
         "Kwang-chow Foo",
         "Kwang-chow",
         "Guang Prefecture",
@@ -214,7 +205,6 @@
         "Cairo, Egypt",
         "Cairo, EG",
         "Cairo, Arab Republic of Egypt",
-        "The Capital Cairo",
         "Cairo, Cairo Governorate",
         "The City of A Thousand Minarets"
       ],
@@ -230,8 +220,6 @@
         "City of Manila",
         "Maynila",
         "Manila, Phillippines",
-        "Capital city of philippines",
-        "Capital of philippines",
         "Manilla, Philippines",
         "Manila, Philippines",
         "Manilan",
@@ -244,7 +232,6 @@
         "Manileño",
         "Manila, Metro Manila",
         "Ciudad de Manila",
-        "Philippine capital",
         "Manilese",
         "Maniler",
         "Manilenyo",
@@ -302,7 +289,6 @@
         "Soul Tukpyolsi",
         "Seoul Teukbyeolsi",
         "Hansung",
-        "Capital of South Korea",
         "Capitals of South Korea",
         "Hwangseong",
         "Soeul",
@@ -409,7 +395,6 @@
         "Bang Makok",
         "Krungthepmahanakornamornratanakosinmahintarayutthayamahadilokphop nopparatrajathaniburiromudomrajaniwesmahasatharn amornphimarnavatarnsathitsakkattiyavisanukamprasit",
         "Krung Thep",
-        "Capital of Thailand",
         "Bangkok, Thailand",
         "Bangkok Special Governed District",
         "KrungThepMahaNakhon",
@@ -429,14 +414,11 @@
         "Mexican Federal District",
         "México D.F.",
         "Ciudad de Méjico",
-        "Mexico City, Distrito Federal",
         "City of Mexico",
         "Mexico Distrito Federal",
         "Mexico City proper",
-        "Capital city of mexico",
         "Cidade do Mexico",
         "MX-DIF",
-        "Mexico City, Federal District",
         "Méjico City",
         "Ciudad Mexico",
         "Distrito Federal de México",
@@ -450,7 +432,8 @@
         "Cedemequis",
         "Mexico, Districto Federal",
         "CDMX",
-        "Ciudad de México"
+        "Ciudad de México",
+        "Mex City"
       ],
       "value": 17734212
     },
@@ -469,7 +452,6 @@
         "Bejing",
         "Peiking",
         "Bejiing",
-        "Northern capital",
         "Beijingg",
         "Beeijing",
         "Peking, China",
@@ -529,7 +511,6 @@
       "name": "Moscow",
       "aliases": [
         "Moscow, Russia",
-        "Capital of Russia",
         "Moskow",
         "Moskva Federal City, Russia",
         "Moscow, USSR",
@@ -550,8 +531,6 @@
         "Moscú",
         "Muskva",
         "Muskovi",
-        "Capital of the Soviet Union",
-        "Capital of Soviet Union",
         "Moscow, RU",
         "Mosky",
         "Maskva",
@@ -578,7 +557,6 @@
       "name": "New York City",
       "aliases": [
         "New York City, USA",
-        "New York City, New York",
         "New York, NY",
         "City New York",
         "Nueva York",
@@ -611,7 +589,6 @@
         "NYC, NYS",
         "New Yor City",
         "Noo Yawk City",
-        "United States largest city",
         "New Yrok City",
         "NY NY",
         "New York City, New York, U.S.",
@@ -680,7 +657,6 @@
         "Bengaluru, India",
         "Bangalore, Karnataka",
         "Silicon Plateau",
-        "IT Capital of India",
         "Bangladore",
         "B'luru",
         "Bangalore, Mysore State",
@@ -695,7 +671,19 @@
     },
     {
       "name": "Lagos",
-      "aliases": [],
+      "aliases": [
+        "Lagos, Nigeria",
+        "City of Lagos",
+        "Lagaos",
+        "Las Gidi",
+        "Lasgidi",
+        "Lagos city",
+        "Lagos, Lagos State",
+        "Lagos, Lagos State, Nigeria",
+        "Lagos, Lagos, Nigeria",
+        "Metropolitan Lagos",
+        "Èko"
+      ],
       "value": 12791699
     },
     {
@@ -746,7 +734,6 @@
       "name": "Chennai",
       "aliases": [
         "Chennai, India",
-        "Banking Capital of India",
         "Gate way of South India",
         "Chennai, Tamil Nadu",
         "Chennapatnam",
@@ -811,8 +798,6 @@
         "The City of Kings",
         "La Ciudad de los Reyes",
         "Limeño",
-        "Capital city of peru",
-        "Capital of Peru",
         "Ciudad de los Reyes"
       ],
       "value": 10580241
@@ -822,15 +807,12 @@
       "aliases": [
         "London, Great Britain",
         "London, United Kingdom",
-        "Capital of the United Kingdom",
-        "Capital of the UK",
         "London, UK",
         "England London",
         "London Britain",
         "GBLON",
         "London, Middlesex",
         "London England",
-        "Capital of England",
         "Llundain",
         "Londontown",
         "Londyn",
@@ -844,23 +826,11 @@
         "Lunnainn",
         "Londain",
         "Loundres",
-        "Capital city of England",
-        "Capital city of the United Kingdom",
-        "England's capital",
-        "England's capital city",
-        "England capital city",
-        "England capital",
-        "United Kingdom capital",
-        "United Kingdom capital city",
-        "United Kingdom's capital city",
-        "United Kingdom's capital",
-        "Capital city of the UK",
-        "UK capital",
-        "UK capital city",
         "Llundein",
         "London, GB",
         "London, United Kingdon",
-        "London, Eng."
+        "London, Eng.",
+        "Greater London"
       ],
       "value": 10416420
     },
@@ -892,7 +862,8 @@
         "Rio de Janiero, Brazil",
         "Rio de Jainero",
         "Faz Quem Quer",
-        "Rio"
+        "Rio",
+        "RJ"
       ],
       "value": 9500336
     },
@@ -935,7 +906,6 @@
         "Indian Hyderabad",
         "Hyderabad, Telangana State",
         "Hyderabad, Telangana, India",
-        "Capital of Telangana",
         "Ghouse Nagar Bandlaguda",
         "Heydarabad, India",
         "Haiderabad, India"
@@ -954,7 +924,15 @@
     },
     {
       "name": "Luanda",
-      "aliases": [],
+      "aliases": [
+        "Luanda, Angola",
+        "São Paulo de Luanda",
+        "São Paulo de Loanda",
+        "São Paulo da Assunção de Luanda",
+        "São Paulo da Assunção de Loanda",
+        "St-Paul de Loanda",
+        "Saint Paul de Loanda"
+      ],
       "value": 9051000
     },
     {
@@ -988,7 +966,8 @@
         "Chicargo",
         "Shicago",
         "Chi-Town",
-        "Chitown"
+        "Chitown",
+        "The Windy City"
       ],
       "value": 8864000
     },
@@ -997,7 +976,6 @@
       "aliases": [
         "Cheng Du",
         "Ch'eng-tu",
-        "Ch'engtu",
         "Chengdou",
         "Chéngdū Shì",
         "Chengdu, China",
@@ -1005,7 +983,6 @@
         "Chengdu, Sichuan",
         "Chengdu City",
         "Sing4dou1",
-        "Capital of Sichuan",
         "Chengdu, Sichuan Province",
         "Chentu, Szechwan",
         "Cheng Du City",
@@ -1017,7 +994,8 @@
         "Chengtu Municipality",
         "Municipality of Chengtu",
         "Sindafu",
-        "Sin-din-fu"
+        "Sin-din-fu",
+        "Chengtu"
       ],
       "value": 8813000
     },
@@ -1034,7 +1012,6 @@
         "Quadalampur",
         "Kolumpo",
         "Kualalumpur",
-        "Capital of Malaysia",
         "Gualalumpur",
         "Kuala Lumper",
         "Kualarumpur",
@@ -1049,6 +1026,16 @@
     {
       "name": "Dar es Salaam",
       "aliases": [
+        "Mzizima",
+        "Dar es Salam",
+        "Dar al-Salaam",
+        "Daressalam",
+        "Dar e salaam",
+        "Dar es Salaam, Tanzania",
+        "Dar es Selam",
+        "Dār as-Salām",
+        "Dar Essalam",
+        "Dare-es-salaam",
         "Dar"
       ],
       "value": 7795114
@@ -1056,7 +1043,8 @@
     {
       "name": "Suzhou",
       "aliases": [
-        "Suzhou, Jiangsu"
+        "Suzhou, Jiangsu",
+        "Soochow"
       ],
       "value": 7731101
     },
@@ -1086,14 +1074,15 @@
         "Ahmadabad, Gujarat",
         "Amdawad",
         "Ahmed Abad",
-        "Ahmedebad",
-        "Veer Savarkar Sports Complex"
+        "Ahmedebad"
       ],
       "value": 7632408
     },
     {
       "name": "Hangzhou",
-      "aliases": [],
+      "aliases": [
+        "Hangchow"
+      ],
       "value": 7500208
     },
     {
@@ -1109,7 +1098,6 @@
         "Xi'an, Shaanxi",
         "Sianfu",
         "Sian, China",
-        "Capital of Shaanxi",
         "Xi'an Municipality",
         "Se Gan Foo",
         "Si-ngan-fu",
@@ -1177,7 +1165,6 @@
         "Wuhan, Hubei Province, China",
         "City of Wuhan",
         "Wuhan, Hubei",
-        "Capital of Hubei",
         "Wuhan City, Hubei Province",
         "Wuhon",
         "Wuhan, Hubei Province"
@@ -1241,8 +1228,25 @@
     {
       "name": "Johannesburg",
       "aliases": [
-        "Joburg",
-        "Jozi"
+        "Johannesburg, South Africa",
+        "Johannasberg",
+        "EGoli",
+        "Johanessburg",
+        "Johanesburg",
+        "Johannesburg, Southafrica",
+        "Johannesburg, Gauteng",
+        "Johannes-burg",
+        "Joberg",
+        "Johannesb'g",
+        "Johannesbourg",
+        "Johansberg",
+        "Johannesgurg",
+        "Jo'Bourg",
+        "Yohannesburg",
+        "Johannesburg, Transvaal",
+        "IGoli",
+        "Jozi",
+        "Jo'burg"
       ],
       "value": 7077175
     },
@@ -1281,7 +1285,9 @@
     },
     {
       "name": "Shenyang",
-      "aliases": [],
+      "aliases": [
+        "Mukden"
+      ],
       "value": 6921000
     },
     {
@@ -1380,12 +1386,31 @@
     },
     {
       "name": "Khartoum",
-      "aliases": [],
+      "aliases": [
+        "Khartum",
+        "El Khartum",
+        "Al Khartum",
+        "Al Khurtum",
+        "Khartoum, The Sudan",
+        "Khartoum, Sudan",
+        "Al-Khartoum, Sudan",
+        "Chartum",
+        "Kartoum",
+        "Khartoum, SU",
+        "City of Khartoum",
+        "Karthoum",
+        "Kartouhm",
+        "Kharthoum",
+        "Khartouhm",
+        "Cartoom"
+      ],
       "value": 6809355
     },
     {
       "name": "Nanjing",
-      "aliases": [],
+      "aliases": [
+        "Nanking"
+      ],
       "value": 6800676
     },
     {
@@ -1401,14 +1426,12 @@
     {
       "name": "Madrid",
       "aliases": [
-        "Capital of Spain",
         "Madrid City",
         "Madrileña",
         "Madrileño",
         "Madrid, Spain",
         "Mayrit",
         "Madrilenian",
-        "Madrid capital",
         "City of Madrid",
         "Mántŭa Carpetānṓrum",
         "Municipality of Madrid",
@@ -1445,7 +1468,8 @@
         "Houston, USA",
         "Houston, Texas, U.S.",
         "White Oak Music Hall",
-        "Houston, TX, United States"
+        "Houston, TX, United States",
+        "H-Town"
       ],
       "value": 6115000
     },
@@ -1493,7 +1517,6 @@
         "Toronto, Ont.",
         "City of Toronto, Ontario",
         "Toironto",
-        "Capital of Ontario",
         "Toronto, ON, Canada",
         "Tornto",
         "The 6ix",
@@ -1682,7 +1705,9 @@
     },
     {
       "name": "Dalian",
-      "aliases": [],
+      "aliases": [
+        "Dairen"
+      ],
       "value": 5300000
     },
     {
@@ -1702,7 +1727,9 @@
     },
     {
       "name": "Jinan",
-      "aliases": [],
+      "aliases": [
+        "Tsinan"
+      ],
       "value": 5052000
     },
     {

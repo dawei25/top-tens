@@ -224,7 +224,7 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
       if (vp.name === "desktop") {
         await page.getByTestId("fathom-copy").click();
         const shared = await page.evaluate(() => navigator.clipboard.readText());
-        assert.match(shared, new RegExp(`^Fathom beta ${total}/500\\n\\S( \\S){4}$`));
+        assert.match(shared, new RegExp(`^Fathom ${total}/500  \\n\\S( \\S){4}  \\nhttps?://\\S+/#fathom$`));
       }
       await ctx.close();
     });
@@ -341,6 +341,17 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
       ["Puerto Rico", "other"],
       ["Northern Ireland", "other"],
       ["Turks and Caicos Islands", "other"],
+      // The longest of the places no list has (Nov 8): a plural territory, a part of a country, a region, a former one.
+      ["US Virgin Islands", "other"],
+      ["French Polynesia", "other"],
+      ["Galápagos Islands", "other"],
+      ["Western Australia", "other"],
+      ["Bohemia", "other"],
+      ["Canary Islands", "other"],
+      ["Central America", "other"],
+      ["Czechoslovakia", "other"],
+      ["Scotland", "other"],
+      ["Tasmania", "other"],
       ["Papua New Ginea", "confirm"],
       // A real name somewhere in the game, not a country: the lexicon knows it.
       ["Atlantis", "offList"],

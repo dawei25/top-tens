@@ -67,8 +67,8 @@ list offered as a Blitz needs a deep pool, broad recognition and clean data.
 
 ## 4. Screens
 
-Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list, Random list and Random
-Blitz; Yours: Archive, Past runs, Stats; More: Settings, How to play, Feedback, Privacy), the current screen's tile
+Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list, Random list, Random Blitz and
+Fathom; Yours: Archive, Past runs, Stats; More: Settings, How to play, Feedback, Privacy), the current screen's tile
 marked. The account lives in Home's header, not in the menu and not in a row of its own (owner, Nov 5 and 6): one
 **account key** left of the sound key, the same keycap, in builds with accounts only. Its pixel player is hollow when
 signed out, lit cyan when signed in, carries a pink dot for sync trouble (offline, couldn't sync) or a sign-in that
@@ -76,10 +76,13 @@ didn't finish, and waits (hollow, tinted, disabled) while a sign-in comes back; 
 ("Account: signed in as <name>", never an email). It opens the sign-in sheet (which also creates accounts) or the
 account sheet (name, sync state with try again, sign out, delete account, what we keep). Inner screens have no
 account key: their headers are full, and HOME is one press away (UX.md 19). **Settings** (`#settings`): the sound
-switch and reset all progress. **Fathom (beta)** lives at `#fathom` only, with no Home or menu entry until the owner
-approves it: five estimation questions a game, scored by plain closeness, one rule for every question (docs/FATHOM.md).
+switch and reset all progress (Fathom's too). **Fathom** (`#fathom`), the estimation game, out of beta since Nov 9
+(owner: "ship it now"): five questions a game (estimates, a percent, a year, a name-it round), endless games, scored by
+plain closeness in one line ("The closer your guess, the more points.", UX 21), out of 500 (docs/FATHOM.md). Its key is
+in Home's Free play and its tile in the menu's Play group; its games are in Past runs and its totals in Stats, and they
+sync with an account like list games. No daily Fathom (owner: maybe later, if it's popular).
 
-1. **Home:** Today's list (one key across the row), then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on);
+1. **Home:** Today's list (one key across the row), then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on, and Fathom, its line "Guess the number: 5 questions" where the others count their lists: under them on a phone, the row under the pair, one line high, from 640px);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ). Home never names today's list: the
    topic is the surprise (owner, Nov 7).
 2. **Game:** title card with the prompt and score (no average during play: it's revealed on the results; no Play
@@ -95,12 +98,17 @@ approves it: five estimation questions a game, scored by plain closeness, one ru
    A finished daily offers Play Blitz on the same list (a list game doesn't spoil its Blitz) and Random list. The
    archive is a table, one row per date: number, date, the list's title and its score or "not played"; each row opens
    its own one-try game.
-4. **Past runs:** every game played, under a header per day, one tag per row ("List #22", "Blitz #22", never wrapping). Each row opens its own run (the board
+4. **Past runs:** every game played, under a header per day, one tag per row ("List #22", "Blitz #22", "Fathom", never wrapping). Each row opens its own run (the board
    as it ended, or the Blitz round), which offers Play again (a fresh free game on that same list), the only replay
-   in the game, except on a list held today (today's list or a future day's): "back in free play after its day".
-5. **How to play:** closed by default; the footer key opens it as a dialog over the page.
+   in the game, except on a list held today (today's list or a future day's): "back in free play after its day". A
+   Fathom game's row has its five squares for a title and its total ("328/500"); it opens that game's results
+   (`#fathom/run-<startedAt>`, with the date it was played), which offer New questions, or Resume game while one is
+   under way.
+5. **How to play:** closed by default; the footer key opens it as a dialog over the page. Its last rule is Fathom's, in
+   the game's own scoring line.
 6. **Stats** (`#stats`, Your knowledge): first tries on each list against the players' average, overall, by category and by topic; placeholders
-   before the first game (the three headline figures read "--", "0", "--" in one row). Every screen opened forward
+   before the first game (the three headline figures read "--", "0", "--" in one row). Then Fathom's own card: games,
+   avg / 500 and best / 500 over every finished game, "0", "--", "--" before the first. Every screen opened forward
    starts at its top; Back returns to where the player was.
 
 ## 5. Visual direction: Krillion's language, arcade high-score table

@@ -1,4 +1,5 @@
 import { dailyGame, type DailyEntry } from "../game/daily";
+import { FATHOM_MAX, fathomStats } from "../game/fathom-history";
 import { firstListRuns } from "../game/history";
 import type { ParFile } from "../game/par";
 import type { PuzzleMeta } from "../game/puzzles";
@@ -131,6 +132,45 @@ const NONE = (
   </>
 );
 
+/**
+ * Fathom's own numbers, apart from the lists': games played, the average total and the best, out of 500, over every
+ * finished game (on every device the account syncs). Before the first game the same three, as placeholders (UX 10).
+ */
+function FathomStats() {
+  const f = fathomStats(load().fathom);
+  return (
+    <section data-glass className="panel know-fathom" data-testid="know-fathom" data-empty={f ? undefined : ""} aria-labelledby="know-fathom-title">
+      <h2 id="know-fathom-title" className="label cyan">
+        Fathom
+      </h2>
+      <div className={`know-overall ${f ? "" : "know-none"}`}>
+        <dl className="know-stats">
+          <div>
+            <dt>games</dt>
+            <dd data-testid="know-fathom-games">{f ? f.played : 0}</dd>
+          </div>
+          <div>
+            <dt>avg / {FATHOM_MAX}</dt>
+            <dd data-testid="know-fathom-avg">{f ? Math.round(f.avg) : NONE}</dd>
+          </div>
+          <div>
+            <dt>best / {FATHOM_MAX}</dt>
+            <dd data-testid="know-fathom-best">{f ? f.best : NONE}</dd>
+          </div>
+        </dl>
+        {!f && (
+          <>
+            <p className="know-empty-line">play fathom to see your totals here.</p>
+            <a className="key key-sm" href="#fathom" data-testid="know-fathom-play">
+              Fathom
+            </a>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
 /** The overall distance from the players' average, read out in words ("+0.5 vs avg" on screen). */
 function vsAvgLabel(v: number): string {
   const n = Math.abs(v).toFixed(1);
@@ -139,7 +179,7 @@ function vsAvgLabel(v: number): string {
 
 /**
  * "Your knowledge" (Home's Stats key): how your finished list games compare with the players' average, overall, by
- * category and by topic. Before the first game the same sections show, with placeholders.
+ * category and by topic, then Fathom's totals. Before the first game the same sections show, with placeholders.
  */
 export function Knowledge({ index, entry, onBack, onHome }: Props) {
   const par = usePar();
@@ -213,6 +253,7 @@ export function Knowledge({ index, entry, onBack, onHome }: Props) {
           <CrowdSection index={index} />
         </>
       )}
+      <FathomStats />
     </main>
   );
 }

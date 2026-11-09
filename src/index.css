@@ -700,6 +700,32 @@ a {
 .free-key.blitz {
   --accent: var(--gold);
 }
+/* Fathom: no categories, so its key stands alone; side by side, it takes the row under the pair, as tall as its content
+   (a free-play key's height without the strip). Its line says what it is, and wraps on the narrowest phones. */
+.free-key.fathom {
+  --accent: var(--cyan);
+}
+.mode-key.fathom {
+  --accent: var(--cyan);
+}
+.mode-key.fathom .key-sub {
+  white-space: normal;
+  text-align: right;
+}
+@media (min-width: 640px) {
+  .mode-pair > .free-key.fathom {
+    grid-column: 1 / -1;
+  }
+  /* The whole row is room enough for one line: the title at the left, its line at the right. */
+  .mode-key.fathom {
+    flex-direction: row-reverse;
+    align-items: center;
+    min-height: 0;
+  }
+  .mode-key.fathom .mode-key-top {
+    flex: 1;
+  }
+}
 .cat-strip {
   display: flex;
   align-items: center;
@@ -2968,6 +2994,51 @@ a.arch-cell:active .arch-name {
 .play-row.blitz {
   --accent: var(--gold);
 }
+.play-row.fathom {
+  --accent: var(--cyan);
+}
+/* A Fathom game's title: its five squares in their bands' colours, as on its results (fathom.css), a row's height. */
+.play-bands {
+  display: flex;
+  align-self: center;
+  gap: 5px;
+}
+.play-band {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--band);
+}
+.play-band[data-band="dead-on"] {
+  --band: var(--gold);
+}
+.play-band[data-band="close"] {
+  --band: var(--cyan);
+}
+.play-band[data-band="near"] {
+  --band: #8a9cff;
+}
+.play-band[data-band="far"] {
+  --band: var(--pink);
+}
+/* Lost at sea: a crossed outline, so it reads as played and missed (fathom.css, Nov 5). */
+.play-band[data-band="lost"] {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--label);
+}
+.play-band[data-band="lost"]::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: var(--label);
+  -webkit-mask: var(--fathom-cross) center / 100% 100% no-repeat;
+  mask: var(--fathom-cross) center / 100% 100% no-repeat;
+}
+.past-runs {
+  --fathom-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1H0zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM4 4h1v1H4zM4 0h1v1H4zM3 1h1v1H3zM1 3h1v1H1zM0 4h1v1H0z'/%3E%3C/svg%3E");
+}
 @media (hover: hover) {
   .play-row:hover {
     background-color: rgba(255, 255, 255, 0.04);
@@ -3405,6 +3476,18 @@ a.arch-cell:active .arch-name {
   flex-basis: 100%;
   margin-top: 4px;
   color: var(--label);
+}
+/* Fathom's totals: a card of its own under the lists' (its label as theirs, its figures as the overall ones). */
+.know-fathom {
+  padding: 12px 18px 16px;
+}
+.know-fathom .know-overall {
+  margin-top: 10px;
+}
+@media (max-width: 520px) {
+  .know-fathom {
+    padding-inline: 12px;
+  }
 }
 .know-placeholder .know-name {
   font-size: 18px;

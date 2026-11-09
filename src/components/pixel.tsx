@@ -43,7 +43,7 @@ export function sourceSite(name: string): string {
  * Mode identity, the same everywhere: classic (name the top 10, 5 lives) is pink, Blitz (90 s, points) is gold.
  * A game screen's header names its mode once; the screen itself (lives, the clock) shows the rules.
  */
-export type Mode = "classic" | "blitz";
+export type Mode = "classic" | "blitz" | "fathom";
 
 /** Whether a media query matches now, kept current (false where there is no matchMedia). */
 export function useMedia(query: string): boolean {

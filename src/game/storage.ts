@@ -1,4 +1,5 @@
 import type { BlitzRun, BlitzState } from "./blitz";
+import type { FathomRecord } from "./fathom-history";
 import type { ListRun } from "./history";
 import type { GameState } from "./state";
 
@@ -55,6 +56,12 @@ export interface Saved {
   firstTries?: { list?: Record<string, ListRun>; blitz?: Record<string, BlitzRun> };
   /** "Good list?" on the results: `${mode}:${listId}` -> the player's latest rating (mode: list or blitz). */
   ratings?: Record<string, ListRating>;
+  /**
+   * Fathom: its finished games (Past runs), every game's total (Stats) and the questions of the last games drawn (held
+   * back from the next draw), so they travel with an account (src/game/fathom-history.ts). The game on screen stays in
+   * Fathom's own key.
+   */
+  fathom?: FathomRecord;
 }
 
 const empty = (): Saved => ({ games: {}, daily: {}, seenHelp: false });

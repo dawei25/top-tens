@@ -1,5 +1,6 @@
 import { BLITZ_SECONDS, MAX_BLITZ_RUNS, blitzScore, type BlitzRun, type BlitzState } from "../../game/blitz";
 import { localDate } from "../../game/daily";
+import { mergeFathom, pruneFathom, sanitizeFathom } from "../../game/fathom-history";
 import { MAX_LIST_RUNS, type ListRun } from "../../game/history";
 import type { GameState } from "../../game/state";
 import { withFirstTries, type DailyBlitzResult, type ListRating, type Saved } from "../../game/storage";
@@ -24,6 +25,8 @@ import { isReason, RATING_KEY } from "../ratings";
  * - ratings ("Good list?", per list and mode): the one given last (latest `at`) wins, a rating taken back (0)
  *   included, so taking it back on one device takes it back on all of them.
  * - blitzLive (a round in progress per list): the newer round; the other one, if its time is up, becomes a run.
+ * - fathom (Fathom's finished games, totals and last draws): the union, one game per startedAt (mergeFathom in
+ *   src/game/fathom-history.ts).
  * - resetAt: a reset made while signed in. Anything older than the newest reset is dropped from both sides, so a
  *   reset reaches every device instead of being merged back.
  * - Unknown fields (from a newer version of the game) are kept; where both sides have one, the server's value (this
@@ -101,6 +104,7 @@ export function sanitize(x: unknown): SyncSave {
   setOpt(out, "firstTries", isObj(s.firstTries) ? sanitizeFirstTries(s.firstTries) : undefined);
   setOpt(out, "ratings", isObj(s.ratings) ? filterRec(s.ratings, isRating) : undefined);
   setOpt(out, "resetAt", isNum(s.resetAt) && s.resetAt > 0 ? s.resetAt : undefined);
+  setOpt(out, "fathom", sanitizeFathom(s.fathom));
   return out;
 }
 
@@ -256,6 +260,7 @@ export function pruneBefore(save: SyncSave, t: number): SyncSave {
     out.firstTries = f;
   }
   if (save.ratings) out.ratings = filterRec(save.ratings, (r, k): r is ListRating => isRating(r, k) && keep(r.at));
+  if (save.fathom) out.fathom = pruneFathom(save.fathom, t);
   return out;
 }
 
@@ -335,6 +340,7 @@ export function mergeSaves(local: unknown, remote: unknown, now: number): SyncSa
   setOpt(out, "blitzLive", live);
   setOpt(out, "firstTries", mergeFirstTries(a.firstTries, b.firstTries));
   setOpt(out, "ratings", mergeOptRec(a.ratings, b.ratings, lastRating));
+  setOpt(out, "fathom", mergeFathom(a.fathom, b.fathom));
   setOpt(out, "resetAt", resetAt || undefined);
   // A round retired above may be a list's first Blitz round: filled in like any other (existing first tries stay).
   return withOwnFirstTries(out);

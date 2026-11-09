@@ -1,4 +1,5 @@
 import { isDailyBlitzRun, type BlitzRun } from "./blitz";
+import type { FathomRun } from "./fathom-history";
 import type { GameState } from "./state";
 import type { Saved } from "./storage";
 
@@ -61,11 +62,13 @@ export function freshList(saved: Saved, id: string): Saved {
 
 export type Play =
   | { kind: "list"; id: string; at: number; run: ListRun }
-  | { kind: "blitz"; id: string; at: number; run: BlitzRun; today?: boolean };
+  | { kind: "blitz"; id: string; at: number; run: BlitzRun; today?: boolean }
+  /** A Fathom game: `id` is "fathom" (it has no list). */
+  | { kind: "fathom"; id: "fathom"; at: number; run: FathomRun };
 
 /**
- * Everything played, list games and Blitz rounds alike, newest first. A Blitz round is marked `today` when it was
- * the round that counted as that date's Today's Blitz.
+ * Everything played, list games, Blitz rounds and Fathom games alike, newest first. A Blitz round is marked `today`
+ * when it was the round that counted as that date's Today's Blitz.
  */
 export function recentPlays(saved: Saved, limit = 50): Play[] {
   const plays: Play[] = (saved.listRuns ?? []).map((run) => ({ kind: "list", id: run.id, at: run.finishedAt, run }));
@@ -76,6 +79,7 @@ export function recentPlays(saved: Saved, limit = 50): Play[] {
       plays.push({ kind: "blitz", id, at: run.endedAt, run, ...(today ? { today } : {}) });
     }
   }
+  for (const run of saved.fathom?.runs ?? []) plays.push({ kind: "fathom", id: "fathom", at: run.finishedAt, run });
   return plays.sort((a, b) => b.at - a.at).slice(0, limit);
 }
 

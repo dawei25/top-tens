@@ -2,7 +2,7 @@ import type { FathomQuestion } from "../game/fathom";
 import type { OutboxKind } from "./outbox";
 
 /**
- * Fathom (the estimation beta): each locked-in guess, sent so a reveal can say how real players guessed (and so a
+ * Fathom (the estimation game): each locked-in guess, sent so a reveal can say how real players guessed (and so a
  * question can later be scored by how far off real players are). Only in a build with a backend (submit_fathom_guess
  * and fathom_compare, supabase/migrations/20261105130000_fathom_guesses.sql); without one nothing is sent or queued.
  * The database checks the same things, so keep the two in step. What the reveal says is playersLine in

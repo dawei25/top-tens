@@ -1,15 +1,19 @@
 /**
- * Fathom (beta, #fathom): five questions, about two minutes, no timer, no lives. Four ask for a number and one asks the
+ * Fathom (#fathom): five questions, about two minutes, no timer, no lives. Four ask for a number and one asks the
  * player to name a thing whose figure is close to a target (the name-it round, src/game/fathom-name.ts reads the name).
  * Each scores by how close it is, on one curve (`curve`) with a distance for each round: an estimate by how many times
  * off, a percent by points off and how many times off on the answer's side of 50 (the average), a year by how many
  * times off how long ago it was, a name-it round by its list's figure against the target (a ratio, or steps off). On
  * screen, one plain line (ruleFor).
  *
- * Pure functions only: reading numbers, scoring, the draw, the share text, and the save (its own localStorage key,
- * never the game's save: Fathom touches no record, stat or streak; with a backend, each guess is also sent, see
- * src/net/fathom.ts).
+ * Pure functions only: reading numbers, scoring, the draw, the share text, and the game on screen (its own localStorage
+ * key). Finished games, their totals and the last draws are kept in the player's save, which syncs with an account
+ * (src/game/fathom-history.ts); Fathom touches no list record, stat or streak. With a backend, each guess is also sent
+ * (src/net/fathom.ts).
  */
+import { BANDS, bandLabel, bandOf, FATHOM_KEY, HOLD_GAMES, type Band } from "./fathom-history";
+
+export { HOLD_GAMES };
 
 export const FATHOM_KINDS = [
   "body",
@@ -249,22 +253,8 @@ export const ruleFor = (q: Pick<FathomQuestion, "round" | "unit" | "nameIt">): s
   return round === "name" ? nameRule(q) : RULES[round];
 };
 
-export type Band = "dead-on" | "close" | "near" | "far" | "lost";
-
-/** Bands by score, best first: the least score each one takes. */
-export const BANDS: readonly { band: Band; label: string; min: number }[] = [
-  { band: "dead-on", label: "Dead on", min: 90 },
-  { band: "close", label: "Close", min: 70 },
-  { band: "near", label: "Near", min: 40 },
-  { band: "far", label: "Far", min: 15 },
-  { band: "lost", label: "Lost at sea", min: 0 },
-];
-
-export function bandOf(score: number): Band {
-  return (BANDS.find((b) => score >= b.min) ?? BANDS[BANDS.length - 1]).band;
-}
-
-export const bandLabel = (band: Band): string => BANDS.find((b) => b.band === band)?.label ?? band;
+// The bands live with the history (Past runs shows a game's five squares without this module).
+export { BANDS, bandLabel, bandOf, type Band };
 
 /** A ratio for "Nx too high", from 2: 2, 2.4, 12, 1,500, 3 million. */
 function ratioText(r: number): string {
@@ -837,9 +827,6 @@ export function readBank(json: unknown): FathomQuestion[] | null {
   return out;
 }
 
-/** Games whose questions are held back from the next draw. */
-export const HOLD_GAMES = 3;
-
 /**
  * A game's rounds: two estimates, a percent, a year, and a name-it round (an estimate when the bank has none, or its
  * lists didn't load). Drawn in a mixed order, an easy question first.
@@ -919,9 +906,11 @@ export interface FathomGame {
   at: number;
   /** What was named on a name-it round, by question id: "Colombia". */
   picks?: Record<string, string>;
+  /** Epoch ms it was drawn: the game's id in Past runs and the sync. Older saves lack it. */
+  startedAt?: number;
 }
 
-export const newGame = (ids: string[]): FathomGame => ({ ids, guesses: [], at: 0 });
+export const newGame = (ids: string[], startedAt?: number): FathomGame => ({ ids, guesses: [], at: 0, ...(startedAt !== undefined && { startedAt }) });
 
 export type FathomPhase = "question" | "reveal" | "results";
 
@@ -976,14 +965,17 @@ export const BAND_CHARS: Record<Band, string> = {
   lost: "×",
 };
 
-/** COPY RESULT: "Fathom beta 312/500" and the five bands as plain characters. */
-export function shareText(scored: readonly Scored[]): string {
-  return `Fathom beta ${totalOf(scored)}/${MAX_TOTAL}\n${scored.map((s) => BAND_CHARS[s.band]).join(" ")}`;
+/**
+ * COPY RESULT: "Fathom 312/500", the five bands as plain characters, and the link (`url`, to #fathom) when there is one,
+ * each on its own line (the screen makes the lines keep in a Reddit comment: src/components/share.ts pasteable).
+ */
+export function shareText(scored: readonly Scored[], url?: string): string {
+  return [`Fathom ${totalOf(scored)}/${MAX_TOTAL}`, scored.map((s) => BAND_CHARS[s.band]).join(" "), ...(url ? [url] : [])].join("\n");
 }
 
 /* ---------- The save (its own key) ---------- */
 
-export const FATHOM_KEY = "tentacle:fathom";
+export { FATHOM_KEY };
 
 export interface FathomSave {
   /** The question ids of the last HOLD_GAMES games, newest first (held back from the next draw). */
@@ -1019,7 +1011,8 @@ export function loadFathom(store: Store | undefined = defaultStore()): FathomSav
     const g = raw?.game;
     const ok = g && isIds(g.ids) && Array.isArray(g.guesses) && g.guesses.every((n) => Number.isFinite(n) && n >= 0) && Number.isInteger(g.at);
     const picks = ok ? readPicks(g.picks, g.ids) : undefined;
-    const game = ok ? { ids: g.ids, guesses: g.guesses, at: g.at, ...(picks && { picks }) } : undefined;
+    const startedAt = ok && Number.isFinite(g.startedAt) ? g.startedAt : undefined;
+    const game = ok ? { ids: g.ids, guesses: g.guesses, at: g.at, ...(picks && { picks }), ...(startedAt !== undefined && { startedAt }) } : undefined;
     return { recent, ...(game && { game }) };
   } catch {
     return { recent: [] };
@@ -1034,11 +1027,17 @@ export function saveFathom(save: FathomSave, store: Store | undefined = defaultS
   }
 }
 
-/** A fresh game from the bank, its questions remembered so the next few draws hold them back. */
-export function startGame(save: FathomSave, bank: readonly FathomQuestion[], rand: () => number = Math.random): FathomSave {
+/**
+ * A fresh game from the bank, drawn at `now`, its questions remembered so the next few draws hold them back (the screen
+ * also notes the draw in the player's save, noteDraw in fathom-history.ts, so other devices hold them back too).
+ */
+export function startGame(save: FathomSave, bank: readonly FathomQuestion[], rand: () => number = Math.random, now: number = Date.now()): FathomSave {
   const ids = drawQuestions(bank, save.recent, rand).map((q) => q.id);
-  return { recent: [ids, ...save.recent].slice(0, HOLD_GAMES), game: newGame(ids) };
+  return { recent: [ids, ...save.recent].slice(0, HOLD_GAMES), game: newGame(ids, now) };
 }
+
+/** Whether every question of the game has its guess: its total is final (the last reveal or the results). */
+export const finished = (game: FathomGame): boolean => game.ids.length > 0 && game.guesses.length >= game.ids.length;
 
 /**
  * The saved game, if it can be shown with this bank (its questions all still there): an unfinished one goes on, and a

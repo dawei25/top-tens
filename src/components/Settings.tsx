@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { clearFathomGame } from "../game/fathom-history";
 import { recentPlays } from "../game/history";
 import { load, save, type Saved } from "../game/storage";
 import { noteReset, useAccount } from "../net";
@@ -19,7 +20,8 @@ function hasProgress(saved: Saved): boolean {
     Object.keys(saved.daily).length > 0 ||
     Object.values(saved.blitzRuns ?? {}).some((runs) => runs.length > 0) ||
     Object.keys(saved.blitzDaily ?? {}).length > 0 ||
-    Object.keys(saved.blitzLive ?? {}).length > 0
+    Object.keys(saved.blitzLive ?? {}).length > 0 ||
+    (saved.fathom?.recent?.length ?? 0) > 0
   );
 }
 
@@ -43,6 +45,8 @@ export function Settings({ onBack, onHome }: Props) {
     if (!confirm) return setConfirm(true);
     setConfirm(false);
     save({ games: {}, daily: {}, seenHelp: load().seenHelp });
+    // Fathom's game on screen goes too (its finished games and draws were in the save).
+    clearFathomGame();
     // Signed in, the reset reaches the account and every device instead of syncing back.
     noteReset();
     setCleared(true);

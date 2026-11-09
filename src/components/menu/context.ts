@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import type { DailyEntry } from "../../game/daily";
 
 /** The menu's destinations that are screens, so the one on show can be marked. */
-export type MenuScreen = "today-list" | "archive" | "history" | "stats" | "settings" | "privacy";
+export type MenuScreen = "today-list" | "fathom" | "archive" | "history" | "stats" | "settings" | "privacy";
 
 /**
  * What the menu needs from the app: the screen on show, today's list, and the app's own ways to get there. Rolls go

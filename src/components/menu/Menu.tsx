@@ -155,9 +155,18 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
         return;
       }
       // Scroll keys scroll the menu, if anything; never the page behind. (Space only with no key focused: on a key it
-      // presses it.)
-      if (SCROLL_KEYS.has(e.key) && !scrolls() && (e.key !== " " || document.activeElement === d)) {
+      // presses it.) A menu taller than the screen is scrolled here: with focus on the panel itself, the browser's own
+      // scroll went to the page behind (a phone's menu grew past its screen with the Fathom tile, Nov 9).
+      if (SCROLL_KEYS.has(e.key) && (e.key !== " " || document.activeElement === d)) {
         e.preventDefault();
+        const b = body.current;
+        if (b && scrolls()) {
+          const page = b.clientHeight * 0.85;
+          const by: Record<string, number> = { ArrowDown: 40, ArrowUp: -40, PageDown: page, PageUp: -page, " ": e.shiftKey ? -page : page };
+          if (e.key === "Home") b.scrollTo({ top: 0 });
+          else if (e.key === "End") b.scrollTo({ top: b.scrollHeight });
+          else b.scrollBy({ top: by[e.key] });
+        }
         return;
       }
       if (e.key !== "Tab") return;
@@ -194,7 +203,7 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
   // A Blitz round under way keeps its clock while the menu is open: said at the top, where it can't be missed.
   const live = nav.blitzOnScreen ? resumeBlitz(saved, nav.blitzOnScreen) : undefined;
   const clockRuns = !!live && !live.over;
-  // The one daily first, across the row (as on Home: the main thing gets the most room), then free play's pair.
+  // The one daily first, across the row (as on Home: the main thing gets the most room), then free play's three.
   const play: Tile[] = [
     {
       id: "today-list",
@@ -209,6 +218,7 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
     },
     { id: "random-list", label: "Random list", icon: "dice", tone: "classic", go: nav.onRoll },
     { id: "random-blitz", label: "Random Blitz", icon: "dice", tone: "blitz", disabled: nav.blitzOpen === 0, go: nav.onBlitz },
+    { id: "fathom", label: "Fathom", icon: "sonar", screen: "fathom", go: () => (location.hash = "#fathom") },
   ];
   const hash = (h: string) => () => (location.hash = h);
   const yours: Tile[] = [

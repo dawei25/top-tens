@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalize } from "../../src/game/match";
-import { checkCountryLists, checkList, COUNTRY_LISTS, loadLists, type NameList } from "./lists";
+import { checkCountryLists, checkList, COUNTRY_LISTS, FORMS, isPlace, keptForms, loadLists, NOT_A_NAME, type NameList } from "./lists";
 
 const lists = loadLists();
 const byId = new Map(lists.map(({ list }) => [list.id, list]));
@@ -54,6 +54,25 @@ describe("Fathom name-it lists (public/fathom/lists)", () => {
     for (const [t, name] of Object.entries(typed)) expect(form.get(normalize(t)), t).toBe(name);
     // "Congo" is two countries: neither list entry takes it alone.
     expect(form.get("congo")).toBeUndefined();
+  });
+
+  // Nov 8: "England", "Scotland" and "Wales" were aliases of the United Kingdom, so they locked the whole UK. A place of
+  // its own (fathom-name.ts PLACES) is never an alias: the round says what it is ("Scotland is part of the UK.").
+  it("carries no place of its own as an alias: England, Scotland, Wales, Northern Ireland, Tasmania...", () => {
+    const found = lists.flatMap(({ list }) => list.entries.flatMap((e) => e.aliases.filter(isPlace).map((a) => `${list.id}: ${a} (${e.name})`)));
+    expect(found).toEqual([]);
+    const uk = byId.get("countries-population")!.entries.find((e) => e.name === "United Kingdom")!;
+    expect(uk.aliases.map(normalize)).not.toContain("england");
+    expect(keptForms("United Kingdom", ["UK", "England", "Scotland", "Wales", "Northern Ireland", "Scottish", "Welsh", "British"])).toEqual(["UK", "British"]);
+  });
+
+  it("carries the forms a judge found missing, and no redirect that isn't a name", () => {
+    for (const { list } of lists)
+      for (const e of list.entries) {
+        for (const f of FORMS[e.name] ?? []) expect(e.aliases, `${list.id}: ${e.name}`).toContain(f);
+        expect(e.aliases.filter((a) => NOT_A_NAME.test(a)), `${list.id}: ${e.name}`).toEqual([]);
+      }
+    expect(keptForms("Zambia", ["Zamibia", "Zambian sports", "Traditional Zambian games"])).toEqual(["Zamibia"]);
   });
 
   it("counts land borders as neighbouring countries, not border segments", () => {

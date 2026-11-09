@@ -64,7 +64,7 @@ import {
   type FathomQuestion,
   type Round,
 } from "./fathom";
-import { trainLexicon } from "./junk";
+import { fnv, trainLexicon } from "./junk";
 import {
   asOfText,
   bestAnswers,
@@ -76,6 +76,9 @@ import {
   readList,
   readName,
   readNameQuestion,
+  LINE_MAX,
+  PLACES,
+  rewrites,
   withArticle,
   type NameList,
   type NameRead,
@@ -1082,8 +1085,11 @@ describe("a game", () => {
     let g = newGame(bank.slice(0, 5).map((x) => x.id));
     for (const guess of [200, 100, 400, 1e9, 130]) g = nextQuestion(lockIn(g, guess));
     const text = shareText(scoreGame(g, bank));
-    expect(text).toBe(`Fathom beta 244/${MAX_TOTAL}\n▒ █ ░ × ▓`);
+    expect(text).toBe(`Fathom 244/${MAX_TOTAL}\n▒ █ ░ × ▓`);
     expect(text).not.toMatch(/\p{Extended_Pictographic}/u);
+    // Out of beta (Nov 9): the name alone, and the link to the game on a line of its own.
+    expect(shareText(scoreGame(g, bank), "https://toptentacle.io/#fathom")).toBe(`Fathom 244/${MAX_TOTAL}\n▒ █ ░ × ▓\nhttps://toptentacle.io/#fathom`);
+    expect(text).not.toMatch(/beta/i);
   });
   // Nov 5 review: lost at sea shared as "□", which reads as a question not played. Every band has its own mark, and
   // none of them is an empty box.
@@ -1278,8 +1284,18 @@ describe("name-it: reading the name", () => {
     const withHaiti = { ...POPULATION, entries: [...POPULATION.entries, { name: "Haiti", aliases: [], value: 11.7e6 }] };
     expect(said(readName("Hawaii", withHaiti, []))).toBe("other Hawaii (US state)");
     expect(said(readName("Haitii", withHaiti, []))).toBe("confirm Haiti");
+    // The UK's nations are countries within it (Nov 8: "England" locked the whole UK on the real lists).
     const ni = read("Northern Ireland");
-    expect(ni).toEqual({ kind: "other", name: "Northern Ireland", noun: "", partOf: "the UK" });
+    expect(ni).toEqual({ kind: "other", name: "Northern Ireland", noun: "country", partOf: "the UK" });
+    expect(said(read("Scotland"))).toBe("other Scotland (country)");
+    // Islands and regions are part of their country, and never a misspelling of another (Tasmania is not Tanzania).
+    expect(read("Tasmania")).toEqual({ kind: "other", name: "Tasmania", noun: "island", partOf: "Australia" });
+    expect(said(read("Bali", BORDERS))).toBe("other Bali (island)");
+    expect(read("Canary Islands")).toEqual({ kind: "other", name: "The Canary Islands", noun: "islands", partOf: "Spain", plural: true });
+    expect(said(read("Yugoslavia"))).toBe("other Yugoslavia (former country)");
+    // An exact place before a near name of another kind: "Africa" on a city question is a continent, not South Africa.
+    expect(said(read("Africa", CITIES))).toBe("other Africa (continent)");
+    expect(said(read("South America", CITIES))).toBe("other South America (continent)");
   });
 
   it("says when it doesn't know it, and never turns it into an answer", () => {
@@ -1292,9 +1308,19 @@ describe("name-it: reading the name", () => {
 
   // With the game's lexicon: a real name the list doesn't have says so, and a misspelling the lexicon happens to know as
   // a name elsewhere ("Irak") is still offered: it needs a tap either way.
-  it("with the game's lexicon, says a real name isn't on the list, and still offers what a misspelling means", () => {
-    const lex = trainLexicon(["water"], ["Berlin", "Irak", "Lagos", "Kyiv"]);
+  // Nov 8: the lexicon's real names were still offered as misspellings once it held them back ("Abkhazia" as
+  // Afghanistan, "Tasmania" as Tanzania). Only a misspelling the game stores as one (Lexicon.slips: "Irak" of Iraq) is.
+  it("with the game's lexicon, says a real name isn't on the list, and still offers what a stored misspelling means", () => {
+    const lex = { ...trainLexicon(["water"], ["Berlin", "Irak", "Lagos", "Kyiv", "Irun", "Afganstan"]), slips: fnv("irak>iraq").toString(36) };
     const withLex = (text: string, l = POPULATION) => said(readName(text, l, [...LISTS.values()], { lex }));
+    // A real name one slip from a country (a town in Spain) is still offered as that country, to confirm; one further
+    // off (as "Abkhazia" is from Afghanistan's forms) is itself, offered only without the lexicon.
+    expect(said(readName("Irun", BORDERS, [...LISTS.values()]))).toBe("confirm Iran");
+    expect(withLex("Irun", BORDERS)).toBe("confirm Iran");
+    expect(said(readName("Afganstan", BORDERS, [...LISTS.values()]))).toBe("confirm Afghanistan");
+    expect(withLex("Afganstan", BORDERS)).toBe("offList Afganstan");
+    // An ordinary word the lexicon knows is no name at all.
+    expect(withLex("water")).toBe("unknown");
     expect(withLex("Berlin", CITIES)).toBe("offList Berlin");
     expect(withLex("kyiv", CITIES)).toBe("offList Kyiv");
     expect(nameLine(readName("berlin", CITIES, [], { lex }), CITIES)).toBe(`Berlin isn't one of our ${CITIES.entries.length} cities. Try again.`);
@@ -1302,6 +1328,18 @@ describe("name-it: reading the name", () => {
     expect(withLex("Lagos")).toBe("other Lagos (city)");
     expect(withLex("Frnace")).toBe("confirm France");
     expect(withLex("asdf")).toBe("unknown");
+  });
+
+  // Nov 8: "Korea, North" was put in the box as South Korea, "Dominican Rep" was not one we know.
+  it("reads a list's inverted form and the short forms of Republic and Democratic, exactly", () => {
+    expect(rewrites("Korea, North")).toEqual(["North Korea"]);
+    expect(rewrites("Gambia, The")).toEqual(["The Gambia"]);
+    expect(rewrites("Dominican Rep.")).toEqual(["Dominican Republic"]);
+    expect(rewrites("Congo, Dem. Rep.")).toEqual(["Dem. Rep. Congo", "Congo, Democratic Republic", "Democratic Republic Congo"]);
+    expect(rewrites("France")).toEqual([]);
+    expect(said(read("Korea, North"))).toBe("answer North Korea");
+    expect(said(read("Korea, South"))).toBe("answer South Korea");
+    expect(said(read("Congo, Republic of the"))).toBe("answer Republic of the Congo");
   });
 
   it("leaves out the question's own yardstick", () => {
@@ -1321,6 +1359,25 @@ describe("name-it: reading the name", () => {
     expect(line(read("Serbia"))).toBe(`Serbia isn't one of our ${POPULATION.entries.length} countries. Try again.`);
     expect(line(read("Greenland"))).toBe("Greenland is a territory, not a country. Try again.");
     expect(line(read("Northern Ireland"))).toBe("Northern Ireland is part of the UK. Try again.");
+    expect(line(read("Wales", CITIES), CITIES)).toBe("Wales is part of the UK, not a city.");
+    expect(line(read("Tasmania"))).toBe("Tasmania is part of Australia, not a country.");
+    expect(line(read("Canary Islands"))).toBe("The Canary Islands are part of Spain, not a country.");
+    expect(line(read("Brooklyn", CITIES), CITIES)).toBe("Brooklyn is part of New York City, not a city.");
+    expect(line(read("Borneo"))).toBe("Borneo is an island, not a country. Try again.");
+    expect(line(read("USSR"))).toBe("USSR is no longer a country. Try again.");
+    expect(line(read("Yugoslavia", CITIES), CITIES)).toBe("Yugoslavia was a country, not a city. Try again.");
+    expect(line({ kind: "other", name: "The Galápagos Islands Archipelago", noun: "islands", partOf: "Ecuador", plural: true })).toBe(
+      "They are part of Ecuador, not a country.",
+    );
+    // Every place's line, on a country question and a city one, keeps to the longest a line gets: LINE_MAX (58), two lines at 320px
+    // (fathom-name.e2e.cjs measures the longest; "US Virgin Islands are a territory, not a country. Try again." took three).
+    for (const p of PLACES)
+      for (const name of p.names)
+        for (const l of [POPULATION, CITIES]) {
+          const r = readName(name, { ...l, entries: [{ name: "Nowhere", aliases: [], value: 1 }] }, []);
+          expect(r.kind, name).toBe("other");
+          expect(nameLine(r, l).length, nameLine(r, l)).toBeLessThanOrEqual(LINE_MAX);
+        }
     expect(line({ kind: "offList", name: "Bosnia Herzegovina" })).toBe(`That isn't one of our ${POPULATION.entries.length} countries. Try again.`);
     expect(line(read("UK", AREA, { except: ["United Kingdom"] }), AREA)).toBe("Any country but United Kingdom. Try again.");
     expect(line({ kind: "empty" })).toBe("Type a country first.");
@@ -1492,7 +1549,7 @@ describe("name-it: a game", () => {
     expect(scored[1]).toMatchObject({ pick: "Colombia", guess: 52886363, points: fathomScore(52886363, 50e6), band: "dead-on" });
     expect(scored[0].pick).toBeUndefined();
     expect(totalOf(scored)).toBe(100 + fathomScore(52886363, 50e6) + 100 + 49 + 49);
-    expect(shareText(scored)).toBe(`Fathom beta ${totalOf(scored)}/500\n█ █ █ ▒ ▒`);
+    expect(shareText(scored)).toBe(`Fathom ${totalOf(scored)}/500\n█ █ █ ▒ ▒`);
   });
   it("keeps what was named in the save, and drops a pick that isn't a name of this game's", () => {
     const m = new Map<string, string>();

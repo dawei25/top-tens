@@ -87,9 +87,11 @@ interface Props {
   /** Goes to a random Blitz-ready list (in the category, if given); false when there is none. */
   onBlitz: (category?: string) => Promise<boolean>;
   onArchive: () => void;
+  /** Fathom, the estimation game: a game under way, or a new one. */
+  onFathom: () => void;
 }
 
-export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDaily, onRoll, onBlitz, onArchive }: Props) {
+export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDaily, onRoll, onBlitz, onArchive, onFathom }: Props) {
   const [noBlitz, setNoBlitz] = useState(false);
   /** The open "by category" picker, if any (one at a time). */
   const [picker, setPicker] = useState<Pick | null>(null);
@@ -334,7 +336,7 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
               Free play
             </h2>
           </div>
-          {/* Each key rolls at once; the strip under it opens that mode's categories (a chip rolls in that one). */}
+          {/* Each list key rolls at once; the strip under it opens that mode's categories (a chip rolls in that one). */}
           <div className="mode-pair">
             {freeKey(
               "list",
@@ -360,6 +362,10 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
               blitzCats,
               blitzStrip,
             )}
+            {/* Fathom has no lists, so no categories: its key alone, its line where the others count their lists. */}
+            <div className="free-key fathom">
+              <ModeKey mode="fathom" testId="fathom-key" title="Fathom" status="Guess the number: 5 questions" onClick={onFathom} />
+            </div>
           </div>
           {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
         </section>

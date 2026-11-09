@@ -1,4 +1,4 @@
-// Fathom, the estimation beta (#fathom): five questions that ask for a number. The questions come from
+// Fathom, the estimation game (#fathom): five questions that ask for a number. The questions come from
 // e2e/fixtures/fathom/questions.json (twelve real facts, one per kind, all estimates, so a draw from it fills the
 // percent and year rounds with estimates), served in place of public/fathom/questions.json; the percent and year
 // rounds add two real questions of their own (PERCENT, YEAR).
@@ -6,8 +6,9 @@
 //   question before answering (and on the results), the field (no scale keys or words, the number grouped with commas
 //   as it's typed and the caret after the same digit, "2.5m" still read), invalid input, the reveal (plain closeness,
 //   the same for every question; no "most people miss by" line), the running total from the second question, the
-//   results (the total is the sum), COPY RESULT, NEW QUESTIONS draws new questions, the game's own save is left alone,
-//   and a build without a backend sends and queues nothing.
+//   results (the total is the sum), COPY RESULT (the total, the squares and the link, lines that keep in a Reddit
+//   comment), NEW QUESTIONS draws new questions, the player's save gains only Fathom's part (the finished game, its
+//   total, the draws), and a build without a backend sends and queues nothing.
 // - A percent round and a year round on phone and desktop: each one's rule in view before its answer (and all three on
 //   the results), the field (a decimal keypad and "%" for a percent, 0 to 100; a number pad for a year, never grouped
 //   as "2,007"), the points by each round's rule (a percent by points off and times off its share, or past 50 what's
@@ -24,13 +25,13 @@
 // - At 320px the echo keeps every message on one line and the keys where they were.
 // - No horizontal scroll at 320px, and every control 44px to the finger.
 // - A missing questions file says so.
-// - Hidden: Home and the menu have no way to it.
+// Its Home key, menu tile, How to play rule, Stats block and Past runs rows: fathom-public.e2e.cjs.
 // Its hover, focus and press states are in the states walk (states.e2e.cjs); its look in visual.e2e.cjs.
 const { describe, test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { chromium, VIEWPORTS, open, go, store, noHScroll } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, open, store, noHScroll } = require("./helpers.cjs");
 const { shortReach } = require("./fathom-lib.cjs");
 
 const { PNG } = require("pngjs");
@@ -296,11 +297,12 @@ describe("Fathom", { concurrency: true }, () => {
       // The key that draws new questions says so: "Play again" read as the same five again (UX.md 1 and 14).
       assert.doesNotMatch(await page.getByTestId("fathom-again").innerText(), /again/i);
 
-      // COPY RESULT: "Fathom beta <total>/500" and five plain characters, no emoji.
+      // COPY RESULT: "Fathom <total>/500", five plain characters and the link, no emoji (two spaces end each line but
+      // the last, so a Reddit comment keeps them).
       if (vp.name === "desktop") {
         await page.getByTestId("fathom-copy").click();
         const text = await page.evaluate(() => navigator.clipboard.readText());
-        assert.match(text, new RegExp(`^Fathom beta ${total}/500\\n\\S( \\S){4}$`));
+        assert.match(text, new RegExp(`^Fathom ${total}/500  \\n\\S( \\S){4}  \\nhttps?://\\S+/#fathom$`));
         assert.doesNotMatch(text, /\p{Extended_Pictographic}/u);
       }
 
@@ -315,8 +317,12 @@ describe("Fathom", { concurrency: true }, () => {
       assert.equal((await shownQuestion(page)).easy, true);
       assert.deepEqual(saved.recent[1], firstIds, "the last games are remembered, newest first");
 
-      // Fathom keeps to its own key: the game's save is as it was.
-      assert.deepEqual(await store(page), before);
+      // The player's save gains Fathom's part only (the game played, its total, the draws); the rest is as it was.
+      const kept = await store(page);
+      assert.deepEqual({ ...kept, fathom: undefined }, { ...before, fathom: undefined });
+      assert.deepEqual(kept.fathom.runs.map((r) => r.ids), [firstIds]);
+      assert.deepEqual(Object.values(kept.fathom.totals), [total]);
+      assert.deepEqual(kept.fathom.recent.map((d) => d.ids).slice(0, 2), [saved.game.ids, firstIds]);
       // Without a backend, no guess was sent or queued.
       assert.deepEqual(away, [], "requests off the site");
       assert.equal(await page.evaluate(() => localStorage.getItem("top-tens:fathom-outbox")), null, "no guesses queued");
@@ -487,7 +493,7 @@ describe("Fathom", { concurrency: true }, () => {
       if (vp.name === "desktop") {
         await page.getByTestId("fathom-copy").click();
         const text = await page.evaluate(() => navigator.clipboard.readText());
-        assert.match(text, new RegExp(`^Fathom beta ${total}/500\\n\\S( \\S){4}$`));
+        assert.match(text, new RegExp(`^Fathom ${total}/500  \\n\\S( \\S){4}  \\nhttps?://\\S+/#fathom$`));
       }
       await ctx.close();
     });
@@ -927,30 +933,6 @@ describe("Fathom", { concurrency: true }, () => {
       assert.equal(await page.getByTestId("fathom-input").count(), 0);
       await ctx.close();
     }
-  });
-
-  test("hidden: Home and the menu have no way to Fathom", async () => {
-    const vp = VIEWPORTS.find((v) => v.name === "desktop");
-    const { ctx, page } = await open(browser, vp);
-    await page.getByTestId("today-list").waitFor();
-    const traces = (scope) =>
-      page.evaluate((scope) => {
-        const root = document.querySelector(scope);
-        return {
-          links: [...root.querySelectorAll("a[href]")].filter((a) => /fathom/i.test(a.getAttribute("href"))).length,
-          ids: [...root.querySelectorAll("[data-testid]")].filter((el) => /fathom/i.test(el.dataset.testid)).length,
-          words: /fathom/i.test(root.innerText),
-        };
-      }, scope);
-    assert.deepEqual(await traces("body"), { links: 0, ids: 0, words: false }, "Home");
-    await page.getByTestId("menu-key").click();
-    await page.getByTestId("menu").waitFor();
-    assert.deepEqual(await traces('[data-testid="menu"]'), { links: 0, ids: 0, words: false }, "the menu");
-    await page.keyboard.press("Escape");
-    // Only the link opens it.
-    await go(page, "#fathom");
-    await page.getByTestId("fathom").waitFor();
-    await ctx.close();
   });
 });
 

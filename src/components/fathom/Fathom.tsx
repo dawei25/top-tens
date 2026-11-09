@@ -2,10 +2,12 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type Rea
 import { flushSync } from "react-dom";
 import {
   amountText,
+  BAND_CHARS,
   bandLabel,
   bandOf,
   editField,
   figureParts,
+  finished,
   formatAmount,
   guessError,
   loadFathom,
@@ -31,9 +33,12 @@ import {
   type Band,
   type FathomGame,
   type FathomQuestion,
+  type FathomSave,
   type NumberError,
   type Scored,
 } from "../../game/fathom";
+import { findRun, noteDraw, recentIds, recordRun, runTotal, type FathomRun } from "../../game/fathom-history";
+import { load, save } from "../../game/storage";
 import {
   asOfText,
   bestAnswers,
@@ -47,8 +52,9 @@ import {
 } from "../../game/fathom-name";
 import type { Lexicon } from "../../game/junk";
 import { loadLexicon } from "../../game/puzzles";
-import { compareRound, submitFathomGuess, useFathomCrowd } from "../../net";
+import { compareRound, reportFathom, submitFathomGuess, useFathomCrowd } from "../../net";
 import { Loading } from "../Game";
+import { pasteable } from "../share";
 import { CountUp } from "../motion/effects";
 import { END_FOCUS_MS, reducedMotion, ScreenHead, SwapLabel } from "../pixel";
 import { playFathom } from "../sound/fathom";
@@ -57,18 +63,71 @@ import { BUOY, placed, SQUID } from "./sprites";
 import "./fathom.css";
 
 /**
- * Fathom (beta, #fathom): five questions: estimates in a unit that keeps them short ("kilometres", "million people"),
- * a percent, a year, and a name-it round ("Name a country with about 50 million people", read with the game's matcher
- * over its list). Type a guess, lock it in, see how close it was on a sonar, and NEXT; five of those and the results.
- * One plain scoring rule for each round, stated on the round's first question and again on the results. No timer, no
- * lives, and nothing here touches the rest of the game: its own save, no record or stats. With a backend, each number
- * guess is also sent, and a reveal says how real players guessed once there are enough of them. Reached only by its
- * link; App loads this screen as its own chunk.
+ * Fathom (#fathom, from Home's Free play and the menu): five questions: estimates in a unit that keeps them short
+ * ("kilometres", "million people"), a percent, a year, and a name-it round ("Name a country with about 50 million
+ * people", read with the game's matcher over its list). Type a guess, lock it in, see how close it was on a sonar, and
+ * NEXT; five of those and the results. One plain scoring rule for each round, stated on the round's first question and
+ * again on the results. No timer, no lives, endless games. The game on screen is kept in this browser; each draw and
+ * each finished game go into the player's save (Past runs, Stats, and the account's sync: fathom-history.ts). With a
+ * backend, each guess is also sent, and a reveal says how real players guessed once there are enough of them. App loads
+ * this screen as its own chunk.
+ *
+ * With `run` (#fathom/run-<startedAt>, from Past runs), it shows that finished game's results instead.
  */
 
 interface Props {
   onBack: () => void;
   onHome: () => void;
+  /** A finished game to show (its startedAt), from Past runs. */
+  run?: number;
+}
+
+/** The share text's link: Fathom itself. */
+const fathomUrl = () => `${location.origin}${location.pathname}#fathom`;
+
+/**
+ * The questions the next draw holds back: the last games drawn on any of the player's devices (the save), or this
+ * browser's own memory from before they were kept there.
+ */
+const recentOf = (local: FathomSave): string[][] => {
+  const synced = recentIds(load().fathom);
+  return synced.length ? synced : local.recent;
+};
+
+/** A fresh game, drawn now: kept in this browser, and its draw in the player's save. */
+function freshGame(bank: readonly FathomQuestion[]): FathomGame {
+  const local = loadFathom();
+  const next = startGame({ ...local, recent: recentOf(local) }, bank);
+  saveFathom(next);
+  const game = next.game!;
+  save({ ...load(), fathom: noteDraw(load().fathom, { startedAt: game.startedAt!, ids: game.ids }) });
+  return game;
+}
+
+/**
+ * A game whose last guess is in, recorded in the player's save (once: Past runs, Stats, the sync), with each question's
+ * points as scored now. A game from before games were dated gets its date first.
+ */
+function recordFinished(game: FathomGame, bank: readonly FathomQuestion[]): void {
+  if (!finished(game) || game.startedAt === undefined) return;
+  const scored = scoreGame(game, bank);
+  if (scored.length !== game.ids.length) return;
+  const run: FathomRun = {
+    startedAt: game.startedAt,
+    finishedAt: Date.now(),
+    ids: game.ids,
+    guesses: game.guesses,
+    ...(game.picks && { picks: game.picks }),
+    points: scored.map((x) => x.points),
+  };
+  const before = load();
+  // A game from before a reset made on another device stays out (the sync would only prune it again).
+  const resetAt = (before as { resetAt?: number }).resetAt;
+  if (resetAt && run.startedAt < resetAt) return;
+  const fathom = recordRun(before.fathom, run);
+  if (fathom === before.fathom) return;
+  save({ ...before, fathom });
+  reportFathom();
 }
 
 const BANK_URL = `${import.meta.env.BASE_URL}fathom/questions.json`;
@@ -143,12 +202,14 @@ function useShort(): boolean {
   return short;
 }
 
-export default function Fathom({ onBack, onHome }: Props) {
+export default function Fathom({ onBack, onHome, run }: Props) {
   const [data, setData] = useState<Loaded | null | "missing">(null);
   const [game, setGame] = useState<FathomGame | null>(null);
   // The matcher's lexicon (TENtacle's, the app already has it cached): what was typed is a real name of its own, so it
   // is never "corrected" into a different one. Optional: without it, a name still reads.
   const [lex, setLex] = useState<Lexicon>();
+  // Fetched with the bank, so it is there by the name-it round; a name read before it arrives waits for it.
+  const [lexicon] = useState(loadLexicon);
   const short = useShort();
 
   useEffect(() => {
@@ -157,18 +218,21 @@ export default function Fathom({ onBack, onHome }: Props) {
       if (!live) return;
       if (!loaded) return setData("missing");
       const b = loaded.bank;
-      // Pick up the game on screen, unfinished or on its results (a reload, the phone dropping the tab); otherwise a
-      // new draw.
-      const save = loadFathom();
-      const resumed = resumable(save, b);
-      if (resumed) setGame(resumed);
-      else {
-        const next = startGame(save, b);
-        saveFathom(next);
-        setGame(next.game!);
+      // A past game from Past runs: only its results, nothing drawn.
+      if (run === undefined) {
+        // Pick up the game on screen, unfinished or on its results (a reload, the phone dropping the tab); otherwise a
+        // new draw. A game from before games were dated is dated now, and recorded if it is over.
+        const local = loadFathom();
+        let resumed = resumable(local, b);
+        if (resumed && resumed.startedAt === undefined) {
+          resumed = { ...resumed, startedAt: Date.now() };
+          saveFathom({ ...local, game: resumed });
+        }
+        if (resumed) recordFinished(resumed, b);
+        setGame(resumed ?? freshGame(b));
       }
       setData(loaded);
-      if (loaded.lists.size) loadLexicon().then((l) => live && setLex(l));
+      if (loaded.lists.size) lexicon.then((l) => live && setLex(l));
     });
     return () => {
       live = false;
@@ -177,7 +241,7 @@ export default function Fathom({ onBack, onHome }: Props) {
 
   const head = (
     <ScreenHead onBack={onBack} onHome={onHome}>
-      <span className="label mode">Fathom · beta</span>
+      <span className="label mode">Fathom</span>
     </ScreenHead>
   );
 
@@ -187,12 +251,13 @@ export default function Fathom({ onBack, onHome }: Props) {
         {head}
         <section data-glass className="panel prompt" data-testid="fathom-missing">
           <p className="label pink">No questions</p>
-          <h1>The questions aren't here yet.</h1>
-          <p className="caption">fathom is in beta. try again later.</p>
+          <h1>The questions didn't load.</h1>
+          <p className="caption">check your connection and try again.</p>
         </section>
       </main>
     );
   }
+  if (data && run !== undefined) return <PastGame head={head} run={run} bank={data.bank} />;
   if (!data || !game) return <Loading />;
   const { bank, lists } = data;
 
@@ -204,6 +269,7 @@ export default function Fathom({ onBack, onHome }: Props) {
   const update = (next: FathomGame) => {
     setGame(next);
     saveFathom({ ...loadFathom(), game: next });
+    recordFinished(next, bank);
   };
   // LOCK IN: a click, the ping and the band's sound (with sound on), the guess sent (with a backend), then the reveal.
   // A name-it round's guess is the figure of the thing named, kept with its name, and that figure is what's sent.
@@ -224,9 +290,8 @@ export default function Fathom({ onBack, onHome }: Props) {
     focusGuess();
   };
   const again = () => {
-    const fresh = startGame(loadFathom(), bank);
-    saveFathom(fresh);
-    flushSync(() => setGame(fresh.game!));
+    const fresh = freshGame(bank);
+    flushSync(() => setGame(fresh));
     scrollTo({ top: 0 });
     focusGuess();
   };
@@ -286,6 +351,7 @@ export default function Fathom({ onBack, onHome }: Props) {
                 list={list}
                 others={[...lists.values()]}
                 lex={lex}
+                lexicon={lexicon}
                 onLock={lock}
                 footer={ruleBelow && rule ? rule : undefined}
               />
@@ -393,6 +459,9 @@ function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (
   );
 }
 
+/** How long a name waits for the lexicon still on its way before it is read without it. */
+const LEXICON_WAIT_MS = 1500;
+
 /** The tone of a name-it line: a choice to tap, a name in the box to confirm, or why nothing locked. */
 const toneOf = (r: NameRead) => (r.kind === "choose" ? "choose" : r.kind === "confirm" ? "value" : "error");
 
@@ -408,6 +477,7 @@ function AskName({
   list,
   others,
   lex,
+  lexicon,
   onLock,
   footer,
 }: {
@@ -415,6 +485,8 @@ function AskName({
   list: NameList;
   others: NameList[];
   lex?: Lexicon;
+  /** The lexicon on its way, if `lex` isn't here yet: a name read before it arrives waits for it (a moment at most). */
+  lexicon?: Promise<Lexicon | undefined>;
   onLock: (value: number, pick: string) => void;
   footer?: ReactNode;
 }) {
@@ -424,9 +496,11 @@ function AskName({
   const offered = useRef<string[] | undefined>(undefined);
   const noun = list.noun;
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
-    const r = readName(text, list, others, { lex, offered: offered.current, except: question.nameIt?.except });
+    // Without the lexicon a real name may read as a misspelling of something on the list ("Dubai"): wait for it.
+    const known = lex ?? (lexicon && (await Promise.race([lexicon, new Promise<undefined>((r) => setTimeout(r, LEXICON_WAIT_MS))])));
+    const r = readName(text, list, others, { lex: known, offered: offered.current, except: question.nameIt?.except });
     if (r.kind === "answer") return onLock(r.entry.value, r.entry.name);
     if (r.kind === "confirm") setText(r.entry.name);
     if (r.kind === "choose") offered.current = r.names;
@@ -641,12 +715,92 @@ function Figure({ parts }: { parts: { n: string; unit?: string } }) {
   );
 }
 
+/** The share text of a game: the total, the five bands, the link to Fathom; lines that keep in a Reddit comment. */
+const shareOf = (scored: readonly Scored[]) => pasteable(shareText(scored, fathomUrl()));
+
+/**
+ * A finished game from Past runs (#fathom/run-<startedAt>): its results as they were scored (each question's points
+ * kept with the game), the recap of the questions still in the bank, and the way back to playing: RESUME GAME while a
+ * game is under way, else NEW QUESTIONS. A game no longer kept here (another device's, pruned) says so.
+ */
+function PastGame({ head, run: at, bank }: { head: ReactNode; run: number; bank: FathomQuestion[] }) {
+  const run = findRun(load().fathom, at);
+  const local = loadFathom();
+  const underWay = resumable(local, bank);
+  const resume = !!underWay && !finished(underWay);
+  const play = () => {
+    if (!resume) freshGame(bank);
+    location.hash = "#fathom";
+  };
+  if (!run) {
+    return (
+      <main className="screen fathom" data-testid="fathom" data-phase="gone">
+        {head}
+        <section data-glass className="panel prompt" data-testid="fathom-gone">
+          <p className="label pink">Not here</p>
+          <h1>That game isn't kept here.</h1>
+          <div className="results-actions">
+            <button type="button" className="key key-pink" data-testid="fathom-again" onClick={play}>
+              {resume ? "Resume game" : "New questions"}
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
+  const byId = new Map(bank.map((q) => [q.id, q]));
+  const scored: Scored[] = run.ids.flatMap((id, i) => {
+    const question = byId.get(id);
+    if (!question) return [];
+    const pick = run.picks?.[id];
+    return [{ question, guess: run.guesses[i], points: run.points[i], band: bandOf(run.points[i]), ...(pick !== undefined && { pick }) }];
+  });
+  const bands = run.points.map(bandOf);
+  const share = pasteable([`Fathom ${runTotal(run)}/${MAX_TOTAL}`, bands.map((b) => BAND_CHARS[b]).join(" "), fathomUrl()].join("\n"));
+  const when = new Date(run.finishedAt);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    <main className="screen fathom" data-testid="fathom" data-phase="past" data-run={run.startedAt}>
+      {head}
+      <Results
+        scored={scored}
+        total={runTotal(run)}
+        bands={bands}
+        share={share}
+        onAgain={play}
+        againLabel={resume ? "Resume game" : "New questions"}
+        when={`played ${when.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${pad(when.getHours())}:${pad(when.getMinutes())}`}
+        count={false}
+      />
+    </main>
+  );
+}
+
 /**
  * The end: the total, the five bands in a row, the scoring rules again (one line for each round played), NEW
- * QUESTIONS and COPY RESULT, then each question with guess and answer.
+ * QUESTIONS and COPY RESULT, then each question with guess and answer. A past game passes its own total, bands and
+ * share text (a question gone from the bank has no row), when it was played, and its key's label.
  */
-function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void }) {
-  const total = totalOf(scored);
+function Results({
+  scored,
+  onAgain,
+  total = totalOf(scored),
+  bands = scored.map((s) => s.band),
+  share = shareOf(scored),
+  againLabel = "New questions",
+  when,
+  count = true,
+}: {
+  scored: Scored[];
+  onAgain: () => void;
+  total?: number;
+  bands?: Band[];
+  share?: string;
+  againLabel?: string;
+  when?: string;
+  /** The total counts up as it appears (the end of a game), or shows as it is (a past one). */
+  count?: boolean;
+}) {
   const [copied, setCopied] = useState(false);
   const copyKey = useRef<HTMLButtonElement>(null);
   // COPY RESULT takes focus a beat after the end, never at once: an Enter still held from NEXT lands on nothing.
@@ -661,13 +815,12 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
   }, [copied]);
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(shareText(scored));
+      await navigator.clipboard.writeText(share);
       setCopied(true);
     } catch {
       // No clipboard here (an insecure page, a refusal): nothing to say it was copied.
     }
   };
-  const bands = scored.map((s) => s.band);
   // Each round's rule once, from the first question of that round (a name-it round's is its list's).
   // Rounds that share a rule say it once.
   const played = ROUNDS.flatMap((r) => {
@@ -679,9 +832,7 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
       <section className="panel results enter fathom-results" data-glass data-testid="fathom-results">
         <p className="label cyan">Your total</p>
         <p className="score" data-testid="fathom-total" data-total={total} aria-label={`${total} out of ${MAX_TOTAL}`}>
-          <span className="score-n">
-            <CountUp value={total} />
-          </span>
+          <span className="score-n">{count ? <CountUp value={total} /> : total}</span>
           <span className="score-of">/{MAX_TOTAL}</span>
         </p>
         <div className="band-row" role="img" aria-label={bands.map(bandLabel).join(", ")} data-testid="fathom-bands">
@@ -694,9 +845,14 @@ function Results({ scored, onAgain }: { scored: Scored[]; onAgain: () => void })
             {rule}
           </p>
         ))}
+        {when && (
+          <p className="caption fathom-when" data-testid="fathom-when">
+            {when}
+          </p>
+        )}
         <div className="results-actions">
           <button type="button" className="key key-pink" data-testid="fathom-again" onClick={onAgain}>
-            New questions
+            {againLabel}
           </button>
           <button ref={copyKey} type="button" className="key" data-testid="fathom-copy" onClick={copy}>
             <SwapLabel off="Copy result" on="Copied" active={copied} />
