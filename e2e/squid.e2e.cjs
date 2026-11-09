@@ -276,7 +276,7 @@ for (const vp of VIEWPORTS) {
       // Beside a control, a phone hands the tap's click to it (touch adjustment: in Chromium a touch 4px above row 1,
       // on the board's head, clicks row 1). The press and lift land on the squid, the click on the row: the row's
       // alone. Replayed as events (the squid can't be put there), with each click: on the row, on bare glass, none.
-      const q = await squidWhere(page, "clear");
+      let q = await squidWhere(page, "clear");
       const replay = (click) =>
         page.evaluate(
           ({ q, click }) => {
@@ -293,9 +293,12 @@ for (const vp of VIEWPORTS) {
       await page.clock.runFor(400);
       assert.equal((await reaction(page)).pokes, 0, "the squid took a tap the browser gave a row");
       await page.keyboard.press("Escape");
+      q = await squidWhere(page, "clear");
       await replay("glass");
       assert.equal((await reaction(page)).pokes, 1, "a tap on the squid, clicked on bare glass, is the squid's");
       await page.clock.runFor(1500);
+      // Where it is now: it roams on meanwhile (replayed where it was, the tap missed it 1 run in 2, Nov 9).
+      q = await squidWhere(page, "clear");
       await replay(null);
       assert.equal((await reaction(page)).pokes, 1, "the squid didn't wait for the click");
       // A beat later (250 ms) the squid takes a tap no click followed. Stepped, not one jump: under load the frame
