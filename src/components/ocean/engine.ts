@@ -930,10 +930,12 @@ export function startOcean(els: OceanEls): Ocean {
   function fleeForInk() {
     const d = inkDue;
     if (!d) return;
+    // Out past the cloud: its blobs spread about 0.7 of its size (canvas px) from the siphon; and half its own width.
+    const clear = (0.7 * d.size + SQUID_W * 0.5) * px;
     swimmer.flee(() => {
       inkDue = null;
       puff(siphon(), d.size, d.big, d.n);
-    });
+    }, clear);
   }
   /** Each frame: ink still due and the flee taken over, flee again; too late, drop it. */
   function inkStillDue() {

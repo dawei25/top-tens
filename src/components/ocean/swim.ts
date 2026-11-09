@@ -164,6 +164,8 @@ export class Swimmer {
   private onJet: (() => void) | null = null;
   /** Confined, hemmed in as it inks: a quick flip about its middle before the flee (see flip). */
   private flipping = false;
+  /** How far the flee should get (CSS px): past the cloud's reach. */
+  private clear = 0;
 
   private world: World;
   private rand: () => number;
@@ -536,14 +538,15 @@ export class Swimmer {
 
   /**
    * Ink and flee: jet hard away from where it is, the direction with the most room nearest the way it faces, at least
-   * FLEE_MIN of its widths. `ink` runs as the jet fires, so the ink comes out with the dart, never in place: after a
-   * turn, or (confined, hemmed in: facing the glass, no room to turn) a quick flip about its middle. False, and no
-   * ink, when there is no way out at all.
+   * FLEE_MIN of its widths or `clear` px (past the cloud), where there is room for that. `ink` runs as the jet fires,
+   * so the ink comes out with the dart, never in place: after a turn, or (confined, hemmed in: facing the glass, no
+   * room to turn) a quick flip about its middle. False, and no ink, when there is no way out at all.
    */
-  flee(ink?: () => void): boolean {
+  flee(ink?: () => void, clear = 0): boolean {
     if (this.behaviour === "loop") return false;
     this.wakeUp();
     this.behaviour = "roam";
+    this.clear = clear;
     if (!this.fleeGo(true)) return false;
     this.fleeing = true;
     this.onJet = ink ?? null;
@@ -560,11 +563,13 @@ export class Swimmer {
   /** Set up the flee's jet (or, hemmed in and `flip`, the flip before it). False when there is nowhere to go. */
   private fleeGo(flip: boolean): boolean {
     const b = this.bounds();
-    const L = this.unit * 1.1 * Math.max(1, this.speed);
-    const min = Math.min(L, this.world.sw * FLEE_MIN);
+    const far = Math.max(this.world.sw * FLEE_MIN, this.clear);
+    const L = Math.max(far, this.unit * 1.1 * Math.max(1, this.speed));
     if (this.room && !this.escaping) {
-      // The heading with the most room, nearest the way it faces.
-      const q = this.plan(this.tilt, L, min, 1 / 400);
+      // The heading with the most room, nearest the way it faces: past the cloud, or as near that as there is room for
+      // (at least FLEE_MIN widths).
+      const min = this.world.sw * FLEE_MIN;
+      const q = this.plan(this.tilt, L, Math.min(far, L), 1 / 400) ?? this.plan(this.tilt, L, min, 1 / 400);
       if (!q) return flip && this.flip(L, min);
       this.target = {
         x: this.x + Math.sin(q.aim * RAD) * q.travel,
