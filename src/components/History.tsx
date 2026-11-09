@@ -1,4 +1,5 @@
 import { localDate, type DailyEntry } from "../game/daily";
+import { bandLabel, bandOf, FATHOM_MAX, runTotal } from "../game/fathom-history";
 import { recentPlays, type Play } from "../game/history";
 import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
@@ -20,6 +21,7 @@ const NB = String.fromCharCode(160);
 
 /** The score first, then how it ended. */
 function result(p: Play): { text: string; tone: string } {
+  if (p.kind === "fathom") return { text: `${runTotal(p.run)}/${FATHOM_MAX}`, tone: "cyan" };
   if (p.kind === "blitz") {
     const k = p.run.hits.length;
     return { text: `${p.run.score}${NB}pts · ${k}${NB}answer${k === 1 ? "" : "s"}`, tone: "gold" };
@@ -37,6 +39,7 @@ function result(p: Play): { text: string; tone: string } {
  * (before Nov 9) open the same way.
  */
 function href(p: Play): string {
+  if (p.kind === "fathom") return `#fathom/run-${p.run.startedAt}`;
   if (p.kind === "blitz") return `#blitz-${p.id}/run-${p.run.startedAt}`;
   return `#p-${p.id}/run-${p.run.startedAt}`;
 }
@@ -48,7 +51,23 @@ function href(p: Play): string {
  */
 function tag(p: Play): string {
   if (p.kind === "list") return p.run.daily ? `List #${p.run.daily}` : "List";
-  return "Blitz";
+  return p.kind === "fathom" ? "Fathom" : "Blitz";
+}
+
+/**
+ * A row's title: the list's name, or for a Fathom game (which has none) its five questions as the results show them,
+ * a square per question in its band's colour, named for a screen reader.
+ */
+function title(p: Play, index: PuzzleMeta[]) {
+  if (p.kind !== "fathom") return <span className="play-title">{index.find((m) => m.id === p.id)?.title ?? p.id}</span>;
+  const bands = p.run.points.map(bandOf);
+  return (
+    <span className="play-title play-bands" role="img" aria-label={`Fathom: ${bands.map(bandLabel).join(", ")}`} data-testid="history-bands">
+      {bands.map((b, i) => (
+        <span key={i} className="play-band" data-band={b} />
+      ))}
+    </span>
+  );
 }
 
 /** "21:40" in the player's time. */
@@ -66,7 +85,7 @@ function dayName(date: string, today: string): string {
   return shortDate(date, today);
 }
 
-/** Everything played, list games and Blitz rounds alike, newest first, under one header per day. */
+/** Everything played, list games, Blitz rounds and Fathom games alike, newest first, under one header per day. */
 export function History({ index, today, entry, onBack, onHome }: Props) {
   const saved = load();
   const plays = recentPlays(saved, 100);
@@ -98,14 +117,14 @@ export function History({ index, today, entry, onBack, onHome }: Props) {
               <ol className="play-rows">
                 {dayPlays.map((p) => {
                   const r = result(p);
-                  const mode = p.kind === "blitz" ? "blitz" : "classic";
+                  const mode = p.kind === "list" ? "classic" : p.kind;
                   return (
                     <li key={`${p.kind}-${p.id}-${p.at}`}>
                       <a className={`play-row ${mode}`} data-testid="history-row" data-kind={p.kind} href={href(p)}>
                         <time className="play-time" dateTime={new Date(p.at).toISOString()}>
                           {clock(p.at)}
                         </time>
-                        <span className="play-title">{index.find((m) => m.id === p.id)?.title ?? p.id}</span>
+                        {title(p, index)}
                         <span className="play-tag" data-testid="history-tag">
                           {tag(p)}
                         </span>

@@ -194,7 +194,7 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
   // A Blitz round under way keeps its clock while the menu is open: said at the top, where it can't be missed.
   const live = nav.blitzOnScreen ? resumeBlitz(saved, nav.blitzOnScreen) : undefined;
   const clockRuns = !!live && !live.over;
-  // The one daily first, across the row (as on Home: the main thing gets the most room), then free play's pair.
+  // The one daily first, across the row (as on Home: the main thing gets the most room), then free play's three.
   const play: Tile[] = [
     {
       id: "today-list",
@@ -209,6 +209,7 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
     },
     { id: "random-list", label: "Random list", icon: "dice", tone: "classic", go: nav.onRoll },
     { id: "random-blitz", label: "Random Blitz", icon: "dice", tone: "blitz", disabled: nav.blitzOpen === 0, go: nav.onBlitz },
+    { id: "fathom", label: "Fathom", icon: "sonar", screen: "fathom", go: () => (location.hash = "#fathom") },
   ];
   const hash = (h: string) => () => (location.hash = h);
   const yours: Tile[] = [

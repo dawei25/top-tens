@@ -2,15 +2,16 @@ import { lazy, Suspense } from "react";
 import { Loading } from "../Game";
 
 /**
- * Fathom, the estimation beta (#fathom). Hidden: nothing links to it, and it is its own chunk (with its styles),
- * downloaded only when the link is opened, so the main bundle stays as it was.
+ * Fathom, the estimation game (#fathom; one finished game: #fathom/run-<startedAt>). Its own chunk (with its styles),
+ * downloaded only when it is opened, so the main bundle stays as it was.
  */
 const Fathom = lazy(() => import("./Fathom"));
 
-export function FathomScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void }) {
+export function FathomScreen({ onBack, onHome, run }: { onBack: () => void; onHome: () => void; run?: number }) {
   return (
     <Suspense fallback={<Loading />}>
-      <Fathom onBack={onBack} onHome={onHome} />
+      {/* A game and a past game are separate screens: each starts from its own save. */}
+      <Fathom key={run ?? "game"} onBack={onBack} onHome={onHome} run={run} />
     </Suspense>
   );
 }

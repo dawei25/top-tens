@@ -131,6 +131,12 @@ export function reportList(game: GameState, daily?: string): void {
   });
 }
 
+/** A Fathom game just finished on this device (its run is in the save): signed in, the save syncs soon, as after a list game. */
+export function reportFathom(): void {
+  if (!backendOn || getAccount().status !== "in") return;
+  withService((s) => s.syncSoon(1500));
+}
+
 /** A Blitz round just finished on this device (a date's Blitz played on its date: pass the date). */
 export function reportBlitz(state: BlitzState, daily?: string): void {
   if (!backendOn) return;

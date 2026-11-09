@@ -1084,8 +1084,11 @@ describe("a game", () => {
     let g = newGame(bank.slice(0, 5).map((x) => x.id));
     for (const guess of [200, 100, 400, 1e9, 130]) g = nextQuestion(lockIn(g, guess));
     const text = shareText(scoreGame(g, bank));
-    expect(text).toBe(`Fathom beta 244/${MAX_TOTAL}\n▒ █ ░ × ▓`);
+    expect(text).toBe(`Fathom 244/${MAX_TOTAL}\n▒ █ ░ × ▓`);
     expect(text).not.toMatch(/\p{Extended_Pictographic}/u);
+    // Out of beta (Nov 9): the name alone, and the link to the game on a line of its own.
+    expect(shareText(scoreGame(g, bank), "https://toptentacle.io/#fathom")).toBe(`Fathom 244/${MAX_TOTAL}\n▒ █ ░ × ▓\nhttps://toptentacle.io/#fathom`);
+    expect(text).not.toMatch(/beta/i);
   });
   // Nov 5 review: lost at sea shared as "□", which reads as a question not played. Every band has its own mark, and
   // none of them is an empty box.
@@ -1544,7 +1547,7 @@ describe("name-it: a game", () => {
     expect(scored[1]).toMatchObject({ pick: "Colombia", guess: 52886363, points: fathomScore(52886363, 50e6), band: "dead-on" });
     expect(scored[0].pick).toBeUndefined();
     expect(totalOf(scored)).toBe(100 + fathomScore(52886363, 50e6) + 100 + 49 + 49);
-    expect(shareText(scored)).toBe(`Fathom beta ${totalOf(scored)}/500\n█ █ █ ▒ ▒`);
+    expect(shareText(scored)).toBe(`Fathom ${totalOf(scored)}/500\n█ █ █ ▒ ▒`);
   });
   it("keeps what was named in the save, and drops a pick that isn't a name of this game's", () => {
     const m = new Map<string, string>();
