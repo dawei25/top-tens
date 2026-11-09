@@ -925,6 +925,9 @@ export function startOcean(els: OceanEls): Ocean {
   function inkAndFlee(size: number, big: boolean, n?: number) {
     if (inkDue && inkDue.size > size) return;
     inkDue = { size, big, n, until: t + INK_DUE };
+    // One dart at a time: darting off from a cloud already out, this one waits for that dart to end (a new flee now
+    // would brake it to a stop by the first cloud).
+    if (swimmer.fleeing && !swimmer.inkPending) return;
     fleeForInk();
   }
   function fleeForInk() {
@@ -933,14 +936,16 @@ export function startOcean(els: OceanEls): Ocean {
     // Out past the cloud: its blobs spread about 0.7 of its size (canvas px) from the siphon; and half its own width.
     const clear = (0.7 * d.size + SQUID_W * 0.5) * px;
     swimmer.flee(() => {
-      inkDue = null;
+      if (inkDue === d) inkDue = null;
       puff(siphon(), d.size, d.big, d.n);
     }, clear);
   }
-  /** Each frame: ink still due and the flee taken over, flee again; too late, drop it. */
+  /** Each frame: ink still due and the flee taken over (or the dart before it over), flee again; too late, drop it. */
   function inkStillDue() {
-    if (!inkDue || swimmer.fleeing) return;
-    if (t > inkDue.until) inkDue = null;
+    if (!inkDue) return;
+    // A dart under way: the time to find a way out starts when it ends.
+    if (swimmer.fleeing) inkDue.until = Math.max(inkDue.until, t + INK_DUE);
+    else if (t > inkDue.until) inkDue = null;
     else if (!swimmer.escaping) fleeForInk();
   }
 

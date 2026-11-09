@@ -426,37 +426,50 @@ const edgeDistance = (page, p) =>
   }, p);
 
 /**
- * Moves the frozen clock on until the squid is clear of the controls and "open" (far from every edge) or at an "edge".
- * Left to roam, some runs it keeps off every edge for a minute and more, others it keeps near one. So, wide screens:
- * open is as far from the viewport's edges and the glass as it gets (2.2 of its widths, easing to 1.6 over the
- * search); for an edge, panels come over it (panelOver), which is sure to put it by one. On a phone it shows clear of
- * the controls only in a band above the bottom edge: open from 1.8 widths (easing to 1.5), an edge under 1.8. The exact
- * cases, in open water, hemmed in at the glass and in the corners, are pinned in ocean/swim.test.ts.
+ * Moves the frozen clock on until the squid is "open" (far from every edge: the viewport's, and on wide screens the
+ * glass) or at an "edge". Left to roam, some runs it keeps off every edge for a minute and more, others it keeps near
+ * one. So open is as far from every edge as it gets (2.2 of its widths, easing to 1.6 over the search), and an edge as
+ * near one as it gets (1.2 widths, easing to 1.8); on wide screens panels come over it instead (panelOver), which is
+ * sure to put it by one. The exact cases, in open water, hemmed in at the glass and in the corners, are pinned in
+ * ocean/swim.test.ts.
  */
 async function squidAtEdge(page, where) {
   const phone = (await page.evaluate(() => innerWidth)) < 700;
   if (where === "edge" && !phone) return panelOver(page);
   const seen = [];
   const TRIES = 400;
-  // Open: as far from every edge as it gets, from 2.2 widths (1.8 on a phone) down to 1.6 (1.5) over the search.
-  const [far, near] = phone ? [1.8, 1.5] : [2.2, 1.6];
   for (let i = 0; i < TRIES; i++) {
     const p = await squidSpot(page);
     if (p) {
-      const c = await controlsAt(page, p);
       const { w } = await inkFrame(page);
       const d = (await edgeDistance(page, p)) / w;
-      if (!c.under && !c.ring) {
-        if (where === "open" ? d > far - ((far - near) * i) / TRIES : d < 1.8) return p;
-        seen.push(d);
-      }
+      const s = i / TRIES;
+      if (where === "open" ? d > 2.2 - 0.6 * s : d < 1.2 + 0.6 * s) return p;
+      seen.push(d);
     }
     // A key now and then, so it never dozes off on the seabed (after 20 s without input).
     if (i % 40 === 39) await page.keyboard.press("Shift");
     await page.clock.runFor(200);
   }
   const range = seen.length ? `${Math.min(...seen).toFixed(2)} to ${Math.max(...seen).toFixed(2)}` : "none";
-  throw new Error(`the squid never showed ${where === "open" ? "in the open" : "next to an edge"} (clear of the controls ${seen.length} times, ${range} widths from an edge)`);
+  throw new Error(`the squid never showed ${where === "open" ? "in the open" : "next to an edge"} (in view ${seen.length} times, ${range} widths from an edge)`);
+}
+
+/**
+ * A tap on the squid's own pixels at p, for the spam tests. Wide screens: a real click (it is in open water, where
+ * there are no controls). Phones: the squid swims behind the glass, mostly under the board's rows and the guess box,
+ * clear of every control only now and then; so the tap is replayed as events on bare page at p (press, lift, click),
+ * which the squid reads on the window as ever. The rule that a control over it keeps the tap is the tap test's, above,
+ * with real taps.
+ */
+async function tapSquid(page, vp, p) {
+  if (!vp.hasTouch) return page.mouse.click(p.x, p.y);
+  await page.evaluate((p) => {
+    const at = { bubbles: true, clientX: p.x, clientY: p.y, pointerId: 9, isPrimary: true, pointerType: "touch" };
+    document.body.dispatchEvent(new PointerEvent("pointerdown", at));
+    document.body.dispatchEvent(new PointerEvent("pointerup", at));
+    document.body.click();
+  }, p);
 }
 
 /**
@@ -553,26 +566,15 @@ for (const vp of VIEWPORTS) {
     await recordClicks(page);
     for (const where of ["open", "edge"]) {
       await squidAtEdge(page, where);
-      // Spam: a tap on the squid every 100 ms for 5 s, chasing it, wherever it is clear of the controls (on a phone it
-      // can keep under them for seconds: then on until it has inked, 15 s at most); then 3 s more to see the last
-      // trick through.
+      // Spam: a tap on the squid every 100 ms for 5 s, chasing it (on its eyes, wherever they show); then 3 s more to
+      // see the last trick through.
       let taps = 0;
       const pokes = (await reaction(page)).pokes;
-      const frames = [await inkFrame(page)];
-      let until = Math.round(5000 / FRAME_MS);
-      for (let i = 0; i < until + Math.round(3000 / FRAME_MS); i++) {
-        const f = frames[i];
-        if (i < until && i % 3 === 0 && f.eye) {
-          const c = await controlsAt(page, f.eye);
-          if (!c.under && !c.ring) {
-            await tapAt(page, vp, f.eye);
-            taps++;
-          }
-        }
-        await page.clock.runFor(FRAME_MS);
-        frames.push(await inkFrame(page));
-        if (i === until - 1 && frames[i + 1].inks === frames[0].inks && until * FRAME_MS < 15000) until += 30;
-      }
+      const frames = await film(page, Math.round(8000 / FRAME_MS), async (i, f) => {
+        if (i % 3 || i * FRAME_MS > 5000 || !f.eye) return;
+        await tapSquid(page, vp, f.eye);
+        taps++;
+      });
       const puffs = assertDarts(frames, where);
       const took = (await reaction(page)).pokes - pokes;
       assert.ok(puffs.length >= 1, `${where}: the taps never made the squid ink (${taps} taps, ${took} taken)`);
@@ -601,8 +603,9 @@ for (const vp of VIEWPORTS) {
       await removePanels(page);
       await page.clock.runFor(2000);
     }
-    // Two lives lost in quick succession: never a cloud on a squid that stays put.
-    const frames = await film(page, 110, async (i) => {
+    // Two lives lost in quick succession: never a cloud on a squid that stays put (the second waits for the first's
+    // dart to end, or joins its cloud if that one isn't out yet).
+    const frames = await film(page, 150, async (i) => {
       if (i === 0 || i === 6) await guess(page, misses.shift());
     });
     const puffs = assertDarts(frames, "two misses").length;

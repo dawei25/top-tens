@@ -579,6 +579,11 @@ export class Swimmer {
     this.hold(0.3);
   }
 
+  /** Fleeing, its ink not out yet (it comes with the jet). */
+  get inkPending() {
+    return this.onJet !== null;
+  }
+
   /** The other moves: a flee (and its ink, if not out yet) is over. */
   private endFlee() {
     this.fleeing = false;
