@@ -22,6 +22,8 @@ export interface MenuNav {
   onRoll: () => void;
   /** A random Blitz (never the one on screen). */
   onBlitz: () => void;
+  /** Fathom: new questions if the last game is over, else that game. */
+  onFathom: () => void;
 }
 
 export const MenuContext = createContext<MenuNav | null>(null);

@@ -175,6 +175,52 @@
   color: var(--label);
 }
 /*
+ * Phones: an estimate's unit on a line of its own under the number, inside the field, so the number has the field's
+ * whole width (the review, Nov 9: "metres per second" took two lines and cut the placeholder to "your gue"; "8,800,000"
+ * scrolled beside "million people"). A percent's "%" and a year stay beside it.
+ */
+@media (max-width: 420px) {
+  .fathom-field[data-stack] {
+    flex-wrap: wrap;
+    row-gap: 0;
+    padding: 0 0 7px;
+  }
+  .fathom-field[data-stack] input {
+    flex: 1 0 100%;
+    height: 46px;
+  }
+  .fathom-field[data-stack] .fathom-unit {
+    flex: 1 0 100%;
+    max-width: none;
+    margin-top: -4px;
+    padding: 0 14px;
+    font-size: 18px;
+    line-height: 1;
+    text-align: left;
+    white-space: nowrap;
+  }
+}
+/* Under the narrow phones' smaller number (below), the unit keeps its left edge. */
+@media (max-width: 379px) {
+  .fathom-field[data-stack] .fathom-unit {
+    padding: 0 10px;
+  }
+}
+/* With little height (the keyboard up), the stacked field a step shorter, so LOCK IN stays above the keyboard. */
+@media (max-width: 420px) {
+  .fathom[data-short] .fathom-field[data-stack] {
+    min-height: 0;
+    padding-bottom: 5px;
+  }
+  .fathom[data-short] .fathom-field[data-stack] input {
+    height: 40px;
+  }
+  .fathom[data-short] .fathom-field[data-stack] .fathom-unit {
+    margin-top: -3px;
+    font-size: 16px;
+  }
+}
+/*
  * The echo: what's wrong, or what was read when the field doesn't show it ("2.5m"), and nothing otherwise. One line kept
  * for it, and never more, so nothing moves as it changes (a second line pushed the keys down at 320px). Every message
  * and number fits whole at 320px (fathom.e2e.cjs); the ellipsis is only a backstop.
@@ -301,6 +347,13 @@
   .band-word {
     font-size: 40px;
     letter-spacing: 0.03em;
+  }
+}
+/* LOST AT SEA, the longest word, a step smaller on a phone so its points stay beside it (the review, Nov 9). */
+@media (max-width: 559px) {
+  .band-word[data-band="lost"] {
+    font-size: min(46px, 9vw);
+    letter-spacing: 0.02em;
   }
 }
 .reveal-score {

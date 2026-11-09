@@ -6,7 +6,8 @@
 // - Home's Fathom key and the menu's tile start new questions after a finished game (free play is new every time,
 //   UX 14); a game under way resumes; a reload on the results keeps them.
 // - SHARE as on lists and Blitz: the phone's share sheet, else a copy and "Copied".
-// - Home's Fathom key at 320 is as tall as Random list (its line shortens, UX 8); Your record's labels one line each.
+// - Home's Fathom key at 320, 360 and 375 as tall as Random list, its line on one line (it shortens, UX 8); Your
+//   record's first label ("lists played") on one line, the row as tall as it was with "played".
 // - LOST AT SEA and its points on one row at 320 and 390.
 // The copy findings (Play Fathom, Back to your game, lists played, the percent's miss, the share squares, the 3
 // decimals, Try again. on every wrong-kind line, one format per column) are unit tests: src/game/fathom-review.test.ts,
@@ -197,22 +198,22 @@ test("SHARE: the phone's share sheet with the squares and the link; on a desktop
   }
 });
 
-test("Home at 320: the Fathom key as tall as Random list, its line on one line; Your record's labels one line each", async () => {
-  const { ctx, page } = await open(browser, at(320), "", undefined, { reducedMotion: "reduce" });
-  await page.getByTestId("fathom-key").waitFor();
-  const [list, fathom] = [await page.getByTestId("random-list").boundingBox(), await page.getByTestId("fathom-key").boundingBox()];
-  assert.equal(Math.round(fathom.height), Math.round(list.height), "as tall as its neighbour");
-  const line = await textLines(page.getByTestId("fathom-key-status"));
-  assert.equal(line.lines, 1, `"${line.text}" on one line`);
-  const labels = await page.locator('[data-testid="home-record"] dt').evaluateAll((els) =>
-    els.map((el) => {
-      const r = document.createRange();
-      r.selectNodeContents(el);
-      return new Set([...r.getClientRects()].filter((b) => b.width > 0).map((b) => Math.round(b.top))).size;
-    }),
-  );
-  assert.ok(labels.every((n) => n === 1), `record labels take ${labels.join(", ")} lines`);
-  await ctx.close();
+test("Home on narrow phones: the Fathom key as tall as Random list, its line on one line; lists played on one line", async () => {
+  for (const width of [320, 360, 375]) {
+    const { ctx, page } = await open(browser, at(width), "", undefined, { reducedMotion: "reduce" });
+    await page.getByTestId("fathom-key").waitFor();
+    const [list, fathom] = [await page.getByTestId("random-list").boundingBox(), await page.getByTestId("fathom-key").boundingBox()];
+    assert.equal(Math.round(fathom.height), Math.round(list.height), `${width}px: as tall as its neighbour`);
+    const line = await textLines(page.getByTestId("fathom-key-status"));
+    assert.ok(line.lines === 1 && !line.cut, `${width}px: "${line.text}" on one line, whole`);
+    // Your record: "lists played" on one line, and the row as tall as the next label's ("perfect", one word).
+    const dts = page.locator('[data-testid="home-record"] dt');
+    const first = await textLines(dts.first());
+    assert.equal(first.lines, 1, `${width}px: "${first.text}" on one line`);
+    const [a, b] = [await dts.nth(0).boundingBox(), await dts.nth(2).boundingBox()];
+    assert.equal(Math.round(a.height), Math.round(b.height), `${width}px: the label is as tall as its row's others`);
+    await ctx.close();
+  }
 });
 
 // At 390, LOST AT SEA pushed its points to a second line.

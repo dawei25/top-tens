@@ -139,14 +139,14 @@ for (const vp of VIEWPORTS) {
     const total = await playGame(page);
     await noBeta(page, "the results");
     if (vp.name === "desktop") {
-      await page.getByTestId("fathom-copy").click();
+      await page.getByTestId("fathom-share").click();
       const shared = await page.evaluate(() => navigator.clipboard.readText());
       const lines = shared.split("\n");
       assert.equal(lines.length, 3);
       assert.equal(lines[0], `Fathom ${total}/500  `);
-      assert.match(lines[1], /^\S( \S){4} {2}$/);
+      assert.match(lines[1], /^(\p{Extended_Pictographic} ){4}\p{Extended_Pictographic} {2}$/u);
       assert.match(lines[2], /^https?:\/\/[^ ]+\/#fathom$/);
-      assert.doesNotMatch(shared, /beta|\p{Extended_Pictographic}/iu);
+      assert.doesNotMatch(shared, /beta/i);
     }
     // Kept in the player's save: the finished game, its total, its draw; the list games as they were.
     const saved = await store(page);

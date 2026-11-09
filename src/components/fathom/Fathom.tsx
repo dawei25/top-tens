@@ -9,6 +9,7 @@ import {
   figureParts,
   finished,
   formatAmount,
+  formatColumn,
   guessError,
   loadFathom,
   lockIn,
@@ -23,6 +24,7 @@ import {
   roundOf,
   ROUNDS,
   ruleFor,
+  ruleShownAt,
   saveFathom,
   scoreFor,
   scoreGame,
@@ -37,7 +39,8 @@ import {
   type NumberError,
   type Scored,
 } from "../../game/fathom";
-import { findRun, noteDraw, recentIds, recordRun, runTotal, type FathomRun } from "../../game/fathom-history";
+import { findRun, noteDraw, recentIds, recordRun, runTotal, takeFreshFathom, type FathomRun } from "../../game/fathom-history";
+import { FATHOM_BACK } from "../copy";
 import { load, save } from "../../game/storage";
 import {
   asOfText,
@@ -229,6 +232,9 @@ export default function Fathom({ onBack, onHome, run }: Props) {
           saveFathom({ ...local, game: resumed });
         }
         if (resumed) recordFinished(resumed, b);
+        // From Home's key or the menu's tile, a finished game makes way for new questions (free play is new every
+        // time, UX 14); a game under way goes on, and a reload on the results keeps them.
+        if (takeFreshFathom() && resumed && finished(resumed)) resumed = undefined;
         setGame(resumed ?? freshGame(b));
       }
       setData(loaded);
@@ -315,8 +321,7 @@ export default function Fathom({ onBack, onHome, run }: Props) {
   // the first estimate, the percent's on the percent). With little height (a small phone, or the keyboard up) it goes
   // under LOCK IN, so the question, the field and LOCK IN still fit.
   const round = question && roundOf(question);
-  const firstOfRound = !!question && questions.findIndex((x) => roundOf(x) === round) === game.at;
-  const rule = firstOfRound && (
+  const rule = ruleShownAt(questions, game.at) && (
     <p className="fathom-rule" data-testid="fathom-rule" data-round={round}>
       {ruleFor(question)}
     </p>
@@ -421,7 +426,8 @@ function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (
 
   return (
     <form className="panel fathom-ask" data-glass onSubmit={submit} data-testid="fathom-ask">
-      <label className="fathom-field">
+      {/* On a phone an estimate's unit goes under the number, so it never squeezes the field (the review, Nov 9). */}
+      <label className="fathom-field" data-stack={round === "estimate" || undefined}>
         <input
           value={text}
           onChange={edit}
@@ -601,6 +607,8 @@ function Reveal({ scored, list, total, last, onNext }: { scored: Scored; list?: 
   const answer = figureParts(q, q.answer);
   const yours = figureParts(q, guess);
   const best = name && list ? bestAnswers(list, q.answer, q.nameIt?.except) : [];
+  // One format for the column: all in words or all in digits ("996,600" beside "1.067 million" read as two scales).
+  const column = formatColumn(best.map((e) => e.value));
   const asOf = asOfText(q.nameIt?.asOf);
   const card = useRef<HTMLElement>(null);
   const nextKey = useRef<HTMLButtonElement>(null);
@@ -661,10 +669,10 @@ function Reveal({ scored, list, total, last, onNext }: { scored: Scored; list?: 
         <div className="fathom-best" data-testid="fathom-best">
           <p className="label gold">Best answers</p>
           <ol>
-            {best.map((e) => (
+            {best.map((e, i) => (
               <li key={e.name} data-testid="fathom-best-row" data-name={e.name} data-value={e.value} data-yours={e.name === pick || undefined}>
                 <span className="best-name">{e.name}</span>
-                <span className="best-n">{formatAmount(e.value)}</span>
+                <span className="best-n">{column[i]}</span>
               </li>
             ))}
           </ol>
@@ -741,7 +749,7 @@ function PastGame({ head, run: at, bank }: { head: ReactNode; run: number; bank:
           <h1>That game isn't kept here.</h1>
           <div className="results-actions">
             <button type="button" className="key key-pink" data-testid="fathom-again" onClick={play}>
-              {resume ? "Resume game" : "New questions"}
+              {resume ? FATHOM_BACK : "New questions"}
             </button>
           </div>
         </section>
@@ -768,7 +776,7 @@ function PastGame({ head, run: at, bank }: { head: ReactNode; run: number; bank:
         bands={bands}
         share={share}
         onAgain={play}
-        againLabel={resume ? "Resume game" : "New questions"}
+        againLabel={resume ? FATHOM_BACK : "New questions"}
         when={`played ${when.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${pad(when.getHours())}:${pad(when.getMinutes())}`}
         count={false}
       />
@@ -813,12 +821,16 @@ function Results({
     const t = setTimeout(() => setCopied(false), 2000);
     return () => clearTimeout(t);
   }, [copied]);
-  const copy = async () => {
+  // SHARE, as on a list's results and a Blitz's: the phone's share sheet, else a copy and "Copied".
+  const shareIt = async () => {
     try {
-      await navigator.clipboard.writeText(share);
-      setCopied(true);
+      if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ text: share });
+      else {
+        await navigator.clipboard.writeText(share);
+        setCopied(true);
+      }
     } catch {
-      // No clipboard here (an insecure page, a refusal): nothing to say it was copied.
+      // The share sheet dismissed, or no clipboard here (an insecure page, a refusal): nothing to say.
     }
   };
   // Each round's rule once, from the first question of that round (a name-it round's is its list's).
@@ -854,8 +866,8 @@ function Results({
           <button type="button" className="key key-pink" data-testid="fathom-again" onClick={onAgain}>
             {againLabel}
           </button>
-          <button ref={copyKey} type="button" className="key" data-testid="fathom-copy" onClick={copy}>
-            <SwapLabel off="Copy result" on="Copied" active={copied} />
+          <button ref={copyKey} type="button" className="key" data-testid="fathom-share" onClick={shareIt}>
+            <SwapLabel off="Share" on="Copied" active={copied} />
           </button>
         </div>
       </section>

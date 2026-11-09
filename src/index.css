@@ -709,8 +709,21 @@ a {
   --accent: var(--cyan);
 }
 .mode-key.fathom .key-sub {
-  white-space: normal;
+  white-space: nowrap;
   text-align: right;
+}
+/* Narrower than a 390 phone only "5 questions": the whole line wrapped at 320 and made the key taller than its
+   neighbours (UX 8); from 390 it fits on one line. */
+.mode-key.fathom .sub-short {
+  display: none;
+}
+@media (max-width: 389px) {
+  .mode-key.fathom .sub-long {
+    display: none;
+  }
+  .mode-key.fathom .sub-short {
+    display: inline;
+  }
 }
 @media (min-width: 640px) {
   .mode-pair > .free-key.fathom {

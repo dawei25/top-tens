@@ -218,7 +218,7 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
     },
     { id: "random-list", label: "Random list", icon: "dice", tone: "classic", go: nav.onRoll },
     { id: "random-blitz", label: "Random Blitz", icon: "dice", tone: "blitz", disabled: nav.blitzOpen === 0, go: nav.onBlitz },
-    { id: "fathom", label: "Fathom", icon: "sonar", screen: "fathom", go: () => (location.hash = "#fathom") },
+    { id: "fathom", label: "Fathom", icon: "sonar", screen: "fathom", go: nav.onFathom },
   ];
   const hash = (h: string) => () => (location.hash = h);
   const yours: Tile[] = [
