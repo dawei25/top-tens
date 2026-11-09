@@ -21,7 +21,7 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   6", the histogram, "better than 19% of players (estimated)" while the estimate outweighs them, then "better than 12%
   of 1,203 players". Blitz has no estimate: its results get a line like that from 30 players. Stats adds "Vs players"
   (`list_averages`, real players alone) for lists with 50+ players (`MIN_PLAYERS`). Each player counts once per list
-  and mode (their first game), like the game's own stats (first tries only), and the owner's testers not at all.
+  and mode (their first game), like the game's own stats (first tries only), the owner and his testers included.
 - **List ratings.** The results of a list game or Blitz round (and their runs in Past runs) end with "Good list?" and
   a thumbs up and down; after a thumbs down, one optional reason from a fixed set (too hard, too easy, boring,
   answers felt unfair, wrong data: `RATING_REASONS`, `src/net/ratings.ts`). The rating goes into the save first
@@ -48,14 +48,14 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   guess on each question, so once a question has enough of them it can be scored by how far off real players are
   (their median and spread). The reveal asks `fathom_compare` (the question, its round, the guess, the answer it
   shows, since the questions live in the static site, and the random id; cached 5 min): how many players, their
-  median guess, and the share further off than this guess, one guess per player (their first), leaving out the
-  owners, `stats_excluded` and the player asking. "Further off" is on the round's scale (`p_round`, from
+  median guess, and the share further off than this guess, one guess per player (their first), everyone but the
+  player asking (the owner and testers included). "Further off" is on the round's scale (`p_round`, from
   `compareRound` in `src/net/fathom.ts`): how many times off for an estimate and a name-it round on a ratio list
   (`estimate`, `name-ratio`; a 0 counts as a tiny positive, so it is the furthest off), points, years or steps off for
   a percent, a year and a name-it round on a steps list (`percent`, `year`, `name-steps`); any other round raises.
   From 20 players on a question (`MIN_PLAYERS`, `src/game/fathom.ts`) it says "Players' typical guess: 4 litres · you
   were closer than 72%"; below that, nothing; a name-it reveal never asks. Never in the save, never synced. See Switch
-  it on (2.8).
+  it on (2.7).
 - **Missed guesses** (owner, Nov 8: "real data instead of agents guessing what people type"). Where a list or Blitz
   guess is judged (`Game.tsx`, `Blitz.tsx`), the facade's `reportGuess` gets what was typed and the result
   (`src/net/misses.ts`). A guess the game didn't take goes into its own outbox (`top-tens:miss-outbox`): `unknown` (not
@@ -68,7 +68,7 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   alone, never the player's session and no cookies, carrying a random id of its own (`top-tens:miss-id`), not the one
   plays, ratings, notes and Fathom guesses carry, so a miss can't be joined to anyone's rows; offline it waits and is
   retried like plays. Never in the save, never synced. The loop reads `list_misses` (Running it). See Switch it on
-  (2.9).
+  (2.8).
 - **Accounts.** Sign-in methods come from `VITE_SIGN_IN`: Google, an email and password (`password`: nothing is
   emailed), or a link by email (`email`, PKCE; the email also carries a code for another device). Google is our own
   key (our keycap, Google's G, "Continue with Google"). With `VITE_GOOGLE_CLIENT_ID` set (`src/net/google.ts`), it
@@ -108,10 +108,10 @@ a player count. The histogram and "better than X%" use W x the estimate's share 
 the average is (W x the estimate's figure + n x the real mean) / (W + n), so a list nobody has played reads exactly as
 before, 30 real players weigh as much as the estimate, and 300 make it about 91% real. While n < W the line says
 "(estimated)"; from W it names the players ("of 1,203 players"). Blitz has no estimate, so its line waits for W real
-players. The owner and the accounts in `stats_excluded` (testers, friends: step 2.7) are left out of `list_stats` and
-`list_averages`, with the games their browsers sent signed out, so the people who built the lists don't set the
-first numbers. Planned at about 200 players a list: adjust for each player's strength (a player who aces every list
-says less about this one), so a few strong regulars can't lift every average.
+players. Everyone counts, the owner and his testers included (owner, Nov 9: "i want to keep me and testers in the
+averages"; the `stats_excluded` migration that left them out was dropped before it ran). Planned at about 200 players
+a list: adjust for each player's strength (a player who aces every list says less about this one), so a few strong
+regulars can't lift every average.
 
 ## Switch it on
 
@@ -141,8 +141,8 @@ says less about this one), so a few strong regulars can't lift every average.
         ```
 
         Check it took: `select count(*) from public.owners;` says 1 (0 means no account has that address yet). Notes
-        count as yours when you send them signed in; after step 7 your games stay out of the players' numbers too. To
-        add someone else later, the same line with their address;
+        count as yours when you send them signed in; your games count in the players' numbers like anyone's. To add
+        someone else later, the same line with their address;
         `delete from public.owners where user_id = ...` removes one.
       - **Set the reader key**, the secret the improvement loop reads notes with. Make a long random one on your
         machine (`openssl rand -hex 32`: hex is safe in JSON and in a shell), keep it in your password manager, and
@@ -159,37 +159,26 @@ says less about this one), so a few strong regulars can't lift every average.
         give it a `VITE_` prefix: the game itself never reads notes.
    6. `supabase/migrations/20261104130000_feedback_reader_header.sql` (run once, after 5): `list_feedback` also takes
       the reader key from an `X-Feedback-Reader` header, which is how the cloud environment's proxy hands it over.
-   7. `supabase/migrations/20261105120000_stats_exclusions.sql` (after 4 and 5; safe to run again): testers out of the
-      public numbers. Adds the `stats_excluded` table (players can't read or touch it) and replaces `list_stats` and
-      `list_averages` with versions that leave out first tries by the owners (step 5) and by `stats_excluded`: their
-      accounts' games, and the games sent signed out from any browser they've used signed in (someone else signed in
-      there still counts). Same functions and answers, so the game works the same before and after it runs. Then, for
-      each tester or friend whose games shouldn't count (they sign in to the game once first, so the account exists):
-
-      ```sql
-      insert into public.stats_excluded (user_id) select id from auth.users where email = '<their email>';
-      ```
-
-      Check it took: `select count(*) from public.stats_excluded;` went up by 1. It counts from the next stats read
-      (the game caches them 5 min). `delete from public.stats_excluded where user_id = (select id from auth.users where
-      email = '<their email>');` counts them again; deleting their account removes the row too (and with it the
-      browser link, so games they sent signed out count again). Games sent signed out from a browser never used
-      signed in can't be told apart from anyone else's.
-   8. `supabase/migrations/20261105130000_fathom_guesses.sql` (after 7; run once): the Fathom beta's guesses. Adds the
-      `fathom_guesses` table (players can't read or touch it), `submit_fathom_guess` and `fathom_compare`, which
-      leaves out the owners and `stats_excluded` like the score stats. The game works before it runs: until then
-      `submit_fathom_guess` answers 404 and the game drops those guesses, and reveals show no players' line, as they
-      don't anyway below 20 players on a question. Check it took: lock in a guess on `#fathom`; Table Editor >
-      `fathom_guesses` has a row, and `select fathom_compare('eiffel-tower-height', 'estimate', 300, 330);` returns
-      `{"n": ..., "median": ..., "further_off": ...}`. (The file was changed in place on Nov 8, before it first ran: a
-      guess of 0 is taken, and `fathom_compare` takes the round. It is still run once, on a project that never had it.)
-   9. `supabase/migrations/20261108120000_missed_guesses.sql` (after 5 and 6; run once, before the public launch):
+   7. `supabase/migrations/20261105130000_fathom_guesses.sql` (needs none of the others; run once): the Fathom beta's
+      guesses. Adds the `fathom_guesses` table (players can't read or touch it), `submit_fathom_guess` and
+      `fathom_compare`, which counts every player but the one asking, the owner and testers included, like the score
+      stats. The game works before it runs: until then `submit_fathom_guess` answers 404 and the game drops those
+      guesses, and reveals show no players' line, as they don't anyway below 20 players on a question. Check it took:
+      lock in a guess on `#fathom`; Table Editor > `fathom_guesses` has a row, and
+      `select fathom_compare('eiffel-tower-height', 'estimate', 300, 330);` returns
+      `{"n": ..., "median": ..., "further_off": ...}`. (The file was changed in place before it first ran: on Nov 8 a
+      guess of 0 is taken and `fathom_compare` takes the round; on Nov 9 it stopped leaving out the owners and testers.
+      It is still run once, on a project that never had it.)
+   8. `supabase/migrations/20261108120000_missed_guesses.sql` (after 5 and 6; run once, before the public launch):
       what players type that the game doesn't take. Adds the `missed_guesses` table (players can't read or touch it,
       and no row is anyone's, so account deletion has nothing to do there), `submit_miss` and `list_misses`, which
       answers only to the reader key from step 5, the same key as notes. The game works before it runs: until then
       `submit_miss` answers 404 and those misses are dropped. Check it took: type a word that isn't an answer (`pizza`
       on the mountains list); the network tab shows `rpc/submit_miss` answering `true`, and in the SQL Editor
       `select * from list_misses('<your reader key>');` has a row `mountains | list | unknown | pizza | 1 | <now>`.
+
+   7 and 8 don't depend on each other (8 needs only 5 and 6): run them in either order. The live project has 1 to 6
+   (Nov 9), so 7 and 8 are what's left.
 
    Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the one-time steps above still go
    in the SQL Editor). Stats alone only need the first.
@@ -239,9 +228,9 @@ says less about this one), so a few strong regulars can't lift every average.
 5. **Data API**: nothing to expose by hand. The game calls nine functions (`submit_play`, `list_stats`,
    `list_averages`, `rate_list`, `list_ratings`, `submit_feedback`, `submit_fathom_guess`, `fathom_compare`,
    `submit_miss`) and reads and writes only its own `saves` row; the migrations grant exactly that (`ratings`,
-   `feedback`, `fathom_guesses`, `missed_guesses`, `owners` and `stats_excluded`, like `plays`, have no grants for
-   players at all, and the `private` schema isn't in the API's exposed schemas: leave it out). `list_feedback` and
-   `list_misses` are for the loop and refuse anyone without the reader key.
+   `feedback`, `fathom_guesses`, `missed_guesses` and `owners`, like `plays`, have no grants for players at all, and
+   the `private` schema isn't in the API's exposed schemas: leave it out). `list_feedback` and `list_misses` are for
+   the loop and refuse anyone without the reader key.
 6. **Env vars in Vercel** (Project > Settings > Environment Variables, Production and Preview):
    - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` = the publishable key (`VITE_SUPABASE_PUBLISHABLE_KEY` works
      too). **Public**: built into the JavaScript, which is what they're for; RLS and the functions decide what anyone
@@ -318,7 +307,7 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
   (`src/net/service.ts`).
 - **The average**: the results blend real players in per list (How the averages blend). Past runs and Stats' "vs avg"
   still compare with `public/puzzles/par.json` alone (players never see the word "par"); once lists have real
-  players, par.json could be regenerated from `list_stats`. Testers: `stats_excluded` (step 2.7).
+  players, par.json could be regenerated from `list_stats`.
 - **Ratings for the improvement loop**: `list_ratings(p_since timestamptz default null)` returns, per list and mode,
   `up`, `down`, the downs per reason (`too_hard`, `too_easy`, `boring`, `unfair`, `wrong_data`) and `last_rated`:
   totals only, no ids, each player counted once (their latest rating). `p_since` keeps only ratings given or changed
@@ -393,7 +382,7 @@ Figures as of late 2026, from secondary sources: check supabase.com/pricing and 
 - **Tests**: `npm test` covers the client (`src/net/*.test.ts`), the merge and the database functions
   (`supabase/migrations.test.ts`, in PGlite, with and without new tables exposed, ratings, notes and Fathom guesses
   included: no player reads a note, a wrong reader key raises, the key by header, the owner's notes come first, the
-  rate limits, deletion, the owners and `stats_excluded` left out of the stats and of `fathom_compare`, signed in or
+  rate limits, deletion, the owner and a tester counted in the stats and in `fathom_compare` like anyone, signed in or
   not; a browser's first guess kept, 0 taken and negatives refused, one per player, the asker left out, ties not
   further off, each round on its own scale: times off, points, years, steps; a miss normalized as the game normalizes
   it, once per browser and text, 60 an hour, emails, phone numbers and links refused, no account column, and

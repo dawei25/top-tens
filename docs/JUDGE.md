@@ -1,6 +1,6 @@
 # The list judge
 
-Before a list runs as **Today's list** or **Today's Blitz**, a judge reviews its built puzzle the way a player would
+Before a list runs as **Today's list**, a judge reviews its built puzzle the way a player would
 meet it, and decides where it belongs. Dailies are the front door of the game: everyone plays the same one, so a
 daily must be fun for a typical player, not just correct.
 
@@ -63,9 +63,9 @@ sports statistician.
 
 Pick the best fit, in this order:
 
-**Two topics a day.** Today's list and Today's Blitz are separate topics, because they reward different things: a
-good list is about knowing the top 10 and its order, a good Blitz about breadth (lots of names a casual player can
-fire off that all score). The owner's target for Today's list: a typical player averages **5 to 6 out of 10**.
+**One daily.** Today's list is the only daily (Today's Blitz was retired, owner Nov 9); Blitz is free play. A good
+list is about knowing the top 10 and its order, a good Blitz about breadth (lots of names a casual player can fire off
+that all score). The owner's target for Today's list: a typical player averages **5 to 6 out of 10**.
 
 - **`daily-list`** (Today's list): all of
   - recognizability >= 4: most adults could name 5 of these without being fans of the topic (Broadway shows, NHL
@@ -79,10 +79,10 @@ fire off that all score). The owner's target for Today's list: a typical player 
     the casual score into an estimated crowd that bunches toward the middle (1.5 + 0.45 x casual for the typical
     player): 6 found lands the average near 5, 8 near 6. Below 6 is too hard for a daily, 9-10 too easy. How fast
     famous misses burn lives belongs in `fairness`, not here;
-- **Today's Blitz** is drawn by the scheduler from any Blitz-ready list whose verdict scores blitzDepth >= 4,
-  data >= 4 and recognizability >= 4 (and isn't `reject` or `fix-first`), whatever its list decision: a list too
-  easy or too punishing as a classic (US states by GDP, world cities) can be a great Blitz. Simulate the casual
-  Blitz honestly so blitzDepth means something. `daily-blitz` remains for a list that is only good as a Blitz.
+- **Blitz** (free play): any Blitz-ready list whose verdict scores blitzDepth >= 4, data >= 4 and recognizability
+  >= 4 (and isn't `reject` or `fix-first`), whatever its list decision: a list too easy or too punishing as a classic
+  (US states by GDP, world cities) can be a great Blitz. Simulate the casual Blitz honestly so blitzDepth means
+  something. `daily-blitz` remains for a list that is only good as a Blitz.
 - **`free-play`**: correct and playable but too niche or too hard for a daily; fine for random rolls, Random Blitz
   and the archive.
 - **`fix-first`**: would qualify, but has data problems to fix in the next rebuild (list them precisely).
@@ -144,10 +144,7 @@ them to each other in a verdict.
 ## How the schedule uses verdicts
 
 `scripts/schedule.ts` only schedules **judged** lists. Each day gets a `daily-list` verdict for Today's list (new
-lists first, which wait out of random play for their debut, then rotating categories and highest priority) and a
-different list for Today's Blitz (the Blitz bar above, deepest first, varied by category and topic tag, keeping lists
-that could be a daily list for that pool). Today's list runs only once. When no list that never ran is left for a
-Blitz, the day reruns one that already ran (another category than the day's list, 30 days after its last Blitz),
-so no day waits for a new pick. A judge who sends a new (`debut`) list to free play only says so in `fixes`: its flag
-must go, or it waits out of random play for good. Every day's Blitz is an explicit `blitz` field in daily.json, so
-adding days never changes a past one (`schedule.ts --blitz` fills any upcoming day missing one). Lists without a verdict, or judged `free-play`, stay in random play and the archive.
+lists first, which wait out of random play for their debut, then rotating categories and highest priority). Today's
+list runs only once. The scheduler still writes a `blitz` field for every day (from when there was a Today's Blitz);
+only old `#dailyblitz-<date>` links read it, and that list stays ordinary free play. A judge who sends a new (`debut`)
+list to free play only says so in `fixes`: its flag must go, or it waits out of random play for good. Lists without a verdict, or judged `free-play`, stay in random play and the archive.

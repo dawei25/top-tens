@@ -26,11 +26,13 @@ async function tapAt(page, loc, block = "end") {
 }
 
 test("phone: a screen opened from a scrolled Home starts at its top; Back returns to the same spot", async () => {
-  const { ctx, page } = await open(browser, phone);
+  // Nov 9: 21 days in the archive, a long list even at one short row a day (one daily since Nov 10).
+  const { ctx, page } = await open(browser, phone, "", undefined, { now: new Date("2026-11-09T12:00:00-05:00") });
   await page.getByTestId("today-list").waitFor();
 
-  // Home scrolled down to Your games, ARCHIVE pressed: the archive opens at its top. Browser back: Home where it was.
-  const homeY = await tapAt(page, page.getByTestId("archive-key"));
+  // Home scrolled down past Your games (it sits near the top of the scroll, so the thumb brings it up to the top),
+  // ARCHIVE pressed: the archive opens at its top. Browser back: Home where it was.
+  const homeY = await tapAt(page, page.getByTestId("archive-key"), "start");
   assert.ok(homeY > 100, `Home scrolls on a phone (${homeY})`);
   await page.getByTestId("archive-row").first().waitFor();
   await settled(page);
@@ -43,11 +45,11 @@ test("phone: a screen opened from a scrolled Home starts at its top; Back return
 
   // Again, the archive scrolled a long way and an old daily opened (at its top), then Back, Back (the key): each
   // screen where it was.
-  assert.equal(await tapAt(page, page.getByTestId("archive-key")), homeY);
+  assert.equal(await tapAt(page, page.getByTestId("archive-key"), "start"), homeY);
   await page.getByTestId("archive-row").first().waitFor();
   await settled(page);
   assert.equal(await scrollY(page), 0);
-  const archiveY = await tapAt(page, page.getByTestId("archive-row").nth(6), "center");
+  const archiveY = await tapAt(page, page.getByTestId("archive-row").nth(14), "center");
   assert.ok(archiveY > 300, `the archive scrolls (${archiveY})`);
   await page.getByTestId("slot").first().waitFor();
   await settled(page);
@@ -63,7 +65,7 @@ test("phone: a screen opened from a scrolled Home starts at its top; Back return
   assert.equal(await scrollY(page), homeY, "Back key: Home where it was");
 
   // A short screen (Stats, about a screen tall) and back: Home's spot is still there.
-  const statsY = await tapAt(page, page.getByTestId("stats-key"));
+  const statsY = await tapAt(page, page.getByTestId("stats-key"), "start");
   await page.getByTestId("knowledge").waitFor();
   await settled(page);
   assert.equal(await scrollY(page), 0, "Stats opens at its top");

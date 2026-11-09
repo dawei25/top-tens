@@ -1,4 +1,4 @@
-// Visual baselines: the key screens at phone 390 and desktop 1440, at rest, plus the Today keys hovered on desktop and
+// Visual baselines: the key screens at phone 390 and desktop 1440, at rest, plus the Today key hovered on desktop and
 // the menu open, compared pixel by pixel with the PNGs in e2e/baselines (docs/UX.md: "The visual baselines are the
 // reference").
 //
@@ -141,15 +141,13 @@ describe("visual baselines", { concurrency: true }, () => {
       // Home, fresh.
       await shot("home");
 
-      // Desktop: the Today keys under the mouse (lift, glow, ENTER cap; nothing else moves).
+      // Desktop: the Today key under the mouse (lift, glow, ENTER cap; nothing else moves).
       if (vp.name === "desktop") {
         await settle(page);
         const today = page.locator("section.home-group").first();
-        for (const id of ["today-list", "today-blitz"]) {
-          const box = await page.getByTestId(id).boundingBox();
-          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-          await shot(`${id}-hover`, today);
-        }
+        const box = await page.getByTestId("today-list").boundingBox();
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await shot("today-list-hover", today);
         await page.mouse.move(0, 0);
       }
 
@@ -184,17 +182,10 @@ describe("visual baselines", { concurrency: true }, () => {
       await page.getByTestId("blitz-results").waitFor();
       await shot("blitz-over");
 
-      // Today's list and Today's Blitz played, then the archive.
+      // Today's list played, then the archive.
       await go(page, "");
       await page.getByTestId("today-list").click();
       await giveUp(page);
-      await go(page, "");
-      await page.getByTestId("today-blitz").click();
-      const screen = page.getByTestId("blitz-screen");
-      await screen.waitFor();
-      await guess(page, puzzleJson(await screen.getAttribute("data-list")).answers[0].name);
-      await page.clock.fastForward(91_000);
-      await page.getByTestId("blitz-results").waitFor();
       await go(page, "#archive");
       await page.getByTestId("archive-row").first().waitFor();
       await shot("archive");
@@ -204,7 +195,7 @@ describe("visual baselines", { concurrency: true }, () => {
       await page.getByTestId("know-category").first().waitFor();
       await shot("stats");
 
-      // The menu open over it: today's pair played, Stats marked as the screen on show.
+      // The menu open over it: today's list played, Stats marked as the screen on show.
       await page.getByTestId("menu-key").click();
       await page.getByTestId("menu").waitFor();
       await shot("menu", page, { window: true });

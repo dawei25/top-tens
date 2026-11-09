@@ -1,6 +1,6 @@
 ---
 name: list-judge
-description: Judges one built TENtacle puzzle from a typical player's point of view and decides whether it can run as Today's list, Today's Blitz, free play only, needs data fixes, or should be rejected. Give it a puzzle id.
+description: Judges one built TENtacle puzzle from a typical player's point of view and decides whether it can run as Today's list, free play only (list and Blitz), needs data fixes, or should be rejected. Give it a puzzle id.
 tools: Bash, Read, Write, Glob, Grep
 ---
 

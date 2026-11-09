@@ -1,14 +1,12 @@
-import { isDailyBlitzRun } from "../game/blitz";
-import { entryForDate, localDate, todayEntry, type DailyEntry } from "../game/daily";
+import { localDate, type DailyEntry } from "../game/daily";
 import { recentPlays, type Play } from "../game/history";
 import type { PuzzleMeta } from "../game/puzzles";
-import { load, type Saved } from "../game/storage";
+import { load } from "../game/storage";
 import { ScreenHead, shortDate } from "./pixel";
 import { usePar, vsParText } from "./par";
 
 interface Props {
   index: PuzzleMeta[];
-  schedule: DailyEntry[];
   /** The player's local date, for the day headers (Today, Yesterday). */
   today: string;
   /** Today's daily, for the empty state's key. */
@@ -33,31 +31,24 @@ function result(p: Play): { text: string; tone: string } {
   return { text: `10/10 · ${r.lives}${NB}${r.lives === 1 ? "life" : "lives"}${NB}left`, tone: "gold" };
 }
 
-/** The date whose Blitz a round was (Today's Blitz, on the day or later from a link), if it was one. */
-function blitzDate(p: Play, saved: Saved): string | undefined {
-  if (p.kind !== "blitz") return undefined;
-  return Object.entries(saved.blitzDaily ?? {}).find(([, d]) => isDailyBlitzRun(d, p.id, p.run))?.[0];
-}
-
 /**
- * Where a row leads: always its own run. A list game opens its run view; a Blitz round its run's results, a date's
- * round on that date's Blitz screen (which keeps it from spoiling that date's list).
+ * Where a row leads: always its own run. A list game opens its run view, a Blitz round its run's results (on its
+ * list's Blitz screen, which stays closed while that would spoil a daily). Rounds from the days of Today's Blitz
+ * (before Nov 9) open the same way.
  */
-function href(p: Play, date?: string): string {
-  if (p.kind === "blitz") return date ? `#dailyblitz-${date}/run-${p.run.startedAt}` : `#blitz-${p.id}/run-${p.run.startedAt}`;
+function href(p: Play): string {
+  if (p.kind === "blitz") return `#blitz-${p.id}/run-${p.run.startedAt}`;
   return `#p-${p.id}/run-${p.run.startedAt}`;
 }
 
 /**
- * The row's one tag: the mode, and the day's number when it was that day's list or Blitz ("Blitz #22", as the Blitz
- * screen names that date's round and the archive numbers the day). One line on any phone.
+ * The row's one tag: the mode, and the day's number when it was that day's list ("List #22", as the archive numbers
+ * the day). Blitz is free play only, so a Blitz round is "Blitz", the old Today's Blitz rounds too. One line on any
+ * phone.
  */
-function tag(p: Play, saved: Saved, schedule: DailyEntry[]): string {
+function tag(p: Play): string {
   if (p.kind === "list") return p.run.daily ? `List #${p.run.daily}` : "List";
-  const day = blitzDate(p, saved);
-  if (!day) return "Blitz";
-  const n = (entryForDate(schedule, day) ?? todayEntry(schedule, day))?.n;
-  return n ? `Blitz #${n}` : "Blitz";
+  return "Blitz";
 }
 
 /** "21:40" in the player's time. */
@@ -76,7 +67,7 @@ function dayName(date: string, today: string): string {
 }
 
 /** Everything played, list games and Blitz rounds alike, newest first, under one header per day. */
-export function History({ index, schedule, today, entry, onBack, onHome }: Props) {
+export function History({ index, today, entry, onBack, onHome }: Props) {
   const saved = load();
   const plays = recentPlays(saved, 100);
   const par = usePar();
@@ -110,13 +101,13 @@ export function History({ index, schedule, today, entry, onBack, onHome }: Props
                   const mode = p.kind === "blitz" ? "blitz" : "classic";
                   return (
                     <li key={`${p.kind}-${p.id}-${p.at}`}>
-                      <a className={`play-row ${mode}`} data-testid="history-row" data-kind={p.kind} href={href(p, blitzDate(p, saved))}>
+                      <a className={`play-row ${mode}`} data-testid="history-row" data-kind={p.kind} href={href(p)}>
                         <time className="play-time" dateTime={new Date(p.at).toISOString()}>
                           {clock(p.at)}
                         </time>
                         <span className="play-title">{index.find((m) => m.id === p.id)?.title ?? p.id}</span>
                         <span className="play-tag" data-testid="history-tag">
-                          {tag(p, saved, schedule)}
+                          {tag(p)}
                         </span>
                         <span className={`play-result ${r.tone}`}>{r.text}</span>
                         {p.kind === "list" && par?.[p.id] && (

@@ -8,10 +8,10 @@ import { cleanMiss, looksPersonal } from "../src/net/misses";
  * The migrations, run in PGlite (Postgres in WebAssembly) against small stand-ins for what Supabase provides: the
  * anon, authenticated and service_role roles, auth.users and auth.uid(). Checks the contract the game relies on: who
  * can touch what, what submit_play, rate_list, submit_feedback, submit_fathom_guess and submit_miss accept, what the
- * stats, ratings and Fathom comparison functions return (the owners and stats_excluded left out of the stats and the
- * comparison), that notes and missed guesses are read only with the reader key (list_feedback, list_misses), that a
- * miss is normalized as the game normalizes it and linked to nobody, the save's version check, and what account
- * deletion (api/delete-account.ts, as service_role) needs.
+ * stats, ratings and Fathom comparison functions return (every player counted, the owners and testers included), that
+ * notes and missed guesses are read only with the reader key (list_feedback, list_misses), that a miss is normalized
+ * as the game normalizes it and linked to nobody, the save's version check, and what account deletion
+ * (api/delete-account.ts, as service_role) needs.
  *
  * Everything runs twice: once as older projects set up public (every new table and function handed to the API roles,
  * which the migrations must take back), once with "Automatically expose new tables" off (nothing handed out, as in
@@ -232,99 +232,30 @@ function suite(exposeNewTables: boolean) {
     });
   });
 
-  describe("testers out of the stats (owners and stats_excluded)", () => {
-    // C is an owner, D a tester the owner excluded, E a player who signs in on D's browser.
+  describe("everyone in the stats, the owners and testers included (owner, Nov 9)", () => {
+    // C is an owner, D a tester: an account like any other.
     const C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
     const D = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
-    const E = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
-    type Stats = { n: number; counts: number[]; avg: number | null };
-    const stats = async (mode = "list") =>
-      (await as("anon", null, () => db.query<{ s: Stats }>("select public.list_stats('s-tests', $1) as s", [mode]))).rows[0].s;
-    const average = async (mode = "list") =>
-      (await as("anon", null, () => db.query<{ list_id: string; n: number; avg: string }>("select * from public.list_averages($1)", [mode]))).rows.find(
-        (r) => r.list_id === "s-tests",
-      );
 
-    beforeAll(async () => {
-      await db.query("insert into auth.users (id, email) values ($1, 'c@example.com'), ($2, 'd@example.com'), ($3, 'e@example.com')", [C, D, E]);
+    it("counts the owner's and the testers' first games like anyone's, signed in or not", async () => {
+      await db.query("insert into auth.users (id, email) values ($1, 'c@example.com'), ($2, 'd@example.com')", [C, D]);
+      await db.query("insert into public.owners (user_id) values ($1)", [C]);
+      // A player scores 4. The owner scores 10 signed in, and 10 signed out on a browser he rates with signed in; the
+      // tester scores 10 signed in.
       await as("anon", null, async () => {
-        // 30 players score 4, one scores 9.
-        for (let i = 0; i < 30; i++) await submit({ list: "s-tests", client: client(700 + i), score: 4, started: ago(60) });
-        await submit({ list: "s-tests", client: client(730), score: 9, started: ago(60) });
-        await submit({ list: "s-tests", mode: "blitz", client: client(700), score: 120, found: 3, started: ago(60) });
-        // Signed out on browsers C and D also use signed in (below): perfect scores.
+        await submit({ list: "s-tests", client: client(700), score: 4, started: ago(60) });
         await submit({ list: "s-tests", client: client(741), score: 10, started: ago(55) });
-        await submit({ list: "s-tests", client: client(751), score: 10, started: ago(55) });
-        await submit({ list: "s-tests", client: client(752), score: 10, started: ago(55) });
       });
-      // Signed in: C and D score 10 (D in Blitz too). C rates a list on browser 741, D sends a note from 751 and plays
-      // another list on 752: those browsers are theirs.
       await as("authenticated", C, async () => {
         await submit({ list: "s-tests", client: client(740), score: 10, started: ago(50) });
         await rate({ list: "s-other", client: client(741) });
       });
-      await as("authenticated", D, async () => {
-        await submit({ list: "s-tests", client: client(750), score: 10, started: ago(50) });
-        await submit({ list: "s-tests", mode: "blitz", client: client(750), score: 600, found: 12, started: ago(50) });
-        await note({ list: "s-other", client: client(751), text: "from a tester" });
-        await submit({ list: "s-other", client: client(752), score: 8, started: ago(45) });
-      });
-      // Someone else signed in on D's browser: a 7.
-      await as("authenticated", E, () => submit({ list: "s-tests", client: client(751), score: 7, started: ago(40) }));
-    });
-
-    it("counts everyone until the owner adds them", async () => {
-      // 31 players, the 3 browsers and C, D and E.
-      expect((await stats()).n).toBe(37);
-      expect((await average())?.n).toBe(37);
-      expect((await stats("blitz")).n).toBe(2);
-    });
-
-    it("leaves out the owners and stats_excluded: their accounts' games, and their browsers' signed-out games", async () => {
-      await db.query("insert into public.owners (user_id) values ($1)", [C]);
-      // The owner's one-liner (docs/BACKEND.md, 2.7).
-      await db.query("insert into public.stats_excluded (user_id) select id from auth.users where email = 'd@example.com'");
-      // 30 at 4, one 9, and E's 7 (signed in on D's browser, still a player).
-      expect(await stats()).toEqual({ n: 32, counts: [0, 0, 0, 0, 30, 0, 0, 1, 0, 1, 0], avg: 4.25 });
-      const avg = await average();
-      expect(avg?.n).toBe(32);
-      expect(Number(avg?.avg)).toBe(4.25);
-      expect(await stats("blitz")).toEqual({ n: 1, counts: [0, 0, 1], avg: 120 });
-      // Taking a tester back out of the table counts them again.
-      await db.query("delete from public.stats_excluded where user_id = $1", [D]);
-      expect((await stats()).n).toBe(35);
-      await db.query("insert into public.stats_excluded (user_id) values ($1)", [D]);
-      expect((await stats()).n).toBe(32);
-    });
-
-    it("keeps the signatures and answers the game calls, for the public key", async () => {
-      const sig = await db.query<{ name: string; args: string; result: string }>(
-        `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
-         from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('list_stats', 'list_averages') order by 1`,
-      );
-      expect(sig.rows).toEqual([
-        { name: "list_averages", args: "p_mode text", result: "TABLE(list_id text, n integer, avg numeric)" },
-        { name: "list_stats", args: "p_list_id text, p_mode text", result: "json" },
-      ]);
-      await as("authenticated", A, async () => {
-        expect(Object.keys((await db.query<{ s: object }>("select public.list_stats('s-tests') as s")).rows[0].s)).toEqual(["n", "counts", "avg"]);
-        expect((await db.query("select * from public.list_averages()")).rows.length).toBeGreaterThan(0);
-      });
-    });
-
-    it("gives players no access to stats_excluded", async () => {
-      for (const [role, user] of [["anon", null], ["authenticated", E]] as const) {
-        await as(role, user, async () => {
-          expect(await code(db.query("select * from public.stats_excluded"))).toBe("42501");
-          expect(await code(db.query("insert into public.stats_excluded (user_id) values ($1)", [E]))).toBe("42501");
-          expect(await code(db.query("delete from public.stats_excluded"))).toBe("42501");
-        });
-      }
-    });
-
-    it("drops an account's row when the account is deleted", async () => {
-      await db.query("delete from auth.users where id = $1", [D]);
-      expect((await db.query("select * from public.stats_excluded where user_id = $1", [D])).rows).toEqual([]);
+      await as("authenticated", D, () => submit({ list: "s-tests", client: client(750), score: 10, started: ago(50) }));
+      const stats = await as("anon", null, () => db.query<{ s: unknown }>("select public.list_stats('s-tests', 'list') as s"));
+      expect(stats.rows[0].s).toEqual({ n: 4, counts: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3], avg: 8.5 });
+      const averages = await as("anon", null, () => db.query<{ list_id: string; n: number; avg: string }>("select * from public.list_averages('list')"));
+      const row = averages.rows.find((r) => r.list_id === "s-tests");
+      expect([row?.n, Number(row?.avg)]).toEqual([4, 8.5]);
     });
   });
 
@@ -631,7 +562,7 @@ function suite(exposeNewTables: boolean) {
   });
 
   describe("Fathom guesses", () => {
-    // F signs in on two browsers, G is an owner, H a tester in stats_excluded.
+    // F signs in on two browsers, G is an owner, H a tester (an account like any other).
     const F = "ffffffff-ffff-4fff-8fff-ffffffffffff";
     const G = "12121212-1212-4121-8121-121212121212";
     const H = "34343434-3434-4343-8343-343434343434";
@@ -672,13 +603,14 @@ function suite(exposeNewTables: boolean) {
       await as("authenticated", F, () => fathomGuess({ question: "fq-cmp", guess: 1000, client: client(1101) }));
       await db.query("update public.fathom_guesses set created_at = now() - interval '10 minutes' where client_id = $1", [client(1101)]);
       await as("authenticated", F, () => fathomGuess({ question: "fq-cmp", guess: 50, client: client(1102) }));
-      // G (an owner, once added) spot on, signed in; and signed out on a browser G has used signed in.
+      // G (an owner, once added) spot on, signed in; and signed out on a browser G has used signed in (nothing joins the
+      // two, so two players, as for anyone).
       await as("authenticated", G, async () => {
         await fathomGuess({ question: "fq-cmp", guess: 100, client: client(1201) });
         await fathomGuess({ question: "fq-other", guess: 7, client: client(1202) });
       });
       await as("anon", null, () => fathomGuess({ question: "fq-cmp", guess: 100, client: client(1202) }));
-      // H (a tester, once excluded) spot on too.
+      // H (a tester) spot on too.
       await as("authenticated", H, () => fathomGuess({ question: "fq-cmp", guess: 100, client: client(1301) }));
     });
 
@@ -762,26 +694,27 @@ function suite(exposeNewTables: boolean) {
 
     it("compares a guess with real players: how many, their median guess, and the share further off", async () => {
       // 25 players, F once (1000, the first), G twice (signed in, and signed out on a browser of theirs) and H; not the
-      // asker. Nobody is an owner or excluded yet.
+      // asker.
       expect((await compare("fq-cmp", 120, 100)).n).toBe(29);
+      // The owner and his testers count like anyone (owner, Nov 9: "keep me and testers in the averages").
       await db.query("insert into public.owners (user_id) values ($1)", [G]);
-      await db.query("insert into public.stats_excluded (user_id) values ($1)", [H]);
-      // 10 at 50, 10 at 200, 6 at 1000: the middle guess is 200. 120 is closer than everyone.
-      expect(await compare("fq-cmp", 120, 100)).toEqual({ n: 26, median: 200, further_off: 1 });
+      // 10 at 50, three at 100 (G twice, H), 10 at 200, 6 at 1000: the middle guess is 200. 120 is closer than all but
+      // the three spot on.
+      expect(await compare("fq-cmp", 120, 100)).toEqual({ n: 29, median: 200, further_off: 0.8966 });
       // Half or double: as far off as 20 of them (not further), closer than the six at 1000.
-      expect(await compare("fq-cmp", 200, 100)).toEqual({ n: 26, median: 200, further_off: 0.2308 });
-      expect(await compare("fq-cmp", 50, 100)).toEqual({ n: 26, median: 200, further_off: 0.2308 });
-      expect(await compare("fq-cmp", 1000, 100)).toEqual({ n: 26, median: 200, further_off: 0 });
+      expect(await compare("fq-cmp", 200, 100)).toEqual({ n: 29, median: 200, further_off: 0.2069 });
+      expect(await compare("fq-cmp", 50, 100)).toEqual({ n: 29, median: 200, further_off: 0.2069 });
+      expect(await compare("fq-cmp", 1000, 100)).toEqual({ n: 29, median: 200, further_off: 0 });
       // Measured against the answer the game shows (a corrected answer applies to every guess at once): at 1000, the
-      // six who said 1000 tie, the other 20 are further off.
-      expect((await compare("fq-cmp", 1000, 1000)).further_off).toBe(0.7692);
+      // six who said 1000 tie, the other 23 are further off.
+      expect((await compare("fq-cmp", 1000, 1000)).further_off).toBe(0.7931);
     });
 
     it("leaves the player asking out: their browser, and their account on every device", async () => {
       // Without a browser to leave out, the asker's own 100 is in the crowd.
-      expect((await compare("fq-cmp", 120, 100, { asker: null })).n).toBe(27);
+      expect((await compare("fq-cmp", 120, 100, { asker: null })).n).toBe(30);
       // F signed in on a third browser: neither of F's guesses counts (and the other asker's 100 does).
-      expect((await compare("fq-cmp", 120, 100, { asker: client(1103), user: F })).n).toBe(26);
+      expect((await compare("fq-cmp", 120, 100, { asker: client(1103), user: F })).n).toBe(29);
     });
 
     it("measures an estimate (and a name-it ratio list) in how many times off, with 0 the furthest of all", async () => {
@@ -857,10 +790,10 @@ function suite(exposeNewTables: boolean) {
       expect(await compare("fq-none", 10, 100)).toEqual({ n: 0, median: null, further_off: null });
       expect(await compare("fq-none", 0, 0, { round: "percent" })).toEqual({ n: 0, median: null, further_off: null });
       // Without a guess or an answer on the scale, still how many and their median, but no share.
-      expect(await compare("fq-cmp", -1, 100)).toEqual({ n: 26, median: 200, further_off: null });
-      expect(await compare("fq-cmp", 120, -1)).toEqual({ n: 26, median: 200, further_off: null });
+      expect(await compare("fq-cmp", -1, 100)).toEqual({ n: 29, median: 200, further_off: null });
+      expect(await compare("fq-cmp", 120, -1)).toEqual({ n: 29, median: 200, further_off: null });
       const short = await as("anon", null, () => db.query<{ c: Compare }>("select public.fathom_compare('fq-cmp', 'estimate', 120, 100) as c"));
-      expect(short.rows[0].c.n).toBe(27);
+      expect(short.rows[0].c.n).toBe(30);
       const sig = await db.query<{ name: string; args: string; result: string }>(
         `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
          from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('fathom_compare', 'submit_fathom_guess') order by 1`,

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { BlitzState } from "../game/blitz";
 import type { GameState } from "../game/state";
 import type { Puzzle } from "../game/types";
-import { blitzShare, dailyBlitzShare, listShare, pasteable } from "./share";
+import { blitzShare, listShare, pasteable } from "./share";
 
 const board: Puzzle = {
   id: "t",
@@ -48,7 +48,7 @@ describe("share text", () => {
   it("a Blitz round: its lines survive a Reddit paste", () => {
     const round: BlitzState = { puzzleId: "t", startedAt: 1, endedAt: 90_001, hits: [{ name: "A1", rank: 1, n: 100, points: 100 }] };
     keepsBreaks(blitzShare(round, board, "u"));
-    keepsBreaks(dailyBlitzShare(round, board, "u", 7));
-    expect(dailyBlitzShare(round, board, "u", 7).startsWith("TENtacle Blitz #7: T  \n100 pts · 1 answer in 90s  \n")).toBe(true);
+    // Free play only (owner, Nov 9): no daily number on a Blitz.
+    expect(blitzShare(round, board, "u").startsWith("TENtacle Blitz: T  \n100 pts · 1 answer in 90s  \n")).toBe(true);
   });
 });

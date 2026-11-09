@@ -242,12 +242,14 @@ describe("new lists debut as dailies", () => {
   const index = read<ListMeta[]>("index.json");
   const debuts = index.filter((m) => m.debut);
   const first = (id: string) => days.filter((d) => d.id === id || d.blitz === id).map((d) => d.date).sort()[0];
+  /** A day's Blitz is free play since Nov 10: a list first scheduled as one joins random play on that day. */
+  const out = (id: string, today: string) => days.some((d) => (d.id === id && d.date < today) || (d.blitz === id && d.date <= today));
   it("each new list is unscheduled, scheduled from today on, or has run; random play follows", () => {
     const today = localDate();
     for (const { id } of debuts) {
       const debut = first(id);
       const held = rollHoldouts(days, index, undefined, today).has(id);
-      if (debut && debut < today) expect(heldDebuts(days, index, today).has(id), `${id} ran on ${debut}`).toBe(false);
+      if (out(id, today)) expect(heldDebuts(days, index, today).has(id), `${id} ran on ${debut}`).toBe(false);
       else expect(held, `${id} ${debut ? `debuts on ${debut}` : "has no day yet"}: held from random play`).toBe(true);
     }
   });

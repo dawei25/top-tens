@@ -87,8 +87,10 @@ interface Tile {
   label: string;
   icon: GlyphName;
   tone?: "classic" | "blitz";
-  /** Today's tiles: "new" or the result, as on Home. */
+  /** Today's list: "new" or the result, as on Home. */
   status?: { text: string; done: boolean };
+  /** Takes the whole row (Today's list). */
+  wide?: boolean;
   /** The screen it opens, if it opens one: marked while that screen is on show, and then it only closes the menu. */
   screen?: MenuScreen;
   disabled?: boolean;
@@ -188,34 +190,23 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
   }, []);
 
   const saved = load();
-  const today = todayStatus(saved, nav.entry, nav.today);
+  const today = todayStatus(saved, nav.entry);
   // A Blitz round under way keeps its clock while the menu is open: said at the top, where it can't be missed.
   const live = nav.blitzOnScreen ? resumeBlitz(saved, nav.blitzOnScreen) : undefined;
   const clockRuns = !!live && !live.over;
+  // The one daily first, across the row (as on Home: the main thing gets the most room), then free play's pair.
   const play: Tile[] = [
     {
       id: "today-list",
       label: "Today's list",
       icon: "list",
       tone: "classic",
-      status: { text: today.list.status, done: today.list.done },
+      status: { text: today.status, done: today.done },
       screen: "today-list",
       disabled: !nav.entry,
+      wide: true,
       go: nav.onDaily,
     },
-    ...(nav.hasDailyBlitz
-      ? [
-          {
-            id: "today-blitz",
-            label: "Today's Blitz",
-            icon: "bolt",
-            tone: "blitz",
-            status: { text: today.blitz.status, done: today.blitz.done },
-            screen: "today-blitz",
-            go: nav.onDailyBlitz,
-          } satisfies Tile,
-        ]
-      : []),
     { id: "random-list", label: "Random list", icon: "dice", tone: "classic", go: nav.onRoll },
     { id: "random-blitz", label: "Random Blitz", icon: "dice", tone: "blitz", disabled: nav.blitzOpen === 0, go: nav.onBlitz },
   ];
@@ -264,7 +255,7 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
       <button
         key={t.id}
         type="button"
-        className="key menu-tile"
+        className={`key menu-tile${t.wide ? " wide" : ""}`}
         data-testid={`menu-${t.id}`}
         aria-current={current ? "page" : undefined}
         disabled={t.disabled}

@@ -51,26 +51,23 @@ Formerly Top Tens. Name the top 10 of a ranked list. Five lives.
 
 Puzzles are prebuilt from Wikipedia tables (`scripts/topics.ts`, `scripts/build.ts`) into `public/puzzles/*.json`,
 with every table row as an accepted answer, aliases from redirects, and a source link with an "as of" date.
-Modes: daily (Today's list and Today's Blitz, from `public/puzzles/daily.json`) and free play (a random list or Blitz,
-optionally by category). **Dailies are one try each**, archive dailies included: a finished daily always reopens on
+Modes: one daily, Today's list (from `public/puzzles/daily.json`), and free play (a random list or Blitz, optionally
+by category). Blitz is free play only: Today's Blitz was retired (owner, Nov 9), and an old `#dailyblitz-<date>` link
+opens that date's list as a free Blitz. **Dailies are one try each**, archive dailies included: a finished daily always reopens on
 its result. Free play is endless: Roll new list rolls a new random game, keeping the category if one was picked, and
 prefers lists the player hasn't played in that mode. Before play it sits in its own box right of the guess panel.
 
-**Separate topics.** Today's list and Today's Blitz are different lists, because a good list rewards knowing the
-top 10 and a good Blitz rewards breadth. `daily.json` gives every day a `blitz`; a day without one gets a
-date-seeded Blitz list that isn't that day's daily or a later one. Random rolls (list or Blitz) never land on today's
-list or Blitz, played or not, or on a future day's: a day's pair joins random play the day after it runs.
+**Never spoil a daily.** Random rolls (list or Blitz) never land on today's list, played or not, or on a future
+day's: a day's list joins random play the day after it runs. `daily.json` still names a `blitz` per day (the
+scheduler writes it; only old links read it), and such a list is ordinary free play.
 **New lists debut as dailies** (owner): a list built with `debut` stays out of random play, list and Blitz, until its
-first day as Today's list or Today's Blitz has run, scheduled or not (`heldDebuts`); the scheduler runs debut lists
-first. Today's list is always one that never ran. A day never waits for a new Blitz: when none is approved, its Blitz
-reruns a list from random play (another category than the day's list, at least 30 days after its last Blitz). If a Blitz
-ever runs on its day's own list, it shows only the player's hits
-until that list is finished (`blitzHold`). The judge's bars (docs/JUDGE.md): a typical player averages 5 to 6 on
-Today's list; Today's Blitz needs a deep pool, broad recognition and clean data.
+first day as Today's list has run, scheduled or not (`heldDebuts`); the scheduler runs debut lists first. Today's list
+is always one that never ran. The judge's bars (docs/JUDGE.md): a typical player averages 5 to 6 on Today's list; a
+list offered as a Blitz needs a deep pool, broad recognition and clean data.
 
 ## 4. Screens
 
-Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list and Blitz, Random list and
+Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list, Random list and Random
 Blitz; Yours: Archive, Past runs, Stats; More: Settings, How to play, Feedback, Privacy), the current screen's tile
 marked. The account lives in Home's header, not in the menu and not in a row of its own (owner, Nov 5 and 6): one
 **account key** left of the sound key, the same keycap, in builds with accounts only. Its pixel player is hollow when
@@ -82,9 +79,9 @@ account key: their headers are full, and HOME is one press away (UX.md 19). **Se
 switch and reset all progress. **Fathom (beta)** lives at `#fathom` only, with no Home or menu entry until the owner
 approves it: five estimation questions a game, scored by plain closeness, one rule for every question (docs/FATHOM.md).
 
-1. **Home:** Today's list and Blitz, then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on);
-   Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ). Home never names today's list or
-   Blitz: the topic is the surprise (owner, Nov 7).
+1. **Home:** Today's list (one key across the row), then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on);
+   Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ). Home never names today's list: the
+   topic is the surprise (owner, Nov 7).
 2. **Game:** title card with the prompt and score (no average during play: it's revealed on the results; no Play
    Blitz key there, owner Nov 8: "for simplicity"); lives; 10 rank slots, each empty one with a
    clue magnifier; feedback line; chips for life-costing misses.
@@ -95,12 +92,12 @@ approves it: five estimation questions a game, scored by plain closeness, one ru
    under the board that opens the next ten ranks with their figures (life-costing guesses in pink; "See 11 to 15" when
    the list stops sooner; none on Blitz), source link, share, Roll new list (a new random game), and Play Blitz on a
    list's results. A Blitz's results never offer its own list as a list game: it's spoiled (UX 15).
-   A finished daily offers Today's Blitz and Random list instead. The archive is a table, one row per date: number and
-   date, then a List cell and a Blitz cell (title, and score or "not played" under it), with "List" and "Blitz" named
-   once at the top; each cell opens its own one-try game.
+   A finished daily offers Play Blitz on the same list (a list game doesn't spoil its Blitz) and Random list. The
+   archive is a table, one row per date: number, date, the list's title and its score or "not played"; each row opens
+   its own one-try game.
 4. **Past runs:** every game played, under a header per day, one tag per row ("List #22", "Blitz #22", never wrapping). Each row opens its own run (the board
    as it ended, or the Blitz round), which offers Play again (a fresh free game on that same list), the only replay
-   in the game, except on a list held today (today's pair or a future day's): "back in free play after its day".
+   in the game, except on a list held today (today's list or a future day's): "back in free play after its day".
 5. **How to play:** closed by default; the footer key opens it as a dialog over the page.
 6. **Stats** (`#stats`, Your knowledge): first tries on each list against the players' average, overall, by category and by topic; placeholders
    before the first game (the three headline figures read "--", "0", "--" in one row). Every screen opened forward
