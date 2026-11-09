@@ -10,9 +10,10 @@
  * its fins (in place or in a tight arc; slower the faster it is still going, so the keel keeps up), and only jets
  * once it faces the way it will go. A dart or a flee turns faster and brakes harder, but turns all the same.
  *
- * Reactions are behaviours on top: a dart (to a point, braking into it), a flee (away from its own ink, preferring
- * the way it already faces), loops (a circle that starts along its heading), dozing (it swims down head-first, rights
- * itself above the seabed and settles slowly) and hovering near something the player points at.
+ * Reactions are behaviours on top: a dart (to a point, braking into it), a flee (the ink comes out as its jet fires,
+ * and it shoots off at least twice its width, preferring the way it already faces; hemmed in, it flips round first),
+ * loops (a circle that starts along its heading), dozing (it swims down head-first, rights itself above the seabed and
+ * settles slowly) and hovering near something the player points at.
  *
  * Confined (wide screens, with a Room): the whole squid, limbs included, stays in open water. Every turn is checked
  * against the glass before it starts (the way round that fits), every glide against the room ahead of it (a heading
@@ -78,11 +79,20 @@ const DRIFT = 12;
 const PIVOT_SPEED = 12;
 /** Confined: headings tried for that slow turn. */
 const PIVOT_HEADINGS = [30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180];
+/** Confined, hemmed in as it inks: headings tried for the flip, every 10 degrees round (in a strip only one near level
+ *  may have the room, Nov 9). */
+const FLIP_HEADINGS = Array.from({ length: 34 }, (_, i) => (i % 2 ? -1 : 1) * 10 * Math.ceil((i + 1) / 2)).concat(180);
 /** Confined: a glide stops this far short of the room it has ahead (CSS px). */
 const SHORT = 24;
 /** Confined: headings tried around the one it wants, nearest first; for a hop, only near its own. */
 const OFFSETS = [0, 12, -12, 25, -25, 40, -40, 60, -60, 90, -90, 120, -120, 150, -150, 180];
 const HOP_OFFSETS = [0, 15, -15, 30, -30, 50, -50];
+/** A flee from its ink goes at least this many of its widths, so the cloud is well behind it (confined, where open
+ *  water is tight, FLEE_LEAST). */
+const FLEE_MIN = 2;
+const FLEE_LEAST = 1.5;
+/** Confined and hemmed in as it inks: it flips round about its middle this fast (degrees a second), then flees. */
+const FLIP = 420;
 
 const RAD = Math.PI / 180;
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
@@ -153,6 +163,17 @@ export class Swimmer {
    *  settles (dozing, righting itself where there is no room to turn the usual way). */
   private pivotTo = 0;
   private settleAfter = false;
+  /** Fleeing its own ink: from flee() until that glide runs out, or another move takes over. */
+  fleeing = false;
+  /** The flee's ink, squirted as its jet fires (dropped if another move takes over first). */
+  private onJet: (() => void) | null = null;
+  /** Confined, hemmed in as it inks: a quick flip about its middle before the flee (see flip). */
+  private flipping = false;
+  /** How far the flee should get (CSS px): past the cloud's reach. */
+  private clear = 0;
+  /** Confined: how far the flee it planned goes at least (CSS px), and how many times it has planned it again. */
+  private fleeMin = 0;
+  private fleeTries = 0;
 
   private world: World;
   private rand: () => number;
@@ -208,6 +229,7 @@ export class Swimmer {
     this.thrust = 0;
     this.arrive = null;
     this.escaping = false;
+    this.endFlee();
     this.spin = 0;
     if (this.behaviour !== "doze") {
       this.phase = "glide";
@@ -273,6 +295,7 @@ export class Swimmer {
    * away, then inflate (finishing the turn), then jet.
    */
   private go(aim: number, v: number, inflate = 0.22, urgent = false, arrive: Pt | null = null, spin: 1 | -1 | 0 = 0) {
+    this.endFlee();
     this.aim = aim;
     this.jet = v;
     this.urgent = urgent;
@@ -322,6 +345,7 @@ export class Swimmer {
 
   /** Confined, with nowhere to go from here: hang a moment, then look again. */
   private hold(s = 0.6) {
+    this.endFlee();
     this.phase = "hover";
     this.left = s + this.rand() * 0.4;
     this.thrust = 0;
@@ -413,6 +437,7 @@ export class Swimmer {
       }
     }
     if (best === null) return false;
+    this.endFlee();
     this.pivotTo = best;
     this.phase = "pivot";
     this.left = 0.2;
@@ -435,7 +460,7 @@ export class Swimmer {
       return;
     }
     const b = room.back;
-    const rate = ((PIVOT_SPEED / b) * 180) / Math.PI;
+    const rate = this.flipping ? FLIP : ((PIVOT_SPEED / b) * 180) / Math.PI;
     const diff = wrapDeg(this.pivotTo - this.tilt);
     const step = clamp(diff, -rate * dt, rate * dt);
     const cx = this.x - Math.sin(this.tilt * RAD) * b;
@@ -444,6 +469,21 @@ export class Swimmer {
     this.x = cx + Math.sin(this.tilt * RAD) * b;
     this.y = cy - Math.cos(this.tilt * RAD) * b;
     this.vx = this.vy = 0;
+    if (this.flipping) {
+      if (Math.abs(diff - step) >= 0.5) return;
+      // Round: the flee (and its ink) now.
+      this.flipping = false;
+      const ink = this.onJet;
+      if (this.fleeGo(false)) {
+        this.fleeing = true;
+        this.onJet = ink;
+        return;
+      }
+      this.endFlee();
+      this.phase = "glide";
+      this.left = 0;
+      return this.next();
+    }
     // Clear enough to turn the usual way now: on with it.
     this.left -= dt;
     if (this.left <= 0 && !this.settleAfter) {
@@ -468,6 +508,7 @@ export class Swimmer {
     if (!this.room || Math.abs(wrapDeg(this.tilt)) > 50) return false;
     const d = Math.min(this.room.drop(this.x, this.y, this.tilt, Math.min(max, 220)), max) - 8;
     if (d < 24) return false;
+    this.endFlee();
     this.phase = "sink";
     this.left = d / DRIFT;
     this.thrust = 0;
@@ -480,9 +521,10 @@ export class Swimmer {
   /**
    * A find: a quick happy hop, head-first, a short way along (or near) its heading; bigger for the feeding
    * tentacles. With no room for one, a flourish in place: the mantle fills and snaps, the arms flare and close.
+   * Not while it flees its ink: that dart goes on (a hop would cut it short, by the cloud).
    */
   hop(big: boolean) {
-    if (this.behaviour === "loop" || this.escaping) return;
+    if (this.behaviour === "loop" || this.escaping || this.fleeing) return;
     this.wakeUp();
     this.behaviour = "roam";
     const want = big ? 90 : 55;
@@ -502,27 +544,94 @@ export class Swimmer {
     this.hold(s);
   }
 
-  /** Jet hard away from where it is (it just inked): the direction with the most room, nearest the way it faces. */
-  flee() {
-    if (this.behaviour === "loop") return;
+  /**
+   * Ink and flee: jet hard away from where it is, the direction with the most room nearest the way it faces, at least
+   * FLEE_MIN of its widths or `clear` px (past the cloud), where there is room for that. `ink` runs as the jet fires,
+   * so the ink comes out with the dart, never in place: after a turn, or (confined, hemmed in: facing the glass, no
+   * room to turn) a quick flip about its middle. False, and no ink, when there is no way out at all.
+   */
+  flee(ink?: () => void, clear = 0): boolean {
+    if (this.behaviour === "loop") return false;
     this.wakeUp();
     this.behaviour = "roam";
+    this.clear = clear;
+    this.fleeTries = 0;
+    if (!this.fleeGo(true)) return false;
+    this.fleeing = true;
+    this.onJet = ink ?? null;
+    return true;
+  }
+
+  /**
+   * About to jet a flee, `off` degrees from the heading it planned: is it facing that way, and (confined) is the room
+   * it planned still ahead (the glide brakes a hard stop's 32 px short of the glass)?
+   */
+  private fleeClear(off: number) {
+    if (off > ALIGN * 2) return false;
+    const room = this.room;
+    if (!room || this.escaping) return true;
+    return room.reach(this.x, this.y, this.tilt, this.fleeMin + 32) - 32 >= this.fleeMin * 0.75;
+  }
+
+  /** The flee's jet would not get it clear: plan it again from here, ink and all (three times at most, then no ink). */
+  private fleeAgain() {
+    const ink = this.onJet;
+    if (++this.fleeTries <= 3 && this.fleeGo(true)) {
+      this.fleeing = true;
+      this.onJet = ink;
+      return;
+    }
+    this.hold(0.3);
+  }
+
+  /** Fleeing, its ink not out yet (it comes with the jet). */
+  get inkPending() {
+    return this.onJet !== null;
+  }
+
+  /** The other moves: a flee (and its ink, if not out yet) is over. */
+  private endFlee() {
+    this.fleeing = false;
+    this.flipping = false;
+    this.onJet = null;
+  }
+
+  /**
+   * Set up the flee's jet (or, hemmed in and `flip`, the flip before it). False when there is nowhere to go, and,
+   * confined, while it is still out of glass that came over it (it has no room to plan against yet: wait until out).
+   */
+  private fleeGo(flip: boolean): boolean {
     const b = this.bounds();
-    const L = this.unit * 1.1 * Math.max(1, this.speed);
-    if (this.room && !this.escaping) {
-      // The heading with the most room, nearest the way it faces.
-      const q = this.plan(this.tilt, L, 30, 1 / 400);
-      if (!q) return this.go(this.tilt, 0, 0.07, true);
-      this.target = {
+    const far = Math.max(this.world.sw * FLEE_MIN, this.clear);
+    const L = Math.max(far, this.unit * 1.1 * Math.max(1, this.speed));
+    if (this.room) {
+      if (this.escaping) return false;
+      // The heading with the most room, nearest the way it faces: past the cloud, or as near that as there is room for
+      // (FLEE_MIN widths, or FLEE_LEAST where open water is tight: mid-strip, say).
+      const mins = [Math.min(far, L), this.world.sw * FLEE_MIN, this.world.sw * FLEE_LEAST];
+      let q: ReturnType<Swimmer["plan"]> = null;
+      for (const m of mins) {
+        q = this.plan(this.tilt, L, m, 1 / 400);
+        this.fleeMin = m;
+        if (q) break;
+      }
+      if (!q) return flip && (this.flip(L, mins[1]) || this.flip(L, mins[2]));
+      // A dart (a hard jet, braking into the end of the run), so it is well clear of the cloud within half a second
+      // however short the run.
+      const end = {
         x: this.x + Math.sin(q.aim * RAD) * q.travel,
         y: this.y - Math.cos(q.aim * RAD) * q.travel,
       };
-      return this.go(q.aim, q.travel * DRAG, 0.07, true, null, q.spin);
+      this.target = end;
+      this.go(q.aim, clamp(q.travel * 5, 300, 3200) * Math.max(1, this.speed * 0.9), 0.07, true, end, q.spin);
+      return true;
     }
+    // Behind the glass: headings at random and every 45 degrees round (so a corner always shows the way out), scored
+    // by the room at the end of the run and by how near the way it faces they are.
     let best = this.tilt;
     let score = -Infinity;
-    for (let i = 0; i < 12; i++) {
-      const h = this.tilt + (this.rand() - 0.5) * 360;
+    for (let i = 0; i < 20; i++) {
+      const h = this.tilt + (i < 12 ? (this.rand() - 0.5) * 360 : (i - 12) * 45);
       const ux = Math.sin(h * RAD);
       const uy = -Math.cos(h * RAD);
       const p = { x: this.x + ux * L, y: this.y + uy * L };
@@ -538,6 +647,41 @@ export class Swimmer {
       y: this.y - Math.cos(best * RAD) * L,
     });
     this.go(best, L * DRAG, 0.07, true);
+    return true;
+  }
+
+  /**
+   * Confined and hemmed in as it inks (facing the glass, no room to turn the usual way, nothing ahead): a quick flip
+   * about the middle of its silhouette, which stays put (so it always fits), to the heading nearest its own with room
+   * for a flee of at least `min` px; the flee follows (stepPivot). False if no heading has that room.
+   */
+  private flip(L: number, min: number) {
+    const room = this.room!;
+    const b = room.back;
+    const cx = this.x - Math.sin(this.tilt * RAD) * b;
+    const cy = this.y + Math.cos(this.tilt * RAD) * b;
+    let best: number | null = null;
+    let score = -Infinity;
+    for (const off of FLIP_HEADINGS) {
+      const h = wrapDeg(this.tilt + off);
+      const ahead = room.reach(cx + Math.sin(h * RAD) * b, cy - Math.cos(h * RAD) * b, h, L + SHORT) - SHORT;
+      const k = Math.min(ahead, L) - Math.abs(off);
+      if (ahead >= min && k > score) {
+        score = k;
+        best = h;
+      }
+    }
+    if (best === null) return false;
+    this.pivotTo = best;
+    this.phase = "pivot";
+    this.flipping = true;
+    this.left = 9;
+    this.thrust = 0;
+    this.arrive = null;
+    this.urgent = true;
+    this.spin = 0;
+    this.vx = this.vy = 0;
+    return true;
   }
 
   /**
@@ -579,6 +723,7 @@ export class Swimmer {
 
   private startLoop({ c, r, dir }: { c: Pt; r: number; dir: number }, turns: number, done?: () => void) {
     const a0 = Math.atan2(this.y - c.y, this.x - c.x);
+    this.endFlee();
     this.loop = { c, r, a0, dir, turns, t: 0, dur: 0.5 + turns * 0.95 };
     this.behaviour = "loop";
     this.onLoopDone = done ?? null;
@@ -613,6 +758,7 @@ export class Swimmer {
    */
   doze(x?: number, turnY?: number) {
     if (this.behaviour === "loop" || this.behaviour === "doze") return;
+    this.endFlee();
     this.behaviour = "doze";
     this.arrive = null;
     this.urgent = false;
@@ -742,6 +888,9 @@ export class Swimmer {
       const side = Math.abs(-this.vx * Math.cos(this.tilt * RAD) - this.vy * Math.sin(this.tilt * RAD));
       const settled = side < Math.max(MOVING, 0.12 * Math.hypot(this.vx, this.vy));
       if (this.left <= 0 && ((off <= ALIGN && settled) || this.left < -0.5)) {
+        // A flee's jet must carry it (and its ink) clear: held off the heading it planned (the guard stopped the turn
+        // short) or with the room ahead gone, it plans again from here and the ink waits.
+        if (this.onJet && !this.fleeClear(off)) return this.fleeAgain();
         // The jet: the mantle contracts hard (narrow and long) and the burst begins, along the heading.
         this.thrust = THRUST;
         this.jetAge = 0;
@@ -749,6 +898,10 @@ export class Swimmer {
         this.sy = 1.14;
         this.phase = "glide";
         this.left = (1.1 + this.rand() * 0.8) / this.cadence;
+        // A flee's ink comes out with the jet.
+        const ink = this.onJet;
+        this.onJet = null;
+        ink?.();
       }
     } else if (this.phase === "settle") {
       return this.stepSettle(dt, t, refill);
@@ -940,6 +1093,7 @@ export class Swimmer {
 
   /** The glide has run out: pulse on toward the waypoint, pick a new one, or hover a moment. */
   private next() {
+    this.endFlee();
     this.urgent = false;
     this.arrive = null;
     if (this.after !== null) {

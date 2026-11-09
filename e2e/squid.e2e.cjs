@@ -196,13 +196,15 @@ const controlsAt = (page, p, only = "*") =>
 
 /**
  * Moves the frozen clock on until the squid is on screen and "clear" of every control by a fingertip, or "under" a
- * control that matches `only`. Returns where it is.
+ * control that matches `only`. Returns where it is. A key now and then keeps it awake: after 20 s without input it
+ * dozes on the seabed, which on a phone is behind the guess row, and it would never come clear (Nov 9, under load).
  */
 async function squidWhere(page, where, { only = "*", tries = 200 } = {}) {
   const fits = (c) => (where === "clear" ? !c.under && !c.ring : c.only);
   for (let i = 0; i < tries; i++) {
     const p = await squidSpot(page);
     if (p && fits(await controlsAt(page, p, only))) return p;
+    if (i % 40 === 39) await page.keyboard.press("Shift");
     await page.clock.runFor(200);
   }
   throw new Error(`the squid never showed ${where} a control`);
@@ -276,7 +278,7 @@ for (const vp of VIEWPORTS) {
       // Beside a control, a phone hands the tap's click to it (touch adjustment: in Chromium a touch 4px above row 1,
       // on the board's head, clicks row 1). The press and lift land on the squid, the click on the row: the row's
       // alone. Replayed as events (the squid can't be put there), with each click: on the row, on bare glass, none.
-      const q = await squidWhere(page, "clear");
+      let q = await squidWhere(page, "clear");
       const replay = (click) =>
         page.evaluate(
           ({ q, click }) => {
@@ -293,9 +295,12 @@ for (const vp of VIEWPORTS) {
       await page.clock.runFor(400);
       assert.equal((await reaction(page)).pokes, 0, "the squid took a tap the browser gave a row");
       await page.keyboard.press("Escape");
+      q = await squidWhere(page, "clear");
       await replay("glass");
       assert.equal((await reaction(page)).pokes, 1, "a tap on the squid, clicked on bare glass, is the squid's");
       await page.clock.runFor(1500);
+      // Where it is now: it roams on meanwhile (replayed where it was, the tap missed it 1 run in 2, Nov 9).
+      q = await squidWhere(page, "clear");
       await replay(null);
       assert.equal((await reaction(page)).pokes, 1, "the squid didn't wait for the click");
       // A beat later (250 ms) the squid takes a tap no click followed. Stepped, not one jump: under load the frame
@@ -357,6 +362,255 @@ for (const vp of VIEWPORTS) {
     await page.clock.runFor(700);
     await guess(page, p.extras.find((e) => e.rank > 10).name);
     assert.deepEqual(await reaction(page), { react: "hit", pokes: 0, finds: 4 });
+    await ctx.close();
+  });
+}
+
+/* ---------------------------------------------------------------- ink comes with a dart */
+
+// The owner, Nov 9: "when you spam click the squid and it blows the ink, sometimes its stationary and the ink is just
+// sitting on top of the squid- whenever u blow ink, squid should dart". Every puff of ink (the tap trick, a lost life)
+// leaves with the squid: it is already darting as the ink appears, and soon well clear of the cloud, in the open and
+// next to an edge (where it once faced the glass, could not turn, and inked in place over and over). Spam taps start
+// no second trick while the first one's dart is on.
+
+/** Frames are stepped one at a time on the frozen clock (the ocean runs at about 30 fps). */
+const FRAME_MS = 33;
+
+/**
+ * One frame: where the squid's eyes are (viewport CSS px, null when hidden), its width (20 sprite px), how many ink
+ * puffs so far (the stand-in's data-inks) and the last one's centre (data-ink-at), and whether ink is drawn there.
+ */
+const inkFrame = (page) =>
+  page.evaluate(() => {
+    const c = document.querySelector('[data-testid="ocean"] .ocean-front');
+    const k = c.getBoundingClientRect().width / c.width;
+    const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+    const near = (i, rgb) => Math.abs(d[i] - (rgb >> 16)) <= 2 && Math.abs(d[i + 1] - ((rgb >> 8) & 255)) <= 2 && Math.abs(d[i + 2] - (rgb & 255)) <= 2;
+    const s = document.querySelector('[data-testid="ocean"] [data-testid="squid"]');
+    const at = s.dataset.inkAt?.split(",").map(Number);
+    let n = 0;
+    let sx = 0;
+    let sy = 0;
+    let ink = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] !== 255) continue;
+      const x = (i / 4) % c.width;
+      const y = Math.floor(i / 4 / c.width);
+      if (near(i, 0xa6f1ff)) {
+        sx += x;
+        sy += y;
+        n++;
+      } else if (at && [0x1a0f36, 0x2a1650, 0x0d0720].some((rgb) => near(i, rgb)) && Math.hypot((x + 0.5) * k - at[0], (y + 0.5) * k - at[1]) < 20 * k) ink++;
+    }
+    return {
+      eye: n ? { x: (sx / n + 0.5) * k, y: (sy / n + 0.5) * k } : null,
+      w: 20 * k,
+      inks: Number(s.dataset.inks ?? 0),
+      at: at ? { x: at[0], y: at[1] } : null,
+      ink,
+    };
+  });
+
+/** How far a point is from the nearest edge: the viewport's, and on wide screens (open water) the glass panels'. */
+const edgeDistance = (page, p) =>
+  page.evaluate((p) => {
+    let d = Math.min(p.x, innerWidth - p.x, p.y, innerHeight - p.y);
+    if (innerWidth >= 700)
+      for (const el of document.querySelectorAll("[data-glass]")) {
+        const r = el.getBoundingClientRect();
+        if (!r.width || !r.height) continue;
+        d = Math.min(d, Math.hypot(Math.max(r.left - p.x, 0, p.x - r.right), Math.max(r.top - p.y, 0, p.y - r.bottom)));
+      }
+    return d;
+  }, p);
+
+/**
+ * Moves the frozen clock on until the squid is "open" (far from every edge: the viewport's, and on wide screens the
+ * glass) or at an "edge". Left to roam, some runs it keeps off every edge for a minute and more, others it keeps near
+ * one. So open is the most open it shows (more than 2.2 of its widths from every edge, the bar easing to nothing over
+ * the search), and on a phone an edge the nearest one it comes (under 1.2 widths, the bar easing up likewise); on wide
+ * screens panels come over it instead (panelOver), which is sure to put it by one. The exact cases, in open water,
+ * hemmed in at the glass, in a strip and in the corners, are pinned in ocean/swim.test.ts.
+ */
+async function squidAtEdge(page, where) {
+  const phone = (await page.evaluate(() => innerWidth)) < 700;
+  if (where === "edge" && !phone) return panelOver(page);
+  const seen = [];
+  const TRIES = 400;
+  for (let i = 0; i < TRIES; i++) {
+    const p = await squidSpot(page);
+    if (p) {
+      const { w } = await inkFrame(page);
+      const d = (await edgeDistance(page, p)) / w;
+      const s = (i + 1) / TRIES;
+      if (where === "open" ? d > 2.2 * (1 - s) : d < 1.2 / (1 - s + 1e-9)) return p;
+      seen.push(d);
+    }
+    // A key now and then, so it never dozes off on the seabed (after 20 s without input).
+    if (i % 40 === 39) await page.keyboard.press("Shift");
+    await page.clock.runFor(200);
+  }
+  const range = seen.length ? `${Math.min(...seen).toFixed(2)} to ${Math.max(...seen).toFixed(2)}` : "none";
+  throw new Error(`the squid never showed ${where === "open" ? "in the open" : "next to an edge"} (in view ${seen.length} times, ${range} widths from an edge)`);
+}
+
+/**
+ * A tap on the squid's own pixels at p, for the spam tests. Wide screens: a real click (it is in open water, where
+ * there are no controls). Phones: the squid swims behind the glass, mostly under the board's rows and the guess box,
+ * clear of every control only now and then; so the tap is replayed as events on bare page at p (press, lift, click),
+ * which the squid reads on the window as ever. The rule that a control over it keeps the tap is the tap test's, above,
+ * with real taps.
+ */
+async function tapSquid(page, vp, p) {
+  if (!vp.hasTouch) return page.mouse.click(p.x, p.y);
+  await page.evaluate((p) => {
+    const at = { bubbles: true, clientX: p.x, clientY: p.y, pointerId: 9, isPrimary: true, pointerType: "touch" };
+    document.body.dispatchEvent(new PointerEvent("pointerdown", at));
+    document.body.dispatchEvent(new PointerEvent("pointerup", at));
+    document.body.click();
+  }, p);
+}
+
+/**
+ * Wide screens: panels come over the squid above and below (test-only [data-glass] bands, taking no pointer, as a
+ * result card or a new screen would), leaving it a strip of open water 300 px (3.75 of its widths) tall: too thin to
+ * turn round in anywhere (where it once inked in place), and its eyes never much more than 2 widths from an edge.
+ * Returns where it is once inside the strip, a moment later. removePanels takes them away.
+ */
+async function panelOver(page) {
+  const p = await squidWhere(page, "clear");
+  await page.evaluate((p) => {
+    // The open water's top at the squid's column: the lowest glass above it there.
+    let top = 0;
+    for (const el of document.querySelectorAll("[data-glass]")) {
+      const r = el.getBoundingClientRect();
+      if (r.left <= p.x && r.right >= p.x && r.bottom <= p.y) top = Math.max(top, r.bottom);
+    }
+    const H = 300;
+    const y0 = Math.min(Math.max(top, p.y - H / 2), innerHeight - H);
+    for (const [id, a, b] of [["e2e-panel-top", 0, y0], ["e2e-panel-bottom", y0 + H, innerHeight]]) {
+      const d = document.createElement("div");
+      d.id = id;
+      d.className = "e2e-panel";
+      d.dataset.glass = "";
+      Object.assign(d.style, { position: "fixed", left: "0", width: "100%", top: `${a}px`, height: `${Math.max(0, b - a)}px`, pointerEvents: "none" });
+      document.body.append(d);
+    }
+  }, p);
+  const inStrip = (q) =>
+    page.evaluate((q) => {
+      const a = document.getElementById("e2e-panel-top").getBoundingClientRect().bottom;
+      const b = document.getElementById("e2e-panel-bottom").getBoundingClientRect().top;
+      return q.y > a && q.y < b;
+    }, q);
+  let settled = 0;
+  for (let i = 0; i < 100; i++) {
+    await page.clock.runFor(100);
+    const q = await squidSpot(page);
+    // Out from under the panels, and still there half a second on.
+    settled = q && (await inStrip(q)) ? settled + 1 : 0;
+    if (settled >= 5) return q;
+  }
+  throw new Error("the squid never swam out from under the panels");
+}
+const removePanels = (page) => page.evaluate(() => document.querySelectorAll(".e2e-panel").forEach((e) => e.remove()));
+
+/**
+ * Steps `frames` frames, calling `each(i, frame)` before each step (to tap or guess), and returns every frame read,
+ * the one before the first step included.
+ */
+async function film(page, frames, each) {
+  const out = [await inkFrame(page)];
+  for (let i = 0; i < frames; i++) {
+    if (each) await each(i, out[i]);
+    await page.clock.runFor(FRAME_MS);
+    out.push(await inkFrame(page));
+  }
+  return out;
+}
+
+/** Frames from a puff to the check that the squid is clear of it. */
+const CLEAR_FRAMES = Math.round(700 / FRAME_MS);
+
+/**
+ * Every puff in a film: ink is drawn at its centre; the squid is already moving as it appears (its eyes a tenth of
+ * its width on, ~100 ms after the frame before); and 700 ms on it is clear of the cloud (eyes in view, more than its
+ * width from the centre). The film must run 700 ms past its last puff. Returns the frames the puffs appeared on.
+ */
+function assertDarts(frames, label) {
+  const puffs = [];
+  for (let k = 1; k < frames.length; k++) if (frames[k].inks > frames[k - 1].inks) puffs.push(k);
+  for (const k of puffs) {
+    const { at, w } = frames[k];
+    const tag = `${label}: puff on frame ${k} at ${at.x},${at.y}`;
+    assert.ok(k + CLEAR_FRAMES < frames.length, `${tag}: the film ends too soon to check it`);
+    assert.ok(frames.slice(k, k + 3).some((f) => f.ink > 0), `${tag}: no ink drawn there`);
+    const before = frames.slice(0, k).reverse().find((f) => f.eye)?.eye;
+    const soon = frames[k + 3].eye;
+    assert.ok(soon, `${tag}: 100 ms on the squid is hidden under the ink`);
+    if (before) assert.ok(Math.hypot(soon.x - before.x, soon.y - before.y) >= 0.1 * w, `${tag}: the ink came out while the squid was still`);
+    const later = frames[k + CLEAR_FRAMES];
+    const d = later.eye && Math.hypot(later.eye.x - at.x, later.eye.y - at.y);
+    assert.ok(d && d > w, `${tag}: 700 ms on the squid is ${later.eye ? `${(d / w).toFixed(2)} of its width from the cloud` : "hidden under it"}`);
+  }
+  return puffs;
+}
+
+for (const vp of VIEWPORTS) {
+  test(`every ink puff comes with a dart: spam taps, in the open and next to an edge (${vp.name})`, async () => {
+    const { ctx, page } = await open(browser, vp, `#p-${LIST}`);
+    await page.getByLabel("Your guess").waitFor();
+    await page.waitForTimeout(1600);
+    await freeze(page);
+    await recordClicks(page);
+    for (const where of ["open", "edge"]) {
+      await squidAtEdge(page, where);
+      // Spam: a tap on the squid every 100 ms for 5 s, chasing it (on its eyes, wherever they show); then 3 s more to
+      // see the last trick through.
+      let taps = 0;
+      const pokes = (await reaction(page)).pokes;
+      const frames = await film(page, Math.round(8000 / FRAME_MS), async (i, f) => {
+        if (i % 3 || i * FRAME_MS > 5000 || !f.eye) return;
+        await tapSquid(page, vp, f.eye);
+        taps++;
+      });
+      const puffs = assertDarts(frames, where);
+      const took = (await reaction(page)).pokes - pokes;
+      assert.ok(puffs.length >= 1, `${where}: the taps never made the squid ink (${taps} taps, ${took} taken)`);
+      // One trick at a time: taps during a trick and its dart start no second one.
+      for (let j = 1; j < puffs.length; j++)
+        assert.ok((puffs[j] - puffs[j - 1]) * FRAME_MS >= 1500, `${where}: a second trick ${(puffs[j] - puffs[j - 1]) * FRAME_MS} ms after the first`);
+      await removePanels(page);
+      await page.clock.runFor(3000);
+    }
+    assert.deepEqual(await controlClicks(page), [], "a tap on the squid pressed a control");
+    await ctx.close();
+  });
+
+  test(`a lost life inks and darts, in the open and next to an edge, even two in a row (${vp.name})`, async () => {
+    const { ctx, page } = await open(browser, vp, `#p-${LIST}`);
+    await page.getByLabel("Your guess").waitFor();
+    await page.waitForTimeout(1600);
+    await freeze(page);
+    const misses = (await puzzle(page, LIST)).extras.filter((e) => e.rank > 10).map((e) => e.name);
+    for (const where of ["open", "edge"]) {
+      await squidAtEdge(page, where);
+      const frames = await film(page, 90, async (i) => {
+        if (i === 0) await guess(page, misses.shift());
+      });
+      assert.equal(assertDarts(frames, `${where} miss`).length, 1, `${where}: a lost life inked ${frames.at(-1).inks - frames[0].inks} times`);
+      await removePanels(page);
+      await page.clock.runFor(2000);
+    }
+    // Two lives lost in quick succession: never a cloud on a squid that stays put (the second waits for the first's
+    // dart to end, or joins its cloud if that one isn't out yet).
+    const frames = await film(page, 150, async (i) => {
+      if (i === 0 || i === 6) await guess(page, misses.shift());
+    });
+    const puffs = assertDarts(frames, "two misses").length;
+    assert.ok(puffs === 1 || puffs === 2, `two lives lost inked ${puffs} times`);
+    assert.equal(await page.getByTestId("lives").getAttribute("data-lives"), "1");
     await ctx.close();
   });
 }
