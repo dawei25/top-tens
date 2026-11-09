@@ -56,6 +56,17 @@ export const CLUE_ASK_NEXT = "next letter? 1 life";
 /** What the days-in-a-row count means (Home's record and a daily's results). */
 export const STREAK_NOTE = "Days in a row you've finished Today's list.";
 
+/** Home's record counts list games (a Fathom-only player read "played --"). */
+export const RECORD_PLAYED = "lists played";
+
+/** Fathom's key on Stats before the first game: what it does (UX 1). */
+export const FATHOM_PLAY = "Play Fathom";
+/** An old Fathom game from Past runs, while another is under way: back to that one. */
+export const FATHOM_BACK = "Back to your game";
+/** Home's Fathom key, where the other free-play keys count their lists; on the narrowest phones only its end. */
+export const FATHOM_LINE = "Guess the number: 5 questions";
+export const FATHOM_LINE_SHORT = "5 questions";
+
 /** "No life lost.", wrapping as one piece: onto its own line when the sentence before it fills the first. */
 export const NO_LIFE_LOST = ["No", "life", "lost."].join(NBSP);
 

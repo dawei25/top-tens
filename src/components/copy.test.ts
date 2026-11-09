@@ -6,6 +6,11 @@ import { shownValue } from "../game/state";
 import type { Entry, Puzzle } from "../game/types";
 import {
   alreadyGuessed,
+  FATHOM_BACK,
+  FATHOM_LINE,
+  FATHOM_LINE_SHORT,
+  FATHOM_PLAY,
+  RECORD_PLAYED,
   BLITZ_SCORING,
   blitzPrompt,
   blitzPromptShown,
@@ -207,5 +212,25 @@ describe("Blitz title card", () => {
       const up = pts.findIndex((x, i) => i > 0 && x.pts > pts[i - 1].pts);
       expect(up, `${p.id}: a smaller number scores more`).toBe(-1);
     }
+  });
+});
+
+// The first-time review before launch (Nov 9): keys say what they do (UX 1), and a number says what it counts.
+describe("Fathom's keys and Home's record", () => {
+  it("names each key by what happens", () => {
+    // Stats' key before the first game said only "FATHOM".
+    expect(FATHOM_PLAY).toBe("Play Fathom");
+    // An old game opened from Past runs while another is under way said "RESUME GAME", as if it were that one.
+    expect(FATHOM_BACK).toBe("Back to your game");
+    // Home's Fathom key: what it is, and on the narrowest phones only how long ("GUESS THE NUMBER: 5 QUESTIONS" wrapped
+    // to two lines at 320px, taller than its neighbours: UX 8).
+    expect(FATHOM_LINE).toBe("Guess the number: 5 questions");
+    expect(FATHOM_LINE_SHORT).toBe("5 questions");
+    expect(FATHOM_LINE.endsWith(FATHOM_LINE_SHORT)).toBe(true);
+    expect(FATHOM_LINE_SHORT.length).toBeLessThanOrEqual("111 lists".length + 2);
+  });
+  // A Fathom-only player saw "played --" on Home: Your record counts list games.
+  it("says Your record's games are list games", () => {
+    expect(RECORD_PLAYED).toBe("lists played");
   });
 });

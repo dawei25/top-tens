@@ -79,7 +79,7 @@ describe("name-it on the real lists: the judge's readings (Nov 8)", { timeout: 3
       ["Flanders", "Belgium"],
     ];
     for (const q of COUNTRY_EACH) {
-      for (const [place, country] of parts) expect(reads(place, q), `${q.id}: ${place}`).toBe(`${place} is part of ${country}, not a country.`);
+      for (const [place, country] of parts) expect(reads(place, q), `${q.id}: ${place}`).toBe(`${place} is part of ${country}, not a country. Try again.`);
       expect(reads("Hawaii", q)).toBe("Hawaii is a US state, not a country. Try again.");
       expect(reads("Greenland", q)).toBe("Greenland is a territory, not a country. Try again.");
       expect(reads("Borneo", q)).toBe("Borneo is an island, not a country. Try again.");
@@ -104,9 +104,9 @@ describe("name-it on the real lists: the judge's readings (Nov 8)", { timeout: 3
       for (const city of ["Dubai", "Boston", "Berlin", "Rome", "Sydney", "Vienna", "Las Vegas", "Algiers"])
         expect(reads(city, q), `${q.id}: ${city}`).toBe(`${city} isn't one of our ${CITIES} cities. Try again.`);
       for (const c of ["Africa", "South America", "Europe", "Asia"]) expect(reads(c, q), `${q.id}: ${c}`).toBe(`${c} is a continent, not a city. Try again.`);
-      expect(reads("England", q)).toBe("England is part of the UK, not a city.");
+      expect(reads("England", q)).toBe("England is part of the UK, not a city. Try again.");
       expect(reads("Dakha", q)).toMatch(/^(answer|confirm) Dhaka$/);
-      expect(reads("Brooklyn", q)).toBe("Brooklyn is part of New York City, not a city.");
+      expect(reads("Brooklyn", q)).toBe("Brooklyn is part of New York City, not a city. Try again.");
     }
   });
 

@@ -293,18 +293,19 @@ describe("rounds", () => {
   });
 
   it("says a percent's miss in points, a year's in years early or late", () => {
-    expect(pointsOff(65, 71)).toBe("6 points low");
-    expect(pointsOff(72, 71)).toBe("1 point high");
-    expect(pointsOff(73.5, 71)).toBe("2.5 points high");
-    expect(pointsOff(71.96, 71)).toBe("1 point high");
+    // In percentage points, without the word (the review, Nov 9: the score is the reveal's points).
+    expect(pointsOff(65, 71)).toBe("6 too low");
+    expect(pointsOff(72, 71)).toBe("1 too high");
+    expect(pointsOff(73.5, 71)).toBe("2.5 too high");
+    expect(pointsOff(71.96, 71)).toBe("1 too high");
     expect(pointsOff(71.3, 71)).toBe("spot on");
-    expect(pointsOff(0, 71)).toBe("71 points low");
+    expect(pointsOff(0, 71)).toBe("71 too low");
     expect(yearsOff(2004, 2007)).toBe("3 years early");
     expect(yearsOff(2008, 2007)).toBe("1 year late");
     expect(yearsOff(1066, 2007)).toBe("941 years early");
     expect(yearsOff(2007, 2007)).toBe("spot on");
     expect(missText(q("a", "body"), 300)).toBe("3x too high");
-    expect(missText(pct("p", "body"), 65)).toBe("6 points low");
+    expect(missText(pct("p", "body"), 65)).toBe("6 too low");
     expect(missText(yr("y", "body"), 2010)).toBe("3 years late");
   });
 
@@ -1085,10 +1086,10 @@ describe("a game", () => {
     let g = newGame(bank.slice(0, 5).map((x) => x.id));
     for (const guess of [200, 100, 400, 1e9, 130]) g = nextQuestion(lockIn(g, guess));
     const text = shareText(scoreGame(g, bank));
-    expect(text).toBe(`Fathom 244/${MAX_TOTAL}\n▒ █ ░ × ▓`);
-    expect(text).not.toMatch(/\p{Extended_Pictographic}/u);
+    // Squares in the results' colours, as a list's share has them (the review, Nov 9).
+    expect(text).toBe(`Fathom 244/${MAX_TOTAL}\n🟪 🟨 🟥 ⬛ 🟦`);
     // Out of beta (Nov 9): the name alone, and the link to the game on a line of its own.
-    expect(shareText(scoreGame(g, bank), "https://toptentacle.io/#fathom")).toBe(`Fathom 244/${MAX_TOTAL}\n▒ █ ░ × ▓\nhttps://toptentacle.io/#fathom`);
+    expect(shareText(scoreGame(g, bank), "https://toptentacle.io/#fathom")).toBe(`Fathom 244/${MAX_TOTAL}\n🟪 🟨 🟥 ⬛ 🟦\nhttps://toptentacle.io/#fathom`);
     expect(text).not.toMatch(/beta/i);
   });
   // Nov 5 review: lost at sea shared as "□", which reads as a question not played. Every band has its own mark, and
@@ -1359,16 +1360,19 @@ describe("name-it: reading the name", () => {
     expect(line(read("Serbia"))).toBe(`Serbia isn't one of our ${POPULATION.entries.length} countries. Try again.`);
     expect(line(read("Greenland"))).toBe("Greenland is a territory, not a country. Try again.");
     expect(line(read("Northern Ireland"))).toBe("Northern Ireland is part of the UK. Try again.");
-    expect(line(read("Wales", CITIES), CITIES)).toBe("Wales is part of the UK, not a city.");
-    expect(line(read("Tasmania"))).toBe("Tasmania is part of Australia, not a country.");
-    expect(line(read("Canary Islands"))).toBe("The Canary Islands are part of Spain, not a country.");
-    expect(line(read("Brooklyn", CITIES), CITIES)).toBe("Brooklyn is part of New York City, not a city.");
+    // Every one ends "Try again." (the review, Nov 9: Tasmania's line didn't).
+    expect(line(read("Wales", CITIES), CITIES)).toBe("Wales is part of the UK, not a city. Try again.");
+    expect(line(read("Tasmania"))).toBe("Tasmania is part of Australia, not a country. Try again.");
+    expect(line(read("Canary Islands"))).toBe("The Canary Islands are part of Spain. Try again.");
+    expect(line(read("Brooklyn", CITIES), CITIES)).toBe("Brooklyn is part of New York City, not a city. Try again.");
     expect(line(read("Borneo"))).toBe("Borneo is an island, not a country. Try again.");
     expect(line(read("USSR"))).toBe("USSR is no longer a country. Try again.");
     expect(line(read("Yugoslavia", CITIES), CITIES)).toBe("Yugoslavia was a country, not a city. Try again.");
     expect(line({ kind: "other", name: "The Galápagos Islands Archipelago", noun: "islands", partOf: "Ecuador", plural: true })).toBe(
-      "They are part of Ecuador, not a country.",
+      "They are part of Ecuador, not a country. Try again.",
     );
+    // A line too long for two lines at 320px leaves the name out, never its ending.
+    expect(line(read("US Virgin Islands"))).toBe("They are a territory, not a country. Try again.");
     // Every place's line, on a country question and a city one, keeps to the longest a line gets: LINE_MAX (58), two lines at 320px
     // (fathom-name.e2e.cjs measures the longest; "US Virgin Islands are a territory, not a country. Try again." took three).
     for (const p of PLACES)
@@ -1549,7 +1553,7 @@ describe("name-it: a game", () => {
     expect(scored[1]).toMatchObject({ pick: "Colombia", guess: 52886363, points: fathomScore(52886363, 50e6), band: "dead-on" });
     expect(scored[0].pick).toBeUndefined();
     expect(totalOf(scored)).toBe(100 + fathomScore(52886363, 50e6) + 100 + 49 + 49);
-    expect(shareText(scored)).toBe(`Fathom ${totalOf(scored)}/500\n█ █ █ ▒ ▒`);
+    expect(shareText(scored)).toBe(`Fathom ${totalOf(scored)}/500\n🟨 🟨 🟨 🟪 🟪`);
   });
   it("keeps what was named in the save, and drops a pick that isn't a name of this game's", () => {
     const m = new Map<string, string>();
