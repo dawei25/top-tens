@@ -9,8 +9,8 @@
 -- user_id is set while the player is signed in, and then they count once across their devices.
 --
 -- Players never touch the table: row level security on, no policies, no grants. submit_fathom_guess is the way in,
--- fathom_compare the way out (a count, a median and a share: never a row or an id). The owners and the accounts in
--- stats_excluded are left out of the comparison, as they are out of the score stats (20261105120000).
+-- fathom_compare the way out (a count, a median and a share: never a row or an id). Every player counts, the owner and
+-- his testers included, as in the score stats (list_stats).
 --
 -- The answers aren't here: the questions live in the static site (public/fathom/questions.json), so the game passes
 -- fathom_compare the answer it shows and the question's round (how far off is measured on the round's own scale), and
@@ -23,10 +23,13 @@
 -- borders are fair guesses; still never negative, still under 1e300), and fathom_compare takes the round (p_round:
 -- estimate, percent, year, name-ratio or name-steps) and measures "further off" on its scale: how many times off for
 -- an estimate and a name-it ratio list (0 counting as a tiny positive), points, years or steps off for the rest.
+-- Changed again on Nov 9, still before it first ran (owner: "i want to keep me and testers in the averages"):
+-- fathom_compare no longer leaves out the owners or stats_excluded (that migration is gone), so it reads only
+-- fathom_guesses.
 --
--- Run after 20261105120000_stats_exclusions.sql (it reads owners, stats_excluded, plays, ratings and feedback). Safe to
--- run once, on a project that has never had it. Until it has run the game plays as before: submit_fathom_guess answers
--- 404 and those guesses are dropped, and the reveal shows no players' line.
+-- Needs none of the other migrations (only Supabase's auth.users and auth.uid()), so it runs before or after any of
+-- them. Safe to run once, on a project that has never had it. Until it has run the game plays as before:
+-- submit_fathom_guess answers 404 and those guesses are dropped, and the reveal shows no players' line.
 
 create table public.fathom_guesses (
   id bigint generated always as identity primary key,
@@ -92,8 +95,8 @@ $$;
 -- How real players guessed on a question, against p_guess (the asker's guess) and p_answer (the answer the game
 -- shows), as JSON: {"n": players, "median": their median guess, "further_off": the share of them further from the
 -- answer than p_guess, 0 to 1}. One guess per player (their first; a signed-in player is one player across devices).
--- Left out: the owners and stats_excluded (their accounts' guesses, and those sent signed out from any browser they
--- have used signed in), and the player asking (p_client_id's browser, and their account while signed in).
+-- Left out: only the player asking (p_client_id's browser, and their account while signed in). Everyone else counts,
+-- the owners and testers included.
 --
 -- "Further" is on the scale of the question's round (p_round), and a tie is not further:
 --   estimate, name-ratio (a name-it round on a ratio list: populations, areas): how many times off, |ln(guess / answer)|
@@ -124,27 +127,10 @@ begin
   end if;
   times_off := p_round in ('estimate', 'name-ratio');
 
-  with excluded as (
-    select o.user_id from public.owners o
-    union
-    select x.user_id from public.stats_excluded x
-  ),
-  -- Browsers an excluded player has used signed in: their guesses there signed out are theirs too.
-  excluded_clients as (
-    select p.client_id from public.plays p join excluded e on e.user_id = p.user_id
-    union
-    select r.client_id from public.ratings r join excluded e on e.user_id = r.user_id
-    union
-    select f.client_id from public.feedback f join excluded e on e.user_id = f.user_id
-    union
-    select g.client_id from public.fathom_guesses g join excluded e on e.user_id = g.user_id
-  ),
-  firsts as (
+  with firsts as (
     select distinct on (coalesce(g.user_id::text, g.client_id::text)) g.guess
     from public.fathom_guesses g
     where g.question_id = p_question_id
-      and not exists (select 1 from excluded e where e.user_id = g.user_id)
-      and (g.user_id is not null or not exists (select 1 from excluded_clients c where c.client_id = g.client_id))
       and g.client_id is distinct from p_client_id
       and (auth.uid() is null or g.user_id is distinct from auth.uid())
     order by coalesce(g.user_id::text, g.client_id::text), g.created_at
