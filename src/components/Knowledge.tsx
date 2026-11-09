@@ -1,5 +1,6 @@
 import { dailyGame, type DailyEntry } from "../game/daily";
-import { FATHOM_MAX, fathomStats } from "../game/fathom-history";
+import { FATHOM_MAX, fathomStats, wantFreshFathom } from "../game/fathom-history";
+import { FATHOM_PLAY } from "./copy";
 import { firstListRuns } from "../game/history";
 import type { ParFile } from "../game/par";
 import type { PuzzleMeta } from "../game/puzzles";
@@ -161,8 +162,8 @@ function FathomStats() {
         {!f && (
           <>
             <p className="know-empty-line">play fathom to see your totals here.</p>
-            <a className="key key-sm" href="#fathom" data-testid="know-fathom-play">
-              Fathom
+            <a className="key key-sm" href="#fathom" data-testid="know-fathom-play" onClick={wantFreshFathom}>
+              {FATHOM_PLAY}
             </a>
           </>
         )}

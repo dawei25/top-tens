@@ -6,7 +6,7 @@ import { recentPlays } from "../game/history";
 import { Countdown } from "./Countdown";
 import { HowToPlay } from "./HowToPlay";
 import { EnterHint, type Mode } from "./pixel";
-import { STREAK_NOTE } from "./copy";
+import { FATHOM_LINE, FATHOM_LINE_SHORT, RECORD_PLAYED, STREAK_NOTE } from "./copy";
 import { FloatNote } from "./Note";
 import { SoundToggle } from "./sound/SoundToggle";
 import { HomeAccountKey, PrivacyLink } from "./account";
@@ -31,7 +31,7 @@ function ModeKey({
 }: {
   mode: Mode;
   title: string;
-  status: string;
+  status: React.ReactNode;
   today?: boolean;
   done?: boolean;
   disabled?: boolean;
@@ -364,7 +364,19 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
             )}
             {/* Fathom has no lists, so no categories: its key alone, its line where the others count their lists. */}
             <div className="free-key fathom">
-              <ModeKey mode="fathom" testId="fathom-key" title="Fathom" status="Guess the number: 5 questions" onClick={onFathom} />
+              <ModeKey
+                mode="fathom"
+                testId="fathom-key"
+                title="Fathom"
+                // On the narrowest phones only its end, so the key stays as tall as its neighbours (UX 8).
+                status={
+                  <>
+                    <span className="sub-long">{FATHOM_LINE}</span>
+                    <span className="sub-short">{FATHOM_LINE_SHORT}</span>
+                  </>
+                }
+                onClick={onFathom}
+              />
             </div>
           </div>
           {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
@@ -412,7 +424,8 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
         </div>
         <dl className="stat-row">
           <div>
-            <dt>played</dt>
+            {/* List games: Fathom's are on Stats (a Fathom-only player read "played --"). */}
+            <dt>{RECORD_PLAYED}</dt>
             <dd>{fresh ? NONE : s.played}</dd>
           </div>
           <div>

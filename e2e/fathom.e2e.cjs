@@ -297,13 +297,12 @@ describe("Fathom", { concurrency: true }, () => {
       // The key that draws new questions says so: "Play again" read as the same five again (UX.md 1 and 14).
       assert.doesNotMatch(await page.getByTestId("fathom-again").innerText(), /again/i);
 
-      // COPY RESULT: "Fathom <total>/500", five plain characters and the link, no emoji (two spaces end each line but
-      // the last, so a Reddit comment keeps them).
+      // SHARE: "Fathom <total>/500", five squares in the bands' colours and the link (two spaces end each line but the
+      // last, so a Reddit comment keeps them).
       if (vp.name === "desktop") {
-        await page.getByTestId("fathom-copy").click();
+        await page.getByTestId("fathom-share").click();
         const text = await page.evaluate(() => navigator.clipboard.readText());
-        assert.match(text, new RegExp(`^Fathom ${total}/500  \\n\\S( \\S){4}  \\nhttps?://\\S+/#fathom$`));
-        assert.doesNotMatch(text, /\p{Extended_Pictographic}/u);
+        assert.match(text, new RegExp(`^Fathom ${total}/500  \\n(\\p{Extended_Pictographic} ){4}\\p{Extended_Pictographic}  \\nhttps?://\\S+/#fathom$`, "u"));
       }
 
       // NEW QUESTIONS: a new draw, none of the five just played (the bank has room).
@@ -407,7 +406,8 @@ describe("Fathom", { concurrency: true }, () => {
 
       // The percent: "%" beside a decimal keypad, its rule, 0 to 100.
       assert.equal(await attr(page, "fathom-question", "data-round"), "percent");
-      await ruleBefore("percent");
+      // The percent says the same words as the estimate: said once, on the first question (the review, Nov 9).
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "percent: the rule was said on the estimate");
       assert.equal((await page.getByTestId("fathom-unit").textContent()).trim(), "%");
       assert.equal(await field.getAttribute("inputmode"), "decimal");
       for (const [text, want] of [["59%", 59], ["59.5", 59.5], ["0", 0]]) {
@@ -432,16 +432,16 @@ describe("Fathom", { concurrency: true }, () => {
       assert.equal(Number(await attr(page, "fathom-guess", "data-value")), 53);
       assert.equal((await page.getByTestId("fathom-answer").textContent()).trim(), "59%");
       assert.equal((await page.getByTestId("fathom-guess").textContent()).trim(), "53%");
-      assert.match(await page.getByTestId("fathom-off").textContent(), /^6 points? low$/, "the miss in points");
+      assert.match(await page.getByTestId("fathom-off").textContent(), /^6 too low$/, "the miss in percentage points, without the word");
       assert.ok(Math.abs((await squidAt()) - percentOff(53, PERCENT.answer)) < 0.05, "the squid left, by the distance the points come from");
-      assert.equal(await page.getByTestId("fathom-rule").count(), 1, "the rule stays with the percent's reveal");
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule on the percent's reveal");
       assert.equal(Number(await attr(page, "fathom-running", "data-total")), 100 + percentWant, "the running total");
       assert.equal(await noHScroll(page), true);
       await next(page);
 
       // The year: a number pad, typed as four digits and never grouped.
       assert.equal(await attr(page, "fathom-question", "data-round"), "year");
-      await ruleBefore("year");
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "year: the rule was said on the estimate");
       assert.equal(await field.getAttribute("inputmode"), "numeric");
       assert.ok((await page.getByTestId("fathom-unit").textContent()).trim().length > 0, "the unit shows beside the field");
       await field.focus();
@@ -491,9 +491,9 @@ describe("Fathom", { concurrency: true }, () => {
       assert.deepEqual(await page.getByTestId("fathom-rule").evaluateAll((els) => els.map((el) => el.dataset.round)), ["estimate"]);
       assert.equal(await noHScroll(page), true);
       if (vp.name === "desktop") {
-        await page.getByTestId("fathom-copy").click();
+        await page.getByTestId("fathom-share").click();
         const text = await page.evaluate(() => navigator.clipboard.readText());
-        assert.match(text, new RegExp(`^Fathom ${total}/500  \\n\\S( \\S){4}  \\nhttps?://\\S+/#fathom$`));
+        assert.match(text, new RegExp(`^Fathom ${total}/500  \\n(\\p{Extended_Pictographic} ){4}\\p{Extended_Pictographic}  \\nhttps?://\\S+/#fathom$`, "u"));
       }
       await ctx.close();
     });

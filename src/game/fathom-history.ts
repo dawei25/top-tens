@@ -14,6 +14,20 @@ export const FATHOM_MAX = 500;
 /** The game on screen, in this browser only (loadFathom in fathom.ts reads it). */
 export const FATHOM_KEY = "tentacle:fathom";
 
+/**
+ * Home's Fathom key and the menu's tile ask for new questions if the game on screen is over (free play is new every
+ * time, UX 14); Fathom takes the ask when it opens. In memory only: a reload on the results keeps them.
+ */
+let freshWanted = false;
+export function wantFreshFathom(): void {
+  freshWanted = true;
+}
+export function takeFreshFathom(): boolean {
+  const w = freshWanted;
+  freshWanted = false;
+  return w;
+}
+
 /** Settings' reset: the game on screen goes with the rest of the progress. */
 export function clearFathomGame(): void {
   try {

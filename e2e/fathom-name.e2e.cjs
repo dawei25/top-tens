@@ -222,9 +222,9 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
       assert.deepEqual(await page.getByTestId("fathom-rule").evaluateAll((els) => els.map((el) => el.dataset.round)), ["estimate", "name"]);
       assert.equal(await noHScroll(page), true);
       if (vp.name === "desktop") {
-        await page.getByTestId("fathom-copy").click();
+        await page.getByTestId("fathom-share").click();
         const shared = await page.evaluate(() => navigator.clipboard.readText());
-        assert.match(shared, new RegExp(`^Fathom ${total}/500  \\n\\S( \\S){4}  \\nhttps?://\\S+/#fathom$`));
+        assert.match(shared, new RegExp(`^Fathom ${total}/500  \\n(\\p{Extended_Pictographic} ){4}\\p{Extended_Pictographic}  \\nhttps?://\\S+/#fathom$`, "u"));
       }
       await ctx.close();
     });

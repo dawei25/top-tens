@@ -14,6 +14,7 @@ import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
 import { freshBlitz } from "./game/blitz";
 import { freshList, lastPlayed } from "./game/history";
+import { wantFreshFathom } from "./game/fathom-history";
 import {
   blitzOfTheDay,
   rollHoldouts,
@@ -130,6 +131,12 @@ function NoList({ text, onHome }: { text: string; onHome: () => void }) {
       </section>
     </main>
   );
+}
+
+/** Fathom from Home's key or the menu's tile: new questions if the last game is over, else that game, where it was. */
+function openFathom() {
+  wantFreshFathom();
+  location.hash = "#fathom";
 }
 
 /** The deep-sea backdrop and its roaming squid stay put behind every screen (decorative, aria-hidden). */
@@ -317,6 +324,7 @@ function Screens() {
     onDaily: () => current && (location.hash = `#daily-${current.date}`),
     onRoll: () => roll(undefined, route.screen === "game" ? route.id : undefined),
     onBlitz: () => void blitzRoll(undefined, blitzOnScreen),
+    onFathom: openFathom,
   };
 
   const screen = (): React.ReactNode => {
@@ -413,7 +421,7 @@ function Screens() {
         blitzLists={openBlitz()}
         freeLists={rollableLists(schedule, index, load(), today)}
         onArchive={() => (location.hash = "#archive")}
-        onFathom={() => (location.hash = "#fathom")}
+        onFathom={openFathom}
       />
     );
   };

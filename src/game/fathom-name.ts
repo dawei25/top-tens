@@ -307,7 +307,7 @@ export const PLACES: readonly Place[] = [
     Canada: ["Quebec", "Québec", "Ontario", "British Columbia", "Alberta"],
     Belgium: ["Flanders", "Wallonia"],
     Russia: ["Siberia"],
-    "the Czech Republic": ["Bohemia", "Moravia"],
+    Czechia: ["Bohemia", "Moravia"],
     France: ["Normandy", "Brittany", "Provence", "Île-de-France"],
     Spain: ["Andalusia"],
     Romania: ["Transylvania"],
@@ -548,12 +548,11 @@ export function withArticle(noun: string): string {
  * list of countries holds a little less of one).
  */
 const NAME_IN_LINE = 18;
-const named = (name: string, fallback: string, max = NAME_IN_LINE) => (name.length <= max ? name : fallback);
 const sameWord = (a: string, b: string) => normalize(a) === normalize(b);
 
 /**
- * The longest line that keeps to two lines at 320px (fathom-name.e2e.cjs measures the longest): past it, a line drops its
- * "Try again." ("US Virgin Islands are a territory, not a country. Try again." took three).
+ * The longest line that keeps to two lines at 320px (fathom-name.e2e.cjs measures the longest; "US Virgin Islands are
+ * a territory, not a country. Try again." took three): past it, the line leaves the long name out.
  */
 export const LINE_MAX = 58;
 
@@ -563,11 +562,15 @@ export const LINE_MAX = 58;
  * the line has room for it).
  */
 export function nameLine(read: NameRead, list: Pick<NameList, "noun" | "nounPlural" | "entries">): string {
-  const line = lineFor(read, list);
-  return line.length > LINE_MAX ? line.replace(/ Try again\.$/, "") : line;
+  // Every line that costs nothing ends the same way ("Try again."). A long one says less instead: a part of something
+  // without "not a country" ("The Canary Islands are part of Spain. Try again."), else without its name ("They are a
+  // territory, not a country. Try again.").
+  const tries = [lineFor(read, list), lineFor(read, list, { bare: true }), lineFor(read, list, { short: true })];
+  return tries.find((l) => l.length <= LINE_MAX) ?? tries[tries.length - 1];
 }
 
-function lineFor(read: NameRead, list: Pick<NameList, "noun" | "nounPlural" | "entries">): string {
+function lineFor(read: NameRead, list: Pick<NameList, "noun" | "nounPlural" | "entries">, { short = false, bare = false } = {}): string {
+  const named = (name: string, fallback: string, max = NAME_IN_LINE) => (!short && name.length <= max ? name : fallback);
   switch (read.kind) {
     case "empty":
       return `Type ${withArticle(list.noun)} first.`;
@@ -586,8 +589,8 @@ function lineFor(read: NameRead, list: Pick<NameList, "noun" | "nounPlural" | "e
       // Part of something: "Scotland is part of the UK." (a country of its own, on a country question), "Tasmania is
       // part of Australia, not a country.", "Brooklyn is part of New York City, not a city."
       if (read.partOf) {
-        if (sameWord(read.noun, list.noun)) return `${name} is part of ${read.partOf}. Try again.`;
-        return `${name} ${read.plural ? "are" : "is"} part of ${read.partOf}, ${not}.`;
+        if (sameWord(read.noun, list.noun) || bare) return `${name} ${read.plural ? "are" : "is"} part of ${read.partOf}. Try again.`;
+        return `${name} ${read.plural ? "are" : "is"} part of ${read.partOf}, ${not}. Try again.`;
       }
       return `${name} ${read.plural ? "are" : "is"} ${withArticle(read.noun)}, ${not}. Try again.`;
     }

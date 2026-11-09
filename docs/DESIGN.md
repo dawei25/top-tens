@@ -82,7 +82,7 @@ plain closeness in one line ("The closer your guess, the more points.", UX 21), 
 in Home's Free play and its tile in the menu's Play group; its games are in Past runs and its totals in Stats, and they
 sync with an account like list games. No daily Fathom (owner: maybe later, if it's popular).
 
-1. **Home:** Today's list (one key across the row), then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on, and Fathom, its line "Guess the number: 5 questions" where the others count their lists: under them on a phone, the row under the pair, one line high, from 640px);
+1. **Home:** Today's list (one key across the row), then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on, and Fathom, its line "Guess the number: 5 questions" where the others count their lists ("5 questions" below 390px): under them on a phone, the row under the pair, one line high, from 640px);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ). Home never names today's list: the
    topic is the surprise (owner, Nov 7).
 2. **Game:** title card with the prompt and score (no average during play: it's revealed on the results; no Play
@@ -102,7 +102,7 @@ sync with an account like list games. No daily Fathom (owner: maybe later, if it
    as it ended, or the Blitz round), which offers Play again (a fresh free game on that same list), the only replay
    in the game, except on a list held today (today's list or a future day's): "back in free play after its day". A
    Fathom game's row has its five squares for a title and its total ("328/500"); it opens that game's results
-   (`#fathom/run-<startedAt>`, with the date it was played), which offer New questions, or Resume game while one is
+   (`#fathom/run-<startedAt>`, with the date it was played), which offer New questions, or Back to your game while one is
    under way.
 5. **How to play:** closed by default; the footer key opens it as a dialog over the page. Its last rule is Fathom's, in
    the game's own scoring line.

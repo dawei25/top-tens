@@ -253,6 +253,14 @@ export const ruleFor = (q: Pick<FathomQuestion, "round" | "unit" | "nameIt">): s
   return round === "name" ? nameRule(q) : RULES[round];
 };
 
+/**
+ * Whether the question at `at` says its scoring line: the first in the game with that line, once a game for each
+ * line. The estimate, the percent and the year say the same words, so only the first of them does (the review, Nov 9:
+ * a line on the first, second and fourth questions but not the third read as a bug); the name-it round has its own.
+ */
+export const ruleShownAt = (questions: readonly Pick<FathomQuestion, "round" | "unit" | "nameIt">[], at: number): boolean =>
+  !!questions[at] && questions.findIndex((q) => ruleFor(q) === ruleFor(questions[at])) === at;
+
 // The bands live with the history (Past runs shows a game's five squares without this module).
 export { BANDS, bandLabel, bandOf, type Band };
 
@@ -283,11 +291,12 @@ export function timesOff(guess: number, answer: number): string {
   return `${times(Math.max(2, ratio))} too ${high ? "high" : "low"}`;
 }
 
-/** A percent's miss in points: "6 points low", "1 point high", "2.5 points high", "spot on" within half a point. */
+/** A percent's miss, in percentage points: "6 too low", "1 too high", "2.5 too high", "spot on" within half a point. */
 export function pointsOff(guess: number, answer: number): string {
   if (percentSpotOn(guess, answer)) return "spot on";
+  // Not "12 points high": the reveal's points are the score (the review, Nov 9: "NEAR 68 points" beside it).
   const off = trimZeros(Math.abs(guess - answer).toFixed(1));
-  return `${off} ${off === "1" ? "point" : "points"} ${guess > answer ? "high" : "low"}`;
+  return `${off} too ${guess > answer ? "high" : "low"}`;
 }
 
 /** A year's miss: "3 years early", "1 year late", "spot on" for the year itself. */
@@ -714,9 +723,22 @@ export function editField(prev: string, next: string, caret: number, round: Roun
   return { text, caret: at };
 }
 
-/** "2,500,000", "0.1", "8,848.86" (up to 10 significant digits, so 1.1 x 1000 reads 1,100). */
+/** "2,500,000", "0.1", "8,848.86" (up to 10 significant digits, so 1.1 x 1000 reads 1,100, and 3 decimals). */
 export function formatDigits(n: number): string {
-  return n.toLocaleString("en-US", { maximumSignificantDigits: 10 });
+  // At most 3 decimals: "8.804", never "8.80419" (the review, Nov 9: New York City in million people); 42.195 as it is.
+  // A number under a hundredth keeps two significant digits instead, so a tiny guess never reads as 0 ("0.0001").
+  const small = n !== 0 && Math.abs(n) < 0.01;
+  const decimals = small ? Math.ceil(-Math.log10(Math.abs(n))) + 1 : 3;
+  return Number(n.toFixed(decimals)).toLocaleString("en-US", { maximumSignificantDigits: 10 });
+}
+
+/**
+ * A column of figures written one way (the reveal's best answers): in words when every one is a million or more ("49.8
+ * million"), else in digits ("996,600", "1,067,000"), never a mix of the two.
+ */
+export function formatColumn(values: readonly number[]): string[] {
+  if (values.length && values.every((v) => v >= 1e6)) return values.map(formatWords);
+  return values.map((v) => formatDigits(v >= 1000 ? Math.round(v) : v));
 }
 
 const WORDS: readonly [number, string][] = [
@@ -955,14 +977,16 @@ export function scoreGame(game: FathomGame, bank: readonly FathomQuestion[]): Sc
 
 export const totalOf = (scored: readonly Scored[]): number => scored.reduce((sum, s) => sum + s.points, 0);
 
-/** One plain character per band for the share text (no emoji): fuller is closer. */
+/** One square per band for the share text, in the band's colour on the results. */
 export const BAND_CHARS: Record<Band, string> = {
-  "dead-on": "█",
-  close: "▓",
-  near: "▒",
-  far: "░",
-  // A cross, not an empty box: an empty box read as a question not played.
-  lost: "×",
+  // The squares a list's share uses where the colours match (gold, cyan, a miss), and the nearest for the others: the
+  // results' periwinkle and pink. Lost at sea is a dark square, as a list's miss, never an empty box (it read as a
+  // question not played).
+  "dead-on": "🟨",
+  close: "🟦",
+  near: "🟪",
+  far: "🟥",
+  lost: "⬛",
 };
 
 /**
