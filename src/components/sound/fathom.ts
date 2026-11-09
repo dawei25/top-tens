@@ -1,5 +1,5 @@
 /**
- * Fathom's sounds (the estimation beta): a soft click on LOCK IN, a sonar ping as the answer shows, then the band's
+ * Fathom's sounds (the estimation game): a soft click on LOCK IN, a sonar ping as the answer shows, then the band's
  * own sound (Dead on a bright rising chord with a sparkle, Close a warm two-note chime, Near one soft note, Far a low
  * thud, Lost at sea a sinking bubble), and a short fanfare on the results that grows with the total. Quiet and short,
  * on the game's chip voices, and only with sound on (the speaker key).

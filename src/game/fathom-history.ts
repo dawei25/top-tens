@@ -11,6 +11,18 @@
 /** Points a game can score: five questions of 100 (MAX_TOTAL in fathom.ts, which fathom.test.ts holds to this). */
 export const FATHOM_MAX = 500;
 
+/** The game on screen, in this browser only (loadFathom in fathom.ts reads it). */
+export const FATHOM_KEY = "tentacle:fathom";
+
+/** Settings' reset: the game on screen goes with the rest of the progress. */
+export function clearFathomGame(): void {
+  try {
+    localStorage.removeItem(FATHOM_KEY);
+  } catch {
+    // No storage: nothing kept to clear.
+  }
+}
+
 /** Games whose questions are held back from the next draw. */
 export const HOLD_GAMES = 3;
 

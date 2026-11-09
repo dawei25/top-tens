@@ -3477,6 +3477,18 @@ a.arch-cell:active .arch-name {
   margin-top: 4px;
   color: var(--label);
 }
+/* Fathom's totals: a card of its own under the lists' (its label as theirs, its figures as the overall ones). */
+.know-fathom {
+  padding: 12px 18px 16px;
+}
+.know-fathom .know-overall {
+  margin-top: 10px;
+}
+@media (max-width: 520px) {
+  .know-fathom {
+    padding-inline: 12px;
+  }
+}
 .know-placeholder .know-name {
   font-size: 18px;
   text-transform: none;

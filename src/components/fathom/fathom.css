@@ -1,4 +1,4 @@
-/* ---------- Fathom (beta, #fathom) ---------- */
+/* ---------- Fathom (#fathom) ---------- */
 /*
  * One column, phone first: the question card (index.css .prompt), then the ask card (the field with its unit, the
  * echo line and LOCK IN) or, once locked in, the reveal card in its place. The results reuse
@@ -10,22 +10,14 @@
 .fathom {
   max-width: calc(640px + 2 * var(--gutter));
 }
-/* "FATHOM · BETA" on one line in the header: a little tighter on phones, where the label has about 130px (100px on
-   the narrowest). */
+/* "FATHOM" in the header, on one line, the size every screen's label has (it was tightened for "FATHOM · BETA"). */
 .fathom .game-head-mid > .mode:only-child {
   white-space: nowrap;
 }
-@media (max-width: 480px) {
-  .fathom .game-head-mid > .mode:only-child {
-    font-size: 15px;
-    letter-spacing: 0.18em;
-  }
-}
-@media (max-width: 380px) {
-  .fathom .game-head-mid > .mode:only-child {
-    font-size: 14px;
-    letter-spacing: 0.1em;
-  }
+/* A past game's line under its rules: when it was played. */
+.fathom-when {
+  margin-top: 4px;
+  color: var(--muted);
 }
 .fathom [data-band="dead-on"] {
   --band: var(--gold);

@@ -97,6 +97,14 @@ export function HowToPlay({ onClose }: { onClose: () => void }) {
               the list, the more points.
             </span>
           </li>
+          <li data-testid="howto-fathom">
+            <span className="rule-n">7</span>
+            <span>
+              {/* UX 21: one plain line for the score, the same one the game says. */}
+              <b className="cyan">Fathom:</b> guess the number. Five questions a game, and one asks you to name a
+              country or a city. The closer your guess, the more points. New questions every game.
+            </span>
+          </li>
         </ol>
       </div>
     </dialog>

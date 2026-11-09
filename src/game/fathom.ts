@@ -11,7 +11,7 @@
  * (src/game/fathom-history.ts); Fathom touches no list record, stat or streak. With a backend, each guess is also sent
  * (src/net/fathom.ts).
  */
-import { BANDS, bandLabel, bandOf, HOLD_GAMES, type Band } from "./fathom-history";
+import { BANDS, bandLabel, bandOf, FATHOM_KEY, HOLD_GAMES, type Band } from "./fathom-history";
 
 export { HOLD_GAMES };
 
@@ -975,7 +975,7 @@ export function shareText(scored: readonly Scored[], url?: string): string {
 
 /* ---------- The save (its own key) ---------- */
 
-export const FATHOM_KEY = "tentacle:fathom";
+export { FATHOM_KEY };
 
 export interface FathomSave {
   /** The question ids of the last HOLD_GAMES games, newest first (held back from the next draw). */
