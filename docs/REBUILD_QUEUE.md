@@ -10,6 +10,13 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Country lists: UK aliases and redirect junk** (found by the Fathom name-it work, Nov 10). Built country
+      lists carry "Northern Ireland", "Scottish" and "Welsh" as UK aliases, and redirect junk such as "Zambian
+      sports" and "Mongolian cyclone". Fathom's lists filter them (`scripts/fathom/lists.ts`); TENtacle's country
+      lists don't. Decide with the owner whether "Scotland"/"England" should count as the UK on a country list
+      (generous) or say "part of the UK" (strict, as Fathom does), then drop the junk at build time with a
+      validate.ts check.
+
 - [ ] **Fun facts for the other 72 lists.** The test set's facts were rewritten for fun with full articles and
       Did-you-know hooks; the other 72 lists still have the first-pass facts and need the same rewrite (coordinator,
       only for lists judged daily-worthy). Antarctic Desert has no fact yet.
