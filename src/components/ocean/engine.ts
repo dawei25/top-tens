@@ -18,8 +18,8 @@
  *
  * The easter egg: a tap or click on the squid's own pixels (never on a control over it, nor one the browser hands
  * the tap's click to, never while a dialog is open) makes it blush, flinch and wave a tentacle, with a pixel heart; a
- * third tap in a row and it spins, squirts a puff of ink and darts off. With reduced motion it only blushes for a
- * moment. The layer still takes no pointer itself: the taps are read on the window, passively, and the page under the
+ * third tap in a row and it spins, then darts off with a puff of ink (ink always comes out with a dart, never in place:
+ * see inkAndFlee). With reduced motion it only blushes for a moment. The layer still takes no pointer itself: the taps are read on the window, passively, and the page under the
  * finger gets them as ever.
  */
 import { onPlay, type PlayEvent } from "../../game/events";
@@ -93,6 +93,10 @@ const STREAK_MS = 900;
 const TRICK_TAPS = 3;
 /** Reduced motion: a tap only blushes it, this long (ms). */
 const STILL_BLUSH_MS = 600;
+/** The siphon, where ink comes out: this far behind the mantle's pivot along the body (sprite px), at the arms' roots. */
+const SIPHON = 6;
+/** Ink waits this long (s) for a way out to dart along; after that it is dropped, never squirted in place. */
+const INK_DUE = 2;
 const RAD = Math.PI / 180;
 
 /**
@@ -444,6 +448,7 @@ export function startOcean(els: OceanEls): Ocean {
       }
     }
     if (swimmer.behaviour !== "doze" && now - lastInput > IDLE_MS) doze();
+    inkStillDue();
     scene.step(dt, t);
     swimmer.step(dt, t);
     pose();
@@ -903,10 +908,45 @@ export function startOcean(els: OceanEls): Ocean {
     fx.sparksAt(p.x, p.y, big ? 36 : 20, reach * 0.8, colors);
   }
 
+  /** A life lost: it inks and darts off (a cloud as big as the screen for the last one). */
   function ink(big: boolean) {
+    const size = Math.min(scene.w, scene.h) * (big ? 0.5 : 0.2);
+    inkAndFlee(size, big);
+  }
+
+  /**
+   * Ink comes with a dart, never in place: the squid flees (turning, or flipping round where it is hemmed in) and the
+   * cloud comes out of its siphon as the jet fires, so it is already darting off as the ink appears. The ink stays due
+   * until then: if something else takes over the flee first (the glass a miss redraws comes over it, or blocks the
+   * turn it planned), it flees again from where it is (once any escape is over). With nowhere to go for INK_DUE
+   * seconds, no ink. A second ink before the first is out joins it: one cloud, the bigger.
+   */
+  let inkDue: { size: number; big: boolean; n?: number; until: number } | null = null;
+  function inkAndFlee(size: number, big: boolean, n?: number) {
+    if (inkDue && inkDue.size > size) return;
+    inkDue = { size, big, n, until: t + INK_DUE };
+    fleeForInk();
+  }
+  function fleeForInk() {
+    const d = inkDue;
+    if (!d) return;
+    swimmer.flee(() => {
+      inkDue = null;
+      puff(siphon(), d.size, d.big, d.n);
+    });
+  }
+  /** Each frame: ink still due and the flee taken over, flee again; too late, drop it. */
+  function inkStillDue() {
+    if (!inkDue || swimmer.fleeing) return;
+    if (t > inkDue.until) inkDue = null;
+    else if (!swimmer.escaping) fleeForInk();
+  }
+
+  /** Where the ink comes out (canvas px): the siphon, under the mantle where the arms leave it, behind the eyes. */
+  function siphon(): Pt {
     const p = here();
-    puff(p, Math.min(scene.w, scene.h) * (big ? 0.5 : 0.2), big);
-    swimmer.flee();
+    const a = swimmer.tilt * RAD;
+    return { x: p.x - Math.sin(a) * SIPHON, y: p.y + Math.cos(a) * SIPHON };
   }
 
   /** An ink cloud at p (canvas px), counted on the stand-in with its centre (CSS px), for tests and tools. */
@@ -1133,11 +1173,11 @@ export function startOcean(els: OceanEls): Ocean {
   }
   const onCancel = () => (down = null);
 
-  /** Tapped: a boop, or (the third tap in a row) the trick; with reduced motion, only a blush. */
+  /**
+   * Tapped: a boop, or (the third tap in a row) the trick; with reduced motion, only a blush. While a trick or a dart
+   * from its ink plays out, taps are ignored, and build no streak toward another one: one cloud at a time.
+   */
   function poke(tapX: number) {
-    const now = performance.now();
-    streak = now - lastPoke < STREAK_MS ? streak + 1 : 1;
-    lastPoke = now;
     if (still) {
       // A short colour change, nothing moves: the parked frame, blushing, then the same frame again.
       count("pokes");
@@ -1152,7 +1192,13 @@ export function startOcean(els: OceanEls): Ocean {
       reactFor("blush", STILL_BLUSH_MS / 1000, true);
       return;
     }
-    if (t < trickUntil) return;
+    if (t < trickUntil || swimmer.fleeing || inkDue) {
+      streak = 0;
+      return;
+    }
+    const now = performance.now();
+    streak = now - lastPoke < STREAK_MS ? streak + 1 : 1;
+    lastPoke = now;
     count("pokes");
     if (streak >= TRICK_TAPS && swimmer.behaviour !== "loop") {
       streak = 0;
@@ -1185,8 +1231,9 @@ export function startOcean(els: OceanEls): Ocean {
   }
 
   /**
-   * The trick, for a few taps in a row: it spins once on the spot (where it has room to turn round), throwing sparks,
-   * then squirts a little puff of ink and darts off. Under a second and a half.
+   * The trick, for a few taps in a row: it spins once on the spot (where it has room to turn round; else it wobbles),
+   * throwing sparks, then darts off with a little puff of ink (inkAndFlee). The spin takes about half a second; taps
+   * do nothing more until the dart is over. Already fleeing (a life lost meanwhile), that one ink is all.
    */
   function trick() {
     squidSound("trick");
@@ -1204,8 +1251,7 @@ export function startOcean(els: OceanEls): Ocean {
     fx.sparksAt(p.x, p.y, 14, 7, [CYAN, GOLD, PINK, WHITE], 0.05);
     fx.ring(p.x, p.y, 4, 14, CYAN, 0.5);
     later(SPIN, () => {
-      puff(here(), Math.min(scene.w, scene.h) * 0.08, false, 7);
-      swimmer.flee();
+      if (!swimmer.fleeing && !inkDue) inkAndFlee(Math.min(scene.w, scene.h) * 0.08, false, 7);
     });
     reactFor("trick", SPIN + 0.6);
   }
@@ -1216,6 +1262,7 @@ export function startOcean(els: OceanEls): Ocean {
   const onMotion = () => {
     still = !!mq?.matches;
     flourishes = [];
+    inkDue = null;
     blushUntil = -1;
     stillBlush = 0;
     if (still) {

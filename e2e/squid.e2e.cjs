@@ -422,24 +422,30 @@ const edgeDistance = (page, p) =>
 
 /**
  * Moves the frozen clock on until the squid is clear of the controls and "open" (far from every edge) or at an "edge".
- * Wide screens: open is more than 2.2 of its widths from the viewport's edges and the glass, an edge under 1.2. On a
- * phone it shows clear of the controls only in a band above the bottom edge, so there the two split at 1.8 widths.
+ * Wide screens: open is more than 2.2 of its widths from the viewport's edges and the glass, an edge under 1.3 (it
+ * comes that close nose first, as near as it swims to the glass). On a phone it shows clear of the controls only in a
+ * band above the bottom edge, so there the two split at 1.8 widths.
  */
 async function squidAtEdge(page, where) {
   const phone = (await page.evaluate(() => innerWidth)) < 700;
+  const seen = [];
   for (let i = 0; i < 400; i++) {
     const p = await squidSpot(page);
     if (p) {
       const c = await controlsAt(page, p);
       const { w } = await inkFrame(page);
       const d = (await edgeDistance(page, p)) / w;
-      if (!c.under && !c.ring && (where === "open" ? d > (phone ? 1.8 : 2.2) : d < (phone ? 1.8 : 1.2))) return p;
+      if (!c.under && !c.ring) {
+        if (where === "open" ? d > (phone ? 1.8 : 2.2) : d < (phone ? 1.8 : 1.3)) return p;
+        seen.push(d);
+      }
     }
     // A key now and then, so it never dozes off on the seabed (after 20 s without input).
     if (i % 40 === 39) await page.keyboard.press("Shift");
     await page.clock.runFor(200);
   }
-  throw new Error(`the squid never showed ${where === "open" ? "in the open" : "next to an edge"}`);
+  const range = seen.length ? `${Math.min(...seen).toFixed(2)} to ${Math.max(...seen).toFixed(2)}` : "none";
+  throw new Error(`the squid never showed ${where === "open" ? "in the open" : "next to an edge"} (clear of the controls ${seen.length} times, ${range} widths from an edge)`);
 }
 
 /**
@@ -456,10 +462,13 @@ async function film(page, frames, each) {
   return out;
 }
 
+/** Frames from a puff to the check that the squid is clear of it. */
+const CLEAR_FRAMES = Math.round(700 / FRAME_MS);
+
 /**
  * Every puff in a film: ink is drawn at its centre; the squid is already moving as it appears (its eyes a tenth of
- * its width on within ~100 ms of the frame before); and within 700 ms it is clear of the cloud (eyes in view, more
- * than its width from the centre). Returns the frames the puffs appeared on.
+ * its width on, ~100 ms after the frame before); and 700 ms on it is clear of the cloud (eyes in view, more than its
+ * width from the centre). The film must run 700 ms past its last puff. Returns the frames the puffs appeared on.
  */
 function assertDarts(frames, label) {
   const puffs = [];
@@ -467,13 +476,13 @@ function assertDarts(frames, label) {
   for (const k of puffs) {
     const { at, w } = frames[k];
     const tag = `${label}: puff on frame ${k} at ${at.x},${at.y}`;
+    assert.ok(k + CLEAR_FRAMES < frames.length, `${tag}: the film ends too soon to check it`);
     assert.ok(frames.slice(k, k + 3).some((f) => f.ink > 0), `${tag}: no ink drawn there`);
     const before = frames.slice(0, k).reverse().find((f) => f.eye)?.eye;
-    const soon = frames[k + 3]?.eye;
-    if (before && soon && k + 3 < frames.length)
-      assert.ok(Math.hypot(soon.x - before.x, soon.y - before.y) >= 0.1 * w, `${tag}: the ink came out while the squid was still`);
-    const later = frames[k + Math.round(700 / FRAME_MS)];
-    if (!later) continue;
+    const soon = frames[k + 3].eye;
+    assert.ok(soon, `${tag}: 100 ms on the squid is hidden under the ink`);
+    if (before) assert.ok(Math.hypot(soon.x - before.x, soon.y - before.y) >= 0.1 * w, `${tag}: the ink came out while the squid was still`);
+    const later = frames[k + CLEAR_FRAMES];
     const d = later.eye && Math.hypot(later.eye.x - at.x, later.eye.y - at.y);
     assert.ok(d && d > w, `${tag}: 700 ms on the squid is ${later.eye ? `${(d / w).toFixed(2)} of its width from the cloud` : "hidden under it"}`);
   }
@@ -489,14 +498,20 @@ for (const vp of VIEWPORTS) {
     await recordClicks(page);
     for (const where of ["open", "edge"]) {
       await squidAtEdge(page, where);
-      // Spam: a tap on the squid every 100 ms for 6 s, chasing it, wherever it is clear of the controls.
-      const frames = await film(page, Math.round(6000 / FRAME_MS), async (i, f) => {
-        if (i % 3 || !f.eye) return;
+      // Spam: a tap on the squid every 100 ms for 5 s, chasing it, wherever it is clear of the controls; then 3 s more
+      // to see the last trick through.
+      let taps = 0;
+      const pokes = (await reaction(page)).pokes;
+      const frames = await film(page, Math.round(8000 / FRAME_MS), async (i, f) => {
+        if (i % 3 || i * FRAME_MS > 5000 || !f.eye) return;
         const c = await controlsAt(page, f.eye);
-        if (!c.under && !c.ring) await tapAt(page, vp, f.eye);
+        if (c.under || c.ring) return;
+        await tapAt(page, vp, f.eye);
+        taps++;
       });
       const puffs = assertDarts(frames, where);
-      assert.ok(puffs.length >= 1, `${where}: the taps never made the squid ink`);
+      const took = (await reaction(page)).pokes - pokes;
+      assert.ok(puffs.length >= 1, `${where}: the taps never made the squid ink (${taps} taps, ${took} taken)`);
       // One trick at a time: taps during a trick and its dart start no second one.
       for (let j = 1; j < puffs.length; j++)
         assert.ok((puffs[j] - puffs[j - 1]) * FRAME_MS >= 1500, `${where}: a second trick ${(puffs[j] - puffs[j - 1]) * FRAME_MS} ms after the first`);
@@ -514,17 +529,18 @@ for (const vp of VIEWPORTS) {
     const misses = (await puzzle(page, LIST)).extras.filter((e) => e.rank > 10).map((e) => e.name);
     for (const where of ["open", "edge"]) {
       await squidAtEdge(page, where);
-      const frames = await film(page, 40, async (i) => {
+      const frames = await film(page, 90, async (i) => {
         if (i === 0) await guess(page, misses.shift());
       });
       assert.equal(assertDarts(frames, `${where} miss`).length, 1, `${where}: a lost life inked ${frames.at(-1).inks - frames[0].inks} times`);
       await page.clock.runFor(2000);
     }
     // Two lives lost in quick succession: never a cloud on a squid that stays put.
-    const frames = await film(page, 50, async (i) => {
+    const frames = await film(page, 110, async (i) => {
       if (i === 0 || i === 6) await guess(page, misses.shift());
     });
-    assert.ok(assertDarts(frames, "two misses").length >= 1);
+    const puffs = assertDarts(frames, "two misses").length;
+    assert.ok(puffs === 1 || puffs === 2, `two lives lost inked ${puffs} times`);
     assert.equal(await page.getByTestId("lives").getAttribute("data-lives"), "1");
     await ctx.close();
   });
