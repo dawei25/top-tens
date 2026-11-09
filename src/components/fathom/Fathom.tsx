@@ -121,6 +121,9 @@ function recordFinished(game: FathomGame, bank: readonly FathomQuestion[]): void
     points: scored.map((x) => x.points),
   };
   const before = load();
+  // A game from before a reset made on another device stays out (the sync would only prune it again).
+  const resetAt = (before as { resetAt?: number }).resetAt;
+  if (resetAt && run.startedAt < resetAt) return;
   const fathom = recordRun(before.fathom, run);
   if (fathom === before.fathom) return;
   save({ ...before, fathom });
