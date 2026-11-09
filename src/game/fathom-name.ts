@@ -16,8 +16,8 @@ import {
   type NameIt,
   type NameScoring,
 } from "./fathom";
-import { isKnownName, type Lexicon } from "./junk";
-import { judgeGuess, normalize } from "./match";
+import { isKnownName, isPlainWord, isSlipOf, type Lexicon } from "./junk";
+import { editDistance, judgeGuess, normalize } from "./match";
 import type { Entry, Puzzle } from "./types";
 
 /* ---------- Lists ---------- */
@@ -210,25 +210,53 @@ export type NameRead =
   | { kind: "choose"; names: string[] }
   | { kind: "vague" }
   | { kind: "except"; name: string }
-  /** `partOf`: a place that is part of something on the list ("Northern Ireland": the UK), not a kind of its own. */
-  | { kind: "other"; name: string; noun: string; partOf?: string }
+  /**
+   * `partOf`: a place that is part of something on a list ("Scotland": the UK; "Tasmania": Australia), said as that.
+   * `plural`: a name that takes "are" ("The Canary Islands").
+   */
+  | { kind: "other"; name: string; noun: string; partOf?: string; plural?: boolean }
   | { kind: "offList"; name: string }
   | { kind: "unknown" };
 
+/** A place a player may well type that no list has: what it is, and what it is part of, if it is part of one thing. */
+export interface Place {
+  /** What it is: "territory", "US state", "continent", "island", "region", "former country"; "country" for the UK's. */
+  noun: string;
+  /** What it is part of, as said in a line: "the UK", "Australia", "New York City". */
+  partOf?: string;
+  /** Its names take "are" ("The Azores are part of Portugal"). */
+  plural?: boolean;
+  names: readonly string[];
+}
+
+/** The noun of a country that no longer is one ("Yugoslavia is no longer a country."). */
+export const FORMER = "former country";
+
 /**
- * Places a player may well type that none of the lists has, by what they are: a territory, a US state, a continent,
- * part of the UK. Only to say what they are ("Greenland is a territory, not a country."): never an answer, and a name
- * the round's own list has (Georgia, the country) is read as that first.
+ * Places a player may well type that none of the lists has, by what they are: a territory, a US state, a continent, a
+ * part of a country (the UK's nations, islands, regions, a city's boroughs), a region of several countries, a country
+ * that no longer is one. Only to say what they are ("Greenland is a territory, not a country.", "Tasmania is part of
+ * Australia, not a country."): never an answer, never corrected into one (Tasmania is not Tanzania), and a name the
+ * round's own list has (Georgia, the country) is read as that first. Nothing disputed: a place whose status is argued
+ * over (a breakaway region, a claimed territory) is left to the lists and the lexicon. The lists never carry one of these
+ * as an alias (scripts/fathom/lists.ts drops them: "England" once locked the UK).
  */
-const PLACES: readonly { noun: string; partOf?: string; names: readonly string[] }[] = [
+export const PLACES: readonly Place[] = [
   {
     noun: "territory",
     names: [
-      "Greenland", "Puerto Rico", "Hong Kong", "Macau", "Macao", "Guam", "Bermuda", "Faroe Islands", "Faroes",
-      "New Caledonia", "French Polynesia", "Tahiti", "Gibraltar", "Cayman Islands", "Aruba", "Curaçao", "Isle of Man",
-      "Jersey", "Guernsey", "Falkland Islands", "Falklands", "American Samoa", "US Virgin Islands", "British Virgin Islands",
-      "Northern Mariana Islands", "Réunion", "Martinique", "Guadeloupe", "French Guiana", "Mayotte", "Anguilla",
-      "Montserrat", "Turks and Caicos Islands", "Sint Maarten", "Bonaire", "Åland", "Svalbard", "Saint Helena",
+      "Greenland", "Puerto Rico", "Hong Kong", "Macau", "Macao", "Guam", "Bermuda", "New Caledonia", "French Polynesia",
+      "Tahiti", "Gibraltar", "Aruba", "Curaçao", "Isle of Man", "Jersey", "Guernsey", "American Samoa", "Réunion",
+      "Martinique", "Guadeloupe", "French Guiana", "Mayotte", "Anguilla", "Montserrat", "Sint Maarten", "Bonaire", "Åland",
+      "Svalbard", "Saint Helena",
+    ],
+  },
+  {
+    noun: "territory",
+    plural: true,
+    names: [
+      "Faroe Islands", "Faroes", "Cayman Islands", "Falkland Islands", "Falklands", "US Virgin Islands", "British Virgin Islands",
+      "Northern Mariana Islands", "Turks and Caicos Islands",
     ],
   },
   {
@@ -243,9 +271,89 @@ const PLACES: readonly { noun: string; partOf?: string; names: readonly string[]
     ],
   },
   { noun: "continent", names: ["Africa", "Europe", "Asia", "North America", "South America", "Antarctica", "Oceania"] },
-  { noun: "", partOf: "the UK", names: ["England", "Scotland", "Wales", "Northern Ireland"] },
+  // The UK's nations are countries of their own within it: "Scotland is part of the UK."
+  { noun: "country", partOf: "the UK", names: ["England", "Scotland", "Wales", "Northern Ireland", "N. Ireland"] },
+  ...partsOf("island", {
+    Australia: ["Tasmania"],
+    Indonesia: ["Bali", "Java", "Sumatra", "Sulawesi", "Lombok"],
+    France: ["Corsica"],
+    Italy: ["Sardinia", "Sicily", "Capri"],
+    Greece: ["Crete", "Rhodes", "Corfu", "Santorini", "Mykonos"],
+    Spain: ["Mallorca", "Majorca", "Menorca", "Ibiza", "Tenerife", "Gran Canaria", "Lanzarote"],
+    Portugal: ["Madeira"],
+    Japan: ["Hokkaido", "Honshu", "Kyushu", "Shikoku", "Okinawa"],
+    China: ["Hainan"],
+    Tanzania: ["Zanzibar"],
+    Thailand: ["Phuket", "Koh Samui"],
+    Malaysia: ["Penang", "Langkawi"],
+    Philippines: ["Luzon", "Mindanao", "Palawan", "Boracay"],
+    Canada: ["Vancouver Island", "Newfoundland", "Prince Edward Island"],
+    Ecuador: ["Galápagos", "Galapagos"],
+    Chile: ["Easter Island"],
+    Russia: ["Sakhalin"],
+    "South Korea": ["Jeju"],
+    Sweden: ["Gotland"],
+    "the UK": ["Isle of Wight", "Isle of Skye", "Anglesey", "Shetland", "Orkney"],
+    "the US": ["Long Island"],
+  }),
+  ...partsOf(
+    "islands",
+    { Spain: ["The Canary Islands", "Canaries", "The Balearic Islands", "Balearics"], Portugal: ["The Azores"], Ecuador: ["The Galápagos Islands"], "the UK": ["The Hebrides"] },
+    true,
+  ),
+  ...partsOf("region", {
+    Germany: ["Bavaria"],
+    Italy: ["Tuscany", "Lombardy"],
+    Canada: ["Quebec", "Québec", "Ontario", "British Columbia", "Alberta"],
+    Belgium: ["Flanders", "Wallonia"],
+    Russia: ["Siberia"],
+    "the Czech Republic": ["Bohemia", "Moravia"],
+    France: ["Normandy", "Brittany", "Provence", "Île-de-France"],
+    Spain: ["Andalusia"],
+    Romania: ["Transylvania"],
+    Australia: ["Queensland", "New South Wales", "Western Australia"],
+    India: ["Kerala", "Goa", "Maharashtra", "Rajasthan"],
+    China: ["Guangdong"],
+    Pakistan: ["Sindh"],
+    Mexico: ["Yucatán", "Yucatan"],
+  }),
+  // A city's boroughs and districts, on a city question "part of New York City" (a city: no "not a city" after it).
+  ...partsOf("district", {
+    "New York City": ["Brooklyn", "Queens", "Manhattan", "The Bronx", "Staten Island"],
+    "Hong Kong": ["Kowloon"],
+    "Los Angeles": ["Hollywood"],
+    London: ["Westminster"],
+    Tokyo: ["Shibuya", "Shinjuku"],
+  }),
+  {
+    noun: "region",
+    names: [
+      "Scandinavia", "The Middle East", "The Caribbean", "Central America", "Latin America", "Southeast Asia", "Central Asia",
+      "Iberia", "Patagonia", "Lapland", "The Sahara", "Polynesia", "Benelux", "Mesopotamia", "The Arctic",
+    ],
+  },
+  { noun: "region", plural: true, names: ["The Balkans"] },
+  { noun: "island", names: ["Borneo", "Hispaniola"] },
+  {
+    noun: FORMER,
+    names: [
+      "Soviet Union", "USSR", "Yugoslavia", "Czechoslovakia", "East Germany", "West Germany", "Prussia", "Ottoman Empire",
+      "Austria-Hungary", "Serbia and Montenegro", "Rhodesia",
+    ],
+  },
 ];
-const placeByForm = new Map(PLACES.flatMap((p) => p.names.map((name) => [normalize(name), { ...p, name }] as const)));
+
+/** Places of one kind by what each is part of: `{ Australia: ["Tasmania"] }`. */
+function partsOf(noun: string, by: Record<string, string[]>, plural = false): Place[] {
+  return Object.entries(by).map(([partOf, names]) => ({ noun, partOf, names, ...(plural && { plural }) }));
+}
+
+/** Each place by its normalized names; a form two names share ("Quebec", "Québec") is the first's. */
+const placeByForm = new Map<string, Place & { name: string }>();
+for (const p of PLACES) for (const name of p.names) if (!placeByForm.has(normalize(name))) placeByForm.set(normalize(name), { ...p, name });
+
+/** The place no list has that `text` names exactly, if it names one ("scotland": Scotland, part of the UK). */
+export const placeNamed = (text: string): (Place & { name: string }) | undefined => placeByForm.get(normalize(text));
 
 interface Read {
   puzzle: Puzzle;
@@ -321,13 +429,42 @@ const sameNoun = (a: NameList, b: NameList) => normalize(a.noun) === normalize(b
 const titled = (text: string) => text.trim().replace(/\s+/g, " ").replace(/(^|[\s-])(\p{L})/gu, (_, a: string, b: string) => a + b.toUpperCase());
 
 /**
+ * Other ways of writing a name, read only as an exact name or alias: a list's inverted form ("Korea, North" is North
+ * Korea, "Gambia, The" the Gambia) and the short forms of "Republic" and "Democratic" ("Dominican Rep.", "Dem. Rep.
+ * Congo").
+ */
+export function rewrites(text: string): string[] {
+  const out: string[] = [];
+  const inverted = text.match(/^\s*([^,]+?)\s*,\s*([^,]+?)\s*$/);
+  if (inverted) out.push(`${inverted[2]} ${inverted[1]}`);
+  for (const t of [text, ...out]) {
+    const long = t.replace(/\b(?:rep|repub)\b\.?/gi, "Republic").replace(/\bdem\b\.?/gi, "Democratic");
+    if (long !== t) out.push(long);
+  }
+  return out;
+}
+
+/** The entry `text` names exactly on the list once rewritten (rewrites), if only one entry carries that form. */
+function rewritten(text: string, list: NameList): NameEntry | undefined {
+  const forms = readOf(list).forms;
+  for (const t of rewrites(text)) {
+    const at = forms.get(normalize(t));
+    if (at?.length === 1) return at[0];
+  }
+  return undefined;
+}
+
+/**
  * Reads a typed name on a name-it round over its `list`. `others` are the other lists the game has (a city list on a
  * country question): what was typed is a thing of another kind when one of them knows it by that name and this list
  * doesn't ("Paris", "Lagos" rather than a misspelling of Laos, "Mexico City" rather than Mexico), and so is a place
- * none of them has (PLACES: Greenland, Texas). `lex`, the game's lexicon: a name of its own isn't read as a misspelling
- * of something on the list, unless nothing else reads it (the confirm or the tap that a misspelling needs keeps that
- * fair); and a real name the list doesn't have says so ("Berlin isn't one of our 85 cities."). `offered`: the names the
- * last read offered, so typing or tapping one picks it. `except`: names that don't count.
+ * none of them has (PLACES: Greenland, Texas, Scotland, Tasmania); a name of another kind, named exactly, is read as
+ * that before anything on this list is read into it ("Tasmania" is not Tanzania, "Africa" on a city question not South
+ * Africa). `lex`, the game's lexicon: a name of its own isn't read as a misspelling of something on the list, unless the
+ * game stores it as a misspelling of that thing ("Irak", for Iraq: the confirm or the tap that a misspelling needs
+ * keeps that fair); any other real name the list doesn't have says so ("Berlin isn't one of our 85 cities.", and
+ * "Abkhazia" is not Afghanistan). `offered`: the names the last read offered, so typing or tapping one picks it.
+ * `except`: names that don't count.
  */
 export function readName(
   text: string,
@@ -337,8 +474,11 @@ export function readName(
 ): NameRead {
   if (!normalize(text)) return { kind: "empty" };
   const out = excepted(except);
+  const take = (e: NameEntry): NameRead => (out(e) ? { kind: "except", name: e.name } : { kind: "answer", entry: e });
   const main = judge(text, list, lex, offered);
-  if (main.kind === "exact") return out(main.entry) ? { kind: "except", name: main.entry.name } : { kind: "answer", entry: main.entry };
+  if (main.kind === "exact") return take(main.entry);
+  const alt = rewritten(text, list);
+  if (alt) return take(alt);
 
   // Not an exact name on this list: what the other lists make of it, and whether it's a place none of them has.
   const elsewhere = others
@@ -346,13 +486,10 @@ export function readName(
     .map((o) => ({ o, j: judge(text, o, lex) }))
     .filter((x): x is { o: NameList; j: Extract<Judged, { entry: NameEntry }> } => x.j.kind === "exact" || x.j.kind === "confirm");
   const exactElsewhere = elsewhere.find((x) => x.j.kind === "exact" && !sameNoun(x.o, list));
-  const place = placeByForm.get(normalize(text));
-  const placeRead: NameRead | undefined = place && { kind: "other", name: place.name, noun: place.noun, ...(place.partOf && { partOf: place.partOf }) };
   // A thing of another kind, named exactly, is that thing, not a misspelling or part of something on this list.
-  if (main.kind !== "none") {
-    if (exactElsewhere) return { kind: "other", name: exactElsewhere.j.entry.name, noun: exactElsewhere.o.noun };
-    if (placeRead) return placeRead;
-  }
+  if (exactElsewhere) return { kind: "other", name: exactElsewhere.j.entry.name, noun: exactElsewhere.o.noun };
+  const place = placeNamed(text);
+  if (place) return { kind: "other", name: place.name, noun: place.noun, ...(place.partOf && { partOf: place.partOf }), ...(place.plural && { plural: true }) };
 
   const kept = (m: Judged): NameRead | undefined => {
     if (m.kind === "confirm") return out(m.entry) ? { kind: "except", name: m.entry.name } : { kind: "confirm", entry: m.entry };
@@ -372,15 +509,30 @@ export function readName(
 
   const kind = elsewhere.find((x) => !sameNoun(x.o, list));
   if (kind) return { kind: "other", name: kind.j.entry.name, noun: kind.o.noun };
-  if (placeRead) return placeRead;
   const same = elsewhere.find((x) => x.j.kind === "exact" && sameNoun(x.o, list));
   if (same) return { kind: "offList", name: same.j.entry.name };
-  // The lexicon held back a reading because what was typed is a name somewhere ("Irak", an alias elsewhere in the
-  // game): it still needs a confirm or a tap, so offer it.
+  // The lexicon held back a reading because what was typed is a name somewhere. It is still offered when it is one slip
+  // from what it was read as ("Chili", "Perm"), or a misspelling the game stores as one ("Irak", Iraq's): it needs a
+  // confirm or a tap either way. A real name further off is itself, not a slip of something on the list ("Abkhazia" is
+  // not Afghanistan); an ordinary word ("island", "kingdom") is no name at all.
   const plain = lex ? kept(judge(text, list, undefined, offered)) : undefined;
-  if (plain) return plain;
-  if (lex && isKnownName(text, lex)) return { kind: "offList", name: titled(text) };
-  return { kind: "unknown" };
+  if (plain && slipOf(text, plain, list, lex)) return plain;
+  if (lex && isKnownName(text, lex)) return isPlainWord(text, lex) ? { kind: "unknown" } : { kind: "offList", name: titled(text) };
+  return plain ?? { kind: "unknown" };
+}
+
+/**
+ * Whether `text` is a slip of what `read` offers: one edit from one of its names (a letter off, a swap), or a misspelling
+ * the game stores as one of it (`Lexicon.slips`: "Irak" of Iraq).
+ */
+function slipOf(text: string, read: NameRead, list: NameList, lex: Lexicon | undefined): boolean {
+  const names = read.kind === "confirm" ? [read.entry.name] : read.kind === "choose" ? read.names : read.kind === "except" ? [read.name] : [];
+  const t = normalize(text);
+  return names.some((n) => {
+    if (isSlipOf(text, n, lex)) return true;
+    const e = list.entries.find((x) => x.name === n);
+    return !!e && [e.name, ...e.aliases].some((f) => editDistance(t, normalize(f)) <= 1);
+  });
 }
 
 /* ---------- What the round says ---------- */
@@ -397,6 +549,7 @@ export function withArticle(noun: string): string {
  */
 const NAME_IN_LINE = 18;
 const named = (name: string, fallback: string, max = NAME_IN_LINE) => (name.length <= max ? name : fallback);
+const sameWord = (a: string, b: string) => normalize(a) === normalize(b);
 
 /**
  * What the round says about a typed name that doesn't lock (nothing for `answer`; `choose` is followed by the names to
@@ -414,9 +567,18 @@ export function nameLine(read: NameRead, list: Pick<NameList, "noun" | "nounPlur
       return "More than one fits. Be more specific.";
     case "except":
       return `Any ${list.noun} but ${named(read.name, "that one")}. Try again.`;
-    case "other":
-      if (read.partOf) return `${named(read.name, "That")} is part of ${read.partOf}. Try again.`;
-      return `${named(read.name, "That")} is ${withArticle(read.noun)}, not ${withArticle(list.noun)}. Try again.`;
+    case "other": {
+      const name = named(read.name, read.plural ? "They" : "That");
+      const not = `not ${withArticle(list.noun)}`;
+      if (read.noun === FORMER) return sameWord(list.noun, "country") ? `${name} is no longer a country. Try again.` : `${name} was a country, ${not}. Try again.`;
+      // Part of something: "Scotland is part of the UK." (a country of its own, on a country question), "Tasmania is
+      // part of Australia, not a country.", "Brooklyn is part of New York City, not a city."
+      if (read.partOf) {
+        if (sameWord(read.noun, list.noun)) return `${name} is part of ${read.partOf}. Try again.`;
+        return `${name} ${read.plural ? "are" : "is"} part of ${read.partOf}, ${not}.`;
+      }
+      return `${name} ${read.plural ? "are" : "is"} ${withArticle(read.noun)}, ${not}. Try again.`;
+    }
     case "offList":
       return `${named(read.name, "That", 14)} isn't one of our ${list.entries.length} ${list.nounPlural}. Try again.`;
     case "unknown":

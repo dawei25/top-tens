@@ -6,6 +6,7 @@
 // `checkCountryLists`, run on the committed files by lists.test.ts.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { placeNamed } from "../../src/game/fathom-name";
 import { normalize } from "../../src/game/match";
 import type { Entry, Puzzle } from "../../src/game/types";
 import { blockedAlias, CITY_JUNK, COUNTRY_JUNK } from "../aliases";
@@ -158,10 +159,51 @@ function currentForms<E extends { name: string; aliases: string[] }>(entries: E[
 }
 
 /**
+ * Forms the round needs that the puzzles don't give (a judge typed about 50 answers on each name-it question, Nov 8):
+ * old names and common misspellings, by the entry's name.
+ */
+export const FORMS: Record<string, string[]> = {
+  Libya: ["Lybia"],
+  Belarus: ["Byelorussia"],
+  Cambodia: ["Kampuchea"],
+  Kyrgyzstan: ["Kirghizia"],
+  Laos: ["Lao"],
+  Djibouti: ["Jibuti"],
+  India: ["Hindustan"],
+  "Bosnia and Herzegovina": ["BiH"],
+  Hungary: ["Magyarország"],
+  Dhaka: ["Dakha"],
+  London: ["Greater London"],
+  "Mexico City": ["Mex City"],
+};
+
+/**
+ * Redirects some puzzles carry that are no name anyone types for the thing (a sport, a cyclone, a nickname for its
+ * capital): left out of the round's lists, where a stray word in one could read as that country.
+ */
+export const NOT_A_NAME =
+  /\b(?:sports?|games|athletes|boxing|cyclone|independence|occupation|english|standing|mandates|colony|heart of|capital|largest city)\b|\bterritory,/i;
+
+/**
+ * Whether a form is a place of its own (fathom-name.ts PLACES: "England", "Northern Ireland", "Tasmania"), never an
+ * alias: "England" on the United Kingdom locked the whole UK; the round says "England is part of the UK." instead.
+ */
+export const isPlace = (form: string): boolean => !!placeNamed(form) || PART_WORDS.has(normalize(form));
+
+/** The people of a part of a country, never the country: "Scottish" and "Welsh" locked the UK as "Scotland" did. */
+const PART_WORDS = new Set(["English", "Scottish", "Scots", "Welsh", "Northern Irish"].map(normalize));
+
+/** The forms a list keeps for an entry: its own and FORMS, less places of their own and redirects that aren't names. */
+export function keptForms(name: string, aliases: string[]): string[] {
+  return [...aliases, ...(FORMS[name] ?? [])].filter((a) => !isPlace(a) && !NOT_A_NAME.test(a));
+}
+
+/**
  * An entry's aliases with every form another entry also has dropped (an alias two countries share would make a
  * typed answer ambiguous; neither gets it), and the forms that only repeat its own name.
  */
-function uniqueForms(entries: { name: string; aliases: string[]; value: number }[]): NameEntry[] {
+function uniqueForms(given: { name: string; aliases: string[]; value: number }[]): NameEntry[] {
+  const entries = given.map((e) => ({ ...e, aliases: keptForms(e.name, e.aliases) }));
   const count = new Map<string, number>();
   for (const e of entries)
     for (const f of new Set([e.name, ...e.aliases].map(normalize).filter(Boolean))) count.set(f, (count.get(f) ?? 0) + 1);
