@@ -142,6 +142,58 @@ describe("ink comes with a dart, never in place", () => {
       for (const seed of SEEDS) expectDart(flee(phone, null, p, tilt, seed), phone, `phone ${p.x},${p.y}, seed ${seed}`);
   });
 
+  // A strip of open water 300 px tall (the browser suite puts panels over the squid like this): too thin to turn
+  // round in anywhere.
+  const strip = Room.build(
+    [...DESKTOP_GLASS, { left: 0, top: 0, right: 1440, bottom: 300 }, { left: 0, top: 600, right: 1440, bottom: 900 }],
+    desktop.w,
+    desktop.h,
+    4,
+  )!;
+
+  it("glass came over it as it inks: no flee (and no ink) until it is out, then the dart", () => {
+    // (Seen in the browser: a flee planned while escaping ignores the glass, and the glide braked to a stop at it.)
+    const s = new Swimmer(desktop, seeded(5));
+    s.setWorld(desktop);
+    s.setRoom(strip);
+    s.place({ x: 1100, y: 330 }, 0);
+    s.escape({ x: 1100, y: 460 }, 90);
+    let t = 0;
+    for (; t < 0.1; t += DT) s.step(DT, t);
+    expect(s.escaping).toBe(true);
+    expect(s.flee(() => {})).toBe(false);
+    for (; s.escaping && t < 3; t += DT) s.step(DT, t);
+    expect(s.escaping).toBe(false);
+  });
+
+  it("a turn held short (the guard stops it at the glass): the ink waits for a jet that gets it clear", () => {
+    for (const seed of SEEDS) {
+      const r = seeded(seed * 31);
+      const s = new Swimmer(desktop, seeded(seed));
+      s.setWorld(desktop);
+      s.setRoom(strip);
+      let p = { x: 0, y: 0 };
+      let tilt = 0;
+      do {
+        p = { x: 880 + r() * 540, y: 300 + r() * 300 };
+        tilt = (r() - 0.5) * 360;
+      } while (strip.fit(p.x, p.y, tilt) < 0);
+      s.place(p, tilt);
+      const inks: { x: number; y: number; tilt: number }[] = [];
+      s.flee(() => inks.push({ x: s.x, y: s.y, tilt: s.tilt }), 2 * desktop.sw);
+      // For the first 0.8 s the end of every turn (while the mantle fills, where a jet goes anyway after half a second)
+      // is held where it was; the flip about its middle goes on.
+      let t = 0;
+      for (; t < 3; t += DT) {
+        const before = s.tilt;
+        s.step(DT, t);
+        if (t < 0.8 && /\/inflate/.test(s.state)) s.tilt = before;
+      }
+      // Any ink came out on a jet with the room it needed ahead (two widths, less the hard stop's margin).
+      for (const k of inks) expect(strip.reach(k.x, k.y, k.tilt, 200) - 32, `seed ${seed}: inked facing the glass`).toBeGreaterThanOrEqual(0.75 * 2 * desktop.sw);
+    }
+  });
+
   it("a find meanwhile doesn't cut the dart short", () => {
     const s = new Swimmer(desktop, seeded(7));
     s.setWorld(desktop);

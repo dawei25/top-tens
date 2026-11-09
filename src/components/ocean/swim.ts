@@ -166,6 +166,9 @@ export class Swimmer {
   private flipping = false;
   /** How far the flee should get (CSS px): past the cloud's reach. */
   private clear = 0;
+  /** Confined: how far the flee it planned goes at least (CSS px), and how many times it has planned it again. */
+  private fleeMin = 0;
+  private fleeTries = 0;
 
   private world: World;
   private rand: () => number;
@@ -547,10 +550,33 @@ export class Swimmer {
     this.wakeUp();
     this.behaviour = "roam";
     this.clear = clear;
+    this.fleeTries = 0;
     if (!this.fleeGo(true)) return false;
     this.fleeing = true;
     this.onJet = ink ?? null;
     return true;
+  }
+
+  /**
+   * About to jet a flee, `off` degrees from the heading it planned: is it facing that way, and (confined) is the room
+   * it planned still ahead (the glide brakes a hard stop's 32 px short of the glass)?
+   */
+  private fleeClear(off: number) {
+    if (off > ALIGN * 2) return false;
+    const room = this.room;
+    if (!room || this.escaping) return true;
+    return room.reach(this.x, this.y, this.tilt, this.fleeMin + 32) - 32 >= this.fleeMin * 0.75;
+  }
+
+  /** The flee's jet would not get it clear: plan it again from here, ink and all (three times at most, then no ink). */
+  private fleeAgain() {
+    const ink = this.onJet;
+    if (++this.fleeTries <= 3 && this.fleeGo(true)) {
+      this.fleeing = true;
+      this.onJet = ink;
+      return;
+    }
+    this.hold(0.3);
   }
 
   /** The other moves: a flee (and its ink, if not out yet) is over. */
@@ -560,16 +586,22 @@ export class Swimmer {
     this.onJet = null;
   }
 
-  /** Set up the flee's jet (or, hemmed in and `flip`, the flip before it). False when there is nowhere to go. */
+  /**
+   * Set up the flee's jet (or, hemmed in and `flip`, the flip before it). False when there is nowhere to go, and,
+   * confined, while it is still out of glass that came over it (it has no room to plan against yet: wait until out).
+   */
   private fleeGo(flip: boolean): boolean {
     const b = this.bounds();
     const far = Math.max(this.world.sw * FLEE_MIN, this.clear);
     const L = Math.max(far, this.unit * 1.1 * Math.max(1, this.speed));
-    if (this.room && !this.escaping) {
+    if (this.room) {
+      if (this.escaping) return false;
       // The heading with the most room, nearest the way it faces: past the cloud, or as near that as there is room for
       // (at least FLEE_MIN widths).
       const min = this.world.sw * FLEE_MIN;
-      const q = this.plan(this.tilt, L, Math.min(far, L), 1 / 400) ?? this.plan(this.tilt, L, min, 1 / 400);
+      const q0 = this.plan(this.tilt, L, Math.min(far, L), 1 / 400);
+      const q = q0 ?? this.plan(this.tilt, L, min, 1 / 400);
+      this.fleeMin = q0 ? Math.min(far, L) : min;
       if (!q) return flip && this.flip(L, min);
       this.target = {
         x: this.x + Math.sin(q.aim * RAD) * q.travel,
@@ -840,6 +872,9 @@ export class Swimmer {
       const side = Math.abs(-this.vx * Math.cos(this.tilt * RAD) - this.vy * Math.sin(this.tilt * RAD));
       const settled = side < Math.max(MOVING, 0.12 * Math.hypot(this.vx, this.vy));
       if (this.left <= 0 && ((off <= ALIGN && settled) || this.left < -0.5)) {
+        // A flee's jet must carry it (and its ink) clear: held off the heading it planned (the guard stopped the turn
+        // short) or with the room ahead gone, it plans again from here and the ink waits.
+        if (this.onJet && !this.fleeClear(off)) return this.fleeAgain();
         // The jet: the mantle contracts hard (narrow and long) and the burst begins, along the heading.
         this.thrust = THRUST;
         this.jetAge = 0;

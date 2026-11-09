@@ -553,17 +553,26 @@ for (const vp of VIEWPORTS) {
     await recordClicks(page);
     for (const where of ["open", "edge"]) {
       await squidAtEdge(page, where);
-      // Spam: a tap on the squid every 100 ms for 5 s, chasing it, wherever it is clear of the controls; then 3 s more
-      // to see the last trick through.
+      // Spam: a tap on the squid every 100 ms for 5 s, chasing it, wherever it is clear of the controls (on a phone it
+      // can keep under them for seconds: then on until it has inked, 15 s at most); then 3 s more to see the last
+      // trick through.
       let taps = 0;
       const pokes = (await reaction(page)).pokes;
-      const frames = await film(page, Math.round(8000 / FRAME_MS), async (i, f) => {
-        if (i % 3 || i * FRAME_MS > 5000 || !f.eye) return;
-        const c = await controlsAt(page, f.eye);
-        if (c.under || c.ring) return;
-        await tapAt(page, vp, f.eye);
-        taps++;
-      });
+      const frames = [await inkFrame(page)];
+      let until = Math.round(5000 / FRAME_MS);
+      for (let i = 0; i < until + Math.round(3000 / FRAME_MS); i++) {
+        const f = frames[i];
+        if (i < until && i % 3 === 0 && f.eye) {
+          const c = await controlsAt(page, f.eye);
+          if (!c.under && !c.ring) {
+            await tapAt(page, vp, f.eye);
+            taps++;
+          }
+        }
+        await page.clock.runFor(FRAME_MS);
+        frames.push(await inkFrame(page));
+        if (i === until - 1 && frames[i + 1].inks === frames[0].inks && until * FRAME_MS < 15000) until += 30;
+      }
       const puffs = assertDarts(frames, where);
       const took = (await reaction(page)).pokes - pokes;
       assert.ok(puffs.length >= 1, `${where}: the taps never made the squid ink (${taps} taps, ${took} taken)`);
