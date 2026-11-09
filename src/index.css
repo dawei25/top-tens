@@ -485,7 +485,7 @@ a {
  * - Every play key is a mode key: its status on top (right-aligned), the action below. No rules tags: the title
  *   names the mode and the color carries it.
  * - Mode identity: classic is pink, Blitz is gold, on the accent and the fill.
- * - Today's two keys are always filled with their mode's color; played, they dim a step and show the result.
+ * - Today's key is always filled with its mode's color; played, it dims a step and shows the result.
  *   Free-play keys are quiet; Your games (archive, past runs) are quieter still.
  * - The keyboard hint lives on the focused key, with a fine pointer only.
  */
@@ -522,28 +522,17 @@ a {
     grid-template-columns: 1fr 1fr;
   }
 }
-/* Today's two keys are the page's hero: stacked, full width, on every screen size. */
+/* Today's list, the one daily, is the page's hero: the whole width of its card, on every screen size (the row that
+   held Today's list and Today's Blitz until Nov 10). */
 .today-stack {
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
-/* Wide enough: Today's list and Today's Blitz side by side. The list is the main event, so it gets two thirds. */
+/* Wide enough: a key that wide doesn't need its phone height. */
 @media (min-width: 640px) {
-  .today-stack {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-  }
-  /* Side by side, the keys don't need their stacked height. */
   .today-stack .mode-key.today {
     min-height: 84px;
     padding: 10px 20px 12px;
-  }
-  /* The narrower Blitz key keeps its title on one line. */
-  .today-stack .mode-key.today.blitz .key-label {
-    font-size: clamp(20px, 2.1vw, 28px);
-    letter-spacing: 0.12em;
-    white-space: nowrap;
   }
 }
 .today-stack .key-sub {
@@ -590,7 +579,7 @@ a {
   opacity: 1;
 }
 
-/* Today's pair: always filled with the mode's color, on every device. Size lives on the key alone: a state rule that
+/* Today's key: always filled with the mode's color, on every device. Size lives on the key alone: a state rule that
    repeated it beat the desktop override below and grew the key on hover (Nov 3). */
 .mode-key.today {
   min-height: 116px;
@@ -633,8 +622,8 @@ a {
 /*
  * The keyboard hint, on the focused key only: a small legend on the status line, at the key's top left, like the
  * second legend on a keycap. It is always laid out and only made visible, and it floats over the line's empty left
- * end, so showing it moves nothing. (Next to the title it doesn't fit: beside "Today's Blitz" there are as few as 23px
- * to spare, at 640px wide, and the cap needs 62.)
+ * end, so showing it moves nothing. (Next to the title it doesn't fit: beside a long title on a narrow key there was
+ * as little as 23px to spare, and the cap needs 62.)
  */
 .mode-key-top {
   position: relative;
@@ -665,7 +654,7 @@ a {
   html[data-modality="keyboard"] .mode-key:focus .enter-hint {
     visibility: visible;
   }
-  /* Today's keys lift and grow a touch under the mouse, in their own color; transform only, so nothing moves. */
+  /* Today's key lifts and grows a touch under the mouse, in its own color; transform only, so nothing moves. */
   .mode-key.today {
     transition:
       transform 120ms ease,
@@ -2810,45 +2799,18 @@ a.text-btn {
 
 /*
  * Archive (past dailies): a table, one row per day. The day on the left (its number over its date, TODAY under
- * today's), then that day's list and its Blitz in two columns, named once in the header in their modes' colors (List
- * pink, Blitz gold), never on the rows. Each cell is its own link, the title with its status under it, and fills its
- * row's height. Hover, focus and press light the cell in its mode's color (see the states below): color and shadow
- * only, so nothing moves. A day without a Blitz keeps the column, with a quiet dash.
+ * today's), then that day's list: one link, the title with its status under it, filling its row's height. Hover,
+ * focus and press light the cell in the list's color (see the states below): color and shadow only, so nothing
+ * moves. (Until Nov 10 each day also had a Blitz, in a second column; Blitz is free play only now.)
  */
 @media (min-width: 1100px) {
-  /* Wide screens: Home's width, so most titles fit their column on one line. */
+  /* Wide screens: Home's width, so the header keys sit where Home has them. */
   .past-dailies {
     max-width: calc(880px + 2 * var(--gutter));
   }
 }
 .arch-table {
-  padding: 0 10px 6px;
-}
-.arch-head,
-.arch-day {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: 8px;
-}
-.arch-head {
-  padding: 12px 0 8px;
-  border-bottom: 1px solid var(--hairline);
-}
-.arch-col {
-  grid-row: 1;
-  padding-left: 14px;
-  font-size: 16px;
-  line-height: 1.2;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-}
-.arch-col.list {
-  grid-column: 2;
-  color: var(--pink);
-}
-.arch-col.blitz {
-  grid-column: 3;
-  color: var(--gold);
+  padding: 4px 10px 6px;
 }
 .arch-days {
   list-style: none;
@@ -2858,9 +2820,12 @@ a.text-btn {
   border-top: 1px solid rgba(125, 147, 184, 0.08);
 }
 .arch-day {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  column-gap: 8px;
   padding: 4px 0;
 }
-/* Its top padding puts the number on the titles' first baseline. */
+/* Its top padding puts the number on the title's first baseline. */
 .arch-when {
   display: flex;
   flex-direction: column;
@@ -2894,18 +2859,11 @@ a.text-btn {
     background-color 120ms linear,
     box-shadow 120ms linear;
 }
-.arch-cell.blitz {
-  --accent: var(--gold);
-}
-.arch-name,
-.arch-cell.none {
+.arch-name {
   font-size: 21px;
   line-height: 1.15;
   overflow-wrap: break-word;
   text-wrap: pretty;
-}
-.arch-cell.none {
-  color: var(--faint);
 }
 .arch-status {
   font-size: 18px;
@@ -2913,7 +2871,7 @@ a.text-btn {
   font-variant-numeric: tabular-nums;
 }
 /* The states: the cell lifts a shade, its mode's bar lights and its title takes the mode's color (as the category
-   strips do). A tint of the mode's color would go grey for gold on navy. */
+   strips do). */
 @media (hover: hover) {
   a.arch-cell:hover {
     background-color: rgba(255, 255, 255, 0.04);
@@ -2939,36 +2897,17 @@ a.arch-cell:active .arch-name {
   padding: 10px 8px;
 }
 @media (max-width: 520px) {
-  /* Phones: the day on a line of its own over its two cells, so the titles get the panel's full width. */
+  /* Phones: tighter, so the title gets the most of the panel. */
   .arch-table {
-    padding: 0 6px 4px;
+    padding: 2px 6px 4px;
   }
-  .arch-head,
   .arch-day {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 4px;
   }
-  .arch-col {
-    padding-left: 8px;
-  }
-  .arch-col.list {
-    grid-column: 1;
-  }
-  .arch-col.blitz {
-    grid-column: 2;
-  }
-  .arch-when {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    align-items: baseline;
-    gap: 10px;
-    padding: 8px 8px 0;
-  }
   .arch-cell {
-    padding: 4px 8px 8px;
+    padding: 8px 10px 9px;
   }
-  .arch-name,
-  .arch-cell.none {
+  .arch-name {
     font-size: 19px;
   }
   .arch-status {

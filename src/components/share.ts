@@ -1,4 +1,4 @@
-import { blitzShareText, dailyBlitzShareText, type BlitzState } from "../game/blitz";
+import { blitzShareText, type BlitzState } from "../game/blitz";
 import { MAX_LIVES, shareText, type GameState } from "../game/state";
 import type { Puzzle } from "../game/types";
 
@@ -23,8 +23,5 @@ export function listShare(state: GameState, puzzle: Puzzle, url: string, daily?:
   return pasteable(shareText(state, puzzle, url, daily).replace(` ${hearts}`, ` · ${livesLeft(state.lives)}`));
 }
 
-/** A free Blitz round's share text. */
+/** A Blitz round's share text (Blitz is free play only: no daily number). */
 export const blitzShare = (state: BlitzState, puzzle: Puzzle, url: string) => pasteable(blitzShareText(state, puzzle, url));
-
-/** Today's (or a date's) Blitz share text. */
-export const dailyBlitzShare = (state: BlitzState, puzzle: Puzzle, url: string, n: number) => pasteable(dailyBlitzShareText(state, puzzle, url, n));

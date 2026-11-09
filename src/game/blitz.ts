@@ -1,4 +1,4 @@
-import type { DailyEntry } from "./daily";
+import { dailyGame, type DailyEntry } from "./daily";
 import type { Lexicon } from "./junk";
 import { judgeGuess, type UnknownVerdict } from "./match";
 import type { DailyBlitzResult, Saved } from "./storage";
@@ -165,7 +165,8 @@ export function missedTop(puzzle: Puzzle, state: BlitzState, k = 10): Entry[] {
 
 /**
  * Blitz shows every answer at the end, so it would spoil a daily: today's list is blocked until that daily is
- * finished, and lists scheduled for later dates are blocked until their day has passed and been played or skipped.
+ * finished (its locked result counts, so a daily finished on another device opens it too: a finished daily's results
+ * offer its Blitz), and lists scheduled for later dates are blocked until their day has passed and been played or skipped.
  */
 export function blitzAvailable(puzzle: Pick<Puzzle, "id" | "blitz">, schedule: DailyEntry[], today: string, saved: Saved): boolean {
   if (!puzzle.blitz) return false;
@@ -173,7 +174,7 @@ export function blitzAvailable(puzzle: Pick<Puzzle, "id" | "blitz">, schedule: D
     if (e.id !== puzzle.id) continue;
     if (e.date > today) return false;
     if (e.date === today) {
-      const g = saved.games[e.id];
+      const g = dailyGame(saved, e);
       if (!g || g.status === "playing") return false;
     }
   }

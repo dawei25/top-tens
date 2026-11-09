@@ -647,10 +647,10 @@ test("signed in: Home's key is lit and names the player, never the address; it o
   await ctx.close();
 });
 
-test("Home: the account is a key in the header, never a row; nothing comes between Today's pair and Free play", async () => {
+test("Home: the account is a key in the header, never a row; nothing comes between Today and Free play", async () => {
   // Owner: "I hate how the sign-in thing takes up an entire row of space in the center." Signed out and signed in, at
-  // every phone size and on a desktop: Free play follows Today's pair directly, the key sits in the header's right
-  // group, and Today's keys and Free play stand exactly where a build without accounts has them.
+  // every phone size and on a desktop: Free play follows Today directly, the key sits in the header's right group, and
+  // Today's key and Free play stand exactly where a build without accounts has them.
   const plain = process.env.E2E_URL;
   const sizes = [
     [320, 568],
@@ -680,17 +680,17 @@ test("Home: the account is a key in the header, never a row; nothing comes betwe
       // title still had its fallback font, 49px shorter (two flaky runs, Nov 7 and Nov 8).
       const tops = async (p) => {
         await p.evaluate(() => document.fonts.ready.then(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))));
-        return Promise.all(["today-blitz", "free-play"].map((id) => p.getByTestId(id).evaluate((el) => Math.round(el.getBoundingClientRect().top))));
+        return Promise.all(["today-list", "free-play"].map((id) => p.getByTestId(id).evaluate((el) => Math.round(el.getBoundingClientRect().top))));
       };
       const here = await tops(page);
       assert.ok(await noHScroll(page), tag);
       if (plain) {
-        // The same screen in the build without accounts: Today's keys and Free play haven't moved.
+        // The same screen in the build without accounts: Today's key and Free play haven't moved.
         const other = await ctx.newPage();
         await other.clock.install({ time: NOW });
         await other.goto(plain);
-        await other.getByTestId("today-blitz").waitFor();
-        assert.deepEqual(here, await tops(other), `${tag}: Today's Blitz and Free play where the plain build has them`);
+        await other.getByTestId("today-list").waitFor();
+        assert.deepEqual(here, await tops(other), `${tag}: Today's list and Free play where the plain build has them`);
         await other.close();
       }
       await ctx.close();

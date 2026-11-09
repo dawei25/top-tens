@@ -6,7 +6,7 @@
 // too crammed"), and the guess box beside it still shows its placeholder and a typical answer whole. Under 320px it
 // sits directly above the guess panel instead, full width. It lands on another list, keeps offering itself there, and
 // goes once play starts (a losing game can't be dodged): the panel then takes the full width, its left edge where it
-// was, and nothing else moves. Never on a daily, Today's Blitz or a list opened directly.
+// was, and nothing else moves. Never on a daily, a daily's own Blitz or a list opened directly.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, open, go, hash, puzzle, guess } = require("./helpers.cjs");
@@ -203,9 +203,12 @@ for (const vp of VIEWPORTS) {
     assert.equal(await top(clock), clockTop);
     assert.equal(await top(score), scoreTop);
 
-    // Never on Today's Blitz.
+    // Never on a daily's own Blitz (Play Blitz on a finished daily's results): it wasn't rolled.
     await page.getByTestId("nav-home").click();
-    await page.getByTestId("today-blitz").click();
+    await page.getByTestId("today-list").click();
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("blitz-key").click();
     await page.getByTestId("blitz-clock").waitFor();
     assert.equal(await roll.count(), 0);
     await ctx.close();

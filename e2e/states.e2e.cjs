@@ -161,19 +161,19 @@ const SCREENS = [
     },
   },
   {
-    name: "home, today's list and Blitz played",
+    // The one daily, over: its results offer Play Blitz on this list and Random list.
+    name: "today's list over",
     setup: async (page) => {
       await go(page, "");
       await page.getByTestId("today-list").click();
       await giveUp(page);
-      await go(page, "");
-      await page.getByTestId("today-blitz").click();
-      const screen = page.getByTestId("blitz-screen");
-      await screen.waitFor();
-      const p = await puzzle(page, await screen.getAttribute("data-list"));
-      await guess(page, p.answers[0].name);
-      await page.clock.fastForward(91_000);
-      await page.getByTestId("blitz-results").waitFor();
+      await page.getByTestId("blitz-key").waitFor();
+      await tick(page);
+    },
+  },
+  {
+    name: "home, today's list played",
+    setup: async (page) => {
       await go(page, "");
       await page.getByTestId("streak-tip").waitFor();
       await tick(page);

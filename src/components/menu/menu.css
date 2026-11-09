@@ -135,6 +135,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 10px;
 }
+/* Today's list, the one daily, across the row; free play's two keys share the row under it. */
+.menu-tile.wide {
+  grid-column: 1 / -1;
+}
 
 /* A tile: a keycap with its icon (and today's status) on top and its name below. */
 .menu-tile {

@@ -98,6 +98,9 @@ describe("availability and bests", () => {
     expect(blitzAvailable(puzzle, schedule, "2026-10-29", saved)).toBe(false);
     const done: Saved = { ...saved, games: { islands: { puzzleId: "islands", found: [], lives: 0, log: [], status: "lost" } } };
     expect(blitzAvailable(puzzle, schedule, "2026-10-29", done)).toBe(true);
+    // A daily locked to its date (or synced from another device) without the list's own save counts as finished.
+    const locked: Saved = { ...saved, dailyGames: { "2026-10-29": done.games.islands } };
+    expect(blitzAvailable(puzzle, schedule, "2026-10-29", locked)).toBe(true);
     expect(blitzAvailable({ id: "later", blitz: true }, schedule, "2026-10-29", saved)).toBe(false);
     expect(blitzAvailable({ id: "old", blitz: true }, schedule, "2026-10-29", saved)).toBe(true);
     expect(blitzAvailable({ id: "x" }, schedule, "2026-10-29", saved)).toBe(false);

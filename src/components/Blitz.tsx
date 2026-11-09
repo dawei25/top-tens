@@ -5,13 +5,11 @@ import {
   blitzGuess,
   blitzHistory,
   blitzScore,
-  dailyBlitzPlayed,
   finishBlitz,
   isOver,
   missedTop,
   newBlitz,
   recordBlitz,
-  recordDailyBlitz,
   resumeBlitz,
   saveLiveBlitz,
   startBlitz,
@@ -21,7 +19,7 @@ import {
   type BlitzRun,
   type BlitzState,
 } from "../game/blitz";
-import { dailyGame, localDate, todayEntry, type DailyEntry } from "../game/daily";
+import type { DailyEntry } from "../game/daily";
 import type { Lexicon } from "../game/junk";
 import { loadPuzzle, type PuzzleMeta } from "../game/puzzles";
 import { load, save } from "../game/storage";
@@ -31,7 +29,7 @@ import type { Entry, Puzzle } from "../game/types";
 import { Loading } from "./Game";
 import { END_FOCUS_MS, PHONE, RollBox, rollState, ScreenHead, SwapLabel, useMedia } from "./pixel";
 import { BLITZ_SCORING, blitzPromptShown, metricLabel, NOT_A_GUESS, notInRanking, notOnList, PLACEHOLDER, PLACEHOLDER_SHORT, ROLL_NEW } from "./copy";
-import { blitzShare, dailyBlitzShare } from "./share";
+import { blitzShare } from "./share";
 import { CountUp, ScoreFloat } from "./motion/effects";
 import { BlitzResultsSquid, BlitzSquid, ScoreBump } from "./squid";
 import { BlitzCrowdLine } from "./account";
@@ -48,24 +46,11 @@ interface Props {
   showRuns?: boolean;
   /** Show this past run's results (its startedAt), at <base>/run-<startedAt>. */
   openRun?: number;
-  /** Set when this is a date's Today's Blitz (n is that date's daily number). */
-  dailyBlitz?: { date: string; n: number };
-  /**
-   * That date's daily, when it is this same list and the player hasn't finished it (see blitzHold): the round and
-   * its results show only what the player hit, and the rest waits for the daily. The schedule gives every day a Blitz
-   * on another list, so this is a guard; the "rest shows once you finish" copy appears only here.
-   */
-  hold?: DailyEntry;
-  /** Today's Blitz list while it's unplayed: a free round on it is closed (it would be practice for a one-try round). */
-  todaysBlitz?: string;
-  /** This screen's own address, "#blitz-<id>" or "#dailyblitz-<date>"; sub-views hang off it. */
+  /** This screen's own address, "#blitz-<id>"; sub-views hang off it. */
   base: string;
   onBack: () => void;
   onHome: () => void;
-  /**
-   * A fresh round on another random open Blitz list: Roll new list after a round, Random Blitz after Today's Blitz.
-   * Missing when no other list is open.
-   */
+  /** A fresh round on another random open Blitz list: Roll new list after a round. Missing when no other list is open. */
   onRoll?: () => void;
   /**
    * This round was rolled (Random Blitz, a category, Roll new list) in this tab. Until the clock starts it offers Roll
@@ -73,8 +58,8 @@ interface Props {
    */
   rolled?: boolean;
   /**
-   * Play again on a past run: a fresh free round on this same list. Missing while the list is held (today's list or
-   * Blitz, or a future day's).
+   * Play again on a past run: a fresh free round on this same list. Missing while the list is held (today's list or a
+   * future day's).
    */
   onReplay?: () => void;
 }
@@ -119,18 +104,13 @@ export function runTime(ms: number): string {
 }
 
 /** Why Blitz is closed for this list, in the same order blitzAvailable checks. */
-function refusal(puzzle: Puzzle, schedule: DailyEntry[], today: string): { text: string; play: string; label?: string } {
+function refusal(puzzle: Puzzle, schedule: DailyEntry[], today: string): { text: string; play: string } {
   const daily = schedule.find((e) => e.id === puzzle.id && e.date >= today);
   if (!puzzle.blitz) return { text: "This list can't be played as a Blitz yet.", play: `#p-${puzzle.id}` };
   if (daily && daily.date > today)
     return { text: "This list is a future daily. It opens for Blitz after its day.", play: "" };
   if (daily) return { text: "This is today's daily. Finish it first: Blitz shows every answer.", play: `#daily-${daily.date}` };
   return { text: "Blitz isn't available for this list.", play: `#p-${puzzle.id}` };
-}
-
-/** A free round on Today's Blitz list, before that round is played. */
-function heldForToday(today: string) {
-  return { text: "This is today's Blitz. It's one round: play it from Today's Blitz.", play: `#dailyblitz-${today}`, label: "Today's Blitz" };
 }
 
 /** The ticking countdown. Only it re-renders ten times a second; it calls onExpire when the time is up. */
@@ -172,16 +152,10 @@ function RoundLists({
   puzzle,
   hits,
   byName,
-  gone = false,
-  waitFor,
 }: {
   puzzle: Puzzle;
   hits: BlitzHit[];
   byName: Map<string, Entry>;
-  /** The round is no longer in the history (only its score is kept). */
-  gone?: boolean;
-  /** The unfinished daily this list would spoil ("today's list"): the answers missed stay hidden until it's done. */
-  waitFor?: string;
 }) {
   return (
     <>
@@ -189,9 +163,7 @@ function RoundLists({
         <h2 id="blitz-got" className="label cyan">
           Your answers
         </h2>
-        {gone ? (
-          <p className="caption">this round's answers are no longer kept.</p>
-        ) : hits.length ? (
+        {hits.length ? (
           <ol>
             {[...hits]
               .sort((a, b) => b.points - a.points)
@@ -207,17 +179,11 @@ function RoundLists({
         <h2 id="blitz-missed" className="label">
           Biggest you missed
         </h2>
-        {waitFor ? (
-          <p className="caption" data-testid="blitz-rest-hidden">
-            the rest shows once you finish {waitFor}.
-          </p>
-        ) : (
-          <ol>
-            {missedTop(puzzle, { puzzleId: puzzle.id, hits }, 10).map((e) => (
-              <HitRow key={e.name} testId="blitz-missed-row" points={e.rank ? `#${e.rank}` : ""} name={e.name} value={shownValue(e)} />
-            ))}
-          </ol>
-        )}
+        <ol>
+          {missedTop(puzzle, { puzzleId: puzzle.id, hits }, 10).map((e) => (
+            <HitRow key={e.name} testId="blitz-missed-row" points={e.rank ? `#${e.rank}` : ""} name={e.name} value={shownValue(e)} />
+          ))}
+        </ol>
       </section>
     </>
   );
@@ -272,9 +238,6 @@ export function Blitz({
   lexicon,
   showRuns = false,
   openRun: openAt,
-  dailyBlitz,
-  hold,
-  todaysBlitz,
   base,
   onBack,
   onHome,
@@ -289,12 +252,7 @@ export function Blitz({
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [copied, setCopied] = useState(false);
   /** The best-score check for the finished round. */
-  const [record, setRecord] = useState<{
-    best: boolean;
-    previous?: number;
-    /** Today's Blitz: whether this round was the one that counts, and the day's score. */
-    daily?: { counted: boolean; score: number };
-  } | null>(null);
+  const [record, setRecord] = useState<{ best: boolean; previous?: number } | null>(null);
   /** How this round came back after the player left, if it did. */
   const [note, setNote] = useState<"resumed" | "away" | null>(null);
   /** Past-runs panel; stays open across a visit to one of its runs, so Back lands on the open list. */
@@ -302,8 +260,6 @@ export function Blitz({
   useEffect(() => {
     if (showRuns) setRunsOpen(true);
   }, [showRuns]);
-  /** A date's Blitz that was already played when this screen opened: one round only, so it shows that round. */
-  const [locked, setLocked] = useState<{ score: number; answers: number; gone: boolean } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const shareRef = useRef<HTMLButtonElement>(null);
   const stateRef = useRef<BlitzState | null>(null);
@@ -317,25 +273,13 @@ export function Blitz({
     loadPuzzle(id)
       .then((p) => {
         setPuzzle(p);
-        const saved = load();
-        const played = dailyBlitz && dailyBlitzPlayed(saved, dailyBlitz.date);
-        if (played) {
-          const run = played.result.id === id ? played.run : undefined;
-          const { score, answers } = played.result;
-          setLocked({ score, answers, gone: !run });
-          setRecord({ best: false, previous: saved.blitzBest?.[id], daily: { counted: true, score } });
-          setState(run ? { puzzleId: id, startedAt: run.startedAt, endedAt: run.endedAt, hits: run.hits } : { ...newBlitz(p), endedAt: Date.now() });
-          return;
-        }
         // A round left mid-way: carry on (the clock never stopped), or show how it ended.
-        const back = resumeBlitz(saved, id);
+        const back = resumeBlitz(load(), id);
         if (back) setNote(back.over ? "away" : "resumed");
         setState(back ? back.state : newBlitz(p));
       })
       .catch((e) => setError(String(e.message ?? e)));
-    // The date is fixed for this screen (App keys it by date).
   }, [id]);
-
 
   // Keep the live round in storage if the page goes away (tab closed, app switched).
   useEffect(() => {
@@ -357,20 +301,12 @@ export function Blitz({
   useEffect(() => {
     if (!state?.endedAt || record) return;
     const r = recordBlitz(load(), id, state);
-    let next = r.saved;
-    let daily: { counted: boolean; score: number } | undefined;
-    // A date's Blitz is one round: the first one finished locks it. Played after its date, it's marked late.
-    if (dailyBlitz) {
-      const d = recordDailyBlitz(next, dailyBlitz.date, state, dailyBlitz.date !== localDate());
-      next = d.saved;
-      daily = { counted: d.counted, score: next.blitzDaily?.[dailyBlitz.date]?.score ?? blitzScore(state) };
-    }
-    save(next);
+    save(r.saved);
     emitPlay({ kind: "blitz-end", score: blitzScore(state), best: r.best && r.previous !== undefined });
-    // Score stats (and sync): a no-op without a backend. A date's Blitz counts as a daily only on its own date.
-    reportBlitz(state, dailyBlitz && daily?.counted && dailyBlitz.date === localDate() ? dailyBlitz.date : undefined);
-    setRecord({ best: r.best, previous: r.previous, daily });
-  }, [state, record, id, dailyBlitz]);
+    // Score stats (and sync): a no-op without a backend. Blitz is free play only, never a daily.
+    reportBlitz(state);
+    setRecord({ best: r.best, previous: r.previous });
+  }, [state, record, id]);
 
   const expire = useCallback(() => {
     setEndedHere(true);
@@ -407,11 +343,9 @@ export function Blitz({
   if (!puzzle || !state) return <Loading />;
 
   const saved = load();
-  // A date's own-list Blitz (hold) opens before its daily is finished: it holds back the answers missed instead.
-  // A free round on Today's Blitz list waits until that round is played.
-  const open = !!hold || blitzAvailable(puzzle, schedule, today, saved);
-  if (!open || (!dailyBlitz && todaysBlitz === puzzle.id)) {
-    const why = open ? heldForToday(today) : refusal(puzzle, schedule, today);
+  // Closed while it would spoil a daily: today's list until it's finished, a future day's list until its day.
+  if (!blitzAvailable(puzzle, schedule, today, saved)) {
+    const why = refusal(puzzle, schedule, today);
     return (
       <main className="screen game">
         <section data-glass className="panel error blitz-closed" data-testid="blitz-closed">
@@ -420,8 +354,8 @@ export function Blitz({
           <p>{why.text}</p>
           <div className="results-actions">
             {why.play && (
-              <a className={`key ${why.label ? "key-blitz" : "key-pink"}`} data-testid="blitz-closed-go" href={why.play}>
-                {why.label ?? "Play the list"}
+              <a className="key key-pink" data-testid="blitz-closed-go" href={why.play}>
+                Play the list
               </a>
             )}
             <button className="key" onClick={onHome}>
@@ -433,8 +367,8 @@ export function Blitz({
     );
   }
 
-  // A rolled round (never a date's Blitz) can be skipped for another list until its clock starts (the roll box).
-  const rerollSlot = !!rolled && !!onRoll && !dailyBlitz;
+  // A rolled round can be skipped for another list until its clock starts (the roll box).
+  const rerollSlot = !!rolled && !!onRoll;
   const keepLive = (s: BlitzState) => {
     if (s.startedAt && !isOver(s)) save(saveLiveBlitz(load(), s));
   };
@@ -476,10 +410,7 @@ export function Blitz({
     scrollTo({ top: 0, behavior: "auto" });
   };
   const share = async () => {
-    const base = `${location.origin}${location.pathname}`;
-    const text = dailyBlitz
-      ? dailyBlitzShare(state, puzzle, `${base}#dailyblitz-${dailyBlitz.date}`, dailyBlitz.n)
-      : blitzShare(state, puzzle, `${base}#blitz-${puzzle.id}`);
+    const text = blitzShare(state, puzzle, `${location.origin}${location.pathname}#blitz-${puzzle.id}`);
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ text });
       else {
@@ -492,21 +423,16 @@ export function Blitz({
     }
   };
 
-  const score = locked ? locked.score : blitzScore(state);
+  const score = blitzScore(state);
   const prompt = blitzPromptShown(puzzle.title, puzzle.prompt);
   const hits = [...state.hits].reverse();
-  const n = locked ? locked.answers : state.hits.length;
+  const n = state.hits.length;
   const runs = blitzHistory(saved, id);
   const best = saved.blitzBest?.[id];
   const pastRuns = <PastRuns runs={runs} best={best} open={runsOpen} onToggle={setRunsOpen} onOpen={openRun} />;
   const viewRun = openAt ? runs.find((r) => r.startedAt === openAt) : undefined;
-  // The list key on the results: never this round's own list (the owner, Nov 8: "if someone played blitz no point to
-  // give them option to play the same list since its alr spoiled... list -> blitz still makes sense tho"). A date's
-  // Blitz offers Today's list, a different list, while that is unplayed, as a daily's results offer Today's Blitz.
-  const todays = todayEntry(schedule, today);
-  const todayOpen = !!todays && (dailyGame(saved, todays)?.status ?? "playing") === "playing";
-  const waitFor = hold && (hold === todays ? "today's list" : `daily #${hold.n}`);
-  const todaysList = dailyBlitz && todayOpen && todays.id !== puzzle.id ? `#daily-${todays.date}` : undefined;
+  // The results never offer this round's own list as a list game (the owner, Nov 8: "if someone played blitz no point
+  // to give them option to play the same list since its alr spoiled... list -> blitz still makes sense tho").
   // A new best needs an old one to beat: never on a list's first round.
   const newBest = !!record?.best && score > 0 && record.previous !== undefined;
 
@@ -550,7 +476,7 @@ export function Blitz({
         <RateList listId={puzzle.id} mode="blitz" />
       </section>
     );
-    board = <RoundLists puzzle={puzzle} hits={viewRun.hits} byName={byName} waitFor={waitFor} />;
+    board = <RoundLists puzzle={puzzle} hits={viewRun.hits} byName={byName} />;
   } else if (!over) {
     // A rolled round shows Roll new list in its own box right of the guess panel until the clock starts.
     const reroll = rerollSlot && !state.startedAt;
@@ -641,15 +567,11 @@ export function Blitz({
     );
   } else {
     control = (
-      <section
-        className="panel results enter lead"
-        data-testid="blitz-results"
-        data-locked={locked ? "true" : undefined}
-        aria-live="polite"
-        data-glass
-      >
+      <section className="panel results enter lead" data-testid="blitz-results" aria-live="polite" data-glass>
         <BlitzResultsSquid hits={state.hits} best={newBest} />
-        {locked ? <p className="label gold">Played</p> : <p className="label gold" data-motion="banner">Time's up</p>}
+        <p className="label gold" data-motion="banner">
+          Time's up
+        </p>
         {note === "away" && <p className="caption">time ran out while you were away.</p>}
         <p className="score" aria-label={`${score} points`}>
           <span className={`score-n ${newBest ? "gold" : ""}`} data-testid="blitz-final">
@@ -658,19 +580,12 @@ export function Blitz({
           <span className="score-of">pts</span>
         </p>
         <div className="results-meta">
-          {locked && <p>one round only. this was yours.</p>}
           <p>
             <b>{n}</b> answer{n === 1 ? "" : "s"} in {BLITZ_SECONDS} seconds
           </p>
           {/* The yardstick under the score (UX 21), as the title card says it. */}
           <p data-testid="blitz-scoring">{BLITZ_SCORING}</p>
           <BlitzCrowdLine id={id} score={score} />
-          {/* The day's score, only when it isn't the big number right above (it almost always is). */}
-          {record?.daily?.counted && dailyBlitz && record.daily.score !== score && (
-            <p className="gold" data-testid="daily-blitz-line">
-              {dailyBlitz.date === today ? "today's blitz" : `blitz #${dailyBlitz.n}`}: <b>{record.daily.score}</b>
-            </p>
-          )}
           {/* A best needs something to beat: a first round on a list says nothing about it. */}
           {record &&
             record.previous !== undefined &&
@@ -684,31 +599,17 @@ export function Blitz({
               </p>
             ))}
         </div>
-        {/* A date's Blitz is one round: no Roll new list there, a Random Blitz instead. Free play leads with Roll new
-            list (never this one: so not "Play again"). No key is autofocused: SHARE takes focus a beat after the
-            buzzer (above). */}
+        {/* Free play leads with Roll new list (never this one: so not "Play again"). No key is autofocused: SHARE
+            takes focus a beat after the buzzer (above). */}
         <div className="results-actions">
-          {!dailyBlitz && onRoll && (
+          {onRoll && (
             <button className="key key-gold" data-testid="blitz-again" onClick={onRoll}>
               {ROLL_NEW}
             </button>
           )}
-          {!locked?.gone && (
-            <button ref={shareRef} className={dailyBlitz ? "key key-gold" : "key"} data-testid="share" onClick={share}>
-              <SwapLabel off="Share" on="Copied" active={copied} />
-            </button>
-          )}
-          {/* Today's list, still to play, is the next thing. */}
-          {todaysList && (
-            <a className="key key-pink" data-testid="blitz-list" href={todaysList}>
-              Today's list
-            </a>
-          )}
-          {dailyBlitz && onRoll && (
-            <button className="key" data-testid="blitz-roll" onClick={onRoll}>
-              Random Blitz
-            </button>
-          )}
+          <button ref={shareRef} className="key" data-testid="share" onClick={share}>
+            <SwapLabel off="Share" on="Copied" active={copied} />
+          </button>
         </div>
         {!onRoll && <p className="caption">no other lists are open for blitz yet.</p>}
         <RateList listId={puzzle.id} mode="blitz" />
@@ -716,7 +617,7 @@ export function Blitz({
     );
     board = (
       <>
-        <RoundLists puzzle={puzzle} hits={state.hits} byName={byName} gone={locked?.gone} waitFor={waitFor} />
+        <RoundLists puzzle={puzzle} hits={state.hits} byName={byName} />
         {pastRuns}
       </>
     );
@@ -725,9 +626,7 @@ export function Blitz({
   return (
     <main className={`screen game blitz stage ${over ? "blitz-over" : ""}`} data-testid="blitz-screen" data-list={puzzle.id}>
       <ScreenHead onBack={onBack} onHome={onHome}>
-        <span className="label mode gold">
-          {!dailyBlitz ? "Blitz" : dailyBlitz.date === today ? `Today's Blitz #${dailyBlitz.n}` : `Blitz #${dailyBlitz.n}`}
-        </span>
+        <span className="label mode gold">Blitz</span>
       </ScreenHead>
 
       <div className="board-col">

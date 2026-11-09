@@ -140,37 +140,30 @@ describe("Blitz spoiler holds", () => {
     // A day past the end of the schedule follows its stand-in.
     expect(blitzHold(days, "2026-11-07", "b", fresh)?.n).toBe(2);
   });
-  it("free Blitz never offers today's daily, a future one, or Today's Blitz", () => {
+  it("free Blitz never offers today's daily or a future one", () => {
     const fresh = saved([]);
-    // 2026-11-04's Blitz is another list (c, the only one left), held back played or not.
-    expect([...blitzHoldouts(days, lists, fresh, "2026-11-04")].sort()).toEqual(["a", "b", "c"]);
-    const played: Saved = { ...fresh, blitzDaily: { "2026-11-04": { id: "c", score: 10, answers: 1 } } };
-    expect([...blitzHoldouts(days, lists, played, "2026-11-04")].sort()).toEqual(["a", "b", "c"]);
-    // Today's list and Today's Blitz (another topic) are both held back.
-    const todays = blitzOfTheDay(days, lists, "2026-11-05")!;
-    expect(todays).not.toBe("b");
-    expect([...blitzHoldouts(days, lists, fresh, "2026-11-05")].sort()).toEqual(["b", todays].sort());
+    expect([...blitzHoldouts(days, lists, fresh, "2026-11-04")].sort()).toEqual(["a", "b"]);
+    expect([...blitzHoldouts(days, lists, fresh, "2026-11-05")]).toEqual(["b"]);
   });
-  it("a random roll never lands on today's list or Blitz, played or not, or on a future day's", () => {
+  it("a random roll never lands on today's list or a future day's; a day's Blitz is free play (owner, Nov 10)", () => {
     const sched: DailyEntry[] = [
       { n: 1, date: "2026-11-03", id: "a", blitz: "m" },
       { n: 2, date: "2026-11-04", id: "b", blitz: "n" },
     ];
     const all = [...lists, { id: "m", blitz: true }, { id: "n", blitz: true }, { id: "z", blitz: true }];
     const fresh = saved([]);
-    // Nov 3: today's list a, today's Blitz m (unplayed), and Nov 4's list b and Blitz n are all held back.
-    expect([...rollHoldouts(sched, all, fresh, "2026-11-03")].sort()).toEqual(["a", "b", "m", "n"]);
-    // Played or not, today's pair stays out of random play for the day; the next day it's back.
+    // Nov 3: today's list a and Nov 4's list b are held back; the Blitz fields (m today, n tomorrow) are not.
+    expect([...rollHoldouts(sched, all, fresh, "2026-11-03")].sort()).toEqual(["a", "b"]);
+    // An old save's Today's Blitz result changes nothing.
     const played: Saved = { ...fresh, blitzDaily: { "2026-11-03": { id: "m", score: 5, answers: 3 } } };
-    expect([...rollHoldouts(sched, all, played, "2026-11-03")].sort()).toEqual(["a", "b", "m", "n"]);
-    expect([...rollHoldouts(sched, all, played, "2026-11-04")].sort()).toEqual(["b", "n"]);
-    // Future Blitz topics are held even from the plain daily holdouts.
-    expect(dailyHoldouts(sched, "2026-11-03").has("n")).toBe(true);
+    expect([...rollHoldouts(sched, all, played, "2026-11-03")].sort()).toEqual(["a", "b"]);
+    expect([...rollHoldouts(sched, all, played, "2026-11-04")]).toEqual(["b"]);
+    expect(dailyHoldouts(sched, "2026-11-03").has("n")).toBe(false);
   });
 });
 
 describe("new lists debut as dailies", () => {
-  // "new" debuts as Today's list on Nov 6, "fresh" as Today's Blitz on Nov 7; "later" has no day yet.
+  // "new" debuts as Today's list on Nov 6, "fresh" is Nov 7's Blitz (free play since Nov 10); "later" has no day yet.
   const sched: DailyEntry[] = [
     { n: 1, date: "2026-11-05", id: "a", blitz: "b" },
     { n: 2, date: "2026-11-06", id: "new", blitz: "c" },
@@ -191,13 +184,17 @@ describe("new lists debut as dailies", () => {
       expect(blitzHoldouts(sched, lists, fresh, day).has("new"), day).toBe(true);
     }
   });
-  it("releases it the day after its first day as Today's list or Today's Blitz", () => {
+  it("releases it the day after its first day as Today's list", () => {
     expect(heldDebuts(sched, lists, "2026-11-07").has("new")).toBe(false);
     expect(rollHoldouts(sched, lists, fresh, "2026-11-07").has("new")).toBe(false);
-    expect(rollHoldouts(sched, lists, fresh, "2026-11-07").has("fresh")).toBe(true);
-    expect(heldDebuts(sched, lists, "2026-11-08").has("fresh")).toBe(false);
-    // Nov 8 holds only its own pair and the list still waiting for a day.
-    expect([...rollHoldouts(sched, lists, fresh, "2026-11-08")].sort()).toEqual(["later", "x", "y"]);
+    // Nov 8 holds only its own list and the list still waiting for a day.
+    expect([...rollHoldouts(sched, lists, fresh, "2026-11-08")].sort()).toEqual(["later", "x"]);
+  });
+  it("a new list scheduled as a day's Blitz joins free play on that day (no Today's Blitz since Nov 10)", () => {
+    expect(rollHoldouts(sched, lists, fresh, "2026-11-06").has("fresh")).toBe(true);
+    expect(heldDebuts(sched, lists, "2026-11-07").has("fresh")).toBe(false);
+    expect(rollHoldouts(sched, lists, fresh, "2026-11-07").has("fresh")).toBe(false);
+    expect(blitzHoldouts(sched, lists, fresh, "2026-11-07").has("fresh")).toBe(false);
   });
   it("keeps a new list that was never scheduled held, however long the schedule runs", () => {
     for (const day of ["2026-11-05", "2026-11-08", "2027-03-01"]) {
