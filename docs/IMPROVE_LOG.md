@@ -2,6 +2,16 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-09, launch-week morning check (Mon)
+
+- Notes since last night: 1, the owner's, on mlb-hits (thumbs down): the average is too high, not a list for casual
+  players, "robinson" offered three Robinsons but not Jackie Robinson, and today's stars aren't near the top. Acted:
+  estimate lowered (casual 4 to 2, average 4 to 3), free play only (ownerVeto, docs/OWNER_PICKS.md). The two readings
+  ("robinson" without Jackie Robinson, "judge" as a #138 player instead of Aaron Judge) went to a matcher fix as rules
+  for every people list. Today's stars ranking low is the source's truth (career hits favour long careers): kept.
+- Ratings since last night: island-countries 1 up; mlb-hits 1 down (the owner's).
+- Missed guesses: none yet. The missed_guesses migration hasn't been run on the backend.
+
 ## 2026-11-06, weekly lineup (week of Nov 9)
 
 - Proposed 7 lists + 7 Blitzes (doc "TENtacle lineup, week of Nov 9"); the owner approved all 14 as proposed. Two new

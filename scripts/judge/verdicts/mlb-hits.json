@@ -4,12 +4,30 @@
   "decision": "fix-first",
   "alsoBlitz": true,
   "priority": 5,
-  "scores": { "recognizability": 3, "curve": 2, "fairness": 4, "data": 3, "fun": 3, "blitzDepth": 4 },
-  "casual": { "found": 4, "livesLost": 5, "guesses": 9 },
+  "scores": {
+    "recognizability": 3,
+    "curve": 2,
+    "fairness": 4,
+    "data": 3,
+    "fun": 3,
+    "blitzDepth": 4
+  },
+  "casual": {
+    "found": 2,
+    "livesLost": 5,
+    "guesses": 9
+  },
   "fan": null,
-  "blitzCasual": { "scored": 13, "named": 19 },
+  "blitzCasual": {
+    "scored": 13,
+    "named": 19
+  },
   "difficulty": 3,
-  "tags": ["sports", "baseball", "mlb"],
+  "tags": [
+    "sports",
+    "baseball",
+    "mlb"
+  ],
   "audience": "baseball fans",
   "summary": "Too hard as a classic daily (half the top 10 played before 1930), but a good Blitz: almost any baseball name a casual fan knows scores, as long as 'A-Rod' and a few junk aliases get fixed.",
   "reasons": [
@@ -22,5 +40,6 @@
     "Remove 'A rod' from Rod Carew (#28).",
     "Remove junk aliases: '4,256' (Pete Rose); 'Stan Musial Lifetime Achievement Award' (Musial); 'RE2PECT' (Jeter); 'Isabella Pujols' (Pujols); 'Cynthia Scurtis', 'Boli' (Alex Rodriguez); 'Barry Bonds 714th home run' (Bonds).",
     "Strip the disambiguation from the alias 'Ben Taylor (first baseman, born 1888)'."
-  ]
+  ],
+  "ownerVeto": "owner, Nov 9: not a great list for the casual player (career hits favour long-retired players over the names people know); free play only, average lower"
 }
