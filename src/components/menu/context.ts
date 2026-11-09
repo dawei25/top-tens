@@ -11,8 +11,6 @@ export type MenuScreen = "today-list" | "archive" | "history" | "stats" | "setti
 export interface MenuNav {
   /** The screen on show, when it is one of the menu's destinations. */
   current?: MenuScreen;
-  /** The player's local date. */
-  today: string;
   /** Today's daily; missing only if the schedule failed to load. */
   entry?: DailyEntry;
   /** How many lists are open for a free Blitz right now (none: the Random Blitz tile is off). */

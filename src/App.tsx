@@ -309,7 +309,6 @@ function Screens() {
   const blitzOnScreen = route.screen === "blitz" ? route.id : undefined;
   const nav: MenuNav = {
     current: menuScreen(route, current?.date),
-    today,
     entry: current,
     blitzOpen: openBlitz().length,
     blitzOnScreen,
