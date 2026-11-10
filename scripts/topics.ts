@@ -232,6 +232,8 @@ export interface Also {
   nameFromLink?: boolean;
   /** Removed from names, as on a topic: the S&P 500's ", Inc." */
   nameStrip?: RegExp;
+  /** The name cell gives several names for one row ("Catalan, Valencian"): each part is an alias, not one glued string. */
+  nameSplit?: RegExp;
   skip?: string[];
   /** Other columns that also name the row (the artist of a tour), as on a topic. */
   aliasCols?: (string | number)[];
@@ -480,6 +482,23 @@ const NOT_HEDGE_FUNDS = [
   "Blackstone", "KKR", "Apollo Global Management", "Carlyle Group", "Bain Capital", "Brookfield Asset Management",
   "Vanguard", "Fidelity Investments", "State Street", "JPMorgan Chase", "Morgan Stanley",
 ];
+
+/**
+ * Big on Spotify (the lead artists of the most-streamed songs, among others), and on no table of the Spotify page.
+ * Its song tables' artist cells glue several names together ("Mark Ronson and Bruno Mars"), so they are listed by
+ * hand: spotify-artists, and music-artists' chart artists (coverage audit, Nov 8).
+ */
+const SPOTIFY_MORE: Record<string, string[]> = {
+  "Twenty One Pilots": ["21 Pilots"], "The Neighbourhood": [], "Lewis Capaldi": [], "Vance Joy": [], "Glass Animals": [],
+  "Tom Odell": [], "James Arthur": [], "The Killers": [], "Tones and I": [], "John Legend": [], Toto: [], "A-ha": [],
+  Passenger: [], "Kate Bush": [], Joji: [], "Lil Nas X": [], Måneskin: ["Maneskin"], "DJ Snake": [], "Major Lazer": [],
+  Khalid: [], "Daft Punk": [], "Lord Huron": [], "Goo Goo Dolls": [], "Luis Fonsi": [], "Mark Ronson": [],
+  "Morgan Wallen": ["Wallen"], Future: [], "Chappell Roan": [], "Benson Boone": [], "Peso Pluma": [],
+  "Metro Boomin": [], "21 Savage": [], "J. Cole": ["J Cole"], "Tyler, the Creator": ["Tyler the Creator"],
+  "Frank Ocean": [], "Playboi Carti": ["Carti"], "Rosé": ["Rose"], Radiohead: [], "Marshmello": [], Kygo: [],
+  "Cardi B": [], "Charlie Puth": [], "Camila Cabello": [], Hozier: [], OneRepublic: [],
+  "Tate McRae": [], "Teddy Swims": [], "Sabrina Carpenter": [], "Avicii": [], "The Chainsmokers": ["Chainsmokers"],
+};
 
 export const TOPICS: Topic[] = [
   // Geography
@@ -1087,12 +1106,33 @@ export const TOPICS: Topic[] = [
     value: "Total",
     metric: "Speakers (millions)",
     nameFromText: true,
-    also: [{ page: "List of languages by number of native speakers", tables: [0, 1], name: "Language", nameFromText: true }],
+    also: [
+      { page: "List of languages by number of native speakers", tables: [0, 1], name: "Language", nameFromText: true },
+      // Coverage audit (Nov 8): the ranked table stops near #38, so Polish, Dutch, Greek and 60 more well-known
+      // languages were unknown, and Sindhi and Catalan were corrected into Hindi and Spanish. Every language with an
+      // ISO 639-1 code, by its article's title less " language" ("Catalan language" for "Catalan, Valencian"); the
+      // cell's other names are aliases (Valencian, Flemish, Moldovan, Sinhalese, Uyghur).
+      {
+        page: "List of ISO 639 language codes",
+        tables: [0],
+        name: "ISO language names",
+        nameFromLink: true,
+        nameStrip: / language$/,
+        nameSplit: /,\s*/,
+        // Punjabi is the ranked Western Punjabi, as before (a second, figureless Punjabi took "punjabi"); the usual
+        // names for two more.
+        rename: { Punjabi: "Western Punjabi", Oriya: "Odia", "Central Khmer": "Khmer" },
+      },
+    ],
+    // No ISO 639-1 code: "aramaic" was corrected into Arabic.
+    more: { Aramaic: [] },
     universeCategories: ["Languages of India", "Languages of Europe"],
     // Overview articles and peoples in the categories, and pool entries that hijack a ranked language's name.
     categorySkip: /^(languages|classical languages|multilingualism|indian states)\b|\b(people|peoples|dialects|macaronic language)$/i,
-    skip: ["Hijra Farsi", "Punjabi dialects", "German-Russian macaronic language"],
-    junkAliases: ["Frenches"],
+    // "Maldivian language" in the categories is the ISO table's Dhivehi.
+    skip: ["Hijra Farsi", "Punjabi dialects", "German-Russian macaronic language", "Maldivian language"],
+    // "Greek, Modern (1453–)" and "Interlingue, Occidental" in the ISO table: plain words, not names to type.
+    junkAliases: ["Frenches", "Modern", "Occidental"],
   },
   {
     id: "buildings",
@@ -1565,9 +1605,23 @@ export const TOPICS: Topic[] = [
       "Red Hot Chili Peppers": ["RHCP"],
       "Led Zeppelin": ["Led Zep"],
     },
+    // Coverage audit (Nov 8): today's chart artists (BTS, Bad Bunny, Billie Eilish, Kendrick Lamar) were "not one of
+    // the artists here". The Spotify page, as spotify-artists reads it: the listener tables, the yearly top fives and
+    // the monthly number ones; its hand list; and boy bands and girl groups by hand.
+    also: [
+      { page: "List of most-streamed artists on Spotify", tables: [4, 5], name: "Artist" },
+      ...range(1, 5).map((c) => ({ page: "List of most-streamed artists on Spotify", tables: [0], name: c })),
+      ...range(1, 12).map((c) => ({ page: "List of most-streamed artists on Spotify", tables: [6], name: c })),
+    ],
+    more: {
+      ...SPOTIFY_MORE,
+      "One Direction": ["1D"], NSYNC: ["*NSYNC", "N Sync", "N'Sync"], TLC: [], "Spice Girls": [], "Little Mix": [],
+      "Destiny's Child": [], "Fifth Harmony": [], "Take That": [], Westlife: [], "New Kids on the Block": ["NKOTB"],
+      "Boyz II Men": ["Boyz 2 Men"], "Jonas Brothers": [], "The Pussycat Dolls": ["Pussycat Dolls"], "Girls Aloud": [],
+      "Sugababes": [], "En Vogue": [], "The Supremes": ["Supremes"], Blackpink: [],
+    },
     // Songs, albums, tours, labels, fans and relatives among the redirects: CELEBRITY_JUNK in scripts/aliases.ts.
-    // A real rapper the list doesn't have, read as junk (coverage audit, Nov 8). Not built yet: music-artists is
-    // protected until after Nov 10 16:00 HKT (docs/REBUILD_QUEUE.md).
+    // A real rapper the list doesn't have, read as junk (coverage audit, Nov 8).
     knownNames: ["6ix9ine", "Tekashi 6ix9ine"],
   },
   {
@@ -1931,6 +1985,9 @@ export const TOPICS: Topic[] = [
       "Vancouver Christian School", "Vancouver City Centre, British Columbia", "Rowntree Montessori Schools",
       "Beverly Hills 4, Ontario", "MacNab Street Presbyterian Church", "Eastport Drive", "Pleasant Valley, Hamilton, Ontario",
     ],
+    // Capitals below the top 100 (coverage audit, Nov 8): unranked, no figure. No capitals table exists ("List of
+    // Canadian provincial and territorial capital cities" is no article).
+    more: { Charlottetown: [], Whitehorse: [], Yellowknife: [], Iqaluit: [] },
   },
   {
     id: "china-cities",
@@ -2669,19 +2726,7 @@ export const TOPICS: Topic[] = [
       ...range(1, 5).map((c) => ({ tables: [0], name: c })),
       ...range(1, 12).map((c) => ({ tables: [6], name: c })),
     ],
-    // Big on Spotify (the lead artists of the most-streamed songs, among others), and on no table here. Their song
-    // tables' artist cells glue several names together ("Mark Ronson and Bruno Mars"), so they are listed by hand.
-    more: {
-      "Twenty One Pilots": ["21 Pilots"], "The Neighbourhood": [], "Lewis Capaldi": [], "Vance Joy": [], "Glass Animals": [],
-      "Tom Odell": [], "James Arthur": [], "The Killers": [], "Tones and I": [], "John Legend": [], Toto: [], "A-ha": [],
-      Passenger: [], "Kate Bush": [], Joji: [], "Lil Nas X": [], Måneskin: ["Maneskin"], "DJ Snake": [], "Major Lazer": [],
-      Khalid: [], "Daft Punk": [], "Lord Huron": [], "Goo Goo Dolls": [], "Luis Fonsi": [], "Mark Ronson": [],
-      "Morgan Wallen": ["Wallen"], Future: [], "Chappell Roan": [], "Benson Boone": [], "Peso Pluma": [],
-      "Metro Boomin": [], "21 Savage": [], "J. Cole": ["J Cole"], "Tyler, the Creator": ["Tyler the Creator"],
-      "Frank Ocean": [], "Playboi Carti": ["Carti"], "Rosé": ["Rose"], Radiohead: [], "Marshmello": [], Kygo: [],
-      "Cardi B": [], "Charlie Puth": [], "Camila Cabello": [], Hozier: [], "Lewis Capaldi": [], OneRepublic: [],
-      "Tate McRae": [], "Teddy Swims": [], "Sabrina Carpenter": [], "Avicii": [], "The Chainsmokers": ["Chainsmokers"],
-    },
+    more: SPOTIFY_MORE,
     junkAliases: [
       "Starboy", "King Of The Fall", "We're Alone Together", "Monologue Song", "Lady Gaga as a gay icon",
       "Lady Gaga as gay icon", "Coldplay.com", "Pectoralz", "Los Unidades", "Big Fat Noises", "Shakira Bio",

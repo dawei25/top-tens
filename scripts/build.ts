@@ -238,7 +238,11 @@ export function titleCase(name: string): string {
 }
 
 function cellName(cell: Cell, topic: Pick<Topic, "nameFromText" | "nameFromLink" | "nameStrip" | "titleCase">): string {
-  if (topic.nameFromLink && cell.link) return cleanName(cell.link);
+  // The article's title, less what `nameStrip` cuts: "Catalan language" (for "Catalan, Valencian") is "Catalan".
+  if (topic.nameFromLink && cell.link) {
+    const linked = cleanName(cell.link);
+    return topic.nameStrip ? linked.replace(topic.nameStrip, "").trim() || linked : linked;
+  }
   let name = cleanName(topic.nameFromText || !cell.linkText ? cell.text : cell.linkText);
   if (topic.nameStrip) name = name.replace(topic.nameStrip, "").trim();
   // "ROSÉ" in the table is "Rosé" in her article: the article's casing. A table that writes every word capitalized
@@ -864,7 +868,11 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
         }
         // A family row's text ("Karl and Theo Albrecht") names several people: not an alias of one of them.
         const family = raw !== named;
-        const lines = family ? [] : (cell.lines.length > 1 ? cell.lines : [cell.text]).map(unglue);
+        const lines = family
+          ? []
+          : (cell.lines.length > 1 ? cell.lines : [cell.text])
+              .map(unglue)
+              .flatMap((l) => (src.nameSplit ? cleanName(l).split(src.nameSplit) : [l]));
         const others = aliasCs.flatMap((c) => (r[c] ? [r[c].linkText ?? "", ...r[c].lines.flatMap((l) => l.split("/")).map((p) => p.split(",")[0])] : []));
         const aliases = [...lines, family ? "" : cell.linkText ?? "", ...shortForms(name, topic.stripWords), ...others].map(cleanName);
         const entry: Entry = { rank: 0, name, aliases: aliases.filter((a) => a && a !== name) };
