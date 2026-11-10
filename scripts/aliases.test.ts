@@ -836,6 +836,59 @@ describe("aliases as built: what players type", () => {
   });
 
   it.each([
+    // Coverage audit (Nov 8), built Nov 10 after their dailies: "bahasa", "deutsch" and "yue" missed; the ranked
+    // table stops near #38, so Polish, Dutch and Greek were unknown and Aramaic was corrected into Arabic. The ISO
+    // 639-1 table and its other names (Valencian, Flemish) fill the gap.
+    ["languages", "bahasa", "Indonesian"],
+    ["languages", "deutsch", "Standard German"],
+    ["languages", "yue", "Yue Chinese"],
+    ["languages", "polish", "Polish"],
+    ["languages", "malayalam", "Malayalam"],
+    ["languages", "sindhi", "Sindhi"],
+    ["languages", "catalan", "Catalan"],
+    ["languages", "valencian", "Catalan"],
+    ["languages", "dutch", "Dutch"],
+    ["languages", "greek", "Greek"],
+    ["languages", "aramaic", "Aramaic"],
+    ["languages", "maldivian", "Dhivehi"],
+    // The ISO rows of ranked languages stay those entries.
+    ["languages", "chinese", "Mandarin Chinese"],
+    ["languages", "arabic", "Modern Standard Arabic"],
+    ["languages", "punjabi", "Western Punjabi"],
+    ["languages", "persian", "Iranian Persian"],
+    // Today's chart artists, the Spotify hand list, boy bands and girl groups; Kanye's legal name.
+    ["music-artists", "ye", "Kanye West"],
+    ["music-artists", "bts", "BTS"],
+    ["music-artists", "bad bunny", "Bad Bunny"],
+    ["music-artists", "billie eilish", "Billie Eilish"],
+    ["music-artists", "kendrick lamar", "Kendrick Lamar"],
+    ["music-artists", "morgan wallen", "Morgan Wallen"],
+    ["music-artists", "one direction", "One Direction"],
+    ["music-artists", "nsync", "NSYNC"],
+    ["music-artists", "tlc", "TLC"],
+    // Provincial and territorial capitals below the top 100.
+    ["canada-cities", "charlottetown", "Charlottetown"],
+    ["canada-cities", "whitehorse", "Whitehorse"],
+    ["canada-cities", "yellowknife", "Yellowknife"],
+    ["canada-cities", "iqaluit", "Iqaluit"],
+    // Shared country forms ("lybia" and "northern ireland" found nothing before the rebuild).
+    ["coffee-countries", "columbia", "Colombia"],
+    ["coffee-countries", "brasil", "Brazil"],
+    ["coffee-countries", "guatamala", "Guatemala"],
+    ["coffee-countries", "lybia", "Libya"],
+    ["coffee-countries", "northern ireland", "United Kingdom"],
+  ])("coverage audit, protected lists: %s, %s -> %s", (id, guess, name) => {
+    expect(lands(id, guess)).toBe(name);
+  });
+
+  it("coverage audit, protected lists: no language corrected into a ranked one, no rapper read as junk", () => {
+    expect(lands("languages", "sindhi")).not.toBe("Hindi");
+    expect(lands("languages", "catalan")).not.toBe("Spanish");
+    const r = judgeGuess("6ix9ine", JSON.parse(readFileSync(join(dir, "music-artists.json"), "utf8")) as Puzzle, new Set(), lex);
+    expect(r.kind === "unknown" && r.junk).toBe(false);
+  });
+
+  it.each([
     // Coverage audit: today's big streaming artists were "not one of the artists here".
     ["sabrina carpenter", "Sabrina Carpenter"],
     ["morgan wallen", "Morgan Wallen"],
