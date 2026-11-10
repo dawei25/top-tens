@@ -2,6 +2,19 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-10, launch-week morning check (Tue, launch day)
+
+- Notes since yesterday's check: none.
+- Ratings: coffee-countries (list) 1 up; music-artists (Blitz) 1 down, no reason ticked. One rating each, so a
+  signal, not a verdict; both lists are in today's 16:30 protected-list rebuild anyway.
+- Missed guesses: 1 text from 1 browser. On brazil-cities (Blitz), a player typed the country's own name in its
+  Portuguese spelling. Today's matcher reads it as a known name that isn't in the ranking (no life lost). It could
+  also be a short try at the capital. One browser is a hint, not a fix: watch for repeats, and if more than one
+  browser types it, offer the capital as an option.
+- Plays so far: 94 first tries across 57 lists, all time (the backend gives no per-day count).
+- Backend: the fathom_guesses migration isn't run yet (`fathom_compare` is missing), so Fathom guesses aren't
+  stored. The owner has the link.
+
 ## 2026-11-09, launch-week morning check (Mon)
 
 - Notes since last night: 1, the owner's, on mlb-hits (thumbs down): the average is too high, not a list for casual
