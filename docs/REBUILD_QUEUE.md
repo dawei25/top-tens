@@ -52,8 +52,14 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       in the shared country junk list (13 country lists); infobox values never replace a stat from a table (lists
       using `values`).
 
-- [ ] **Coverage audit (Nov 8) fixes for the protected lists, after Nov 10 16:00 HKT.** The code is in (data agent
+- [x] **Coverage audit (Nov 8) fixes for the protected lists, after Nov 10 16:00 HKT.** The code is in (data agent
       B); only the rebuild of these four is left. Add each guard to scripts/aliases.test.ts once built.
+      **Built Nov 10** (these four only, 0 requests): top 10s unchanged; answers languages 286 → 438, music-artists
+      129 → 241, canada-cities 100 → 104, coffee-countries 251 (forms). Also: `nameStrip` now applies to
+      `nameFromLink` names (it was skipped), `also.nameSplit` takes the ISO cell's other names (Valencian, Flemish,
+      Moldovan), Punjabi stays the ranked Western Punjabi, the categories' "Maldivian language" is Dhivehi, and
+      spotify-artists' hand list is `SPOTIFY_MORE`, shared with music-artists. Guards: aliases.test.ts "coverage
+      audit, protected lists".
       - **languages:** intent.ts gives Indonesian "Bahasa" ("bahasa" was corrected to Bengali), Standard German
         "Deutsch" and Yue Chinese "Yue" (both found nothing). Guards: "bahasa" → Indonesian, "deutsch" → Standard
         German, "yue" → Yue Chinese. Still open, a source for agent A: the ranked table stops near #38, so Polish,
