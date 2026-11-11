@@ -2,6 +2,15 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-11, launch-week morning check (Wed)
+
+- Notes, ratings and missed guesses since yesterday's check: none. Plays all time: still 94 across 57 lists, the
+  same as yesterday morning, so no one finished a list game in 24 hours.
+- Checked that it isn't a recording bug: the live site (toptentacle.io), with every backend call blocked so no row
+  was written, still sends submit_play, submit_miss and list_stats when a random list game ends. The client works;
+  the likely reason is no traffic (launch post not up or not seen). Asked the owner.
+- Backend: fathom_guesses still not run (`fathom_compare` missing).
+
 ## 2026-11-10, launch-week morning check (Tue, launch day)
 
 - Notes since yesterday's check: none.
