@@ -2,6 +2,13 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-12, launch-week morning check (Thu)
+
+- Notes, ratings and missed guesses since yesterday's check: none.
+- Plays all time: 95 across 58 lists (one new first try, on a list nobody had played), which also shows the server
+  records plays end to end. Traffic is still close to zero; no launch post response yet from the owner.
+- Backend: fathom_guesses still not run (`fathom_compare` missing).
+
 ## 2026-11-11, launch-week morning check (Wed)
 
 - Notes, ratings and missed guesses since yesterday's check: none. Plays all time: still 94 across 57 lists, the
