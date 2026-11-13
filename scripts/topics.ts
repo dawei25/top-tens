@@ -369,6 +369,15 @@ const COASTLINE_NAMES: Record<string, string> = {
   Swaziland: "Eswatini",
 };
 
+/**
+ * The women's champions-by-year cells write a champion by her full married name: the all-time table's name, so the
+ * cell is the ranked answer, not a second one.
+ */
+const SLAM_NAMES: Record<string, string> = {
+  "Margaret Smith Court": "Margaret Court",
+  "Billie Jean Moffitt King": "Billie Jean King",
+};
+
 /** Famous accounts on the big social platforms, shared by the follower-count lists. */
 const CELEBRITIES: Also[] = [
   { page: "List of most-followed X accounts", tables: [0, 1], name: "Owner" },
@@ -4111,6 +4120,130 @@ export const TOPICS: Topic[] = [
       "Hay", "Alfalfa", "Silage", "Sheep milk", "Sheep's milk", "Goat milk", "Goat's milk", "Camel milk", "Meat",
       "Fruit", "Fruits", "Vegetables", "Veg", "Grain", "Dairy", "Poultry", "Livestock", "Crops", "Nuts", "Berries",
       "Avocado", "Coconut", "Lemon", "Pineapple", "Pear", "Cherry", "Pumpkin",
+    ],
+  },
+  // Nov 13: candidates for the week of Nov 16 (Today's lists).
+  {
+    id: "billionaire-cities",
+    debut: true,
+    category: "Business",
+    title: "Cities with the most billionaires",
+    noun: "cities",
+    placesIn: "world",
+    prompt: "Name the 10 cities where the most billionaires live (Hurun Global Rich List 2026)",
+    page: "List of cities by number of billionaires",
+    // Hurun's 2026 count, 32 cities deep. The page's Forbes table (2025) stops at 10, all of them in Hurun's too.
+    tables: [1],
+    name: "City",
+    value: "Billionaires",
+    metric: "Billionaires (Hurun 2026)",
+    dataAsOf: "2026",
+    also: CITIES,
+    universe: "capitals",
+    // Where New York's rich live, as on skyscraper-cities.
+    aliases: { "New York City": ["Manhattan"] },
+  },
+  {
+    id: "winter-olympics-countries",
+    debut: true,
+    category: "Sports",
+    // Ranked by all medals, not golds (the page's own top 10 orders by gold: Canada #4, Finland out).
+    title: "Countries with the most Winter Olympic medals (total)",
+    noun: "countries",
+    prompt: "Name the 10 countries with the most Winter Olympic medals of all time (gold, silver and bronze together)",
+    page: "All-time Olympic Games medal table",
+    // The Winter Games' total column, of today's teams and the defunct ones (the Soviet Union, East Germany).
+    tables: [0, 2],
+    name: 0,
+    value: 10,
+    metric: "Winter Olympic medals",
+    universe: "countries",
+    // Russia's athletes in 2022 (32 medals) are no country, and "ROC" is also a name of Taiwan: ranked, it took all of
+    // Taiwan's names ("taiwan" cost a life as the Russian Olympic Committee). Left out; "roc" is Russia (intent.ts).
+    skip: ["ROC"],
+    // The table's name for Taiwan, so its miss shows its 0.
+    rename: { "Chinese Taipei": "Taiwan" },
+    junkAliases: [
+      "Swedish sin", "Folkland", "Britain's languages", "Great Britain's languages", "Council Union", "Soviet order",
+      "People's republic of russia", "United states of soviet russia", "European USSR", "De", "Modern day China",
+    ],
+  },
+  {
+    id: "grand-slam-titles",
+    debut: true,
+    category: "Sports",
+    title: "Tennis players with the most Grand Slam singles titles",
+    noun: "tennis players",
+    prompt: "Name the 10 tennis players, men or women, with the most Grand Slam singles titles",
+    page: "List of Grand Slam and related tennis records",
+    // The all-time singles leaders, men's and women's tables together (everyone with 8 or more).
+    tables: [11, 12],
+    name: "Player",
+    value: "Titles",
+    metric: "Grand Slam singles titles",
+    people: true,
+    // The table's name is a redirect to her article.
+    articles: { "Helen Wills Moody": "Helen Wills" },
+    // The tables' footer row.
+    skip: ["Top 10"],
+    // Her name for most of her titles, and the nicknames fans use.
+    aliases: {
+      "Margaret Court": ["Margaret Smith"],
+      "Rafael Nadal": ["Rafa"],
+      "Roger Federer": ["FedEx"],
+      "Pete Sampras": ["Pistol Pete"],
+    },
+    // Relatives, a church, a foundation, an achievement and social handles among the redirects.
+    junkAliases: [
+      "Jelena Djokovic", "Jelena Ristić", "@DjokerNole", "No1e", "Victory Life Center", "Victory Life Centre",
+      "Serena Slam", "@serenawilliams", "Olympia Ohanian", "Fundación Rafa Nadal", "@RafaelNadal", "Charlene Riva Federer",
+      "Myla Rose Federer", "Charlene Federer", "Myla Federer", "Darth Federer", "Superduperhuman", "Roger Fedora",
+      "@rogerfederer", "Helen Wills Moody Eileen",
+    ],
+    // Famous players with no Grand Slam singles title: free, and real names.
+    knownNames: [
+      "Nick Kyrgios", "Anna Kournikova", "Tim Henman", "Casper Ruud", "Stefanos Tsitsipas", "Holger Rune", "Taylor Fritz",
+      "Ben Shelton", "Frances Tiafoe", "Tommy Paul", "Jack Draper", "Alex de Minaur", "Andrey Rublev", "Grigor Dimitrov",
+      "Gaël Monfils", "Jo-Wilfried Tsonga", "Tomáš Berdych", "David Ferrer", "Milos Raonic", "Kei Nishikori",
+      "David Nalbandian", "Tommy Haas", "Marcelo Ríos", "John Isner", "Jessica Pegula", "Ons Jabeur", "Jelena Janković",
+      "Dinara Safina", "Agnieszka Radwańska", "Elina Svitolina", "Karolína Plíšková", "Jasmine Paolini",
+      "Qinwen Zheng", "Zheng Qinwen", "Mirra Andreeva", "Amanda Anisimova", "Elena Dementieva", "Bob Bryan", "Mike Bryan",
+      "Bryan brothers", "Leander Paes",
+    ],
+    // Every champion of the four majors is an answer, with the career total the champions-by-year cells count
+    // ("John McEnroe (7/7)"): "McEnroe: 7".
+    also: [
+      ...["Australian Open", "French Open", "Wimbledon", "US Open"].flatMap((col) => [
+        { page: "List of Grand Slam men's singles champions", tables: [2], name: col, counts: true },
+        { page: "List of Grand Slam women's singles champions", tables: [1], name: col, counts: true, rename: SLAM_NAMES },
+      ]),
+    ],
+  },
+  {
+    id: "wine-countries",
+    debut: true,
+    category: "Business",
+    title: "Countries that produce the most wine",
+    noun: "countries",
+    prompt: "Name the 10 countries that produce the most wine (2021, by weight)",
+    page: "List of wine-producing countries",
+    tables: [0],
+    name: "Country",
+    value: "Production",
+    metric: "Wine produced (2021)",
+    unit: " tonnes",
+    dataAsOf: "2021",
+    universe: "countries",
+    // The rows link each country's wine article, whose redirects are regions and blends ("Stellenbosch", "Cape
+    // blend"): the country's own names come from its own article.
+    articles: { Australia: "Australia", Chile: "Chile", "South Africa": "South Africa" },
+    junkAliases: ["Wine from the United Kingdom"],
+    // Wine words, not countries: free, and real names, so "napa" is never read as Nepal nor "port" as a country.
+    knownNames: [
+      "Champagne", "Bordeaux", "Burgundy", "Bourgogne", "Napa", "Napa Valley", "Sonoma", "Rioja", "Chianti", "Tuscany",
+      "Prosecco", "Port", "Porto", "Sherry", "Madeira", "Tokaji", "Cava", "Barolo", "Mosel", "Alsace", "Provence",
+      "Merlot", "Malbec", "Shiraz", "Syrah", "Cabernet", "Cabernet Sauvignon", "Sauvignon Blanc", "Pinot Noir",
+      "Pinot Grigio", "Chardonnay", "Riesling", "Zinfandel", "Rosé", "Sake", "Mead", "Cider",
     ],
   },
 ];

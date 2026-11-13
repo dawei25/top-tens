@@ -1,0 +1,52 @@
+{
+  "New York City": {
+    "text": "One of the few US cities that taxes its residents' income, and still home to more billionaires than anywhere.",
+    "source": "https://en.wikipedia.org/wiki/New_York_City",
+    "evidence": "New York City is one of the relatively few American cities levying an income tax (about 3%) on its residents; despite this tax levy, New York City in 2024 was home by a significant margin to the highest number of billionaires of any city in the world, with a total of 110."
+  },
+  "Shenzhen": {
+    "text": "In the early 1980s this city on China's border with Hong Kong became the country's first special economic zone.",
+    "source": "https://en.wikipedia.org/wiki/Shenzhen",
+    "evidence": "In the early 1980s, the reform and opening up introduced by Deng Xiaoping resulted in the city becoming the first special economic zone of China due to its close proximity to Hong Kong, attracting foreign direct investment and migrants searching for opportunities."
+  },
+  "Shanghai": {
+    "text": "China's Shanghai has the world's busiest container port and Asia-Pacific's biggest stock exchange.",
+    "source": "https://en.wikipedia.org/wiki/Shanghai",
+    "evidence": "The Port of Shanghai is the world's busiest container port. It is the home of the Shanghai Stock Exchange, the largest stock exchange in the Asia-Pacific by market capitalization"
+  },
+  "Beijing": {
+    "text": "China's capital was once dubbed the \"billionaire capital of the world\", ahead of New York.",
+    "source": "https://en.wikipedia.org/wiki/Beijing",
+    "evidence": "Beijing has also been described as the \"billionaire capital of the world\". (Reference: \"Beijing overtakes New York as new 'billionaire capital'\".)"
+  },
+  "London": {
+    "text": "The UK capital's financial heart, the City of London, was founded by the Romans as Londinium and keeps its medieval boundaries.",
+    "source": "https://en.wikipedia.org/wiki/London",
+    "evidence": "Its ancient core and financial centre, the City of London, was founded by the Romans as Londinium and has retained its medieval boundaries."
+  },
+  "Mumbai": {
+    "text": "Mukesh Ambani's 27-storey home on Mumbai's Billionaires' Row, Antilia, the most expensive in India, has a 168-car garage.",
+    "source": "https://en.wikipedia.org/wiki/Antilia_(building)",
+    "evidence": "Antilia is the residence of the Indian billionaire businessman Mukesh Ambani and his family. It is the most expensive residence in India ... It is located on Billionaires' Row in Mumbai. ... The structure is 27 storeys and 173 metres (568 ft) tall ... equipped with amenities including a 168-car garage"
+  },
+  "Hong Kong": {
+    "text": "It has the most billionaires per person of any city: one for every 109,657 people in this part of China.",
+    "source": "https://en.wikipedia.org/wiki/Hong_Kong",
+    "evidence": "The city has the most billionaires per capita, with one billionaire per 109,657 people, as well as the second-highest number of billionaires of any city in the world, the highest number of billionaires of any city in Asia"
+  },
+  "San Francisco": {
+    "text": "Cantonese migrants who came for California's 1849 gold rush called it \"Gold Mountain\".",
+    "source": "https://en.wikipedia.org/wiki/San_Francisco",
+    "evidence": "The California gold rush of 1849 brought rapid growth, making it the largest city on the West Coast at the time. ... The California Cantonese who came for the California Gold Rush called California and specifically San Francisco 金山 (Gāmsāan, \"Gold Mountain\")."
+  },
+  "Moscow": {
+    "text": "Russia's capital has more billionaires than any other city in Europe.",
+    "source": "https://en.wikipedia.org/wiki/Moscow",
+    "evidence": "Moscow is home to the third-highest number of billionaires among cities internationally, and the highest number among cities in Europe."
+  },
+  "Hangzhou": {
+    "text": "Alibaba, Ant Group, Geely and DeepSeek all have their headquarters in this city in East China.",
+    "source": "https://en.wikipedia.org/wiki/Hangzhou",
+    "evidence": "It is the capital and most populous city of Zhejiang Province in East China. ... The city hosts the headquarters of Alibaba Group, Ant Group, DeepSeek, Geely, and NetEase."
+  }
+}

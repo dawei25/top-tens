@@ -1,0 +1,52 @@
+{
+  "Italy": {
+    "text": "In AD 92 Emperor Domitian had a great many vineyards destroyed, to free up land for food.",
+    "source": "https://en.wikipedia.org/wiki/Italian_wine",
+    "evidence": "Under ancient Rome large-scale, slave-run plantations sprang up in many coastal areas of Italy and spread to such an extent that, in AD 92, Emperor Domitian was forced to destroy a great number of vineyards in order to free up fertile land for food production."
+  },
+  "France": {
+    "text": "Its winemaking began in the 6th century BCE, with the Greek settlers who founded Marseille.",
+    "source": "https://en.wikipedia.org/wiki/French_wine",
+    "evidence": "French wine originated in the 6th century BCE, with the colonization of Southern Gaul by Greek settlers. Viticulture soon flourished with the founding of the Greek colony of Marseille."
+  },
+  "Spain": {
+    "text": "It has more land under vines than any other country, over 1.2 million hectares, but its old vines yield little.",
+    "source": "https://en.wikipedia.org/wiki/Spanish_wine",
+    "evidence": "Spain has over 1.2 million hectares (3.0 million acres) planted in wine grapes, making it the most widely planted wine-producing nation, but the third largest producer of wine in the world, behind Italy and France and ahead of the United States; this is due, in part, to the very low yields and wide spacing of the old vines"
+  },
+  "United States": {
+    "text": "Prohibition nearly ended its wine industry; before it, dry wines outsold sweet ones three to one.",
+    "source": "https://en.wikipedia.org/wiki/American_wine",
+    "evidence": "Following the Repeal of Prohibition in 1933, operators tried to revive the American wine-making industry, which was nearly ended. ... Before Prohibition, dry table wines outsold sweet wines by three to one, but afterward, the ratio of demand changed dramatically."
+  },
+  "China": {
+    "text": "One region, Yantai-Penglai, with over 140 wineries, makes 40% of its wine.",
+    "source": "https://en.wikipedia.org/wiki/Wine_in_China",
+    "evidence": "The largest producing region is Yantai-Penglai; with over 140 wineries, it produces 40% of China's wine."
+  },
+  "Australia": {
+    "text": "Its first vines came from the Cape of Good Hope on the First Fleet, in 1788.",
+    "source": "https://en.wikipedia.org/wiki/Australian_wine",
+    "evidence": "Vine cuttings from the Cape of Good Hope were brought to the penal colony of New South Wales by Governor Phillip on the First Fleet (1788)."
+  },
+  "Chile": {
+    "text": "The phylloxera louse that ravaged Europe's vines never reached it, so its vines need no grafting.",
+    "source": "https://en.wikipedia.org/wiki/Chilean_wine",
+    "evidence": "Chile is also fortunate to remain free of the phylloxera louse, which means that its grapevines do not require grafting with phylloxera-resistant rootstocks."
+  },
+  "Argentina": {
+    "text": "Mendoza province alone makes more than 60% of its wine.",
+    "source": "https://en.wikipedia.org/wiki/Argentine_wine",
+    "evidence": "The Mendoza province produces more than 60% of the Argentine wine and is the source of an even higher percentage of the total exports."
+  },
+  "South Africa": {
+    "text": "Its first wine was made in Cape Town in 1659, by the colony's founder Jan van Riebeeck.",
+    "source": "https://en.wikipedia.org/wiki/South_African_wine",
+    "evidence": "South African wine has a history dating back to 1659, with the first bottle being produced in Cape Town by its founder and governor Jan van Riebeeck."
+  },
+  "Portugal": {
+    "text": "Two of its wine regions are UNESCO World Heritage Sites: the Douro Valley and Pico Island.",
+    "source": "https://en.wikipedia.org/wiki/Portuguese_wine",
+    "evidence": "Portugal has two wine-producing regions protected by UNESCO as World Heritage: the Douro Valley Wine Region (Douro Vinhateiro) and Pico Island Wine Region (Ilha do Pico Vinhateira)."
+  }
+}
