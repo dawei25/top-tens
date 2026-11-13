@@ -488,6 +488,18 @@ describe("a word that fits a crowd", () => {
     expect(judgeGuess("ford", cars, new Set())).toMatchObject({ kind: "typo", suggestions: ["Ford F-Series", "Ford Fiesta"] });
     expect(judgeGuess("toyota corolla", cars, new Set())).toMatchObject({ kind: "correct", entry: { rank: 1 } });
   });
+  it("even when one of them is called that once a qualifier is dropped (Central Coast)", () => {
+    const cities: Puzzle = {
+      ...puzzle,
+      id: "cities14",
+      answers: [...puzzle.answers.slice(0, 5), e(6, "Gold Coast"), ...puzzle.answers.slice(6, 8), e(9, "Sunshine Coast"), e(10, "Central Coast")],
+      extras: [],
+    };
+    expect(judgeGuess("coast", cities, new Set())).toMatchObject({ kind: "unknown", vague: 3 });
+    expect(judgeGuess("the coast", cities, new Set())).toMatchObject({ kind: "unknown", vague: 3 });
+    expect(judgeGuess("central coast", cities, new Set())).toMatchObject({ kind: "correct", corrected: false, entry: { rank: 10 } });
+    // Two are still a choice of equals: North and South Carolina (above).
+  });
   it("while a distinctive word still finds its entry", () => {
     expect(judgeGuess("renaissance tour", tours, new Set())).toMatchObject({ kind: "correct", entry: { rank: 6 } });
     expect(judgeGuess("vertigo", tours, new Set())).toMatchObject({ kind: "near", entry: { rank: 11 } });
