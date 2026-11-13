@@ -134,6 +134,8 @@ interface Candidate {
   ends: boolean;
   /** Whole words were shared with the best form and the rest starts with the same letter: "john rahm" / "jon rahm". */
   besideShared: boolean;
+  /** One slip in one word, beside whole words no other entry has (`slipBesideOwn`): "hustin bieber", "lana del ray". */
+  besideOwn: boolean;
   /** The best form starts with the same letter as the guess. */
   sameStart: boolean;
   /** The guess and the best form, as compared (shared words dropped): for `sounds`. */
@@ -263,7 +265,8 @@ function swapsAWord(a: string, b: string): boolean {
   return x.some((w, i) => w !== y[i] && editDistance(w, y[i]) > Math.max(1, autoCorrectBudget(Math.min(w.length, y[i].length))));
 }
 
-function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useWords = true): Candidate[] {
+/** `pool`: the whole list, for the words only one entry has (`besideOwn`). */
+function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useWords = true, pool?: Puzzle): Candidate[] {
   const numGuess = numbersAsDigits(guess);
   const guessDigits = digitsOf(numGuess);
   const compactGuess = guess.replace(/ /g, "");
@@ -274,6 +277,7 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
     let viaWord = false;
     let ends = false;
     let besideShared = false;
+    let besideOwn = false;
     let sameStart = false;
     let pair: [string, string] = ["", ""];
     const { forms, words: nameWordForms, codes } = formsOf(entry);
@@ -308,16 +312,22 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
       // A misspelling keeps its first letter: "factories" is not a typo of Castries. One slip there is fine in a long
       // word, or between letters that sound alike ("kanada"); in a short one it is another word ("kmart" / "WMart").
       if (dist > 1 && g[0] !== rest[0]) continue;
+      // Whole words that only this entry has say which one it is ("bieber", "lana del"): one slip in the one word left
+      // is a slip, its first letter or a short word too ("hustin bieber", "lana del ray").
+      const own = dist === 1 && !isWord && !!pool && slipBesideOwn(guess, f, entry, pool);
       const swapped = g[0] === rest[1] && g[1] === rest[0];
-      if (dist === 1 && !soundAlike(g[0], rest[0]) && !swapped && Math.min(g.length, rest.length) < 8) continue;
+      if (dist === 1 && !own && !soundAlike(g[0], rest[0]) && !swapped && Math.min(g.length, rest.length) < 8) continue;
       // One word of a longer name only catches a near-exact misspelling of a real word ("kareen" for Kareem), never a
       // different short word: "pope" is not "Don't Bother Me, I Can't Cope".
       if (dist > 0 && isWord && (dist > 1 || g.length < 5 || g[0] !== rest[0])) continue;
       // A whole word typed is never swapped for another: "snapchat" is not Stripchat, "gac motor" not GM Motors.
       if (dist > 1 && (swapsWord(g, rest) || swapsAWord(g, rest))) continue;
       const isName = i === 0;
+      // One form as close is enough: the name may come after an alias just as far from the guess.
+      if (dist === best) besideOwn ||= own;
       if (dist < best || (dist === 0 && isName)) {
         best = dist;
+        besideOwn = own;
         len = rest.length;
         fullName = dist === 0 && isName;
         viaWord = isWord;
@@ -329,8 +339,52 @@ function closestPerEntry(guess: string, entries: Entry[], inTop10: boolean, useW
         pair = [g, rest];
       }
     }
-    return { entry, inTop10, dist: best, len, fullName, viaWord, ends, besideShared, sameStart, pair };
+    return { entry, inTop10, dist: best, len, fullName, viaWord, ends, besideShared, besideOwn, sameStart, pair };
   });
+}
+
+/**
+ * Whether the guess is one of the entry's forms (one slip away, `closestPerEntry`) with one word changed, beside whole
+ * words only this entry has on the list ("hustin bieber", "lana del ray"). The shared words make five letters or more
+ * besides generic ones: "vw" ("vw bus" is not VW Bug) and "mount" ("mount albert" is not Mount Elbert) say nothing.
+ * Words several entries have say nothing about which one: "los angeles", "new york", "korea". Both changed words have
+ * three letters or more and no digits (numbers and codes are identity), and the typed one is no other entry's word
+ * ("dustin bieber" beside Dustin Lynch may be someone else).
+ *
+ * A short word slipped into other sounds is another word (the leak audit, Nov 13): "dan marino" is not San Marino,
+ * "green bay" not Green Day, "astro bot" not Astro Boy, "princess power" not Princess Tower. Under six letters the
+ * slip keeps the word's sounds (`skeleton`: "ray" / "rey"); a longer word may lose its first letter ("hustin").
+ */
+function slipBesideOwn(guess: string, form: string, entry: Entry, puzzle: Puzzle): boolean {
+  const x = guess.split(" ");
+  const y = form.split(" ");
+  if (x.length < 2 || x.length !== y.length) return false;
+  const differ = x.flatMap((w, i) => (w === y[i] ? [] : [i]));
+  if (differ.length !== 1) return false;
+  const k = differ[0];
+  if (!/^[a-z]{3,}$/.test(x[k]) || !/^[a-z]{3,}$/.test(y[k])) return false;
+  if (Math.min(x[k].length, y[k].length) < 6 && skeleton(x[k]) !== skeleton(y[k])) return false;
+  if (x.filter((w, i) => i !== k && !GENERIC.has(w)).join("").replace(/[^a-z]/g, "").length < 5) return false;
+  const owners = holders(puzzle, x.slice(0, k).join(" "), x.slice(k + 1).join(" "));
+  return owners.length === 1 && owners[0] === entry && holders(puzzle, x[k], "").every((e) => e === entry);
+}
+
+/** The entries (two at most) with a name or alias that has `head` and `tail` as whole words. */
+const holderCache = new WeakMap<Puzzle, Map<string, Entry[]>>();
+function holders(puzzle: Puzzle, head: string, tail: string): Entry[] {
+  let cache = holderCache.get(puzzle);
+  if (!cache) holderCache.set(puzzle, (cache = new Map()));
+  const key = `${head}|${tail}`;
+  let out = cache.get(key);
+  if (!out) {
+    out = [];
+    for (const e of [...puzzle.answers, ...puzzle.extras]) {
+      if (formsOf(e).forms.some((f) => (!head || wordsWithin(head, f)) && (!tail || wordsWithin(tail, f)))) out.push(e);
+      if (out.length > 1) break;
+    }
+    cache.set(key, out);
+  }
+  return out;
 }
 
 /**
@@ -408,8 +462,8 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
   // aren't readings of it. Names and partial names ("jordan", "shenzhen", "kevin") still are.
   const plain = isPlainWord(raw, lex) && !notableWords(puzzle).has(guess);
   const candidates = [
-    ...closestPerEntry(guess, puzzle.answers, true, !plain),
-    ...closestPerEntry(guess, puzzle.extras, false, !plain),
+    ...closestPerEntry(guess, puzzle.answers, true, !plain, puzzle),
+    ...closestPerEntry(guess, puzzle.extras, false, !plain, puzzle),
   ].sort((a, b) => a.dist - b.dist);
 
   const best = candidates[0];
@@ -614,7 +668,7 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
   // Six or seven letters get a third edit when the first and last letters agree: a slip in the middle ("hungray").
   // The wider pool's obscure names (no rank, no figure) only take a slip in the middle, with the first and last letters
   // kept: "planes" is not Our Planet. Beside a whole word both share ("rahm"), one slip in a short word is still a
-  // slip: "john rahm" is Jon Rahm.
+  // slip: "john rahm" is Jon Rahm. Beside words only that answer has, any one slip is: "lana del ray" (`besideOwn`).
   //
   // What was typed may itself be a real name, and then it is never corrected into a different answer ("Austria" is not
   // Australia), except that a misspelling the bank stores as an alias still finds its own entry ("afganistan" is
@@ -642,7 +696,7 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
     if (c.viaWord && !notable) return false;
     // The third edit of a slip in the middle needs the same sounds: "korean" is not Kushan, "catalan" not Castilian.
     const budget = typoBudget(len) + (notable && c.ends && len >= 6 && len <= 7 && sounds(c) ? 1 : 0);
-    return c.dist <= Math.max(budget, c.besideShared ? 1 : 0) && (notable || c.ends);
+    return c.dist <= Math.max(budget, c.besideShared || c.besideOwn ? 1 : 0) && (notable || c.ends);
   });
   if (close.length > 0) {
     const tied = close.filter((c) => c.dist === close[0].dist);
