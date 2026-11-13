@@ -387,6 +387,14 @@ describe("coverage audit: matching rules", () => {
     expect(lands(id, guess)).toEqual([name]);
   });
 
+  // The list judge (australia-cities, Nov 13): "coast" put Central Coast (#10) in the box, "central" being a qualifier,
+  // though Gold Coast (#6) and Sunshine Coast (#9) are coasts too.
+  it("australia-cities: a word three top-10 answers share is vague, though one is that word less a qualifier", () => {
+    for (const g of ["coast", "the coast"]) expect(judge("australia-cities", g), g).toMatchObject({ kind: "unknown", vague: expect.any(Number) });
+    expect(lands("australia-cities", "central coast")).toEqual(["Central Coast"]);
+    expect(lands("australia-cities", "gold coast")).toEqual(["Gold Coast"]);
+  });
+
   it("nba-assists: Isaiah Thomas offers Isiah Thomas (#10) too", () => {
     expect(lands("nba-assists", "isaiah thomas")).toEqual(["Isaiah Thomas", "Isiah Thomas"]);
   });

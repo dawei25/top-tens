@@ -21,6 +21,7 @@ import {
   metricLabel,
   missLine,
   NO_LIFE_LOST,
+  notInRanking,
   notOnList,
 } from "./copy";
 
@@ -69,6 +70,22 @@ describe("miss copy", () => {
     expect(plain(missLine({ kind: "unknown", junk: false }, funds, "Pointy"))).toBe("Not one of the 151 firms here. No life lost.");
     expect(plain(missLine({ kind: "unknown", junk: true }, funds, "asdf"))).toBe("That doesn't look like an answer. No life lost.");
     expect(plain(missLine({ kind: "unknown", junk: false, vague: 4 }, funds, "pizza"))).toBe("More than one answer fits. Be more specific. No life lost.");
+  });
+  // The list judge (life-expectancy-countries, Nov 13): "hong kong" read "Hong kong isn't in this ranking."
+  it("writes a real name it doesn't rank as a name, keeping capitals the player typed", () => {
+    const countries = { noun: "countries", answers: entries(10), extras: entries(190) };
+    const known = (typed: string) => plain(missLine({ kind: "unknown", junk: false, known: true }, countries, typed));
+    expect(known("hong kong")).toBe("Hong Kong isn't in this ranking. No life lost.");
+    expect(known("  Hong   kong ")).toBe("Hong Kong isn't in this ranking. No life lost.");
+    expect(known("bosnia and herzegovina")).toBe("Bosnia and Herzegovina isn't in this ranking. No life lost.");
+    expect(known("the isle of man")).toBe("The Isle of Man isn't in this ranking. No life lost.");
+    expect(known("guinea-bissau")).toBe("Guinea-Bissau isn't in this ranking. No life lost.");
+    expect(known("são tomé")).toBe("São Tomé isn't in this ranking. No life lost.");
+    expect(known("McDonald's")).toBe("McDonald's isn't in this ranking. No life lost.");
+    expect(known("USA")).toBe("USA isn't in this ranking. No life lost.");
+    expect(notInRanking("jane street")).toBe("Jane Street isn't in this ranking.");
+    // Not a known name: the plain miss, which never repeats what was typed.
+    expect(plain(missLine({ kind: "unknown", junk: false }, countries, "hong kong"))).toBe("Not one of the 200 countries here. No life lost.");
   });
 });
 

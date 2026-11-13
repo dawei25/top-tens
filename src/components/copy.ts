@@ -16,12 +16,22 @@ export function notOnList(puzzle: Pick<Puzzle, "noun" | "answers" | "extras">): 
   return `Not one of the ${count.toLocaleString("en-US")} ${puzzle.noun}${NBSP}here.`;
 }
 
+/** Words a name keeps in lower case after its first: "Bosnia and Herzegovina", "Isle of Man". */
+const SMALL_WORDS = new Set("a an and at by for in of on or the to".split(" "));
+
 /**
- * A real name that isn't an answer here, as typed ("Point72 isn't in this ranking."): the game knows it, so it says so
- * plainly rather than "Not one of the 151 firms here.", which reads as if it didn't (the owner, and the coverage audit).
+ * A real name that isn't an answer here ("Point72 isn't in this ranking."): the game knows it, so it says so plainly
+ * rather than "Not one of the 151 firms here.", which reads as if it didn't (the owner, and the coverage audit). It is
+ * written as a name: "Hong Kong", not "Hong kong" as typed (the list judge). The lexicon keeps only hashes, so each word
+ * gets a capital (and each part after a hyphen: "Guinea-Bissau"), small words after the first stay lower case, and a
+ * word the player gave capitals of their own keeps them ("McDonald's", "USA").
  */
 export function notInRanking(typed: string): string {
-  const name = typed.trim().replace(/\s+/g, " ");
+  const name = typed
+    .trim()
+    .split(/\s+/)
+    .map((w, i) => (/\p{Lu}/u.test(w) || (i > 0 && SMALL_WORDS.has(w)) ? w : w.replace(/(^|-)(\p{Ll})/gu, (_, a, c) => a + c.toUpperCase())))
+    .join(" ");
   return `${name.charAt(0).toUpperCase()}${name.slice(1)} isn't in this ranking.`;
 }
 

@@ -566,12 +566,7 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
       a.entry.name.localeCompare(b.entry.name);
     const open = cs.filter((c) => !(c.inTop10 && found.has(c.entry.rank))).sort(byProminence);
     if (open.length === 0) return resolve([...cs].sort(byProminence)[0], false);
-    // A word shared by three top-10 answers ("toyota" on car models, "china" on banks), or by a crowd with two or more
-    // ("tour" on concert tours), is a category on this list, not a name: offering a few, again and again, would hand
-    // over the top 10. Two ("avengers", "ed sheeran") are a choice, and one top-10 answer in a crowd ("star wars" on box
-    // office) is the natural reading.
-    const top10Fits = cs.filter((c) => c.inTop10).length;
-    if (top10Fits >= 3 || (cs.length > VAGUE_ABOVE && top10Fits > 1)) return { kind: "unknown", junk: false, vague: cs.length };
+    if (crowd(cs)) return { kind: "unknown", junk: false, vague: cs.length };
     const [top, next] = open;
     if (!next) return resolve(top, true);
     // Someone in the pool with that surname keeps a surname match far down, or a first name, from standing out.
@@ -598,6 +593,9 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
    */
   const fits = (cs: Candidate[], part: boolean): Reading => {
     if (cs.length === 1) return resolve(cs[0], part);
+    // A crowd stays vague though one of it is called just that once a qualifier is dropped: "coast" is not Central
+    // Coast (#10), with Gold Coast and Sunshine Coast in the top 10 too (the list judge, australia-cities).
+    if (crowd(cs)) return natural(cs, MAX_CHOICES, true);
     const core = cs.filter((c) => coreName(c.entry.name) === guess);
     if (core.length === 1) return resolve(core[0], part);
     if (core.length > 1 && core.length <= MAX_CHOICES) return choose(core, false);
@@ -881,6 +879,17 @@ const NEAR_MISS_RANK = 20;
  * likely Aaron Judge (unranked) as Joe Judge (#138).
  */
 const FAMOUS_RANK = 20;
+
+/**
+ * Whether the entries a word fits are a category on this list, not a name: three top-10 answers ("toyota" on car
+ * models, "china" on banks, "coast" on Australian cities), or a crowd with two or more ("tour" on concert tours).
+ * Offering a few, again and again, would hand over the top 10. Two ("avengers", "ed sheeran") are a choice, and one
+ * top-10 answer in a crowd ("star wars" on box office) is the natural reading.
+ */
+function crowd(cs: Candidate[]): boolean {
+  const top10Fits = cs.filter((c) => c.inTop10).length;
+  return top10Fits >= 3 || (cs.length > VAGUE_ABOVE && top10Fits > 1);
+}
 
 function notableNearMiss(c: Candidate): boolean {
   return !c.inTop10 && c.entry.rank > 0 && c.entry.rank <= NEAR_MISS_RANK && c.entry.value !== undefined;
