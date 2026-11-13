@@ -1660,6 +1660,8 @@ export const INTENT: Record<string, Intent> = {
       // Russia's 2022 team, an entry of its own like its 2018 one (Olympic Athletes from Russia): "roc" is not Taiwan's
       // (no Winter medal) nor Russia's. It takes none of Taiwan's other names (topics.ts `notCountries`).
       "Russian Olympic Committee": ["ROC"],
+      // Coverage audit (Nov 13): "team canada" found nothing, where "team usa" and "team gb" land.
+      Canada: ["Team Canada"],
     },
   },
   "happiest-countries": {

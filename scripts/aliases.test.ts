@@ -1009,6 +1009,10 @@ describe("aliases as built: what players type", () => {
     ["russian federation", "Russia"],
     ["ussr", "Soviet Union"],
     ["uk", "Great Britain"],
+    // Coverage audit (Nov 13): "team canada" found nothing, where "team usa" and "team gb" land.
+    ["team canada", "Canada"],
+    ["team usa", "United States"],
+    ["team gb", "Great Britain"],
   ])("winter-olympics-countries: %s -> %s", (guess, name) => {
     expect(lands("winter-olympics-countries", guess)).toBe(name);
   });
