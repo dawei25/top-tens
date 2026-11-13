@@ -3698,17 +3698,29 @@ export const TOPICS: Topic[] = [
     // The system's name: "tokyo metro", "beijing subway", "london underground".
     aliasCols: ["Name"],
     aliases: {
-      "Hong Kong": ["MTR"],
+      // Kowloon is Hong Kong's (as on skyscraper-cities), not "isn't in this ranking".
+      "Hong Kong": ["MTR", "Kowloon"],
       Tokyo: ["Toei", "Toei Subway"],
       Seoul: ["Seoul Subway", "Seoul Metro"],
-      "New York City": ["NYC Subway", "New York Subway"],
-      Paris: ["Paris Metro", "Paris Métro"],
+      // Coverage audit (Nov 13): what riders call their systems found nothing ("mta", "wmata", "ttc", "septa", "subte",
+      // the systems' own names in Spanish and French, "delhi ncr").
+      "New York City": ["NYC Subway", "New York Subway", "MTA", "NYC MTA"],
+      Paris: ["Paris Metro", "Paris Métro", "Métro de Paris", "Metro de Paris"],
+      Madrid: ["Metro de Madrid"],
+      Santiago: ["Metro de Santiago"],
+      "Buenos Aires": ["Subte", "Buenos Aires Subte"],
+      "Washington, D.C.": ["DC Metro", "WMATA"],
+      Toronto: ["TTC"],
+      Philadelphia: ["SEPTA"],
+      Delhi: ["Delhi NCR"],
       "Mexico City": ["Mexico City Metro"],
     },
     // Systems named by a kind of railway or a colour, not their city: "red line" or "skyline" names no city.
     junkAliases: ["Mass Rapid Transit", "Metropolitan Rapid Transit", "Metro Rail", "Metrorail", "Red Line", "Skyline", "Federal District Metro"],
     also: CITIES,
     universe: "capitals",
+    // Tokyo's busiest districts (Shinjuku has the world's busiest station) are no city of their own: free, said plainly.
+    knownNames: ["Shinjuku", "Shibuya"],
   },
   {
     id: "landlocked-countries",

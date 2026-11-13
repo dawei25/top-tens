@@ -428,6 +428,13 @@ export const CITY_FORMS: string[][] = [
   ["Astana", "Nur-Sultan", "Nursultan", "Akmola", "Tselinograd"],
   ["Pretoria", "Tshwane"],
   ["Jakarta", "Batavia"],
+  // South Korea's cities in the older romanization (metro-cities coverage audit, Nov 13: "pusan" and "taegu" found
+  // nothing).
+  ["Busan", "Pusan"],
+  ["Daegu", "Taegu"],
+  ["Incheon", "Inchon"],
+  ["Gwangju", "Kwangju"],
+  ["Daejeon", "Taejon"],
 ];
 
 /**

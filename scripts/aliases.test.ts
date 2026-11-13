@@ -1078,6 +1078,32 @@ describe("aliases as built: what players type", () => {
     expect(lands("australia-cities", guess)).toBe(name);
   });
 
+  it.each([
+    // Coverage audit (Nov 13): what riders call their systems, and Korea's older romanization, found nothing.
+    ["mta", "New York City"],
+    ["wmata", "Washington, D.C."],
+    ["dc metro", "Washington, D.C."],
+    ["ttc", "Toronto"],
+    ["septa", "Philadelphia"],
+    ["subte", "Buenos Aires"],
+    ["metro de paris", "Paris"],
+    ["metro de madrid", "Madrid"],
+    ["delhi ncr", "Delhi"],
+    ["pusan", "Busan"],
+    ["taegu", "Daegu"],
+    ["toei", "Tokyo"],
+    // Kowloon is Hong Kong's, not "isn't in this ranking"; Tokyo's districts are real names, free.
+    ["kowloon", "Hong Kong"],
+    ["shinjuku", "unknown"],
+  ])("metro-cities: %s -> %s", (guess, name) => {
+    expect(lands("metro-cities", guess)).toBe(name);
+  });
+
+  it("metro-cities: Tokyo's fact says the ranking is Tokyo Metro alone (the judge, Nov 5)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "metro-cities.json"), "utf8"));
+    expect(p.answers.find((e) => e.name === "Tokyo")?.fact?.text).toMatch(/Toei/);
+  });
+
   it("australia-cities: topic redirects are no names of the city (CITY_JUNK)", () => {
     const p: Puzzle = JSON.parse(readFileSync(join(dir, "australia-cities.json"), "utf8"));
     const aliases = p.answers.flatMap((e) => e.aliases);
