@@ -203,9 +203,10 @@ export interface Topic {
    */
   textRows?: TextRow[];
   /**
-   * What an unranked answer no table gives a figure shows instead, by name, where the source says why: "not in any
-   * report" for the countries no World Happiness Report ranks (Monaco, North Korea). Shown, never scored; the build
-   * fails on a name that isn't such an answer.
+   * A word on an entry's figure, by name, where the source says it: added in brackets to a figure ("7,314 km
+   * (without Greenland)": the CIA counts Denmark's coast apart from Greenland's), or, on an unranked answer no table
+   * gives a figure, shown in its place ("not in any report": Monaco on the World Happiness Report). Never scored;
+   * the build fails on a name that is no entry.
    */
   notes?: Record<string, string>;
   /**
@@ -3796,9 +3797,12 @@ export const TOPICS: Topic[] = [
         dated: { label: "not a sovereign state", unit: " km" },
       },
     ],
-    // Greenland's 44,087 km would be #4: as a part of Denmark it is free, not a costly miss.
-    skip: ["World", "European Union", "Greenland"],
+    // Greenland's 44,087 km would be #4: as a part of Denmark it is free, not a costly miss. Antarctica, no country
+    // either, cost a life showing 17,968 km, a top-10 figure (the judge, Nov 5).
+    skip: ["World", "European Union", "Greenland", "Antarctica"],
     universe: "countries",
+    // A player who reaches Denmark through Greenland sees why it's only #17 (the judge, Nov 5).
+    notes: { Denmark: "without Greenland" },
   },
   {
     id: "coffee-countries",

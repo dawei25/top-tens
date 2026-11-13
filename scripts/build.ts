@@ -367,6 +367,9 @@ export function textRow(pageText: string, t: TextRow): Row {
   return { name: t.name, value: v.value, valueText: v.display, aliasSeeds: [t.name], redirectTarget: t.name, link: t.name };
 }
 
+/** An entry's figure with a topic's note (`notes`): in brackets after it, or in its place when there is none. */
+export const noted = (value: string | undefined, note: string): string => (value === undefined ? note : `${value} (${note})`);
+
 export async function readRows(topic: Topic): Promise<Row[]> {
   const rows: Row[] = [];
   const members = topic.canonical ? [topic.universe ?? []].flat().flatMap((u) => UNIVERSES[u]()) : [];
@@ -1518,11 +1521,11 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     const e = taken.get(name) ?? (countryMembers.size ? countryNames([name]).map((n) => taken.get(n)).find(Boolean) : undefined);
     if (e && e.rank === 0 && e.value === undefined) e.value = shown;
   }
-  // "not in any report": what an unranked answer with no figure from any table shows instead (`notes`).
+  // A word on a figure, "7,314 km (without Greenland)", or in place of none, "not in any report" (`notes`).
   for (const [name, note] of Object.entries(topic.notes ?? {})) {
     const e = entries.find((x) => x.name === name);
-    if (!e || e.rank !== 0 || e.value !== undefined) throw new Error(`${topic.id}: note for "${name}", which is no unranked answer without a figure`);
-    e.value = note;
+    if (!e) throw new Error(`${topic.id}: note for "${name}", which is no entry`);
+    e.value = noted(e.value, note);
   }
   if (topic.people) {
     // A near miss with a figure ("Tyson Fury: #3 in 2025") is typed by surname like the ranked: "prescott" is Dak

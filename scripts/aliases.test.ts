@@ -1167,6 +1167,23 @@ describe("aliases as built: what players type", () => {
     expect(p.answers.find((e) => e.name === "Tokyo")?.fact?.text).toMatch(/Toei/);
   });
 
+  it.each([
+    // Coverage audit (Nov 13): Australia's short forms found nothing (shared COUNTRY_FORMS, applied at this build).
+    ["aus", "Australia"],
+    ["oz", "Australia"],
+    // The judge (Nov 5): Antarctica is no country, like Greenland: free, not a costly miss with a top-10 figure.
+    ["antarctica", "unknown"],
+    ["greenland", "unknown"],
+  ])("coastline-countries: %s -> %s", (guess, name) => {
+    expect(lands("coastline-countries", guess)).toBe(name);
+  });
+
+  it("coastline-countries: Denmark's figure says it leaves out Greenland (the judge, Nov 5)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "coastline-countries.json"), "utf8"));
+    expect(p.extras.find((e) => e.name === "Denmark")?.value).toBe("7,314 km (without Greenland)");
+    expect(p.extras.find((e) => e.name === "Antarctica")).toBeUndefined();
+  });
+
   it("australia-cities: topic redirects are no names of the city (CITY_JUNK)", () => {
     const p: Puzzle = JSON.parse(readFileSync(join(dir, "australia-cities.json"), "utf8"));
     const aliases = p.answers.flatMap((e) => e.aliases);

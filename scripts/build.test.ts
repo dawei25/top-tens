@@ -27,6 +27,7 @@ import {
   scaledFigure,
   shortFormOnly,
   skipName,
+  noted,
   spellingVariants,
   textRow,
 } from "./build";
@@ -518,5 +519,12 @@ describe("textRow (figures from the page's text)", () => {
   it("fails when the page no longer says it, or the quote doesn't give the figure", () => {
     expect(() => textRow(note, { name: "Monaco", value: "86.50", says: "Monaco (LE 86.50 years" })).toThrow(/no longer says/);
     expect(() => textRow(note, { name: "Monaco", value: "86.37", says: "Monaco (LE" })).toThrow(/doesn't give/);
+  });
+});
+
+describe("noted (a word on a figure)", () => {
+  it("goes in brackets after a figure, or stands in for none", () => {
+    expect(noted("7,314 km", "without Greenland")).toBe("7,314 km (without Greenland)");
+    expect(noted(undefined, "not in any report")).toBe("not in any report");
   });
 });
