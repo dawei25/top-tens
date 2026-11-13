@@ -2,6 +2,30 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-13, launch-week morning check (Fri)
+
+- Notes and ratings since yesterday's check: none. Plays all time: 135 across 73 lists (+40 since yesterday).
+- Missed guesses: 158 texts, each from one browser, on 26 lists, all typed between about 10:45 and 16:05 HKT on Nov 12
+  (most likely one or two players, many on Blitz). Re-judged with today's matcher: all still unknown. By theme:
+  - **Real one-slip misspellings not taken** (the fix): a top-10 artist with its first letter slipped, and a
+    three-letter last word slipped beside two exact words, both on spotify-artists. Cause: after shared words are
+    dropped, the matcher rejects a first-letter slip under 8 letters and any slip in a 3-letter word, even when the
+    exact words point at one answer. Fix in progress (matcher agent: one slip is taken beside distinctive shared
+    words, with a leak audit over every list).
+  - **Wrong kind** (the most common theme, 4 lists): sports typed on sports-leagues (about 10, e.g. a sport's own
+    name), cities on tourism and mcdonalds-countries, countries on airports and companies-revenue. Each gets
+    "isn't in this ranking. No life lost", which is true. A "that's a city / a sport" line, as Fathom has, would read
+    better: method idea for the owner, not built.
+  - **Harder misspellings** (hints, one browser): a two-vowel slip on Grand Teton, a three-letter rotation in
+    Bundesliga, a word-order swap of Shake Shack, a two-slip Kendrick Lamar. The single-slip versions are already
+    taken; left as they are.
+  - **Data hints** (queued in REBUILD_QUEUE): a short form for Arabic; Wingstop missing from fast-food-chains; a
+    plain-words name for the IPL.
+  - **Not answers, correctly refused:** celebrity surnames on us-surnames (about 20), recent albums and songs on
+    the all-time lists, regional chains, countries with no McDonald's, near-miss passwords, names outside the
+    popularity tables. No change.
+- Backend: fathom_guesses still not run (`fathom_compare` missing).
+
 ## 2026-11-12, launch-week morning check (Thu)
 
 - Notes, ratings and missed guesses since yesterday's check: none.

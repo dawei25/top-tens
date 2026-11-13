@@ -10,6 +10,12 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Launch-week missed guesses (Nov 12), data hints** (one browser each; build when the list is next rebuilt):
+      languages: "arab" should reach Modern Standard Arabic (intent.ts short form; guard in aliases.test.ts).
+      fast-food-chains: Wingstop (about 2,500 locations) isn't in the source table; check whether the page's
+      other tables have it before adding it by hand. sports-leagues: "indian cricket league" finds nothing, though
+      the Indian Premier League (#12) is there; consider "indian cricket league" as an intent alias.
+
 - [ ] **Country lists: UK aliases and redirect junk** (found by the Fathom name-it work, Nov 10). Built country
       lists carry "Northern Ireland", "Scottish" and "Welsh" as UK aliases, and redirect junk such as "Zambian
       sports" and "Mongolian cyclone". Fathom's lists filter them (`scripts/fathom/lists.ts`); TENtacle's country
