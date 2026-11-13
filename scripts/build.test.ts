@@ -27,7 +27,9 @@ import {
   scaledFigure,
   shortFormOnly,
   skipName,
+  noted,
   spellingVariants,
+  textRow,
 } from "./build";
 import { inRegion, UNIVERSES, whereIs } from "./gazetteer";
 import { COUNTRY_FORMS } from "./intent";
@@ -497,5 +499,32 @@ describe("infobox values", () => {
     expect(readValue(retired, "mlb-hits").year).toBeUndefined();
     const japan = box("<tr><th colspan=2>NPB statistics</th></tr><tr><th>Hits</th><td>297</td></tr>");
     expect(readValue(japan, "mlb-hits")).toMatchObject({ skip: "no MLB statistics" });
+  });
+});
+
+describe("textRow (figures from the page's text)", () => {
+  // The life expectancy page's note on its UN table (Nov 13), with a line break where the page's markup has one.
+  const note =
+    "Only countries with populations over 50,000 are listed. Due to this criterion, the table does not include such\n" +
+    "countries as Monaco (LE 86.37 years, population 39,000), San Marino (LE 85.71 years, population 34,000).";
+  it("ranks a row the table leaves out by the figure the text gives", () => {
+    expect(textRow(note, { name: "Monaco", value: "86.37", says: "Monaco (LE 86.37 years" })).toMatchObject({
+      name: "Monaco",
+      value: 86.37,
+      valueText: "86.37",
+      redirectTarget: "Monaco",
+    });
+    expect(textRow(note, { name: "Monaco", value: "86.37", says: "include such countries as Monaco (LE 86.37" }).value).toBe(86.37);
+  });
+  it("fails when the page no longer says it, or the quote doesn't give the figure", () => {
+    expect(() => textRow(note, { name: "Monaco", value: "86.50", says: "Monaco (LE 86.50 years" })).toThrow(/no longer says/);
+    expect(() => textRow(note, { name: "Monaco", value: "86.37", says: "Monaco (LE" })).toThrow(/doesn't give/);
+  });
+});
+
+describe("noted (a word on a figure)", () => {
+  it("goes in brackets after a figure, or stands in for none", () => {
+    expect(noted("7,314 km", "without Greenland")).toBe("7,314 km (without Greenland)");
+    expect(noted(undefined, "not in any report")).toBe("not in any report");
   });
 });

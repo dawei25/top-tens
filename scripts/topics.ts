@@ -197,6 +197,19 @@ export interface Topic {
    */
   cited?: Record<string, { value: string; n: number; aliases: string[]; source: string }>;
   /**
+   * Ranked rows the table leaves out whose figure the page's own text gives: the UN's life expectancy table drops
+   * places under 50,000 people, and its note says "Monaco (LE 86.37 years". `says` is quoted from the page and gives
+   * `value`; the build fails once the page no longer says it. The row ranks like a table row (build.ts `textRow`).
+   */
+  textRows?: TextRow[];
+  /**
+   * A word on an entry's figure, by name, where the source says it: added in brackets to a figure ("7,314 km
+   * (without Greenland)": the CIA counts Denmark's coast apart from Greenland's), or, on an unranked answer no table
+   * gives a figure, shown in its place ("not in any report": Monaco on the World Happiness Report). Never scored;
+   * the build fails on a name that is no entry.
+   */
+  notes?: Record<string, string>;
+  /**
    * Names of the list's kind that are not answers, read like `also`: free to guess (no figure to learn from), but
    * still real names to the game. The build records them in scripts/known/<id>.json and the lexicon learns them, so
    * typed in full one is never junk nor corrected into an answer, and their words still count as plain words.
@@ -310,6 +323,13 @@ export interface Dated {
    * ($407,600,113)" for the year's highest-grossing tour.
    */
   perYear?: { col: string | number; rank?: number };
+}
+
+/** A ranked row from the page's text (`textRows`): its name, its figure as the page writes it, and the words saying so. */
+export interface TextRow {
+  name: string;
+  value: string;
+  says: string;
 }
 
 /** Redirects to US states that are jokes, documents, agencies or teams, found by the list judges. */
@@ -1721,6 +1741,8 @@ export const TOPICS: Topic[] = [
       "Attempted Taylor Swift concert terrorist plot", "Live in Ahmedabad", "Coldplay - Live in Ahmedabad", "Tutto Passa",
       "Coldplay – Live in Paris", "The Weeknd Live at SoFi Stadium", "Kiss the future tour",
     ],
+    // Not on the page, and real names, said plainly rather than "not one of the tours" (coverage audit, Nov 13).
+    knownNames: ["Bono", "ACDC", "Oasis Live '25 Tour", "Oasis Live 25", "Live '25"],
   },
   {
     id: "animated-films",
@@ -3698,17 +3720,29 @@ export const TOPICS: Topic[] = [
     // The system's name: "tokyo metro", "beijing subway", "london underground".
     aliasCols: ["Name"],
     aliases: {
-      "Hong Kong": ["MTR"],
+      // Kowloon is Hong Kong's (as on skyscraper-cities), not "isn't in this ranking".
+      "Hong Kong": ["MTR", "Kowloon"],
       Tokyo: ["Toei", "Toei Subway"],
       Seoul: ["Seoul Subway", "Seoul Metro"],
-      "New York City": ["NYC Subway", "New York Subway"],
-      Paris: ["Paris Metro", "Paris Métro"],
+      // Coverage audit (Nov 13): what riders call their systems found nothing ("mta", "wmata", "ttc", "septa", "subte",
+      // the systems' own names in Spanish and French, "delhi ncr").
+      "New York City": ["NYC Subway", "New York Subway", "MTA", "NYC MTA"],
+      Paris: ["Paris Metro", "Paris Métro", "Métro de Paris", "Metro de Paris"],
+      Madrid: ["Metro de Madrid"],
+      Santiago: ["Metro de Santiago"],
+      "Buenos Aires": ["Subte", "Buenos Aires Subte"],
+      "Washington, D.C.": ["DC Metro", "WMATA"],
+      Toronto: ["TTC"],
+      Philadelphia: ["SEPTA"],
+      Delhi: ["Delhi NCR"],
       "Mexico City": ["Mexico City Metro"],
     },
     // Systems named by a kind of railway or a colour, not their city: "red line" or "skyline" names no city.
     junkAliases: ["Mass Rapid Transit", "Metropolitan Rapid Transit", "Metro Rail", "Metrorail", "Red Line", "Skyline", "Federal District Metro"],
     also: CITIES,
     universe: "capitals",
+    // Tokyo's busiest districts (Shinjuku has the world's busiest station) are no city of their own: free, said plainly.
+    knownNames: ["Shinjuku", "Shibuya"],
   },
   {
     id: "landlocked-countries",
@@ -3765,9 +3799,12 @@ export const TOPICS: Topic[] = [
         dated: { label: "not a sovereign state", unit: " km" },
       },
     ],
-    // Greenland's 44,087 km would be #4: as a part of Denmark it is free, not a costly miss.
-    skip: ["World", "European Union", "Greenland"],
+    // Greenland's 44,087 km would be #4: as a part of Denmark it is free, not a costly miss. Antarctica, no country
+    // either, cost a life showing 17,968 km, a top-10 figure (the judge, Nov 5).
+    skip: ["World", "European Union", "Greenland", "Antarctica"],
     universe: "countries",
+    // A player who reaches Denmark through Greenland sees why it's only #17 (the judge, Nov 5).
+    notes: { Denmark: "without Greenland" },
   },
   {
     id: "coffee-countries",
@@ -3983,7 +4020,8 @@ export const TOPICS: Topic[] = [
     dataAsOf: "2026",
     people: true,
     aliases: {
-      "Leonardo da Vinci": ["Da Vinci", "Leonardo", "Leo da Vinci"],
+      // "di vinci", the usual slip, found nothing (coverage audit, Nov 13).
+      "Leonardo da Vinci": ["Da Vinci", "Leonardo", "Leo da Vinci", "Di Vinci", "Leonardo di Vinci"],
       "Willem de Kooning": ["de Kooning", "DeKooning"],
       "Paul Cézanne": ["Cezanne"],
       "Jackson Pollock": ["Pollock"],
@@ -4020,6 +4058,10 @@ export const TOPICS: Topic[] = [
       "Henri de Toulouse-Lautrec", "Toulouse-Lautrec", "Norman Rockwell", "Gerhard Richter", "Leonardo DiCaprio",
       "Sigmund Freud", "Donatello", "Auguste Rodin", "Rodin", "Gustave Courbet", "Camille Pissarro", "Jan van Eyck",
       "Hieronymus Bosch", "Pieter Bruegel", "Albrecht Dürer", "Artemisia Gentileschi",
+      // Coverage audit (Nov 13): these read as "not one of the painters" (surnames alone, and painters left out).
+      "Piet Mondrian", "Mondrian", "James McNeill Whistler", "Whistler", "Bruegel", "Brueghel", "Dürer", "Van Eyck",
+      "Schiele", "Klee", "Pissarro", "Courbet", "Haring", "Rockwell", "Botero", "Gentileschi", "Lautrec", "Koons",
+      "Frida", "Yoshitomo Nara", "Zhang Daqian", "Ai Weiwei",
     ],
   },
   {
@@ -4289,11 +4331,20 @@ export const TOPICS: Topic[] = [
     unit: " years",
     dataAsOf: "2023",
     universe: "countries",
-    // Sovereign states only: the table's territories (Hong Kong #1, French Polynesia, Réunion, Macau) are free. So are
-    // the microstates it leaves out: the CIA puts Monaco (89.8, the guess everyone makes) and San Marino above the
-    // UN's #10, and Liechtenstein just below it on a scale that runs higher, so none may cost a life. Vatican City has
-    // no figure anywhere.
-    skip: [...DEPENDENCIES, "Monaco", "San Marino", "Liechtenstein", "Vatican City"],
+    // Sovereign states only: the table's territories (Hong Kong #1, French Polynesia, Réunion, Macau) are free.
+    // The table leaves out places under 50,000 people, but its note gives the UN's figures for Monaco and San Marino,
+    // both above Japan: they rank from it (the judge, Nov 13: "Monaco isn't in this ranking" told the player who
+    // knew the famous answer that they were wrong).
+    textRows: [
+      { name: "Monaco", value: "86.37", says: "Monaco (LE 86.37 years" },
+      { name: "San Marino", value: "85.71", says: "San Marino (LE 85.71 years" },
+    ],
+    // Liechtenstein has no UN figure on the page (the World Bank's note gives 84.20 for 2024), so it stays free. The
+    // UN's own data (WPP 2024, 2023) gives it 83.63, below Spain's 83.67: the top 10 is right without it (checked
+    // Nov 13). Vatican City has no figure anywhere.
+    skip: [...DEPENDENCIES, "Liechtenstein", "Vatican City"],
+    // Monaco's best-known district: "monte carlo" said it isn't in the ranking, with Monaco #1 (coverage audit).
+    aliases: { Monaco: ["Monte Carlo"] },
     // The other countries the UN table leaves out, with the CIA's 2024 figure.
     also: [
       {
@@ -4317,9 +4368,16 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Country or region",
     value: "Life evaluation",
+    // The table is in the report's own order, from unrounded scores: Czechia #20 and the UAE #21 both show 6.821
+    // (the judge, Nov 13: the UAE read #20).
+    keepOrder: true,
     metric: "Life rating, 0 to 10 (2026 report)",
     dataAsOf: "2026",
     universe: "countries",
+    // Countries no report has ranked (Gallup doesn't poll them), the rich-and-happy guesses among them: a figure that
+    // says so, the way Bhutan's says "#95 in the 2019 report" (the judge, Nov 13). Not every country without a
+    // figure: the page has no 2014, 2015 or 2021 table, which may rank one (Djibouti).
+    notes: Object.fromEntries(["Monaco", "Liechtenstein", "San Marino", "Vatican City", "North Korea"].map((c) => [c, "not in any report"])),
     // Every country is an answer. A dependency no report ranks is free (Greenland, the Faroe Islands); the two some
     // report ranks stay (Hong Kong #90, Puerto Rico in 2016). An old table's "Europe" row is no country.
     skip: [...DEPENDENCIES.filter((d) => d !== "Hong Kong" && d !== "Puerto Rico"), "Europe"],
@@ -4345,7 +4403,8 @@ export const TOPICS: Topic[] = [
     prompt: "Name the 10 most populous cities in Australia (urban areas, 2025)",
     page: "List of cities in Australia by population",
     // The ABS's significant urban areas (June 2025 estimates), 103 of them: a city with the suburbs it has grown into.
-    // By this count Melbourne passed Sydney in 2023.
+    // By this count Melbourne passed Sydney in 2023. Alice Springs (#50) has exactly Mount Gambier's 30,875, and so
+    // does the ABS cube the page cites (32180DS0004, Table 2, June 2025): a coincidence, not a slip (checked Nov 13).
     tables: [1],
     name: "Significant Urban Area",
     value: "June 2025",
@@ -4357,15 +4416,25 @@ export const TOPICS: Topic[] = [
       "Newcastle–Maitland": "Newcastle",
       "Canberra–Queanbeyan": "Canberra",
     },
-    // The 50 largest urban centres (2021 census): suburbs and towns the urban areas count inside others (Melton,
-    // Gawler), with their census count.
-    also: [{ tables: [3], name: "Urban centre", value: 2, dated: { label: "2021 census" } }],
-    // Builder's fan run (Nov 13): "greater sydney" found nothing; Gosford is the Central Coast's main town.
-    aliases: { Sydney: ["Greater Sydney"], Perth: ["Greater Perth"], "Central Coast": ["Gosford"] },
+    // The 50 largest urban centres (2021 census), with their census count. Not the towns the table places inside one
+    // city's urban area (its column 9 names it): Melton and Sunbury are Melbourne's, Blue Mountains Sydney's, Gawler
+    // Adelaide's, so by this list's own count they are part of #1, #2 and #5 and free, like Fremantle (the judge, Nov
+    // 13). The parts of joined areas ("Newcastle–Maitland") stay: they merge into their area.
+    also: [{ tables: [3], name: "Urban centre", value: 2, dated: { label: "2021 census" }, where: { col: 9, match: /^$|–/ } }],
+    // Builder's fan run (Nov 13): "greater sydney" found nothing; Gosford is the Central Coast's main town. Coverage
+    // audit (Nov 13): "newie" found nothing.
+    aliases: { Sydney: ["Greater Sydney"], Perth: ["Greater Perth"], "Central Coast": ["Gosford"], Newcastle: ["Newy", "Newie"] },
+    // To Australians "south coast" is the NSW South Coast, not the Gold Coast (the judge, Nov 13). "South Coast,
+    // Queensland" stays.
+    junkAliases: ["South Coast"],
     // Suburbs, towns and sights inside the urban areas, and places that aren't cities: free, and real names.
     knownNames: [
       "Fremantle", "Parramatta", "Surfers Paradise", "Noosa", "Noosa Heads", "Bondi", "Bondi Beach", "St Kilda",
       "Manly", "Uluru", "Ayers Rock", "Great Barrier Reef", "Kakadu", "Whitsundays",
+      "Melton", "Sunbury", "Blue Mountains", "Gawler",
+      // Coverage audit (Nov 13): towns the urban areas hold, which read as "not one of the cities".
+      "Caloundra", "Maroochydore", "Mooloolaba", "Mandurah", "Penrith", "Ipswich", "Frankston", "Dandenong", "Wyong",
+      "Mount Barker",
     ],
   },
 ];

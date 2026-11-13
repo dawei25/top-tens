@@ -7,7 +7,7 @@ import { join } from "node:path";
 import type { Entry, Fact, Puzzle } from "../src/game/types";
 import { normalize } from "../src/game/match";
 import { cleanText, splitHeader, statNumber, tableGrid, wikitables, type Cell } from "./table";
-import { TEST_SET, TOPICS, type Also, type Dated, type Topic } from "./topics";
+import { TEST_SET, TOPICS, type Also, type Dated, type TextRow, type Topic } from "./topics";
 import { fetchCategory, fetchPage, fetchRedirects, NotFound, pageUrl, requestCount } from "./wiki";
 import { addValues } from "./values";
 import { KNOWN_DIR, writeLexicon } from "./lexicon";
@@ -354,6 +354,22 @@ export function rankRows<R extends Pick<Row, "value" | "tiebreak">>(topic: Pick<
   return rows.sort((a, b) => dir * (b.value - a.value) || (b.tiebreak ?? 0) - (a.tiebreak ?? 0));
 }
 
+/**
+ * A ranked row the table leaves out, from the page's own text (`textRows`): the UN's note gives "Monaco (LE 86.37
+ * years". Fails when the text no longer says it, so a changed page never ships a figure it dropped.
+ */
+export function textRow(pageText: string, t: TextRow): Row {
+  const said = (s: string) => s.replace(/\s+/g, " ");
+  if (!said(t.says).includes(t.value)) throw new Error(`textRows "${t.name}": "${t.says}" doesn't give ${t.value}`);
+  if (!said(pageText).includes(said(t.says))) throw new Error(`textRows "${t.name}": the page no longer says "${t.says}"`);
+  const v = parseValue(t.value);
+  if (!v) throw new Error(`textRows "${t.name}": ${t.value} is no figure`);
+  return { name: t.name, value: v.value, valueText: v.display, aliasSeeds: [t.name], redirectTarget: t.name, link: t.name };
+}
+
+/** An entry's figure with a topic's note (`notes`): in brackets after it, or in its place when there is none. */
+export const noted = (value: string | undefined, note: string): string => (value === undefined ? note : `${value} (${note})`);
+
 export async function readRows(topic: Topic): Promise<Row[]> {
   const rows: Row[] = [];
   const members = topic.canonical ? [topic.universe ?? []].flat().flatMap((u) => UNIVERSES[u]()) : [];
@@ -453,6 +469,14 @@ export async function readRows(topic: Topic): Promise<Row[]> {
           ...(ccol >= 0 ? { country: cellCountries(r[ccol], unknownCountries) } : {}),
         });
       }
+    }
+  }
+  if (topic.textRows?.length) {
+    const $ = await fetchPage(topic.page);
+    $("style, script").remove();
+    for (const t of topic.textRows) {
+      rows.push(textRow($("body").text(), t));
+      console.log(`     ${topic.id}: ${t.name} ${t.value} from the page's text ("${t.says}")`);
     }
   }
   for (const name of Object.keys(topic.overrides ?? {})) {
@@ -1496,6 +1520,12 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     // The table's "Czech Republic: 0" is the universe's Czechia.
     const e = taken.get(name) ?? (countryMembers.size ? countryNames([name]).map((n) => taken.get(n)).find(Boolean) : undefined);
     if (e && e.rank === 0 && e.value === undefined) e.value = shown;
+  }
+  // A word on a figure, "7,314 km (without Greenland)", or in place of none, "not in any report" (`notes`).
+  for (const [name, note] of Object.entries(topic.notes ?? {})) {
+    const e = entries.find((x) => x.name === name);
+    if (!e) throw new Error(`${topic.id}: note for "${name}", which is no entry`);
+    e.value = noted(e.value, note);
   }
   if (topic.people) {
     // A near miss with a figure ("Tyson Fury: #3 in 2025") is typed by surname like the ranked: "prescott" is Dak

@@ -1,9 +1,9 @@
 {
   "Melbourne": {
-    "text": "Victoria's capital first overtook Sydney as Australia's biggest city in 1865; on this count it is ahead again.",
-    "source": "https://en.wikipedia.org/wiki/Melbourne",
+    "text": "Victoria's capital is Australia's biggest urban area, but Greater Sydney, which also counts the Central Coast, has more people: 5.64 million to 5.44 million.",
+    "source": "https://en.wikipedia.org/wiki/List_of_cities_in_Australia_by_population",
     "where": "Victoria",
-    "evidence": "Exponential growth ensued, and by 1865, Melbourne had overtaken Sydney as Australia's most populous city."
+    "evidence": "Greater Capital City Statistical Areas, June 2025: 1 Greater Sydney 5,638,830 (included SUAs: Sydney, Central Coast); 2 Greater Melbourne 5,435,590 (Melbourne, Bacchus Marsh, Gisborne). Significant Urban Areas: 1 Melbourne 5,328,274; 2 Sydney 5,219,674."
   },
   "Sydney": {
     "text": "The capital of New South Wales has seventy surf beaches, Bondi the most famous.",

@@ -189,6 +189,8 @@ const BASE_COUNTRY_FORMS: string[][] = [
   // "aus" and "oz" found nothing (builder's fan run on life expectancy, Nov 13).
   ["Australia", "Aussie", "Aussies", "Aus", "Oz"],
   ["Switzerland", "Swiss", "Swiss Confederation"],
+  // "lux" found nothing on life-expectancy-countries (coverage audit, Nov 13); happiest-countries had it alone.
+  ["Luxembourg", "Lux"],
   ["India", "Bharat"],
   ["Japan", "Nippon", "Nihon"],
   ["South Africa", "RSA"],
@@ -312,6 +314,9 @@ export const CITY_FORMS: string[][] = [
   ["Adelaide", "Radelaide"],
   ["Gold Coast", "Goldie"],
   ["Sunshine Coast", "Sunny Coast"],
+  // As everyone says them (coverage audit, Nov 13: "wagga" and "coffs" were only offered).
+  ["Wagga Wagga", "Wagga"],
+  ["Coffs Harbour", "Coffs"],
   ["Delhi", "New Delhi", "Dilli"],
   ["Mumbai", "Bombay"],
   ["Chennai", "Madras"],
@@ -428,6 +433,13 @@ export const CITY_FORMS: string[][] = [
   ["Astana", "Nur-Sultan", "Nursultan", "Akmola", "Tselinograd"],
   ["Pretoria", "Tshwane"],
   ["Jakarta", "Batavia"],
+  // South Korea's cities in the older romanization (metro-cities coverage audit, Nov 13: "pusan" and "taegu" found
+  // nothing).
+  ["Busan", "Pusan"],
+  ["Daegu", "Taegu"],
+  ["Incheon", "Inchon"],
+  ["Gwangju", "Kwangju"],
+  ["Daejeon", "Taejon"],
 ];
 
 /**
@@ -1076,6 +1088,9 @@ export const INTENT: Record<string, Intent> = {
       Stones: ["A Bigger Bang Tour", "No Filter Tour", "Voodoo Lounge Tour", "Licks Tour"],
       U2: ["360° Tour", "The Joshua Tree Tours 2017 & 2019", "Vertigo Tour", "PopMart Tour"],
       Springsteen: ["Springsteen and E Street Band 2023–2025 Tour", "Magic Tour", "The River Tour 2016", "Born in the U.S.A. Tour"],
+      // Coverage audit (Nov 13): "swift" and "taylor" said they aren't in the ranking, with the Eras Tour #1.
+      Swift: ["The Eras Tour", "The 1989 World Tour"],
+      Taylor: ["The Eras Tour", "The 1989 World Tour"],
     },
   },
   "animated-films": {
@@ -1645,6 +1660,8 @@ export const INTENT: Record<string, Intent> = {
       // Russia's 2022 team, an entry of its own like its 2018 one (Olympic Athletes from Russia): "roc" is not Taiwan's
       // (no Winter medal) nor Russia's. It takes none of Taiwan's other names (topics.ts `notCountries`).
       "Russian Olympic Committee": ["ROC"],
+      // Coverage audit (Nov 13): "team canada" found nothing, where "team usa" and "team gb" land.
+      Canada: ["Team Canada"],
     },
   },
   "happiest-countries": {

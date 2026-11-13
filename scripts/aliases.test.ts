@@ -958,6 +958,14 @@ describe("aliases as built: what players type", () => {
     expect(lands("painters", "van gogh")).toBe("Vincent van Gogh");
   });
 
+  it("painters: the usual slip on da Vinci, and famous painters the ranking leaves out say so (coverage audit, Nov 13)", () => {
+    expect(lands("painters", "di vinci")).toBe("Leonardo da Vinci");
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "painters.json"), "utf8"));
+    for (const name of ["mondrian", "whistler", "bruegel", "durer", "van eyck", "schiele", "koons", "klee", "money"]) {
+      expect(judgeGuess(name, p, new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
+    }
+  });
+
   it.each([
     // Builder's fan run (Nov 13): her maiden name, the nicknames, and a married name in the champions' cells.
     ["margaret smith", "Margaret Court"],
@@ -1001,6 +1009,10 @@ describe("aliases as built: what players type", () => {
     ["russian federation", "Russia"],
     ["ussr", "Soviet Union"],
     ["uk", "Great Britain"],
+    // Coverage audit (Nov 13): "team canada" found nothing, where "team usa" and "team gb" land.
+    ["team canada", "Canada"],
+    ["team usa", "United States"],
+    ["team gb", "Great Britain"],
   ])("winter-olympics-countries: %s -> %s", (guess, name) => {
     expect(lands("winter-olympics-countries", guess)).toBe(name);
   });
@@ -1033,16 +1045,33 @@ describe("aliases as built: what players type", () => {
     ["korea", "South Korea"],
     ["swiss", "Switzerland"],
     ["nippon", "Japan"],
-    // Sovereign states only: the table's territories and the microstates it leaves out are free.
+    // Sovereign states only: the table's territories are free, and Liechtenstein, which has no UN figure on the page.
     ["hong kong", "unknown"],
     ["macau", "unknown"],
     ["french polynesia", "unknown"],
-    ["monaco", "unknown"],
-    ["san marino", "unknown"],
+    ["liechtenstein", "unknown"],
+    // The judge (Nov 13): the UN note on the table ranks Monaco and San Marino, above Japan.
+    ["monaco", "Monaco"],
+    ["san marino", "San Marino"],
+    // Coverage audit (Nov 13): Monaco's district said it isn't in the ranking; "lux" found nothing.
+    ["monte carlo", "Monaco"],
+    ["lux", "Luxembourg"],
     // Redirects that are no name for the country.
     ["andorran navy", "unknown"],
   ])("life-expectancy-countries: %s -> %s", (guess, name) => {
     expect(lands("life-expectancy-countries", guess)).toBe(name);
+  });
+
+  it("life-expectancy-countries: Monaco and San Marino rank from the UN's note, and Japan's fact is true (the judge, Nov 13)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "life-expectancy-countries.json"), "utf8"));
+    expect(p.answers.map((e) => e.name)).toEqual([
+      "Monaco", "San Marino", "Japan", "South Korea", "Andorra", "Switzerland", "Australia", "Singapore", "Italy", "Spain",
+    ]);
+    expect(p.answers.slice(0, 2).map((e) => e.value)).toEqual(["86.37 years", "85.71 years"]);
+    for (const e of p.answers) expect(e.fact, e.name).toBeDefined();
+    // Hong Kong, a territory, tops the UN table: Japan is not "first on the UN's figures".
+    expect(p.answers.find((e) => e.name === "Japan")?.fact?.text).not.toMatch(/^First/);
+    expect(p.answers.find((e) => e.name === "San Marino")?.aliases).not.toContain("Liberation from the Alberoni Occupation");
   });
 
   it.each([
@@ -1056,6 +1085,20 @@ describe("aliases as built: what players type", () => {
     ["bhutan", "Bhutan"],
   ])("happiest-countries: %s -> %s", (guess, name) => {
     expect(lands("happiest-countries", guess)).toBe(name);
+  });
+
+  it("happiest-countries: ties take the report's own rank, and a country no report ranks says so (the judge, Nov 13)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "happiest-countries.json"), "utf8"));
+    const of = (name: string) => [...p.answers, ...p.extras].find((e) => e.name === name);
+    // Both 6.821 to three decimals; the report ranks Czechia #20 and the UAE #21.
+    expect(of("Czechia")?.rank).toBe(20);
+    expect(of("United Arab Emirates")?.rank).toBe(21);
+    for (const c of ["Monaco", "Liechtenstein", "San Marino", "Vatican City", "North Korea"]) {
+      expect(of(c), c).toMatchObject({ rank: 0, value: "not in any report" });
+      expect(of(c)?.n, c).toBeUndefined();
+    }
+    expect(of("Bhutan")?.value).toBe("#95 in the 2019 report");
+    expect(of("Israel")?.fact?.text).toMatch(/since 2022/);
   });
 
   it.each([
@@ -1074,8 +1117,86 @@ describe("aliases as built: what players type", () => {
     // Suburbs and sights inside the urban areas are free.
     ["fremantle", "unknown"],
     ["surfers paradise", "unknown"],
+    // The judge (Nov 13): towns the source puts inside Melbourne's, Sydney's and Adelaide's urban areas cost a life
+    // as answers outside the ranking. They are part of #1, #2 and #5: free.
+    ["melton", "unknown"],
+    ["sunbury", "unknown"],
+    ["blue mountains", "unknown"],
+    ["gawler", "unknown"],
+    // "South Coast" is the NSW one to Australians, not the Gold Coast; the full name still is.
+    ["south coast", "unknown"],
+    ["south coast queensland", "Gold Coast"],
+    // Coverage audit (Nov 13): a nickname found nothing, two short forms were only offered.
+    ["newy", "Newcastle"],
+    ["wagga", "Wagga Wagga"],
+    ["coffs", "Coffs Harbour"],
   ])("australia-cities: %s -> %s", (guess, name) => {
     expect(lands("australia-cities", guess)).toBe(name);
+  });
+
+  it("australia-cities: towns inside an urban area say so plainly, and the facts say why Melbourne leads", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "australia-cities.json"), "utf8"));
+    for (const town of ["melton", "gawler", "maroochydore", "ipswich", "penrith"]) {
+      expect(judgeGuess(town, p, new Set(), lex), town).toMatchObject({ kind: "unknown", known: true });
+    }
+    expect(p.answers.find((e) => e.name === "Melbourne")?.fact?.text).toMatch(/Greater Sydney/);
+    // Alice Springs and Mount Gambier really have the same figure: the ABS cube the page cites agrees (Nov 13).
+    const alice = p.extras.find((e) => e.name === "Alice Springs");
+    expect(alice?.value).toBe("30,875");
+  });
+
+  it.each([
+    // Coverage audit (Nov 13): what riders call their systems, and Korea's older romanization, found nothing.
+    ["mta", "New York City"],
+    ["wmata", "Washington, D.C."],
+    ["dc metro", "Washington, D.C."],
+    ["ttc", "Toronto"],
+    ["septa", "Philadelphia"],
+    ["subte", "Buenos Aires"],
+    ["metro de paris", "Paris"],
+    ["metro de madrid", "Madrid"],
+    ["delhi ncr", "Delhi"],
+    ["pusan", "Busan"],
+    ["taegu", "Daegu"],
+    ["toei", "Tokyo"],
+    // Kowloon is Hong Kong's, not "isn't in this ranking"; Tokyo's districts are real names, free.
+    ["kowloon", "Hong Kong"],
+    ["shinjuku", "unknown"],
+  ])("metro-cities: %s -> %s", (guess, name) => {
+    expect(lands("metro-cities", guess)).toBe(name);
+  });
+
+  it("metro-cities: Tokyo's fact says the ranking is Tokyo Metro alone (the judge, Nov 5)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "metro-cities.json"), "utf8"));
+    expect(p.answers.find((e) => e.name === "Tokyo")?.fact?.text).toMatch(/Toei/);
+  });
+
+  it("concert-tours: the artist's surname or first name alone, and names the page leaves out (coverage audit, Nov 13)", () => {
+    // "swift" and "taylor" said they aren't in the ranking, with the Eras Tour #1; like "taylor swift", they put it in
+    // the box to confirm (her 1989 World Tour has the names too).
+    expect(lands("concert-tours", "swift")).toBe("The Eras Tour");
+    expect(lands("concert-tours", "taylor")).toBe("The Eras Tour");
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "concert-tours.json"), "utf8"));
+    for (const name of ["bono", "acdc", "oasis live 25"]) {
+      expect(judgeGuess(name, p, new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
+    }
+  });
+
+  it.each([
+    // Coverage audit (Nov 13): Australia's short forms found nothing (shared COUNTRY_FORMS, applied at this build).
+    ["aus", "Australia"],
+    ["oz", "Australia"],
+    // The judge (Nov 5): Antarctica is no country, like Greenland: free, not a costly miss with a top-10 figure.
+    ["antarctica", "unknown"],
+    ["greenland", "unknown"],
+  ])("coastline-countries: %s -> %s", (guess, name) => {
+    expect(lands("coastline-countries", guess)).toBe(name);
+  });
+
+  it("coastline-countries: Denmark's figure says it leaves out Greenland (the judge, Nov 5)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "coastline-countries.json"), "utf8"));
+    expect(p.extras.find((e) => e.name === "Denmark")?.value).toBe("7,314 km (without Greenland)");
+    expect(p.extras.find((e) => e.name === "Antarctica")).toBeUndefined();
   });
 
   it("australia-cities: topic redirects are no names of the city (CITY_JUNK)", () => {

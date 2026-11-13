@@ -1,8 +1,18 @@
 {
+  "Monaco": {
+    "text": "It stopped collecting income tax from its residents in 1869, an indulgence paid for by its casino at Monte Carlo.",
+    "source": "https://en.wikipedia.org/wiki/Monaco",
+    "evidence": "In 1869, the principality stopped collecting income tax from its residents, an indulgence the Grimaldi family could afford to entertain thanks solely to the extraordinary success of the casino."
+  },
+  "San Marino": {
+    "text": "Founded, it says, in AD 301, it claims to be the oldest country still standing and the oldest constitutional republic.",
+    "source": "https://en.wikipedia.org/wiki/San_Marino",
+    "evidence": "San Marino claims to have been founded in AD 301 and to be the oldest extant sovereign state, and the oldest constitutional republic."
+  },
   "Japan": {
-    "text": "First on the UN's 2023 figures, it also has the oldest population of any country: a third of its people are elderly.",
-    "source": "https://en.wikipedia.org/wiki/Japan",
-    "evidence": "Japan is one of the world's fastest aging countries and has the highest proportion of elderly citizens of any country, comprising one-third of its total population"
+    "text": "The longest-lived country of over 50,000 people: in the UN's table, only Hong Kong, a Chinese territory, tops it.",
+    "source": "https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy",
+    "evidence": "UN table (2023): Hong Kong 85.51, Japan 84.71, South Korea 84.33. \"Only countries with populations over 50,000 are listed. Due to this criterion, the table does not include such countries as Monaco (LE 86.37 years, population 39,000), San Marino (LE 85.71 years, population 34,000)\""
   },
   "South Korea": {
     "text": "As recently as 2008 it ranked only 34th in the world for life expectancy.",
@@ -38,15 +48,5 @@
     "text": "COVID-19 cut its life expectancy by more than a year in 2020.",
     "source": "https://en.wikipedia.org/wiki/Spain",
     "evidence": "In January 2020, the COVID-19 virus was confirmed to have spread to Spain, causing life expectancy to drop by more than a year."
-  },
-  "France": {
-    "text": "Jeanne Calment of Arles lived 122 years and 164 days, the longest verified human life. She said she once met van Gogh.",
-    "source": "https://en.wikipedia.org/wiki/Jeanne_Calment",
-    "evidence": "Jeanne Louise Calment ... was a French supercentenarian who is the oldest person in recorded history whose age has been verified, with a documented lifespan of 122 years and 164 days. ... Calment claimed to reporters that she had met van Gogh"
-  },
-  "Norway": {
-    "text": "It has the world's largest sovereign wealth fund, worth US$2.1 trillion.",
-    "source": "https://en.wikipedia.org/wiki/Norway",
-    "evidence": "It has the world's largest sovereign wealth fund, with a value of US$2.1 trillion."
   }
 }
