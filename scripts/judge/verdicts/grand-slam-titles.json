@@ -1,0 +1,22 @@
+{
+  "id": "grand-slam-titles",
+  "by": "builder",
+  "judgedAt": "2026-11-13",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 8,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 5, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": { "scored": 16, "named": 18 },
+  "difficulty": 3,
+  "tags": ["sports", "tennis"],
+  "audience": "anyone",
+  "summary": "Federer, Nadal, Djokovic and Serena come fast, Sampras and Graf with thought; Evert, Navratilova, Court and Helen Wills are the stretches, and Agassi, Venus and McEnroe are the traps.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. Two casual orders both found 6 (the Big Three, Serena, Sampras, Graf) and lost lives on Venus Williams (7), Andy Murray (3), Agassi (8), McEnroe (7) and Sharapova (5), each showing its count.",
+    "Men and women together, from the all-time tables (everyone with 8 or more is ranked); every champion of the four majors is an answer with a career total, so a miss always teaches a number. Djokovic and Court tie at 24 (#1 and #2).",
+    "Famous players with no singles major (Kyrgios, Kournikova, Henman) are free; 'williams' is Serena, 'martina' Navratilova, 'court' Margaret Court."
+  ],
+  "fixes": []
+}

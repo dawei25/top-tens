@@ -676,5 +676,33 @@
   "category": "Oddball",
   "blitz": true,
   "debut": true
+ },
+ {
+  "id": "billionaire-cities",
+  "title": "Cities with the most billionaires",
+  "category": "Business",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "winter-olympics-countries",
+  "title": "Countries with the most Winter Olympic medals (total)",
+  "category": "Sports",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "grand-slam-titles",
+  "title": "Tennis players with the most Grand Slam singles titles",
+  "category": "Sports",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "wine-countries",
+  "title": "Countries that produce the most wine",
+  "category": "Business",
+  "blitz": true,
+  "debut": true
  }
 ]

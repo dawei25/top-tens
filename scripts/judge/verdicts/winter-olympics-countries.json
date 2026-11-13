@@ -1,0 +1,22 @@
+{
+  "id": "winter-olympics-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-13",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 5, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 20, "named": 22 },
+  "difficulty": 2,
+  "tags": ["sports", "olympics", "winter sports"],
+  "audience": "anyone",
+  "summary": "Norway, the US, Canada and Germany come fast; Finland and the Soviet Union are the surprises, and Russia, Japan, China and South Korea are the traps, each with its count.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. Two casual orders found 8 and 6 (Norway, US, Canada, Germany, Switzerland, Sweden, Austria, Finland) and lost lives on Russia (#13, 118), Japan (#15), China (#16), South Korea (#17) and France (#12).",
+    "All medals, not golds (by golds Canada is #4 and Finland drops out), Milano Cortina 2026 included. The Soviet Union counts apart from Russia, as on olympic-medals; ROC's 2022 row is left out (its name is also Taiwan's), so 'roc' reads as Russia.",
+    "Shares 5 of 10 answers with olympic-medals (Today's list on Nov 7): run it a few weeks apart."
+  ],
+  "fixes": []
+}

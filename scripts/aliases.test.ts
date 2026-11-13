@@ -957,4 +957,63 @@ describe("aliases as built: what players type", () => {
     expect(lands("painters", "gogh")).toBe("Vincent van Gogh");
     expect(lands("painters", "van gogh")).toBe("Vincent van Gogh");
   });
+
+  it.each([
+    // Builder's fan run (Nov 13): her maiden name, the nicknames, and a married name in the champions' cells.
+    ["margaret smith", "Margaret Court"],
+    ["margaret smith court", "Margaret Court"],
+    ["court", "Margaret Court"],
+    ["rafa", "Rafael Nadal"],
+    ["fedex", "Roger Federer"],
+    ["pistol pete", "Pete Sampras"],
+    ["helen wills", "Helen Wills Moody"],
+    ["chrissie evert", "Chris Evert"],
+    ["billie jean king", "Billie Jean King"],
+    // Champions show their count ("McEnroe: 7"); famous players with no singles major are real names, free.
+    ["mcenroe", "John McEnroe"],
+    ["kyrgios", "unknown"],
+    ["kournikova", "unknown"],
+  ])("grand-slam-titles: %s -> %s", (guess, name) => {
+    expect(lands("grand-slam-titles", guess)).toBe(name);
+  });
+
+  it("grand-slam-titles: a champion the cells name by her married name is the ranked answer, not a second one", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "grand-slam-titles.json"), "utf8"));
+    const names = [...p.answers, ...p.extras].map((e) => e.name);
+    expect(names).not.toContain("Margaret Smith Court");
+    expect(names).not.toContain("Billie Jean Moffitt King");
+    expect(names.filter((n) => n === "Billie Jean King")).toHaveLength(1);
+  });
+
+  it.each([
+    // "ROC" is a name of Taiwan too: ranked, the Russian Olympic Committee took all of Taiwan's names.
+    ["taiwan", "Taiwan"],
+    ["chinese taipei", "Taiwan"],
+    ["roc", "Russia"],
+    ["ussr", "Soviet Union"],
+    ["uk", "Great Britain"],
+  ])("winter-olympics-countries: %s -> %s", (guess, name) => {
+    expect(lands("winter-olympics-countries", guess)).toBe(name);
+  });
+
+  it.each([
+    ["manhattan", "New York City"],
+    ["delhi", "New Delhi"],
+    ["bombay", "Mumbai"],
+    ["sf", "San Francisco"],
+  ])("billionaire-cities: %s -> %s", (guess, name) => {
+    expect(lands("billionaire-cities", guess)).toBe(name);
+  });
+
+  it.each([
+    // The rows link the wine articles, whose redirects are regions: the countries' own names count.
+    ["aussie", "Australia"],
+    ["rsa", "South Africa"],
+    ["stellenbosch", "unknown"],
+    // Wine words are free and never read as a country ("napa" as Nepal).
+    ["napa", "unknown"],
+    ["champagne", "unknown"],
+  ])("wine-countries: %s -> %s", (guess, name) => {
+    expect(lands("wine-countries", guess)).toBe(name);
+  });
 });

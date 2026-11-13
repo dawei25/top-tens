@@ -1632,6 +1632,13 @@ export const INTENT: Record<string, Intent> = {
       ROC: ["Russian Olympic Committee"],
     },
   },
+  "winter-olympics-countries": {
+    same: {
+      // The ROC row is left out (topics.ts), so "roc" isn't Taiwan's (no Winter medal): it is Russia's 2022 team,
+      // nearest Russia. (Its 2018 team, Olympic Athletes from Russia, is a row of its own.)
+      Russia: ["ROC", "Russian Olympic Committee"],
+    },
+  },
   "fast-food-chains": {
     same: {
       "Dunkin' Donuts": ["Dunkin", "Dunkin'"],

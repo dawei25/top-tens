@@ -262,6 +262,17 @@ describe("counted names", () => {
     expect(countedNames("no figures here")).toEqual([]);
   });
 
+  // grand-slam-titles: a champions-by-year cell numbers each title of the career, "Ken Rosewall (3/8)": the
+  // figure is the career total, so every champion's miss shows it ("John McEnroe: 7").
+  it("read a career total from a k/n count", () => {
+    expect(countedNames("Ken Rosewall (3/8)")).toEqual([{ name: "Ken Rosewall", figure: "8" }]);
+    // Two editions in one year (Australian Open, 1977).
+    expect(countedNames("Roscoe Tanner (1/1) Vitas Gerulaitis (1/1)")).toEqual([
+      { name: "Roscoe Tanner", figure: "1" },
+      { name: "Vitas Gerulaitis", figure: "1" },
+    ]);
+  });
+
   it("show them on the built list", () => {
     const p: Puzzle = JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", "skyscraper-cities.json"), "utf8"));
     const value = (name: string) => p.extras.find((e) => e.name === name)?.value;

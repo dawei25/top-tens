@@ -1,0 +1,24 @@
+{
+  "id": "wine-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-13",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 4,
+  "scores": { "recognizability": 5, "curve": 2, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 4 },
+  "casual": { "found": 9, "livesLost": 4, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 18, "named": 20 },
+  "difficulty": 1,
+  "tags": ["food", "drink", "geography"],
+  "audience": "anyone",
+  "summary": "The famous wine countries are the answer: France, Italy, Spain, the US, Australia, Chile, Argentina, South Africa and Portugal all come fast, and only China at #5 surprises.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. Two casual orders found 10 and 9; lives went on Germany (#12), New Zealand (#18), Greece (#16) and Mexico. Too easy for Today's list.",
+    "FAO's 2021 production by weight (70 countries). Wine words (champagne, napa, bordeaux, malbec) are free; every country is an answer.",
+    "A good Blitz: 69 countries carry a figure and a casual names about 20, nearly all scoring."
+  ],
+  "fixes": [
+    "If a judge agrees on free play, drop its `debut` flag in topics.ts, or it waits out of random play for good."
+  ]
+}
