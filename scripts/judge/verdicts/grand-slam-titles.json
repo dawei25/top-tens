@@ -1,22 +1,25 @@
 {
   "id": "grand-slam-titles",
-  "by": "builder",
   "judgedAt": "2026-11-13",
-  "decision": "daily-list",
+  "decision": "free-play",
   "alsoBlitz": true,
-  "priority": 8,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 5, "fun": 4, "blitzDepth": 4 },
-  "casual": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "priority": 3,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 2, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 4, "livesLost": 5, "guesses": 9 },
   "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
-  "blitzCasual": { "scored": 16, "named": 18 },
-  "difficulty": 3,
+  "blitzCasual": { "scored": 18, "named": 20 },
+  "difficulty": 4,
   "tags": ["sports", "tennis"],
-  "audience": "anyone",
-  "summary": "Federer, Nadal, Djokovic and Serena come fast, Sampras and Graf with thought; Evert, Navratilova, Court and Helen Wills are the stretches, and Agassi, Venus and McEnroe are the traps.",
+  "audience": "sports fans",
+  "summary": "Clean and famous, but too punishing for a daily: after the Big Three and Serena, a casual player's next names (Venus, Murray, Alcaraz, Sharapova, Agassi) all cost a life. A great Blitz.",
   "reasons": [
-    "Builder's own replay, pending a real judge. Two casual orders both found 6 (the Big Three, Serena, Sampras, Graf) and lost lives on Venus Williams (7), Andy Murray (3), Agassi (8), McEnroe (7) and Sharapova (5), each showing its count.",
-    "Men and women together, from the all-time tables (everyone with 8 or more is ranked); every champion of the four majors is an answer with a career total, so a miss always teaches a number. Djokovic and Court tie at 24 (#1 and #2).",
-    "Famous players with no singles major (Kyrgios, Kournikova, Henman) are free; 'williams' is Serena, 'martina' Navratilova, 'court' Margaret Court."
+    "Casual found 4 (Serena, Federer, Nadal, Djokovic) and lost all 5 lives on the next five guesses: Venus (7), Andy Murray (3), Alcaraz (7), Sharapova (5), Agassi (#18, 8). Sampras and Graf never got typed. A US persona also found 4 (Gauff, Osaka, Sharapova, Agassi); only a UK persona who reached Sampras early found 7.",
+    "Every famous modern name below the Big Four costs a life (also McEnroe 7, Sinner 5, Osaka 4, Gauff 2, Swiatek 6, Sabalenka 4), and none is near the cut of 14. Each shows its total, so misses teach, but they burn lives too fast. Only Billie Jean King (12) and Borg (11) feel like near misses.",
+    "The top 10 is right (Court 24, Wills Moody 19, through the 2026 US Open: Alcaraz 7, Sinner 5) and the facts are good, but four of the ten are pre-1990 women, the owner's mlb-hits problem. Kyrgios, Kournikova and subject words are free. In Blitz every major champion scores."
   ],
-  "fixes": []
+  "fixes": [
+    "Debut flag: remove `debut: true` from grand-slam-titles in scripts/topics.ts, so the list enters random play and Blitz instead of waiting for a daily slot.",
+    "scripts/facts/grand-slam-titles.json, Roger Federer: \"a record eight Wimbledons\" -> \"a men's record eight Wimbledons\". Navratilova's fact on the same list says her nine are the all-time record, so the two contradict each other in the reveal.",
+    "scripts/topics.ts grand-slam-titles aliases: add \"Jokovic\" and \"Jokovich\" to Novak Djokovic. The phonetic spelling \"jokovic\" is not recognized now."
+  ]
 }
