@@ -395,6 +395,55 @@ describe("coverage audit: matching rules", () => {
     expect(lands("australia-cities", "gold coast")).toEqual(["Gold Coast"]);
   });
 
+  // The coverage audit (Nov 13): on metro-cities "france" put Fort-de-France in the box and "spain" Port of Spain, both
+  // unranked (a life once confirmed), and on the regional lists "isn't in Europe" besides.
+  it("a country's name is never a longer place name that merely contains it", () => {
+    const known = { kind: "unknown", known: true };
+    for (const id of ["metro-cities", "world-cities", "europe-cities", "capitals"]) {
+      for (const g of ["france", "spain", "jordan"]) expect(judge(id, g), `${id}: ${g}`).toMatchObject(known);
+    }
+    expect(judge("us-metros", "panama"), "Panama City, Florida").toMatchObject(known);
+    expect(judge("mountains", "austria"), "Staufen, Austria").toMatchObject(known);
+    expect(judge("national-parks", "samoa"), "American Samoa").toMatchObject(known);
+    // A place called that, a city named for its country, and what the list names for it still are.
+    expect(lands("metro-cities", "port of spain")).toEqual(["Port of Spain"]);
+    expect(lands("metro-cities", "new york")).toEqual(["New York City"]);
+    for (const id of ["metro-cities", "world-cities", "capitals"]) expect(lands(id, "mexico"), id).toEqual(["Mexico City"]);
+    expect(lands("capitals", "kuwait")).toEqual(["Kuwait City"]);
+    expect(lands("airports", "mexico")).toEqual(["Mexico City International Airport"]);
+    for (const id of ["us-states-area", "us-states-population"]) expect(lands(id, "mexico"), id).toEqual(["New Mexico"]);
+    expect(judge("us-cities", "jordan"), "West Jordan").toMatchObject(known);
+    for (const [id, g] of [["films-gross", "russia"], ["youtube-channels", "india"], ["banks", "japan"], ["stadiums", "mexico"]]) {
+      expect(judge(id, g), `${id}: ${g}`).toMatchObject(known);
+    }
+    expect(lands("coastline-countries", "spain")).toEqual(["Spain"]);
+    expect(lands("countries-population", "france")).toEqual(["France"]);
+    expect(lands("empires", "japan")).toEqual(["Empire of Japan"]);
+    expect(lands("lakes", "chad")).toEqual(["Lake Chad"]);
+    expect(lands("mountains", "kenya")).toEqual(["Mount Kenya"]);
+    expect(lands("banks", "india")).toEqual(["State Bank of India"]);
+    // On a list of people a country's name may be someone's surname.
+    expect(lands("nba-points", "jordan")).toEqual(["Michael Jordan"]);
+  });
+
+  // The coverage audit (Nov 13): on coastline-countries "coast" put Ivory Coast (#94) in the box.
+  it("a word of the list's own title is never one answer that contains it", () => {
+    for (const g of ["coast", "coastline", "coastlines"]) expect(judge("coastline-countries", g).kind, g).toBe("unknown");
+    expect(lands("coastline-countries", "ivory coast")).toEqual(["Ivory Coast"]);
+    expect(judge("africa-population", "african").kind).toBe("unknown");
+    expect(judge("albums", "best").kind).toBe("unknown");
+    expect(judge("olympic-medals", "olympic").kind).toBe("unknown");
+    // A title word that fits no answer, or only as an ordinary word, is judged as before: Brazil and Leader are known
+    // names. On a list of literal strings whatever is typed is a guess, and "chan" is not the head of "channel".
+    expect(judge("brazil-cities", "brazil")).toMatchObject({ kind: "unknown", known: true });
+    expect(judge("nhl-goals", "leader")).toMatchObject({ kind: "unknown", known: true });
+    expect(lands("passwords", "pass")).toEqual(["Pass@123"]);
+    expect(lands("youtube-channels", "chan")).toContain("Jessica Chan");
+    // What the list names for a country, beyond the generic words: its league, its stadium.
+    expect(lands("sports-leagues", "greece")).toEqual(["Super League Greece"]);
+    expect(lands("stadiums", "france")).toEqual(["Stade de France"]);
+  });
+
   it("nba-assists: Isaiah Thomas offers Isiah Thomas (#10) too", () => {
     expect(lands("nba-assists", "isaiah thomas")).toEqual(["Isaiah Thomas", "Isiah Thomas"]);
   });

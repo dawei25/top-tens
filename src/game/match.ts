@@ -1,4 +1,4 @@
-import { countryKey, isGiveUp, isJunk, isKnownName, isPersonWord, isPlainWord, isSlipOf, type Lexicon } from "./junk";
+import { countryKey, fnv, isGiveUp, isJunk, isKnownName, isPersonWord, isPlainWord, isSlipOf, type Lexicon } from "./junk";
 import type { Entry, GuessResult, Puzzle } from "./types";
 
 /**
@@ -614,13 +614,36 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
   const words = guess.split(" ");
   const smallNumber = (w: string) => /^\d{1,2}$/.test(w);
   const category = words.some(isCategory);
-  if (words.every((w) => GENERIC.has(w) || subject.has(w) || smallNumber(w) || isCategory(w)) && !words.every(smallNumber)) {
-    if (strong.length) return fits(strong, false);
-    // A category fits its singular too: "burgers" fits Burger King.
+  const aboutList = (w: string) => GENERIC.has(w) || subject.has(w) || smallNumber(w) || isCategory(w);
+  // A category fits its singular too: "burgers" fits Burger King.
+  const fitCount = () => {
     const singular = category ? words.map(singularOf).join(" ") : guess;
-    const fit = new Set([...allExact, ...wordMatches(guess, candidates), ...wordMatches(singular, candidates)].map((c) => c.entry)).size;
+    return new Set([...allExact, ...wordMatches(guess, candidates), ...wordMatches(singular, candidates)].map((c) => c.entry)).size;
+  };
+  if (words.every(aboutList) && !words.every(smallNumber)) {
+    if (strong.length) return fits(strong, false);
+    const fit = fitCount();
     return { kind: "unknown", junk: false, ...(fit > 1 || (category && fit > 0) ? { vague: fit } : {}) };
   }
+  // The words of the list's title too ("coast" on Countries with the longest coastlines put Ivory Coast, #94, in the
+  // box: the coverage audit, Nov 13; "african" on Most populous African countries the Central African Republic). They
+  // only stop such a reading: an answer or alias called that still counts, a word that fits no answer is judged as any
+  // other ("brazil" on Largest cities in Brazil is a known name), an ordinary word is never read as part of a name
+  // anyway, and on a list of literal strings whatever is typed is a guess ("pass" is Pass@123).
+  const titled = titleWords(puzzle.title);
+  const ofTitle = words.some((w) => titled.has(w) && !aboutList(w)) && words.every((w) => aboutList(w) || titled.has(w));
+  if (ofTitle && !strong.length && !plain && !literalList(puzzle, lex)) {
+    const fit = fitCount();
+    if (fit > 0) return { kind: "unknown", junk: false, ...(fit > 1 || category ? { vague: fit } : {}) };
+  }
+
+  // A country's name names that country (the coverage audit, Nov 13: on metro-cities "france" put Fort-de-France in the
+  // box, "spain" Port of Spain). Where no answer is called it, it is never read as one longer name that merely contains
+  // it, only as one named for it (`namedFor`: Mexico City, New Mexico, Lake Chad, Empire of Japan); otherwise it is a
+  // known name that isn't in this ranking. Choices stay, since they show whole names, and on a list of people the name
+  // may be someone's surname ("jordan" is Michael Jordan).
+  const country = !strong.length && isCountryName(guess, lex) && !peopleList(puzzle, lex);
+  const stray = (r: Reading) => country && "entry" in r && !namedFor(r.entry, guess, subject);
 
   if (exact.length > 0) {
     const r = fits(exact, !strong.length);
@@ -628,7 +651,7 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
     // the namesakes only matter once it's found, or when the reading could cost a life.
     const own = strong.length === 1 && strong[0].inTop10 ? strong[0] : undefined;
     if (own && namesakes.length && r.kind === "correct" && r.entry === own.entry) return resolve(own, false);
-    return r;
+    if (!stray(r)) return r;
   }
 
   // A country on a list whose entries say which country they're in (islands): that country's islands, offered, the most
@@ -646,7 +669,10 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
   // A whole word (or run of words) from a longer name is a short form, not a misspelling. It is checked before
   // near-spellings, which are weaker evidence ("wilt" is two letters from "West").
   const partial = plain ? [] : wordMatches(guess, candidates);
-  if (partial.length > 0) return fits(partial, true);
+  if (partial.length > 0) {
+    const r = fits(partial, true);
+    if (!stray(r)) return r;
+  }
 
   // A name of its own, however it's spaced ("golden doodle" is the Goldendoodle, not Golden Retriever).
   const ownName = !!lex && (isKnownName(raw, lex) || (guess.includes(" ") && isKnownName(guess.replace(/ /g, ""), lex)));
@@ -978,6 +1004,63 @@ function subjectWords(noun?: string): Set<string> {
     else if (w.endsWith("s")) out.add(w.slice(0, -1));
   }
   return out;
+}
+
+/**
+ * The words of a list's title, as `subjectWords`, with the first part of a long compound ("coast" in "coastline",
+ * four letters or more either side of the singular, so not "chan" in "channels"): what the list is about, typed alone.
+ */
+const titleCache = new Map<string, Set<string>>();
+function titleWords(title?: string): Set<string> {
+  const key = title ?? "";
+  let out = titleCache.get(key);
+  if (!out) {
+    out = subjectWords(key);
+    for (const w of normalize(key).split(" ")) {
+      const one = w.endsWith("ies") ? `${w.slice(0, -3)}y` : w.replace(/s$/, "");
+      for (let n = 4; n <= one.length - 4; n++) out.add(one.slice(0, n));
+    }
+    titleCache.set(key, out);
+  }
+  return out;
+}
+
+/** The names the lexicon's country forms point to ("nippon": japan): every country with a usual other form. */
+let countryNameCache: { src: string; set: Set<string> } | null = null;
+function isCountryName(guess: string, lex?: Lexicon): boolean {
+  if (!lex?.countries) return false;
+  if (countryNameCache?.src !== lex.countries) {
+    countryNameCache = { src: lex.countries, set: new Set(lex.countries.split(" ").map((p) => p.split(":")[1])) };
+  }
+  return countryNameCache.set.has(fnv(guess).toString(36));
+}
+
+/**
+ * Generic words that make a name another place's: West Jordan, South Georgia, Great Britain. Not "new": a New place is
+ * named for the old one, and on its list typed without the "New" it is the natural reading ("mexico" is New Mexico,
+ * #5, on Largest US states).
+ */
+const OTHER_PLACE = new Set("old north south east west northern southern eastern western central upper lower great little big".split(" "));
+/** Besides the generic words, what a country's league or institution is called: Super League Greece, Stade de France. */
+const NAMED_FOR = new Set("premier super first division primera pro professional gallery stade estadio".split(" "));
+
+/**
+ * Whether one of the entry's names is the place's name with only words that say what the entry is: generic ones
+ * ("Mexico City", "New Mexico", "Lake Chad", "State Bank of India", "Japan National Stadium"), a category ("National
+ * Basketball League (Australia)") or the list's own ("Empire of Japan" on empires). Anything else merely contains it:
+ * "Port of Spain", "Fort-de-France", "American Samoa", "From Russia with Love", "Japan Post Bank"; and a compass point
+ * makes another place ("West Jordan").
+ */
+function namedFor(entry: Entry, place: string, subject: Set<string>): boolean {
+  const p = place.split(" ");
+  const says = (x: string) => (GENERIC.has(x) && !OTHER_PLACE.has(x)) || NAMED_FOR.has(x) || subject.has(x) || isCategory(x);
+  return formsOf(entry).forms.some((f) => {
+    const w = f.split(" ");
+    for (let i = 0; i + p.length <= w.length; i++) {
+      if (p.every((x, j) => w[i + j] === x) && [...w.slice(0, i), ...w.slice(i + p.length)].every(says)) return true;
+    }
+    return false;
+  });
 }
 
 /** Words that qualify a place's name without being the name: North Carolina, New Jersey, Republic of the Congo. */
