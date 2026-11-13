@@ -186,7 +186,8 @@ const BASE_COUNTRY_FORMS: string[][] = [
     "Team GB", "British",
   ],
   ["China", "PRC", "People's Republic of China", "Mainland China", "Zhongguo"],
-  ["Australia", "Aussie", "Aussies"],
+  // "aus" and "oz" found nothing (builder's fan run on life expectancy, Nov 13).
+  ["Australia", "Aussie", "Aussies", "Aus", "Oz"],
   ["Switzerland", "Swiss", "Swiss Confederation"],
   ["India", "Bharat"],
   ["Japan", "Nippon", "Nihon"],
@@ -304,6 +305,13 @@ export const CITY_FORMS: string[][] = [
   ["Calgary", "YYC"],
   ["Edmonton", "YEG"],
   ["Vancouver", "YVR"],
+  // Australia's, as Australians shorten them (australia-cities, Nov 13).
+  ["Sydney", "Syd"],
+  ["Melbourne", "Melb", "Melbs"],
+  ["Brisbane", "Brissie", "Brisvegas", "Bris"],
+  ["Adelaide", "Radelaide"],
+  ["Gold Coast", "Goldie"],
+  ["Sunshine Coast", "Sunny Coast"],
   ["Delhi", "New Delhi", "Dilli"],
   ["Mumbai", "Bombay"],
   ["Chennai", "Madras"],
@@ -1634,9 +1642,15 @@ export const INTENT: Record<string, Intent> = {
   },
   "winter-olympics-countries": {
     same: {
-      // The ROC row is left out (topics.ts), so "roc" isn't Taiwan's (no Winter medal): it is Russia's 2022 team,
-      // nearest Russia. (Its 2018 team, Olympic Athletes from Russia, is a row of its own.)
-      Russia: ["ROC", "Russian Olympic Committee"],
+      // Russia's 2022 team, an entry of its own like its 2018 one (Olympic Athletes from Russia): "roc" is not Taiwan's
+      // (no Winter medal) nor Russia's. It takes none of Taiwan's other names (topics.ts `notCountries`).
+      "Russian Olympic Committee": ["ROC"],
+    },
+  },
+  "happiest-countries": {
+    same: {
+      // Builder's fan run (Nov 13): "lux" found nothing.
+      Luxembourg: ["Lux"],
     },
   },
   "fast-food-chains": {

@@ -681,8 +681,7 @@
   "id": "billionaire-cities",
   "title": "Cities with the most billionaires",
   "category": "Business",
-  "blitz": true,
-  "debut": true
+  "blitz": true
  },
  {
   "id": "winter-olympics-countries",
@@ -695,13 +694,32 @@
   "id": "grand-slam-titles",
   "title": "Tennis players with the most Grand Slam singles titles",
   "category": "Sports",
-  "blitz": true,
-  "debut": true
+  "blitz": true
  },
  {
   "id": "wine-countries",
   "title": "Countries that produce the most wine",
   "category": "Business",
+  "blitz": true
+ },
+ {
+  "id": "life-expectancy-countries",
+  "title": "Countries with the highest life expectancy",
+  "category": "Science",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "happiest-countries",
+  "title": "Happiest countries (World Happiness Report 2026)",
+  "category": "Culture",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "australia-cities",
+  "title": "Largest cities in Australia",
+  "category": "Geography",
   "blitz": true,
   "debut": true
  }

@@ -1,0 +1,22 @@
+{
+  "id": "life-expectancy-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-13",
+  "decision": "daily-list",
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 17 },
+  "blitzCasual": { "scored": 20, "named": 20 },
+  "difficulty": 2,
+  "tags": ["science", "health", "countries"],
+  "audience": "anyone",
+  "summary": "Japan, Switzerland, Italy, Spain and Australia come fast, Singapore, South Korea, France and Norway take a thought, and Andorra at #3 is the stretch. The Nordic guesses are the traps: Sweden #12, Iceland #14, Denmark #25.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. Two casual orders found 7 each; lives went on Sweden (#12), Iceland (#14), Canada (#15), Denmark and Finland, each with its figure.",
+    "The UN's 2023 figures, sovereign states only: the table's territories (Hong Kong #1, French Polynesia, Macau) are free, and so are Monaco, San Marino and Liechtenstein, which it leaves out (the CIA puts Monaco first). #10 Norway 83.31, #11 Malta 83.30: close, no tie.",
+    "Every country is an answer; five small ones the UN table lacks show the CIA's 2024 figure."
+  ],
+  "fixes": []
+}

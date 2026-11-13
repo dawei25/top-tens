@@ -1,0 +1,52 @@
+{
+  "Japan": {
+    "text": "First on the UN's 2023 figures, it also has the oldest population of any country: a third of its people are elderly.",
+    "source": "https://en.wikipedia.org/wiki/Japan",
+    "evidence": "Japan is one of the world's fastest aging countries and has the highest proportion of elderly citizens of any country, comprising one-third of its total population"
+  },
+  "South Korea": {
+    "text": "As recently as 2008 it ranked only 34th in the world for life expectancy.",
+    "source": "https://en.wikipedia.org/wiki/South_Korea",
+    "evidence": "South Korea has experienced a dramatic increase in life expectancy, from 79.10 years in 2008 (which was 34th in the world), to 83.53 years in 2024"
+  },
+  "Andorra": {
+    "text": "Its two heads of state are a Spanish bishop and the president of France.",
+    "source": "https://en.wikipedia.org/wiki/Andorra",
+    "evidence": "It is currently headed by two co-princes: the Bishop of Urgell in Catalonia, Spain, and the president of France."
+  },
+  "Switzerland": {
+    "text": "The Swiss live 3.6 years longer than the average in the OECD's rich countries.",
+    "source": "https://en.wikipedia.org/wiki/Switzerland",
+    "evidence": "The country records a life expectancy of 83.9 years, which is 3.6 years higher than the OECD average."
+  },
+  "Australia": {
+    "text": "Since 1981 a singing cartoon seagull, Sid, has told Australians to \"Slip, Slop, Slap\" against skin cancer.",
+    "source": "https://en.wikipedia.org/wiki/Slip-Slop-Slap",
+    "evidence": "an anthropomorphic mascot named Sid the Seagull would sing and dance to the phrase. The campaign, originally funded by public donations, was launched by Cancer Council Victoria in 1981 to combat high rates of skin cancer in Australia"
+  },
+  "Singapore": {
+    "text": "A 2019 study gave it the longest life expectancy of any country: 84.8 years.",
+    "source": "https://en.wikipedia.org/wiki/Singapore",
+    "evidence": "In 2019, Singaporeans had the longest life expectancy of any country at 84.8 years."
+  },
+  "Italy": {
+    "text": "Mountain villages in Sardinia were the first \"blue zone\", named for the blue pen scientists used to mark long-lived places on a map.",
+    "source": "https://en.wikipedia.org/wiki/Blue_zone",
+    "evidence": "who \"used a blue pen on a map to mark the villages with long-lived population.\" ... In the original study of centenarians living in 14 mountain villages of Sardinia (the first proposed blue zone)"
+  },
+  "Spain": {
+    "text": "COVID-19 cut its life expectancy by more than a year in 2020.",
+    "source": "https://en.wikipedia.org/wiki/Spain",
+    "evidence": "In January 2020, the COVID-19 virus was confirmed to have spread to Spain, causing life expectancy to drop by more than a year."
+  },
+  "France": {
+    "text": "Jeanne Calment of Arles lived 122 years and 164 days, the longest verified human life. She said she once met van Gogh.",
+    "source": "https://en.wikipedia.org/wiki/Jeanne_Calment",
+    "evidence": "Jeanne Louise Calment ... was a French supercentenarian who is the oldest person in recorded history whose age has been verified, with a documented lifespan of 122 years and 164 days. ... Calment claimed to reporters that she had met van Gogh"
+  },
+  "Norway": {
+    "text": "It has the world's largest sovereign wealth fund, worth US$2.1 trillion.",
+    "source": "https://en.wikipedia.org/wiki/Norway",
+    "evidence": "It has the world's largest sovereign wealth fund, with a value of US$2.1 trillion."
+  }
+}

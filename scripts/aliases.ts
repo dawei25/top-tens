@@ -260,6 +260,11 @@ export const CITY_JUNK = [
   "Seoulite", "Parisien", "Parisian", "Parisians", "Cairene", "Lagosian", "Kinois", "Kinshasan", "Kinshasans",
   "Léopoldvillian", "Léopoldvillians", "Luandense", "Paulistano", "Paulista", "Beijinger", "Beijingers", "Pekinger",
   "Pekingers", "Peipinger", "Londonise", "Londonize", "London's", "Non ducor, duco",
+  // Australia's (building australia-cities, Nov 13): topics, speedways, a hospital, taxis, Wi-Fi, a jibe.
+  "Brisbane Historical Buildings", "Brisbane Architecture", "Scene around Brisbane, Queensland", "Brisbane sport",
+  "Brisbane music groups", "Brisbane entertainment and music", "Brisbane roads, seaports and airports",
+  "Brisbane city streets", "Pinjar Park Speedway", "Bibra Lake Speedway", "AdelaideFree WiFi",
+  "Calvary John James Hospital", "Central Coast Taxis", "Bleak City",
   // Another place's name: Dili is East Timor's capital.
   "Dili, India", "Delhi, Punjab",
 ];
@@ -395,6 +400,11 @@ export const COUNTRY_JUNK = [
   "Traditional Indian social structure", "Indian traditional social structure", "India etymology", "Bharath Niwas",
   "Alpine Deutschen", "Iraqi Security Forces", "Iraqi Security Force", "Confucian Southeast Asia", "Roman New Republic",
   "Land of the Irish", "Land of the English",
+  // Found building life-expectancy-countries (Nov 13): a navy, a police unit, a team, a question, an era, mottoes.
+  "Andorran Navy", "Grup d'Intervenció Policia d'Andorra", "Andorra national cricket team", "Andorran question",
+  "Modern–era Japan", "Republic of Demonstrations", "Light of the South", "Intelligent Island",
+  // And happiest-countries: a web address, a past republic, a region.
+  "Denmark.dk", "Second Costa Rican Republic", "East Luxembourg",
 ];
 
 let english: Set<string> | undefined;

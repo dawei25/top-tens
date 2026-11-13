@@ -1,0 +1,22 @@
+{
+  "id": "australia-cities",
+  "by": "builder",
+  "judgedAt": "2026-11-13",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 3 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": { "scored": 13, "named": 14 },
+  "difficulty": 2,
+  "tags": ["geography", "cities", "australia"],
+  "audience": "anyone",
+  "summary": "Sydney, Melbourne, Brisbane, Perth and Adelaide come first, Canberra and the Gold Coast next, and Newcastle, the Sunshine Coast and the Central Coast are the stretch. Hobart, Darwin and Cairns are the famous traps.",
+  "reasons": [
+    "Builder's own replay, pending a real judge. Two casual orders found 8 and 7; lives went on Darwin (#17), Hobart (#13), Cairns (#15), Alice Springs (#50) and Townsville (#14), each with its population.",
+    "The ABS's 103 significant urban areas (June 2025). By this count Melbourne is #1, ahead of Sydney; the Central Coast's fact explains why Greater Sydney is still bigger. Joined areas go by their main city (Queanbeyan is Canberra, Tweed Heads the Gold Coast, Maitland Newcastle).",
+    "A city outside Australia is free (Auckland, Wellington), as on the Canada list; suburbs and sights (Fremantle, Surfers Paradise, Bondi, Uluru) are free and real names."
+  ],
+  "fixes": []
+}

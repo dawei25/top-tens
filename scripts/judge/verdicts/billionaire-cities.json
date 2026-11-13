@@ -1,6 +1,5 @@
 {
   "id": "billionaire-cities",
-  "by": "builder",
   "judgedAt": "2026-11-13",
   "decision": "free-play",
   "alsoBlitz": false,
@@ -14,11 +13,9 @@
   "audience": "news followers",
   "summary": "New York, London, Hong Kong and Beijing are easy, Shenzhen and Hangzhou surprise, but the rich-sounding cities a player reaches for (Los Angeles, Dubai, Tokyo, Paris, Miami) all cost lives.",
   "reasons": [
-    "Builder's own replay, pending a real judge. Three casual orders found 8, 5 and 3: it depends on whether Los Angeles (#17, 40), Dubai (#30), Tokyo (#23), Paris (#14), Singapore (#12) and Miami come before the Chinese cities.",
-    "Hurun Global Rich List 2026, 32 cities deep; Forbes' 2025 top 10 on the same page agrees on 9 of them (it has Singapore and Los Angeles, not Shenzhen and Hangzhou). Cities under Hurun's cut (Miami, Monaco, Zurich, Chicago) are answers with no figure.",
-    "Like billionaire-countries (free play): a wall of famous near misses, so it is likely too punishing for Today's list."
+    "Free play, the coordinator's call (Nov 13): the cities players reach for first, Los Angeles, Tokyo, Dubai and Paris, all cost a life.",
+    "Builder's own replay. Three casual orders found 8, 5 and 3: it depends on whether Los Angeles (#17, 40), Dubai (#30), Tokyo (#23), Paris (#14), Singapore (#12) and Miami come before the Chinese cities.",
+    "Hurun Global Rich List 2026, 32 cities deep; Forbes' 2025 top 10 on the same page agrees on 9 of them (it has Singapore and Los Angeles, not Shenzhen and Hangzhou). Cities under Hurun's cut (Miami, Monaco, Zurich, Chicago) are answers with no figure."
   ],
-  "fixes": [
-    "If a judge agrees on free play, drop its `debut` flag in topics.ts, or it waits out of random play for good."
-  ]
+  "fixes": []
 }

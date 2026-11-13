@@ -1064,7 +1064,8 @@ function curated(topic: Topic, entries: Entry[], final: boolean): Curated[] {
     for (const forms of COUNTRY_FORMS) {
       const set = new Set(forms.map(normalize));
       let hits = entries.filter((e) => set.has(normalize(e.name)));
-      if (!hits.length) hits = entries.filter((e) => e.aliases.some((a) => set.has(normalize(a))));
+      // An entry that is no country takes no country's forms by a name it shares with one (topics.ts `notCountries`).
+      if (!hits.length) hits = entries.filter((e) => !topic.notCountries?.includes(e.name) && e.aliases.some((a) => set.has(normalize(a))));
       if (hits.length !== 1) continue;
       for (const alias of forms) out.push({ alias, targets: hits, strict: false });
     }
