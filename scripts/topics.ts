@@ -197,6 +197,18 @@ export interface Topic {
    */
   cited?: Record<string, { value: string; n: number; aliases: string[]; source: string }>;
   /**
+   * Ranked rows the table leaves out whose figure the page's own text gives: the UN's life expectancy table drops
+   * places under 50,000 people, and its note says "Monaco (LE 86.37 years". `says` is quoted from the page and gives
+   * `value`; the build fails once the page no longer says it. The row ranks like a table row (build.ts `textRow`).
+   */
+  textRows?: TextRow[];
+  /**
+   * What an unranked answer no table gives a figure shows instead, by name, where the source says why: "not in any
+   * report" for the countries no World Happiness Report ranks (Monaco, North Korea). Shown, never scored; the build
+   * fails on a name that isn't such an answer.
+   */
+  notes?: Record<string, string>;
+  /**
    * Names of the list's kind that are not answers, read like `also`: free to guess (no figure to learn from), but
    * still real names to the game. The build records them in scripts/known/<id>.json and the lexicon learns them, so
    * typed in full one is never junk nor corrected into an answer, and their words still count as plain words.
@@ -310,6 +322,13 @@ export interface Dated {
    * ($407,600,113)" for the year's highest-grossing tour.
    */
   perYear?: { col: string | number; rank?: number };
+}
+
+/** A ranked row from the page's text (`textRows`): its name, its figure as the page writes it, and the words saying so. */
+export interface TextRow {
+  name: string;
+  value: string;
+  says: string;
 }
 
 /** Redirects to US states that are jokes, documents, agencies or teams, found by the list judges. */
@@ -4329,9 +4348,16 @@ export const TOPICS: Topic[] = [
     tables: [0],
     name: "Country or region",
     value: "Life evaluation",
+    // The table is in the report's own order, from unrounded scores: Czechia #20 and the UAE #21 both show 6.821
+    // (the judge, Nov 13: the UAE read #20).
+    keepOrder: true,
     metric: "Life rating, 0 to 10 (2026 report)",
     dataAsOf: "2026",
     universe: "countries",
+    // Countries no report has ranked (Gallup doesn't poll them), the rich-and-happy guesses among them: a figure that
+    // says so, the way Bhutan's says "#95 in the 2019 report" (the judge, Nov 13). Not every country without a
+    // figure: the page has no 2014, 2015 or 2021 table, which may rank one (Djibouti).
+    notes: Object.fromEntries(["Monaco", "Liechtenstein", "San Marino", "Vatican City", "North Korea"].map((c) => [c, "not in any report"])),
     // Every country is an answer. A dependency no report ranks is free (Greenland, the Faroe Islands); the two some
     // report ranks stay (Hong Kong #90, Puerto Rico in 2016). An old table's "Europe" row is no country.
     skip: [...DEPENDENCIES.filter((d) => d !== "Hong Kong" && d !== "Puerto Rico"), "Europe"],

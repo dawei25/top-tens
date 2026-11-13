@@ -1058,6 +1058,20 @@ describe("aliases as built: what players type", () => {
     expect(lands("happiest-countries", guess)).toBe(name);
   });
 
+  it("happiest-countries: ties take the report's own rank, and a country no report ranks says so (the judge, Nov 13)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "happiest-countries.json"), "utf8"));
+    const of = (name: string) => [...p.answers, ...p.extras].find((e) => e.name === name);
+    // Both 6.821 to three decimals; the report ranks Czechia #20 and the UAE #21.
+    expect(of("Czechia")?.rank).toBe(20);
+    expect(of("United Arab Emirates")?.rank).toBe(21);
+    for (const c of ["Monaco", "Liechtenstein", "San Marino", "Vatican City", "North Korea"]) {
+      expect(of(c), c).toMatchObject({ rank: 0, value: "not in any report" });
+      expect(of(c)?.n, c).toBeUndefined();
+    }
+    expect(of("Bhutan")?.value).toBe("#95 in the 2019 report");
+    expect(of("Israel")?.fact?.text).toMatch(/since 2022/);
+  });
+
   it.each([
     // How Australians shorten their cities, and the places an urban area joins.
     ["syd", "Sydney"],
