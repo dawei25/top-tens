@@ -603,6 +603,48 @@ describe("coverage audit readings", () => {
   });
   const v = (rank: number, name: string, aliases: string[] = [], value = "1"): Entry => ({ rank, name, aliases, value });
 
+  // The coverage audit (Nov 13, metro-cities): "france" put Fort-de-France in the box, "spain" Port of Spain.
+  it("a country's name is not a longer name that merely contains it", () => {
+    const cities: Puzzle = {
+      ...puzzle,
+      id: "cities15",
+      noun: "cities",
+      answers: [...puzzle.answers.slice(0, 9).map((x) => ({ ...x, name: `${x.name} Town` })), v(10, "Mexico City")],
+      extras: [e(0, "Port of Spain"), e(0, "Fort-de-France"), e(0, "West Jordan"), e(0, "Kuwait City"), e(0, "New York City", ["New York"])],
+    };
+    const countries: [string, string][] = [["espana", "spain"], ["republique francaise", "france"], ["hashemite kingdom", "jordan"], ["mejico", "mexico"], ["state of kuwait", "kuwait"]];
+    const lex = lexOf({ names: ["france", "spain", "jordan", "mexico", "kuwait"], countries });
+    const j = (g: string, p: Puzzle = cities) => judgeGuess(g, p, new Set(), lex);
+    for (const g of ["france", "spain", "jordan"]) expect(j(g), g).toEqual({ kind: "unknown", junk: false, known: true });
+    expect(j("port of spain")).toMatchObject({ kind: "near", corrected: false, entry: { name: "Port of Spain" } });
+    expect(j("new york")).toMatchObject({ kind: "near", corrected: false, entry: { name: "New York City" } });
+    // A city named for its country, with only "City" more, is the natural reading.
+    expect(j("mexico")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Mexico City" } });
+    expect(j("kuwait")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Kuwait City" } });
+    // So is what a list names for the country: words the list is about, or a lake's, a bank's.
+    const empires: Puzzle = { ...puzzle, id: "empires15", noun: "empires", answers: puzzle.answers, extras: [e(13, "Empire of Spain"), e(0, "Lake Jordan"), e(0, "Fort France")] };
+    expect(j("spain", empires)).toMatchObject({ kind: "near", corrected: true, entry: { name: "Empire of Spain" } });
+    expect(j("jordan", empires)).toMatchObject({ kind: "near", corrected: true, entry: { name: "Lake Jordan" } });
+    expect(j("france", empires)).toEqual({ kind: "unknown", junk: false, known: true });
+    // Without the lexicon's countries the old reading stands.
+    expect(judgeGuess("france", cities, new Set(), lexOf({ names: ["france"] }))).toMatchObject({ kind: "near", entry: { name: "Fort-de-France" } });
+  });
+
+  // The coverage audit (Nov 13, coastline-countries): "coast" put Ivory Coast (#94) in the box.
+  it("a word of the list's title is not one answer that contains it", () => {
+    const coasts: Puzzle = { ...puzzle, id: "coasts15", title: "Countries with the longest coastlines", noun: "countries", extras: [e(94, "Ivory Coast")] };
+    // The bank's names, as the lexicon has them (an empty letter model would read every name here as mash).
+    const lex = lexOf({ names: [...puzzle.answers.map((x) => x.name.toLowerCase()), "ivory coast", "coast"] });
+    expect(judgeGuess("coast", coasts, new Set(), lex)).toEqual({ kind: "unknown", junk: false });
+    expect(judgeGuess("coastline", coasts, new Set(), lex)).toMatchObject({ kind: "unknown" });
+    expect(judgeGuess("ivory coast", coasts, new Set(), lex)).toMatchObject({ kind: "near", corrected: false, entry: { name: "Ivory Coast" } });
+    // An answer named exactly that still counts, and a title word that fits nothing is judged as before.
+    expect(judgeGuess("coast", { ...coasts, extras: [e(94, "Coast")] }, new Set(), lex)).toMatchObject({ kind: "near", corrected: false });
+    const brazil: Puzzle = { ...puzzle, id: "brazil15", title: "Largest cities in Brazil", noun: "cities" };
+    expect(judgeGuess("brazil", brazil, new Set(), lex)).toMatchObject({ kind: "correct", entry: { name: "Brazil" } });
+    expect(judgeGuess("brazil", { ...brazil, answers: puzzle.answers.filter((x) => x.name !== "Brazil") }, new Set(), lex)).toEqual({ kind: "unknown", junk: false, known: true });
+  });
+
   it("a known real name that isn't an answer says so (class 1)", () => {
     const funds: Puzzle = { ...puzzle, id: "funds9", noun: "firms", answers: [e(1, "Bridgewater Associates"), ...puzzle.answers.slice(1)], extras: [] };
     const lex = lexOf({ names: ["point72"] });
