@@ -874,3 +874,59 @@ describe("a lone surname on a list of people", () => {
     expect(judgeGuess("robinson", hits, new Set())).toEqual({ kind: "typo", suggestions: ["Brooks Robinson", "Frank Robinson", "Robinson Canó"] });
   });
 });
+
+// Launch week (Nov 12): the guess box says typos are free, yet "hustin bieber" and "lana del ray" found nothing (a
+// first letter slipped, a three-letter word slipped). Whole words shared with one answer alone are evidence.
+describe("one slip beside words only one answer has", () => {
+  const artists: Puzzle = {
+    ...puzzle,
+    id: "artists14",
+    noun: "artists",
+    answers: [e(1, "Taylor Swift"), e(2, "The Weeknd"), e(3, "Bad Bunny"), e(4, "Justin Bieber", ["Bieber"]), ...puzzle.answers.slice(4)],
+    extras: [e(22, "Lana Del Rey"), e(38, "Justin Timberlake", ["Timberlake"]), e(0, "Mount Elbert"), e(0, "Mount Kosciuszko")],
+  };
+  const j = (g: string, p: Puzzle = artists) => judgeGuess(g, p, new Set());
+  it("takes the slip, the first letter or a short word included", () => {
+    expect(j("hustin bieber")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Justin Bieber" } });
+    expect(j("lana del ray")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Lana Del Rey" } });
+    expect(j("bed bunny")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Bad Bunny" } });
+    // A swap of two letters is one slip too.
+    expect(j("lana del rye")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Lana Del Rey" } });
+  });
+  it("not when another entry has the shared words too", () => {
+    const two: Puzzle = { ...artists, id: "artists15", extras: [...artists.extras, e(0, "Jaxon Bieber"), e(0, "Bugs Bunny")] };
+    expect(j("hustin bieber", two).kind).toBe("unknown");
+    expect(j("bed bunny", two).kind).toBe("unknown");
+    // "justin" is two answers' word: "justin biever" is still a slip of the word left, as before.
+    expect(j("justin biever", two)).toMatchObject({ kind: "correct", entry: { name: "Justin Bieber" } });
+  });
+  it("not beside a short or generic shared word, or a word left that names another entry", () => {
+    const cars: Puzzle = { ...puzzle, id: "cars14", answers: [e(1, "Volkswagen Beetle", ["VW Bug", "Beetle"]), ...puzzle.answers.slice(1)], extras: [] };
+    expect(j("vw bus", cars).kind).toBe("unknown");
+    expect(j("mount whitney").kind).toBe("unknown");
+    // "mount" is a generic word, even where one entry alone has it.
+    const one: Puzzle = { ...artists, id: "artists16", extras: artists.extras.filter((x) => x.name !== "Mount Kosciuszko") };
+    expect(j("mount albert", one).kind).toBe("unknown");
+    // "dustin" is a word of another entry here: "dustin bieber" may be someone else. Without him, it is a slip.
+    const dustin: Puzzle = { ...artists, id: "artists17", extras: [...artists.extras, e(0, "Dustin Lynch")] };
+    expect(j("dustin bieber", dustin).kind).toBe("unknown");
+    expect(j("dustin bieber")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Justin Bieber" } });
+  });
+  // The leak audit (Nov 13): real names outside the bank, judged with no known names, that the rule first took in.
+  it("not a short word slipped into other sounds: another name, not a slip", () => {
+    const leaks: Puzzle = {
+      ...puzzle,
+      id: "leaks14",
+      extras: [e(12, "San Marino"), e(13, "Green Day"), e(14, "Astro Boy"), e(15, "Princess Tower"), e(16, "San Francisco")],
+    };
+    for (const g of ["dan marino", "green bay", "astro bot", "princess power", "sao francisco"]) expect(j(g, leaks).kind, g).toBe("unknown");
+  });
+  it("leaves different answers sharing words different (South and North Korea)", () => {
+    const koreas: Puzzle = { ...puzzle, id: "koreas14", extras: [e(12, "South Korea"), e(13, "North Korea")] };
+    expect(j("south korea", koreas)).toMatchObject({ kind: "near", corrected: false, entry: { name: "South Korea" } });
+    expect(j("north korea", koreas)).toMatchObject({ kind: "near", corrected: false, entry: { name: "North Korea" } });
+    expect(j("sorth korea", koreas)).toMatchObject({ kind: "near", corrected: true, entry: { name: "South Korea" } });
+    const south: Puzzle = { ...puzzle, id: "koreas15", extras: [e(12, "South Korea")] };
+    expect(j("north korea", south).kind).toBe("unknown");
+  });
+});
