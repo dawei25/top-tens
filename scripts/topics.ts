@@ -4122,10 +4122,10 @@ export const TOPICS: Topic[] = [
       "Avocado", "Coconut", "Lemon", "Pineapple", "Pear", "Cherry", "Pumpkin",
     ],
   },
-  // Nov 13: candidates for the week of Nov 16 (Today's lists).
+  // Nov 13: candidates for the week of Nov 16 (Today's lists). Billionaire cities and wine went to free play
+  // (coordinator, Nov 13), so they carry no `debut`.
   {
     id: "billionaire-cities",
-    debut: true,
     category: "Business",
     title: "Cities with the most billionaires",
     noun: "cities",
@@ -4221,7 +4221,6 @@ export const TOPICS: Topic[] = [
   },
   {
     id: "wine-countries",
-    debut: true,
     category: "Business",
     title: "Countries that produce the most wine",
     noun: "countries",

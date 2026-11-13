@@ -681,8 +681,7 @@
   "id": "billionaire-cities",
   "title": "Cities with the most billionaires",
   "category": "Business",
-  "blitz": true,
-  "debut": true
+  "blitz": true
  },
  {
   "id": "winter-olympics-countries",
@@ -702,7 +701,6 @@
   "id": "wine-countries",
   "title": "Countries that produce the most wine",
   "category": "Business",
-  "blitz": true,
-  "debut": true
+  "blitz": true
  }
 ]
