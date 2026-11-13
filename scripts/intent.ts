@@ -1088,6 +1088,9 @@ export const INTENT: Record<string, Intent> = {
       Stones: ["A Bigger Bang Tour", "No Filter Tour", "Voodoo Lounge Tour", "Licks Tour"],
       U2: ["360° Tour", "The Joshua Tree Tours 2017 & 2019", "Vertigo Tour", "PopMart Tour"],
       Springsteen: ["Springsteen and E Street Band 2023–2025 Tour", "Magic Tour", "The River Tour 2016", "Born in the U.S.A. Tour"],
+      // Coverage audit (Nov 13): "swift" and "taylor" said they aren't in the ranking, with the Eras Tour #1.
+      Swift: ["The Eras Tour", "The 1989 World Tour"],
+      Taylor: ["The Eras Tour", "The 1989 World Tour"],
     },
   },
   "animated-films": {

@@ -1167,6 +1167,17 @@ describe("aliases as built: what players type", () => {
     expect(p.answers.find((e) => e.name === "Tokyo")?.fact?.text).toMatch(/Toei/);
   });
 
+  it("concert-tours: the artist's surname or first name alone, and names the page leaves out (coverage audit, Nov 13)", () => {
+    // "swift" and "taylor" said they aren't in the ranking, with the Eras Tour #1; like "taylor swift", they put it in
+    // the box to confirm (her 1989 World Tour has the names too).
+    expect(lands("concert-tours", "swift")).toBe("The Eras Tour");
+    expect(lands("concert-tours", "taylor")).toBe("The Eras Tour");
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "concert-tours.json"), "utf8"));
+    for (const name of ["bono", "acdc", "oasis live 25"]) {
+      expect(judgeGuess(name, p, new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
+    }
+  });
+
   it.each([
     // Coverage audit (Nov 13): Australia's short forms found nothing (shared COUNTRY_FORMS, applied at this build).
     ["aus", "Australia"],

@@ -1741,6 +1741,8 @@ export const TOPICS: Topic[] = [
       "Attempted Taylor Swift concert terrorist plot", "Live in Ahmedabad", "Coldplay - Live in Ahmedabad", "Tutto Passa",
       "Coldplay – Live in Paris", "The Weeknd Live at SoFi Stadium", "Kiss the future tour",
     ],
+    // Not on the page, and real names, said plainly rather than "not one of the tours" (coverage audit, Nov 13).
+    knownNames: ["Bono", "ACDC", "Oasis Live '25 Tour", "Oasis Live 25", "Live '25"],
   },
   {
     id: "animated-films",
