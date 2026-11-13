@@ -958,6 +958,14 @@ describe("aliases as built: what players type", () => {
     expect(lands("painters", "van gogh")).toBe("Vincent van Gogh");
   });
 
+  it("painters: the usual slip on da Vinci, and famous painters the ranking leaves out say so (coverage audit, Nov 13)", () => {
+    expect(lands("painters", "di vinci")).toBe("Leonardo da Vinci");
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "painters.json"), "utf8"));
+    for (const name of ["mondrian", "whistler", "bruegel", "durer", "van eyck", "schiele", "koons", "klee", "money"]) {
+      expect(judgeGuess(name, p, new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
+    }
+  });
+
   it.each([
     // Builder's fan run (Nov 13): her maiden name, the nicknames, and a married name in the champions' cells.
     ["margaret smith", "Margaret Court"],

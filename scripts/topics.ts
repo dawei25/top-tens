@@ -4014,7 +4014,8 @@ export const TOPICS: Topic[] = [
     dataAsOf: "2026",
     people: true,
     aliases: {
-      "Leonardo da Vinci": ["Da Vinci", "Leonardo", "Leo da Vinci"],
+      // "di vinci", the usual slip, found nothing (coverage audit, Nov 13).
+      "Leonardo da Vinci": ["Da Vinci", "Leonardo", "Leo da Vinci", "Di Vinci", "Leonardo di Vinci"],
       "Willem de Kooning": ["de Kooning", "DeKooning"],
       "Paul Cézanne": ["Cezanne"],
       "Jackson Pollock": ["Pollock"],
@@ -4051,6 +4052,10 @@ export const TOPICS: Topic[] = [
       "Henri de Toulouse-Lautrec", "Toulouse-Lautrec", "Norman Rockwell", "Gerhard Richter", "Leonardo DiCaprio",
       "Sigmund Freud", "Donatello", "Auguste Rodin", "Rodin", "Gustave Courbet", "Camille Pissarro", "Jan van Eyck",
       "Hieronymus Bosch", "Pieter Bruegel", "Albrecht Dürer", "Artemisia Gentileschi",
+      // Coverage audit (Nov 13): these read as "not one of the painters" (surnames alone, and painters left out).
+      "Piet Mondrian", "Mondrian", "James McNeill Whistler", "Whistler", "Bruegel", "Brueghel", "Dürer", "Van Eyck",
+      "Schiele", "Klee", "Pissarro", "Courbet", "Haring", "Rockwell", "Botero", "Gentileschi", "Lautrec", "Koons",
+      "Frida", "Yoshitomo Nara", "Zhang Daqian", "Ai Weiwei",
     ],
   },
   {
