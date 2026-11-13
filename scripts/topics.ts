@@ -4207,7 +4207,7 @@ export const TOPICS: Topic[] = [
       "Gaël Monfils", "Jo-Wilfried Tsonga", "Tomáš Berdych", "David Ferrer", "Milos Raonic", "Kei Nishikori",
       "David Nalbandian", "Tommy Haas", "Marcelo Ríos", "John Isner", "Jessica Pegula", "Ons Jabeur", "Jelena Janković",
       "Dinara Safina", "Agnieszka Radwańska", "Elina Svitolina", "Karolína Plíšková", "Jasmine Paolini",
-      "Qinwen Zheng", "Zheng Qinwen", "Mirra Andreeva", "Amanda Anisimova", "Elena Dementieva", "Bob Bryan", "Mike Bryan",
+      "Qinwen Zheng", "Zheng Qinwen", "Amanda Anisimova", "Elena Dementieva", "Bob Bryan", "Mike Bryan",
       "Bryan brothers", "Leander Paes",
     ],
     // Every champion of the four majors is an answer, with the career total the champions-by-year cells count
