@@ -1074,8 +1074,32 @@ describe("aliases as built: what players type", () => {
     // Suburbs and sights inside the urban areas are free.
     ["fremantle", "unknown"],
     ["surfers paradise", "unknown"],
+    // The judge (Nov 13): towns the source puts inside Melbourne's, Sydney's and Adelaide's urban areas cost a life
+    // as answers outside the ranking. They are part of #1, #2 and #5: free.
+    ["melton", "unknown"],
+    ["sunbury", "unknown"],
+    ["blue mountains", "unknown"],
+    ["gawler", "unknown"],
+    // "South Coast" is the NSW one to Australians, not the Gold Coast; the full name still is.
+    ["south coast", "unknown"],
+    ["south coast queensland", "Gold Coast"],
+    // Coverage audit (Nov 13): a nickname found nothing, two short forms were only offered.
+    ["newy", "Newcastle"],
+    ["wagga", "Wagga Wagga"],
+    ["coffs", "Coffs Harbour"],
   ])("australia-cities: %s -> %s", (guess, name) => {
     expect(lands("australia-cities", guess)).toBe(name);
+  });
+
+  it("australia-cities: towns inside an urban area say so plainly, and the facts say why Melbourne leads", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "australia-cities.json"), "utf8"));
+    for (const town of ["melton", "gawler", "maroochydore", "ipswich", "penrith"]) {
+      expect(judgeGuess(town, p, new Set(), lex), town).toMatchObject({ kind: "unknown", known: true });
+    }
+    expect(p.answers.find((e) => e.name === "Melbourne")?.fact?.text).toMatch(/Greater Sydney/);
+    // Alice Springs and Mount Gambier really have the same figure: the ABS cube the page cites agrees (Nov 13).
+    const alice = p.extras.find((e) => e.name === "Alice Springs");
+    expect(alice?.value).toBe("30,875");
   });
 
   it.each([

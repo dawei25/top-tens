@@ -312,6 +312,9 @@ export const CITY_FORMS: string[][] = [
   ["Adelaide", "Radelaide"],
   ["Gold Coast", "Goldie"],
   ["Sunshine Coast", "Sunny Coast"],
+  // As everyone says them (coverage audit, Nov 13: "wagga" and "coffs" were only offered).
+  ["Wagga Wagga", "Wagga"],
+  ["Coffs Harbour", "Coffs"],
   ["Delhi", "New Delhi", "Dilli"],
   ["Mumbai", "Bombay"],
   ["Chennai", "Madras"],

@@ -4357,7 +4357,8 @@ export const TOPICS: Topic[] = [
     prompt: "Name the 10 most populous cities in Australia (urban areas, 2025)",
     page: "List of cities in Australia by population",
     // The ABS's significant urban areas (June 2025 estimates), 103 of them: a city with the suburbs it has grown into.
-    // By this count Melbourne passed Sydney in 2023.
+    // By this count Melbourne passed Sydney in 2023. Alice Springs (#50) has exactly Mount Gambier's 30,875, and so
+    // does the ABS cube the page cites (32180DS0004, Table 2, June 2025): a coincidence, not a slip (checked Nov 13).
     tables: [1],
     name: "Significant Urban Area",
     value: "June 2025",
@@ -4369,15 +4370,25 @@ export const TOPICS: Topic[] = [
       "Newcastle–Maitland": "Newcastle",
       "Canberra–Queanbeyan": "Canberra",
     },
-    // The 50 largest urban centres (2021 census): suburbs and towns the urban areas count inside others (Melton,
-    // Gawler), with their census count.
-    also: [{ tables: [3], name: "Urban centre", value: 2, dated: { label: "2021 census" } }],
-    // Builder's fan run (Nov 13): "greater sydney" found nothing; Gosford is the Central Coast's main town.
-    aliases: { Sydney: ["Greater Sydney"], Perth: ["Greater Perth"], "Central Coast": ["Gosford"] },
+    // The 50 largest urban centres (2021 census), with their census count. Not the towns the table places inside one
+    // city's urban area (its column 9 names it): Melton and Sunbury are Melbourne's, Blue Mountains Sydney's, Gawler
+    // Adelaide's, so by this list's own count they are part of #1, #2 and #5 and free, like Fremantle (the judge, Nov
+    // 13). The parts of joined areas ("Newcastle–Maitland") stay: they merge into their area.
+    also: [{ tables: [3], name: "Urban centre", value: 2, dated: { label: "2021 census" }, where: { col: 9, match: /^$|–/ } }],
+    // Builder's fan run (Nov 13): "greater sydney" found nothing; Gosford is the Central Coast's main town. Coverage
+    // audit (Nov 13): "newie" found nothing.
+    aliases: { Sydney: ["Greater Sydney"], Perth: ["Greater Perth"], "Central Coast": ["Gosford"], Newcastle: ["Newy", "Newie"] },
+    // To Australians "south coast" is the NSW South Coast, not the Gold Coast (the judge, Nov 13). "South Coast,
+    // Queensland" stays.
+    junkAliases: ["South Coast"],
     // Suburbs, towns and sights inside the urban areas, and places that aren't cities: free, and real names.
     knownNames: [
       "Fremantle", "Parramatta", "Surfers Paradise", "Noosa", "Noosa Heads", "Bondi", "Bondi Beach", "St Kilda",
       "Manly", "Uluru", "Ayers Rock", "Great Barrier Reef", "Kakadu", "Whitsundays",
+      "Melton", "Sunbury", "Blue Mountains", "Gawler",
+      // Coverage audit (Nov 13): towns the urban areas hold, which read as "not one of the cities".
+      "Caloundra", "Maroochydore", "Mooloolaba", "Mandurah", "Penrith", "Ipswich", "Frankston", "Dandenong", "Wyong",
+      "Mount Barker",
     ],
   },
 ];
