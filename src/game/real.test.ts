@@ -411,6 +411,11 @@ describe("coverage audit: matching rules", () => {
     for (const id of ["metro-cities", "world-cities", "capitals"]) expect(lands(id, "mexico"), id).toEqual(["Mexico City"]);
     expect(lands("capitals", "kuwait")).toEqual(["Kuwait City"]);
     expect(lands("airports", "mexico")).toEqual(["Mexico City International Airport"]);
+    for (const id of ["us-states-area", "us-states-population"]) expect(lands(id, "mexico"), id).toEqual(["New Mexico"]);
+    expect(judge("us-cities", "jordan"), "West Jordan").toMatchObject(known);
+    for (const [id, g] of [["films-gross", "russia"], ["youtube-channels", "india"], ["banks", "japan"], ["stadiums", "mexico"]]) {
+      expect(judge(id, g), `${id}: ${g}`).toMatchObject(known);
+    }
     expect(lands("coastline-countries", "spain")).toEqual(["Spain"]);
     expect(lands("countries-population", "france")).toEqual(["France"]);
     expect(lands("empires", "japan")).toEqual(["Empire of Japan"]);
@@ -425,6 +430,9 @@ describe("coverage audit: matching rules", () => {
   it("a word of the list's own title is never one answer that contains it", () => {
     for (const g of ["coast", "coastline", "coastlines"]) expect(judge("coastline-countries", g).kind, g).toBe("unknown");
     expect(lands("coastline-countries", "ivory coast")).toEqual(["Ivory Coast"]);
+    expect(judge("africa-population", "african").kind).toBe("unknown");
+    expect(judge("albums", "best").kind).toBe("unknown");
+    expect(judge("olympic-medals", "olympic").kind).toBe("unknown");
     // A title word that fits no answer, or only as an ordinary word, is judged as before: Brazil and Leader are known
     // names. On a list of literal strings whatever is typed is a guess, and "chan" is not the head of "channel".
     expect(judge("brazil-cities", "brazil")).toMatchObject({ kind: "unknown", known: true });

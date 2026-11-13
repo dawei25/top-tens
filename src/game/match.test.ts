@@ -621,6 +621,10 @@ describe("coverage audit readings", () => {
     // A city named for its country, with only "City" more, is the natural reading.
     expect(j("mexico")).toMatchObject({ kind: "correct", corrected: true, entry: { name: "Mexico City" } });
     expect(j("kuwait")).toMatchObject({ kind: "near", corrected: true, entry: { name: "Kuwait City" } });
+    // A New place is named for the old one ("mexico" is New Mexico on US states); a compass point makes another place.
+    const states: Puzzle = { ...puzzle, id: "states15", noun: "US states", answers: [...puzzle.answers.slice(0, 9), v(10, "New Mexico")], extras: [e(0, "West Virginia")] };
+    expect(j("mexico", states)).toMatchObject({ kind: "correct", corrected: true, entry: { name: "New Mexico" } });
+    expect(j("jordan", { ...states, extras: [e(0, "West Jordan")] })).toEqual({ kind: "unknown", junk: false, known: true });
     // So is what a list names for the country: words the list is about, or a lake's, a bank's.
     const empires: Puzzle = { ...puzzle, id: "empires15", noun: "empires", answers: puzzle.answers, extras: [e(13, "Empire of Spain"), e(0, "Lake Jordan"), e(0, "Fort France")] };
     expect(j("spain", empires)).toMatchObject({ kind: "near", corrected: true, entry: { name: "Empire of Spain" } });
@@ -638,6 +642,10 @@ describe("coverage audit readings", () => {
     expect(judgeGuess("coast", coasts, new Set(), lex)).toEqual({ kind: "unknown", junk: false });
     expect(judgeGuess("coastline", coasts, new Set(), lex)).toMatchObject({ kind: "unknown" });
     expect(judgeGuess("ivory coast", coasts, new Set(), lex)).toMatchObject({ kind: "near", corrected: false, entry: { name: "Ivory Coast" } });
+    // The title's adjective too: "african" is not the Central African Republic on African countries.
+    const african: Puzzle = { ...puzzle, id: "african15", title: "Most populous African countries", extras: [e(38, "Central African Republic")] };
+    expect(judgeGuess("african", african, new Set(), lex)).toEqual({ kind: "unknown", junk: false });
+    expect(judgeGuess("african", { ...african, title: "Most populous countries" }, new Set(), lex)).toMatchObject({ kind: "near", corrected: true });
     // An answer named exactly that still counts, and a title word that fits nothing is judged as before.
     expect(judgeGuess("coast", { ...coasts, extras: [e(94, "Coast")] }, new Set(), lex)).toMatchObject({ kind: "near", corrected: false });
     const brazil: Puzzle = { ...puzzle, id: "brazil15", title: "Largest cities in Brazil", noun: "cities" };

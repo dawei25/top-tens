@@ -610,32 +610,38 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
   // kind of answer, not one: it asks for more whenever some answer carries the word, rather than handing over the one
   // that happens to have it in its name (the audit: "pizza" put Pizza Hut in the box, "basketball" offered three
   // obscure leagues).
-  //
-  // The words of the list's title count too ("coast" on Countries with the longest coastlines put Ivory Coast, #94, in
-  // the box: the coverage audit, Nov 13), but only to stop such a reading: an ordinary word, or one that fits no
-  // answer, is judged as any other ("brazil" on Largest cities in Brazil is a known name), and on a list of literal
-  // strings whatever is typed is a guess ("pass" is Pass@123).
   const subject = subjectWords(puzzle.noun);
-  const titled = literalList(puzzle, lex) ? new Set<string>() : titleWords(puzzle.title);
   const words = guess.split(" ");
   const smallNumber = (w: string) => /^\d{1,2}$/.test(w);
   const category = words.some(isCategory);
   const aboutList = (w: string) => GENERIC.has(w) || subject.has(w) || smallNumber(w) || isCategory(w);
-  if (words.every((w) => aboutList(w) || titled.has(w)) && !words.every(smallNumber)) {
-    if (strong.length) return fits(strong, false);
-    // A category fits its singular too: "burgers" fits Burger King.
+  // A category fits its singular too: "burgers" fits Burger King.
+  const fitCount = () => {
     const singular = category ? words.map(singularOf).join(" ") : guess;
-    const fit = new Set([...allExact, ...wordMatches(guess, candidates), ...wordMatches(singular, candidates)].map((c) => c.entry)).size;
-    if (words.every(aboutList) || (fit > 0 && !plain)) {
-      return { kind: "unknown", junk: false, ...(fit > 1 || (category && fit > 0) ? { vague: fit } : {}) };
-    }
+    return new Set([...allExact, ...wordMatches(guess, candidates), ...wordMatches(singular, candidates)].map((c) => c.entry)).size;
+  };
+  if (words.every(aboutList) && !words.every(smallNumber)) {
+    if (strong.length) return fits(strong, false);
+    const fit = fitCount();
+    return { kind: "unknown", junk: false, ...(fit > 1 || (category && fit > 0) ? { vague: fit } : {}) };
+  }
+  // The words of the list's title too ("coast" on Countries with the longest coastlines put Ivory Coast, #94, in the
+  // box: the coverage audit, Nov 13; "african" on Most populous African countries the Central African Republic). They
+  // only stop such a reading: an answer or alias called that still counts, a word that fits no answer is judged as any
+  // other ("brazil" on Largest cities in Brazil is a known name), an ordinary word is never read as part of a name
+  // anyway, and on a list of literal strings whatever is typed is a guess ("pass" is Pass@123).
+  const titled = titleWords(puzzle.title);
+  const ofTitle = words.some((w) => titled.has(w) && !aboutList(w)) && words.every((w) => aboutList(w) || titled.has(w));
+  if (ofTitle && !strong.length && !plain && !literalList(puzzle, lex)) {
+    const fit = fitCount();
+    if (fit > 0) return { kind: "unknown", junk: false, ...(fit > 1 || category ? { vague: fit } : {}) };
   }
 
   // A country's name names that country (the coverage audit, Nov 13: on metro-cities "france" put Fort-de-France in the
   // box, "spain" Port of Spain). Where no answer is called it, it is never read as one longer name that merely contains
-  // it, only as one named for it (`namedFor`: Mexico City, Lake Chad, Empire of Japan); otherwise it is a known name
-  // that isn't in this ranking. Choices stay, since they show whole names, and on a list of people the name may be
-  // someone's surname ("jordan" is Michael Jordan).
+  // it, only as one named for it (`namedFor`: Mexico City, New Mexico, Lake Chad, Empire of Japan); otherwise it is a
+  // known name that isn't in this ranking. Choices stay, since they show whole names, and on a list of people the name
+  // may be someone's surname ("jordan" is Michael Jordan).
   const country = !strong.length && isCountryName(guess, lex) && !peopleList(puzzle, lex);
   const stray = (r: Reading) => country && "entry" in r && !namedFor(r.entry, guess, subject);
 
@@ -1029,16 +1035,21 @@ function isCountryName(guess: string, lex?: Lexicon): boolean {
   return countryNameCache.set.has(fnv(guess).toString(36));
 }
 
-/** Generic words that make a name another place's: West Jordan, New Mexico, South Georgia. */
-const OTHER_PLACE = new Set("new old north south east west northern southern eastern western central upper lower great little big".split(" "));
+/**
+ * Generic words that make a name another place's: West Jordan, South Georgia, Great Britain. Not "new": a New place is
+ * named for the old one, and on its list typed without the "New" it is the natural reading ("mexico" is New Mexico,
+ * #5, on Largest US states).
+ */
+const OTHER_PLACE = new Set("old north south east west northern southern eastern western central upper lower great little big".split(" "));
 /** Besides the generic words, what a country's league or institution is called: Super League Greece, Stade de France. */
 const NAMED_FOR = new Set("premier super first division primera pro professional gallery stade estadio".split(" "));
 
 /**
  * Whether one of the entry's names is the place's name with only words that say what the entry is: generic ones
- * ("Mexico City", "Lake Chad", "State Bank of India", "Japan National Stadium"), a category ("National Basketball
- * League (Australia)") or the list's own ("Empire of Japan" on empires). Anything else merely contains it: "Port of
- * Spain", "Fort-de-France", "From Russia with Love"; and a compass point or "New" makes another place ("West Jordan").
+ * ("Mexico City", "New Mexico", "Lake Chad", "State Bank of India", "Japan National Stadium"), a category ("National
+ * Basketball League (Australia)") or the list's own ("Empire of Japan" on empires). Anything else merely contains it:
+ * "Port of Spain", "Fort-de-France", "American Samoa", "From Russia with Love", "Japan Post Bank"; and a compass point
+ * makes another place ("West Jordan").
  */
 function namedFor(entry: Entry, place: string, subject: Set<string>): boolean {
   const p = place.split(" ");
