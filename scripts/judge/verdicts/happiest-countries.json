@@ -1,22 +1,26 @@
 {
   "id": "happiest-countries",
-  "by": "builder",
   "judgedAt": "2026-11-13",
   "decision": "daily-list",
   "alsoBlitz": true,
-  "priority": 6,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "priority": 7,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
   "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
   "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
-  "blitzCasual": { "scored": 20, "named": 20 },
+  "blitzCasual": { "scored": 24, "named": 25 },
   "difficulty": 2,
-  "tags": ["culture", "happiness", "countries"],
+  "tags": ["culture", "countries", "happiness"],
   "audience": "anyone",
-  "summary": "The five Nordic countries are gimmes, the Netherlands and Switzerland follow, and Costa Rica (#4), Israel (#8) and Luxembourg (#9) are the surprises. Canada, Australia and New Zealand (#11) are the traps.",
+  "summary": "A famous yearly headline with a set universe. The Nordics are gimmes, Costa Rica, Luxembourg and Israel are the thinking and the surprise, and Canada, New Zealand, Australia and Bhutan are the traps that end most games.",
   "reasons": [
-    "Builder's own replay, pending a real judge. Two casual orders found 8 each, at the top of the 6 to 8 window; lives went on Canada (#25), New Zealand (#11), Australia (#15), Bhutan and Japan or Austria.",
-    "The 2026 World Happiness Report (life ratings 2023 to 2025). Bhutan, of Gross National Happiness, costs a life and shows \"#95 in the 2019 report\"; a country no report has (North Korea, Monaco) is an answer with no figure, a dependency no report ranks is free.",
-    "Shares Switzerland and Norway with life-expectancy-countries, and the same well-off-country feel: schedule them apart."
+    "Casual: 8 found in the order I wrote before reading the build (Costa Rica as guess 12), 7 in a second order that tries Austria first. Both ran out of lives on Canada #25, New Zealand #11, Australia #15, Bhutan and Japan #61 or Austria #19. 8 is the top of the window, not past it: games end on those traps, and Israel and Luxembourg keep 10/10 for fans.",
+    "Top 10, scores and ranks match the cached page's 2026 table (147 rows, 2023 to 2025 average) exactly. Each older table's year matches its heading. Bhutan's \"#95 in the 2019 report\" is right: 2019 is its last report. Finland's ninth year at #1 is on the page.",
+    "Each famous miss teaches something: New Zealand #11 is the ideal near miss, and Canada #25 and the US #23 (usa, us, america) are surprises worth knowing. Bhutan at #95 busts a myth. Israel #8 is the one stretch and may draw comment, but it has made the report's top 10 every year since 2022.",
+    "Its closest list is gdp-per-capita, which shares 6 of these 10 (Luxembourg, Switzerland, Norway, Iceland, Denmark, Netherlands), so keep the two weeks apart. In the Nov 16 week, keep it away from capitals (Tue 17), for example Sat 21 or later."
   ],
-  "fixes": []
+  "fixes": [
+    "Minor, not blocking: the miss for United Arab Emirates shows #20, but the page ranks it #21 (Czechia #20, both 6.821 to three decimals). Take the page's Rank column when two values tie outside the top 10.",
+    "Minor, not blocking: Monaco, Liechtenstein, San Marino, Vatican City and North Korea cost a life with no figure. Monaco and Liechtenstein are common guesses for a rich-and-happy list. Give the countries no report ranks the value \"not in any report\", the same way Bhutan gets \"#95 in the 2019 report\".",
+    "Optional: Israel's fact (Hebrew revived) says nothing about the list's biggest surprise. Something like \"In the report's top 10 every year since 2022\" (from the page's tables: #9, #4, #5, #8, #8) would answer the \"really?\" first."
+  ]
 }
