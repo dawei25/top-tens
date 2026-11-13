@@ -10,6 +10,12 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Every gazetteer country in the lexicon's country set** (matcher agent, Nov 13): the guard that keeps a country's
+      name off longer names that contain it only knows the 195 countries the lexicon has another form for. 65 others
+      (Andorra, San Marino, Togo, Bermuda, Jersey...) still land on such names ("togo" is Chooks-to-Go, "bermuda" The
+      Bermuda Triangle). Fix in `scripts/lexicon.ts`; regenerating the lexicon changes matching on every list, so do it
+      when no daily is at risk and check today's and tomorrow's lists read as before.
+
 - [ ] **Shared forms from the Nov 13 coverage audit** (apply at each list's next rebuild): Korean city spellings
       (Pusan, Taegu, Inchon, Kwangju, Taejon), Wagga and Coffs, "Lux" for Luxembourg, one San Marino redirect in the
       shared junk list.
