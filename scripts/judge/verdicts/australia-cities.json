@@ -1,22 +1,28 @@
 {
   "id": "australia-cities",
-  "by": "builder",
   "judgedAt": "2026-11-13",
   "decision": "daily-list",
-  "alsoBlitz": false,
+  "alsoBlitz": true,
   "priority": 6,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 3 },
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
   "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
   "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
-  "blitzCasual": { "scored": 13, "named": 14 },
+  "blitzCasual": { "scored": 14, "named": 16 },
   "difficulty": 2,
   "tags": ["geography", "cities", "australia"],
   "audience": "anyone",
-  "summary": "Sydney, Melbourne, Brisbane, Perth and Adelaide come first, Canberra and the Gold Coast next, and Newcastle, the Sunshine Coast and the Central Coast are the stretch. Hobart, Darwin and Cairns are the famous traps.",
+  "summary": "The big five and Canberra come easily, the Gold Coast and Newcastle take thought, and the Sunshine and Central Coasts are the stretch. Hobart, Darwin, Cairns and Townsville are fair traps that show their rank. Melbourne at #1 is a good twist, but its fact should say why.",
   "reasons": [
-    "Builder's own replay, pending a real judge. Two casual orders found 8 and 7; lives went on Darwin (#17), Hobart (#13), Cairns (#15), Alice Springs (#50) and Townsville (#14), each with its population.",
-    "The ABS's 103 significant urban areas (June 2025). By this count Melbourne is #1, ahead of Sydney; the Central Coast's fact explains why Greater Sydney is still bigger. Joined areas go by their main city (Queanbeyan is Canberra, Tweed Heads the Gold Coast, Maitland Newcastle).",
-    "A city outside Australia is free (Auckland, Wellington), as on the Canada list; suburbs and sights (Fremantle, Surfers Paradise, Bondi, Uluru) are free and real names."
+    "Casual: 8/10 in 13 guesses (7 in an order without Newcastle). All five lives went on famous places, each showing rank and population: Hobart #13, Darwin #17, Cairns #15, Alice Springs #50, Townsville #14. Fan: 10/10, losing only Hobart, Wollongong #11 and Geelong #12.",
+    "Data matches the source's June 2025 SUA table row for row. Joined areas read right (Tweed Heads, Maitland, Queanbeyan and Gosford count), every fact names its state, misspellings land, and suburbs and sights (Fremantle, Parramatta, Bondi, Uluru) are free.",
+    "Melbourne over Sydney is the talking point, but only the Central Coast fact (#10, which most players see only on the reveal) says why. Melbourne's own fact says just 'on this count it is ahead again'. The title is plain, and the prompt says 'urban areas', as canada-cities does with 'municipalities'.",
+    "Same template as canada-cities (Nov 8), but different answers more than a week later: not a conflict. Run it late in the week, away from capitals on Nov 17."
   ],
-  "fixes": []
+  "fixes": [
+    "Before it runs: rewrite Melbourne's fact (scripts/facts/australia-cities.json) to give the reason, e.g. 'Victoria's capital is Australia's biggest urban area, but Greater Sydney, which also counts the Central Coast, has more people: 5.64 million to 5.44 million.' Evidence: the source page's Greater Capital City Statistical Areas table (Greater Sydney 5,638,830, included SUAs Sydney and Central Coast; Greater Melbourne 5,435,590). Rebuild this topic only.",
+    "Matcher (src/game/match.ts, coordinator): 'coast' and 'the coast' put Central Coast (#10) in the box to confirm, a free stretch answer. coreName() drops 'central' (QUALIFIERS), so the core shortcut in fits() resolves it before natural() can apply the rule that a word shared by 3+ top-10 answers is vague ('coasts' already gets 'be more specific'). Apply that rule before the core shortcut. Guard: a test that 'coast' is vague on australia-cities.",
+    "Melton and Sunbury (Melbourne), Blue Mountains (Sydney) and Gawler (Adelaide) each cost a life as 'an accepted answer outside the ranking' with a 2021 figure. The source's urban-centre table places them inside those SUAs, so by this list's own definition they are part of #1, #2 and #5. Drop them from the pool so they are free, like Fremantle and Parramatta.",
+    "Drop the bare 'South Coast' alias from Gold Coast (keep 'South Coast, Queensland'). To Australians, 'south coast' means the NSW South Coast, and today it counts as Gold Coast at once.",
+    "Check Alice Springs (#50, 30,875), a common casual miss. The source row has exactly Mount Gambier's figure and +15% growth for a town that has barely grown, so it is probably a copy slip on the page. Verify against ABS Regional population 2024-25 and use the ABS figure if it differs."
+  ]
 }
