@@ -10,6 +10,10 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Shared forms from the Nov 13 coverage audit** (apply at each list's next rebuild): Korean city spellings
+      (Pusan, Taegu, Inchon, Kwangju, Taejon), Wagga and Coffs, "Lux" for Luxembourg, one San Marino redirect in the
+      shared junk list.
+
 - [ ] **Shared forms from the Nov 13 builds** (apply at each list's next rebuild): "Aus"/"Oz" and "Lux" in
       COUNTRY_FORMS; the Australian city short forms in CITY_FORMS; Australia in the state/province list used by place
       facts; the new shared junk entries.
