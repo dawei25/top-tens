@@ -315,6 +315,13 @@ describe("coverage audit: matching rules", () => {
     ["video-games", "modern warfare 2", "Call of Duty: Modern Warfare"],
     ["car-models", "vw bus", "Volkswagen Beetle"],
     ["car-makers", "gac motor", "General Motors"],
+    // The leak audit for one slip beside words only one answer has (Nov 13).
+    ["countries-population", "dan marino", "San Marino"],
+    ["nfl-passing-yards", "san marino", "Dan Marino"],
+    ["music-artists", "green bay", "Green Day"],
+    ["manga", "astro bot", "Astro Boy"],
+    ["buildings", "princess power", "Princess Tower"],
+    ["us-cities", "sao francisco", "San Francisco"],
   ])("%s: %s is never %s", (id, guess, name) => {
     expect(lands(id, guess)).not.toContain(name);
   });
@@ -363,6 +370,20 @@ describe("coverage audit: matching rules", () => {
     ["albums", "the fame", "The Fame / The Fame Monster"],
     ["youtube-videos", "baby shark song", "Baby Shark Dance"],
   ])("%s: the short form %s is %s", (id, guess, name) => {
+    expect(lands(id, guess)).toEqual([name]);
+  });
+
+  // Launch week (Nov 12): "typos are free", yet a first letter slipped or a three-letter word slipped beside the rest
+  // of the name found nothing.
+  it.each([
+    ["spotify-artists", "hustin bieber", "Justin Bieber"],
+    ["spotify-artists", "lana del ray", "Lana Del Rey"],
+    ["music-artists", "kendrik lamar", "Kendrick Lamar"],
+    ["national-parks", "grand titon", "Grand Teton"],
+    ["sports-leagues", "bundesliag", "Bundesliga"],
+    ["countries-population", "south korea", "South Korea"],
+    ["countries-population", "north korea", "North Korea"],
+  ])("%s: one slip beside the rest of the name, %s, is %s", (id, guess, name) => {
     expect(lands(id, guess)).toEqual([name]);
   });
 

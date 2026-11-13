@@ -1,22 +1,26 @@
 {
   "id": "winter-olympics-countries",
-  "by": "builder",
   "judgedAt": "2026-11-13",
   "decision": "daily-list",
   "alsoBlitz": true,
-  "priority": 7,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 5, "fun": 4, "blitzDepth": 4 },
-  "casual": { "found": 7, "livesLost": 5, "guesses": 13 },
-  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
-  "blitzCasual": { "scored": 20, "named": 22 },
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": { "scored": 24, "named": 27 },
   "difficulty": 2,
   "tags": ["sports", "olympics", "winter sports"],
   "audience": "anyone",
-  "summary": "Norway, the US, Canada and Germany come fast; Finland and the Soviet Union are the surprises, and Russia, Japan, China and South Korea are the traps, each with its count.",
+  "summary": "A good daily: Norway, the US, Canada and Germany come fast, the Alpine and Nordic countries take a little thought, and the Soviet Union and Italy are fair stretches. Russia (#13) and the Asian hosts are the near misses that cost lives.",
   "reasons": [
-    "Builder's own replay, pending a real judge. Two casual orders found 8 and 6 (Norway, US, Canada, Germany, Switzerland, Sweden, Austria, Finland) and lost lives on Russia (#13, 118), Japan (#15), China (#16), South Korea (#17) and France (#12).",
-    "All medals, not golds (by golds Canada is #4 and Finland drops out), Milano Cortina 2026 included. The Soviet Union counts apart from Russia, as on olympic-medals; ROC's 2022 row is left out (its name is also Taiwan's), so 'roc' reads as Russia.",
-    "Shares 5 of 10 answers with olympic-medals (Today's list on Nov 7): run it a few weeks apart."
+    "Casual found 8/10 in 13 guesses (US, Canada, Norway, Germany, Switzerland, Sweden, Austria, Finland). Lives went on Russia #13, China #16, Japan #15, Netherlands #11 and South Korea #17. A player who types the Asian hosts before the Nordic countries lands on 6. Fan found 10/10, losing lives on Russia, East Germany and the Netherlands.",
+    "Every value matches the source's Winter table, Milano Cortina 2026 included, re-ranked by total as the title and prompt say. The Netherlands (#11, 167) is 4 medals behind Italy: a fair near miss.",
+    "Names read right: Soviet Union, USSR, Soviets and CCCP are #7. Russia, Russian Federation and ROC are Russia #13. Germany is only the team called Germany (293); East Germany (#14), West Germany (#18), GDR, DDR and FRG each cost a life with their own figure, as in the source. Taiwan, Chinese Taipei and Republic of China read as Taiwan (0 medals). Holland and Dutch work.",
+    "Shares 5 answers and the Russia vs Soviet Union trap with olympic-medals (Nov 7). It isn't a weaker copy (Norway, #11 there, is #1 here; Austria, Switzerland, Finland and Canada are new), but regulars will remember the Soviet Union. Run it late in the week, or 3+ weeks after Nov 7.",
+    "Blitz: 24 of 27 casual names scored (only Iceland, Jamaica and Mexico have 0)."
   ],
-  "fixes": []
+  "fixes": [
+    "Sweden's fact (scripts/facts/winter-olympics-countries.json) says 'its one Olympics at home was the 1912 Summer Games in Stockholm', but Stockholm also held the equestrian events of the 1956 Summer Games. Reword to: 'It has never hosted the Winter Games; Stockholm hosted the 1912 Summer Games.' This is a one-topic rebuild, best done before it runs.",
+    "Minor, for the rebuild queue: 'roc' and 'russian olympic committee' read as Russia and show Russia's 118, which leaves out ROC's own 32 Winter medals (5-12-15 in the source's Winter table). Olympic Athletes from Russia (2018) is already its own entry (#28), so do the same for this one: remove ROC from skip, rank it as an entry named 'Russian Olympic Committee' (32, #21), give it the aliases 'ROC' and 'Russian Olympic Committee' (and not Taiwan's article or names), and drop those two aliases from Russia. Taiwan, Chinese Taipei and Republic of China must stay on Taiwan."
+  ]
 }
