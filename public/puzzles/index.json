@@ -694,8 +694,7 @@
   "id": "grand-slam-titles",
   "title": "Tennis players with the most Grand Slam singles titles",
   "category": "Sports",
-  "blitz": true,
-  "debut": true
+  "blitz": true
  },
  {
   "id": "wine-countries",

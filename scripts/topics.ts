@@ -179,6 +179,11 @@ export interface Topic {
    * Dhaka's 2022 census where the table still has 2011's. `value` is read like a table cell ("10,278,882").
    */
   overrides?: Record<string, { value: string; source: string }>;
+  /**
+   * Entries (by name) that are no country though one of their names is a country's: they take none of that country's
+   * other forms. "ROC" is the Russian Olympic Committee on the Winter medals, and also Taiwan, whose names it took.
+   */
+  notCountries?: string[];
   /** Aliases to drop by exact text (after normalize): junk the rules in scripts/aliases.ts can't tell from a name. */
   junkAliases?: string[];
   /** The Wikipedia article for an entry, by name, when the table links the wrong one (or none). */
@@ -368,6 +373,26 @@ const COASTLINE_NAMES: Record<string, string> = {
   "Congo, Republic of the": "Republic of the Congo",
   Swaziland: "Eswatini",
 };
+
+/**
+ * The countries universe's dependencies and other places that are no sovereign state (those the area page gives no
+ * rank), by the universe's names. On a list of sovereign states only, naming one is free. Taiwan and Kosovo are left
+ * in: most lists rank them as countries.
+ */
+const DEPENDENCIES = [
+  "Ascension Island", "Anguilla", "Antarctica", "American Samoa", "Aruba", "Aland", "Saint Barthelemy", "Bermuda",
+  "Bonaire", "Bouvet Island", "Cocos (Keeling) Islands", "Cook Islands", "Curacao", "Christmas Island", "Western Sahara",
+  "Falkland Islands", "Faroe Islands", "French Guiana", "Guernsey", "Gibraltar", "Greenland", "Guadeloupe",
+  "South Georgia and the South Sandwich Islands", "Guam", "Hong Kong", "Heard Island and McDonald Islands",
+  "Isle of Man", "British Indian Ocean Territory", "Jersey", "Cayman Islands", "Saint Martin", "Macao",
+  "Northern Mariana Islands", "Martinique", "Montserrat", "New Caledonia", "Norfolk Island", "Niue",
+  "French Polynesia", "Saint Pierre and Miquelon", "Pitcairn Islands", "Puerto Rico", "Reunion", "Saint Helena",
+  "Svalbard and Jan Mayen", "Sint Maarten", "Tristan da Cunha", "Turks and Caicos Islands",
+  "French Southern Territories", "Tokelau", "U.S. Minor Outlying Islands", "British Virgin Islands",
+  "U.S. Virgin Islands", "Wallis and Futuna", "Mayotte",
+  // The tables' own spellings of three of them.
+  "Macau", "Réunion", "Curaçao",
+];
 
 /**
  * The women's champions-by-year cells write a champion by her full married name: the all-time table's name, so the
@@ -4122,8 +4147,8 @@ export const TOPICS: Topic[] = [
       "Avocado", "Coconut", "Lemon", "Pineapple", "Pear", "Cherry", "Pumpkin",
     ],
   },
-  // Nov 13: candidates for the week of Nov 16 (Today's lists). Billionaire cities and wine went to free play
-  // (coordinator, Nov 13), so they carry no `debut`.
+  // Nov 13: candidates for the week of Nov 16 (Today's lists). Billionaire cities, Grand Slam titles and wine went to
+  // free play (the coordinator and the judges, Nov 13), so they carry no `debut`.
   {
     id: "billionaire-cities",
     category: "Business",
@@ -4158,11 +4183,11 @@ export const TOPICS: Topic[] = [
     value: 10,
     metric: "Winter Olympic medals",
     universe: "countries",
-    // Russia's athletes in 2022 (32 medals) are no country, and "ROC" is also a name of Taiwan: ranked, it took all of
-    // Taiwan's names ("taiwan" cost a life as the Russian Olympic Committee). Left out; "roc" is Russia (intent.ts).
-    skip: ["ROC"],
-    // The table's name for Taiwan, so its miss shows its 0.
-    rename: { "Chinese Taipei": "Taiwan" },
+    // Russia's athletes in 2022 (32 medals) are an entry of their own, as Olympic Athletes from Russia (2018) is: "roc"
+    // is theirs (intent.ts) and none of Taiwan's names are, though "ROC" is one of them (the judge, Nov 13). Taiwan's
+    // table name, so its miss shows its 0.
+    rename: { "Chinese Taipei": "Taiwan", ROC: "Russian Olympic Committee" },
+    notCountries: ["Russian Olympic Committee"],
     junkAliases: [
       "Swedish sin", "Folkland", "Britain's languages", "Great Britain's languages", "Council Union", "Soviet order",
       "People's republic of russia", "United states of soviet russia", "European USSR", "De", "Modern day China",
@@ -4170,7 +4195,6 @@ export const TOPICS: Topic[] = [
   },
   {
     id: "grand-slam-titles",
-    debut: true,
     category: "Sports",
     title: "Tennis players with the most Grand Slam singles titles",
     noun: "tennis players",
@@ -4192,6 +4216,8 @@ export const TOPICS: Topic[] = [
       "Rafael Nadal": ["Rafa"],
       "Roger Federer": ["FedEx"],
       "Pete Sampras": ["Pistol Pete"],
+      // Djokovic as it sounds (the judge, Nov 13).
+      "Novak Djokovic": ["Jokovic", "Jokovich", "Novak Jokovic"],
     },
     // Relatives, a church, a foundation, an achievement and social handles among the redirects.
     junkAliases: [

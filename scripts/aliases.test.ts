@@ -973,6 +973,10 @@ describe("aliases as built: what players type", () => {
     ["mcenroe", "John McEnroe"],
     ["kyrgios", "unknown"],
     ["kournikova", "unknown"],
+    // The judge, Nov 13: Djokovic as it sounds.
+    ["jokovic", "Novak Djokovic"],
+    ["jokovich", "Novak Djokovic"],
+    ["novak jokovic", "Novak Djokovic"],
   ])("grand-slam-titles: %s -> %s", (guess, name) => {
     expect(lands("grand-slam-titles", guess)).toBe(name);
   });
@@ -986,10 +990,15 @@ describe("aliases as built: what players type", () => {
   });
 
   it.each([
-    // "ROC" is a name of Taiwan too: ranked, the Russian Olympic Committee took all of Taiwan's names.
+    // "ROC" is a name of Taiwan too: ranked, the Russian Olympic Committee once took all of Taiwan's names. It is an
+    // entry of its own now (the judge, Nov 13), with none of them.
     ["taiwan", "Taiwan"],
     ["chinese taipei", "Taiwan"],
-    ["roc", "Russia"],
+    ["republic of china", "Taiwan"],
+    ["roc", "Russian Olympic Committee"],
+    ["russian olympic committee", "Russian Olympic Committee"],
+    ["russia", "Russia"],
+    ["russian federation", "Russia"],
     ["ussr", "Soviet Union"],
     ["uk", "Great Britain"],
   ])("winter-olympics-countries: %s -> %s", (guess, name) => {
