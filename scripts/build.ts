@@ -604,10 +604,11 @@ export function rankOf(text: string | undefined): number | undefined {
 
 /**
  * The names and figures a cell lists (`counts` in topics.ts): "New York City (324), Jersey City (22), Fort Lee (2)",
- * "Burnaby (17), Vancouver (7), Coquitlam (4). New Westminster (1)".
+ * "Burnaby (17), Vancouver (7), Coquitlam (4). New Westminster (1)". A count of the career so far, "Ken Rosewall
+ * (3/8)" (the third of eight titles), gives the total.
  */
 export function countedNames(text: string): { name: string; figure: string }[] {
-  return [...text.matchAll(/([^,;()]+?)\s*\((\d[\d,]*(?:\.\d+)?)\)/g)]
+  return [...text.matchAll(/([^,;()]+?)\s*\((?:\d+\/)?(\d[\d,]*(?:\.\d+)?)\)/g)]
     .map((m) => ({ name: m[1].replace(/^[\s.]+/, "").trim(), figure: m[2] }))
     .filter((c) => c.name);
 }
