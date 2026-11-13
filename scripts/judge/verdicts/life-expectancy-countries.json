@@ -1,28 +1,26 @@
 {
   "id": "life-expectancy-countries",
   "judgedAt": "2026-11-13",
-  "decision": "fix-first",
-  "alsoBlitz": false,
+  "decision": "daily-list",
+  "alsoBlitz": true,
   "priority": 6,
-  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 7, "livesLost": 5, "guesses": 13 },
-  "fan": { "found": 9, "livesLost": 5, "guesses": 19 },
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 0, "guesses": 12 },
   "blitzCasual": { "scored": 29, "named": 30 },
   "difficulty": 2,
   "tags": ["geography", "health", "countries"],
   "audience": "anyone",
-  "summary": "A good daily in the making: famous countries, and the Nordics as the surprise traps. But the UN's own 2023 figures put Monaco and San Marino above Japan, so the answer key doesn't match the prompt yet.",
+  "summary": "Monaco, the guess everyone makes, is now #1 and San Marino #2, from the UN's own note on its table. Japan and Switzerland come fast, Andorra and South Korea take thought, and the Nordics are the traps.",
   "reasons": [
-    "Casual found 7 (Japan, Switzerland, Norway, Singapore, Australia, Italy, Spain). Lives went on Sweden #12, Iceland #14, Canada #15, Denmark #25 and Finland #26, each with its figure. A Nordic-first order finds 5, an Asia-first one 9.",
-    "The page's note on the UN table gives Monaco 86.37 and San Marino 85.71 for 2023, both above Japan's 84.71. The table leaves them out only because they have under 50,000 people, so 'Monaco isn't in this ranking' tells the player who knows the famous answer that they're wrong.",
-    "Hong Kong (the table's #1) and Monaco are free, so leaving them out costs nothing, but nothing says why. Japan's fact even says 'First on the UN's 2023 figures'.",
-    "As built, #10 Norway 83.31 and #11 Malta 83.30 differ by 0.01 years, with Sweden 83.26 just behind. That's not a tie, but it is noise. Ranking Monaco and San Marino moves the cut to Spain 83.67 and France 83.33.",
+    "Fixed (data agent, Nov 13): Monaco 86.37 and San Marino 85.71 rank from the UN note on the page (build option textRows, which fails if the page stops saying it). Top 10: Monaco, San Marino, Japan, South Korea, Andorra, Switzerland, Australia, Singapore, Italy, Spain; France #11, Norway #12. Both new answers have facts, and Japan's no longer claims first place (Hong Kong, a territory, tops the UN table).",
+    "Replayed after the fix: casual 7 (Japan, Switzerland, Monaco, Singapore, Australia, Italy, Spain; lives on Norway #12, Sweden #14, Iceland #16, Canada #17, France #11). Three other honest orders land 7, 7 and 8. Only an order that leads with five Nordic countries collapses (2). Fan 10 in 12 guesses, Hong Kong and Liechtenstein free.",
+    "Liechtenstein stays free: the page gives it no UN figure. The UN's own data (WPP 2024) gives 83.63 for 2023, below Spain's 83.67, so the top 10 is right without it and the prompt needs no caveat.",
+    "Fairness stays 3: with Norway out of the top 10 all five Nordics are near misses with figures. They teach, but they end most games.",
     "Too close to happiest-countries for one week: the same well-off countries, with the Nordics as the gimmes there and the traps here. Run them at least a week apart, and keep both away from gdp-per-capita."
   ],
   "fixes": [
-    "Monaco and San Marino. Preferred: rank them from the UN note on the page (Monaco 86.37, San Marino 85.71, 2023), which needs a build option for figures from the page text. The top 10 becomes Monaco, San Marino, Japan, South Korea, Andorra, Switzerland, Australia, Singapore, Italy, Spain (France #11, Norway #12), and Monaco and San Marino need facts. Liechtenstein has no UN figure on the page (the World Bank's 2024 note says 84.20) and could land above Spain's 83.67: rank it from a sourced UN 2023 figure, or keep it free and say so in the prompt. If the build can't do this, say what the table is in the prompt instead: 'Name the 10 countries with the highest life expectancy at birth (UN, 2023; places under 50,000 people not ranked)'.",
-    "Japan's fact: 'First on the UN's 2023 figures' is false (Hong Kong tops the UN table). Rewrite, e.g. 'Only Hong Kong, a Chinese territory, tops it in the UN's table. A third of its people are elderly.' (98 characters), adjusted if Japan becomes #3.",
-    "Coordinator, not a rebuild: 'hong kong' reads 'Hong kong isn't in this ranking. No life lost.' That's untrue (it is the table's #1), and it echoes the typed casing ('Hong kong', 'San marino'). A territory the list leaves out needs a line like 'Hong Kong isn't a country here.', and the line should use the name's own casing.",
-    "Keep `debut`: once fixed, this is a daily-list (and a Blitz: casual scored 29 of 30)."
+    "Coordinator, not a rebuild: 'hong kong' reads 'Hong kong isn't in this ranking. No life lost.' That's untrue (it is the table's #1), and it echoes the typed casing ('Hong kong'). A territory the list leaves out needs a line like 'Hong Kong isn't a country here.', and the line should use the name's own casing.",
+    "Keep `debut`."
   ]
 }

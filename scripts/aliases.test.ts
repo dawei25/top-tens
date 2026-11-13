@@ -1033,16 +1033,33 @@ describe("aliases as built: what players type", () => {
     ["korea", "South Korea"],
     ["swiss", "Switzerland"],
     ["nippon", "Japan"],
-    // Sovereign states only: the table's territories and the microstates it leaves out are free.
+    // Sovereign states only: the table's territories are free, and Liechtenstein, which has no UN figure on the page.
     ["hong kong", "unknown"],
     ["macau", "unknown"],
     ["french polynesia", "unknown"],
-    ["monaco", "unknown"],
-    ["san marino", "unknown"],
+    ["liechtenstein", "unknown"],
+    // The judge (Nov 13): the UN note on the table ranks Monaco and San Marino, above Japan.
+    ["monaco", "Monaco"],
+    ["san marino", "San Marino"],
+    // Coverage audit (Nov 13): Monaco's district said it isn't in the ranking; "lux" found nothing.
+    ["monte carlo", "Monaco"],
+    ["lux", "Luxembourg"],
     // Redirects that are no name for the country.
     ["andorran navy", "unknown"],
   ])("life-expectancy-countries: %s -> %s", (guess, name) => {
     expect(lands("life-expectancy-countries", guess)).toBe(name);
+  });
+
+  it("life-expectancy-countries: Monaco and San Marino rank from the UN's note, and Japan's fact is true (the judge, Nov 13)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "life-expectancy-countries.json"), "utf8"));
+    expect(p.answers.map((e) => e.name)).toEqual([
+      "Monaco", "San Marino", "Japan", "South Korea", "Andorra", "Switzerland", "Australia", "Singapore", "Italy", "Spain",
+    ]);
+    expect(p.answers.slice(0, 2).map((e) => e.value)).toEqual(["86.37 years", "85.71 years"]);
+    for (const e of p.answers) expect(e.fact, e.name).toBeDefined();
+    // Hong Kong, a territory, tops the UN table: Japan is not "first on the UN's figures".
+    expect(p.answers.find((e) => e.name === "Japan")?.fact?.text).not.toMatch(/^First/);
+    expect(p.answers.find((e) => e.name === "San Marino")?.aliases).not.toContain("Liberation from the Alberoni Occupation");
   });
 
   it.each([

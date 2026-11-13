@@ -405,6 +405,8 @@ export const COUNTRY_JUNK = [
   "Modern–era Japan", "Republic of Demonstrations", "Light of the South", "Intelligent Island",
   // And happiest-countries: a web address, a past republic, a region.
   "Denmark.dk", "Second Costa Rican Republic", "East Luxembourg",
+  // San Marino ranked on life-expectancy-countries (Nov 13): an event of 1739-40.
+  "Liberation from the Alberoni Occupation",
 ];
 
 let english: Set<string> | undefined;

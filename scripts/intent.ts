@@ -189,6 +189,8 @@ const BASE_COUNTRY_FORMS: string[][] = [
   // "aus" and "oz" found nothing (builder's fan run on life expectancy, Nov 13).
   ["Australia", "Aussie", "Aussies", "Aus", "Oz"],
   ["Switzerland", "Swiss", "Swiss Confederation"],
+  // "lux" found nothing on life-expectancy-countries (coverage audit, Nov 13); happiest-countries had it alone.
+  ["Luxembourg", "Lux"],
   ["India", "Bharat"],
   ["Japan", "Nippon", "Nihon"],
   ["South Africa", "RSA"],

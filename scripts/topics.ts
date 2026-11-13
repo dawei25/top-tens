@@ -4320,11 +4320,20 @@ export const TOPICS: Topic[] = [
     unit: " years",
     dataAsOf: "2023",
     universe: "countries",
-    // Sovereign states only: the table's territories (Hong Kong #1, French Polynesia, Réunion, Macau) are free. So are
-    // the microstates it leaves out: the CIA puts Monaco (89.8, the guess everyone makes) and San Marino above the
-    // UN's #10, and Liechtenstein just below it on a scale that runs higher, so none may cost a life. Vatican City has
-    // no figure anywhere.
-    skip: [...DEPENDENCIES, "Monaco", "San Marino", "Liechtenstein", "Vatican City"],
+    // Sovereign states only: the table's territories (Hong Kong #1, French Polynesia, Réunion, Macau) are free.
+    // The table leaves out places under 50,000 people, but its note gives the UN's figures for Monaco and San Marino,
+    // both above Japan: they rank from it (the judge, Nov 13: "Monaco isn't in this ranking" told the player who
+    // knew the famous answer that they were wrong).
+    textRows: [
+      { name: "Monaco", value: "86.37", says: "Monaco (LE 86.37 years" },
+      { name: "San Marino", value: "85.71", says: "San Marino (LE 85.71 years" },
+    ],
+    // Liechtenstein has no UN figure on the page (the World Bank's note gives 84.20 for 2024), so it stays free. The
+    // UN's own data (WPP 2024, 2023) gives it 83.63, below Spain's 83.67: the top 10 is right without it (checked
+    // Nov 13). Vatican City has no figure anywhere.
+    skip: [...DEPENDENCIES, "Liechtenstein", "Vatican City"],
+    // Monaco's best-known district: "monte carlo" said it isn't in the ranking, with Monaco #1 (coverage audit).
+    aliases: { Monaco: ["Monte Carlo"] },
     // The other countries the UN table leaves out, with the CIA's 2024 figure.
     also: [
       {
