@@ -4271,6 +4271,103 @@ export const TOPICS: Topic[] = [
       "Pinot Grigio", "Chardonnay", "Riesling", "Zinfandel", "Rosé", "Sake", "Mead", "Cider",
     ],
   },
+  // Nov 13: candidates for the week of Nov 23 (Today's lists).
+  {
+    id: "life-expectancy-countries",
+    debut: true,
+    category: "Science",
+    title: "Countries with the highest life expectancy",
+    noun: "countries",
+    prompt: "Name the 10 countries with the highest life expectancy at birth (UN, 2023)",
+    page: "List of countries by life expectancy",
+    // The UN's 2023 figures (World Population Prospects), every country and territory. The WHO table ranks member
+    // states only but is from 2019; the UN's is four years newer.
+    tables: [1],
+    name: "Locations",
+    value: "overall / at birth",
+    metric: "Life expectancy at birth (UN, 2023)",
+    unit: " years",
+    dataAsOf: "2023",
+    universe: "countries",
+    // Sovereign states only: the table's territories (Hong Kong #1, French Polynesia, Réunion, Macau) are free. So are
+    // the microstates it leaves out: the CIA puts Monaco (89.8, the guess everyone makes) and San Marino above the
+    // UN's #10, and Liechtenstein just below it on a scale that runs higher, so none may cost a life. Vatican City has
+    // no figure anywhere.
+    skip: [...DEPENDENCIES, "Monaco", "San Marino", "Liechtenstein", "Vatican City"],
+    // The other countries the UN table leaves out, with the CIA's 2024 figure.
+    also: [
+      {
+        tables: [5],
+        name: "Country",
+        value: "All",
+        where: { col: "Country", match: /^(Nauru|Tuvalu|Palau|Marshall Islands|Saint Kitts and Nevis)$/ },
+        dated: { label: "2024", source: "CIA", unit: " years" },
+      },
+    ],
+  },
+  {
+    id: "happiest-countries",
+    debut: true,
+    category: "Culture",
+    title: "Happiest countries (World Happiness Report 2026)",
+    noun: "countries",
+    prompt: "Name the 10 happiest countries in the 2026 World Happiness Report",
+    page: "World Happiness Report",
+    // The 2026 report's ranking: people's own rating of their lives, 0 to 10, averaged over 2023 to 2025.
+    tables: [0],
+    name: "Country or region",
+    value: "Life evaluation",
+    metric: "Life rating, 0 to 10 (2026 report)",
+    dataAsOf: "2026",
+    universe: "countries",
+    // Every country is an answer. A dependency no report ranks is free (Greenland, the Faroe Islands); the two some
+    // report ranks stay (Hong Kong #90, Puerto Rico in 2016). An old table's "Europe" row is no country.
+    skip: [...DEPENDENCIES.filter((d) => d !== "Hong Kong" && d !== "Puerto Rico"), "Europe"],
+    // A country the 2026 report leaves out shows its rank in the latest earlier report that has it (2025 back to
+    // 2013): Bhutan, of Gross National Happiness, "#95 in the 2019 report". The page's headings name the years.
+    also: ["2025", "2024", "2023", "2022", "2020", "2019", "2018", "2017", "2016", "2013"].map((year, i) => ({
+      tables: [i + 1],
+      // "Country or region" in the newer tables, "Country" in the older.
+      name: "Country",
+      rename: { "Somaliland region": "Somaliland" },
+      dated: { rank: "Rank", label: `the ${year} report` },
+    })),
+    // Older tables' names, written as an index sorts them.
+    junkAliases: ["Congo, Republic of", "Congo, Democratic Republic of", "Somaliland region"],
+  },
+  {
+    id: "australia-cities",
+    debut: true,
+    category: "Geography",
+    title: "Largest cities in Australia",
+    noun: "cities",
+    placesIn: "Australia",
+    prompt: "Name the 10 most populous cities in Australia (urban areas, 2025)",
+    page: "List of cities in Australia by population",
+    // The ABS's significant urban areas (June 2025 estimates), 103 of them: a city with the suburbs it has grown into.
+    // By this count Melbourne passed Sydney in 2023.
+    tables: [1],
+    name: "Significant Urban Area",
+    value: "June 2025",
+    metric: "Population (urban area, 2025)",
+    dataAsOf: "2025",
+    // The areas that join two places by their main one; the other place is an alias ("queanbeyan" is Canberra's).
+    rename: {
+      "Gold Coast–Tweed Heads": "Gold Coast",
+      "Newcastle–Maitland": "Newcastle",
+      "Canberra–Queanbeyan": "Canberra",
+    },
+    // The 50 largest urban centres (2021 census): suburbs and towns the urban areas count inside others (Melton,
+    // Gawler), with their census count.
+    also: [{ tables: [3], name: "Urban centre", value: 2, dated: { label: "2021 census" } }],
+    // Builder's fan run (Nov 13): "greater sydney" found nothing; Gosford is the Central Coast's main town.
+    aliases: { Sydney: ["Greater Sydney"], Perth: ["Greater Perth"], "Central Coast": ["Gosford"] },
+    // Suburbs, towns and sights inside the urban areas, and places that aren't cities: free, and real names.
+    knownNames: [
+      "Fremantle", "Parramatta", "Surfers Paradise", "Noosa", "Noosa Heads", "Bondi", "Bondi Beach", "St Kilda",
+      "Manly", "Uluru", "Ayers Rock", "Great Barrier Reef", "Kakadu", "Whitsundays",
+    ],
+  },
 ];
 
 /** Table indexes from..to, inclusive. */

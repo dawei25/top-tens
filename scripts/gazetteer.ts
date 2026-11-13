@@ -212,6 +212,10 @@ export const DIVISIONS = {
     "Zhejiang", "Guangxi", "Inner Mongolia", "Ningxia", "Tibet", "Xinjiang", "Beijing", "Chongqing", "Shanghai",
     "Tianjin", "Hong Kong", "Macau", "municipality",
   ],
+  Australia: [
+    "New South Wales", "Victoria", "Queensland", "Western Australia", "South Australia", "Tasmania",
+    "Australian Capital Territory", "Northern Territory", "Jervis Bay Territory",
+  ],
 } satisfies Record<string, string[]>;
 
 export type DivisionCountry = keyof typeof DIVISIONS;

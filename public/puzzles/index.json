@@ -701,5 +701,26 @@
   "title": "Countries that produce the most wine",
   "category": "Business",
   "blitz": true
+ },
+ {
+  "id": "life-expectancy-countries",
+  "title": "Countries with the highest life expectancy",
+  "category": "Science",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "happiest-countries",
+  "title": "Happiest countries (World Happiness Report 2026)",
+  "category": "Culture",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "australia-cities",
+  "title": "Largest cities in Australia",
+  "category": "Geography",
+  "blitz": true,
+  "debut": true
  }
 ]

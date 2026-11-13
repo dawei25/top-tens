@@ -1025,4 +1025,64 @@ describe("aliases as built: what players type", () => {
   ])("wine-countries: %s -> %s", (guess, name) => {
     expect(lands("wine-countries", guess)).toBe(name);
   });
+
+  it.each([
+    // Builder's fan run (Nov 13): Australia's short forms found nothing.
+    ["aus", "Australia"],
+    ["oz", "Australia"],
+    ["korea", "South Korea"],
+    ["swiss", "Switzerland"],
+    ["nippon", "Japan"],
+    // Sovereign states only: the table's territories and the microstates it leaves out are free.
+    ["hong kong", "unknown"],
+    ["macau", "unknown"],
+    ["french polynesia", "unknown"],
+    ["monaco", "unknown"],
+    ["san marino", "unknown"],
+    // Redirects that are no name for the country.
+    ["andorran navy", "unknown"],
+  ])("life-expectancy-countries: %s -> %s", (guess, name) => {
+    expect(lands("life-expectancy-countries", guess)).toBe(name);
+  });
+
+  it.each([
+    ["lux", "Luxembourg"],
+    ["holland", "Netherlands"],
+    ["suomi", "Finland"],
+    ["danish", "Denmark"],
+    // An old report's "Europe" row is no country, and a dependency no report ranks is free.
+    ["europe", "unknown"],
+    ["greenland", "unknown"],
+    ["bhutan", "Bhutan"],
+  ])("happiest-countries: %s -> %s", (guess, name) => {
+    expect(lands("happiest-countries", guess)).toBe(name);
+  });
+
+  it.each([
+    // How Australians shorten their cities, and the places an urban area joins.
+    ["syd", "Sydney"],
+    ["melb", "Melbourne"],
+    ["brissie", "Brisbane"],
+    ["brisvegas", "Brisbane"],
+    ["goldie", "Gold Coast"],
+    ["sunny coast", "Sunshine Coast"],
+    ["queanbeyan", "Canberra"],
+    ["central coast", "Central Coast"],
+    ["gosford", "Central Coast"],
+    ["greater sydney", "Sydney"],
+    ["hobart", "Hobart"],
+    // Suburbs and sights inside the urban areas are free.
+    ["fremantle", "unknown"],
+    ["surfers paradise", "unknown"],
+  ])("australia-cities: %s -> %s", (guess, name) => {
+    expect(lands("australia-cities", guess)).toBe(name);
+  });
+
+  it("australia-cities: topic redirects are no names of the city (CITY_JUNK)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "australia-cities.json"), "utf8"));
+    const aliases = p.answers.flatMap((e) => e.aliases);
+    for (const junk of ["Brisbane sport", "Brisbane Architecture", "Pinjar Park Speedway", "Central Coast Taxis"]) {
+      expect(aliases).not.toContain(junk);
+    }
+  });
 });

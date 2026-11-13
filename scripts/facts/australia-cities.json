@@ -1,0 +1,62 @@
+{
+  "Melbourne": {
+    "text": "Victoria's capital first overtook Sydney as Australia's biggest city in 1865; on this count it is ahead again.",
+    "source": "https://en.wikipedia.org/wiki/Melbourne",
+    "where": "Victoria",
+    "evidence": "Exponential growth ensued, and by 1865, Melbourne had overtaken Sydney as Australia's most populous city."
+  },
+  "Sydney": {
+    "text": "The capital of New South Wales has seventy surf beaches, Bondi the most famous.",
+    "source": "https://en.wikipedia.org/wiki/Sydney",
+    "where": "New South Wales",
+    "evidence": "Seventy surf beaches can be found along its coastline, with Bondi Beach being the most famous."
+  },
+  "Brisbane": {
+    "text": "Queensland's capital will host the 2032 Summer Olympics. It also bid for 1992, and lost to Barcelona.",
+    "source": "https://en.wikipedia.org/wiki/Brisbane",
+    "where": "Queensland",
+    "evidence": "It will host the 2032 Summer Olympics and 2032 Summer Paralympics in Victoria Park. The city also bid for the 1992 Summer Olympics but lost to Barcelona."
+  },
+  "Perth": {
+    "text": "Western Australia's capital is one of the most isolated big cities in the world.",
+    "source": "https://en.wikipedia.org/wiki/Perth",
+    "where": "Western Australia",
+    "evidence": "With more than two million residents, Perth is one of the most isolated major cities in the world."
+  },
+  "Adelaide": {
+    "text": "South Australia's capital was built for free settlers, not convicts: its 1837 plan had no prison.",
+    "source": "https://en.wikipedia.org/wiki/Adelaide",
+    "where": "South Australia",
+    "evidence": "Adelaide was established as a planned colony of free settlers ... As it was believed that in a colony of free settlers there would be little crime, no provision was made for a gaol (Prison) in Colonel Light's 1837 plan."
+  },
+  "Gold Coast": {
+    "text": "In 2007 this Queensland city passed Newcastle to become Australia's largest city that isn't a capital.",
+    "source": "https://en.wikipedia.org/wiki/Gold_Coast,_Queensland",
+    "where": "Queensland",
+    "evidence": "In 2007, the Gold Coast overtook the population of Newcastle, New South Wales, to become the sixth largest city in Australia and the largest non-capital city."
+  },
+  "Newcastle": {
+    "text": "This New South Wales city is the world's largest coal-exporting harbour: 143 million tonnes in 2022.",
+    "source": "https://en.wikipedia.org/wiki/Newcastle,_New_South_Wales",
+    "where": "New South Wales",
+    "evidence": "Famous for its coal, Newcastle is the largest coal exporting harbour in the world, exporting 143 million tonnes of coal in 2022."
+  },
+  "Canberra": {
+    "text": "Built in the Australian Capital Territory as a compromise between Sydney and Melbourne, it was designed by two architects from Chicago.",
+    "source": "https://en.wikipedia.org/wiki/Canberra",
+    "where": "Australian Capital Territory",
+    "evidence": "being a compromise between Sydney and Melbourne, Australia's two largest cities. ... the design by Walter Burley Griffin and Marion Mahony Griffin of Chicago, Illinois, United States, being declared the winner."
+  },
+  "Sunshine Coast": {
+    "text": "James Cook saw its Glass House Mountains, in Queensland, from the Endeavour in 1770.",
+    "source": "https://en.wikipedia.org/wiki/Sunshine_Coast,_Queensland",
+    "where": "Queensland",
+    "evidence": "In 1770, James Cook on the deck of HMS Bark Endeavour became the first known European to sight the Glass House Mountains, located south-west of Caloundra."
+  },
+  "Central Coast": {
+    "text": "This New South Wales region is why Greater Sydney still outnumbers Greater Melbourne: the ABS counts it as part of Sydney.",
+    "source": "https://en.wikipedia.org/wiki/Central_Coast_(New_South_Wales)",
+    "where": "New South Wales",
+    "evidence": "ABS currently includes the Central Coast region population wholly within Greater Sydney which results in Greater Sydney's population being larger than that of Greater Melbourne."
+  }
+}
