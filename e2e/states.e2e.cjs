@@ -220,8 +220,8 @@ const SCREENS = [
     },
   },
   {
-    // Fathom (beta, #fathom), on the fixture bank: a long number typed (grouped as it's typed), its reveal, then the
-    // results.
+    // Today's Fathom (#fathom), on the fixture bank (the day seeded by its date): a long number typed (grouped as it's
+    // typed), its reveal, then the results.
     name: "Fathom, a number typed",
     setup: async (page) => {
       await page.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: FATHOM_BANK, contentType: "application/json" }));

@@ -1,4 +1,5 @@
-// Fathom, the estimation game (#fathom): five questions that ask for a number. The questions come from
+// Fathom, the estimation game, endless (#fathom-endless, hidden since Nov 14; Today's Fathom, #fathom, is
+// fathom-daily.e2e.cjs): five questions that ask for a number. The questions come from
 // e2e/fixtures/fathom/questions.json (twelve real facts, one per kind, all estimates, so a draw from it fills the
 // percent and year rounds with estimates), served in place of public/fathom/questions.json; the percent and year
 // rounds add two real questions of their own (PERCENT, YEAR).
@@ -51,9 +52,9 @@ const bank =
   (ctx) =>
     ctx.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill(fulfill));
 
-/** Opens #fathom with the fixture bank, and Fathom's own save seeded once (`save`), if given. */
+/** Opens endless Fathom with the fixture bank, and its own save seeded once (`save`), if given. */
 function openFathom(vp, { save, serve = bank(), setup, ...opts } = {}) {
-  return open(browser, vp, "#fathom", undefined, {
+  return open(browser, vp, "#fathom-endless", undefined, {
     ...opts,
     setup: async (ctx) => {
       await serve(ctx);

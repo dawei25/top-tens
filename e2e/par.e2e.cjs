@@ -4,7 +4,7 @@
 // never reaches the screen (players didn't know it).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, VIEWPORTS, open, hash, puzzle, guess, noHScroll } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, TODAY, open, hash, puzzle, guess, noHScroll } = require("./helpers.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -75,6 +75,34 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 }
+
+// The owner, Nov 14: "dont specify estimated just say you did better than xx% of players today with a histogram".
+// "today" only on Today's list on its own day: a random list, and an earlier day's list from the archive, say "players".
+test("where a list's score stands: better than X% of players, today on Today's list, never estimated (phone)", async () => {
+  const vp = VIEWPORTS.find((v) => v.name === "phone");
+  const { ctx, page } = await open(browser, vp, `#p-${LIST}`);
+  const yesterday = (await page.evaluate(async () => (await fetch("puzzles/daily.json")).json())).find((e) => e.date === "2026-10-28");
+  const lineOf = async () => {
+    await page.getByTestId("give-up").click();
+    await page.getByTestId("give-up").click();
+    const block = page.getByTestId("results").getByTestId("par");
+    await block.waitFor();
+    const line = (await block.getByTestId("par-line").textContent()).trim();
+    assert.doesNotMatch(await page.getByTestId("results").innerText(), /estimat/i);
+    return { line, p: await block.getAttribute("data-p") };
+  };
+  const random = await lineOf();
+  assert.equal(random.line, `better than ${random.p}% of players`);
+  await page.goto(page.url().replace(/#.*$/, `#daily-${TODAY}`));
+  const today = await lineOf();
+  assert.equal(today.line, `better than ${today.p}% of players today`);
+  if (yesterday) {
+    await page.goto(page.url().replace(/#.*$/, `#daily-${yesterday.date}`));
+    const past = await lineOf();
+    assert.equal(past.line, `better than ${past.p}% of players`);
+  }
+  await ctx.close();
+});
 
 // Launch audit, Nov 6: before the first game, Stats' top row read "-- vs avg", "0 games", "-- your avg / 10", and the
 // first sat about 25 px lower than the other two (a 60px dash beside 36px numbers; UX 8). The row's figures share one

@@ -74,6 +74,12 @@ const FATHOM_CROWD = {
   "adult-bones": { n: 12, median: 200, further_off: 0.5 },
 };
 
+/**
+ * Real players' totals on Today's Fathom (fathom_day_stats, 50 bins of 10 points): 40 of them, all in 400-409, so
+ * the histogram's bin there stands out over the simulated crowd's 30.
+ */
+const FATHOM_DAY = { n: 40, counts: Array.from({ length: 50 }, (_, i) => (i === 40 ? 40 : 0)), avg: 404 };
+
 /** Someone who signs up with an email and password. */
 const PW_USER = { ...USER, id: "22222222-2222-4222-8222-222222222222", email: "fox@example.com", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: {} };
 const PW_SESSION = { ...SESSION, user: PW_USER };
@@ -90,7 +96,7 @@ const REFUSED_SUB = "refuse-me";
  * A Google ID token signs Dana in, unless its `sub` is REFUSED_SUB.
  */
 async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
-  const calls = { submit: [], rate: [], feedback: [], stats: [], fathom: [], compare: [], miss: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
+  const calls = { submit: [], rate: [], feedback: [], stats: [], fathom: [], compare: [], fathomPlay: [], fathomDay: [], miss: [], otp: [], authorize: [], saves: [], deleted: [], signup: [], password: [], idToken: [] };
   let row = save;
   const cors = {
     "access-control-allow-origin": "*",
@@ -121,6 +127,12 @@ async function mockSupabase(ctx, { save = null, averages = [] } = {}) {
       case "/rest/v1/rpc/submit_fathom_guess":
         calls.fathom.push(req.postDataJSON());
         return json(200, true);
+      case "/rest/v1/rpc/submit_fathom_play":
+        calls.fathomPlay.push(req.postDataJSON());
+        return json(200, true);
+      case "/rest/v1/rpc/fathom_day_stats":
+        calls.fathomDay.push(url.searchParams.get("p_date"));
+        return json(200, FATHOM_DAY);
       case "/rest/v1/rpc/submit_miss":
         // The headers too: a miss goes with the public key alone, never the player's session.
         calls.miss.push({ args: req.postDataJSON(), headers: req.headers() });
@@ -310,6 +322,7 @@ module.exports = {
   REFUSED_SUB,
   mockSupabase,
   opener,
+  FATHOM_DAY,
   FRESH,
   UUID,
   until,

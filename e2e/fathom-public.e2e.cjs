@@ -1,14 +1,12 @@
-// Fathom as a full game mode (owner, Nov 9: "ship it now"), on phone and desktop:
-// - Home's Free play: a Fathom key beside Random list and Random Blitz, the same keycap, its one line where the others
-//   count their lists; it opens Fathom. Phone: under the two, as wide. Desktop: the row under the pair, from the left
-//   of Random list to the right of Random Blitz.
-// - The menu's Play group: a Fathom tile that opens it, marked while Fathom is on show.
-// - How to play: a Fathom rule, with the game's own scoring line.
+// Fathom as a full game mode (owner, Nov 9: "ship it now"; Today's Fathom since Nov 14), on phone and desktop:
+// - Home's key and the menu's tile (Today's Fathom, in the Today panel and the Play group): fathom-daily.e2e.cjs.
+// - How to play: a Today's Fathom rule, with the game's own scoring line.
 // - Stats: a Fathom block before the first game (0 games, placeholders) and after one (games, average, best of 500).
 // - Past runs: a finished game under today's header, with its total; the row opens that game's results (the same
 //   total and rows, the date it was played); Back returns to Past runs, and a deep link's Back goes up to it.
-// - The share text: "Fathom <total>/500", the squares and the link to #fathom, every line but the last ending in two
-//   spaces so the lines keep in a Reddit comment.
+// - The share text: "Fathom #2 <total>/500", the squares and the link to #fathom, every line but the last ending in
+//   two spaces so the lines keep in a Reddit comment.
+// - A past game's key opens Today's Fathom where it was.
 // - Nothing says beta: Home, the menu, How to play, Fathom's question, reveal and results, the share text, Stats,
 //   Past runs.
 // The sync of Fathom's games with an account: backend.e2e.cjs. The name-it round's lines at 320px: fathom-name.e2e.cjs.
@@ -20,13 +18,18 @@ const { chromium, VIEWPORTS, TODAY, open, openTab, go, hash, store, noHScroll } 
 
 const FIXTURE = path.join(__dirname, "fixtures", "fathom", "questions.json");
 const BANK = new Map(JSON.parse(fs.readFileSync(FIXTURE, "utf8")).questions.map((q) => [q.id, q]));
-const serveBank = (ctx) => ctx.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: FIXTURE, contentType: "application/json" }));
+const SCHEDULE = path.join(__dirname, "fixtures", "fathom", "daily.json");
+const DAY = JSON.parse(fs.readFileSync(SCHEDULE, "utf8")).find((e) => e.date === TODAY);
+/** The fixture bank, and the fixture schedule (Fathom #2 today). */
+const serveBank = async (ctx) => {
+  await ctx.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: FIXTURE, contentType: "application/json" }));
+  await ctx.route(/\/fathom\/daily\.json(\?.*)?$/, (route) => route.fulfill({ path: SCHEDULE, contentType: "application/json" }));
+};
 
 let browser;
 before(async () => (browser = await chromium.launch()));
 after(() => browser.close());
 
-const box = (page, id) => page.getByTestId(id).boundingBox();
 const noBeta = async (page, where) => assert.doesNotMatch(await page.evaluate(() => document.body.innerText), /\bbeta\b/i, `${where} says beta`);
 
 /** Plays the five questions on screen (each answer a little high), and returns the results' total. */
@@ -43,67 +46,6 @@ async function playGame(page) {
   }
   await page.getByTestId("fathom-results").waitFor();
   return Number(await page.getByTestId("fathom-total").getAttribute("data-total"));
-}
-
-for (const vp of VIEWPORTS) {
-  test(`Home's Free play has a Fathom key beside the other two, and it opens Fathom (${vp.name})`, async () => {
-    const { ctx, page } = await open(browser, vp, "", undefined, { setup: serveBank, reducedMotion: "reduce" });
-    const key = page.getByTestId("fathom-key");
-    await key.waitFor();
-    await noBeta(page, "Home");
-    // In Free play, the same keycap as Random list, its line where the others count their lists.
-    assert.ok(await page.getByTestId("free-play").evaluate((el) => !!el.querySelector('[data-testid="fathom-key"]')));
-    const classes = (id) => page.getByTestId(id).evaluate((el) => [...el.classList].filter((c) => c === "key" || c === "mode-key"));
-    assert.deepEqual(await classes("fathom-key"), await classes("random-list"));
-    assert.ok((await page.getByTestId("fathom-key-status").textContent()).trim().length > 0, "its one line");
-    const [list, blitz, fathom] = [await box(page, "random-list"), await box(page, "random-blitz"), await box(page, "fathom-key")];
-    const strip = await box(page, "random-blitz-categories");
-    if (vp.name === "phone") {
-      // Under the two, as wide as they are.
-      assert.ok(fathom.y >= strip.y + strip.height, "under Random Blitz's strip");
-      assert.equal(Math.round(fathom.x), Math.round(list.x));
-      assert.equal(Math.round(fathom.width), Math.round(list.width));
-    } else {
-      // The row under the pair, across both.
-      assert.ok(fathom.y >= strip.y + strip.height, "under the pair");
-      assert.equal(Math.round(fathom.x), Math.round(list.x));
-      assert.equal(Math.round(fathom.x + fathom.width), Math.round(blitz.x + blitz.width));
-      assert.ok(fathom.height <= list.height, "no taller than the keys beside it need");
-    }
-    assert.ok(fathom.height >= 44, "44px to the finger");
-    assert.ok(await noHScroll(page));
-    // Hover, focus and press move nothing (states.e2e.cjs walks every control; this one by name).
-    const rest = await box(page, "fathom-key");
-    if (vp.name === "desktop") await key.hover();
-    await key.focus();
-    assert.deepEqual(await box(page, "fathom-key"), rest);
-    await key.click();
-    await page.getByTestId("fathom-question").waitFor();
-    assert.equal(await hash(page), "#fathom");
-    await noBeta(page, "Fathom's question");
-    await ctx.close();
-  });
-
-  test(`the menu's Fathom tile opens it and is marked there (${vp.name})`, async () => {
-    const { ctx, page } = await open(browser, vp, "", undefined, { setup: serveBank, reducedMotion: "reduce" });
-    await page.getByTestId("today-list").waitFor();
-    await page.getByTestId("menu-key").click();
-    const tile = page.getByTestId("menu-fathom");
-    await tile.waitFor();
-    await noBeta(page, "the menu");
-    // In the Play group, with an icon like every tile.
-    assert.ok(await page.getByTestId("menu-play").evaluate((el) => !!el.querySelector('[data-testid="menu-fathom"]')));
-    assert.equal(await tile.locator("svg.menu-tile-icon").count(), 1);
-    await tile.click();
-    await page.getByTestId("fathom-question").waitFor();
-    assert.equal(await hash(page), "#fathom");
-    await page.getByTestId("menu-key").click();
-    assert.deepEqual(await page.locator('[data-testid="menu"] [aria-current="page"]').evaluateAll((els) => els.map((e) => e.dataset.testid)), ["menu-fathom"]);
-    await page.getByTestId("menu-fathom").click();
-    await page.getByTestId("menu").waitFor({ state: "detached" });
-    assert.equal(await hash(page), "#fathom", "choosing it there only closes the menu");
-    await ctx.close();
-  });
 }
 
 // The game itself says no scoring line since Nov 14 (the owner): How to play is where it is explained.
@@ -141,18 +83,18 @@ for (const vp of VIEWPORTS) {
       const shared = await page.evaluate(() => navigator.clipboard.readText());
       const lines = shared.split("\n");
       assert.equal(lines.length, 3);
-      assert.equal(lines[0], `Fathom ${total}/500  `);
+      assert.equal(lines[0], `Fathom #${DAY.n} ${total}/500  `);
       assert.match(lines[1], /^(\p{Extended_Pictographic} ){4}\p{Extended_Pictographic} {2}$/u);
       assert.match(lines[2], /^https?:\/\/[^ ]+\/#fathom$/);
       assert.doesNotMatch(shared, /beta/i);
     }
-    // Kept in the player's save: the finished game, its total, its draw; the list games as they were.
+    // Kept in the player's save: the finished game with its day, its total; the list games as they were.
     const saved = await store(page);
     assert.equal(saved.fathom.runs.length, 1);
     const run = saved.fathom.runs[0];
     assert.equal(run.points.reduce((a, b) => a + b, 0), total);
+    assert.deepEqual(run.daily, { date: TODAY, n: DAY.n });
     assert.deepEqual(saved.fathom.totals, { [run.startedAt]: total });
-    assert.deepEqual(saved.fathom.recent[0].ids, run.ids);
     assert.deepEqual({ ...saved, fathom: undefined }, { ...before, fathom: undefined });
 
     // Stats after it.
@@ -185,7 +127,7 @@ for (const vp of VIEWPORTS) {
     await row.waitFor();
     assert.equal(await hash(page), "#history");
 
-    // A deep link to it: Back goes up to Past runs. NEW QUESTIONS there starts a game.
+    // A deep link to it: Back goes up to Past runs. Its key opens Today's Fathom: played, so its results.
     const deep = await openTab(ctx, `#fathom/run-${run.startedAt}`);
     await deep.getByTestId("fathom-results").waitFor();
     await deep.getByTestId("nav-back").click();
@@ -193,29 +135,30 @@ for (const vp of VIEWPORTS) {
     assert.equal(await hash(deep), "#history");
     await deep.locator('[data-testid="history-row"][data-kind="fathom"]').click();
     await deep.getByTestId("fathom-again").click();
-    await deep.getByTestId("fathom-question").waitFor();
+    await deep.locator('[data-testid="fathom"][data-phase="results"]').waitFor();
     assert.equal(await hash(deep), "#fathom");
-    assert.equal(await deep.getByTestId("fathom").getAttribute("data-phase"), "question");
     await ctx.close();
   });
 }
 
-// A game under way when a past one is opened: its key resumes that game, it doesn't draw over it.
-test("a past game's key resumes a game under way", async () => {
+// Today's Fathom under way when a past game is opened: its key resumes the day's game, it doesn't start over.
+test("a past game's key opens Today's Fathom where it was", async () => {
   const vp = VIEWPORTS.find((v) => v.name === "phone");
-  const { ctx, page } = await open(browser, vp, "#fathom", undefined, { setup: serveBank, reducedMotion: "reduce" });
+  // A past game: endless Fathom's (hidden), finished.
+  const { ctx, page } = await open(browser, vp, "#fathom-endless", undefined, { setup: serveBank, reducedMotion: "reduce" });
   await playGame(page);
   const startedAt = (await store(page)).fathom.runs[0].startedAt;
-  await page.getByTestId("fathom-again").click();
+  await go(page, "#fathom");
   await page.getByTestId("fathom-input").fill("42");
   await page.getByTestId("fathom-lock").click();
   await page.getByTestId("fathom-reveal").waitFor();
-  const underWay = await page.evaluate(() => localStorage.getItem("tentacle:fathom"));
+  const underWay = await page.evaluate(() => localStorage.getItem("tentacle:fathom-daily"));
   await go(page, `#fathom/run-${startedAt}`);
   await page.getByTestId("fathom-results").waitFor();
   await page.getByTestId("fathom-again").click();
   await page.getByTestId("fathom-reveal").waitFor();
-  assert.equal(await page.evaluate(() => localStorage.getItem("tentacle:fathom")), underWay, "the same game, where it was");
+  assert.equal(await hash(page), "#fathom");
+  assert.equal(await page.evaluate(() => localStorage.getItem("tentacle:fathom-daily")), underWay, "the same game, where it was");
   // A game that isn't kept here says so.
   await go(page, "#fathom/run-123");
   await page.getByTestId("fathom-gone").waitFor();

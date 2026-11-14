@@ -48,9 +48,9 @@ const serve =
     });
   };
 
-/** Opens #fathom on `questions` (the fixture bank and the name-it fixtures by default), its save seeded once. */
+/** Opens endless Fathom (#fathom-endless) on `questions` (the fixture bank and the name-it fixtures by default), its save seeded once. */
 function openFathom(vp, { questions = [...BANK, ...NAMES], lists = true, save, setup, ...opts } = {}) {
-  return open(browser, vp, "#fathom", undefined, {
+  return open(browser, vp, "#fathom-endless", undefined, {
     reducedMotion: "reduce",
     ...opts,
     setup: async (ctx) => {

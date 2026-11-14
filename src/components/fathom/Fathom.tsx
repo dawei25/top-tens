@@ -996,22 +996,28 @@ function ScoreBar({ scored }: { scored: Scored[] }) {
   }, [total]);
   return (
     <div className="fathom-score" data-testid="fathom-score" data-total={total}>
-      <span className="score-track" role="img" aria-label={`Score so far: ${total} out of ${MAX_TOTAL}`}>
+      <span className="tally-track" role="img" aria-label={`Score so far: ${total} out of ${MAX_TOTAL}`}>
         {scored.map((s, i) => (
           <span
             key={i}
-            className="score-fill"
+            className="tally-fill"
             data-band={s.band}
             data-new={i === scored.length - 1 && total !== from ? "" : undefined}
             style={{ width: `${(s.points / MAX_TOTAL) * 100}%` }}
           />
         ))}
       </span>
-      <span className="score-sum" aria-hidden="true">
-        <span key={total} className="score-n" data-count={total !== from ? "" : undefined} style={{ "--from": from, "--to": total } as React.CSSProperties}>
-          <span>{total}</span>
+      {/* As wide as the widest total ("500/500") from the start: a third digit never pushes the track. */}
+      <span className="tally-sum" aria-hidden="true">
+        <span className="tally-size">
+          {MAX_TOTAL}/{MAX_TOTAL}
         </span>
-        <span className="score-of">/{MAX_TOTAL}</span>
+        <span className="tally-now">
+          <span key={total} className="tally-n" data-count={total !== from ? "" : undefined} style={{ "--from": from, "--to": total } as React.CSSProperties}>
+            <span>{total}</span>
+          </span>
+          <span className="tally-of">/{MAX_TOTAL}</span>
+        </span>
       </span>
     </div>
   );
