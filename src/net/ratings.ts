@@ -3,13 +3,21 @@ import type { OutboxKind } from "./outbox";
 import { LIST_ID } from "./plays";
 
 /**
- * "Good list?": a thumbs up or down on a list in a mode, after its results. Kept in the save (so it shows as chosen
- * later, offline and without a backend, and syncs), and sent to rate_list (supabase/migrations) when there is a
+ * "Good list?": a thumbs up or down on a list in a mode, after its results, or on a Fathom question (mode "fathom", the
+ * question's id as the list id: the same mechanics and tables, the owner, Nov 14). Kept in the save (so it shows as
+ * chosen later, offline and without a backend, and syncs), and sent to rate_list (supabase/migrations) when there is a
  * backend. The database checks the same things, so keep the two in step.
  */
 
 export type { RatingReason } from "../game/storage";
-export type RatingMode = "list" | "blitz";
+
+/** What can be rated, and have notes: a list game, a Blitz round, a Fathom question (rate_list, submit_feedback). */
+export const RATING_MODES = ["list", "blitz", "fathom"] as const;
+export type RatingMode = (typeof RATING_MODES)[number];
+/** A list's own modes, a list game and a Blitz round: what plays and missed guesses take (never Fathom). */
+export type ListMode = Exclude<RatingMode, "fathom">;
+
+export const isRatingMode = (x: unknown): x is RatingMode => (RATING_MODES as readonly unknown[]).includes(x);
 
 /** Why not, after a thumbs down: the fixed set the database takes (rate_list). */
 export const RATING_REASONS: readonly RatingReason[] = ["too-hard", "too-easy", "boring", "unfair", "wrong-data"];
@@ -26,14 +34,14 @@ export interface Rating {
 
 /** Where a rating lives in the save's `ratings`. */
 export const ratingKey = (mode: RatingMode, listId: string): string => `${mode}:${listId}`;
-export const RATING_KEY = /^(list|blitz):[a-z0-9-]{1,64}$/;
+export const RATING_KEY = new RegExp(`^(?:${RATING_MODES.join("|")}):[a-z0-9-]{1,64}$`);
 
 export const isReason = (x: unknown): x is RatingReason => (RATING_REASONS as readonly unknown[]).includes(x);
 
 /** Why the server would refuse this rating, or null if it's fine. */
 export function invalidRating(r: Rating): string | null {
   if (typeof r?.listId !== "string" || !LIST_ID.test(r.listId)) return "list id";
-  if (r.mode !== "list" && r.mode !== "blitz") return "mode";
+  if (!isRatingMode(r.mode)) return "mode";
   if (r.rating !== -1 && r.rating !== 0 && r.rating !== 1) return "rating";
   if (r.reason !== null && (!isReason(r.reason) || r.rating !== -1)) return "reason";
   if (!Number.isFinite(r.at)) return "at";

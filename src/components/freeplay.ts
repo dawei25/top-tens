@@ -2,8 +2,41 @@
 // categories Home's by-category pickers offer. App rolls from these; Home draws its keys and pickers from them.
 import { blitzAvailable } from "../game/blitz";
 import { blitzHoldouts, rollHoldouts, type DailyEntry } from "../game/daily";
+import { freeStartKey } from "../game/free-games";
 import type { PuzzleMeta } from "../game/puzzles";
 import type { Saved } from "../game/storage";
+
+/**
+ * localStorage: the marks free play leaves on the list games it starts (`<list id>:<startedAt>`, newest last), so the
+ * free-play counter (src/game/free-games.ts) can tell a free game under way from a daily's on the same list (they share
+ * the list's save). A mark only ever qualifies a game still in the save, so old marks are harmless; the newest 100 are
+ * kept. Outside the save: it isn't synced (signed in, free play never runs out).
+ */
+export const FREE_STARTS_KEY = "top-tens:free-starts";
+const MAX_FREE_STARTS = 100;
+
+function readStarts(): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(FREE_STARTS_KEY) ?? "[]");
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+/** The marks, as the counter takes them. */
+export const freeStarts = (): Set<string> => new Set(readStarts());
+
+/** Free play started a new list game on `id` (a roll, Play again or a link): mark it. */
+export function markFreeStart(id: string, startedAt: number): void {
+  const key = freeStartKey(id, startedAt);
+  const marks = readStarts().filter((k) => k !== key);
+  try {
+    localStorage.setItem(FREE_STARTS_KEY, JSON.stringify([...marks, key].slice(-MAX_FREE_STARTS)));
+  } catch {
+    // Storage blocked: nothing is remembered anyway.
+  }
+}
 
 /** The fewest lists a roll in a category must have to land on for the pickers to offer it. */
 export const MIN_CATEGORY_LISTS = 3;

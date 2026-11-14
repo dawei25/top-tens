@@ -3,16 +3,16 @@
   "n": 1,
   "date": "2026-11-14",
   "ids": [
-   "hen-eggs-per-year",
-   "record-painting-price",
-   "ring-of-fire-earthquakes",
-   "netherlands-below-sea-level",
-   "hot-dog-eating-record",
-   "high-jump-record",
-   "first-heart-transplant",
-   "first-iphone",
-   "czech-beer",
-   "name-country-10m-people"
+   "adult-teeth",
+   "lego-brick-patent",
+   "wright-first-flight-year",
+   "avocado-fat-share",
+   "london-underground-underground",
+   "deepest-hole",
+   "bolt-top-speed",
+   "name-city-10m-people",
+   "longest-space-stay",
+   "english-speakers"
   ]
  },
  {
@@ -20,31 +20,31 @@
   "date": "2026-11-15",
   "ids": [
    "cheetah-top-speed",
-   "first-modern-olympics",
-   "body-water-share",
+   "big-mac-calories",
+   "first-balloon-flight",
    "southern-hemisphere-people",
-   "first-bitcoins",
-   "oldest-bread",
-   "dinosaur-extinction",
-   "moonwalkers",
-   "first-homo-sapiens",
-   "name-country-as-big-as-france"
+   "first-selfie",
+   "name-country-50m-people",
+   "formula-one-race-distance",
+   "empire-state-build-time",
+   "pacific-ocean-share",
+   "concorde-speed"
   ]
  },
  {
   "n": 3,
   "date": "2026-11-16",
   "ids": [
-   "ostrich-egg-weight",
-   "first-star-wars-film",
-   "speed-of-sound",
-   "name-country-3-borders",
-   "neapolitan-pizza-oven",
-   "lunar-day",
-   "bolt-top-speed",
-   "fresh-water-share",
-   "red-green-colour-blind-men",
-   "first-email"
+   "moonwalkers",
+   "swiss-alps-share",
+   "breath-hold-record",
+   "canada-maple-syrup-share",
+   "birthday-pairs",
+   "world-population-4-billion",
+   "monopoly-board-spaces",
+   "name-country-1m-people",
+   "record-transfer-fee",
+   "web-goes-public"
   ]
  },
  {
@@ -52,15 +52,15 @@
   "date": "2026-11-17",
   "ids": [
    "adult-bones",
-   "name-country-no-land-borders",
-   "air-oxygen-share",
-   "avocado-fat-share",
-   "first-text-message",
-   "f1-fastest-pit-stop",
-   "longest-space-stay",
-   "titanic-sinking",
+   "first-homo-sapiens",
+   "first-bitcoins",
+   "moon-visible-share",
+   "elizabeth-ii-becomes-queen",
    "elephant-daily-food",
-   "deepest-hole"
+   "f1-fastest-pit-stop",
+   "iceberg-underwater-share",
+   "neapolitan-pizza-oven",
+   "name-city-20m-people"
   ]
  },
  {
@@ -68,31 +68,31 @@
   "date": "2026-11-18",
   "ids": [
    "tallest-person",
-   "concorde-speed",
-   "greenland-ice-share",
-   "everest-first-ascent",
-   "van-gogh-oil-paintings",
    "tour-de-france-distance",
-   "name-country-1m-people",
-   "wright-first-flight-year",
-   "perseverance-trip",
-   "wild-mammals-share"
+   "first-underground-railway",
+   "penicillin-discovery",
+   "fresh-water-share",
+   "oldest-bread",
+   "drive-on-the-left-share",
+   "lunar-day",
+   "moon-landing-audience",
+   "name-country-6-borders"
   ]
  },
  {
   "n": 6,
   "date": "2026-11-19",
   "ids": [
-   "oldest-person-age",
-   "hummingbird-heart-rate",
+   "left-handed-share",
+   "mars-gravity-share",
+   "horizon-distance",
+   "first-world-cup",
+   "a380-capacity",
+   "us-mcdonalds",
+   "hen-eggs-per-year",
    "eiffel-tower-height",
    "coca-cola-invented",
-   "record-transfer-fee",
-   "penicillin-discovery",
-   "internet-users-share",
-   "mars-gravity-share",
-   "name-country-9-borders",
-   "youtube-new-video"
+   "name-country-as-big-as-egypt"
   ]
  },
  {
@@ -100,31 +100,95 @@
   "date": "2026-11-20",
   "ids": [
    "adult-blood-volume",
-   "beetle-share-of-animals",
-   "earth-spin-speed",
-   "first-underground-railway",
-   "football-pitch-length",
-   "name-city-20m-people",
-   "venus-surface-temperature",
-   "lego-brick-patent",
-   "amazon-in-brazil",
-   "piano-keys"
+   "czech-beer",
+   "first-modern-olympics",
+   "van-gogh-oil-paintings",
+   "elephant-pregnancy",
+   "name-country-as-big-as-france",
+   "sputnik-launch",
+   "coca-cola-can-sugar",
+   "internet-users-share",
+   "netherlands-below-sea-level"
   ]
  },
  {
   "n": 8,
   "date": "2026-11-21",
   "ids": [
-   "new-york-city-population",
-   "name-country-6-borders",
+   "first-harry-potter-book",
+   "penalties-scored-share",
+   "hummingbird-heart-rate",
+   "amazon-in-brazil",
+   "first-text-message",
+   "name-country-9-borders",
+   "north-pole-to-equator",
+   "hot-dog-eating-record",
+   "iss-orbit-time",
+   "heartbeats-in-a-lifetime"
+  ]
+ },
+ {
+  "n": 9,
+  "date": "2026-11-22",
+  "ids": [
+   "high-jump-record",
+   "reykjavik-share",
+   "blinks-per-minute",
+   "italian-pasta-per-year",
+   "last-moonwalk",
+   "name-country-100m-people",
+   "earth-spin-speed",
+   "record-painting-price",
+   "wild-mammals-share",
+   "euro-cash-arrives"
+  ]
+ },
+ {
+  "n": 10,
+  "date": "2026-11-23",
+  "ids": [
+   "oldest-person-age",
+   "perseverance-trip",
+   "world-cup-2026-matches",
+   "titanic-sinking",
+   "name-country-as-big-as-uk",
+   "ring-of-fire-earthquakes",
+   "new-zealand-sheep",
+   "first-email",
+   "marathon-distance",
+   "beetle-share-of-animals"
+  ]
+ },
+ {
+  "n": 11,
+  "date": "2026-11-24",
+  "ids": [
+   "first-iphone",
+   "brazil-coffee-share",
+   "piano-keys",
    "forest-cover-share",
-   "empire-state-build-time",
+   "name-country-10m-people",
+   "pluto-demoted",
+   "skydiver-fall-speed",
+   "smartphones-shipped",
+   "fingernail-growth",
+   "ostrich-egg-weight"
+  ]
+ },
+ {
+  "n": 12,
+  "date": "2026-11-25",
+  "ids": [
+   "body-water-share",
+   "ball-in-play-minutes",
+   "football-pitch-length",
    "first-youtube-video-year",
-   "sputnik-launch",
-   "moon-landing-audience",
-   "everest-boiling-point",
-   "brain-energy-share",
-   "skydiver-fall-speed"
+   "everest-first-ascent",
+   "last-woolly-mammoths",
+   "heart-pumps-a-day",
+   "olympic-pool-volume",
+   "canada-near-border-share",
+   "name-country-5m-people"
   ]
  }
 ]

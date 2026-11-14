@@ -21,21 +21,21 @@ export { FATHOM_BIN, FATHOM_BINS, totalBin };
 
 /**
  * What a typical casual player (18-35, curious, not a specialist) scores on a question, by its round: the
- * simulation's proxy for a day, summed over its ten. An estimate from the writers' typical miss (`typical` in
- * questions.json: about 2.3x on the questions that aren't openers, which scores about 35); a percent, a year and a
- * name-it round score more for the same reasoning (points off count, an event's age is a way in, a name-it round
- * takes any of several good answers).
+ * simulation's proxy for a day, summed over its ten. The scoring agent's numbers for a typical miss on the gentler
+ * curve (Nov 14: 10x off scores 30): an estimate about 2.3x off (the writers' `typical` on the questions that aren't
+ * openers) scores about 47; a percent, a year and a name-it round score more for the same reasoning (points off count,
+ * an event's age is a way in, a name-it round takes any of several good answers).
  */
-export const EXPECTED_POINTS: Readonly<Record<Round, number>> = { estimate: 35, percent: 55, year: 55, name: 60 };
+export const EXPECTED_POINTS: Readonly<Record<Round, number>> = { estimate: 47, percent: 58, year: 55, name: 60 };
 /** An easy question (a game's opener, where most people have a rough anchor; typical miss about 1.5x), any round. */
-export const EXPECTED_EASY = 65;
+export const EXPECTED_EASY = 66;
 
 /** A question's expected points: EXPECTED_EASY when it's easy, else its round's. */
 export const expectedPoints = (q: Pick<FathomQuestion, "round" | "easy">): number => (q.easy ? EXPECTED_EASY : EXPECTED_POINTS[roundOf(q)]);
 
 /**
  * A day's expected total: its questions' expected points, summed. The usual day (an easy opener, four estimates, two
- * percents, two years, a name-it round) expects 485.
+ * percents, two years, a name-it round) expects 540.
  */
 export const expectedTotal = (questions: readonly Pick<FathomQuestion, "round" | "easy">[]): number =>
   questions.reduce((sum, q) => sum + expectedPoints(q), 0);
@@ -76,7 +76,7 @@ const HIGH = FATHOM_MAX_TOTAL + 0.5;
 const below = (x: number, peak: number) => (spread(x, peak) - spread(LOW, peak)) / (spread(HIGH, peak) - spread(LOW, peak));
 
 /**
- * Where the curve peaks so that half the simulated players score under `centre`: about 60 points under it (the curve
+ * Where the curve peaks so that half the simulated players score under `centre`: about 55 points under it (the curve
  * is nearly flat between the two).
  */
 function peakFor(centre: number): number {
@@ -93,7 +93,7 @@ function peakFor(centre: number): number {
 /**
  * The simulated crowd for a day expecting `expected` (expectedTotal), as ESTIMATE_WEIGHT virtual players spread over
  * the FATHOM_BINS bins (fractions: they add up to exactly 30). Half of them score under the expected total, the
- * middle 80% from about 220 under it to 260 over, and the mean is about 10 over it; nothing outside 0-1,000.
+ * middle 80% from about 215 under it to 260 over, and the mean is about 11 over it; nothing outside 0-1,000.
  */
 export function simulatedCounts(expected: number): number[] {
   const peak = peakFor(Math.max(CENTRE_MIN, Math.min(CENTRE_MAX, expected)));

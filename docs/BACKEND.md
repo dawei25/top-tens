@@ -188,7 +188,13 @@ regulars can't lift every average.
       Check it took: finish Today's Fathom; Table Editor > `fathom_plays` has a row, and
       `select fathom_day_stats(current_date);` returns `{"n": 1, ...}`.
 
-   The live project has 1 to 8 (missed_guesses Nov 9, fathom_guesses Nov 14), so 9 is what's left.
+   10. `supabase/migrations/20261114130000_fathom_feedback.sql` (run once, safe to run twice; before or after 9):
+      ratings and notes take Fathom questions. Lets `mode` be `fathom` in `ratings` and `feedback` (the question's id
+      in `list_id`) and in `rate_list` and `submit_feedback` (same signatures, reasons, limits and one rating per
+      player); `list_ratings` and `list_feedback` already total by mode. Check it took: rate a question on Fathom's
+      results; `select * from list_ratings(now() - interval '1 hour');` has a `fathom` row.
+
+   The live project has 1 to 8 (missed_guesses Nov 9, fathom_guesses Nov 14), so 9 and 10 are what's left.
 
    Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the one-time steps above still go
    in the SQL Editor). Stats alone only need the first.

@@ -75,9 +75,10 @@ function openFathom(vp, { save, serve = bank(), setup, ...opts } = {}) {
 
 /**
  * The scoring rule (src/game/fathom.ts), to check the screen against: plain closeness, the same for every question.
- * Spot on (within 1%) is 100, and only that; otherwise 100 x (1 - d)^2 with d the distance in powers of ten, 0 from 10x.
+ * Spot on (within 1%) is 100, and only that; otherwise the larger of 100 x (1 - d)^2 and 30 x (2 - d), with d the
+ * distance in powers of ten: 30 at 10x, 0 from 100x.
  */
-const curve = (d) => Math.round(100 * Math.max(0, 1 - Math.abs(d)) ** 2);
+const curve = (d) => Math.round(Math.max(100 * Math.max(0, 1 - Math.abs(d)) ** 2, 30 * Math.max(0, 2 - Math.abs(d))));
 const points = (guess, answer) => (Math.abs(guess - answer) <= answer * 0.01 ? 100 : Math.min(99, curve(Math.log10(guess / answer))));
 /**
  * A percent: the average of points off (100 - 3 a point, never under 0) and the curve on how many powers of ten off it
@@ -632,12 +633,12 @@ describe("Fathom", { concurrency: true }, () => {
   test("Dead on and Close celebrate, the others don't, and never with reduced motion (phone)", async () => {
     const vp = VIEWPORTS.find((v) => v.name === "phone");
     const ids = ["eiffel-tower-height", "adult-bones", "octopus-hearts", "moon-distance", "everest-height"];
-    // Dead on, 30% high (Close), double (Near), 4x (Far).
+    // Dead on, 30% high (Close), double (Near), 10x (Far: 30 points since the curve's long tail, Nov 14).
     const plays = [
       [1, "dead-on"],
       [1.3, "close"],
       [2, "near"],
-      [4, "far"],
+      [10, "far"],
     ];
     for (const reducedMotion of ["no-preference", "reduce"]) {
       const { ctx, page } = await openFathom(vp, { save: { recent: [], game: { ids, guesses: [], at: 0 } }, reducedMotion });

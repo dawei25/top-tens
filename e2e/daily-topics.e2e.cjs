@@ -136,11 +136,11 @@ test("free Blitz never lands on today's list or a future day's; the days' Blitz 
     assert.ok(!held.has(id), `rolled ${id}`);
   }
 
-  // Today's list finished: its results offer its own Blitz, and Home keeps its focus on Today's list.
+  // Today's list finished: its results offer no Blitz (owner, Nov 14), and Home keeps its focus on Today's list.
   await go(page, `#daily-${DAY}`);
   await giveUp(page);
   assert.equal(await page.getByTestId("results-daily-blitz").count(), 0);
-  assert.equal(await page.getByTestId("blitz-key").getAttribute("href"), `#blitz-${entry.id}`);
+  assert.equal(await page.getByTestId("blitz-key").count(), 0);
   await go(page, "");
   await page.getByTestId("today-list").waitFor();
   assert.equal(await page.evaluate(() => document.activeElement?.dataset.testid), "today-list");

@@ -1,7 +1,8 @@
 // Blitz is free play only (owner, Nov 10: "remove todays blitz but keep blitz in the free play section ... it was
 // confusing to begin with having 2 different dailies to keep track of"). Home has one daily, Today's list, across the
 // row the pair took, and free play keeps Random list and Random Blitz; the menu the same. A finished daily list offers
-// Play Blitz on that same list (a free round) and Random list. An old link to a date's Blitz (#dailyblitz-<date>, and
+// Share and Random list, no Blitz (owner, Nov 14: the modes stay separate); its list's Blitz opens as a free round by
+// its link once the daily is done. An old link to a date's Blitz (#dailyblitz-<date>, and
 // the /run-<startedAt> Past runs used to link) opens that list's free Blitz; one to a date not here yet goes home.
 // Days in a row count daily lists only, and no screen says Today's Blitz or Daily Blitz any more.
 const { test, before, after } = require("node:test");
@@ -71,21 +72,20 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 
-  test(`a finished daily offers Play Blitz on its own list, and Random list (${vp.name})`, async () => {
+  test(`a finished daily offers Random list and no Blitz; its list's Blitz opens by link (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp);
     const daily = await todaysDaily(page);
     await page.getByTestId("today-list").click();
     await giveUp(page);
-    // One try: no Roll new list; Play Blitz on this list where Today's Blitz was, and a random list.
+    // One try: no Roll new list, no Blitz; a random list.
     assert.equal(await page.getByTestId("results-daily-blitz").count(), 0);
     assert.equal(await page.getByTestId("play-again").count(), 0);
     assert.equal(await page.getByTestId("results-roll").count(), 1);
-    const key = page.getByTestId("blitz-key");
-    assert.equal(await key.getAttribute("href"), `#blitz-${daily.id}`);
+    assert.equal(await page.getByTestId("blitz-key").count(), 0);
     await saysNoDailyBlitz(page, "a daily's results");
 
-    // A free round on the same list, open at once (the daily is done), counted as free play.
-    await key.click();
+    // A free round on the same list by its link, open at once (the daily is done), counted as free play.
+    await go(page, `#blitz-${daily.id}`);
     await page.getByTestId("blitz-clock").waitFor();
     assert.equal(await page.getByTestId("blitz-screen").getAttribute("data-list"), daily.id);
     assert.equal(await page.getByTestId("blitz-closed").count(), 0);

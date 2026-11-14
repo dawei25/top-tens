@@ -39,8 +39,8 @@ name-it round's lists in `public/fathom/lists/<id>.json` (built by `scripts/fath
   by `NODE_NO_WARNINGS=1 npx tsx scripts/fathom/daily.ts --days 7`. Each day is a full game in the round mix (an easy
   number first, then by the draw's own rules), no question comes back, and today's and tomorrow's entries are never
   changed once written; the days after them are chosen again on each run. Ten a day uses the bank twice as fast as
-  five, so the script always says how many days the bank covers with questions not asked yet (102 questions on Nov
-  14: 8 days, through Nov 21, the name-it and year rounds running out first), and fails loudly, writing nothing, when
+  five, so the script always says how many days the bank covers with questions not asked yet (137 questions on Nov
+  14: 12 days, through Nov 25, the 12 name-it questions running out first), and fails loudly, writing nothing, when
   the days asked for go past that: add questions, ask for fewer days, or pass `--repeat` to let the bank start over
   (the last few days held back). It also fails when today's or tomorrow's entry asks a question the bank no longer has
   (put it back, or rewrite that day by hand); a past day's is only a warning. `scripts/fathom/daily.test.ts` holds the
@@ -114,9 +114,9 @@ reaches 0. A miss scores at most 99: only spot on is 100.
 
 | Round | The player types | Points | The rule (How to play only) | The miss |
 |---|---|---|---|---|
-| `estimate` | a number in the question's unit | the curve, d = log10(guess / answer); within 1% spot on, 100. 25% off 82, half or double 49, 3x 27, 10x 0 | "The closer your guess, the more points." | "30% low", "3x too high" |
-| `percent` | 0 to 100: "71", "71%", "71.5" | the average, rounded, of two scores: points off (100 - 3 x points off, never under 0) and times off (the curve, d = how many powers of ten off on the answer's side of 50: up to 50 the shares, log10(guess / answer), past 50 what's left, log10((100 - answer) / (100 - guess)), each kept to 0.5 to 99.5); within half a point spot on, 100. 20 for 25 84, 5 for 2.5 71, 10 for 2.5 47, 0.8 for 25 14, 90 for 71 36; 90 for 99 scores as 10 for 1 | "The closer your guess, the more points." | "6 too low" |
-| `year` | an AD year, up to four digits: "2007" | the curve, d = 2 x log10(ago(answer) / ago(guess)), ago(y) = max(1, this year - y); the exact year 100. In 2026: 1984 for 1967 50, 1960 for 1967 81, 2010 for 2007 72, 2000 for 2007 53, 1850 for 1903 47 | "The closer your guess, the more points." | "3 years early" |
+| `estimate` | a number in the question's unit | the curve: round(max(100 x max(0, 1 - |d|)^2, 30 x max(0, 2 - |d|))), d = log10(guess / answer) (owner, Nov 14: 10x off is worth 25 to 40, not 0); within 1% spot on, 100. 25% off 82, half or double 51, 3x 46, 10x 30, 100x 0 | "The closer your guess, the more points." | "30% low", "3x too high" |
+| `percent` | 0 to 100: "71", "71%", "71.5" | the average, rounded, of two scores: points off (100 - 3 x points off, never under 0) and times off (the curve, d = how many powers of ten off on the answer's side of 50: up to 50 the shares, log10(guess / answer), past 50 what's left, log10((100 - answer) / (100 - guess)), each kept to 0.5 to 99.5); within half a point spot on, 100. 20 for 25 84, 5 for 2.5 72, 10 for 2.5 60, 0.8 for 25 21, 90 for 71 45; 90 for 99 scores as 10 for 1 (52) | "The closer your guess, the more points." | "6 too low" |
+| `year` | an AD year, up to four digits: "2007" | the curve, d = 2 x log10(ago(answer) / ago(guess)), ago(y) = max(1, this year - y); the exact year 100. In 2026: 1984 for 1967 51, 1960 for 1967 81, 2010 for 2007 72, 2000 for 2007 53, 1850 for 1903 51, 2017 for 2007 41 | "The closer your guess, the more points." | "3 years early" |
 | `name` | a name from the question's list: "Colombia" for "Name a country with about 50 million people" | the thing's figure against the target: a `ratio` list by the estimate's rule, a `steps` list 100 - 30 x steps off (one off 70, two 40) | "The closer to the target, the more points." | "6% more people", "2x too many people", "2% low" (an area, a unit of measure), "3 land borders too many" |
 
 Why these: the owner played and found "0.8% for 25%" (the beetles' share of animals) scoring 27 while "1984 for 1967"
@@ -221,13 +221,13 @@ the backend calls are `reportFathomDaily` and `useFathomDay` (`src/net`), on
 
 - **What's simulated** (owner: "just simulate a relatively normal distribution around [a proxy average] (albeit
   skewing to the right cause some ppl do rly good)"): the day's expected total is its questions' expected points,
-  summed: 65 for an easy question, else 35 for an estimate (the writers' typical miss, about 2.3x on the questions
-  that aren't openers), 55 for a percent or a year, 60 for a name-it round. The usual day of ten (an easy opener, four
-  estimates, two percents, two years, a name-it round) expects 485, and every day the bank draws expects about 465 to
-  605. Around it, a two-piece normal curve, its standard deviation 140 points below its peak and 240 above (twice the
+  summed, the scoring agent's numbers for a typical miss on the gentler curve: 66 for an easy question, else 47 for
+  an estimate (the writers' typical miss, about 2.3x on the questions that aren't openers), 58 for a percent, 55 for a
+  year, 60 for a name-it round. The usual day of ten (an easy opener, four estimates, two percents, two years, a
+  name-it round) expects 540, and every day the 137-question bank draws expects about 530 to 615. Around it, a two-piece normal curve, its standard deviation 140 points below its peak and 240 above (twice the
   five-question game's 70 and 120: a player's knack carries across the day's questions, so ten spread totals about
   twice as far), placed so half the simulated players score under the expected total: the middle 80% run from about
-  215 under it to 265 over, the mean sits about 13 over, and nothing falls outside 0 to 1000 (the curve is cut there).
+  215 under it to 260 over, the mean sits about 11 over, and nothing falls outside 0 to 1000 (the curve is cut there).
   100 bins of 10 points (1000 shares the last with 990-999; 10, not 20, so totals 10 apart rank apart), the same every
   time (no randomness). The curve on screen blurs them (The players' curve).
 - **How it's labelled**: it isn't. The line counts the simulated players as players; `n` (the real ones) comes with
@@ -262,6 +262,16 @@ reason their way toward the answer from something they already know. It must pas
 | How long is the Trans-Siberian Railway? | dropped | familiar name, nothing to reason from: you know it or you don't |
 | How heavy is an obscure animal? | dropped | not a familiar subject |
 | How fast does sound travel through air? | dropped (owner, Nov 14) | a physics constant: you know it or you don't, with nothing to reason from |
+| How hot is the surface of Venus? / When did the dinosaurs die out? | dropped (Nov 14) | a planetary constant and a famous figure: known or not, nothing to reason from |
+| Name a country with no land borders | dropped (owner, Nov 14) | "basically its to name an island ... too ez to get deadon": a target many answers hit exactly |
+| What share of the body's energy can the brain use? | dropped (owner, Nov 14) | "what exactly is energy?": a key word read two ways |
+
+**Two rules from the owner's notes** (Nov 14). A name-it target needs few exact hits and answers on both sides of it:
+never an extreme (0 land borders) or the most common value (3 land borders: 28 countries hit it). A key word a player
+can read two ways (energy, size, big, fast, long) names its measure in plain words ("about the same area as", "how
+far is a marathon"). A figure only specialists recall becomes arithmetic when the definition gives the one anchor
+players can't be expected to know (the ISS's speed in the definition: the question is then the orbit time).
+Each question's way in is kept in `scripts/fathom/ways.json`.
 
 **The owner's favourite kind** (Nov 14, from another game's questions he liked and disliked; ours are our own): the
 ones that are "actually fun to figure out". He liked a question you answer by starting from yourself (your own weight
@@ -362,14 +372,13 @@ second date that gives it away. The year must not appear in any other question's
 { "id": "name-country-6-borders", "round": "name", "kind": "places", "list": "land-borders", "target": 6,
   "question": "Name a country with 6 land borders", "easy": false }
 { "id": "name-country-as-big-as-uk", "round": "name", "kind": "places", "list": "countries-area", "target": 244376,
-  "question": "Name a country about as big as the UK", "except": ["United Kingdom"], "easy": false }
+  "question": "Name a country with about the same area as the UK", "except": ["United Kingdom"], "easy": false }
 ```
 
 - **`list`**: a list id in `public/fathom/lists`. It gives the question its unit (the list's measure), its source and
   its scoring; leave `unit`, `answer` and `source` out.
 - **`question`**: "Name a ..." or "Name an ...", naming the list's noun ("country", "city"), no end punctuation, the
-  target in it as a player says it ("about 50 million people", "6 land borders", "no land borders", "about as big as
-  France"). 100 characters with the definition, as any question.
+  target in it as a player says it ("about 50 million people", "6 land borders", "about the same area as France"). 100 characters with the definition, as any question.
 - **`target`**: in the list's measure (people, square kilometres, land borders): a whole number on a steps list, more
   than 0 on a ratio list. When the question names a yardstick ("as big as the UK"), the target is that thing's own
   figure on the list, and the yardstick goes in **`except`** so it doesn't score (a definition says it when the target

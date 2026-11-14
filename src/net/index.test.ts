@@ -162,12 +162,15 @@ describe("without a backend (no env)", () => {
     // A rating is kept in the save (to show it as chosen later), and nothing else is stored or sent.
     net.rateList("mountains", "list", -1, "too-hard");
     net.rateList("airports", "blitz", 1, "boring");
+    // A Fathom question, the same way (mode fathom, its id as the list).
+    net.rateList("first-homo-sapiens", "fathom", -1, "unfair");
     await new Promise((r) => setTimeout(r, 10));
     expect([...store.keys()]).toEqual(["top-tens:v1"]);
     const ratings = JSON.parse(store.get("top-tens:v1")!).ratings;
     expect(ratings["list:mountains"]).toMatchObject({ rating: -1, reason: "too-hard" });
     // A reason only goes with a thumbs down.
     expect(ratings["blitz:airports"]).toEqual({ rating: 1, at: expect.any(Number) });
+    expect(ratings["fathom:first-homo-sapiens"]).toMatchObject({ rating: -1, reason: "unfair" });
     expect(imported).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();
     expect(listeners).toEqual([]);
@@ -176,6 +179,7 @@ describe("without a backend (no env)", () => {
 
     // A note: nowhere to send it, so nothing is kept either (the build shows no note option).
     expect(net.submitFeedback("mountains", "list", "which state each park is in", -1)).toBe(false);
+    expect(net.submitFeedback("first-homo-sapiens", "fathom", "fun one", 1)).toBe(false);
     await new Promise((r) => setTimeout(r, 10));
     expect([...store.keys()]).toEqual(["top-tens:v1"]);
     expect(JSON.parse(store.get("top-tens:v1")!)).not.toHaveProperty("feedback");
@@ -254,6 +258,26 @@ describe("with a backend", () => {
     }
   });
 
+  it("rates a Fathom question as a list (mode fathom, its id as the list), and refuses a mode or id the server would", async () => {
+    configure();
+    const svc = { start: vi.fn(), rateList: vi.fn() };
+    vi.doMock("./service", () => svc);
+    const { store } = fakeBrowser();
+    const now = Date.UTC(2026, 10, 14, 12);
+    vi.useFakeTimers({ now, toFake: ["Date"] });
+    try {
+      const net = await import("./index");
+      net.rateList("first-homo-sapiens", "fathom", -1, "too-easy");
+      net.rateList("first-homo-sapiens", "quiz" as "fathom", 1);
+      net.rateList("Not An Id", "fathom", 1);
+      await vi.waitFor(() => expect(svc.rateList).toHaveBeenCalledTimes(1));
+      expect(svc.rateList.mock.calls[0][0]).toEqual({ listId: "first-homo-sapiens", mode: "fathom", rating: -1, reason: "too-easy", at: now });
+      expect(JSON.parse(store.get("top-tens:v1")!).ratings).toEqual({ "fathom:first-homo-sapiens": { rating: -1, reason: "too-easy", at: now } });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("loads the backend code at startup when plays or ratings are waiting, or a session is stored", async () => {
     configure();
     const svc = { start: vi.fn() };
@@ -279,18 +303,22 @@ describe("with a backend", () => {
       expect(net.submitFeedback("national-parks", "list", "  great list.\r\nsay which state each park is in \n", 1)).toBe(true);
       // The clock didn't move: a second note still gets a name of its own.
       expect(net.submitFeedback("national-parks", "list", "and the year it opened", null)).toBe(true);
-      // Blank or too long: nothing to send.
+      // A Fathom question's note, the same way.
+      expect(net.submitFeedback("first-homo-sapiens", "fathom", " the definition gave it away ", -1)).toBe(true);
+      // Blank or too long, or a mode the server doesn't take: nothing to send.
       expect(net.submitFeedback("national-parks", "list", " \n ", null)).toBe(false);
       expect(net.submitFeedback("national-parks", "list", "x".repeat(501), null)).toBe(false);
+      expect(net.submitFeedback("first-homo-sapiens", "quiz" as "fathom", "hi", null)).toBe(false);
       // Waiting already, though the backend code hasn't arrived (offline, it may never).
       const box = JSON.parse(store.get("top-tens:feedback-outbox")!);
       expect(box.pending).toEqual([
         { listId: "national-parks", mode: "list", rating: 1, text: "great list.\nsay which state each park is in", at: now },
         { listId: "national-parks", mode: "list", rating: null, text: "and the year it opened", at: now + 1 },
+        { listId: "first-homo-sapiens", mode: "fathom", rating: -1, text: "the definition gave it away", at: now + 2 },
       ]);
       expect(svc.flushFeedback).not.toHaveBeenCalled();
       release();
-      await vi.waitFor(() => expect(svc.flushFeedback).toHaveBeenCalledTimes(2));
+      await vi.waitFor(() => expect(svc.flushFeedback).toHaveBeenCalledTimes(3));
       expect(svc.start).toHaveBeenCalled();
       // Never in the save.
       expect(store.get("top-tens:v1")).toBeUndefined();

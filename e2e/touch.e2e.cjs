@@ -191,8 +191,8 @@ test("a found row's fact opens on a tap, with no caption under the board (phones
   for (const width of [320, 390]) {
     const { ctx, page } = await open(browser, phone(width), "#p-mountains", undefined, { reducedMotion: "reduce" });
     await page.getByLabel("Your guess").waitFor();
-    // Anything under the board but its keys (GIVE UP; once over, See 11 to 20): the caption, or a line in its place.
-    const extras = () => page.locator(".board .board-foot > :not([data-testid='give-up'], [data-testid='more-ranks-toggle'])").count();
+    // Anything under the board but GIVE UP: the caption, or a line in its place.
+    const extras = () => page.locator(".board .board-foot > :not([data-testid='give-up'])").count();
     const onBoard = () =>
       page.getByTestId("give-up").evaluate((el) => {
         const [k, f] = [el.getBoundingClientRect(), el.parentElement.getBoundingClientRect()];

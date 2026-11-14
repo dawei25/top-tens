@@ -15,7 +15,6 @@ import {
 } from "../game/state";
 import { load, save } from "../game/storage";
 import { dailyGame, localDate, lockDaily, streak, type DailyEntry } from "../game/daily";
-import { blitzAvailable } from "../game/blitz";
 import { recordListRun } from "../game/history";
 import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
@@ -46,6 +45,8 @@ import { MoreRanks } from "./MoreRanks";
 import { ParBlock, usePar } from "./par";
 import { reportGuess, reportList } from "../net";
 import { RateList } from "./rate/RateList";
+import { markFreeStart } from "./freeplay";
+import { wallOn } from "./account/wall";
 
 interface Props {
   id: string;
@@ -54,7 +55,6 @@ interface Props {
   daily?: DailyEntry;
   /** The player's local date, from App. */
   today: string;
-  schedule: DailyEntry[];
   lexicon?: Lexicon;
   onBack: () => void;
   onHome: () => void;
@@ -98,7 +98,7 @@ function describe(r: GuessResult, puzzle: Puzzle, typed: string): Omit<Feedback,
   }
 }
 
-export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, rolled }: Props) {
+export function Game({ id, meta, daily, today, lexicon, onBack, onHome, onRoll, rolled }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -129,7 +129,12 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         setPuzzle(p);
         // A daily is one try: once finished, it always opens on its result.
         const s = load();
-        setGame((daily ? dailyGame(s, daily) : s.games[id]) ?? newGame(p));
+        const kept = daily ? dailyGame(s, daily) : s.games[id];
+        const g = kept ?? newGame(p);
+        // A new free game is marked as free play's, for the free-play counter (./freeplay): a daily on the same list
+        // shares its save while under way.
+        if (wallOn && !daily && !kept && g.startedAt) markFreeStart(id, g.startedAt);
+        setGame(g);
       })
       .catch((e) => setError(String(e.message ?? e)));
     // The daily is fixed for this screen (App keys it by date).
@@ -326,14 +331,6 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     dailyStreak = streak(sv);
   }
   const mode = !daily ? "Random list" : daily.date === today ? `Daily #${daily.n}` : `Archive #${daily.n}`;
-  // The list's own Blitz key, on its results, dailies included: a free Blitz on the list just finished (a list game
-  // doesn't spoil its Blitz, UX 15). Count this game in before the save effect runs, so finishing today's list opens
-  // its Blitz at once.
-  const blitzOpen = (() => {
-    const sv = load();
-    sv.games[id] = game;
-    return blitzAvailable(puzzle, schedule, today, sv);
-  })();
 
   const missChips = misses.length > 0 && (
     <section className="misses" aria-label="Wrong guesses" data-glass>
@@ -371,8 +368,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-            {/* The score alone (the owner: no Play Blitz here, "for simplicity"; the results offer the list's Blitz).
-                The players' average waits for the results, where it says how you did. */}
+            {/* The score alone (the owner: no Play Blitz here, "for simplicity", nor on the results since Nov 14: the
+                modes stay separate). The players' average waits for the results, where it says how you did. */}
             <span className="prompt-end">
               <span className="count" aria-label={`${game.found.length} of 10 found`}>
                 <b>{game.found.length}</b>/10
@@ -533,7 +530,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               );
             })}
           </ol>
-          {/* Under the board: GIVE UP while playing; once over, ranks 11 to 20 behind a key, the guessed ones marked. */}
+          {/* Under the board: GIVE UP while playing; once over, ranks 11 to 20 below a divider, the guessed ones marked. */}
           {over && <MoreRanks puzzle={puzzle} guessed={new Set(misses.map((m) => m.rank))} />}
           {!over && (
             <div className="board-foot">
@@ -644,12 +641,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button ref={shareRef} className={daily ? "key key-pink" : "key"} data-testid="share" onClick={share}>
                   <SwapLabel off="Share" on="Copied" active={copied} />
                 </button>
-                {/* A daily is one try: no replay, just somewhere else to go: this list as a Blitz, or a random list. */}
-                {blitzOpen && (
-                  <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
-                    Play Blitz
-                  </a>
-                )}
+                {/* A daily is one try: no replay, just somewhere else to go, a random list. No Play Blitz on any list's
+                    results: the modes stay separate (owner, Nov 14). */}
                 {daily && (
                   <button className="key" data-testid="results-roll" onClick={onRoll}>
                     Random list

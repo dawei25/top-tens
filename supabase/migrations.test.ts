@@ -7,8 +7,9 @@ import { cleanMiss, looksPersonal } from "../src/net/misses";
 /**
  * The migrations, run in PGlite (Postgres in WebAssembly) against small stand-ins for what Supabase provides: the
  * anon, authenticated and service_role roles, auth.users and auth.uid(). Checks the contract the game relies on: who
- * can touch what, what submit_play, rate_list, submit_feedback, submit_fathom_guess, submit_fathom_play and submit_miss
- * accept, what the stats, ratings, Fathom comparison and day totals functions return (every player counted, the owners
+ * can touch what, what submit_play, rate_list, submit_feedback (on lists, Blitz rounds and Fathom questions),
+ * submit_fathom_guess, submit_fathom_play and submit_miss accept, what the stats, ratings, Fathom comparison and day
+ * totals functions return (every player counted, the owners
  * and testers included), that
  * notes and missed guesses are read only with the reader key (list_feedback, list_misses), that a miss is normalized
  * as the game normalizes it and linked to nobody, the save's version check, and what account deletion
@@ -566,6 +567,203 @@ function suite(exposeNewTables: boolean) {
       // An hour on, the first browser may write again.
       await db.query("update public.feedback set created_at = now() - interval '61 minutes' where client_id = $1", [client(620)]);
       expect((await as("anon", null, () => note({ list: "f-spam-x", text: "later", client: client(620) }))).rows[0].ok).toBe(true);
+    });
+  });
+
+  // The owner, Nov 14: "add the same feedback system for fathom that we currently have for lists/blitz- ideally we keep
+  // the same mechanics and tables". Mode 'fathom', the question's id as list_id (20261114130000_fathom_feedback.sql).
+  describe("Fathom ratings and notes", () => {
+    // R rates on two browsers and deletes their account at the end; S is anyone signed in.
+    const R = "c1c1c1c1-c1c1-4c1c-8c1c-c1c1c1c1c1c1";
+    const S = "d2d2d2d2-d2d2-4d2d-8d2d-d2d2d2d2d2d2";
+    const Q = "first-homo-sapiens";
+    const KEY = "a-long-random-reader-key-for-fathom-0123";
+    type Row = { list_id: string; mode: string; rating: number; reason: string | null; user_id: string | null; client_id: string };
+    const ratingRows = (list: string) =>
+      db.query<Row>("select list_id, mode, rating, reason, user_id, client_id from public.ratings where list_id = $1 order by mode, client_id", [list]);
+    type Totals = { list_id: string; mode: string; up: number; down: number; too_hard: number; too_easy: number; boring: number; unfair: number; wrong_data: number };
+    const totals = async (list: string) =>
+      (await as("anon", null, () => db.query<Totals & { last_rated: Date }>("select * from public.list_ratings()"))).rows
+        .filter((r) => r.list_id === list)
+        .map(({ last_rated, ...t }) => (expect(last_rated).toBeInstanceOf(Date), t));
+    type Read = { list_id: string; mode: string; rating: number | null; text: string; from_owner: boolean };
+    const readNotes = (reader: string | null) => as("anon", null, () => db.query<Read & { created_at: Date }>("select * from public.list_feedback($1)", [reader]));
+
+    beforeAll(async () => {
+      await db.query("insert into auth.users (id, email) values ($1, 'r@example.com'), ($2, 's@example.com')", [R, S]);
+      await db.query("select public.set_feedback_reader($1)", [KEY]);
+    });
+
+    it("rates a Fathom question as a list is rated: the latest replaces the earlier, 0 takes it back, a list of the same id apart", async () => {
+      await as("anon", null, async () => {
+        expect((await rate({ list: Q, mode: "fathom", client: client(4000) })).rows[0].ok).toBe(true);
+        expect((await rate({ list: Q, mode: "fathom", client: client(4000), rating: -1, reason: "unfair" })).rows[0].ok).toBe(true);
+        expect((await rate({ list: Q, mode: "list", client: client(4000) })).rows[0].ok).toBe(true);
+      });
+      expect((await ratingRows(Q)).rows).toEqual([
+        { list_id: Q, mode: "fathom", rating: -1, reason: "unfair", user_id: null, client_id: client(4000) },
+        { list_id: Q, mode: "list", rating: 1, reason: null, user_id: null, client_id: client(4000) },
+      ]);
+      await as("anon", null, () => rate({ list: Q, mode: "fathom", client: client(4000), rating: 0 }));
+      expect((await ratingRows(Q)).rows.map((r) => r.mode)).toEqual(["list"]);
+    });
+
+    it("takes the same reasons, and refuses what a list refuses (invalid_parameter_value)", async () => {
+      await as("anon", null, async () => {
+        for (const reason of ["too-hard", "too-easy", "boring", "unfair", "wrong-data"]) {
+          expect((await rate({ list: "fr-reasons", mode: "fathom", client: client(4001), rating: -1, reason })).rows[0].ok).toBe(true);
+        }
+        const bad = [{ mode: "Fathom" }, { mode: "fathoms" }, { mode: "name" }, { mode: "" }, { list: "Bad Id" }, { rating: 1, reason: "boring" }, { rating: -1, reason: "meh" }];
+        for (const args of bad) expect(await code(rate({ list: "fr-bad", mode: "fathom", client: client(4002), ...args })), JSON.stringify(args)).toBe("22023");
+        for (const args of [{ mode: "Fathom" }, { mode: "estimate" }, { rating: 0 }, { text: " " }, { list: "x".repeat(65) }]) {
+          expect(await code(note({ list: "fn-bad", mode: "fathom", client: client(4002), ...args })), JSON.stringify(args)).toBe("22023");
+        }
+      });
+      expect((await ratingRows("fr-reasons")).rows.map((r) => [r.mode, r.reason])).toEqual([["fathom", "wrong-data"]]);
+      expect((await ratingRows("fr-bad")).rows).toEqual([]);
+    });
+
+    it("keeps one rating per question across a signed-in player's devices, linked to the account", async () => {
+      await as("authenticated", R, () => rate({ list: "fr-moon", mode: "fathom", client: client(4010) }));
+      await as("authenticated", R, () => rate({ list: "fr-moon", mode: "fathom", client: client(4011), rating: -1, reason: "too-hard" }));
+      await as("authenticated", S, () => rate({ list: "fr-moon", mode: "fathom", client: client(4012) }));
+      expect((await ratingRows("fr-moon")).rows.map((r) => [r.client_id, r.rating, r.user_id])).toEqual([
+        [client(4011), -1, R],
+        [client(4012), 1, S],
+      ]);
+    });
+
+    it("totals each question under mode fathom in list_ratings, with the public key", async () => {
+      await as("anon", null, async () => {
+        for (let i = 0; i < 3; i++) await rate({ list: "fr-totals", mode: "fathom", client: client(4020 + i) });
+        await rate({ list: "fr-totals", mode: "fathom", client: client(4023), rating: -1, reason: "boring" });
+        await rate({ list: "fr-totals", mode: "fathom", client: client(4024), rating: -1 });
+        await rate({ list: "fr-totals", mode: "blitz", client: client(4020), rating: -1, reason: "too-easy" });
+      });
+      expect(await totals("fr-totals")).toEqual([
+        { list_id: "fr-totals", mode: "blitz", up: 0, down: 1, too_hard: 0, too_easy: 1, boring: 0, unfair: 0, wrong_data: 0 },
+        { list_id: "fr-totals", mode: "fathom", up: 3, down: 2, too_hard: 0, too_easy: 0, boring: 1, unfair: 0, wrong_data: 0 },
+      ]);
+    });
+
+    it("takes notes on a question with the rating at the time, read only with the reader key, as a list's", async () => {
+      await as("anon", null, async () => {
+        expect((await note({ list: "fn-moon", mode: "fathom", text: "  the definition gave it away \n", rating: -1, client: client(4030) })).rows[0].ok).toBe(true);
+        // A retry whose answer got lost: once.
+        expect((await note({ list: "fn-moon", mode: "fathom", text: "the definition gave it away", rating: -1, client: client(4030) })).rows[0].ok).toBe(true);
+        // The same text on a list of that id is its own note.
+        expect((await note({ list: "fn-moon", mode: "list", text: "the definition gave it away", client: client(4030) })).rows[0].ok).toBe(true);
+      });
+      await as("authenticated", R, () => note({ list: "fn-moon", mode: "fathom", text: "fun one", rating: 1, client: client(4031) }));
+      const stored = await db.query<Row & { text: string }>(
+        "select list_id, mode, rating, text, user_id, client_id from public.feedback where list_id = 'fn-moon' order by id",
+      );
+      expect(stored.rows.map((r) => [r.mode, r.rating, r.text, r.user_id])).toEqual([
+        ["fathom", -1, "the definition gave it away", null],
+        ["list", null, "the definition gave it away", null],
+        ["fathom", 1, "fun one", R],
+      ]);
+      // The public key alone, or a wrong key, reads nothing; the reader key reads them under mode fathom, with no ids.
+      for (const wrong of [null, "", "anything", KEY.toUpperCase()]) expect(await code(readNotes(wrong)), String(wrong)).toBe("42501");
+      const got = (await readNotes(KEY)).rows.filter((r) => r.list_id === "fn-moon");
+      expect(got.map((r) => [r.mode, r.rating, r.text, r.from_owner])).toEqual([
+        ["fathom", 1, "fun one", false],
+        ["list", null, "the definition gave it away", false],
+        ["fathom", -1, "the definition gave it away", false],
+      ]);
+      expect(Object.keys(got[0])).toEqual(["list_id", "mode", "rating", "text", "from_owner", "created_at"]);
+    });
+
+    it("holds the tables to list, blitz and fathom, and keeps one mode check on each", async () => {
+      for (const table of ["ratings", "feedback"]) {
+        const cols = table === "ratings" ? "(list_id, mode, rating, client_id) values ('fr-direct', $1, 1, $2)" : "(list_id, mode, text, client_id) values ('fr-direct', $1, 'hi', $2)";
+        expect(await code(db.query(`insert into public.${table} ${cols}`, ["fathom", client(4040)])), table).toBeUndefined();
+        expect(await code(db.query(`insert into public.${table} ${cols}`, ["quiz", client(4041)])), table).toBe("23514");
+      }
+      const checks = await db.query<{ tbl: string; name: string; def: string }>(
+        `select rel.relname as tbl, con.conname as name, pg_get_constraintdef(con.oid) as def
+         from pg_constraint con join pg_class rel on rel.oid = con.conrelid
+         join pg_attribute att on att.attrelid = rel.oid and con.conkey = array[att.attnum]
+         where rel.relnamespace = 'public'::regnamespace and rel.relname in ('ratings', 'feedback') and con.contype = 'c' and att.attname = 'mode'
+         order by 1`,
+      );
+      expect(checks.rows.map((r) => [r.tbl, r.name])).toEqual([
+        ["feedback", "feedback_mode_check"],
+        ["ratings", "ratings_mode_check"],
+      ]);
+      for (const r of checks.rows) expect(r.def).toMatch(/'list'.*'blitz'.*'fathom'/);
+      // Players still can't touch either table.
+      await as("anon", null, async () => {
+        expect(await code(db.query("select * from public.ratings"))).toBe("42501");
+        expect(await code(db.query("insert into public.feedback (list_id, mode, text, client_id) values ('x', 'fathom', 'hi', $1)", [client(4042)]))).toBe("42501");
+      });
+    });
+
+    it("keeps the functions' signatures, and is safe to run again", async () => {
+      const sig = () =>
+        db.query<{ name: string; args: string; result: string }>(
+          `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
+           from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('rate_list', 'submit_feedback', 'list_ratings', 'list_feedback') order by 1`,
+        );
+      const before = (await sig()).rows;
+      expect(before.map((r) => [r.name, r.args])).toEqual([
+        ["list_feedback", "p_reader text, p_since timestamp with time zone"],
+        ["list_ratings", "p_since timestamp with time zone"],
+        ["rate_list", "p_list_id text, p_mode text, p_rating integer, p_reason text, p_client_id uuid"],
+        ["submit_feedback", "p_list_id text, p_mode text, p_rating integer, p_text text, p_client_id uuid"],
+      ]);
+      const kept = await totals("fr-totals");
+      await db.exec(readFileSync(join(dir, "20261114130000_fathom_feedback.sql"), "utf8"));
+      expect((await sig()).rows).toEqual(before);
+      expect(await totals("fr-totals")).toEqual(kept);
+      expect((await as("anon", null, () => rate({ list: "fr-again", mode: "fathom", client: client(4050) }))).rows[0].ok).toBe(true);
+      expect(await code(as("anon", null, () => rate({ list: "fr-again", mode: "quiz", client: client(4050) })))).toBe("22023");
+    });
+
+    it("runs on the live project as it is (1 to 8 and fathom_guesses, not fathom_plays), keeping its ratings and notes", async () => {
+      const live = new PGlite();
+      try {
+        await live.exec(standins(exposeNewTables));
+        const sql = (f: string) => readFileSync(join(dir, f), "utf8");
+        const files = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
+        const later = ["20261114120000_fathom_plays.sql", "20261114130000_fathom_feedback.sql"];
+        for (const f of files.filter((f) => !later.includes(f))) await live.exec(sql(f));
+        // What players have sent so far.
+        await live.exec(`
+          select public.rate_list('mountains', 'list', -1, 'boring', '${client(4070)}');
+          select public.rate_list('mountains', 'blitz', 1, null, '${client(4070)}');
+          select public.submit_feedback('mountains', 'list', -1, 'too many volcanoes', '${client(4070)}');
+        `);
+        const snapshot = async () => ({
+          ratings: (await live.query("select list_id, mode, rating, reason, client_id from public.ratings order by id")).rows,
+          notes: (await live.query("select list_id, mode, rating, text, client_id from public.feedback order by id")).rows,
+        });
+        const before = await snapshot();
+        expect(before.ratings).toHaveLength(2);
+        expect(before.notes).toHaveLength(1);
+        // Before it: Fathom is refused.
+        expect(await code(live.query("select public.rate_list($1, 'fathom', 1, null, $2)", [Q, client(4071)]))).toBe("22023");
+        await live.exec(sql("20261114130000_fathom_feedback.sql"));
+        expect(await snapshot()).toEqual(before);
+        expect((await live.query<{ ok: boolean }>("select public.rate_list($1, 'fathom', 1, null, $2) as ok", [Q, client(4071)])).rows[0].ok).toBe(true);
+        expect((await live.query<{ ok: boolean }>("select public.submit_feedback($1, 'fathom', 1, 'nice', $2) as ok", [Q, client(4071)])).rows[0].ok).toBe(true);
+        // fathom_plays after it, as the owner may run them in either order.
+        await live.exec(sql("20261114120000_fathom_plays.sql"));
+        expect((await live.query<{ n: number }>("select count(*)::int as n from public.ratings where mode = 'fathom'")).rows[0].n).toBe(1);
+      } finally {
+        await live.close();
+      }
+    }, 60_000);
+
+    it("goes with the account, and account deletion (service_role) may clear it", async () => {
+      await as("authenticated", S, () => note({ list: "fn-gone", mode: "fathom", text: "from s", client: client(4060) }));
+      await as("service_role", null, async () => {
+        expect((await db.query("delete from public.ratings where user_id = $1", [S])).affectedRows).toBe(1);
+        expect((await db.query("delete from public.feedback where user_id = $1", [S])).affectedRows).toBe(1);
+      });
+      await db.query("delete from auth.users where id = $1", [R]);
+      expect((await db.query("select * from public.ratings where user_id = $1", [R])).rows).toEqual([]);
+      expect((await db.query("select * from public.feedback where user_id = $1", [R])).rows).toEqual([]);
     });
   });
 

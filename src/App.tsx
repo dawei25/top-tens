@@ -12,8 +12,9 @@ import { Game, Loading } from "./components/Game";
 import { shortDate } from "./components/pixel";
 import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
-import { freshBlitz } from "./game/blitz";
+import { blitzAvailable, freshBlitz } from "./game/blitz";
 import { freshList, lastPlayed } from "./game/history";
+import { opensPlayedGame, signInToPlay } from "./game/free-games";
 import {
   blitzOfTheDay,
   rollHoldouts,
@@ -26,10 +27,13 @@ import {
   type DailyEntry,
 } from "./game/daily";
 import { load, save } from "./game/storage";
-import { useSaveVersion } from "./net";
-import { PrivacyScreen } from "./components/account";
+import { useAccount, useSaveVersion } from "./net";
+import { FreeWall, PrivacyScreen } from "./components/account";
+import { dropAsk, keepAsk, peekAsk, wallOn, type FreeAsk } from "./components/account/wall";
+import { wallAlt } from "./components/account/labels";
 import { FathomScreen } from "./components/fathom";
-import { openBlitzLists, rollableLists } from "./components/freeplay";
+import { freeStarts, openBlitzLists, rollableLists } from "./components/freeplay";
+import { todayStatus } from "./components/today";
 
 type Route =
   | { screen: "home" }
@@ -176,6 +180,22 @@ function Screens() {
   const rolledIn = useRef(new Map<string, string | undefined>());
   /** Bumped by Play again, so the screen it opens starts over even when it's the one on screen (same list). */
   const [replays, setReplays] = useState(0);
+  const account = useAccount();
+  /**
+   * The free-play game the wall is holding back while it's open over the screen (src/game/free-games.ts: a signed-out
+   * player past the free ones). Signing in starts it; closing the wall leaves the player where they were.
+   */
+  const [wall, setWall] = useState<FreeAsk | null>(null);
+  /** A game asked for at the wall before a sign-in that left the page (Google in this tab, Supabase's redirect). */
+  const [returning, setReturning] = useState(() => (wallOn ? peekAsk() : null));
+  /** Starts a free game asked for (set below, once the lists and the schedule are in). */
+  const startAsk = useRef<(a: FreeAsk) => void>(() => {});
+  /**
+   * The wall's decision for a link (a shared or typed address, Back or forward) to a free game, made once as the
+   * route arrives, so a game played on that screen never turns into the wall under the player (a Blitz round's results
+   * once its round is recorded).
+   */
+  const linkGate = useRef<{ route: Route; walled: boolean } | null>(null);
 
   useEffect(() => {
     loadIndex().then(setIndex);
@@ -206,6 +226,10 @@ function Screens() {
       ys.length = t.length;
       replacing.current = false;
       pendingScroll.current = y;
+      // The wall belongs to the screen it opened over: going elsewhere closes it, and the game it held back is let go.
+      dropAsk();
+      setWall(null);
+      setReturning(null);
       setRoute(readHash());
     };
     addEventListener("hashchange", onHash);
@@ -234,6 +258,16 @@ function Screens() {
     trail.current[trail.current.length - 1] = location.hash;
     setRoute(readHash());
   }, [route, index, schedule, today]);
+
+  // Back from a sign-in that left the page with a free game asked for: signed in, it starts; signed out (backed out,
+  // or it failed), the wall opens again where the player left it, and says why if there was a why.
+  useEffect(() => {
+    if (!returning || !index || !schedule || account.status === "loading") return;
+    dropAsk();
+    setReturning(null);
+    if (account.status === "in") startAsk.current(returning);
+    else setWall(returning);
+  }, [returning, index, schedule, account.status]);
 
   useEffect(() => {
     const check = () => setToday(localDate());
@@ -295,23 +329,80 @@ function Screens() {
     location.hash = `#blitz-${id}`;
     return true;
   };
-  /** Roll new list on a Blitz: another random open list (in the round's category, if it was rolled in one). */
-  const blitzAgain = (id: string, category?: string) =>
-    blitzChoices(category, id).open.length > 0 ? () => void blitzRoll(category, id) : undefined;
   // Play again on a past run: a fresh free game on that same list (a roll, but of this list). Never on a list held
   // right now (today's list or a future day's): it's back in free play after its day.
-  const replay = (mode: "list" | "blitz", id: string) => {
-    if (rollHoldouts(schedule, index, load(), today).has(id)) return undefined;
+  const held = (id: string) => rollHoldouts(schedule, index, load(), today).has(id);
+  const replayNow = (mode: "list" | "blitz", id: string) => {
     const to = mode === "list" ? `#p-${id}` : `#blitz-${id}`;
-    return () => {
-      save(mode === "list" ? freshList(load(), id) : freshBlitz(load(), id));
-      // Not rolled in a category: Roll new list after it rolls from every list.
-      rolledIn.current.delete(to);
-      setReplays((n) => n + 1);
-      location.hash = to;
-    };
+    save(mode === "list" ? freshList(load(), id) : freshBlitz(load(), id));
+    // Not rolled in a category: Roll new list after it rolls from every list.
+    rolledIn.current.delete(to);
+    setReplays((n) => n + 1);
+    location.hash = to;
   };
   const current = todayEntry(schedule, today);
+
+  // Free play without an account (src/game/free-games.ts): past the free games, a new one asks the player to sign in.
+  // Every way into a new free game comes through here (Home's keys and category chips, the menu's tiles, Roll new list,
+  // Play again); a link to one is checked as it arrives (linkWalled, below). Dailies never are.
+  const mustSignIn = (saved = load()) =>
+    wallOn && signInToPlay(saved, { schedule, today, signedIn: account.status === "in", accounts: true, freeStarts: freeStarts() });
+  /** Opens the wall over the screen instead of starting `a`, if it must: true when it did. */
+  const askFirst = (a: FreeAsk): boolean => {
+    if (!mustSignIn()) return false;
+    setWall(a);
+    return true;
+  };
+  /** Starts a free game asked for (after signing in at the wall, too). */
+  const start = (a: FreeAsk) => {
+    if (a.kind === "roll") return a.mode === "list" ? roll(a.category, a.leave) : void blitzRoll(a.category, a.leave);
+    return held(a.id) ? undefined : replayNow(a.mode, a.id);
+  };
+  startAsk.current = start;
+  const freeRoll = (category?: string, leave?: string) => {
+    if (!askFirst({ kind: "roll", mode: "list", category, leave })) roll(category, leave);
+  };
+  // False only when no list is open for Blitz at all (Home says so); the wall comes after that.
+  const freeBlitz = async (category?: string, leave?: string): Promise<boolean> => {
+    if (!blitzChoices(category, leave).open.length) return false;
+    if (askFirst({ kind: "roll", mode: "blitz", category, leave })) return true;
+    return blitzRoll(category, leave);
+  };
+  /** Roll new list on a Blitz: another random open list (in the round's category, if it was rolled in one). */
+  const blitzAgain = (id: string, category?: string) =>
+    blitzChoices(category, id).open.length > 0 ? () => void freeBlitz(category, id) : undefined;
+  const replay = (mode: "list" | "blitz", id: string) => {
+    if (held(id)) return undefined;
+    return () => {
+      if (!askFirst({ kind: "replay", mode, id })) replayNow(mode, id);
+    };
+  };
+
+  /**
+   * Whether this route is a link to a free game that would start a new one while the player must sign in first:
+   * `#p-<id>` (not today's list: that address opens today's own game) or a fresh round at `#blitz-<id>` (a past
+   * round's results never). A game under way resumes and a finished list game shows its result, as always.
+   */
+  const linkWalled = (r: Route, signedIn: boolean): boolean => {
+    if (!wallOn || signedIn) return false;
+    let mode: "list" | "blitz";
+    if (r.screen === "game") mode = "list";
+    else if (r.screen === "blitz" && r.run === undefined) mode = "blitz";
+    else return false;
+    const meta = index.find((m) => m.id === r.id);
+    if (!meta || (mode === "list" && r.id === current?.id)) return false;
+    const saved = load();
+    // A Blitz that's closed (it would spoil a daily) says so on its own screen: no game starts there.
+    if (mode === "blitz" && !blitzAvailable({ id: meta.id, blitz: !!meta.blitz }, schedule, today, saved)) return false;
+    if (opensPlayedGame(saved, mode, r.id)) return false;
+    return signInToPlay(saved, { schedule, today, signedIn: false, accounts: true, freeStarts: freeStarts() });
+  };
+  // Decided once per arrival (see linkGate); while a sign-in is still coming back, the screen waits to know.
+  if (linkGate.current?.route !== route && account.status !== "loading") {
+    linkGate.current = { route, walled: linkWalled(route, account.status === "in") };
+  }
+  const linkWall = account.status !== "in" && linkGate.current?.route === route && linkGate.current.walled;
+  const linkWait = account.status === "loading" && linkGate.current?.route !== route && linkWalled(route, false);
 
   // The menu, in every screen's header: the screen on show, today's list, and the same ways there as Home's keys. A
   // roll from it never lands on the list or Blitz on screen.
@@ -323,8 +414,8 @@ function Screens() {
     blitzOpen: openBlitz().length,
     blitzOnScreen,
     onDaily: () => current && (location.hash = `#daily-${current.date}`),
-    onRoll: () => roll(undefined, route.screen === "game" ? route.id : undefined),
-    onBlitz: () => void blitzRoll(undefined, blitzOnScreen),
+    onRoll: () => freeRoll(undefined, route.screen === "game" ? route.id : undefined),
+    onBlitz: () => void freeBlitz(undefined, blitzOnScreen),
     onFathom: openFathom,
   };
 
@@ -399,13 +490,12 @@ function Screens() {
           meta={index.find((p) => p.id === id)}
           daily={entry}
           today={today}
-          schedule={schedule}
           lexicon={lexicon}
           onBack={back}
           onHome={home}
           // Roll new list on a random list rolls another in the same category (if it was rolled in one); a finished
           // daily offers a plain random list instead.
-          onRoll={() => roll(entry ? undefined : rolledIn.current.get(`#p-${id}`), id)}
+          onRoll={() => freeRoll(entry ? undefined : rolledIn.current.get(`#p-${id}`), id)}
           rolled={!entry && rolledIn.current.has(`#p-${id}`)}
         />
       );
@@ -417,8 +507,8 @@ function Screens() {
         entry={current}
         archiveCount={schedule.filter((e) => e.date <= today).length}
         onDaily={() => current && (location.hash = `#daily-${current.date}`)}
-        onRoll={roll}
-        onBlitz={blitzRoll}
+        onRoll={freeRoll}
+        onBlitz={freeBlitz}
         blitzLists={openBlitz()}
         freeLists={rollableLists(schedule, index, load(), today)}
         onArchive={() => (location.hash = "#archive")}
@@ -428,7 +518,44 @@ function Screens() {
     );
   };
 
-  return <MenuContext value={nav}>{screen()}</MenuContext>;
+  // The wall's quiet way out: today's list while it waits to be played, else Home (none over Home itself then).
+  const alt = (() => {
+    if (!wall && !linkWall) return null;
+    const a = wallAlt(!current || todayStatus(load(), current).done);
+    if (a.go === "today" && current) return { ...a, hash: `#daily-${current.date}` };
+    return route.screen === "home" ? null : { ...a, hash: "" };
+  })();
+  const closeWall = () => {
+    dropAsk();
+    setWall(null);
+  };
+
+  return (
+    <MenuContext value={nav}>
+      {/* A link to a free game past the free ones: the wall alone over the ocean (no game behind it), and closing it
+          goes back where the player came from (Home, for a link from outside). */}
+      {linkWait ? <Loading /> : linkWall ? <main className="screen" data-testid="free-wall-screen" /> : screen()}
+      {wall ? (
+        <FreeWall
+          onClose={closeWall}
+          onSignedIn={() => {
+            closeWall();
+            start(wall);
+          }}
+          onGoogle={() => keepAsk(wall)}
+          onGo={(h) => {
+            closeWall();
+            location.hash = h;
+          }}
+          alt={alt}
+        />
+      ) : (
+        // Signed in, the link is no longer walled and its game shows. A sign-in that leaves the page comes back to this
+        // same address (Google's way back keeps the screen), so nothing needs keeping.
+        linkWall && <FreeWall onClose={back} onSignedIn={() => {}} onGo={(h) => (location.hash = h)} alt={alt} />
+      )}
+    </MenuContext>
+  );
 }
 
 /**

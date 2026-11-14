@@ -210,6 +210,20 @@ describe("ratings", () => {
     expect(JSON.parse(store.get("top-tens:rating-outbox")!).pending).toEqual([]);
   });
 
+  it("sends a Fathom question's rating to rate_list as a list's: mode fathom, its id as the list", async () => {
+    const svc = await import("./service");
+    svc.rateList(rating({ listId: "first-homo-sapiens", mode: "fathom", rating: -1, reason: "too-hard" }));
+    await vi.waitFor(() => expect(sentRatings()).toHaveLength(1));
+    expect(sentRatings()[0]).toEqual({
+      p_list_id: "first-homo-sapiens",
+      p_mode: "fathom",
+      p_rating: -1,
+      p_reason: "too-hard",
+      p_client_id: store.get("top-tens:client-id"),
+    });
+    await vi.waitFor(() => expect(JSON.parse(store.get("top-tens:rating-outbox")!).pending).toEqual([]));
+  });
+
   it("doesn't send a rating another device has replaced since (that device sends its own)", async () => {
     const at = Date.now() - 60_000;
     store.set("top-tens:v1", JSON.stringify({ games: {}, daily: {}, seenHelp: true, ratings: { "list:mountains": { rating: -1, at: at + 1000 } } }));
@@ -218,6 +232,32 @@ describe("ratings", () => {
     await svc.flushRatings();
     expect(sentRatings()).toEqual([]);
     expect(JSON.parse(store.get("top-tens:rating-outbox")!).pending).toEqual([]);
+  });
+});
+
+describe("notes", () => {
+  const sentNotes = () => fake.calls.rpc.filter(([fn]) => fn === "submit_feedback").map(([, args]) => args);
+  const queue = (items: object[]) => store.set("top-tens:feedback-outbox", JSON.stringify({ pending: items, sent: [] }));
+
+  it("sends the notes the facade queued to submit_feedback, a list's and a Fathom question's, and keeps them while offline", async () => {
+    const at = Date.now();
+    queue([
+      { listId: "national-parks", mode: "list", rating: 1, text: "say which state", at },
+      { listId: "first-homo-sapiens", mode: "fathom", rating: null, text: "fun one", at: at + 1 },
+    ]);
+    const svc = await import("./service");
+    const real = fake.answers.rpc;
+    fake.answers.rpc = (fn, args) => (fn === "submit_feedback" ? { data: null, error: { message: "TypeError: Failed to fetch" }, status: 0 } : real(fn, args));
+    await svc.flushFeedback();
+    expect(JSON.parse(store.get("top-tens:feedback-outbox")!).pending).toHaveLength(2);
+    fake.answers.rpc = real;
+    await svc.flushFeedback();
+    const id = store.get("top-tens:client-id");
+    expect(sentNotes().slice(-2)).toEqual([
+      { p_list_id: "national-parks", p_mode: "list", p_rating: 1, p_text: "say which state", p_client_id: id },
+      { p_list_id: "first-homo-sapiens", p_mode: "fathom", p_rating: null, p_text: "fun one", p_client_id: id },
+    ]);
+    expect(JSON.parse(store.get("top-tens:feedback-outbox")!).pending).toEqual([]);
   });
 });
 

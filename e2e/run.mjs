@@ -40,8 +40,8 @@ noBackend();
 await build({ logLevel: "warn" });
 // The backend specs play copies built with fake Supabase keys against a mocked Supabase: backend.e2e.cjs, note.e2e.cjs
 // and the backend parts of states.e2e.cjs, menu.e2e.cjs and touch.e2e.cjs (Home's account key) without a Google client
-// ID, backend-google.e2e.cjs with one. Built here, before the specs start in parallel, so the builds don't slow the
-// others down.
+// ID, backend-google.e2e.cjs and free-wall.e2e.cjs with one. Built here, before the specs start in parallel, so the
+// builds don't slow the others down.
 const extra = {};
 async function buildWith(specs, env, distVar) {
   if (!files.some((f) => specs.some((spec) => f.endsWith(spec)))) return;
@@ -51,7 +51,7 @@ async function buildWith(specs, env, distVar) {
   noBackend();
 }
 await buildWith(["backend.e2e.cjs", "note.e2e.cjs", "states.e2e.cjs", "menu.e2e.cjs", "touch.e2e.cjs"], BACKEND_ENV, "E2E_BACKEND_DIST");
-await buildWith(["backend-google.e2e.cjs"], GOOGLE_ENV, "E2E_GOOGLE_DIST");
+await buildWith(["backend-google.e2e.cjs", "free-wall.e2e.cjs"], GOOGLE_ENV, "E2E_GOOGLE_DIST");
 const server = await preview({ preview: { port: PORT, strictPort: true }, logLevel: "warn" });
 const code = await new Promise((resolve) => {
   const run = spawn(process.execPath, ["--test", "--test-reporter=spec", ...files], {

@@ -2,9 +2,11 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { Saved } from "../game/storage";
 import { Outbox, type OutboxData, type SendResult } from "./outbox";
-import { invalidRating, RATING_REASONS, RATINGS, rateArgs, ratingOf, withRating, type Rating } from "./ratings";
+import { invalidRating, isRatingMode, RATING_KEY, RATING_MODES, RATING_REASONS, RATINGS, rateArgs, ratingKey, ratingOf, withRating, type Rating } from "./ratings";
 
 const T = Date.UTC(2026, 10, 3, 12);
+/** The migration that lets a Fathom question be rated and noted as a list is. */
+const FATHOM_SQL = "20261114130000_fathom_feedback.sql";
 const rating = (over: Partial<Rating> = {}): Rating => ({ listId: "mountains", mode: "list", rating: 1, reason: null, at: T, ...over });
 
 describe("a rating", () => {
@@ -42,11 +44,46 @@ describe("a rating", () => {
     expect(ratingOf(s, "list", "mountains")).toBeNull();
   });
 
-  it("has the reasons the database takes (supabase/migrations, ratings)", () => {
-    const sql = readFileSync(new URL("../../supabase/migrations/20261103120000_ratings.sql", import.meta.url), "utf8");
-    const sets = [...sql.matchAll(/reason (?:not )?in \(([^)]*)\)/g)].map((m) => m[1].split(",").map((s) => s.trim().replace(/'/g, "")));
-    expect(sets.length).toBeGreaterThanOrEqual(2);
-    for (const set of sets) expect(set).toEqual(RATING_REASONS);
+  it("has the reasons the database takes (supabase/migrations, ratings, and Fathom's)", () => {
+    for (const file of ["20261103120000_ratings.sql", FATHOM_SQL]) {
+      const sql = readFileSync(new URL(`../../supabase/migrations/${file}`, import.meta.url), "utf8");
+      const sets = [...sql.matchAll(/reason (?:not )?in \(([^)]*)\)/g)].map((m) => m[1].split(",").map((s) => s.trim().replace(/'/g, "")));
+      expect(sets.length, file).toBeGreaterThanOrEqual(file === FATHOM_SQL ? 1 : 2);
+      for (const set of sets) expect(set, file).toEqual(RATING_REASONS);
+    }
+  });
+
+  // The owner, Nov 14: "add the same feedback system for fathom that we currently have for lists/blitz".
+  it("takes a Fathom question as a list in mode fathom: its id as the list id, the same reasons", () => {
+    const q = rating({ listId: "first-homo-sapiens", mode: "fathom", rating: -1, reason: "unfair" });
+    expect(invalidRating(q)).toBeNull();
+    expect(invalidRating(rating({ mode: "fathom", rating: 0 }))).toBeNull();
+    expect(invalidRating(rating({ mode: "Fathom" as "fathom" }))).toBe("mode");
+    expect(invalidRating(rating({ mode: "estimate" as "fathom" }))).toBe("mode");
+    expect(invalidRating(rating({ mode: "fathom", rating: 1, reason: "boring" }))).toBe("reason");
+    expect(rateArgs(q, "c-1")).toEqual({ p_list_id: "first-homo-sapiens", p_mode: "fathom", p_rating: -1, p_reason: "unfair", p_client_id: "c-1" });
+    expect(RATING_MODES).toEqual(["list", "blitz", "fathom"]);
+    expect(["list", "blitz", "fathom", "classic", "", null].map(isRatingMode)).toEqual([true, true, true, false, false, false]);
+    // In the save under its own key, apart from a list of the same id; the sync keeps it (RATING_KEY).
+    let s: Saved = { games: {}, daily: {}, seenHelp: true };
+    s = withRating(s, q);
+    s = withRating(s, rating({ listId: "first-homo-sapiens", at: T + 1 }));
+    expect(s.ratings).toEqual({
+      "fathom:first-homo-sapiens": { rating: -1, reason: "unfair", at: T },
+      "list:first-homo-sapiens": { rating: 1, at: T + 1 },
+    });
+    expect(ratingOf(s, "fathom", "first-homo-sapiens")).toEqual({ rating: -1, reason: "unfair", at: T });
+    expect(ratingKey("fathom", "moon-visible-share")).toBe("fathom:moon-visible-share");
+    for (const key of ["list:mountains", "blitz:airports", "fathom:first-homo-sapiens"]) expect(RATING_KEY.test(key), key).toBe(true);
+    for (const key of ["classic:mountains", "fathom:Bad Id", "fathom:", "xfathom:a", "fathom:a:b"]) expect(RATING_KEY.test(key), key).toBe(false);
+  });
+
+  it("has the modes the database takes (supabase/migrations, Fathom's feedback)", () => {
+    const sql = readFileSync(new URL(`../../supabase/migrations/${FATHOM_SQL}`, import.meta.url), "utf8");
+    const sets = [...sql.matchAll(/mode (?:not )?in \(([^)]*)\)/g)].map((m) => m[1].split(",").map((s) => s.trim().replace(/'/g, "")));
+    // The two tables' checks, rate_list's and submit_feedback's.
+    expect(sets).toHaveLength(4);
+    for (const set of sets) expect(set).toEqual(RATING_MODES);
   });
 });
 
@@ -84,6 +121,19 @@ describe("the ratings outbox", () => {
     expect(box.add(rating({ rating: 0, at: T + 4 }))).toBe(true);
     await box.flush();
     expect(got.at(-1)).toMatchObject({ listId: "mountains", rating: 0 });
+  });
+
+  it("keeps a Fathom question's latest rating waiting apart from a list's of the same id", async () => {
+    const store = memoryStore();
+    const box = new Outbox<Rating>(store, async () => "retry", () => T, RATINGS);
+    expect(box.add(rating({ listId: "first-homo-sapiens", mode: "fathom", at: T }))).toBe(true);
+    expect(box.add(rating({ listId: "first-homo-sapiens", mode: "list", at: T + 1 }))).toBe(true);
+    expect(box.add(rating({ listId: "first-homo-sapiens", mode: "fathom", rating: -1, reason: "too-easy", at: T + 2 }))).toBe(true);
+    expect(box.add(rating({ listId: "first-homo-sapiens", mode: "quiz" as "fathom", at: T + 3 }))).toBe(false);
+    expect(store.data.pending.map((r) => [r.mode, r.rating, r.reason])).toEqual([
+      ["list", 1, null],
+      ["fathom", -1, "too-easy"],
+    ]);
   });
 
   it("sends a rating given while the one before it is on its way, after it", async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accountAlert, accountKeyLabel, ago, cleanName, homeName, HOME_NAME_MAX, privacySignInLine, signInCaption, syncLabel } from "./labels";
+import { accountAlert, accountKeyLabel, ago, cleanName, homeName, HOME_NAME_MAX, privacySignInLine, signInCaption, syncLabel, WALL_LINE, WALL_TITLE, wallAlt } from "./labels";
 import type { SignInMethod } from "../../net/config";
 
 // Every build's sign-in copy is right for what it offers: the launch offers Google alone (owner, Nov 7: "google only
@@ -113,5 +113,26 @@ describe("syncLabel", () => {
       "offline",
       "sync failed",
     ]);
+  });
+});
+
+// The free-play wall (owner, Nov 14: "after a user plays more than once in free play, they have to sign in with google
+// to continue playing"): a plain heading, one dry line that says what an account gives and what stays free, and a way to
+// today's list (Home once it's played).
+describe("the free-play wall's copy", () => {
+  it("says it plainly, in the game's voice", () => {
+    expect(WALL_TITLE).toBe("Sign in to keep playing");
+    expect(WALL_LINE).toBe("free play is unlimited with an account. today's list is always free.");
+    expect(wallAlt(false)).toEqual({ go: "today", label: "Play today's list" });
+    expect(wallAlt(true)).toEqual({ go: "home", label: "Home" });
+  });
+  it("one short line, no em dashes or emoji (UI copy rule)", () => {
+    for (const s of [WALL_TITLE, WALL_LINE, wallAlt(false).label, wallAlt(true).label]) {
+      expect(s).not.toMatch(/[—–\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u);
+    }
+    expect(WALL_LINE).not.toMatch(/\n/);
+    expect(WALL_LINE.length).toBeLessThanOrEqual(80);
+    // UPPERCASE in the sheet's heading: one line on a 320px phone.
+    expect(WALL_TITLE.length).toBeLessThanOrEqual(24);
   });
 });

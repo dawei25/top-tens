@@ -1,11 +1,12 @@
 import type { OutboxKind } from "./outbox";
 import { LIST_ID } from "./plays";
-import type { RatingMode } from "./ratings";
+import { isRatingMode, type RatingMode } from "./ratings";
 
 /**
- * "add a note" under "Good list?": a few words on a list in a mode, for the improvement loop (docs/IMPROVE.md). Only in
- * a build with a backend: sent to submit_feedback (supabase/migrations), never kept in the save or synced. The database
- * checks the same things, so keep the two in step.
+ * "add a note" under "Good list?": a few words on a list in a mode, or on a Fathom question (mode "fathom", its id as
+ * the list id), for the improvement loop (docs/IMPROVE.md). Only in a build with a backend: sent to submit_feedback
+ * (supabase/migrations), never kept in the save or synced. The database checks the same things, so keep the two in
+ * step.
  */
 
 /** The longest note, in characters (the database counts characters too). */
@@ -36,7 +37,7 @@ export const noteLength = (text: string): number => [...text].length;
 /** Why the server would refuse this note, or null if it's fine. */
 export function invalidFeedback(f: Feedback): string | null {
   if (typeof f?.listId !== "string" || !LIST_ID.test(f.listId)) return "list id";
-  if (f.mode !== "list" && f.mode !== "blitz") return "mode";
+  if (!isRatingMode(f.mode)) return "mode";
   if (f.rating !== -1 && f.rating !== 1 && f.rating !== null) return "rating";
   if (typeof f.text !== "string" || cleanNote(f.text) !== f.text) return "text";
   const n = noteLength(f.text);

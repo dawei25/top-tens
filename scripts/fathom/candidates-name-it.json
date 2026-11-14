@@ -1,0 +1,44 @@
+{
+ "version": 1,
+ "questions": [
+  {
+   "id": "name-country-as-big-as-india",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-area",
+   "target": 3287263,
+   "question": "Name a country with about the same area as India",
+   "except": [
+    "India"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count more than 10 country name-it questions."
+  },
+  {
+   "id": "name-country-as-many-people-as-australia",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-population",
+   "target": 27921150,
+   "question": "Name a country with about as many people as Australia",
+   "except": [
+    "Australia"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count more than 10 country name-it questions."
+  },
+  {
+   "id": "name-country-200m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-population",
+   "target": 200000000,
+   "question": "Name a country with about 200 million people",
+   "easy": false,
+   "verified": false,
+   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count more than 10 country name-it questions."
+  }
+ ]
+}
