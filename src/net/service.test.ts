@@ -289,6 +289,62 @@ describe("Fathom guesses", () => {
   });
 });
 
+describe("Today's Fathom totals", () => {
+  const sentTotals = () => fake.calls.rpc.filter(([fn]) => fn === "submit_fathom_play").map(([, args]) => args);
+  const queue = (items: object[]) => store.set("top-tens:fathom-play-outbox", JSON.stringify({ pending: items, sent: [] }));
+  const today = new Date().toISOString().slice(0, 10);
+
+  it("sends each total the facade queued to submit_fathom_play, with this browser's id, and keeps it while offline", async () => {
+    queue([{ date: today, total: 312, at: Date.now() }]);
+    const svc = await import("./service");
+    const real = fake.answers.rpc;
+    fake.answers.rpc = (fn, args) => (fn === "submit_fathom_play" ? { data: null, error: { message: "TypeError: Failed to fetch" }, status: 0 } : real(fn, args));
+    await svc.flushFathomPlays();
+    expect(JSON.parse(store.get("top-tens:fathom-play-outbox")!).pending).toHaveLength(1);
+    fake.answers.rpc = real;
+    await svc.flushFathomPlays();
+    expect(sentTotals()).toEqual([
+      { p_date: today, p_total: 312, p_client_id: store.get("top-tens:client-id") },
+      { p_date: today, p_total: 312, p_client_id: store.get("top-tens:client-id") },
+    ]);
+    expect(store.get("top-tens:client-id")).toMatch(/^[0-9a-f-]{36}$/);
+    expect(JSON.parse(store.get("top-tens:fathom-play-outbox")!)).toEqual({ pending: [], sent: [today] });
+  });
+
+  it("sends what waited when the backend code starts", async () => {
+    queue([{ date: today, total: 0, at: Date.now() }]);
+    const svc = await import("./service");
+    await svc.start();
+    await vi.waitFor(() => expect(sentTotals()).toEqual([{ p_date: today, p_total: 0, p_client_id: store.get("top-tens:client-id") }]));
+  });
+
+  it("drops a total the server refuses for good, or doesn't know yet (the migration not run: 404)", async () => {
+    queue([{ date: today, total: 312, at: Date.now() }]);
+    fake.answers.rpc = () => ({ data: null, error: { message: "not found" }, status: 404 });
+    const svc = await import("./service");
+    await svc.flushFathomPlays();
+    expect(JSON.parse(store.get("top-tens:fathom-play-outbox")!).pending).toEqual([]);
+  });
+
+  it("reads a day's totals from fathom_day_stats (a read, GET), once, and nothing it can't read", async () => {
+    const counts = Array<number>(50).fill(0);
+    counts[31] = 40;
+    fake.answers.rpc = (fn) => (fn === "fathom_day_stats" ? { data: { n: 40, counts, avg: 315.5 }, error: null, status: 200 } : { data: true, error: null, status: 200 });
+    const svc = await import("./service");
+    const a = await svc.fathomDay("2026-11-14");
+    expect(await svc.fathomDay("2026-11-14")).toBe(a);
+    expect(a).toEqual({ n: 40, counts, avg: 315.5 });
+    expect(fake.calls.rpc).toEqual([["fathom_day_stats", { p_date: "2026-11-14" }, { get: true }]]);
+    const { recall } = await import("./store");
+    expect(recall("fathom-day:2026-11-14")?.value).toEqual(a);
+    // The server can't say (the migration not run), or says something else: null, never a throw.
+    fake.answers.rpc = () => ({ data: null, error: { message: "not found" }, status: 404 });
+    expect(await svc.fathomDay("2026-11-13")).toBeNull();
+    fake.answers.rpc = () => ({ data: { n: 3, counts: [1] }, error: null, status: 200 });
+    expect(await svc.fathomDay("2026-11-12")).toBeNull();
+  });
+});
+
 describe("missed guesses", () => {
   const queue = (items: object[]) => store.set("top-tens:miss-outbox", JSON.stringify({ pending: items, sent: [] }));
   const at = Date.now();
