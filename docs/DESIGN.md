@@ -210,7 +210,7 @@ The squid leaves the header and lives in a deep-ocean world behind the whole app
   is always in view and never behind the board. On phones and narrow layouts, where no strip is wide enough, it
   roams behind the glass instead. It swims head-first with pulse-and-glide strokes, never backwards.
 - Reactions: its limbs light for answers found; a find makes it dart and glow; a lost life darts
-  off in a puff of ink (ink always comes with a dart: it leaves from the jet, never in place, owner Nov 9); a perfect 10 does loops; Blitz momentum makes it swim faster and glow brighter; idle,
+  off in a puff of ink (ink always comes with a dart: it leaves from the jet, never in place, owner Nov 9); a click on open water (not a panel, control or text) sends it darting there (owner, Nov 14; no frame cost); a perfect 10 does loops; Blitz momentum makes it swim faster and glow brighter; idle,
   it sinks and dozes.
 - A find also gives a quick wiggle in time with the limb's flash (bigger for a top 3; half size for a Blitz hit outside
   the top 10). A tap on the squid's own pixels makes it blush, wave and pop a pixel heart; three taps in a row, a spin,
