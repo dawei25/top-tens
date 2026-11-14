@@ -55,9 +55,9 @@
     "judgedAt": "2026-11-07"
   },
   "eiffel-tower-height": {
-    "verdict": "keep",
-    "why": "The owner liked it. Most players have seen or visited it and can count it in storeys. Size question kept.",
-    "judgedAt": "2026-11-07"
+    "verdict": "fix",
+    "why": "fact reworded without the Chrysler Building's year, now a year question's answer (first-world-cup)",
+    "judgedAt": "2026-11-14"
   },
   "statue-of-liberty-height": {
     "verdict": "drop",
@@ -110,9 +110,9 @@
     "judgedAt": "2026-11-07"
   },
   "iss-orbit-time": {
-    "verdict": "keep",
-    "why": "Familiar. Reason from a plane taking about two days to fly round the world, and the ISS being far faster. 93 minutes surprises, and the fact's speed and height explain it.",
-    "judgedAt": "2026-11-07"
+    "verdict": "fix",
+    "why": "Nov 14 bar: the orbit time alone is a constant; with the speed (from the source) in the definition it's Fermi arithmetic, 40,000 km at 27,600 km/h",
+    "judgedAt": "2026-11-14"
   },
   "venus-rotation": {
     "verdict": "drop",
@@ -120,9 +120,9 @@
     "judgedAt": "2026-11-05"
   },
   "moonwalkers": {
-    "verdict": "keep",
-    "why": "Reason from Apollo 11's two moonwalkers times a handful of landings. Only 12 people ever is a reveal.",
-    "judgedAt": "2026-11-07"
+    "verdict": "fix",
+    "why": "the fact now explains the 12: six landings, two walkers each (Apollo program)",
+    "judgedAt": "2026-11-14"
   },
   "challenger-deep-depth": {
     "verdict": "drop",
@@ -145,9 +145,9 @@
     "judgedAt": "2026-11-07"
   },
   "speed-of-sound": {
-    "verdict": "keep",
-    "why": "Way in: counting seconds between lightning and thunder (about 3 s per km). 'Through iron, 15 times faster' teaches.",
-    "judgedAt": "2026-11-07"
+    "verdict": "drop",
+    "why": "the owner cut it (Nov 14): a physics constant you know or don't",
+    "judgedAt": "2026-11-14"
   },
   "air-weight": {
     "verdict": "drop",
@@ -340,9 +340,9 @@
     "judgedAt": "2026-11-07"
   },
   "antarctica-winter-population": {
-    "verdict": "keep",
-    "why": "Reason from a few dozen research stations with a few dozen people each. A continent with a village's population, four times bigger in summer, teaches.",
-    "judgedAt": "2026-11-07"
+    "verdict": "fix",
+    "why": "fact reworded without '4,000', now another question's answer (last-woolly-mammoths)",
+    "judgedAt": "2026-11-14"
   },
   "sun-width-in-earths": {
     "verdict": "drop",
@@ -360,9 +360,9 @@
     "judgedAt": "2026-11-07"
   },
   "mars-year": {
-    "verdict": "keep",
-    "why": "Yardstick: Earth's 365 days, and Mars being farther out. Nearly two years, with seasons twice as long.",
-    "judgedAt": "2026-11-07"
+    "verdict": "drop",
+    "why": "pure recall (Nov 14 bar): a planetary constant; 'farther out, so longer' gives a direction, not a number",
+    "judgedAt": "2026-11-14"
   },
   "giant-pumpkin-record": {
     "verdict": "drop",
@@ -530,9 +530,9 @@
     "judgedAt": "2026-11-06"
   },
   "venus-surface-temperature": {
-    "verdict": "keep",
-    "why": "464 C average as stated; reasoned from ovens, and hotter than Mercury (source) is the surprise.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "pure recall (Nov 14 bar): a planetary constant with nothing to reason from",
+    "judgedAt": "2026-11-14"
   },
   "earth-orbit-speed": {
     "verdict": "drop",
@@ -576,8 +576,8 @@
   },
   "oldest-bread": {
     "verdict": "fix",
-    "why": "Page says 14,500 years (not 14,400) at a Natufian site in Jordan's north-eastern desert; the hunter-gatherer and wild-cereal detail isn't on it: answer and fact from the page.",
-    "judgedAt": "2026-11-06"
+    "why": "fact reworded without '10,000 BC', now another question's answer (north-pole-to-equator)",
+    "judgedAt": "2026-11-14"
   },
   "us-penny-cost": {
     "verdict": "fix",
@@ -590,9 +590,9 @@
     "judgedAt": "2026-11-08"
   },
   "youtube-new-video": {
-    "verdict": "fix",
-    "why": "More than 500 hours a minute as of May 2019, as stated; the 80-years fact was the writer's arithmetic: now up from 48 hours a minute in 2011 (source), question in the past tense.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "no way in (Nov 14 bar): a company's 2019 statistic, reached only by stacking guesses",
+    "judgedAt": "2026-11-14"
   },
   "chess-first-moves": {
     "verdict": "drop",
@@ -630,19 +630,19 @@
     "judgedAt": "2026-11-06"
   },
   "everest-boiling-point": {
-    "verdict": "fix",
-    "why": "High-altitude cooking gives no Everest figure; Boiling point states 71 C at the summit (34 kPa): source, answer and fact from it.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "no way in (Nov 14 bar): you know water boils lower up high, not how much lower",
+    "judgedAt": "2026-11-14"
   },
   "dinosaur-extinction": {
-    "verdict": "keep",
-    "why": "66 million years as the page gives it (65.5 in one line, within 1%); three quarters of species and the asteroid are stated.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "pure recall (Nov 14 bar): the famous 66 million years, known or not, with nothing to figure out",
+    "judgedAt": "2026-11-14"
   },
   "first-homo-sapiens": {
-    "verdict": "fix",
-    "why": "'Homo sapiens' redirects to Human, which says 'around 300,000 years ago' and nothing of Jebel Irhoud or fossils: source Human, definition dropped, fact now hunter-gatherers until 12,000 years ago.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "pure recall (Nov 14 bar): 200,000 or 300,000 years is a figure you remember; farming and cave art only give a floor",
+    "judgedAt": "2026-11-14"
   },
   "horizon-distance": {
     "verdict": "fix",
@@ -655,9 +655,9 @@
     "judgedAt": "2026-11-06"
   },
   "van-gogh-oil-paintings": {
-    "verdict": "keep",
-    "why": "About 860 oil paintings of 2,100 works, most in his last two years, as stated; a decade's output is easy to reason about.",
-    "judgedAt": "2026-11-06"
+    "verdict": "fix",
+    "why": "Nov 14 bar: 'just over a decade' (from the source) in the definition gives it a way in, a painting every few days",
+    "judgedAt": "2026-11-14"
   },
   "record-painting-price": {
     "verdict": "fix",
@@ -690,9 +690,9 @@
     "judgedAt": "2026-11-06"
   },
   "all-gold-mined": {
-    "verdict": "fix",
-    "why": "The page's 201,296 t is all gold above ground as of 2020: definition says so; the cube is 21.7 m on a side (stated), not 'about 22'.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "no way in (Nov 14 bar): nobody can reason to a tonnage of gold; the cube in the fact was the only surprise",
+    "judgedAt": "2026-11-14"
   },
   "first-mobile-phone-weight": {
     "verdict": "fix",
@@ -811,8 +811,8 @@
   },
   "first-bitcoins": {
     "verdict": "fix",
-    "why": "Network launched in 2009 as stated; the pizzas were the first notable purchase of goods, not the first purchase: fact reworded.",
-    "judgedAt": "2026-11-06"
+    "why": "fact reworded to 'ten thousand bitcoins' in words: the digits read as another question's answer (north-pole-to-equator)",
+    "judgedAt": "2026-11-14"
   },
   "titanic-sinking": {
     "verdict": "keep",
@@ -840,9 +840,9 @@
     "judgedAt": "2026-11-06"
   },
   "first-star-wars-film": {
-    "verdict": "keep",
-    "why": "25 May 1977; highest-grossing film until E.T. (1982), as stated.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "pure recall (Nov 14 bar): a film's release year, before the player's life, that you remember or don't",
+    "judgedAt": "2026-11-14"
   },
   "lego-brick-patent": {
     "verdict": "fix",
@@ -885,9 +885,9 @@
     "judgedAt": "2026-11-08"
   },
   "air-oxygen-share": {
-    "verdict": "keep",
-    "why": "coordinator check against well-known figures (source not reopened); passes the bar",
-    "judgedAt": "2026-11-07"
+    "verdict": "drop",
+    "why": "pure recall (Nov 14 bar): a constant of the air, 21% from school or nothing, with no way to reason to it",
+    "judgedAt": "2026-11-14"
   },
   "moon-visible-share": {
     "verdict": "keep",
