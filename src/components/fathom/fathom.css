@@ -62,6 +62,9 @@
 .fathom-clock[data-warn] {
   color: var(--pink);
 }
+.fathom-clock[data-idle] {
+  visibility: hidden;
+}
 /*
  * The running score under the header (owner, Nov 14: "some kind of bar at the top ... sleek and minimalistic"): ten
  * pixel cells, one a question and its 100 points, each filled by what it scored in its band's colour, the one on screen

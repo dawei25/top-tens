@@ -75,10 +75,10 @@ const FATHOM_CROWD = {
 };
 
 /**
- * Real players' totals on Today's Fathom (fathom_day_stats, 50 bins of 10 points): 40 of them, all in 400-409, so
- * the histogram's bin there stands out over the simulated crowd's 30.
+ * Real players' totals on Today's Fathom (fathom_day_stats, 100 bins of 10 points): 40 of them, all in 400-409, so
+ * the curve peaks there over the simulated crowd's 30.
  */
-const FATHOM_DAY = { n: 40, counts: Array.from({ length: 50 }, (_, i) => (i === 40 ? 40 : 0)), avg: 404 };
+const FATHOM_DAY = { n: 40, counts: Array.from({ length: 100 }, (_, i) => (i === 40 ? 40 : 0)), avg: 404 };
 
 /** Someone who signs up with an email and password. */
 const PW_USER = { ...USER, id: "22222222-2222-4222-8222-222222222222", email: "fox@example.com", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: {} };

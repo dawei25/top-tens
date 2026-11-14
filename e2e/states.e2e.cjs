@@ -241,7 +241,8 @@ const SCREENS = [
   {
     name: "Fathom, results",
     setup: async (page) => {
-      for (let i = 0; i < 4; i++) {
+      // The nine questions after the first (ten a game since Nov 14).
+      for (let i = 0; i < 9; i++) {
         await page.getByTestId("fathom-next").click();
         await page.getByTestId("fathom-input").fill("12");
         await page.getByTestId("fathom-lock").click();

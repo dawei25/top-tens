@@ -327,13 +327,20 @@ function Clock({ left }: { left: number }) {
 }
 
 /** The question card's header: which question, and its time (counting only while the question is on screen). */
-function QuestionTop({ at, clockKey, onEnd }: { at: number; clockKey?: string; onEnd: () => void }) {
+function QuestionTop({ at, count, clockKey, onEnd }: { at: number; count: number; clockKey?: string; onEnd: () => void }) {
   return (
     <div className="prompt-top">
       <span className="label cyan">
-        Question {at + 1} of {QUESTIONS_PER_GAME}
+        Question {at + 1} of {count}
       </span>
-      {clockKey ? <Ticking clockKey={clockKey} onEnd={onEnd} /> : <span className="fathom-clock" data-testid="fathom-clock" data-left={0} aria-hidden="true" />}
+      {/* On the reveal, no time: the clock's place kept (hidden), so nothing moves. */}
+      {clockKey ? (
+        <Ticking clockKey={clockKey} onEnd={onEnd} />
+      ) : (
+        <span className="fathom-clock" data-testid="fathom-clock" data-idle="" aria-hidden="true">
+          0:00
+        </span>
+      )}
     </div>
   );
 }
@@ -398,7 +405,9 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
         const d = dayFor(schedule, b, today, schedule[0]?.date ?? DAY_ONE);
         const have = new Set(b.map((q) => q.id));
         const local = loadDailyLocal();
-        const mine = local && local.day.date === today && local.ids.every((id) => have.has(id)) ? fromLocal(local) : undefined;
+        // (Ten questions: a day's game of five from before Nov 14 starts over as the day's ten, which the crowd compares.)
+        const mine =
+          local && local.day.date === today && local.ids.length === QUESTIONS_PER_GAME && local.ids.every((id) => have.has(id)) ? fromLocal(local) : undefined;
         const played = dailyRun(load().fathom, today);
         if (played && !(mine && finished(mine))) setPlayedRun(played);
         else if (mine && local) {
@@ -518,7 +527,7 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
         : `The answer: ${amountText(shown.question, shown.question.answer)}. Yours was ${missText(shown.question, shown.guess)}.`) +
       (game.at > 0 ? ` Total so far: ${total}.` : "")
     : phase === "results"
-      ? `Your total: ${total} out of ${MAX_TOTAL}.`
+      ? `Your total: ${total} out of ${game.ids.length * POINTS_PER_QUESTION}.`
       : "";
   const list = question?.nameIt ? lists.get(question.nameIt.list) : undefined;
   // No scoring line on the card (the owner, Nov 14: "self intuitive already enough"; How to play explains it).
@@ -532,12 +541,18 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
         {said}
       </p>
       {phase === "results" ? (
-        <Results scored={scored} onAgain={day ? undefined : again} n={day?.n} crowd={day ? { date: day.date, questions } : undefined} />
+        <Results
+          scored={scored}
+          max={game.ids.length * POINTS_PER_QUESTION}
+          onAgain={day ? undefined : again}
+          n={day?.n}
+          crowd={day ? { date: day.date, questions } : undefined}
+        />
       ) : (
         <>
           <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id} data-round={round}>
-            <QuestionTop at={game.at} clockKey={clockKey} onEnd={outOfTime} />
-            <ScoreBar scored={scored} at={game.at} />
+            <QuestionTop at={game.at} count={game.ids.length} clockKey={clockKey} onEnd={outOfTime} />
+            <ScoreBar scored={scored} at={game.at} count={game.ids.length} />
             <h1>{question.question}</h1>
             {question.definition && <p className="caption">{question.definition}</p>}
           </section>
@@ -562,7 +577,7 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
               scored={shown!}
               list={list}
               total={game.at > 0 ? total : undefined}
-              last={game.at === QUESTIONS_PER_GAME - 1}
+              last={game.at === game.ids.length - 1}
               onNext={next}
             />
           )}
@@ -1189,7 +1204,7 @@ function BandWord({ band, timedOut = false }: { band: Band; timedOut?: boolean }
  * (not with reduced motion), and the newest stretch grows in; the row is there from the first question, empty, so
  * nothing moves when points land.
  */
-function ScoreBar({ scored, at }: { scored: Scored[]; at: number }) {
+function ScoreBar({ scored, at, count }: { scored: Scored[]; at: number; count: number }) {
   const total = totalOf(scored);
   // The total before the last change, kept from the render before (React's "information from previous renders").
   const [seen, setSeen] = useState({ total, from: total });
@@ -1199,8 +1214,8 @@ function ScoreBar({ scored, at }: { scored: Scored[]; at: number }) {
     <div className="fathom-score" data-testid="fathom-score" data-total={total}>
       {/* A cell a question, each its 100 points: filled by the points it scored, in its band's colour; the one on screen
           outlined. The cells are the progress squares too (ten beside the header's words didn't fit a phone). */}
-      <span className="tally-track" role="img" aria-label={`Question ${at + 1} of ${QUESTIONS_PER_GAME}. Score so far: ${total} out of ${MAX_TOTAL}`}>
-        {Array.from({ length: QUESTIONS_PER_GAME }, (_, i) => {
+      <span className="tally-track" role="img" aria-label={`Question ${at + 1} of ${count}. Score so far: ${total} out of ${count * POINTS_PER_QUESTION}`}>
+        {Array.from({ length: count }, (_, i) => {
           const s = scored[i];
           return (
             <span key={i} className="tally-cell" data-testid="fathom-cell" data-band={s?.band} data-now={i === at || undefined} data-points={s?.points}>
@@ -1224,7 +1239,7 @@ function ScoreBar({ scored, at }: { scored: Scored[]; at: number }) {
           <span key={total} className="tally-n" data-count={total !== from ? "" : undefined} style={{ "--from": from, "--to": total } as React.CSSProperties}>
             <span>{total}</span>
           </span>
-          <span className="tally-of">/{MAX_TOTAL}</span>
+          <span className="tally-of">/{count * POINTS_PER_QUESTION}</span>
         </span>
       </span>
     </div>

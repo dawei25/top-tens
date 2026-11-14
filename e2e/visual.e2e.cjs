@@ -208,10 +208,10 @@ describe("visual baselines", { concurrency: true }, () => {
 
   // Today's Fathom (#fathom), on its fixture bank with a fixed day (Fathom #2, seeded as a game under way): a question
   // with a number typed (grouped with a comma) under the running score, a reveal (a close guess, the sonar), and the
-  // results of five set guesses with the day's players (the simulated crowd: no backend here).
+  // results of ten set guesses with the day's players (the simulated crowd: no backend here).
   for (const vp of VIEWPORTS) {
     test(`Fathom looks as it did (${vp.name})`, async () => {
-      const draw = ["eiffel-tower-height", "moon-distance", "piano-keys", "speed-of-light", "africa-countries"];
+      const draw = ["eiffel-tower-height", "moon-distance", "piano-keys", "speed-of-light", "africa-countries", "octopus-hearts", "fat-calories", "un-members", "everest-height", "adult-bones"];
       const { ctx, page } = await open(browser, vp, "#fathom", undefined, {
         reducedMotion: "reduce",
         setup: async (c) => {
@@ -224,7 +224,8 @@ describe("visual baselines", { concurrency: true }, () => {
         },
       });
       await page.getByTestId("fathom-input").waitFor();
-      await freeze(page, NOW.getTime() + 30_000);
+      // Stopped a second on: the question's clock reads 0:19 (a jump to a later time would run it out).
+      await freeze(page);
       await page.addStyleTag({ content: CAPTURE });
       const problems = [];
       const shot = async (name) => {
@@ -243,7 +244,7 @@ describe("visual baselines", { concurrency: true }, () => {
       await page.clock.runFor(2000);
       await shot("fathom-reveal");
 
-      for (const guess of ["400k", "60", "1m", "2000"]) {
+      for (const guess of ["400k", "60", "1m", "2000", "8", "9", "193", "8848", "206"]) {
         await page.getByTestId("fathom-next").click();
         await page.getByTestId("fathom-input").fill(guess);
         await page.getByTestId("fathom-lock").click();

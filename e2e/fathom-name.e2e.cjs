@@ -276,7 +276,7 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
     await ctx.close();
   });
 
-  test("the draw: the fifth round is name-it when its list loads, never first; an estimate when it doesn't", async () => {
+  test("the draw: one name-it round of the ten when its list loads, never first; an estimate when it doesn't", async () => {
     const vp = VIEWPORTS.find((v) => v.name === "phone");
     // Many new draws on one bank: each game has one name-it round, never the opener.
     const { ctx, page } = await openFathom(vp);
@@ -298,9 +298,38 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
     const without = await openFathom(vp, { lists: false });
     await without.page.getByTestId("fathom-input").waitFor();
     const ids = (await saved(without.page)).game.ids;
-    assert.equal(ids.length, 5);
+    assert.equal(ids.length, 10);
     assert.equal(ids.filter((id) => names.has(id)).length, 0, "no name-it round without its list");
     await without.ctx.close();
+  });
+
+  // The owner, Nov 14: "add a timer per question (maybe like 20s)". A name-it round has the same 20 seconds: at 0, a
+  // name the list has locks in as LOCK IN would take it; anything that wouldn't lock is Time's up.
+  test("at 0 seconds a name the list has locks in; one it doesn't take is Time's up (phone)", async () => {
+    const vp = VIEWPORTS.find((v) => v.name === "phone");
+    const ids = ["eiffel-tower-height", "name-country-50m-people", "adult-bones", "octopus-hearts", "piano-keys"];
+    for (const [typed, locks] of [
+      ["Colombia", true],
+      ["Paris", false],
+    ]) {
+      const { ctx, page } = await openFathom(vp, { save: gameAt(ids, 1) });
+      await page.getByTestId("fathom-input").waitFor();
+      await freeze(page);
+      await page.getByTestId("fathom-input").fill(typed);
+      await page.clock.runFor(21_000);
+      await page.getByTestId("fathom-reveal").waitFor();
+      if (locks) {
+        assert.equal(await attr(page, "fathom-guess", "data-pick"), typed);
+        assert.equal(await attr(page, "fathom-reveal", "data-timeout"), null);
+      } else {
+        assert.equal(await attr(page, "fathom-reveal", "data-timeout"), "true");
+        assert.equal(await attr(page, "fathom-reveal", "data-points"), "0");
+        // The target, and the best answers still there to learn from.
+        await page.getByTestId("fathom-answer").waitFor();
+        await page.getByTestId("fathom-best").waitFor();
+      }
+      await ctx.close();
+    }
   });
 
   test("a reload on a name-it reveal picks it up, the pick and all (phone)", async () => {

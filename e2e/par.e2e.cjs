@@ -1,10 +1,23 @@
 // The players' average ("avg" on screen, par in the data): the game's header shows the score alone, a finished game
-// shows the average with the score histogram (your bar marked, the average marked), Past runs shows the distance from
+// shows the average with the players' curve (your marker on it, the average's caret), Past runs shows the distance from
 // it, and the knowledge page (Home's Stats key, there from the start) lists the game's category. The golf word "par"
 // never reaches the screen (players didn't know it).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, TODAY, open, hash, puzzle, guess, noHScroll } = require("./helpers.cjs");
+
+/** The player's marker in column `col`, on the curve and inside it; the brighter area up to it. */
+async function curveMarked(curve, col) {
+  const got = await curve.evaluate((el) => {
+    const area = el.querySelector(".curve-area").getBoundingClientRect();
+    const you = el.querySelector('[data-testid="curve-you"]').getBoundingClientRect();
+    const below = el.querySelector('[data-testid="curve-below"]').getBBox();
+    return { w: area.width, h: area.height, x: you.x - area.x, y: you.y - area.y, size: you.width, below: below.x + below.width };
+  });
+  assert.ok(got.x >= 0 && got.x + got.size <= got.w && got.y >= 0 && got.y + got.size <= got.h, `the marker inside the curve: ${JSON.stringify(got)}`);
+  assert.ok(Math.abs(got.x + got.size / 2 - (col * 3 + 1)) <= 3, `the marker at column ${col}: ${JSON.stringify(got)}`);
+  assert.equal(got.below, (col + 1) * 3, "the brighter area ends at the player");
+}
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -37,14 +50,21 @@ for (const vp of VIEWPORTS) {
     await page.getByTestId("give-up").click();
     await page.getByTestId("give-up").click();
 
-    // The results: the average, and the histogram with 11 bars, yours (2) marked, the average marked.
+    // The results: the average, and the players' curve (owner, Nov 14: "instead of a bar chart style can you do a
+    // actual curve?"): the player's marker at their score (2) on it, the brighter area up to it, the average's caret.
     const block = page.getByTestId("results").getByTestId("par");
     await block.waitFor();
     assert.equal(Number(await block.getAttribute("data-par")), par);
-    const hist = block.getByTestId("histogram");
-    assert.equal(await hist.locator("[data-score]").count(), 11);
-    assert.equal(await hist.locator("[data-you]").getAttribute("data-score"), "2");
-    assert.equal(await hist.locator("[data-par]").getAttribute("data-score"), String(par));
+    const curve = block.getByTestId("crowd-curve");
+    const col = (score) => Math.floor(((score + 0.5) / 11) * 50);
+    assert.equal(await curve.getByTestId("curve-you").getAttribute("data-col"), String(col(2)));
+    assert.equal(await curve.getByTestId("curve-avg").getAttribute("data-col"), String(col(par)));
+    await curveMarked(curve, col(2));
+    assert.equal(await curve.locator(".histo-axis").textContent(), "010");
+    assert.equal(await curve.getAttribute("aria-label"), `You did ${(await block.getByTestId("par-line").textContent()).trim()}: you got 2 of 10, players average ${par}.`);
+    // The same place and size as the 11 bars it replaced: 150 x 42 on the baseline, beside the average.
+    const plot = await curve.locator(".curve-plot").boundingBox();
+    assert.deepEqual([Math.round(plot.width), Math.round(plot.height)], [150, 42]);
     assert.doesNotMatch(await page.getByTestId("results").innerText(), PAR);
     // The header shows the score alone: the average is the results' news (par.json has loaded by now).
     assert.equal(await page.getByTestId("title-par").count(), 0);

@@ -1078,14 +1078,18 @@ export function startGame(save: FathomSave, bank: readonly FathomQuestion[], ran
 /** Whether every question of the game has its guess: its total is final (the last reveal or the results). */
 export const finished = (game: FathomGame): boolean => game.ids.length > 0 && game.guesses.length >= game.ids.length;
 
+/** A game of five, from before Nov 14: one under way then still plays out as it was. */
+export const OLD_QUESTIONS_PER_GAME = 5;
+
 /**
- * The saved game, if it can be shown with this bank (its questions all still there, ten of them: a five-question game
- * from before Nov 14 is left, and a new one drawn): an unfinished one goes on, and a finished one reopens on its
- * results, so a reload never loses a score. Only NEW QUESTIONS draws again.
+ * The saved game, if it can be shown with this bank (its questions all still there; ten, or five for a game from
+ * before Nov 14, which plays out as it was): an unfinished one goes on, and a finished one reopens on its results, so
+ * a reload never loses a score. Only NEW QUESTIONS draws again.
  */
 export function resumable(save: FathomSave, bank: readonly FathomQuestion[]): FathomGame | undefined {
   const g = save.game;
   if (!g || g.guesses.length > g.ids.length) return undefined;
   const ids = new Set(bank.map((q) => q.id));
-  return g.ids.length === QUESTIONS_PER_GAME && g.ids.every((id) => ids.has(id)) && g.at <= g.guesses.length ? g : undefined;
+  const size = g.ids.length === QUESTIONS_PER_GAME || g.ids.length === OLD_QUESTIONS_PER_GAME;
+  return size && g.ids.every((id) => ids.has(id)) && g.at <= g.guesses.length ? g : undefined;
 }

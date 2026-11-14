@@ -1,10 +1,10 @@
 // Fathom as a full game mode (owner, Nov 9: "ship it now"; Today's Fathom since Nov 14), on phone and desktop:
 // - Home's key and the menu's tile (Today's Fathom, in the Today panel and the Play group): fathom-daily.e2e.cjs.
 // - How to play: a Today's Fathom rule, with the game's own scoring line.
-// - Stats: a Fathom block before the first game (0 games, placeholders) and after one (games, average, best of 500).
+// - Stats: a Fathom block before the first game (0 games, placeholders) and after one (games, average, best of 1000).
 // - Past runs: a finished game under today's header, with its total; the row opens that game's results (the same
 //   total and rows, the date it was played); Back returns to Past runs, and a deep link's Back goes up to it.
-// - The share text: "Fathom #2 <total>/500", the squares and the link to #fathom, every line but the last ending in
+// - The share text: "Fathom #2 <total>/1000", ten squares and the link to #fathom, every line but the last ending in
 //   two spaces so the lines keep in a Reddit comment.
 // - A past game's key opens Today's Fathom where it was.
 // - Nothing says beta: Home, the menu, How to play, Fathom's question, reveal and results, the share text, Stats,
@@ -32,9 +32,9 @@ after(() => browser.close());
 
 const noBeta = async (page, where) => assert.doesNotMatch(await page.evaluate(() => document.body.innerText), /\bbeta\b/i, `${where} says beta`);
 
-/** Plays the five questions on screen (each answer a little high), and returns the results' total. */
+/** Plays the ten questions on screen (each answer a little high), and returns the results' total. */
 async function playGame(page) {
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     const field = page.getByTestId("fathom-input");
     await field.waitFor();
     const q = BANK.get(await page.getByTestId("fathom-question").getAttribute("data-question"));
@@ -83,8 +83,8 @@ for (const vp of VIEWPORTS) {
       const shared = await page.evaluate(() => navigator.clipboard.readText());
       const lines = shared.split("\n");
       assert.equal(lines.length, 3);
-      assert.equal(lines[0], `Fathom #${DAY.n} ${total}/500  `);
-      assert.match(lines[1], /^(\p{Extended_Pictographic} ){4}\p{Extended_Pictographic} {2}$/u);
+      assert.equal(lines[0], `Fathom #${DAY.n} ${total}/1000  `);
+      assert.match(lines[1], /^(\p{Extended_Pictographic} ){9}\p{Extended_Pictographic} {2}$/u);
       assert.match(lines[2], /^https?:\/\/[^ ]+\/#fathom$/);
       assert.doesNotMatch(shared, /beta/i);
     }
@@ -94,7 +94,7 @@ for (const vp of VIEWPORTS) {
     const run = saved.fathom.runs[0];
     assert.equal(run.points.reduce((a, b) => a + b, 0), total);
     assert.deepEqual(run.daily, { date: TODAY, n: DAY.n });
-    assert.deepEqual(saved.fathom.totals, { [run.startedAt]: total });
+    assert.deepEqual(saved.fathom.totals10, { [run.startedAt]: total });
     assert.deepEqual({ ...saved, fathom: undefined }, { ...before, fathom: undefined });
 
     // Stats after it.
@@ -110,8 +110,8 @@ for (const vp of VIEWPORTS) {
     const row = page.locator('[data-testid="history-row"][data-kind="fathom"]');
     await row.waitFor();
     assert.equal(await page.getByTestId("history-day").getAttribute("data-date"), TODAY);
-    assert.match(await row.textContent(), new RegExp(`${total}/500`));
-    assert.equal(await row.locator('[data-testid="history-bands"] [data-band]').count(), 5);
+    assert.match(await row.textContent(), new RegExp(`${total}/1000`));
+    assert.equal(await row.locator('[data-testid="history-bands"] [data-band]').count(), 10);
     assert.equal(await row.getByTestId("history-tag").evaluate((el) => el.getClientRects().length), 1, "the tag on one line");
     assert.ok(await noHScroll(page));
     await noBeta(page, "Past runs");
@@ -120,7 +120,7 @@ for (const vp of VIEWPORTS) {
     assert.equal(await hash(page), `#fathom/run-${run.startedAt}`);
     assert.equal(await page.getByTestId("fathom").getAttribute("data-phase"), "past");
     assert.equal(Number(await page.getByTestId("fathom-total").getAttribute("data-total")), total);
-    assert.equal(await page.getByTestId("fathom-row").count(), 5);
+    assert.equal(await page.getByTestId("fathom-row").count(), 10);
     await page.getByTestId("fathom-when").waitFor();
     assert.ok(await noHScroll(page));
     await page.getByTestId("nav-back").click();

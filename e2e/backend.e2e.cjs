@@ -70,8 +70,12 @@ test("finished games are sent once, and results blend in real players (desktop)"
   assert.equal(Number(await block.getAttribute("data-par")), want.avg);
   assert.equal(Number(await block.getAttribute("data-p")), want.p);
   assert.equal(await block.getByTestId("par-line").textContent(), `better than ${want.p}% of players`);
-  assert.equal(await block.getByTestId("histogram").locator("[data-par]").getAttribute("data-score"), String(Math.round(want.avg)));
-  assert.equal(await block.getByTestId("histogram").locator("[data-you]").getAttribute("data-score"), "2");
+  // The players' curve: the average's caret and the player's marker in their scores' columns (a score is the middle of
+  // its bin, 11 bins across 50 columns).
+  const curve = block.getByTestId("crowd-curve");
+  const col = (score) => String(Math.floor(((score + 0.5) / 11) * 50));
+  assert.equal(await curve.getByTestId("curve-avg").getAttribute("data-col"), col(want.avg));
+  assert.equal(await curve.getByTestId("curve-you").getAttribute("data-col"), col(2));
 
   await until(() => calls.submit.length > 0);
   await settle();
@@ -328,8 +332,10 @@ test("Fathom: each guess is sent once, and a reveal says how players guessed fro
 // sends nothing again), and the results draw the day's real players (fathom_day_stats) with the simulated crowd.
 test("Today's Fathom: the day's total is sent once, and its results count the day's real players (phone)", async () => {
   const bank = path.join(__dirname, "fixtures", "fathom", "questions.json");
-  const ids = ["eiffel-tower-height", "adult-bones", "octopus-hearts", "moon-distance", "everest-height"];
-  const day = { day: { date: TODAY, n: 2 }, ids, guesses: [330, 206, 3, 384400], at: 3, startedAt: NOW.getTime() - 60_000 };
+  const fixture = JSON.parse(fs.readFileSync(bank, "utf8")).questions;
+  // The day's ten, the last of them Everest's height.
+  const ids = [...fixture.map((q) => q.id).filter((id) => id !== "everest-height").slice(0, 9), "everest-height"];
+  const day = { day: { date: TODAY, n: 2 }, ids, guesses: ids.slice(0, 9).map((id) => fixture.find((q) => q.id === id).answer), at: 8, startedAt: NOW.getTime() - 60_000 };
   const { ctx, page, calls } = await open(phone, "#fathom", { ...FRESH, "tentacle:fathom-daily": day }, undefined, (c) =>
     c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: bank, contentType: "application/json" })),
   );
@@ -346,12 +352,17 @@ test("Today's Fathom: the day's total is sent once, and its results count the da
   const total = Number(await page.getByTestId("fathom-total").getAttribute("data-total"));
   assert.deepEqual(calls.fathomPlay[0], { p_date: TODAY, p_total: total, p_client_id: calls.fathomPlay[0].p_client_id });
   assert.match(calls.fathomPlay[0].p_client_id, UUID);
-  // The day's real players join the simulated crowd: their bin (400-409) stands out; the line counts them.
+  // The day's real players join the simulated crowd: the curve peaks where they are (400-409, column 20 of 50); the
+  // line counts them.
   const crowd = page.locator(`[data-testid="fathom-crowd"][data-n="${FATHOM_DAY.n}"]`);
   await crowd.waitFor();
   assert.ok(calls.fathomDay.includes(TODAY));
-  const heights = await crowd.locator(".histo-bar").evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-  assert.equal(Math.max(...heights), heights[40], "the real players' bin is the tallest");
+  const peak = await crowd.locator(".curve-fill").evaluate((p) => {
+    const cols = [...p.getAttribute("d").matchAll(/V([\d.]+)H([\d.]+)/g)].map((m) => ({ top: Number(m[1]), end: Number(m[2]) }));
+    const top = Math.min(...cols.map((c) => c.top));
+    return cols.filter((c) => c.top === top).map((c) => c.end / 3 - 1);
+  });
+  assert.ok(peak.some((c) => Math.abs(c - 20) <= 1), `the curve peaks at the real players: columns ${peak}`);
   assert.match(await crowd.getByTestId("fathom-crowd-line").textContent(), /^you did better than \d+% of players today$/);
   assert.doesNotMatch(await page.locator("main").innerText(), /estimat/i);
   // A reload (the results again) sends nothing again.
@@ -835,13 +846,14 @@ test("signed in: Fathom's games, totals and draws sync both ways, and a game fin
   await page.getByTestId("history-key").click();
   await page.locator('[data-testid="history-row"][data-kind="fathom"]').nth(1).waitFor();
   await page.getByTestId("nav-home").click();
+  // Stats counts ten-question games only: these two are games of five from before Nov 14 (Past runs has them).
   await page.getByTestId("stats-key").click();
-  await page.getByTestId("know-fathom-games").filter({ hasText: "2" }).waitFor();
+  await page.getByTestId("know-fathom-games").filter({ hasText: "0" }).waitFor();
 
   // A game here: none of the last draws' questions (on either device), and once it's over the account has it.
   // (Endless Fathom: its draw holds back the last games'.)
   await page.evaluate(() => (location.hash = "#fathom-endless"));
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     await page.getByTestId("fathom-input").waitFor();
     await page.getByTestId("fathom-input").fill("42");
     await page.getByTestId("fathom-lock").click();
@@ -851,7 +863,8 @@ test("signed in: Fathom's games, totals and draws sync both ways, and a game fin
   await page.getByTestId("fathom-results").waitFor();
   await page.clock.runFor(2000);
   await until(() => (row().data.fathom?.runs?.length ?? 0) === 3);
-  assert.equal(Object.keys(row().data.fathom.totals).length, 3);
+  assert.equal(Object.keys(row().data.fathom.totals).length, 2);
+  assert.equal(Object.keys(row().data.fathom.totals10).length, 1);
   // The draw held back both devices' last games: the two questions neither played are in this one.
   const played = row().data.fathom.runs[0].ids;
   assert.deepEqual(row().data.fathom.recent.map((d) => d.ids), [played, mine.ids, theirs.ids]);
