@@ -224,8 +224,15 @@ describe("visual baselines", { concurrency: true }, () => {
         },
       });
       await page.getByTestId("fathom-input").waitFor();
-      // Stopped a second on: the question's clock reads 0:19 (a jump to a later time would run it out).
+      // The question's clock from a known time: stopped, its time used set to a second, and the screen opened again, so
+      // it reads 0:19 every run (how long the page took to load would show in it otherwise).
       await freeze(page);
+      await page.evaluate((key) => localStorage.setItem("tentacle:fathom-clock", JSON.stringify({ key, used: 1000 })), `${NOW.getTime()}:0:${draw[0]}`);
+      await go(page, "#");
+      await page.getByTestId("today-list").waitFor();
+      await go(page, "#fathom");
+      for (let i = 0; i < 40 && !(await page.getByTestId("fathom-input").count()); i++) await page.clock.runFor(100);
+      await page.getByTestId("fathom-input").waitFor();
       await page.addStyleTag({ content: CAPTURE });
       const problems = [];
       const shot = async (name) => {
@@ -252,6 +259,9 @@ describe("visual baselines", { concurrency: true }, () => {
       }
       await page.getByTestId("fathom-next").click();
       await page.getByTestId("fathom-results").waitFor();
+      // The time to the next Fathom from a fixed time (the clock stopped a second after the question showed, which
+      // varies), so its seconds are the same every run.
+      await page.clock.setSystemTime(NOW.getTime() + 60_000);
       await page.clock.runFor(2000);
       await shot("fathom-results");
 
