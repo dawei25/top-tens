@@ -396,10 +396,15 @@ export class Swimmer {
       // room to turn the usual way, so the best way out leads well off the point): a quick flip about its middle
       // toward the point first, then the dart. A leg that ends short (round the glass) is followed by another.
       const want = headingOf(dx, dy);
-      const q = this.plan(want, d, Math.min(30, d), 1 / 60);
-      if (!q || (flip && Math.abs(wrapDeg(q.aim - want)) > 60)) {
+      const q = this.planDart(goal);
+      // No leg that gets it even halfway there (turned the wrong way in a tight spot): flip toward the point first. No
+      // leg and no flip: hang a moment, then try again (the dart's legs count down).
+      if (!q || q.left > 0.55 * d) {
         if (flip && this.flipToward(want)) return this.aimFor(goal, legs);
-        if (!q) return this.hold(0.3);
+        if (!q) {
+          this.hold(0.2);
+          return this.aimFor(goal, legs);
+        }
       }
       const end = {
         x: this.x + Math.sin(q.aim * RAD) * q.travel,
@@ -410,6 +415,40 @@ export class Swimmer {
     }
     this.go(headingOf(dx, dy), clamp(d * 5, 300, 3200) * boost, 0.05, true, goal);
     this.aimFor(goal, legs);
+  }
+
+  /**
+   * Confined: a dart's leg toward `goal`. Each heading within 90 degrees of the point that it can turn to here (or
+   * already faces) runs as far as the nearest it comes to the point (or as the open water allows); the leg that ends
+   * nearest wins, a little against turning further. `left`: how far from the point it ends. Null when no heading has
+   * room for a leg.
+   */
+  private planDart(goal: Pt): { aim: number; travel: number; spin: 1 | -1 | 0; left: number } | null {
+    const room = this.room!;
+    const dx = goal.x - this.x;
+    const dy = goal.y - this.y;
+    const d = Math.hypot(dx, dy);
+    const want = headingOf(dx, dy);
+    let best: { aim: number; travel: number; spin: 1 | -1 | 0; left: number } | null = null;
+    let score = -Infinity;
+    // Around the point's bearing, and straight ahead (no turn at all: right by the glass, as after a flip, even a
+    // couple of degrees may not fit).
+    for (const off of [...OFFSETS, wrapDeg(this.tilt - want)]) {
+      if (Math.abs(off) > 90) continue;
+      const aim = wrapDeg(want + off);
+      const spin = room.sweep(this.x, this.y, this.tilt, aim);
+      if (spin === null) continue;
+      const along = d * Math.cos(off * RAD);
+      const travel = Math.min(along, room.reach(this.x, this.y, aim, along + SHORT) - SHORT);
+      if (travel < Math.min(30, d)) continue;
+      const left = Math.hypot(goal.x - (this.x + Math.sin(aim * RAD) * travel), goal.y - (this.y - Math.cos(aim * RAD) * travel));
+      const k = -left - Math.abs(off) * 0.5;
+      if (k > score) {
+        score = k;
+        best = { aim, travel, spin, left };
+      }
+    }
+    return best;
   }
 
   /** A dart's point, kept past the leg under way (any other move drops it: endFlee). */
@@ -1162,7 +1201,11 @@ export class Swimmer {
 
   /** The glide has run out: pulse on toward the waypoint, pick a new one, or hover a moment. */
   private next() {
+    // A dart's point not reached yet (a leg held up, or no way at first): on with another leg, three at most.
+    const goal = this.dartGoal;
+    const legs = this.dartLegs;
     this.endFlee();
+    if (goal && legs < 2 && Math.hypot(goal.x - this.x, goal.y - this.y) > 30) return this.dart(goal, true, legs + 1);
     this.urgent = false;
     this.arrive = null;
     if (this.after !== null) {

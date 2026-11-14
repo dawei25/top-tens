@@ -726,7 +726,8 @@ test("a click on open water sends the squid darting there; spam clicks retarget 
   const p = await waterAway(page, 190, 240);
   await page.mouse.click(p.x, p.y);
   assert.equal(await darts(page), 1, "the click on open water didn't send the squid");
-  assert.ok((await closestTo(page, p, 1500)) < 0.75, "the squid didn't get to where the water was clicked");
+  // (A dart that has to flip round by the glass, or go round it, takes a second leg: well within 2.5 s.)
+  assert.ok((await closestTo(page, p, 2500)) < 0.75, "the squid didn't get to where the water was clicked");
   // Three clicks a tenth of a second apart, here and there (each 160 px or more from the others): it heads for the last
   // one, the others dropped (a spot nearer the glass than it fits is taken a little way in: within 1.2 of its widths).
   // (Not on the squid, where it now is: a click there is a boop.)
@@ -740,7 +741,7 @@ test("a click on open water sends the squid darting there; spam clicks retarget 
     await page.clock.runFor(100);
   }
   assert.equal(await darts(page), 4);
-  assert.ok((await closestTo(page, spots[2], 1500)) < 1.2, "spam clicks: the squid didn't end up at the last one");
+  assert.ok((await closestTo(page, spots[2], 2500)) < 1.2, "spam clicks: the squid didn't end up at the last one");
   // None of it pressed a control or changed the screen.
   assert.deepEqual(await controlClicks(page), []);
   assert.deepEqual(await screenState(page), before);
