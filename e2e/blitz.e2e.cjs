@@ -1,9 +1,9 @@
 // Blitz: the clock waits for the first keystroke, a hit scores, a guess after 0 doesn't count, the round is
-// recorded, and its past run opens and closes with Back; neither offers its own list. A list's results open its
-// Blitz (its title card has no Blitz key).
+// recorded, and its past run opens and closes with Back; neither offers its own list. A list game offers no Blitz at
+// all: not on its title card, its results or its past run (the modes stay separate, owner Nov 14).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, VIEWPORTS, open, hash, puzzle, noHScroll, guess } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, TODAY, open, go, hash, puzzle, noHScroll, guess, giveUp } = require("./helpers.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -73,12 +73,16 @@ for (const vp of VIEWPORTS) {
   });
 
   // The owner (Nov 8): "for simplicity remove the play blitz button for lists" (the title card's, beside the score);
-  // list -> Blitz still makes sense on the results. So a list game in play offers no Blitz at all, its title card
-  // keeps only the score, and the results' Play Blitz opens a round on that list.
-  test(`a list's results offer its Blitz, and its title card doesn't (${vp.name})`, async () => {
+  // and (Nov 14) "remove the play blitz option for the post list play screen- moving in a direction to keep the game
+  // modes separate". So a list game offers no Blitz anywhere: in play its title card keeps only the score, and every
+  // list results screen (free play, Today's list, an archive daily, a past run) offers Share and the next game only.
+  test(`a list game offers no Blitz, in play or on any of its results (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp, `#p-${LIST}`);
     await page.getByLabel("Your guess").waitFor();
     const card = page.getByTestId("title-card");
+    // A link or key to a Blitz anywhere on the screen's two columns, and the results' keys, in order.
+    const blitzKeys = () => page.locator('.board-col [href^="#blitz-"], .control-col [href^="#blitz-"], [data-testid="blitz-key"]').count();
+    const actions = () => page.locator(".results-actions").evaluate((el) => [...el.querySelectorAll("a, button")].map((k) => k.dataset.testid));
     // Nothing to press on the card but its source link.
     const keys = await card.evaluate((el) => [...el.querySelectorAll("a, button")].filter((k) => !k.closest(".asof")).length);
     assert.equal(keys, 0, "a key on the title card");
@@ -88,14 +92,25 @@ for (const vp of VIEWPORTS) {
     assert.ok(c.x + c.width - (score.x + score.width) < 30, "the score sits at the card's right end");
     assert.ok(await noHScroll(page));
 
-    await page.getByTestId("give-up").click();
-    await page.getByTestId("give-up").click();
-    await page.getByTestId("results").waitFor();
-    assert.equal(await card.locator('[href^="#blitz-"]').count(), 0);
-    await page.getByTestId("blitz-key").click();
-    await page.getByTestId("blitz-clock").waitFor();
-    assert.equal(await hash(page), `#blitz-${LIST}`);
-    assert.equal(await page.getByTestId("blitz-screen").getAttribute("data-list"), LIST);
+    // A free list's results: Roll new list and Share.
+    await giveUp(page);
+    assert.equal(await blitzKeys(), 0, "a Blitz key on a free list's results");
+    assert.deepEqual(await actions(), ["play-again", "share"]);
+    // Its past run: Play again and Back.
+    await go(page, "#history");
+    await page.locator('[data-testid="history-row"][data-kind="list"]').first().click();
+    await page.getByTestId("run-view").waitFor();
+    assert.equal(await blitzKeys(), 0, "a Blitz key on a past run");
+    assert.deepEqual(await actions(), ["replay", "run-back"]);
+    // Today's list and an archive daily: Share and Random list.
+    const days = await page.evaluate(async () => (await fetch("puzzles/daily.json")).json());
+    for (const date of [TODAY, days.find((d) => d.date < TODAY && d.id !== LIST).date]) {
+      await go(page, `#daily-${date}`);
+      await page.getByLabel("Your guess").waitFor();
+      await giveUp(page);
+      assert.equal(await blitzKeys(), 0, `a Blitz key on the daily's results (${date})`);
+      assert.deepEqual(await actions(), ["share", "results-roll"], date);
+    }
     await ctx.close();
   });
 }

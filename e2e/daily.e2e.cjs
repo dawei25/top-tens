@@ -55,10 +55,10 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("score").getAttribute("data-found"), "2");
     assert.ok(await noHScroll(page));
 
-    // One try: no Roll new list; this list as a free Blitz, and a random list, instead (no Today's Blitz since Nov 10).
+    // One try: no Roll new list; a random list instead (no Today's Blitz since Nov 10, no Play Blitz since Nov 14).
     assert.equal(await page.getByTestId("play-again").count(), 0);
     assert.equal(await page.getByTestId("results-daily-blitz").count(), 0);
-    assert.equal(await page.getByTestId("blitz-key").getAttribute("href"), `#blitz-${entry.id}`);
+    assert.equal(await page.getByTestId("blitz-key").count(), 0);
     assert.equal(await page.getByTestId("results-roll").count(), 1);
 
     // The days-in-a-row count explains itself: a tap or click opens its note (Home's record has the same). The note

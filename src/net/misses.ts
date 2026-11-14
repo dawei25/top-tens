@@ -2,7 +2,7 @@ import type { BlitzResult } from "../game/blitz";
 import type { GuessResult } from "../game/types";
 import type { OutboxKind } from "./outbox";
 import { clientId, LIST_ID } from "./plays";
-import type { RatingMode } from "./ratings";
+import type { ListMode } from "./ratings";
 import { KEYS } from "./store";
 
 /**
@@ -22,7 +22,7 @@ export type MissKind = "unknown" | "junk";
 
 export interface Miss {
   listId: string;
-  mode: RatingMode;
+  mode: ListMode;
   kind: MissKind;
   /** As cleanMiss leaves it: 1 to MAX_MISS characters, nothing that looks like an email, a phone number or a link. */
   text: string;

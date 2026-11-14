@@ -64,13 +64,14 @@
    "unit": "metres",
    "answer": 330,
    "definition": "to the tip",
-   "fact": "It was the tallest human-made structure in the world for 41 years, until New York's Chrysler Building in 1930.",
+   "fact": "It was the tallest human-made structure in the world for 41 years, until New York's Chrysler Building was finished.",
    "source": {
     "title": "Eiffel Tower",
     "url": "https://en.wikipedia.org/wiki/Eiffel_Tower"
    },
    "typical": 2,
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "new-york-city-population",
@@ -93,13 +94,15 @@
    "question": "How long does the International Space Station take to circle Earth once?",
    "unit": "minutes",
    "answer": 92.9,
-   "fact": "It travels at about 27,600 km/h and circles Earth about 15.5 times a day.",
+   "fact": "That's 15.5 laps a day, so its crew sees 16 sunrises and sunsets every day.",
    "source": {
     "title": "International Space Station",
     "url": "https://en.wikipedia.org/wiki/International_Space_Station"
    },
    "typical": 3,
-   "easy": false
+   "easy": false,
+   "definition": "at about 27,600 km/h",
+   "verified": true
   },
   {
    "id": "moonwalkers",
@@ -107,28 +110,14 @@
    "question": "How many people walked on the Moon during the Apollo program?",
    "unit": "people",
    "answer": 12,
-   "fact": "Nobody who landed there ever went back for a second time.",
+   "fact": "Six Apollo landings each set two astronauts down on the surface while a third waited in orbit.",
    "source": {
     "title": "Apollo program",
     "url": "https://en.wikipedia.org/wiki/Apollo_program"
    },
    "typical": 2,
-   "easy": true
-  },
-  {
-   "id": "speed-of-sound",
-   "kind": "science",
-   "question": "How fast does sound travel through air?",
-   "unit": "metres per second",
-   "answer": 343,
-   "definition": "at 20 °C",
-   "fact": "Through iron it goes almost 15 times faster.",
-   "source": {
-    "title": "Speed of sound",
-    "url": "https://en.wikipedia.org/wiki/Speed_of_sound"
-   },
-   "typical": 3,
-   "easy": false
+   "easy": true,
+   "verified": true
   },
   {
    "id": "neapolitan-pizza-oven",
@@ -177,7 +166,7 @@
   {
    "id": "marathon-distance",
    "kind": "sports",
-   "question": "How long is a marathon?",
+   "question": "How far is a marathon?",
    "unit": "kilometres",
    "answer": 42.195,
    "fact": "The distance was fixed in 1921, copied from the course of the 1908 London Olympics.",
@@ -186,7 +175,8 @@
     "url": "https://en.wikipedia.org/wiki/Marathon"
    },
    "typical": 1.3,
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "longest-tennis-match",
@@ -298,28 +288,14 @@
    "unit": "people",
    "answer": 1000,
    "definition": "researchers and their support staff",
-   "fact": "In summer the number swells to about 4,000.",
+   "fact": "In summer the number swells to about four times that.",
    "source": {
     "title": "Demographics of Antarctica",
     "url": "https://en.wikipedia.org/wiki/Demographics_of_Antarctica"
    },
    "typical": 5,
-   "easy": false
-  },
-  {
-   "id": "mars-year",
-   "kind": "space",
-   "question": "How long is a year on Mars?",
-   "unit": "days",
-   "answer": 687,
-   "definition": "in Earth days",
-   "fact": "So its seasons last nearly twice as long as Earth's.",
-   "source": {
-    "title": "Mars",
-    "url": "https://en.wikipedia.org/wiki/Mars"
-   },
-   "typical": 2,
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "hot-dog-eating-record",
@@ -379,21 +355,6 @@
    },
    "typical": 1.3,
    "easy": true
-  },
-  {
-   "id": "air-oxygen-share",
-   "kind": "science",
-   "round": "percent",
-   "question": "How much of the air we breathe is oxygen?",
-   "unit": "percent",
-   "answer": 20.95,
-   "definition": "dry air, by volume",
-   "fact": "Nearly all the rest is nitrogen, at 78%, and carbon dioxide is only about 0.04%.",
-   "source": {
-    "title": "Atmosphere of Earth",
-    "url": "https://en.wikipedia.org/wiki/Atmosphere_of_Earth"
-   },
-   "easy": false
   },
   {
    "id": "moon-visible-share",
@@ -502,22 +463,6 @@
    "easy": false
   },
   {
-   "id": "venus-surface-temperature",
-   "round": "estimate",
-   "kind": "space",
-   "question": "How hot is the surface of Venus?",
-   "unit": "degrees Celsius",
-   "answer": 464,
-   "definition": "average",
-   "fact": "Its thick carbon dioxide air traps the heat, making it hotter than Mercury, which is much closer to the Sun.",
-   "source": {
-    "title": "Venus",
-    "url": "https://en.wikipedia.org/wiki/Venus"
-   },
-   "verified": true,
-   "easy": false
-  },
-  {
    "id": "longest-space-stay",
    "round": "estimate",
    "kind": "space",
@@ -570,7 +515,7 @@
    "question": "How old are the oldest known remains of bread?",
    "unit": "years",
    "answer": 14500,
-   "fact": "It was found at a Natufian site in Jordan's north-eastern desert, older than farming, which made grain a staple from around 10,000 BC.",
+   "fact": "It was found at a Natufian site in Jordan's north-eastern desert, and is thousands of years older than farming.",
    "source": {
     "title": "Bread",
     "url": "https://en.wikipedia.org/wiki/Bread"
@@ -606,22 +551,6 @@
    "source": {
     "title": "Concorde",
     "url": "https://en.wikipedia.org/wiki/Concorde"
-   },
-   "verified": true,
-   "easy": false
-  },
-  {
-   "id": "youtube-new-video",
-   "round": "estimate",
-   "kind": "culture",
-   "question": "How much new video did YouTube get every minute?",
-   "unit": "hours",
-   "answer": 500,
-   "definition": "as of May 2019",
-   "fact": "That's up from 48 hours a minute in 2011.",
-   "source": {
-    "title": "YouTube",
-    "url": "https://en.wikipedia.org/wiki/YouTube"
    },
    "verified": true,
    "easy": false
@@ -707,37 +636,6 @@
    "easy": false
   },
   {
-   "id": "everest-boiling-point",
-   "round": "estimate",
-   "kind": "science",
-   "question": "At what temperature does water boil on top of Mount Everest?",
-   "unit": "degrees Celsius",
-   "answer": 71,
-   "fact": "The air pressure up there is about 34 kPa, a third of sea level's, so water boils long before 100 °C.",
-   "source": {
-    "title": "Boiling point",
-    "url": "https://en.wikipedia.org/wiki/Boiling_point"
-   },
-   "verified": true,
-   "easy": false
-  },
-  {
-   "id": "dinosaur-extinction",
-   "round": "estimate",
-   "kind": "nature",
-   "question": "How long ago did the dinosaurs die out?",
-   "unit": "million years",
-   "answer": 66,
-   "definition": "all but the birds",
-   "fact": "An asteroid strike wiped out about three quarters of all plant and animal species on Earth.",
-   "source": {
-    "title": "Cretaceous–Paleogene extinction event",
-    "url": "https://en.wikipedia.org/wiki/Cretaceous%E2%80%93Paleogene_extinction_event"
-   },
-   "easy": true,
-   "verified": true
-  },
-  {
    "id": "first-homo-sapiens",
    "round": "estimate",
    "kind": "science",
@@ -797,7 +695,8 @@
     "url": "https://en.wikipedia.org/wiki/Vincent_van_Gogh"
    },
    "verified": true,
-   "easy": false
+   "easy": false,
+   "definition": "in a career of just over ten years"
   },
   {
    "id": "record-painting-price",
@@ -864,22 +763,6 @@
    "easy": false
   },
   {
-   "id": "all-gold-mined",
-   "round": "estimate",
-   "kind": "everyday",
-   "question": "How much gold has been mined in all of history?",
-   "unit": "tonnes",
-   "answer": 201296,
-   "definition": "all the gold above ground, 2020",
-   "fact": "Put together, it would make a cube just 21.7 m on each side.",
-   "source": {
-    "title": "Gold",
-    "url": "https://en.wikipedia.org/wiki/Gold"
-   },
-   "verified": true,
-   "easy": false
-  },
-  {
    "id": "first-mobile-phone-weight",
    "round": "estimate",
    "kind": "everyday",
@@ -891,6 +774,372 @@
    "source": {
     "title": "DynaTAC",
     "url": "https://en.wikipedia.org/wiki/DynaTAC"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "heartbeats-in-a-lifetime",
+   "kind": "body",
+   "question": "How many heartbeats does a person have in a lifetime?",
+   "unit": "billion heartbeats",
+   "answer": 2.8,
+   "definition": "an average lifetime",
+   "fact": "A resting adult heart beats 60 to 100 times a minute, so even a slow one tops 86,000 beats a day.",
+   "source": {
+    "title": "Heart rate",
+    "url": "https://en.wikipedia.org/wiki/Heart_rate"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "heart-pumps-a-day",
+   "kind": "body",
+   "question": "How much blood does the heart pump in a day?",
+   "unit": "litres",
+   "answer": 7200,
+   "definition": "at rest",
+   "fact": "At rest it pushes out about 70 ml with each beat, some 70 times a minute.",
+   "source": {
+    "title": "Cardiac output",
+    "url": "https://en.wikipedia.org/wiki/Cardiac_output"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "adult-teeth",
+   "kind": "body",
+   "question": "How many teeth does an adult have?",
+   "unit": "teeth",
+   "answer": 32,
+   "definition": "a full set, wisdom teeth included",
+   "fact": "Children have 20 baby teeth, and the wisdom teeth at the back usually come through between 17 and 25.",
+   "source": {
+    "title": "Human tooth",
+    "url": "https://en.wikipedia.org/wiki/Human_tooth"
+   },
+   "verified": true,
+   "easy": true
+  },
+  {
+   "id": "blinks-per-minute",
+   "kind": "body",
+   "question": "How many times a minute does a person blink?",
+   "unit": "blinks",
+   "answer": 17,
+   "definition": "average, measured in a lab",
+   "fact": "Reading or staring at one thing slows it to about 4 or 5 a minute.",
+   "source": {
+    "title": "Blinking",
+    "url": "https://en.wikipedia.org/wiki/Blinking"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "billion-dollars-a-second",
+   "kind": "everyday",
+   "question": "Spending a dollar a second, how long would a billion dollars last?",
+   "unit": "years",
+   "answer": 31.69,
+   "fact": "At the same rate a million dollars would be gone in under 12 days.",
+   "source": {
+    "title": "Orders of magnitude (time)",
+    "url": "https://en.wikipedia.org/wiki/Orders_of_magnitude_(time)"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "world-cup-2026-matches",
+   "kind": "sports",
+   "question": "How many matches were played at the 2026 World Cup?",
+   "unit": "matches",
+   "answer": 104,
+   "definition": "48 teams, in groups of four, then knockouts",
+   "fact": "Twelve groups of four played six matches each, and the knockout rounds from the last 32 added 32 more.",
+   "source": {
+    "title": "2026 FIFA World Cup",
+    "url": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "monopoly-board-spaces",
+   "kind": "culture",
+   "question": "How many spaces are there around a Monopoly board?",
+   "unit": "spaces",
+   "answer": 40,
+   "fact": "Twenty-eight of them are properties to buy: 22 streets, four railroads and two utilities.",
+   "source": {
+    "title": "Monopoly (game)",
+    "url": "https://en.wikipedia.org/wiki/Monopoly_(game)"
+   },
+   "verified": true,
+   "easy": true
+  },
+  {
+   "id": "football-panels",
+   "kind": "sports",
+   "question": "How many panels make up a classic black-and-white football?",
+   "unit": "panels",
+   "answer": 32,
+   "fact": "Twelve are pentagons and twenty are hexagons, the pattern that made the ball a symbol of the game.",
+   "source": {
+    "title": "Ball (association football)",
+    "url": "https://en.wikipedia.org/wiki/Ball_(association_football)"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "smartphones-shipped",
+   "kind": "everyday",
+   "question": "How many smartphones were shipped worldwide in 2019?",
+   "unit": "billion smartphones",
+   "answer": 1.54,
+   "fact": "Shipments first topped a billion a year in 2013, when smartphones passed half of all mobile phones sold.",
+   "source": {
+    "title": "Smartphone",
+    "url": "https://en.wikipedia.org/wiki/Smartphone"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "cars-in-the-world",
+   "kind": "everyday",
+   "question": "How many cars are there in the world?",
+   "unit": "billion cars",
+   "answer": 1.644,
+   "definition": "in use, January 2025",
+   "fact": "Between them they burn over a trillion litres of petrol and diesel a year.",
+   "source": {
+    "title": "Car",
+    "url": "https://en.wikipedia.org/wiki/Car"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "big-mac-calories",
+   "kind": "food",
+   "question": "How many calories are in a Big Mac?",
+   "unit": "calories",
+   "answer": 580,
+   "definition": "in the US",
+   "fact": "Over half of them, 306, come from its fat.",
+   "source": {
+    "title": "Big Mac",
+    "url": "https://en.wikipedia.org/wiki/Big_Mac"
+   },
+   "verified": true,
+   "easy": true
+  },
+  {
+   "id": "italian-pasta-per-year",
+   "kind": "food",
+   "question": "How much pasta does an Italian eat in a year?",
+   "unit": "kilograms",
+   "answer": 23.5,
+   "definition": "per person, by weight as sold, 2015",
+   "fact": "That's the most of any country, ahead of Tunisia at 16 kg a person.",
+   "source": {
+    "title": "Pasta",
+    "url": "https://en.wikipedia.org/wiki/Pasta"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "vatican-population",
+   "kind": "places",
+   "question": "How many people live in Vatican City, the smallest country?",
+   "unit": "people",
+   "answer": 882,
+   "definition": "2024",
+   "fact": "They are clergy and other religious, the Swiss Guard and lay staff, and their families.",
+   "source": {
+    "title": "Vatican City",
+    "url": "https://en.wikipedia.org/wiki/Vatican_City"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "last-woolly-mammoths",
+   "kind": "animals",
+   "question": "How long ago did the last woolly mammoths die out?",
+   "unit": "years",
+   "answer": 4000,
+   "fact": "Most had died out at the end of the Ice Age, but a few hung on until then on Wrangel Island, off Siberia.",
+   "source": {
+    "title": "Woolly mammoth",
+    "url": "https://en.wikipedia.org/wiki/Woolly_mammoth"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "north-pole-to-equator",
+   "kind": "science",
+   "question": "How far is it from the North Pole to the equator?",
+   "unit": "kilometres",
+   "answer": 10000,
+   "fact": "The metre was first defined as one ten-millionth of this distance, which is why it's so round.",
+   "source": {
+    "title": "Metre",
+    "url": "https://en.wikipedia.org/wiki/Metre"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "russia-time-zones",
+   "kind": "places",
+   "question": "How many time zones does Russia span?",
+   "unit": "time zones",
+   "answer": 11,
+   "fact": "It stretches some 9,000 km from west to east, across 172 of the world's 360 degrees of longitude.",
+   "source": {
+    "title": "Russia",
+    "url": "https://en.wikipedia.org/wiki/Russia"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "countries-in-africa",
+   "kind": "places",
+   "question": "How many countries are there in Africa?",
+   "unit": "countries",
+   "answer": 54,
+   "definition": "fully recognised",
+   "fact": "Most of them kept the borders drawn by colonial powers when they became independent.",
+   "source": {
+    "title": "Africa",
+    "url": "https://en.wikipedia.org/wiki/Africa"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "birthday-pairs",
+   "kind": "science",
+   "question": "How many people does a group need for an even chance two share a birthday?",
+   "unit": "people",
+   "answer": 23,
+   "fact": "With 23 people there are 253 pairs, and each pair is a fresh chance of a match.",
+   "source": {
+    "title": "Birthday problem",
+    "url": "https://en.wikipedia.org/wiki/Birthday_problem"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "coca-cola-can-sugar",
+   "kind": "food",
+   "question": "How much sugar is in a can of Coca-Cola?",
+   "unit": "grams",
+   "answer": 39,
+   "definition": "a 355 ml can",
+   "fact": "It gives the can all of its 140 calories, since there is no fat in it.",
+   "source": {
+    "title": "Coca-Cola",
+    "url": "https://en.wikipedia.org/wiki/Coca-Cola"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "ball-in-play-minutes",
+   "kind": "sports",
+   "question": "How long is the ball in play during a football match?",
+   "unit": "minutes",
+   "answer": 60,
+   "definition": "a 90-minute match, typically",
+   "fact": "Stoppage time doesn't make up for all the time lost to throw-ins, free kicks and goal kicks.",
+   "source": {
+    "title": "Association football",
+    "url": "https://en.wikipedia.org/wiki/Association_football"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "new-zealand-sheep",
+   "kind": "animals",
+   "question": "How many sheep are there in New Zealand?",
+   "unit": "million sheep",
+   "answer": 23.3,
+   "definition": "June 2024",
+   "fact": "It once had 39 million, nearly 10 for every New Zealander, before forests took over farmland.",
+   "source": {
+    "title": "Sheep farming in New Zealand",
+    "url": "https://en.wikipedia.org/wiki/Sheep_farming_in_New_Zealand"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "formula-one-race-distance",
+   "kind": "sports",
+   "question": "How far does a Formula One car race in a Grand Prix?",
+   "unit": "kilometres",
+   "answer": 305,
+   "definition": "the standard race distance",
+   "fact": "Lap lengths vary from track to track, so each race sets its number of laps to make up the distance.",
+   "source": {
+    "title": "Formula One",
+    "url": "https://en.wikipedia.org/wiki/Formula_One"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "a4-sheets-per-square-metre",
+   "kind": "everyday",
+   "question": "How many sheets of A4 paper would cover a square metre?",
+   "unit": "sheets",
+   "answer": 16,
+   "fact": "A0 is exactly one square metre, and each size down is half the one before, so A4 is a sixteenth.",
+   "source": {
+    "title": "Paper size",
+    "url": "https://en.wikipedia.org/wiki/Paper_size"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "us-mcdonalds",
+   "kind": "lists",
+   "question": "How many McDonald's are there in the United States?",
+   "unit": "restaurants",
+   "answer": 13697,
+   "definition": "December 2025",
+   "fact": "Mainland China comes next with over 7,700, then Japan with over 3,000.",
+   "source": {
+    "title": "List of countries with McDonald's restaurants",
+    "url": "https://en.wikipedia.org/wiki/List_of_countries_with_McDonald%27s_restaurants"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "english-speakers",
+   "kind": "lists",
+   "question": "How many people speak English?",
+   "unit": "billion people",
+   "answer": 1.493,
+   "definition": "as a first or second language, 2026",
+   "fact": "Only about 450 million of them are native speakers.",
+   "source": {
+    "title": "List of languages by total number of speakers",
+    "url": "https://en.wikipedia.org/wiki/List_of_languages_by_total_number_of_speakers"
    },
    "verified": true,
    "easy": false
@@ -998,21 +1247,6 @@
    "source": {
     "title": "Beetle",
     "url": "https://en.wikipedia.org/wiki/Beetle"
-   },
-   "verified": true,
-   "easy": false
-  },
-  {
-   "id": "brain-energy-share",
-   "round": "percent",
-   "kind": "body",
-   "question": "What share of the body's energy can the brain use?",
-   "unit": "percent",
-   "answer": 20,
-   "fact": "It uses more than any other organ, though it's only about 2% of the body's weight.",
-   "source": {
-    "title": "Human brain",
-    "url": "https://en.wikipedia.org/wiki/Human_brain"
    },
    "verified": true,
    "easy": false
@@ -1141,6 +1375,162 @@
    "verified": true
   },
   {
+   "id": "london-underground-underground",
+   "round": "percent",
+   "kind": "landmarks",
+   "question": "How much of the London Underground actually runs underground?",
+   "unit": "percent",
+   "answer": 45,
+   "definition": "share of its length",
+   "fact": "Most of the track out in the open is north of the River Thames, on the lines' long outer branches.",
+   "source": {
+    "title": "London Underground",
+    "url": "https://en.wikipedia.org/wiki/London_Underground"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "pacific-ocean-share",
+   "round": "percent",
+   "kind": "nature",
+   "question": "How much of Earth's surface does the Pacific Ocean cover?",
+   "unit": "percent",
+   "answer": 32,
+   "fact": "That's more than all of Earth's land put together.",
+   "source": {
+    "title": "Pacific Ocean",
+    "url": "https://en.wikipedia.org/wiki/Pacific_Ocean"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "brazil-coffee-share",
+   "round": "percent",
+   "kind": "food",
+   "question": "How much of the world's coffee does Brazil grow?",
+   "unit": "percent",
+   "answer": 31,
+   "definition": "2023",
+   "fact": "Vietnam comes second, and in the 1910s Brazil exported about 70% of all the world's coffee.",
+   "source": {
+    "title": "Coffee",
+    "url": "https://en.wikipedia.org/wiki/Coffee"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "canada-maple-syrup-share",
+   "round": "percent",
+   "kind": "food",
+   "question": "How much of the world's maple syrup comes from Canada?",
+   "unit": "percent",
+   "answer": 75,
+   "definition": "2025",
+   "fact": "Quebec alone makes 90% of Canada's, and nearly all the rest of the world's comes from the United States.",
+   "source": {
+    "title": "Maple syrup",
+    "url": "https://en.wikipedia.org/wiki/Maple_syrup"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "penalties-scored-share",
+   "round": "percent",
+   "kind": "sports",
+   "question": "What share of penalty kicks are scored?",
+   "unit": "percent",
+   "answer": 74.25,
+   "definition": "Germany's Bundesliga, 1963 to 2004",
+   "fact": "In World Cup penalty shootouts only 69.4% go in.",
+   "source": {
+    "title": "Penalty kick (association football)",
+    "url": "https://en.wikipedia.org/wiki/Penalty_kick_(association_football)"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "drive-on-the-left-share",
+   "round": "percent",
+   "kind": "everyday",
+   "question": "What share of the world's people live where cars drive on the left?",
+   "unit": "percent",
+   "answer": 33,
+   "fact": "The 75 countries that drive on the left cover only about a sixth of the world's land.",
+   "source": {
+    "title": "Left- and right-hand traffic",
+    "url": "https://en.wikipedia.org/wiki/Left-_and_right-hand_traffic"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "reykjavik-share",
+   "round": "percent",
+   "kind": "places",
+   "question": "What share of Icelanders live in and around Reykjavík?",
+   "unit": "percent",
+   "answer": 64,
+   "definition": "its Capital Region, 2026",
+   "fact": "The city itself has about 140,000 people, and six towns around it make up the rest.",
+   "source": {
+    "title": "Reykjavík",
+    "url": "https://en.wikipedia.org/wiki/Reykjav%C3%ADk"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "swiss-alps-share",
+   "round": "percent",
+   "kind": "nature",
+   "question": "How much of Switzerland do the Alps cover?",
+   "unit": "percent",
+   "answer": 60,
+   "fact": "Yet most of its 9 million people live on the flatter plateau to the north, around Zurich, Geneva and Basel.",
+   "source": {
+    "title": "Switzerland",
+    "url": "https://en.wikipedia.org/wiki/Switzerland"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "canada-near-border-share",
+   "round": "percent",
+   "kind": "places",
+   "question": "What share of Canadians live within 150 km of the US border?",
+   "unit": "percent",
+   "answer": 80,
+   "fact": "That leaves about a fifth of the people for the rest of the world's second-largest country.",
+   "source": {
+    "title": "Canada",
+    "url": "https://en.wikipedia.org/wiki/Canada"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "iceberg-underwater-share",
+   "round": "percent",
+   "kind": "nature",
+   "question": "How much of an iceberg is under the water?",
+   "unit": "percent",
+   "answer": 90,
+   "definition": "by volume",
+   "fact": "Ice is only a little lighter than seawater: about 920 kg a cubic metre against 1,025.",
+   "source": {
+    "title": "Iceberg",
+    "url": "https://en.wikipedia.org/wiki/Iceberg"
+   },
+   "verified": true,
+   "easy": true
+  },
+  {
    "id": "first-iphone",
    "round": "year",
    "kind": "everyday",
@@ -1192,7 +1582,7 @@
    "question": "When were the first bitcoins created?",
    "unit": "year",
    "answer": 2009,
-   "fact": "The first notable purchase of goods with them came the next year: two pizzas for 10,000 bitcoins.",
+   "fact": "The first notable purchase of goods with them came the next year: two pizzas for ten thousand bitcoins.",
    "source": {
     "title": "History of bitcoin",
     "url": "https://en.wikipedia.org/wiki/History_of_bitcoin"
@@ -1256,21 +1646,6 @@
    "source": {
     "title": "Harry Potter and the Philosopher's Stone",
     "url": "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher%27s_Stone"
-   },
-   "easy": true,
-   "verified": true
-  },
-  {
-   "id": "first-star-wars-film",
-   "round": "year",
-   "kind": "culture",
-   "question": "When did the first Star Wars film come out?",
-   "unit": "year",
-   "answer": 1977,
-   "fact": "It became the highest-grossing film ever made, until E.T. overtook it.",
-   "source": {
-    "title": "Star Wars (film)",
-    "url": "https://en.wikipedia.org/wiki/Star_Wars_(film)"
    },
    "easy": true,
    "verified": true
@@ -1366,6 +1741,158 @@
    "easy": false
   },
   {
+   "id": "pluto-demoted",
+   "round": "year",
+   "kind": "space",
+   "question": "When was Pluto demoted from planet to dwarf planet?",
+   "unit": "year",
+   "answer": 2006,
+   "fact": "The find of Eris, an icy world beyond Neptune more massive than Pluto, forced astronomers to define a planet.",
+   "source": {
+    "title": "Pluto",
+    "url": "https://en.wikipedia.org/wiki/Pluto"
+   },
+   "verified": true,
+   "easy": true
+  },
+  {
+   "id": "euro-cash-arrives",
+   "round": "year",
+   "kind": "everyday",
+   "question": "When did euro coins and notes go into circulation?",
+   "unit": "year",
+   "answer": 2002,
+   "fact": "The euro itself began in 1999, but at first only on screens and in bank accounts.",
+   "source": {
+    "title": "Euro",
+    "url": "https://en.wikipedia.org/wiki/Euro"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-traffic-lights",
+   "round": "year",
+   "kind": "everyday",
+   "question": "When were the first traffic lights put up?",
+   "unit": "year",
+   "answer": 1868,
+   "definition": "in London, for horse-drawn traffic",
+   "fact": "A police officer raised and lowered their semaphore arms by day and, at night, worked a lever for red and green lights.",
+   "source": {
+    "title": "Traffic light",
+    "url": "https://en.wikipedia.org/wiki/Traffic_light"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-world-cup",
+   "round": "year",
+   "kind": "sports",
+   "question": "When was the first football World Cup played?",
+   "unit": "year",
+   "answer": 1930,
+   "fact": "Uruguay hosted it to mark 100 years of its independence, and won it.",
+   "source": {
+    "title": "FIFA World Cup",
+    "url": "https://en.wikipedia.org/wiki/FIFA_World_Cup"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "world-population-4-billion",
+   "round": "year",
+   "kind": "places",
+   "question": "When did the world's population reach 4 billion?",
+   "unit": "year",
+   "answer": 1974,
+   "fact": "It took only 48 years more to double again, to 8 billion in November 2022.",
+   "source": {
+    "title": "World population",
+    "url": "https://en.wikipedia.org/wiki/World_population"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "first-balloon-flight",
+   "round": "year",
+   "kind": "science",
+   "question": "When did people first fly, in a hot-air balloon?",
+   "unit": "year",
+   "answer": 1783,
+   "fact": "Étienne Montgolfier, of a family of French paper makers, went up first, tethered, from a Paris workshop yard.",
+   "source": {
+    "title": "Montgolfier brothers",
+    "url": "https://en.wikipedia.org/wiki/Montgolfier_brothers"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "elizabeth-ii-becomes-queen",
+   "round": "year",
+   "kind": "culture",
+   "question": "When did Elizabeth II become queen?",
+   "unit": "year",
+   "answer": 1952,
+   "fact": "She was 25, and reigned for 70 years and 214 days, the longest of any British monarch.",
+   "source": {
+    "title": "Elizabeth II",
+    "url": "https://en.wikipedia.org/wiki/Elizabeth_II"
+   },
+   "verified": true,
+   "easy": true
+  },
+  {
+   "id": "web-goes-public",
+   "round": "year",
+   "kind": "everyday",
+   "question": "When was the World Wide Web released to the whole internet?",
+   "unit": "year",
+   "answer": 1991,
+   "fact": "Tim Berners-Lee had it running at CERN by the end of 1990; other research labs got it some months before everyone else.",
+   "source": {
+    "title": "World Wide Web",
+    "url": "https://en.wikipedia.org/wiki/World_Wide_Web"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
+   "id": "last-moonwalk",
+   "round": "year",
+   "kind": "space",
+   "question": "When did anyone last walk on the Moon?",
+   "unit": "year",
+   "answer": 1972,
+   "fact": "It was Apollo 17, and no one flew beyond low Earth orbit again until a Moon flyby in April 2026.",
+   "source": {
+    "title": "Apollo 17",
+    "url": "https://en.wikipedia.org/wiki/Apollo_17"
+   },
+   "verified": true,
+   "easy": true
+  },
+  {
+   "id": "first-selfie",
+   "round": "year",
+   "kind": "culture",
+   "question": "When was the first selfie taken?",
+   "unit": "year",
+   "answer": 1839,
+   "definition": "a photo of yourself, with any camera",
+   "fact": "Robert Cornelius, an American photography pioneer, took it, and wrote on the back that it was 'the first light picture ever taken'.",
+   "source": {
+    "title": "Selfie",
+    "url": "https://en.wikipedia.org/wiki/Selfie"
+   },
+   "verified": true,
+   "easy": false
+  },
+  {
    "id": "name-country-1m-people",
    "round": "name",
    "kind": "places",
@@ -1411,7 +1938,7 @@
    "kind": "places",
    "list": "countries-area",
    "target": 551500,
-   "question": "Name a country about as big as France",
+   "question": "Name a country with about the same area as France",
    "definition": "mainland France, without its overseas regions",
    "except": [
     "France"
@@ -1425,7 +1952,7 @@
    "kind": "places",
    "list": "countries-area",
    "target": 244376,
-   "question": "Name a country about as big as the UK",
+   "question": "Name a country with about the same area as the UK",
    "except": [
     "United Kingdom"
    ],
@@ -1455,27 +1982,6 @@
    "verified": true
   },
   {
-   "id": "name-country-no-land-borders",
-   "round": "name",
-   "kind": "places",
-   "list": "land-borders",
-   "target": 0,
-   "question": "Name a country with no land borders",
-   "fact": "38 of the 197 countries have none; Ireland, Haiti and Papua New Guinea share their islands, so they have one.",
-   "easy": false,
-   "verified": true
-  },
-  {
-   "id": "name-country-3-borders",
-   "round": "name",
-   "kind": "places",
-   "list": "land-borders",
-   "target": 3,
-   "question": "Name a country with 3 land borders",
-   "easy": false,
-   "verified": true
-  },
-  {
    "id": "name-country-6-borders",
    "round": "name",
    "kind": "places",
@@ -1494,6 +2000,29 @@
    "target": 9,
    "question": "Name a country with 9 land borders",
    "definition": "France has 11, counting its overseas territories",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-as-big-as-egypt",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-area",
+   "target": 1001450,
+   "question": "Name a country with about the same area as Egypt",
+   "except": [
+    "Egypt"
+   ],
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-5m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-population",
+   "target": 5000000,
+   "question": "Name a country with about 5 million people",
    "easy": false,
    "verified": true
   }

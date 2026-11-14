@@ -6,7 +6,7 @@
 // the menu and Roll new list, over the screen the player was on, which closing leaves as it was; Today's list still
 // opens, from Home and from the wall's quiet key; a game in progress resumes; a link to a free list counts, and one
 // past the free ones shows the wall alone, closing back where the player came from; an accidental open doesn't count;
-// Play again and Play Blitz ask too; signing in starts the game asked for (by popup, and with the popup blocked, after a
+// Play again and a finished daily's Random list ask too (no list's results offer its Blitz since Nov 14); signing in starts the game asked for (by popup, and with the popup blocked, after a
 // trip to Google and back), and a signed-in player is never asked; the build without a backend has no wall; the
 // wall's keys never move anything at 390 and 1440.
 const { test, before, after } = require("node:test");
@@ -213,13 +213,15 @@ test("a link to a free list counts, and one past the free ones gets the wall alo
   await ctx.close();
 });
 
-test("Play Blitz on today's finished list asks over its results, whose quiet key then goes Home (desktop)", async () => {
+test("Random list on today's finished list asks over its results, whose quiet key then goes Home (desktop)", async () => {
   const daily = require("../public/puzzles/daily.json").find((e) => e.date === TODAY);
   const done = { puzzleId: daily.id, found: [1, 2, 3], lives: 0, log: [], status: "lost", startedAt: T - 900_000, finishedAt: T - 600_000 };
   const seed = played(2, { games: { [daily.id]: done }, dailyGames: { [TODAY]: done }, daily: { [TODAY]: daily.id } });
   const { ctx, page } = await open(desktop, `#daily-${TODAY}`, seed, undefined, withGoogle({}));
   await page.getByTestId("results").waitFor();
-  await page.getByTestId("blitz-key").click();
+  // No Play Blitz on a list's results (owner, Nov 14: the modes stay separate).
+  assert.equal(await page.getByTestId("blitz-key").count(), 0);
+  await page.getByTestId("results-roll").click();
   await walled(page);
   assert.equal(await hashOf(page), `#daily-${TODAY}`);
   // Today's list is played: Home instead.
@@ -227,7 +229,7 @@ test("Play Blitz on today's finished list asks over its results, whose quiet key
   await page.getByTestId("free-wall-close").click();
   await gone(page);
   await page.getByTestId("results").waitFor();
-  await page.getByTestId("blitz-key").click();
+  await page.getByTestId("results-roll").click();
   await walled(page);
   await page.getByTestId("free-wall-alt").click();
   await gone(page);

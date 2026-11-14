@@ -180,15 +180,21 @@ regulars can't lift every average.
 
    9. `supabase/migrations/20261114120000_fathom_plays.sql` (after 7; run once, safe to run twice): Today's Fathom
       totals, for "better than X% of players today". Adds the `fathom_plays` table (date, a random per-browser id,
-      the account if signed in, the total 0-500; one row per browser per date; players can't read or touch it;
+      the account if signed in, the total 0-1000 (ten questions a day); one row per browser per date; players can't read or touch it;
       deleted with the account), `submit_fathom_play(p_date, p_total, p_client_id)` (refuses a date more than a day
-      from today, a total outside 0-500, a missing id) and `fathom_day_stats(p_date)`, which returns
-      `{"n", "counts": [50 bins of 10 points], "avg"}` for that date, one total per player, everyone counted, callable
+      from today, a total outside 0-1000, a missing id) and `fathom_day_stats(p_date)`, which returns
+      `{"n", "counts": [100 bins of 10 points], "avg"}` for that date, one total per player, everyone counted, callable
       with the public key. The game works before it runs: until then the day's line shows only the simulated crowd.
       Check it took: finish Today's Fathom; Table Editor > `fathom_plays` has a row, and
       `select fathom_day_stats(current_date);` returns `{"n": 1, ...}`.
 
-   The live project has 1 to 8 (missed_guesses Nov 9, fathom_guesses Nov 14), so 9 is what's left.
+   10. `supabase/migrations/20261114130000_fathom_feedback.sql` (run once, safe to run twice; before or after 9):
+      ratings and notes take Fathom questions. Lets `mode` be `fathom` in `ratings` and `feedback` (the question's id
+      in `list_id`) and in `rate_list` and `submit_feedback` (same signatures, reasons, limits and one rating per
+      player); `list_ratings` and `list_feedback` already total by mode. Check it took: rate a question on Fathom's
+      results; `select * from list_ratings(now() - interval '1 hour');` has a `fathom` row.
+
+   The live project has 1 to 8 (missed_guesses Nov 9, fathom_guesses Nov 14), so 9 and 10 are what's left.
 
    Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the one-time steps above still go
    in the SQL Editor). Stats alone only need the first.

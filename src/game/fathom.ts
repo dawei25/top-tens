@@ -105,21 +105,41 @@ export interface FathomBank {
   questions: FathomQuestion[];
 }
 
-export const QUESTIONS_PER_GAME = 5;
+/** Ten a game since Nov 14 (owner: "change it to 10 questions to keep in line with the 10 theme"), five before. */
+export const QUESTIONS_PER_GAME = 10;
 export const POINTS_PER_QUESTION = 100;
 export const MAX_TOTAL = QUESTIONS_PER_GAME * POINTS_PER_QUESTION;
+
+/**
+ * Seconds a question gives (owner, Nov 14: "add a timer per question (maybe like 20s)"): counted from when it shows
+ * and the field takes typing, paused while the tab is hidden. At 0 what's typed locks in if it reads; otherwise the
+ * round scores 0 ("Time's up.").
+ */
+export const QUESTION_SECONDS = 20;
+/** The last seconds, when the clock tints toward pink. */
+export const WARN_SECONDS = 5;
 
 /* ---------- Scoring ---------- */
 
 /** Within 1% of the answer: the reveal says "spot on", and it scores full marks. */
 export const spotOn = (guess: number, answer: number): boolean => Math.abs(guess - answer) <= Math.abs(answer) * 0.01;
 
+/** Points a guess keeps at |d| = 1 (10x off an estimate), on the curve's long tail. */
+export const TAIL = 30;
+/** |d| where the curve reaches 0: 2, 100x off an estimate. */
+export const CURVE_EDGE = 2;
+
 /**
- * The one curve every round scores on: d is how far off on the round's scale (signed or not), 1 where it reaches 0.
- * 100 x max(0, 1 - |d|)^2, rounded: d 0.1 scores 81, 0.3 49, 0.5 25. A miss never scores 100 (the rounds cap it at 99:
- * only spot on is full marks).
+ * The one curve every round scores on: d is how far off on the round's scale (signed or not), in powers of ten for an
+ * estimate. The larger of 100 x max(0, 1 - |d|)^2 (near the answer) and a long straight tail, 30 x (2 - |d|), never
+ * under 0, rounded: d 0.1 scores 81, 0.3 51, 0.5 45, 1 30, 1.5 15, 2 and beyond 0. The tail takes over at about 1.9x
+ * off, so a guess within a power of ten still scores (the owner, Nov 14: 10x off "should get more like 25-40 points").
+ * A miss never scores 100 (the rounds cap it at 99: only spot on is full marks).
  */
-export const curve = (d: number): number => Math.round(POINTS_PER_QUESTION * Math.max(0, 1 - Math.abs(d)) ** 2);
+export const curve = (d: number): number => {
+  const near = POINTS_PER_QUESTION * Math.max(0, 1 - Math.abs(d)) ** 2;
+  return Math.round(Math.max(near, TAIL * Math.max(0, CURVE_EDGE - Math.abs(d))));
+};
 
 /** The best a guess that isn't spot on can score. */
 const MISS_MAX = POINTS_PER_QUESTION - 1;
@@ -127,7 +147,7 @@ const MISS_MAX = POINTS_PER_QUESTION - 1;
 /**
  * Points for a guess, 0 to 100, the same rule for every estimate (the owner: plain closeness): the curve, with d =
  * log10(guess / answer), how many powers of ten off it is. Spot on (within 1%) is 100 and only spot on is; within 10%
- * about 92, 25% off 82, half or double 49, 3x 27, and 10x off or more 0.
+ * about 92, 25% off 82, half or double 51, 3x 46, 5x 39, 10x 30, 30x 16, and 100x off or more 0.
  */
 export function fathomScore(guess: number, answer: number): number {
   if (spotOn(guess, answer)) return POINTS_PER_QUESTION;
@@ -161,8 +181,8 @@ const pointsHalf = (guess: number, answer: number): number =>
 /**
  * Points for a percent guess: the average of two scores, rounded. One counts points off (100 - 3 a point, never under
  * 0); the other how many times off (the curve on percentOff), so a small share's miss counts for more than a big one's
- * of the same points. Within half a point is spot on, 100; a miss at most 99. 20 for 25 scores 84, 5 for 2.5 71, 10
- * for 2.5 47, 0.8 for 25 14, 90 for 71 36.
+ * of the same points. Within half a point is spot on, 100; a miss at most 99. 20 for 25 scores 84, 5 for 2.5 72, 10
+ * for 2.5 60, 0.8 for 25 21, 90 for 71 45.
  */
 export function percentScore(guess: number, answer: number): number {
   if (percentSpotOn(guess, answer)) return POINTS_PER_QUESTION;
@@ -172,7 +192,10 @@ export function percentScore(guess: number, answer: number): number {
 /** The current calendar year: a year round measures how long ago from it. */
 export const currentYear = (): number => new Date().getFullYear();
 
-/** How many times a year's distance counts against an estimate's: 2, so the edge is about 3.2x off in time ago. */
+/**
+ * How many times a year's distance counts against an estimate's: 2, so about 3.2x off in time ago scores as 10x off an
+ * estimate (30), and 10x off in time ago as 100x (0).
+ */
 export const YEAR_STRETCH = 2;
 
 /** Years before `now`, at least 1 (this year and later count as last year, so the ratio stays finite). */
@@ -190,8 +213,8 @@ export function yearOff(guess: number, answer: number, now: number = currentYear
 const yearSpotOn = (guess: number, answer: number): boolean => Math.round(Math.abs(guess - answer)) === 0;
 
 /**
- * Points for a year guess: the curve on yearOff. The exact year is 100. With now 2026: 1984 for 1967 scores 50, 1960
- * for 1967 81, 2010 for 2007 72, 2000 for 2007 53, 1850 for 1903 47.
+ * Points for a year guess: the curve on yearOff. The exact year is 100. With now 2026: 1984 for 1967 scores 51, 1960
+ * for 1967 81, 2010 for 2007 72, 2000 for 2007 53, 1850 for 1903 51.
  */
 export function yearScore(guess: number, answer: number, now: number = currentYear()): number {
   if (yearSpotOn(guess, answer)) return POINTS_PER_QUESTION;
@@ -309,10 +332,11 @@ const STEPS_EDGE = POINTS_PER_QUESTION / PER_STEP;
 
 /**
  * How far off a guess is on its round's scale, from -1 (too low or early) to 1 (too high or late): the distance each
- * round scores by, 1 where its curve reaches 0. Powers of ten for an estimate (10x off) and a name-it round on a ratio
- * list; for a percent, powers of ten on the answer's side of 50 (percentOff: 10x off its share or what's left, where
- * its times-off half reaches 0); for a year, yearOff (about 3.2x off how long ago); steps for a name-it round on a
- * steps list (100 / 30). The sonar places the squid by it: further out on either side never scores more.
+ * round scores by, kept to |d| = 1, where the curve gives TAIL (30; it reaches 0 at CURVE_EDGE). Powers of ten for an
+ * estimate (10x off) and a name-it round on a ratio list; for a percent, powers of ten on the answer's side of 50
+ * (percentOff: 10x off its share or what's left); for a year, yearOff (about 3.2x off how long ago); steps for a name-it
+ * round on a steps list (100 / 30, where it scores 0). The sonar places the squid by it: further out on either side
+ * never scores more.
  */
 export function offAxis(round: Round, guess: number, answer: number, scoring?: NameScoring, now: number = currentYear()): number {
   const d =
@@ -326,8 +350,11 @@ export function offAxis(round: Round, guess: number, answer: number, scoring?: N
   return Number.isNaN(d) ? 0 : Math.max(-1, Math.min(1, d));
 }
 
-/** The most "how tall / how heavy" questions in one game (the owner: too many of them). */
-export const MAX_SIZE_PER_GAME = 2;
+/**
+ * The most "how tall / how heavy" questions in one game (the owner: too many of them): two in five, then three in ten
+ * (a little under the same share, for the same reason).
+ */
+export const MAX_SIZE_PER_GAME = 3;
 
 /** Asks how big or heavy a thing is: "How tall...", "How long is...", "How deep...", "...weigh?", "What weight of...". */
 const ASKS_SIZE = /^how (?:tall|long|high|deep|wide|big|large|thick|heavy)\b|\bweigh(?:s|ed)?\b|\bweight\b/i;
@@ -819,28 +846,31 @@ export function readBank(json: unknown): FathomQuestion[] | null {
 }
 
 /**
- * A game's rounds: two estimates, a percent, a year, and a name-it round (an estimate when the bank has none, or its
- * lists didn't load). Drawn in a mixed order, an easy question first.
+ * A game's ten rounds: five estimates, two percents, two years, and a name-it round (an estimate when the bank has
+ * none, or its lists didn't load). Drawn in a mixed order, an easy question first. The five-question game had two
+ * estimates, a percent, a year and a name-it round; at ten, two of each other round would use the bank's 12 name-it
+ * questions in six days (scripts/fathom/daily.ts), and a name typed against the clock is the slowest round.
  */
-export const GAME_ROUNDS: readonly Round[] = ["estimate", "estimate", "percent", "year", "name"];
+export const GAME_ROUNDS: readonly Round[] = ["estimate", "estimate", "estimate", "estimate", "estimate", "percent", "percent", "year", "year", "name"];
 
 /**
- * Five questions for a game, one per round of GAME_ROUNDS: the first one easy (and a number to type: never the name-it
+ * Ten questions for a game, one per round of GAME_ROUNDS: the first one easy (and a number to type: never the name-it
  * round, which is the odd one out), then the rest in a random order. A round the bank has none of is played as an
- * estimate instead (and once the estimates run out, anything left). Within that: no two of the same kind, at most
- * MAX_SIZE_PER_GAME how tall / how heavy questions, and none from the last HOLD_GAMES games (`recent`, newest first)
- * while the bank has others. When it doesn't, the questions from the oldest of those games come back first; a bank too
- * small for five kinds repeats a kind rather than come up short, and one of nothing but how tall / how heavy questions
- * takes more of them.
+ * estimate instead (and once the estimates run out, anything left). Within that: kinds as spread as the bank allows
+ * (a kind not in the game yet first, then the least used), at most MAX_SIZE_PER_GAME how tall / how heavy questions,
+ * and none from the last HOLD_GAMES games (`recent`, newest first) while the bank has others. When it doesn't, the
+ * questions from the oldest of those games come back first; one of nothing but how tall / how heavy questions takes
+ * more of them.
  */
 export function drawQuestions(
   questions: readonly FathomQuestion[],
   recent: readonly (readonly string[])[] = [],
   rand: () => number = Math.random,
 ): FathomQuestion[] {
-  // How recently each question was played: 0 never (in the last games), HOLD_GAMES in the last one.
+  // How recently each question was played: 0 never (in the last games), the most in the last one.
+  const held = recent.slice(0, HOLD_GAMES);
   const tier = new Map<string, number>();
-  recent.slice(0, HOLD_GAMES).forEach((ids, i) => ids.forEach((id) => tier.has(id) || tier.set(id, HOLD_GAMES - i)));
+  held.forEach((ids, i) => ids.forEach((id) => tier.has(id) || tier.set(id, held.length - i)));
   const key = new Map(questions.map((q) => [q.id, rand()]));
   const order = (a: FathomQuestion, b: FathomQuestion) =>
     (tier.get(a.id) ?? 0) - (tier.get(b.id) ?? 0) || key.get(a.id)! - key.get(b.id)!;
@@ -859,12 +889,16 @@ export function drawQuestions(
   slots.sort((a, b) => Number(a === "estimate") - Number(b === "estimate"));
 
   const sizes = () => picked.filter(isSizeQuestion).length;
-  /** The first question left in the pool that `fits`: of a new kind and within the cap, else within the cap, else any. */
+  /**
+   * The question left in the pool that `fits` and keeps within the cap: the least recently played, then of the least
+   * used kind so far, then the pool's random order; else any that fits.
+   */
   const pick = (fits: (q: FathomQuestion) => boolean) => {
     const left = pool.filter((q) => !picked.includes(q) && fits(q));
-    const kinds = new Set(picked.map((q) => q.kind));
+    const uses = (kind: string) => picked.filter((q) => q.kind === kind).length;
     const capped = left.filter((q) => !isSizeQuestion(q) || sizes() < MAX_SIZE_PER_GAME);
-    return capped.find((q) => !kinds.has(q.kind)) ?? capped[0] ?? left[0];
+    const rank = (q: FathomQuestion) => (tier.get(q.id) ?? 0) * 100 + uses(q.kind);
+    return capped.reduce<FathomQuestion | undefined>((best, q) => (!best || rank(q) < rank(best) ? q : best), undefined) ?? left[0];
   };
   for (const round of slots) {
     const next = pick((q) => roundOf(q) === round) ?? pick((q) => roundOf(q) === "estimate") ?? pick(() => true);
@@ -884,19 +918,22 @@ export function drawQuestions(
 /* ---------- A game ---------- */
 
 export interface FathomGame {
-  /** The five questions, by id, in order. */
+  /** The ten questions, by id, in order. */
   ids: string[];
   /**
    * The locked-in guesses, in order. A name-it round's is the figure of the thing named (its population), which is
-   * what scores; the name itself is in `picks`.
+   * what scores; the name itself is in `picks`. A round whose time ran out with nothing to lock in has 0 here, and its
+   * id in `timeouts`.
    */
   guesses: number[];
   /**
-   * The question on screen (0-4); it is revealed once it has a guess (guesses.length > at). At 5 the results show.
+   * The question on screen (0-9); it is revealed once it has a guess (guesses.length > at). At 10 the results show.
    */
   at: number;
   /** What was named on a name-it round, by question id: "Colombia". */
   picks?: Record<string, string>;
+  /** The questions whose time ran out with nothing typed that reads (scored 0), by id. */
+  timeouts?: string[];
   /** Epoch ms it was drawn: the game's id in Past runs and the sync. Older saves lack it. */
   startedAt?: number;
 }
@@ -917,6 +954,12 @@ export function lockIn(game: FathomGame, guess: number, pick?: string): FathomGa
   return { ...game, guesses: [...game.guesses, guess], ...(picks && { picks }) };
 }
 
+/** The question on screen's time ran out with nothing to lock in: it scores 0, and the reveal says so. */
+export function timeUp(game: FathomGame): FathomGame {
+  if (phaseOf(game) !== "question") return game;
+  return { ...game, guesses: [...game.guesses, 0], timeouts: [...(game.timeouts ?? []), game.ids[game.at]] };
+}
+
 /** From a revealed question to the next one, or to the results after the last. */
 export function nextQuestion(game: FathomGame): FathomGame {
   if (phaseOf(game) !== "reveal") return game;
@@ -930,14 +973,18 @@ export interface Scored {
   band: Band;
   /** A name-it round's: what was named. */
   pick?: string;
+  /** Its time ran out with nothing to lock in: 0 points, no guess. */
+  timedOut?: boolean;
 }
 
-/** Each answered question with its points and band. */
+/** Each answered question with its points and band (a time-out: 0, lost at sea). */
 export function scoreGame(game: FathomGame, bank: readonly FathomQuestion[]): Scored[] {
   const byId = new Map(bank.map((q) => [q.id, q]));
-  return game.guesses.flatMap((guess, i) => {
+  const outs = new Set(game.timeouts ?? []);
+  return game.guesses.flatMap((guess, i): Scored[] => {
     const question = byId.get(game.ids[i]);
     if (!question) return [];
+    if (outs.has(question.id)) return [{ question, guess, points: 0, band: bandOf(0), timedOut: true }];
     const points = scoreFor(question, guess);
     const pick = game.picks?.[question.id];
     return [{ question, guess, points, band: bandOf(points), ...(pick !== undefined && { pick }) }];
@@ -959,11 +1006,21 @@ export const BAND_CHARS: Record<Band, string> = {
 };
 
 /**
- * COPY RESULT: "Fathom 312/500", the five bands as plain characters, and the link (`url`, to #fathom) when there is one,
- * each on its own line (the screen makes the lines keep in a Reddit comment: src/components/share.ts pasteable).
+ * SHARE: "Fathom #12 712/1000" for a day's Fathom (`n`, its number), "Fathom 712/1000" for an endless game, the ten
+ * bands as squares, and the link (`url`, to #fathom) when there is one, each on its own line (the screen makes the
+ * lines keep in a Reddit comment: src/components/share.ts pasteable).
  */
-export function shareText(scored: readonly Scored[], url?: string): string {
-  return [`Fathom ${totalOf(scored)}/${MAX_TOTAL}`, scored.map((s) => BAND_CHARS[s.band]).join(" "), ...(url ? [url] : [])].join("\n");
+export function shareText(scored: readonly Scored[], url?: string, n?: number): string {
+  return shareLines(totalOf(scored), scored.map((s) => s.band), url, n);
+}
+
+/**
+ * The share text from a total and the bands (a past game keeps its points, not always its questions). Out of 100 a
+ * band: a five-question game from before Nov 14 says "/500".
+ */
+export function shareLines(total: number, bands: readonly Band[], url?: string, n?: number): string {
+  const max = bands.length * POINTS_PER_QUESTION;
+  return [`Fathom${n ? ` #${n}` : ""} ${total}/${max}`, bands.map((b) => BAND_CHARS[b]).join(" "), ...(url ? [url] : [])].join("\n");
 }
 
 /* ---------- The save (its own key) ---------- */
@@ -1004,8 +1061,11 @@ export function loadFathom(store: Store | undefined = defaultStore()): FathomSav
     const g = raw?.game;
     const ok = g && isIds(g.ids) && Array.isArray(g.guesses) && g.guesses.every((n) => Number.isFinite(n) && n >= 0) && Number.isInteger(g.at);
     const picks = ok ? readPicks(g.picks, g.ids) : undefined;
+    const timeouts = ok && isIds(g.timeouts) ? g.timeouts.filter((id) => g.ids.includes(id)) : [];
     const startedAt = ok && Number.isFinite(g.startedAt) ? g.startedAt : undefined;
-    const game = ok ? { ids: g.ids, guesses: g.guesses, at: g.at, ...(picks && { picks }), ...(startedAt !== undefined && { startedAt }) } : undefined;
+    const game = ok
+      ? { ids: g.ids, guesses: g.guesses, at: g.at, ...(picks && { picks }), ...(timeouts.length && { timeouts }), ...(startedAt !== undefined && { startedAt }) }
+      : undefined;
     return { recent, ...(game && { game }) };
   } catch {
     return { recent: [] };
@@ -1032,13 +1092,18 @@ export function startGame(save: FathomSave, bank: readonly FathomQuestion[], ran
 /** Whether every question of the game has its guess: its total is final (the last reveal or the results). */
 export const finished = (game: FathomGame): boolean => game.ids.length > 0 && game.guesses.length >= game.ids.length;
 
+/** A game of five, from before Nov 14: one under way then still plays out as it was. */
+export const OLD_QUESTIONS_PER_GAME = 5;
+
 /**
- * The saved game, if it can be shown with this bank (its questions all still there): an unfinished one goes on, and a
- * finished one reopens on its results, so a reload never loses a score. Only NEW QUESTIONS draws again.
+ * The saved game, if it can be shown with this bank (its questions all still there; ten, or five for a game from
+ * before Nov 14, which plays out as it was): an unfinished one goes on, and a finished one reopens on its results, so
+ * a reload never loses a score. Only NEW QUESTIONS draws again.
  */
 export function resumable(save: FathomSave, bank: readonly FathomQuestion[]): FathomGame | undefined {
   const g = save.game;
   if (!g || g.guesses.length > g.ids.length) return undefined;
   const ids = new Set(bank.map((q) => q.id));
-  return g.ids.length === QUESTIONS_PER_GAME && g.ids.every((id) => ids.has(id)) && g.at <= g.guesses.length ? g : undefined;
+  const size = g.ids.length === QUESTIONS_PER_GAME || g.ids.length === OLD_QUESTIONS_PER_GAME;
+  return size && g.ids.every((id) => ids.has(id)) && g.at <= g.guesses.length ? g : undefined;
 }

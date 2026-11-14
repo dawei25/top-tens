@@ -393,6 +393,20 @@ describe("mergeSaves: list ratings", () => {
     }
   });
 
+  // Fathom's "Good question?" (Nov 14): the same mechanics, under its own mode.
+  it("keeps a Fathom question's rating like a list's, apart from a list of the same id", () => {
+    const a = save({ ratings: { "fathom:first-homo-sapiens": down(T + MIN, "unfair"), "list:first-homo-sapiens": up(T) } });
+    const b = save({ ratings: { "fathom:first-homo-sapiens": up(T), "fathom:moon-visible-share": back(T) } });
+    for (const m of [mergeSaves(a, b, NOW), mergeSaves(b, a, NOW)]) {
+      expect(m.ratings).toEqual({
+        "fathom:first-homo-sapiens": down(T + MIN, "unfair"),
+        "list:first-homo-sapiens": up(T),
+        "fathom:moon-visible-share": back(T),
+      });
+    }
+    expect(sanitize({ ratings: { "fathom:Bad Id": up(T), "fathoms:x": up(T) } }).ratings).toEqual({});
+  });
+
   it("takes a rating back on every device: a later 0 beats an earlier rating", () => {
     const m = mergeSaves(save({ ratings: { "list:mountains": up(T) } }), save({ ratings: { "list:mountains": back(T + MIN) } }), NOW);
     expect(m.ratings).toEqual({ "list:mountains": back(T + MIN) });
@@ -481,7 +495,7 @@ function randomSave(rand: () => number): SyncSave {
   }
   s.ratings = {};
   for (const id of ids) {
-    for (const mode of ["list", "blitz"]) {
+    for (const mode of ["list", "blitz", "fathom"]) {
       if (rand() >= 0.4) continue;
       const at = T + Math.floor(rand() * 20) * MIN;
       const rating = pick([-1, 0, 1] as const);

@@ -9,7 +9,7 @@ import { compareKey, FATHOM_GUESSES, FATHOM_PLAYS, fathomDayKey, type CompareRou
 import { cleanNote, FEEDBACK, type Feedback } from "./feedback";
 import { cleanMiss, missKind, MISSES, type Miss } from "./misses";
 import { enqueue, localOutboxStore } from "./outbox";
-import { invalidRating, ratingKey, withRating, type Rating, type RatingMode, type RatingReason } from "./ratings";
+import { invalidRating, ratingKey, withRating, type ListMode, type Rating, type RatingMode, type RatingReason } from "./ratings";
 import type { SyncSave } from "./sync/merge";
 import {
   accountUser,
@@ -148,9 +148,10 @@ export function reportBlitz(state: BlitzState, daily?: string): void {
 }
 
 /**
- * "Good list?": the player rated a list in a mode (1 or -1, a reason only with -1), or took their rating back (0).
- * Kept in this device's save at once, so it shows as chosen later, offline and without a backend; with a backend it
- * is also sent (the latest per list and mode, retried while offline) and synced to the player's other devices.
+ * "Good list?": the player rated a list in a mode (1 or -1, a reason only with -1), or took their rating back (0). A
+ * Fathom question is rated the same way: mode "fathom", its id as the list id. Kept in this device's save at once, so
+ * it shows as chosen later, offline and without a backend; with a backend it is also sent (the latest per list and
+ * mode, retried while offline) and synced to the player's other devices.
  */
 export function rateList(listId: string, mode: RatingMode, rating: -1 | 0 | 1, reason?: RatingReason): void {
   const saved = load();
@@ -169,11 +170,11 @@ export function rateList(listId: string, mode: RatingMode, rating: -1 | 0 | 1, r
 let lastNoteAt = 0;
 
 /**
- * "add a note": a few words on a list in a mode, with the player's rating of it now (1, -1 or null). Only with a
- * backend: without one the note option isn't shown, and this sends and stores nothing. Queued in its own outbox at
- * once, before the backend code loads (so a note survives that download failing offline, or a reload), then sent and
- * retried while offline. Never kept in the save, never synced. False when there's nothing to send: no backend, or a
- * note that's blank or too long.
+ * "add a note": a few words on a list in a mode (or a Fathom question: mode "fathom", its id as the list id), with
+ * the player's rating of it now (1, -1 or null). Only with a backend: without one the note option isn't shown, and
+ * this sends and stores nothing. Queued in its own outbox at once, before the backend code loads (so a note survives
+ * that download failing offline, or a reload), then sent and retried while offline. Never kept in the save, never
+ * synced. False when there's nothing to send: no backend, or a note that's blank or too long.
  */
 export function submitFeedback(listId: string, mode: RatingMode, text: string, rating: -1 | 1 | null): boolean {
   if (!backendOn) return false;
@@ -249,7 +250,7 @@ export function reportFathomDaily(date: string, total: number): boolean {
  * stores nothing. Queued in its own outbox at once (like a note), then sent and retried while offline, once per list,
  * mode and text. Never kept in the save, never synced. True when it was queued.
  */
-export function reportGuess(listId: string, mode: RatingMode, typed: string, result: GuessResult | BlitzResult): boolean {
+export function reportGuess(listId: string, mode: ListMode, typed: string, result: GuessResult | BlitzResult): boolean {
   if (!backendOn) return false;
   const kind = missKind(result);
   if (!kind) return false;

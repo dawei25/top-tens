@@ -32,6 +32,8 @@ describe("a missed guess", () => {
     expect(invalidMiss(miss({ text: "é".repeat(MAX_MISS) }))).toBeNull();
     expect(invalidMiss(miss({ listId: "Bad Id" }))).toBe("list id");
     expect(invalidMiss(miss({ mode: "classic" as "list" }))).toBe("mode");
+    // Fathom's ratings and notes go where a list's do, but nothing from Fathom is a miss (missed_guesses takes list or blitz).
+    expect(invalidMiss(miss({ mode: "fathom" as "list" }))).toBe("mode");
     expect(invalidMiss(miss({ kind: "near" as "unknown" }))).toBe("kind");
     expect(invalidMiss(miss({ text: "" }))).toBe("length");
     expect(invalidMiss(miss({ text: "x".repeat(MAX_MISS + 1) }))).toBe("length");

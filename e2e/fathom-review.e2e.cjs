@@ -4,11 +4,11 @@
 // - No scoring line on Fathom's screens (owner, Nov 14: "doesnt need to be repeated after every question its
 //   overkill ... id just remove it"): no question card, reveal or results says one, in any round; How to play still
 //   explains the score, and Blitz keeps its own line.
-// - Home's Fathom key and the menu's tile start new questions after a finished game (free play is new every time,
-//   UX 14); a game under way resumes; a reload on the results keeps them.
 // - SHARE as on lists and Blitz: the phone's share sheet, else a copy and "Copied".
-// - Home's Fathom key at 320, 360 and 375 as tall as Random list, its line on one line (it shortens, UX 8); Your
-//   record's first label ("lists played") on one line, the row as tall as it was with "played".
+// - Home's Today's Fathom key at 320, 360 and 375 as tall as Random list, its state on one line (UX 8); Your record's
+//   first label ("lists played") on one line, the row as tall as it was with "played".
+// The games here are endless Fathom's (#fathom-endless, their draw seeded in its save); Today's Fathom:
+// fathom-daily.e2e.cjs.
 // - LOST AT SEA and its points on one row at 320 and 390.
 // The copy findings (Play Fathom, Back to your game, lists played, the percent's miss, the share squares, the 3
 // decimals, Try again. on every wrong-kind line, one format per column) are unit tests: src/game/fathom-review.test.ts,
@@ -17,7 +17,7 @@ const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { chromium, VIEWPORTS, open, go, hash } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, open } = require("./helpers.cjs");
 const { textLines } = require("./fathom-lib.cjs");
 
 const REAL = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "public", "fathom", "questions.json"), "utf8")).questions;
@@ -44,14 +44,6 @@ const seedFathom = (save) => (ctx) =>
     },
     [KEY, JSON.stringify(save)],
   );
-/** Locks in a guess on the question on screen: a number, or on a name-it round a name its list has. */
-async function lockAny(page) {
-  const id = await page.getByTestId("fathom-question").getAttribute("data-question");
-  const round = await page.getByTestId("fathom-question").getAttribute("data-round");
-  await page.getByTestId("fathom-input").fill(round !== "name" ? "42" : id.startsWith("name-city") ? "Tokyo" : "Japan");
-  await page.getByTestId("fathom-lock").click();
-  await page.getByTestId("fathom-reveal").waitFor();
-}
 
 /** The answer as a player types the whole amount: "8,804,190" for 8.80419 million people. */
 function typed(q) {
@@ -69,7 +61,7 @@ test("the unit never squeezes the field: placeholder whole, unit one line, the t
   const fails = [];
   for (const width of [320, 390]) {
     const first = [...byUnit.values()][0];
-    const { ctx, page } = await open(browser, at(width), "#fathom", undefined, { reducedMotion: "reduce", setup: seedFathom(gameAt([opener.id, first.id, ...REAL.slice(0, 3).map((q) => q.id)], 1)) });
+    const { ctx, page } = await open(browser, at(width), "#fathom-endless", undefined, { reducedMotion: "reduce", setup: seedFathom(gameAt([opener.id, first.id, ...REAL.slice(0, 3).map((q) => q.id)], 1)) });
     for (const q of byUnit.values()) {
       const others = REAL.filter((x) => x.id !== q.id && x.id !== opener.id && x.round !== "name").slice(0, 3);
       await page.evaluate(([k, s]) => localStorage.setItem(k, s), [KEY, JSON.stringify(gameAt([opener.id, q.id, ...others.map((x) => x.id)], 1))]);
@@ -110,7 +102,7 @@ test("no scoring line on Fathom's question cards, reveals or results, in any rou
   const year = REAL.find((q) => q.round === "year");
   const name = REAL.find((q) => q.round === "name");
   const ids = [est[0].id, pct.id, year.id, name.id, est[1].id];
-  const { ctx, page } = await open(browser, phone, "#fathom", undefined, { reducedMotion: "reduce", setup: seedFathom(gameAt(ids, 0)) });
+  const { ctx, page } = await open(browser, phone, "#fathom-endless", undefined, { reducedMotion: "reduce", setup: seedFathom(gameAt(ids, 0)) });
   const said = async (where) => {
     assert.equal(await page.getByTestId("fathom-rule").count(), 0, `${where}: a rule line`);
     assert.doesNotMatch(await page.locator("main").innerText(), SCORING_LINE, `${where}: a scoring line`);
@@ -139,56 +131,12 @@ test("no scoring line on Fathom's question cards, reveals or results, in any rou
   await ctx.close();
 });
 
-// UX 14: Home's key reopened the last finished game's results.
-for (const vp of VIEWPORTS) {
-  test(`Home's key and the menu's tile start new questions after a finished game; a game under way resumes; a reload keeps the results (${vp.name})`, async () => {
-    const ids = REAL.filter((q) => q.round !== "name").slice(0, 5).map((q) => q.id);
-    const done = gameAt(ids, 5);
-    done.game.at = 5;
-    const { ctx, page } = await open(browser, vp, "#fathom", undefined, { reducedMotion: "reduce", setup: seedFathom(done) });
-    await page.getByTestId("fathom-results").waitFor();
-    // A reload on the results keeps them.
-    await page.reload();
-    await page.getByTestId("fathom-results").waitFor();
-    // From Home: new questions.
-    await page.getByTestId("nav-home").click();
-    await page.getByTestId("fathom-key").click();
-    await page.getByTestId("fathom-input").waitFor();
-    const drawn = JSON.parse(await page.evaluate((k) => localStorage.getItem(k), KEY)).game;
-    assert.notDeepEqual(drawn.ids, ids, "a new draw");
-    assert.equal(drawn.guesses.length, 0);
-    // Under way: Home's key resumes it, where it was.
-    await lockAny(page);
-    await page.getByTestId("nav-home").click();
-    await page.getByTestId("fathom-key").click();
-    await page.getByTestId("fathom-reveal").waitFor();
-    assert.deepEqual(JSON.parse(await page.evaluate((k) => localStorage.getItem(k), KEY)).game.ids, drawn.ids);
-    // Finished, then the menu's tile from another screen: new questions again.
-    for (let i = 0; i < 5; i++) {
-      if (i > 0) {
-        await page.getByTestId("fathom-input").waitFor();
-        await lockAny(page);
-      }
-      await page.getByTestId("fathom-next").click();
-    }
-    await page.getByTestId("fathom-results").waitFor();
-    await go(page, "#stats");
-    await page.getByTestId("know-fathom").waitFor();
-    await page.getByTestId("menu-key").click();
-    await page.getByTestId("menu-fathom").click();
-    await page.getByTestId("fathom-input").waitFor();
-    assert.notDeepEqual(JSON.parse(await page.evaluate((k) => localStorage.getItem(k), KEY)).game.ids, drawn.ids, "a new draw from the menu");
-    assert.equal(await hash(page), "#fathom");
-    await ctx.close();
-  });
-}
-
 test("SHARE: the phone's share sheet with the squares and the link; on a desktop a copy, and Copied", async () => {
   const ids = REAL.filter((q) => q.round !== "name").slice(0, 5).map((q) => q.id);
   const done = gameAt(ids, 5);
   done.game.at = 5;
   for (const vp of [phone, desktop]) {
-    const { ctx, page } = await open(browser, vp, "#fathom", undefined, {
+    const { ctx, page } = await open(browser, vp, "#fathom-endless", undefined, {
       reducedMotion: "reduce",
       setup: async (c) => {
         await seedFathom(done)(c);
@@ -212,13 +160,13 @@ test("SHARE: the phone's share sheet with the squares and the link; on a desktop
   }
 });
 
-test("Home on narrow phones: the Fathom key as tall as Random list, its line on one line; lists played on one line", async () => {
+test("Home on narrow phones: Today's Fathom as tall as Random list, its state on one line; lists played on one line", async () => {
   for (const width of [320, 360, 375]) {
     const { ctx, page } = await open(browser, at(width), "", undefined, { reducedMotion: "reduce" });
-    await page.getByTestId("fathom-key").waitFor();
-    const [list, fathom] = [await page.getByTestId("random-list").boundingBox(), await page.getByTestId("fathom-key").boundingBox()];
-    assert.equal(Math.round(fathom.height), Math.round(list.height), `${width}px: as tall as its neighbour`);
-    const line = await textLines(page.getByTestId("fathom-key-status"));
+    await page.getByTestId("today-fathom").waitFor();
+    const [list, fathom] = [await page.getByTestId("random-list").boundingBox(), await page.getByTestId("today-fathom").boundingBox()];
+    assert.equal(Math.round(fathom.height), Math.round(list.height), `${width}px: as tall as a free-play key`);
+    const line = await textLines(page.getByTestId("today-fathom-status"));
     assert.ok(line.lines === 1 && !line.cut, `${width}px: "${line.text}" on one line, whole`);
     // Your record: "lists played" on one line, and the row as tall as the next label's ("perfect", one word).
     const dts = page.locator('[data-testid="home-record"] dt');
@@ -237,7 +185,7 @@ test("LOST AT SEA and its points on one row (320, 390)", async () => {
   for (const width of [320, 390]) {
     const save = gameAt(ids, 0);
     save.game.guesses = [q.answer * 1000];
-    const { ctx, page } = await open(browser, at(width), "#fathom", undefined, { reducedMotion: "reduce", setup: seedFathom(save) });
+    const { ctx, page } = await open(browser, at(width), "#fathom-endless", undefined, { reducedMotion: "reduce", setup: seedFathom(save) });
     await page.getByTestId("fathom-reveal").waitFor();
     assert.equal(await page.getByTestId("fathom-band").getAttribute("data-band"), "lost");
     const [word, points] = [await page.getByTestId("fathom-band").boundingBox(), await page.getByTestId("fathom-points").boundingBox()];

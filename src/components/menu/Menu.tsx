@@ -4,6 +4,8 @@ import { resumeBlitz } from "../../game/blitz";
 import { load } from "../../game/storage";
 import { PRIVACY_CONTACT } from "../../net/config";
 import { HowToPlay } from "../HowToPlay";
+import { fathomTodayStatus } from "../../game/fathom-history";
+import { FATHOM_TODAY } from "../copy";
 import { todayStatus } from "../today";
 import { useMenuNav, type MenuNav, type MenuScreen } from "./context";
 import { Pixel, type GlyphName } from "./icons";
@@ -200,6 +202,7 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
 
   const saved = load();
   const today = todayStatus(saved, nav.entry);
+  const fathom = fathomTodayStatus(saved.fathom, nav.today);
   // A Blitz round under way keeps its clock while the menu is open: said at the top, where it can't be missed.
   const live = nav.blitzOnScreen ? resumeBlitz(saved, nav.blitzOnScreen) : undefined;
   const clockRuns = !!live && !live.over;
@@ -218,7 +221,15 @@ function MenuPanel({ nav, onClosed, onLayer }: { nav: MenuNav; onClosed: (then?:
     },
     { id: "random-list", label: "Random list", icon: "dice", tone: "classic", go: nav.onRoll },
     { id: "random-blitz", label: "Random Blitz", icon: "dice", tone: "blitz", disabled: nav.blitzOpen === 0, go: nav.onBlitz },
-    { id: "fathom", label: "Fathom", icon: "sonar", screen: "fathom", go: nav.onFathom },
+    // Today's Fathom (owner, Nov 14), in place of the endless tile: its state as Home's key shows it.
+    {
+      id: "today-fathom",
+      label: FATHOM_TODAY,
+      icon: "sonar",
+      status: { text: fathom.status, done: fathom.done },
+      screen: "today-fathom",
+      go: nav.onFathom,
+    },
   ];
   const hash = (h: string) => () => (location.hash = h);
   const yours: Tile[] = [

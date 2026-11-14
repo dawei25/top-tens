@@ -16,7 +16,6 @@ import {
   readBank,
   shareText,
   type Band,
-  type FathomQuestion,
   type Scored,
 } from "./fathom";
 import * as fathom from "./fathom";

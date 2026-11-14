@@ -170,7 +170,7 @@ for (const vp of VIEWPORTS) {
       ["archive", "#archive", "archive-row"],
       ["history", "#history", "nav-back"],
       ["stats", "#stats", "knowledge"],
-      ["fathom", "#fathom", "fathom"],
+      ["today-fathom", "#fathom", "fathom"],
       ["settings", "#settings", "settings"],
       ["privacy", "#privacy", "privacy"],
     ];

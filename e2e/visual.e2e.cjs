@@ -15,7 +15,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { PNG } = require("pngjs");
-const { chromium, NOW, open, go, guess, freeze, giveUp } = require("./helpers.cjs");
+const { chromium, NOW, TODAY, open, go, guess, freeze, giveUp } = require("./helpers.cjs");
 
 const BASELINES = path.join(__dirname, "baselines");
 const FIXTURES = path.join(__dirname, "fixtures", "visual", "puzzles");
@@ -206,24 +206,33 @@ describe("visual baselines", { concurrency: true }, () => {
     });
   }
 
-  // Fathom (beta, #fathom), on its fixture bank with a fixed draw (seeded in its own save): a question with a number
-  // typed (grouped with a comma), a reveal (a close guess, the sonar), and the results of five set guesses.
+  // Today's Fathom (#fathom), on its fixture bank with a fixed day (Fathom #2, seeded as a game under way): a question
+  // with a number typed (grouped with a comma) under the running score, a reveal (a close guess, the sonar), and the
+  // results of ten set guesses with the day's players (the simulated crowd: no backend here).
   for (const vp of VIEWPORTS) {
     test(`Fathom looks as it did (${vp.name})`, async () => {
-      const draw = ["eiffel-tower-height", "moon-distance", "piano-keys", "speed-of-light", "africa-countries"];
+      const draw = ["eiffel-tower-height", "moon-distance", "piano-keys", "speed-of-light", "africa-countries", "octopus-hearts", "fat-calories", "un-members", "everest-height", "adult-bones"];
       const { ctx, page } = await open(browser, vp, "#fathom", undefined, {
         reducedMotion: "reduce",
         setup: async (c) => {
           await c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: FATHOM_BANK, contentType: "application/json" }));
           await c.addInitScript((save) => {
             if (localStorage.getItem("e2e-fathom-seeded")) return;
-            localStorage.setItem("tentacle:fathom", save);
+            localStorage.setItem("tentacle:fathom-daily", save);
             localStorage.setItem("e2e-fathom-seeded", "1");
-          }, JSON.stringify({ recent: [], game: { ids: draw, guesses: [], at: 0 } }));
+          }, JSON.stringify({ day: { date: TODAY, n: 2 }, ids: draw, guesses: [], at: 0, startedAt: NOW.getTime() }));
         },
       });
       await page.getByTestId("fathom-input").waitFor();
-      await freeze(page, NOW.getTime() + 30_000);
+      // The question's clock from a known time: stopped, its time used set to a second, and the screen opened again, so
+      // it reads 0:19 every run (how long the page took to load would show in it otherwise).
+      await freeze(page);
+      await page.evaluate((key) => localStorage.setItem("tentacle:fathom-clock", JSON.stringify({ key, used: 1000 })), `${NOW.getTime()}:0:${draw[0]}`);
+      await go(page, "#");
+      await page.getByTestId("today-list").waitFor();
+      await go(page, "#fathom");
+      for (let i = 0; i < 40 && !(await page.getByTestId("fathom-input").count()); i++) await page.clock.runFor(100);
+      await page.getByTestId("fathom-input").waitFor();
       await page.addStyleTag({ content: CAPTURE });
       const problems = [];
       const shot = async (name) => {
@@ -242,7 +251,7 @@ describe("visual baselines", { concurrency: true }, () => {
       await page.clock.runFor(2000);
       await shot("fathom-reveal");
 
-      for (const guess of ["400k", "60", "1m", "2000"]) {
+      for (const guess of ["400k", "60", "1m", "2000", "8", "9", "193", "8848", "206"]) {
         await page.getByTestId("fathom-next").click();
         await page.getByTestId("fathom-input").fill(guess);
         await page.getByTestId("fathom-lock").click();
@@ -250,6 +259,9 @@ describe("visual baselines", { concurrency: true }, () => {
       }
       await page.getByTestId("fathom-next").click();
       await page.getByTestId("fathom-results").waitFor();
+      // The time to the next Fathom from a fixed time (the clock stopped a second after the question showed, which
+      // varies), so its seconds are the same every run.
+      await page.clock.setSystemTime(NOW.getTime() + 60_000);
       await page.clock.runFor(2000);
       await shot("fathom-results");
 

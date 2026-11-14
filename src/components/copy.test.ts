@@ -6,10 +6,11 @@ import { shownValue } from "../game/state";
 import type { Entry, Puzzle } from "../game/types";
 import {
   alreadyGuessed,
-  FATHOM_BACK,
-  FATHOM_LINE,
-  FATHOM_LINE_SHORT,
   FATHOM_PLAY,
+  FATHOM_TODAY,
+  FATHOM_TIME_UP,
+  fathomDayLine,
+  playersLine,
   RECORD_PLAYED,
   BLITZ_SCORING,
   blitzPrompt,
@@ -237,17 +238,32 @@ describe("Fathom's keys and Home's record", () => {
   it("names each key by what happens", () => {
     // Stats' key before the first game said only "FATHOM".
     expect(FATHOM_PLAY).toBe("Play Fathom");
-    // An old game opened from Past runs while another is under way said "RESUME GAME", as if it were that one.
-    expect(FATHOM_BACK).toBe("Back to your game");
-    // Home's Fathom key: what it is, and on the narrowest phones only how long ("GUESS THE NUMBER: 5 QUESTIONS" wrapped
-    // to two lines at 320px, taller than its neighbours: UX 8).
-    expect(FATHOM_LINE).toBe("Guess the number: 5 questions");
-    expect(FATHOM_LINE_SHORT).toBe("5 questions");
-    expect(FATHOM_LINE.endsWith(FATHOM_LINE_SHORT)).toBe(true);
-    expect(FATHOM_LINE_SHORT.length).toBeLessThanOrEqual("111 lists".length + 2);
+    // Owner, Nov 14: a Fathom a day; Home's key and the menu's tile name it, with no description line ("Guess the
+    // number: 5 questions" went: "doesnt apply anymore ... some answer are not numbers and also its doing too much").
+    expect(FATHOM_TODAY).toBe("Today's Fathom");
   });
   // A Fathom-only player saw "played --" on Home: Your record counts list games.
   it("says Your record's games are list games", () => {
     expect(RECORD_PLAYED).toBe("lists played");
+  });
+});
+
+// Owner, Nov 14: "dont specify estimated just say you did better than xx% of players today with a histogram".
+describe("where a list game stands against other players", () => {
+  it("says better than xx% of players, today on a daily on its own day, and never estimated", () => {
+    expect(playersLine(36, true)).toBe("better than 36% of players today");
+    expect(playersLine(36, false)).toBe("better than 36% of players");
+    // Not "top 19%": the owner's own words, whatever the share.
+    expect(playersLine(81, true)).toBe("better than 81% of players today");
+    expect(playersLine(0, false)).toBe("better than 0% of players");
+    for (const p of [0, 12, 50, 99, 100]) for (const t of [true, false]) expect(playersLine(p, t)).not.toMatch(/estimat/i);
+  });
+  it("says a Fathom question's time ran out, dry and short, no exclamation", () => {
+    expect(FATHOM_TIME_UP).toBe("Time's up");
+    expect(FATHOM_TIME_UP).not.toMatch(/[!\u2014]/);
+  });
+  it("says where Today's Fathom stands in the owner's words", () => {
+    expect(fathomDayLine(81)).toBe("you did better than 81% of players today");
+    expect(fathomDayLine(3)).not.toMatch(/estimat/i);
   });
 });

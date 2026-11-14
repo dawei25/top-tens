@@ -63,14 +63,14 @@ for (const vp of VIEWPORTS) {
     assert.equal(await page.getByTestId("blitz-clock").getAttribute("data-started"), "false", "a fresh round");
     assert.equal(await page.getByTestId("blitz-hit").count(), 0);
 
-    // Today's list finished, and a Blitz on it from its results: held today, so their past runs have no Play again,
-    // just the quiet line.
+    // Today's list finished, and a Blitz on it by its link: held today, so their past runs have no Play again, just
+    // the quiet line.
     await go(page, "");
     await page.getByTestId("today-list").click();
     await page.getByTestId("give-up").waitFor();
     await giveUp(page);
     const todays = (await store(page)).dailyGames[TODAY].puzzleId;
-    await page.getByTestId("blitz-key").click();
+    await go(page, `#blitz-${todays}`);
     const screen = page.getByTestId("blitz-screen");
     await page.getByTestId("blitz-clock").waitFor();
     assert.equal(await screen.getAttribute("data-list"), todays);
