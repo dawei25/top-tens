@@ -9,6 +9,7 @@ import {
   bandOf,
   currentYear,
   curve,
+  CURVE_EDGE,
   drawQuestions,
   editField,
   FATHOM_KEY,
@@ -57,6 +58,7 @@ import {
   YEAR_STRETCH,
   singular,
   stepsScore,
+  TAIL,
   type FathomKind,
   type FathomQuestion,
   type Round,
@@ -111,26 +113,36 @@ describe("scoring: plain closeness, the same rule for every question", () => {
     expect(fathomScore(330, 330)).toBe(100);
     expect(fathomScore(0.1, 0.1)).toBe(100);
   });
-  it("is round(100 x (1 - d)^2), d the distance in powers of ten, either way", () => {
-    for (const r of [1.02, 1.1, 1.3, 1.7, 2, 3, 5, 9.9]) {
-      const want = Math.round(100 * (1 - Math.log10(r)) ** 2);
+  it("is the larger of round(100 x (1 - d)^2) and 30 x (2 - d), d the distance in powers of ten, either way", () => {
+    for (const r of [1.02, 1.1, 1.3, 1.7, 2, 3, 5, 9.9, 10, 30, 99]) {
+      const d = Math.log10(r);
+      const want = Math.round(Math.max(100 * Math.max(0, 1 - d) ** 2, 30 * (2 - d)));
       expect(fathomScore(100 * r, 100), `${r}x too high`).toBe(want);
       expect(fathomScore(100 / r, 100), `${r}x too low`).toBe(want);
     }
   });
-  it("scores the rule's landmarks: 10% off 92, 25% off 82, half or double 49, 3x 27, 10x and beyond 0", () => {
+  // The owner, Nov 14, on 30,000 years for Homo sapiens (300,000): "shouldn't get 0 points for this we were within one
+  // magnitude should get more like 25-40 points". Near the answer the curve is as it was; 10x off now scores 30, and
+  // only 100x off scores 0.
+  it("scores the rule's landmarks: 10% off 92, 25% off 82, half or double 51, 3x 46, 5x 39, 10x 30, 30x 16, 100x and beyond 0", () => {
     expect(fathomScore(110, 100)).toBe(92);
     expect(fathomScore(125, 100)).toBe(82);
-    expect(fathomScore(200, 100)).toBe(49);
-    expect(fathomScore(50, 100)).toBe(49);
-    expect(fathomScore(300, 100)).toBe(27);
-    expect(fathomScore(1000, 100)).toBe(0);
-    expect(fathomScore(10, 100)).toBe(0);
+    expect(fathomScore(200, 100)).toBe(51);
+    expect(fathomScore(50, 100)).toBe(51);
+    expect(fathomScore(300, 100)).toBe(46);
+    expect(fathomScore(500, 100)).toBe(39);
+    expect(fathomScore(1000, 100)).toBe(30);
+    expect(fathomScore(10, 100)).toBe(30);
+    expect(fathomScore(3000, 100)).toBe(16);
+    expect(fathomScore(10000, 100)).toBe(0);
+    expect(fathomScore(1, 100)).toBe(0);
     expect(fathomScore(1e30, 1)).toBe(0);
+    // His guess: 30,000 years for 300,000, inside his 25 to 40.
+    expect(fathomScore(30000, 300000)).toBe(30);
   });
   it("never goes up as the guess gets further off", () => {
     let last = 101;
-    for (let r = 1; r <= 12; r *= 1.01) {
+    for (let r = 1; r <= 200; r *= 1.01) {
       const p = fathomScore(100 * r, 100);
       expect(p).toBeLessThanOrEqual(last);
       last = p;
@@ -140,7 +152,7 @@ describe("scoring: plain closeness, the same rule for every question", () => {
   it("ignores the question's typical miss", () => {
     const bank = [q("a", "body", { typical: 1.3 }), q("b", "food", { typical: 30 })];
     const g = nextQuestion(lockIn(nextQuestion(lockIn(newGame(["a", "b"]), 200)), 200));
-    expect(scoreGame(g, bank).map((s) => s.points)).toEqual([49, 49]);
+    expect(scoreGame(g, bank).map((s) => s.points)).toEqual([51, 51]);
   });
   // A reveal said "spot on" beside 99 points (Nov 5 review): whatever reads as spot on scores full marks.
   it("is 100 whenever the reveal says spot on, and only then", () => {
@@ -186,9 +198,13 @@ describe("rounds", () => {
     expect(roundOf(yr("y", "body"))).toBe("year");
   });
 
-  it("is one curve: 100 x (1 - |d|)^2, rounded, 0 from |d| = 1", () => {
-    expect([0, 0.1, -0.1, 0.3, 0.5, 1, -1, 2].map(curve)).toEqual([100, 81, 81, 49, 25, 0, 0, 0]);
-    for (const r of [1.1, 2, 3, 9.9]) expect(fathomScore(100 * r, 100)).toBe(curve(Math.log10(r)));
+  it("is one curve: the larger of 100 x (1 - |d|)^2 and 30 x (2 - |d|), rounded, 30 at |d| = 1, 0 from |d| = 2", () => {
+    expect(TAIL).toBe(30);
+    expect(CURVE_EDGE).toBe(2);
+    expect([0, 0.1, -0.1, 0.3, 0.5, 1, -1, 1.5, 2, -2, 3].map(curve)).toEqual([100, 81, 81, 51, 45, 30, 30, 15, 0, 0, 0]);
+    for (const r of [1.1, 2, 3, 9.9, 50]) expect(fathomScore(100 * r, 100)).toBe(curve(Math.log10(r)));
+    // The near part until about 1.9x off, the tail from there: nothing jumps where they meet.
+    for (let d = 0; d <= 2.5; d += 0.001) expect(Math.abs(curve(d + 0.001) - curve(d)), `${d}`).toBeLessThanOrEqual(1);
   });
 
   it("percent: the average of points off and times off on the answer's side of 50, spot on (within half a point) 100", () => {
@@ -199,20 +215,22 @@ describe("rounds", () => {
     // Up to 50, the shares themselves: 20 for 25 is 5 points (85) and 1.25x low (82).
     expect(percentScore(20, 25)).toBe(Math.round((byPoints(20, 25) + fathomScore(20, 25)) / 2));
     expect(percentScore(20, 25)).toBe(84);
-    expect([0.8, 5, 10, 15, 20, 30, 40, 50].map((g) => percentScore(g, 25))).toEqual([14, 25, 46, 66, 84, 85, 59, 37]);
-    expect([1, 5, 10].map((g) => percentScore(g, 2.5))).toEqual([66, 71, 47]);
+    expect([0.8, 5, 10, 15, 20, 30, 40, 50].map((g) => percentScore(g, 25))).toEqual([21, 40, 52, 66, 84, 85, 59, 38]);
+    expect([1, 5, 10].map((g) => percentScore(g, 2.5))).toEqual([72, 72, 60]);
     // Past 50, what's left: 65 for 71 is 6 points (82) and 35 left against 29.
     expect(percentScore(65, 71)).toBe(Math.round((82 + fathomScore(35, 29)) / 2));
-    expect([50, 60, 65, 70, 80, 90].map((g) => percentScore(g, 71))).toEqual([48, 71, 83, 97, 72, 36]);
-    // Either side of 50 alike: 90 for 99 is 10 for 1 (9 points, 10x off).
+    expect([50, 60, 65, 70, 80, 90].map((g) => percentScore(g, 71))).toEqual([48, 71, 83, 97, 72, 45]);
+    // Either side of 50 alike: 90 for 99 is 10 for 1 (9 points, 73, and 10x off, 30).
     expect(percentScore(90, 99)).toBe(percentScore(10, 1));
-    expect(percentScore(90, 99)).toBe(37);
+    expect(percentScore(90, 99)).toBe(52);
     expect(percentScore(80, 75)).toBe(percentScore(20, 25));
     // 0 and 100 are fair guesses, their shares taken as 0.5 and 99.5.
-    expect(percentScore(0, 71)).toBe(11);
-    expect(percentScore(100, 71)).toBe(7);
-    expect(percentScore(100, 2)).toBe(0);
-    expect(percentScore(0, 2)).toBe(55);
+    expect(percentScore(0, 71)).toBe(22);
+    expect(percentScore(100, 71)).toBe(10);
+    expect(percentScore(100, 2)).toBe(5);
+    expect(percentScore(0, 2)).toBe(68);
+    // The blend's halves at the far end: 100 points off and 100x off both 0, so a percent can still score 0.
+    expect(percentScore(100, 0.5)).toBe(0);
     // Half a point is not spot on, and only spot on is 100.
     expect(percentScore(71.5, 71)).toBe(99);
     expect(percentScore(50.5, 50)).toBeLessThan(100);
@@ -221,14 +239,16 @@ describe("rounds", () => {
   it("year: how many times off how long ago it was, the exact year 100", () => {
     expect(YEAR_STRETCH).toBe(2);
     expect(yearScore(2007, 2007, NOW)).toBe(100);
-    expect([1984, 1980, 1960, 1950, 2000, 1900].map((g) => yearScore(g, 1967, NOW))).toEqual([50, 61, 81, 61, 8, 12]);
-    expect([2005, 2006, 2008, 2010, 2000, 1995].map((g) => yearScore(g, 2007, NOW))).toEqual([83, 91, 91, 72, 53, 33]);
-    expect([1920, 1950, 1880, 1850].map((g) => yearScore(g, 1903, NOW))).toEqual([76, 34, 72, 47]);
+    expect([1984, 1980, 1960, 1950, 2000, 1900].map((g) => yearScore(g, 1967, NOW))).toEqual([51, 61, 81, 61, 39, 40]);
+    expect([2005, 2006, 2008, 2010, 2000, 1995].map((g) => yearScore(g, 2007, NOW))).toEqual([83, 91, 91, 72, 53, 47]);
+    expect([1920, 1950, 1880, 1850].map((g) => yearScore(g, 1903, NOW))).toEqual([76, 47, 72, 51]);
     expect(yearScore(2010, 2005, NOW)).toBe(58);
     expect(yearScore(2000, 1992, NOW)).toBe(59);
     // Ten years off is far for something 19 years ago and close for something 1,000 years ago.
-    expect(yearScore(2017, 2007, NOW)).toBe(12);
+    expect(yearScore(2017, 2007, NOW)).toBe(41);
     expect(yearScore(1076, 1066, NOW)).toBeGreaterThan(95);
+    // 10x off how long ago (19 years ago against 190) scores 0, as 100x off an estimate does.
+    expect(yearScore(NOW - 190, 2007, NOW)).toBe(0);
     expect(yearScore(1066, 2007, NOW)).toBe(0);
     // This year and later count as a year ago: still finite, still not full marks.
     expect(yearScore(NOW, NOW - 1, NOW)).toBe(99);
@@ -244,7 +264,7 @@ describe("rounds", () => {
     expect(scoreFor(yr("y", "body"), 2004)).toBe(yearScore(2004, 2007));
     const bank = [q("a", "body"), pct("p", "food"), yr("y", "space")];
     const g = [200, 65, 2004].reduce((game, guess) => nextQuestion(lockIn(game, guess)), newGame(["a", "p", "y"]));
-    expect(scoreGame(g, bank).map((s) => s.points)).toEqual([49, 83, yearScore(2004, 2007)]);
+    expect(scoreGame(g, bank).map((s) => s.points)).toEqual([51, 83, yearScore(2004, 2007)]);
   });
 
   it("never goes up as a guess gets further off, on either side", () => {
@@ -312,7 +332,7 @@ describe("rounds", () => {
     }
   });
 
-  it("places the squid by the distance the points come from, its edge where that curve reaches 0", () => {
+  it("places the squid by the distance the points come from, its edge at |d| = 1 (30 points; 0 only further out)", () => {
     expect(offAxis("estimate", 200, 100)).toBeCloseTo(Math.log10(2));
     expect(offAxis("estimate", 1, 100)).toBe(-1);
     expect(offAxis("estimate", 1e9, 100)).toBe(1);
@@ -328,21 +348,26 @@ describe("rounds", () => {
     expect(offAxis("year", 1960, 1967, undefined, NOW)).toBeCloseTo(2 * Math.log10(59 / 66));
     expect(offAxis("year", 2017, 2007, undefined, NOW)).toBeCloseTo(2 * Math.log10(19 / 9));
     expect(offAxis("year", 1066, 2007, undefined, NOW)).toBe(-1);
-    // A year's edge is where it scores 0 (about 3.2x off how long ago); a percent's, where its times-off half does
-    // (10x off the share or what's left), its points-off half still counting.
+    // A year's edge is about 3.2x off how long ago, where it scores TAIL as 10x off an estimate does; a percent's, 10x
+    // off the share or what's left, where its times-off half does, its points-off half still counting.
     const early = 1967 - Math.round(59 * (10 ** (1 / 2) - 1));
     expect(offAxis("year", early, 1967, undefined, NOW)).toBeCloseTo(-1, 1);
-    expect(yearScore(early, 1967, NOW)).toBe(0);
-    expect(curve(offAxis("percent", 2.5, 25))).toBe(0);
-    expect(curve(offAxis("percent", 100 - 2.9, 71))).toBe(0);
-    expect(percentScore(2.5, 25)).toBe(Math.round(byPoints(2.5, 25) / 2));
-    // The squid's distance is the one the points come from.
-    for (const [guess, answer] of [[20, 25], [5, 2.5], [65, 71], [90, 99], [53, 59], [0.8, 25]])
+    expect(yearScore(early, 1967, NOW)).toBe(TAIL);
+    expect(curve(offAxis("percent", 2.5, 25))).toBe(TAIL);
+    expect(curve(offAxis("percent", 100 - 2.9, 71))).toBe(TAIL);
+    expect(percentScore(2.5, 25)).toBe(Math.round((byPoints(2.5, 25) + TAIL) / 2));
+    // The squid's distance is the one the points come from, up to the edge.
+    for (const [guess, answer] of [[20, 25], [5, 2.5], [65, 71], [90, 99], [53, 59], [2.5, 25]])
       expect(percentScore(guess, answer), `${guess} for ${answer}`).toBe(
         Math.min(99, Math.round((byPoints(guess, answer) + curve(offAxis("percent", guess, answer))) / 2)),
       );
     for (const [guess, answer] of [[1984, 1967], [2010, 2005], [1880, 1903], [1994, 1997]])
       expect(yearScore(guess, answer, NOW), `${guess} for ${answer}`).toBe(Math.min(99, curve(offAxis("year", guess, answer, undefined, NOW))));
+    // Past the edge the squid stays there while the points keep falling, to 0 at 100x off (10x off how long ago).
+    expect(offAxis("estimate", 3000, 100)).toBe(1);
+    expect([1000, 3000, 10000].map((g) => fathomScore(g, 100))).toEqual([30, 16, 0]);
+    expect(offAxis("percent", 0.8, 25)).toBe(-1);
+    expect(percentScore(0.8, 25)).toBeLessThan(percentScore(2.5, 25));
   });
 });
 
@@ -351,7 +376,9 @@ describe("rounds", () => {
 // list 100 - 30 per step. A pair agrees when the scores are within 15 points, or the one he picked scores higher; a
 // rating when the score is in his band (Great 80 and up, Good 45 to 80, Ok 25 to 65, Way off under 25). The old scores
 // (100 - 3 a point, 100 - 5 a year) agreed with 6 of his 15 pairs and 2 of his 5 ratings; a first try (a percent by
-// times off alone, a year by 3 x log10) with 12 and 5, but he found it too harsh (his notes, at the end).
+// times off alone, a year by 3 x log10) with 12 and 5, but he found it too harsh (his notes, at the end). The curve
+// 100 x (1 - |d|)^2 agreed with 14 and 4; with its long tail (Nov 14: 10x off scores 30, 100x 0) it agrees with all 15
+// pairs (pair 6 now 59 against 49) and the same 4 ratings.
 describe("the owner's calibration (Nov 8)", () => {
   type Guess = readonly ["percent" | "year" | "estimate" | "steps", number, number];
   const points = ([round, guess, answer]: Guess): number =>
@@ -381,27 +408,24 @@ describe("the owner's calibration (Nov 8)", () => {
     [14, ["steps", 4, 6], ["steps", 9, 6], "A"],
     [15, ["estimate", 84, 50], ["year", 1985, 1992], "Same"],
   ];
-  // Known miss (1 of 15), where the scores and he disagree:
-  //  6. year 2000 for 1992 scores 59, estimate 20 for 8.8 41: he said the same (the year scores 18 higher).
-  const MISSES = [6];
-
+  // No known misses since the long tail (Nov 14). Before it, pair 6: year 2000 for 1992 scored 59, estimate 20 for 8.8
+  // 41 (2.3x off), where he said the same; the tail lifts 2.3x off to 49.
   for (const [n, a, b, pick] of PAIRS) {
-    if (MISSES.includes(n)) continue;
     it(`pair ${n}: ${a.join(" ")} against ${b.join(" ")}, he said ${pick}`, () => {
       const [pa, pb] = [points(a), points(b)];
       expect(agrees(pa, pb, pick), `${pa} against ${pb}`).toBe(true);
     });
   }
 
-  it("agrees with at least 14 of his 15 pairs", () => {
+  it("agrees with all 15 of his pairs", () => {
     const agreed = PAIRS.filter(([, a, b, pick]) => agrees(points(a), points(b), pick));
-    expect(agreed.length).toBeGreaterThanOrEqual(14);
+    expect(agreed.length).toBe(15);
   });
 
   // What he played: the beetles' share now scores below the heart transplant's year.
   it("scores 0.8% for 25% below 1984 for 1967", () => {
-    expect(points(["percent", 0.8, 25])).toBe(14);
-    expect(points(["year", 1984, 1967])).toBe(50);
+    expect(points(["percent", 0.8, 25])).toBe(21);
+    expect(points(["year", 1984, 1967])).toBe(51);
   });
 
   const BANDS = { Great: [80, 100], Good: [45, 80], Ok: [25, 65], "Way off": [0, 24] } as const;
@@ -411,7 +435,9 @@ describe("the owner's calibration (Nov 8)", () => {
     [["percent", 5, 2.5], "Good"],
     [["estimate", 250, 330], "Good"],
   ];
-  // Known miss: year 1880 for 1903, his "Ok" (25 to 65), scores 72.
+  // Known miss: year 1880 for 1903, his "Ok" (25 to 65), scores 72. It is 1.19x off how long ago (d 0.15), where the
+  // curve is as it was: lowering it to 65 would take 250 for 330 (d 0.12, his Good, 77) and 20 for 25 (d 0.10, his
+  // Great, 84) down with it.
   for (const [guess, band] of RATINGS) {
     it(`rates ${guess.join(" ")} ${band}`, () => {
       const [lo, hi] = BANDS[band];
@@ -430,6 +456,15 @@ describe("the owner's calibration (Nov 8)", () => {
     const p = points(["percent", 5, 2.5]);
     expect(p).toBeGreaterThanOrEqual(60);
     expect(p).toBeLessThanOrEqual(75);
+  });
+  // Nov 14, on 30,000 years for Homo sapiens (300,000 years ago, asked as an estimate): "shouldn't get 0 points for this
+  // we were within one magnitude should get more like 25-40 points".
+  it("gives 10x off 25 to 40, either way", () => {
+    for (const guess of [30000, 3000000]) {
+      const p = points(["estimate", guess, 300000]);
+      expect(p).toBeGreaterThanOrEqual(25);
+      expect(p).toBeLessThanOrEqual(40);
+    }
   });
 });
 
@@ -1066,18 +1101,18 @@ describe("a game", () => {
     for (const guess of [100, 400, 1e9, 98]) g = nextQuestion(lockIn(g, guess));
     expect(phaseOf(g)).toBe("results");
     const scored = scoreGame(g, bank);
-    expect(scored.map((s) => s.points)).toEqual([49, 100, 16, 0, 98]);
-    expect(totalOf(scored)).toBe(263);
-    expect(scored.map((s) => s.band)).toEqual(["near", "dead-on", "far", "lost", "dead-on"]);
+    expect(scored.map((s) => s.points)).toEqual([51, 100, 42, 0, 98]);
+    expect(totalOf(scored)).toBe(291);
+    expect(scored.map((s) => s.band)).toEqual(["near", "dead-on", "near", "lost", "dead-on"]);
   });
   it("shares the total and five plain characters, no emoji", () => {
     let g = newGame(bank.slice(0, 5).map((x) => x.id));
     for (const guess of [200, 100, 400, 1e9, 130]) g = nextQuestion(lockIn(g, guess));
     const text = shareText(scoreGame(g, bank));
     // Squares in the results' colours, as a list's share has them (the review, Nov 9).
-    expect(text).toBe(`Fathom 244/${MAX_TOTAL}\n🟪 🟨 🟥 ⬛ 🟦`);
+    expect(text).toBe(`Fathom 272/${MAX_TOTAL}\n🟪 🟨 🟪 ⬛ 🟦`);
     // Out of beta (Nov 9): the name alone, and the link to the game on a line of its own.
-    expect(shareText(scoreGame(g, bank), "https://toptentacle.io/#fathom")).toBe(`Fathom 244/${MAX_TOTAL}\n🟪 🟨 🟥 ⬛ 🟦\nhttps://toptentacle.io/#fathom`);
+    expect(shareText(scoreGame(g, bank), "https://toptentacle.io/#fathom")).toBe(`Fathom 272/${MAX_TOTAL}\n🟪 🟨 🟪 ⬛ 🟦\nhttps://toptentacle.io/#fathom`);
     expect(text).not.toMatch(/beta/i);
   });
   // Nov 5 review: lost at sea shared as "□", which reads as a question not played. Every band has its own mark, and
@@ -1395,9 +1430,10 @@ describe("name-it: scoring", () => {
     const q = nameQ("name-country-50m-people");
     expect(scoreFor(q, 50e6)).toBe(100);
     expect(scoreFor(q, 52886363)).toBe(fathomScore(52886363, 50e6));
-    expect(scoreFor(q, 100e6)).toBe(49);
-    expect(scoreFor(q, 25e6)).toBe(49);
-    expect(scoreFor(q, 500e6)).toBe(0);
+    expect(scoreFor(q, 100e6)).toBe(51);
+    expect(scoreFor(q, 25e6)).toBe(51);
+    expect(scoreFor(q, 500e6)).toBe(30);
+    expect(scoreFor(q, 5e9)).toBe(0);
     const steps = nameQ("name-country-6-borders");
     expect([6, 7, 9].map((n) => scoreFor(steps, n))).toEqual([100, 70, 10]);
   });
@@ -1534,7 +1570,7 @@ describe("name-it: a game", () => {
     const scored = scoreGame(g, bank);
     expect(scored[1]).toMatchObject({ pick: "Colombia", guess: 52886363, points: fathomScore(52886363, 50e6), band: "dead-on" });
     expect(scored[0].pick).toBeUndefined();
-    expect(totalOf(scored)).toBe(100 + fathomScore(52886363, 50e6) + 100 + 49 + 49);
+    expect(totalOf(scored)).toBe(100 + fathomScore(52886363, 50e6) + 100 + 51 + 51);
     expect(shareText(scored)).toBe(`Fathom ${totalOf(scored)}/500\n🟨 🟨 🟨 🟪 🟪`);
   });
   it("keeps what was named in the save, and drops a pick that isn't a name of this game's", () => {

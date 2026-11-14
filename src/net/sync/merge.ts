@@ -22,8 +22,8 @@ import { isReason, RATING_KEY } from "../ratings";
  * - dailyGames, blitzDaily: one try per date (locked), so the first try of that date wins on both devices: the first
  *   finished daily game, the Blitz round that started first.
  * - daily (streak days): the union. seenHelp: true if either side has it. blitzBest: the max.
- * - ratings ("Good list?", per list and mode): the one given last (latest `at`) wins, a rating taken back (0)
- *   included, so taking it back on one device takes it back on all of them.
+ * - ratings ("Good list?", per list and mode; a Fathom question's under mode fathom): the one given last (latest
+ *   `at`) wins, a rating taken back (0) included, so taking it back on one device takes it back on all of them.
  * - blitzLive (a round in progress per list): the newer round; the other one, if its time is up, becomes a run.
  * - fathom (Fathom's finished games, totals and last draws): the union, one game per startedAt (mergeFathom in
  *   src/game/fathom-history.ts).
