@@ -54,7 +54,7 @@ with every table row as an accepted answer, aliases from redirects, and a source
 Modes: one daily, Today's list (from `public/puzzles/daily.json`), and free play (a random list or Blitz, optionally
 by category). Blitz is free play only: Today's Blitz was retired (owner, Nov 9), and an old `#dailyblitz-<date>` link
 opens that date's list as a free Blitz. **Dailies are one try each**, archive dailies included: a finished daily always reopens on
-its result. Free play is endless: Roll new list rolls a new random game, keeping the category if one was picked, and
+its result. Free play is endless (with an account; two games without one, §4): Roll new list rolls a new random game, keeping the category if one was picked, and
 prefers lists the player hasn't played in that mode. Before play it sits in its own box right of the guess panel.
 
 **Never spoil a daily.** Random rolls (list or Blitz) never land on today's list, played or not, or on a future
@@ -74,7 +74,15 @@ marked. The account lives in Home's header, not in the menu and not in a row of 
 signed out, lit cyan when signed in, carries a pink dot for sync trouble (offline, couldn't sync) or a sign-in that
 didn't finish, and waits (hollow, tinted, disabled) while a sign-in comes back; its name and title say the state
 ("Account: signed in as <name>", never an email). It opens the sign-in sheet (which also creates accounts) or the
-account sheet (name, sync state with try again, sign out, delete account, what we keep). Inner screens have no
+account sheet (name, sync state with try again, sign out, delete account, what we keep). **Free play needs an account after two games** (owner, Nov 14: "after a user plays more than once in free play, they
+have to sign in with google to continue playing"), in builds whose accounts offer Google. Signed out, a player may
+play `FREE_GAMES_BEFORE_SIGN_IN` (2, `src/game/free-games.ts`) free games: Random list, Random Blitz, Roll new list,
+Play again, Play Blitz, or a `#p-`/`#blitz-` link. A list game counts from its first guess the list takes, a clue or a
+give-up; a Blitz round once its clock runs; opening one counts nothing. Starting the next opens the **wall** over the
+screen: "Sign in to keep playing", "free play is unlimited with an account. today's list is always free.", the Google
+key, and a quiet key to today's list (Home once it's played). Closing leaves the player where they were; signing in
+starts the game asked for. Never asked: dailies, Fathom, Past runs and their results, Stats, How to play; a game
+under way always resumes. Inner screens have no
 account key: their headers are full, and HOME is one press away (UX.md 19). **Settings** (`#settings`): the sound
 switch and reset all progress (Fathom's too). **Fathom** (`#fathom`), the estimation game, out of beta since Nov 9
 (owner: "ship it now"): five questions a game (estimates, a percent, a year, a name-it round), endless games, scored by
