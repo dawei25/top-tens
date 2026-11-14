@@ -54,11 +54,14 @@ export function invalidPlay(p: Play, now = Date.now(), margin = 0): string | nul
   if (!Number.isFinite(p.startedAt) || p.startedAt > now + CLOCK_SLACK_MS || p.startedAt < now - MAX_AGE_MS + margin) {
     return "started at";
   }
-  if (p.daily !== null) {
-    const d = typeof p.daily === "string" ? dayIndex(p.daily) : NaN;
-    if (!(Math.abs(d - Math.floor(now / 86_400_000)) <= 1)) return "daily date";
-  }
+  if (p.daily !== null && !withinADay(p.daily, now)) return "daily date";
   return null;
+}
+
+/** A YYYY-MM-DD date within a day of today (UTC), as the server takes a daily's date: the player's own day. */
+export function withinADay(date: unknown, now = Date.now()): boolean {
+  const d = typeof date === "string" ? dayIndex(date) : NaN;
+  return Math.abs(d - Math.floor(now / 86_400_000)) <= 1;
 }
 
 /** A finished list game as a play; null for games still going or saved before games had a start time. */

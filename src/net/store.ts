@@ -81,6 +81,8 @@ export const KEYS = {
   feedbackOutbox: "top-tens:feedback-outbox",
   /** Fathom guesses waiting to be sent (one per question). */
   fathomOutbox: "top-tens:fathom-outbox",
+  /** Today's Fathom totals waiting to be sent (one per date). */
+  fathomPlayOutbox: "top-tens:fathom-play-outbox",
   /** Guesses the game didn't take, waiting to be sent (one per list, mode and text). */
   missOutbox: "top-tens:miss-outbox",
   /** The random id missed guesses carry: their own, never the one plays, ratings and notes carry (./misses). */

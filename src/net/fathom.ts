@@ -1,5 +1,7 @@
 import type { FathomQuestion } from "../game/fathom";
+import type { CrowdStats } from "./crowd";
 import type { OutboxKind } from "./outbox";
+import { withinADay } from "./plays";
 
 /**
  * Fathom (the estimation game): each locked-in guess, sent so a reveal can say how real players guessed (and so a
@@ -102,4 +104,80 @@ export function parseCompare(raw: unknown): FathomCrowd | null {
   if (median !== null && !(median >= 0)) return null;
   if (furtherOff !== null && !(furtherOff >= 0 && furtherOff <= 1)) return null;
   return { n, median, furtherOff };
+}
+
+/* ---------- Today's Fathom: a day's totals ---------- */
+
+/**
+ * Today's Fathom, finished: the day's five questions are the same for everyone, so its total (0 to 500) stands
+ * against everyone else's that day ("you did better than 81% of players today"). Sent once per date, to
+ * submit_fathom_play (supabase/migrations/20261114120000_fathom_plays.sql); the database checks the same things.
+ */
+export interface FathomPlay {
+  /** The day it was that day's Fathom, played on its day: YYYY-MM-DD, the player's own date (game/daily's localDate). */
+  date: string;
+  /** The game's total, a whole number 0 to 500. */
+  total: number;
+  /** Epoch ms it finished. */
+  at: number;
+}
+
+/** The most a game can total (five questions of 100). */
+export const FATHOM_MAX_TOTAL = 500;
+/** Totals are counted in bins this many points wide (0-9, 10-19, ...)... */
+export const FATHOM_BIN = 10;
+/** ...this many of them, 500 in the last with 490-499 (fathom_day_stats bins the same way). */
+export const FATHOM_BINS = FATHOM_MAX_TOTAL / FATHOM_BIN;
+
+/** The bin a total falls in: 0 for 0-9, 49 for 490 to 500. */
+export const totalBin = (total: number): number => Math.max(0, Math.min(FATHOM_BINS - 1, Math.floor(total / FATHOM_BIN)));
+
+/** Why the server would refuse this day's total, or null if it's fine. A date over a day from today has gone stale. */
+export function invalidFathomPlay(p: FathomPlay, now = Date.now()): string | null {
+  if (!withinADay(p?.date, now)) return "date";
+  if (!Number.isInteger(p.total) || p.total < 0 || p.total > FATHOM_MAX_TOTAL) return "total";
+  if (!Number.isFinite(p.at)) return "at";
+  return null;
+}
+
+/** Day totals in the outbox, named by date: one per browser and day (the server keeps the first). */
+export const FATHOM_PLAYS: OutboxKind<FathomPlay> = {
+  key: (p) => p.date,
+  invalid: (p, now) => invalidFathomPlay(p, now),
+};
+
+/** The arguments of the submit_fathom_play database function. */
+export function fathomPlayArgs(p: FathomPlay, clientId: string) {
+  return { p_date: p.date, p_total: p.total, p_client_id: clientId };
+}
+
+/** What a day's totals are cached and remembered under (src/net/service.ts), and read back by (useFathomDay). */
+export const fathomDayKey = (date: string): string => `fathom-day:${date}`;
+
+const count = (x: unknown): number | null => (Number.isInteger(x) && (x as number) >= 0 ? (x as number) : null);
+
+/**
+ * fathom_day_stats' answer ({"n", "counts", "avg"}: real players' totals that day, one per player, in FATHOM_BINS
+ * bins), checked: null for anything malformed. Always FATHOM_BINS counts (a short answer is padded with 0s).
+ */
+export function parseFathomDay(raw: unknown): CrowdStats | null {
+  let r = raw;
+  if (typeof r === "string") {
+    try {
+      r = JSON.parse(r);
+    } catch {
+      return null;
+    }
+  }
+  if (typeof r !== "object" || r === null || Array.isArray(r)) return null;
+  const o = r as Record<string, unknown>;
+  const n = count(o.n);
+  if (n === null || !Array.isArray(o.counts) || o.counts.length > FATHOM_BINS) return null;
+  const raws: unknown[] = o.counts;
+  const counts = Array.from({ length: FATHOM_BINS }, (_, i) => (i < raws.length ? count(raws[i]) : 0));
+  // Every player is in one bin.
+  if (counts.some((c) => c === null) || (counts as number[]).reduce((a, b) => a + b, 0) !== n) return null;
+  const avg = o.avg === null || o.avg === undefined ? null : num(o.avg);
+  if (avg !== null && !(avg >= 0 && avg <= FATHOM_MAX_TOTAL)) return null;
+  return { n, counts: counts as number[], avg: n ? avg : null };
 }

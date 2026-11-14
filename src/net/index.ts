@@ -5,7 +5,7 @@ import { load, save } from "../game/storage";
 import type { GuessResult } from "../game/types";
 import { accountsOn, backendOn } from "./config";
 import type { CrowdStats, ListAverages } from "./crowd";
-import { compareKey, FATHOM_GUESSES, type CompareRound, type FathomCrowd, type FathomGuess } from "./fathom";
+import { compareKey, FATHOM_GUESSES, FATHOM_PLAYS, fathomDayKey, type CompareRound, type FathomCrowd, type FathomGuess, type FathomPlay } from "./fathom";
 import { cleanNote, FEEDBACK, type Feedback } from "./feedback";
 import { cleanMiss, missKind, MISSES, type Miss } from "./misses";
 import { enqueue, localOutboxStore } from "./outbox";
@@ -81,7 +81,7 @@ let throttleUntil = 0;
  */
 export function startNet(): void {
   if (!backendOn) return;
-  const pending = [KEYS.outbox, KEYS.ratingOutbox, KEYS.feedbackOutbox, KEYS.fathomOutbox, KEYS.missOutbox].some((k) =>
+  const pending = [KEYS.outbox, KEYS.ratingOutbox, KEYS.feedbackOutbox, KEYS.fathomOutbox, KEYS.missOutbox, KEYS.fathomPlayOutbox].some((k) =>
     /"pending":\[\{/.test(stored(k) ?? ""),
   );
   const session = accountsOn && (!!stored(KEYS.auth) || authCallback());
@@ -110,6 +110,7 @@ export function startNet(): void {
       void s.flushFeedback();
       void s.flushFathom();
       void s.flushMisses();
+      void s.flushFathomPlays();
     }),
   );
   // Coming back to the tab: catch up with other devices (at most every 30 s).
@@ -216,6 +217,31 @@ export function submitFathomGuess(questionId: string, guess: number): boolean {
 }
 
 /**
+ * Today's Fathom just finished on this device: its date (YYYY-MM-DD, the player's own day, game/daily's localDate) and
+ * its total, 0 to 500. Sent once per date, so the day's "better than 81% of players" counts it (src/game/fathom-crowd.ts
+ * blends the day's totals with a simulated crowd). Only with a backend: without one this sends and stores nothing.
+ * Queued in its own outbox at once (like a guess: it survives the backend code failing to download offline, or a
+ * reload), then sent and retried while offline, and the day's totals are fetched after it, so the results count it.
+ * Never kept in the save, never synced (the run itself is in the save: reportFathom). False when nothing was queued
+ * (no backend, a total out of range, a date not within a day of today, or that date's total already sent).
+ */
+export function reportFathomDaily(date: string, total: number): boolean {
+  if (!backendOn) return false;
+  const play: FathomPlay = { date, total, at: Date.now() };
+  try {
+    if (!enqueue(localOutboxStore<FathomPlay>(globalThis.localStorage, KEYS.fathomPlayOutbox), FATHOM_PLAYS, play, play.at)) return false;
+  } catch {
+    // No storage at all (blocked): nothing can wait to be sent.
+    return false;
+  }
+  withService((s) => {
+    s.start();
+    void s.flushFathomPlays().then(() => s.fathomDay(date));
+  });
+  return true;
+}
+
+/**
  * A list or Blitz guess was just judged: pass what was typed and the result. A guess the game didn't take (unknown, or
  * junk) is kept as short lowercase text linked to nobody, so the improvement loop can teach the game the answers
  * players expect (./misses); anything it took or offered (an answer, a near miss, a "did you mean") is not, nor is
@@ -302,4 +328,13 @@ export function useListAverages(): ListAverages | null {
  */
 export function useFathomCrowd(questionId: string, guess: number, answer: number, round: CompareRound = "estimate"): FathomCrowd | null {
   return useLoaded(compareKey(questionId, round, guess, answer), (s) => s.fathomCompare(questionId, guess, answer, round));
+}
+
+/**
+ * Real players' totals on a date's Fathom (YYYY-MM-DD), one per player, in bins of 10 (src/net/fathom.ts totalBin);
+ * null without a backend, while loading, or if the server can't say. Blend it with the simulated crowd through
+ * src/game/fathom-crowd.ts (dayCounts, dayStanding), which reads null as no real players yet.
+ */
+export function useFathomDay(date: string | undefined): CrowdStats | null {
+  return useLoaded(date ? fathomDayKey(date) : null, (s) => s.fathomDay(date!));
 }
