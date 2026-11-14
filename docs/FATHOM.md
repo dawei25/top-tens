@@ -187,6 +187,16 @@ reason their way toward the answer from something they already know. It must pas
 | How long is the Trans-Siberian Railway? | dropped | familiar name, nothing to reason from: you know it or you don't |
 | How heavy is an obscure animal? | dropped | not a familiar subject |
 | How fast does sound travel through air? | dropped (owner, Nov 14) | a physics constant: you know it or you don't, with nothing to reason from |
+| How hot is the surface of Venus? / When did the dinosaurs die out? | dropped (Nov 14) | a planetary constant and a famous figure: known or not, nothing to reason from |
+| Name a country with no land borders | dropped (owner, Nov 14) | "basically its to name an island ... too ez to get deadon": a target many answers hit exactly |
+| What share of the body's energy can the brain use? | dropped (owner, Nov 14) | "what exactly is energy?": a key word read two ways |
+
+**Two rules from the owner's notes** (Nov 14). A name-it target needs few exact hits and answers on both sides of it:
+never an extreme (0 land borders) or the most common value (3 land borders: 28 countries hit it). A key word a player
+can read two ways (energy, size, big, fast, long) names its measure in plain words ("about the same area as", "how
+far is a marathon"). A figure only specialists recall becomes arithmetic when the definition gives the one anchor
+players can't be expected to know (the ISS's speed in the definition: the question is then the orbit time).
+Each question's way in is kept in `scripts/fathom/ways.json`.
 
 **The owner's favourite kind** (Nov 14, from another game's questions he liked and disliked; ours are our own): the
 ones that are "actually fun to figure out". He liked a question you answer by starting from yourself (your own weight
@@ -287,14 +297,13 @@ second date that gives it away. The year must not appear in any other question's
 { "id": "name-country-6-borders", "round": "name", "kind": "places", "list": "land-borders", "target": 6,
   "question": "Name a country with 6 land borders", "easy": false }
 { "id": "name-country-as-big-as-uk", "round": "name", "kind": "places", "list": "countries-area", "target": 244376,
-  "question": "Name a country about as big as the UK", "except": ["United Kingdom"], "easy": false }
+  "question": "Name a country with about the same area as the UK", "except": ["United Kingdom"], "easy": false }
 ```
 
 - **`list`**: a list id in `public/fathom/lists`. It gives the question its unit (the list's measure), its source and
   its scoring; leave `unit`, `answer` and `source` out.
 - **`question`**: "Name a ..." or "Name an ...", naming the list's noun ("country", "city"), no end punctuation, the
-  target in it as a player says it ("about 50 million people", "6 land borders", "no land borders", "about as big as
-  France"). 100 characters with the definition, as any question.
+  target in it as a player says it ("about 50 million people", "6 land borders", "about the same area as France"). 100 characters with the definition, as any question.
 - **`target`**: in the list's measure (people, square kilometres, land borders): a whole number on a steps list, more
   than 0 on a ratio list. When the question names a yardstick ("as big as the UK"), the target is that thing's own
   figure on the list, and the yardstick goes in **`except`** so it doesn't score (a definition says it when the target
