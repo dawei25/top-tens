@@ -2,68 +2,18 @@
  "version": 1,
  "questions": [
   {
-   "id": "name-country-1-border",
-   "round": "name",
-   "kind": "places",
-   "list": "land-borders",
-   "target": 1,
-   "question": "Name a country with only one land border",
-   "easy": false,
-   "verified": false,
-   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count 17 country name-it questions, not 10."
-  },
-  {
    "id": "name-country-as-big-as-india",
    "round": "name",
    "kind": "places",
    "list": "countries-area",
    "target": 3287263,
-   "question": "Name a country about as big as India",
+   "question": "Name a country with about the same area as India",
    "except": [
     "India"
    ],
    "easy": false,
    "verified": false,
-   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count 17 country name-it questions, not 10."
-  },
-  {
-   "id": "name-country-as-big-as-australia",
-   "round": "name",
-   "kind": "places",
-   "list": "countries-area",
-   "target": 7741220,
-   "question": "Name a country about as big as Australia",
-   "except": [
-    "Australia"
-   ],
-   "easy": false,
-   "verified": false,
-   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count 17 country name-it questions, not 10."
-  },
-  {
-   "id": "name-country-as-big-as-egypt",
-   "round": "name",
-   "kind": "places",
-   "list": "countries-area",
-   "target": 1001450,
-   "question": "Name a country about as big as Egypt",
-   "except": [
-    "Egypt"
-   ],
-   "easy": false,
-   "verified": false,
-   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count 17 country name-it questions, not 10."
-  },
-  {
-   "id": "name-country-5m-people",
-   "round": "name",
-   "kind": "places",
-   "list": "countries-population",
-   "target": 5000000,
-   "question": "Name a country with about 5 million people",
-   "easy": false,
-   "verified": false,
-   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count 17 country name-it questions, not 10."
+   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count more than 10 country name-it questions."
   },
   {
    "id": "name-country-as-many-people-as-australia",
@@ -77,7 +27,7 @@
    ],
    "easy": false,
    "verified": false,
-   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count 17 country name-it questions, not 10."
+   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count more than 10 country name-it questions."
   },
   {
    "id": "name-country-200m-people",
@@ -88,7 +38,7 @@
    "question": "Name a country with about 200 million people",
    "easy": false,
    "verified": false,
-   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count 17 country name-it questions, not 10."
+   "note": "Ready for the bank: waits only for src/game/fathom-name.test.ts to count more than 10 country name-it questions."
   }
  ]
 }

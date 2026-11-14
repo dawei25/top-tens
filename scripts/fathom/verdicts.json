@@ -195,9 +195,9 @@
     "judgedAt": "2026-11-07"
   },
   "marathon-distance": {
-    "verdict": "keep",
-    "why": "Size question kept, in the football-pitch class: reason from a 10k or a four-hour jog. The fact explains the odd 0.195 (the 1908 London course).",
-    "judgedAt": "2026-11-07"
+    "verdict": "fix",
+    "why": "'How long' reads two ways (distance or time): the owner's Nov 14 rule on key words",
+    "judgedAt": "2026-11-14"
   },
   "basketball-hoop-height": {
     "verdict": "drop",
@@ -640,9 +640,9 @@
     "judgedAt": "2026-11-14"
   },
   "first-homo-sapiens": {
-    "verdict": "drop",
-    "why": "pure recall (Nov 14 bar): 200,000 or 300,000 years is a figure you remember; farming and cave art only give a floor",
-    "judgedAt": "2026-11-14"
+    "verdict": "fix",
+    "why": "'Homo sapiens' redirects to Human, which says 'around 300,000 years ago' and nothing of Jebel Irhoud or fossils: source Human, definition dropped, fact now hunter-gatherers until 12,000 years ago.",
+    "judgedAt": "2026-11-06"
   },
   "horizon-distance": {
     "verdict": "fix",
@@ -740,9 +740,9 @@
     "judgedAt": "2026-11-06"
   },
   "brain-energy-share": {
-    "verdict": "fix",
-    "why": "Page says 'up to 20%', with no 'at rest': definition dropped, question asks what it 'can' use; 2% of body weight is stated.",
-    "judgedAt": "2026-11-06"
+    "verdict": "drop",
+    "why": "the owner cut it (Nov 14): 'what exactly is energy?'; a key word a player can read two ways",
+    "judgedAt": "2026-11-14"
   },
   "mars-gravity-share": {
     "verdict": "fix",
@@ -931,13 +931,13 @@
   },
   "name-country-as-big-as-france": {
     "verdict": "fix",
-    "why": "Target was 551,695 (not on the list's page); the page gives France (metropolitan) 551,500 km², now the target. Spain, Ukraine, Sweden, Kenya, Madagascar land Close (27); France is the yardstick.",
-    "judgedAt": "2026-11-07"
+    "why": "'as big as' reads two ways (area or people): now 'about the same area as', the owner's Nov 14 rule on key words",
+    "judgedAt": "2026-11-14"
   },
   "name-country-as-big-as-uk": {
-    "verdict": "keep",
-    "why": "Target is the page's own UK figure (244,376 km²). New Zealand, Italy, Romania, Ghana, Poland land Close (26 score 70+); UK, Britain, England read as the yardstick.",
-    "judgedAt": "2026-11-07"
+    "verdict": "fix",
+    "why": "'as big as' reads two ways (area or people): now 'about the same area as', the owner's Nov 14 rule on key words",
+    "judgedAt": "2026-11-14"
   },
   "name-city-10m-people": {
     "verdict": "fix",
@@ -950,14 +950,14 @@
     "judgedAt": "2026-11-07"
   },
   "name-country-no-land-borders": {
-    "verdict": "fix",
-    "why": "Any island country scores 100, so the reveal taught nothing; added a fact from the list (38 have none; Ireland, Haiti, Papua New Guinea share their islands), the twist UK and Ireland players hit.",
-    "judgedAt": "2026-11-07"
+    "verdict": "drop",
+    "why": "the owner cut it (Nov 14): 'basically its to name an island', too easy to get dead on; rule: a name-it target many answers hit exactly is out",
+    "judgedAt": "2026-11-14"
   },
   "name-country-3-borders": {
-    "verdict": "keep",
-    "why": "Count round a mental map: Mexico, Finland, Norway, Vietnam, Chile at 3; the US, Canada, the Netherlands, Belgium Close; Portugal (1) and Spain (5, Gibraltar and Ceuta) teach.",
-    "judgedAt": "2026-11-07"
+    "verdict": "drop",
+    "why": "rule from the owner's Nov 14 note: 3 is the most common border count (28 countries hit it exactly, as many as 2), so it needs no thinking",
+    "judgedAt": "2026-11-14"
   },
   "name-country-6-borders": {
     "verdict": "fix",
@@ -968,5 +968,20 @@
     "verdict": "fix",
     "why": "France was a trap: the list counts the whole Republic (11) where players count 8, a Close answer; the definition now says so. Germany counts out to 9 from a map; Brazil, Austria, Turkey Close.",
     "judgedAt": "2026-11-07"
+  },
+  "name-country-1-border": {
+    "verdict": "drop",
+    "why": "rule from the owner's Nov 14 note: 18 exact hits next to the extreme (0), so any island scores 70",
+    "judgedAt": "2026-11-14"
+  },
+  "name-country-as-big-as-australia": {
+    "verdict": "drop",
+    "why": "rule from the owner's Nov 14 note: an extreme; only the four giants after Russia fit, and any of them scores 90",
+    "judgedAt": "2026-11-14"
+  },
+  "name-country-as-big-as-switzerland": {
+    "verdict": "drop",
+    "why": "the e2e fixture lists hold no small countries, so it can't be played there (check.test.ts, fathom-name.e2e.cjs); written Nov 14, never in the bank",
+    "judgedAt": "2026-11-14"
   }
 }
