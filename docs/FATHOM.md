@@ -12,7 +12,7 @@ another. The questions live in `public/fathom/questions.json`; the name-it round
   number: 5 questions" where they count their lists (it has no categories, so no strip). Under them on a phone; the
   row under the pair from 640px, one line high.
 - **The menu**: a Fathom tile in Play (a sonar's rings), marked while Fathom is on show.
-- **How to play**: rule 7, Fathom in the game's own words and its one scoring line.
+- **How to play**: rule 7, Fathom in the game's own words and its scoring rule (the only place it's written).
 - **Stats**: a Fathom card under the lists' sections: games, avg / 500, best / 500 over every finished game; "0",
   "--", "--" and a key to play before the first.
 - **Past runs**: each finished game under its day, tagged FATHOM, its five squares for a title and its total; the row
@@ -42,7 +42,7 @@ A question's `round` says how it is asked and scored (absent means an estimate).
 The rounds share one curve (`curve`): 100 x max(0, 1 - \|d\|)^2, rounded, with d a distance that is 1 where the curve
 reaches 0. A miss scores at most 99: only spot on is 100.
 
-| Round | The player types | Points | The rule on screen | The miss |
+| Round | The player types | Points | The rule (How to play only) | The miss |
 |---|---|---|---|---|
 | `estimate` | a number in the question's unit | the curve, d = log10(guess / answer); within 1% spot on, 100. 25% off 82, half or double 49, 3x 27, 10x 0 | "The closer your guess, the more points." | "30% low", "3x too high" |
 | `percent` | 0 to 100: "71", "71%", "71.5" | the average, rounded, of two scores: points off (100 - 3 x points off, never under 0) and times off (the curve, d = how many powers of ten off on the answer's side of 50: up to 50 the shares, log10(guess / answer), past 50 what's left, log10((100 - answer) / (100 - guess)), each kept to 0.5 to 99.5); within half a point spot on, 100. 20 for 25 84, 5 for 2.5 71, 10 for 2.5 47, 0.8 for 25 14, 90 for 71 36; 90 for 99 scores as 10 for 1 | "The closer your guess, the more points." | "6 too low" |
@@ -65,11 +65,9 @@ one 120 years ago is closer. That is steep for recent events (2017 for 2007 scor
 least 10 years ago (`check.ts`). The miss reads in percentage points, without the word (the reveal's points are the score: "6 too low"), and in
 years ("3 years early").
 
-On screen every round says only "The closer your guess, the more points." (UX.md 21; the owner: keep it simple); on
-each side of the answer a closer guess never scores less (`fathom.test.ts`). It shows once a game for each of its
-wordings, on the first question that has it (`ruleShownAt`: the estimate, the percent and the year say the same words,
-so only the first of them does; the name-it round has its own), before the answer (under LOCK IN when a phone has
-little height), and the results say each once.
+No round shows a scoring line, on the question, the reveal or the results (owner, Nov 14: "self intuitive already
+enough id just remove it"; UX.md 21): How to play explains it. The rule column above is what How to play says. On
+each side of the answer a closer guess never scores less (`fathom.test.ts`).
 Whatever reads "spot on" scores 100, in every round. The bands, the sonar, the share text, the sound and the
 celebration work the same for every round. The sonar places the squid by the distance the points come from
 (`offAxis`), its edges where the round's curve reaches 0: 10x off for an estimate, \|d\| = 1 for a year (about 3.2x off

@@ -84,9 +84,12 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 
 ## Scores
 
-21. **A score says how it works in one plain line.** Fathom: "The closer your guess, the more points.", with no
-    formulas, multiples or examples on screen: the owner on "Half or double the answer scores about 50. Ten times off
-    scores 0.": "keep it simle just saw closer the guess the more points you get". Blitz keeps "#1 gets 100, smaller
+21. **A score says how it works in one plain line, or not at all when it's obvious.** Fathom shows no scoring line
+    on its questions or results (owner, Nov 14: "doesnt need to be repeated after every question its overkill ... its
+    self intuitive already enough id just remove it"); How to play explains it. Before that it read "The closer your
+    guess, the more points.", with no formulas, multiples or examples on screen: the owner on "Half or double the
+    answer scores about 50. Ten times off scores 0.": "keep it simle just saw closer the guess the more points you
+    get". Blitz keeps "#1 gets 100, smaller
     numbers get less, down to 10." (the owner: "dont change the blitz"). The line must be true (a closer guess never
     scores less; tests check it on every round and every Blitz list), and never a number someone made up: Fathom once scored against a judge's guess of how far off people
     usually are ("most people miss by about 1.3x"), and the owner: "feels made up". Whatever reads "spot on" scores

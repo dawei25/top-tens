@@ -78,7 +78,7 @@ account sheet (name, sync state with try again, sign out, delete account, what w
 account key: their headers are full, and HOME is one press away (UX.md 19). **Settings** (`#settings`): the sound
 switch and reset all progress (Fathom's too). **Fathom** (`#fathom`), the estimation game, out of beta since Nov 9
 (owner: "ship it now"): five questions a game (estimates, a percent, a year, a name-it round), endless games, scored by
-plain closeness in one line ("The closer your guess, the more points.", UX 21), out of 500 (docs/FATHOM.md). Its key is
+plain closeness, with no scoring line on screen (owner, Nov 14; How to play explains it, UX 21), out of 500 (docs/FATHOM.md). Its key is
 in Home's Free play and its tile in the menu's Play group; its games are in Past runs and its totals in Stats, and they
 sync with an account like list games. No daily Fathom (owner: maybe later, if it's popular).
 
@@ -104,8 +104,8 @@ sync with an account like list games. No daily Fathom (owner: maybe later, if it
    Fathom game's row has its five squares for a title and its total ("328/500"); it opens that game's results
    (`#fathom/run-<startedAt>`, with the date it was played), which offer New questions, or Back to your game while one is
    under way.
-5. **How to play:** closed by default; the footer key opens it as a dialog over the page. Its last rule is Fathom's, in
-   the game's own scoring line.
+5. **How to play:** closed by default; the footer key opens it as a dialog over the page. Its last rule is Fathom's, and
+   the only place its scoring is written.
 6. **Stats** (`#stats`, Your knowledge): first tries on each list against the players' average, overall, by category and by topic; placeholders
    before the first game (the three headline figures read "--", "0", "--" in one row). Then Fathom's own card: games,
    avg / 500 and best / 500 over every finished game, "0", "--", "--" before the first. Every screen opened forward
