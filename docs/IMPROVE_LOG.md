@@ -2,6 +2,20 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-14, launch-week morning check (Sat)
+
+- Notes and ratings since yesterday's check: none. Plays all time: 156 across 82 lists (+21).
+- Missed guesses: 61 texts, each from one browser, on 23 lists, typed between about 19:15 and 00:15 HKT on Nov 13.
+  Re-judged with today's matcher: none is a fair answer the list misses.
+  - **Correctly refused** (most): first names and celebrity names on us-surnames (14), consoles that don't exist
+    or have no sales figures, companies and athletes outside the ranking, a webtoon and a light novel on manga,
+    cities on mcdonalds-countries.
+  - **Harder misspellings** (hints, one browser): a two-slip spelling of a manga title (the right spelling, a short
+    form and "slime" all land), a joke spelling of a top-10 billionaire's surname (the real one lands).
+  - **Data hints** (queued): a team's nickname alone doesn't reach its stadium on stadiums; Wingstop typed again on
+    fast-food-chains.
+- Backend: fathom_guesses still not run (`fathom_compare` missing).
+
 ## 2026-11-13, launch-week morning check (Fri)
 
 - Notes and ratings since yesterday's check: none. Plays all time: 135 across 73 lists (+40 since yesterday).

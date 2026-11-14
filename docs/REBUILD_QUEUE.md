@@ -24,6 +24,10 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       COUNTRY_FORMS; the Australian city short forms in CITY_FORMS; Australia in the state/province list used by place
       facts; the new shared junk entries.
 
+- [ ] **Launch-week missed guesses (Nov 13), data hint:** stadiums: a team's nickname alone ("dodgers") doesn't
+      reach its stadium (Dodger Stadium, #210); the full name does. Add team nicknames for stadiums whose team is
+      unambiguous, as the judge did for some. Wingstop typed again (see below).
+
 - [ ] **Launch-week missed guesses (Nov 12), data hints** (one browser each; build when the list is next rebuilt):
       languages: "arab" should reach Modern Standard Arabic (intent.ts short form; guard in aliases.test.ts).
       fast-food-chains: Wingstop (about 2,500 locations) isn't in the source table; check whether the page's
