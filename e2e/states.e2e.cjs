@@ -155,13 +155,13 @@ const SCREENS = [
     },
   },
   {
-    // The one daily, over: its results offer Play Blitz on this list and Random list.
+    // The one daily, over: its results offer Share and Random list.
     name: "today's list over",
     setup: async (page) => {
       await go(page, "");
       await page.getByTestId("today-list").click();
       await giveUp(page);
-      await page.getByTestId("blitz-key").waitFor();
+      await page.getByTestId("results-roll").waitFor();
       await tick(page);
     },
   },

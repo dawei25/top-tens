@@ -15,7 +15,6 @@ import {
 } from "../game/state";
 import { load, save } from "../game/storage";
 import { dailyGame, localDate, lockDaily, streak, type DailyEntry } from "../game/daily";
-import { blitzAvailable } from "../game/blitz";
 import { recordListRun } from "../game/history";
 import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
@@ -56,7 +55,6 @@ interface Props {
   daily?: DailyEntry;
   /** The player's local date, from App. */
   today: string;
-  schedule: DailyEntry[];
   lexicon?: Lexicon;
   onBack: () => void;
   onHome: () => void;
@@ -67,11 +65,6 @@ interface Props {
    * list beside the guess panel, to skip to another list; never once play starts, so a losing game can't be dodged.
    */
   rolled?: boolean;
-  /**
-   * Play Blitz on the results was pressed (a link to the list's Blitz): App may hold the new round back for a sign-in
-   * first (src/game/free-games.ts), opening the wall over the results instead (it prevents the link's default).
-   */
-  onPlayBlitz?: (e: React.MouseEvent) => void;
 }
 
 interface Feedback {
@@ -105,7 +98,7 @@ function describe(r: GuessResult, puzzle: Puzzle, typed: string): Omit<Feedback,
   }
 }
 
-export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, rolled, onPlayBlitz }: Props) {
+export function Game({ id, meta, daily, today, lexicon, onBack, onHome, onRoll, rolled }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -338,14 +331,6 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
     dailyStreak = streak(sv);
   }
   const mode = !daily ? "Random list" : daily.date === today ? `Daily #${daily.n}` : `Archive #${daily.n}`;
-  // The list's own Blitz key, on its results, dailies included: a free Blitz on the list just finished (a list game
-  // doesn't spoil its Blitz, UX 15). Count this game in before the save effect runs, so finishing today's list opens
-  // its Blitz at once.
-  const blitzOpen = (() => {
-    const sv = load();
-    sv.games[id] = game;
-    return blitzAvailable(puzzle, schedule, today, sv);
-  })();
 
   const missChips = misses.length > 0 && (
     <section className="misses" aria-label="Wrong guesses" data-glass>
@@ -383,8 +368,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         <section className="panel prompt" data-glass data-testid="title-card">
           <div className="prompt-top">
             <span className="label cyan">{meta?.category ?? "Top 10"}</span>
-            {/* The score alone (the owner: no Play Blitz here, "for simplicity"; the results offer the list's Blitz).
-                The players' average waits for the results, where it says how you did. */}
+            {/* The score alone (the owner: no Play Blitz here, "for simplicity", nor on the results since Nov 14: the
+                modes stay separate). The players' average waits for the results, where it says how you did. */}
             <span className="prompt-end">
               <span className="count" aria-label={`${game.found.length} of 10 found`}>
                 <b>{game.found.length}</b>/10
@@ -656,12 +641,8 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <button ref={shareRef} className={daily ? "key key-pink" : "key"} data-testid="share" onClick={share}>
                   <SwapLabel off="Share" on="Copied" active={copied} />
                 </button>
-                {/* A daily is one try: no replay, just somewhere else to go: this list as a Blitz, or a random list. */}
-                {blitzOpen && (
-                  <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can" onClick={onPlayBlitz}>
-                    Play Blitz
-                  </a>
-                )}
+                {/* A daily is one try: no replay, just somewhere else to go, a random list. No Play Blitz on any list's
+                    results: the modes stay separate (owner, Nov 14). */}
                 {daily && (
                   <button className="key" data-testid="results-roll" onClick={onRoll}>
                     Random list

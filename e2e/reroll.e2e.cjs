@@ -9,7 +9,7 @@
 // was, and nothing else moves. Never on a daily, a daily's own Blitz or a list opened directly.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, VIEWPORTS, open, go, hash, puzzle, guess } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, open, go, hash, puzzle, guess, todaysDaily } = require("./helpers.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -203,12 +203,14 @@ for (const vp of VIEWPORTS) {
     assert.equal(await top(clock), clockTop);
     assert.equal(await top(score), scoreTop);
 
-    // Never on a daily's own Blitz (Play Blitz on a finished daily's results): it wasn't rolled.
+    // Never on a finished daily's own Blitz, opened by its link: it wasn't rolled.
     await page.getByTestId("nav-home").click();
     await page.getByTestId("today-list").click();
     await page.getByTestId("give-up").click();
     await page.getByTestId("give-up").click();
-    await page.getByTestId("blitz-key").click();
+    await page.getByTestId("results").waitFor();
+    const daily = (await todaysDaily(page)).id;
+    await go(page, `#blitz-${daily}`);
     await page.getByTestId("blitz-clock").waitFor();
     assert.equal(await roll.count(), 0);
     await ctx.close();

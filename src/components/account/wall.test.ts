@@ -14,12 +14,14 @@ describe("the ask kept across a full-page sign-in", () => {
       leave: "airports",
     });
     expect(readAsk({ kind: "replay", mode: "list", id: "mountains", at: now }, now)).toEqual({ kind: "replay", mode: "list", id: "mountains" });
-    expect(readAsk({ kind: "open", mode: "blitz", id: "airports", at: now }, now)).toEqual({ kind: "open", mode: "blitz", id: "airports" });
+  });
+  it("reads an old Play Blitz ask (a list's results offered its Blitz until Nov 14) as no ask", () => {
+    expect(readAsk({ kind: "open", mode: "blitz", id: "airports", at: now }, now)).toBeNull();
   });
   it("drops a stale one, one from the future, and anything malformed", () => {
     expect(readAsk({ kind: "roll", mode: "list", at: now - ASK_TTL - 1 }, now)).toBeNull();
     expect(readAsk({ kind: "roll", mode: "list", at: now + 120_000 }, now)).toBeNull();
-    for (const bad of [null, "roll", { kind: "roll", mode: "fathom", at: now }, { kind: "open", mode: "list", at: now }, { kind: "open", mode: "list", id: "../x", at: now }, { kind: "go", mode: "list", id: "a", at: now }, { kind: "roll", mode: "list" }]) {
+    for (const bad of [null, "roll", { kind: "roll", mode: "fathom", at: now }, { kind: "replay", mode: "list", at: now }, { kind: "replay", mode: "list", id: "../x", at: now }, { kind: "go", mode: "list", id: "a", at: now }, { kind: "roll", mode: "list" }]) {
       expect(readAsk(bad, now)).toBeNull();
     }
   });
