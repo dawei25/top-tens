@@ -180,10 +180,10 @@ regulars can't lift every average.
 
    9. `supabase/migrations/20261114120000_fathom_plays.sql` (after 7; run once, safe to run twice): Today's Fathom
       totals, for "better than X% of players today". Adds the `fathom_plays` table (date, a random per-browser id,
-      the account if signed in, the total 0-500; one row per browser per date; players can't read or touch it;
+      the account if signed in, the total 0-1000 (ten questions a day); one row per browser per date; players can't read or touch it;
       deleted with the account), `submit_fathom_play(p_date, p_total, p_client_id)` (refuses a date more than a day
-      from today, a total outside 0-500, a missing id) and `fathom_day_stats(p_date)`, which returns
-      `{"n", "counts": [50 bins of 10 points], "avg"}` for that date, one total per player, everyone counted, callable
+      from today, a total outside 0-1000, a missing id) and `fathom_day_stats(p_date)`, which returns
+      `{"n", "counts": [100 bins of 10 points], "avg"}` for that date, one total per player, everyone counted, callable
       with the public key. The game works before it runs: until then the day's line shows only the simulated crowd.
       Check it took: finish Today's Fathom; Table Editor > `fathom_plays` has a row, and
       `select fathom_day_stats(current_date);` returns `{"n": 1, ...}`.
