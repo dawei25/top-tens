@@ -838,9 +838,10 @@ export function drawQuestions(
   recent: readonly (readonly string[])[] = [],
   rand: () => number = Math.random,
 ): FathomQuestion[] {
-  // How recently each question was played: 0 never (in the last games), HOLD_GAMES in the last one.
+  // How recently each question was played: 0 never (in the last games), the most in the last one.
+  const held = recent.slice(0, HOLD_GAMES);
   const tier = new Map<string, number>();
-  recent.slice(0, HOLD_GAMES).forEach((ids, i) => ids.forEach((id) => tier.has(id) || tier.set(id, HOLD_GAMES - i)));
+  held.forEach((ids, i) => ids.forEach((id) => tier.has(id) || tier.set(id, held.length - i)));
   const key = new Map(questions.map((q) => [q.id, rand()]));
   const order = (a: FathomQuestion, b: FathomQuestion) =>
     (tier.get(a.id) ?? 0) - (tier.get(b.id) ?? 0) || key.get(a.id)! - key.get(b.id)!;
@@ -959,11 +960,17 @@ export const BAND_CHARS: Record<Band, string> = {
 };
 
 /**
- * COPY RESULT: "Fathom 312/500", the five bands as plain characters, and the link (`url`, to #fathom) when there is one,
- * each on its own line (the screen makes the lines keep in a Reddit comment: src/components/share.ts pasteable).
+ * SHARE: "Fathom #12 312/500" for a day's Fathom (`n`, its number), "Fathom 312/500" for an endless game, the five bands
+ * as squares, and the link (`url`, to #fathom) when there is one, each on its own line (the screen makes the lines keep
+ * in a Reddit comment: src/components/share.ts pasteable).
  */
-export function shareText(scored: readonly Scored[], url?: string): string {
-  return [`Fathom ${totalOf(scored)}/${MAX_TOTAL}`, scored.map((s) => BAND_CHARS[s.band]).join(" "), ...(url ? [url] : [])].join("\n");
+export function shareText(scored: readonly Scored[], url?: string, n?: number): string {
+  return shareLines(totalOf(scored), scored.map((s) => s.band), url, n);
+}
+
+/** The share text from a total and the bands (a past game keeps its points, not always its questions). */
+export function shareLines(total: number, bands: readonly Band[], url?: string, n?: number): string {
+  return [`Fathom${n ? ` #${n}` : ""} ${total}/${MAX_TOTAL}`, bands.map((b) => BAND_CHARS[b]).join(" "), ...(url ? [url] : [])].join("\n");
 }
 
 /* ---------- The save (its own key) ---------- */

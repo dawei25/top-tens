@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type Rea
 import { flushSync } from "react-dom";
 import {
   amountText,
-  BAND_CHARS,
   bandLabel,
   bandOf,
   editField,
@@ -25,6 +24,7 @@ import {
   saveFathom,
   scoreFor,
   scoreGame,
+  shareLines,
   shareText,
   startGame,
   totalOf,
@@ -36,8 +36,23 @@ import {
   type NumberError,
   type Scored,
 } from "../../game/fathom";
-import { findRun, noteDraw, recentIds, recordRun, runTotal, takeFreshFathom, type FathomRun } from "../../game/fathom-history";
-import { FATHOM_BACK } from "../copy";
+import { dayFor, readSchedule, type FathomDailyEntry } from "../../game/fathom-daily";
+import {
+  dailyRun,
+  findRun,
+  loadDailyLocal,
+  noteDraw,
+  recentIds,
+  recordRun,
+  runTotal,
+  saveDailyLocal,
+  type DailyLocal,
+  type FathomDay,
+  type FathomRun,
+} from "../../game/fathom-history";
+import { localDate } from "../../game/daily";
+import { FATHOM_TODAY } from "../copy";
+import { Countdown } from "../Countdown";
 import { load, save } from "../../game/storage";
 import {
   asOfText,
@@ -63,24 +78,51 @@ import { BUOY, placed, SQUID } from "./sprites";
 import "./fathom.css";
 
 /**
- * Fathom (#fathom, from Home's Free play and the menu): five questions: estimates in a unit that keeps them short
- * ("kilometres", "million people"), a percent, a year, and a name-it round ("Name a country with about 50 million
- * people", read with the game's matcher over its list). Type a guess, lock it in, see how close it was on a sonar, and
- * NEXT; five of those and the results. One plain scoring rule for each round, stated on the round's first question and
- * again on the results. No timer, no lives, endless games. The game on screen is kept in this browser; each draw and
- * each finished game go into the player's save (Past runs, Stats, and the account's sync: fathom-history.ts). With a
- * backend, each guess is also sent, and a reveal says how real players guessed once there are enough of them. App loads
- * this screen as its own chunk.
+ * Fathom: five questions: estimates in a unit that keeps them short ("kilometres", "million people"), a percent, a
+ * year, and a name-it round ("Name a country with about 50 million people", read with the game's matcher over its
+ * list). Type a guess, lock it in, see how close it was on a sonar, and NEXT; five of those and the results. No timer,
+ * no lives, no scoring line (How to play explains it); a running score in the question card's header.
+ *
+ * Two ways to play (owner, Nov 14: "id like fathom to have a today's fathom- remove the unlimited fathom play for now-
+ * keep access to it via a hidden url"):
+ * - `daily` (#fathom, Home's key under Today's list and the menu): Today's Fathom, the same five for everyone
+ *   (fathom-daily.ts), one try: a finished one reopens on its results, on any of the player's devices.
+ * - `endless` (#fathom-endless, linked nowhere): new questions after every game, as before.
+ * The game under way is kept in this browser; each finished game goes into the player's save (Past runs, Stats, and
+ * the account's sync: fathom-history.ts). With a backend, each guess is also sent, and a reveal says how real players
+ * guessed once there are enough of them. App loads this screen as its own chunk.
  *
  * With `run` (#fathom/run-<startedAt>, from Past runs), it shows that finished game's results instead.
  */
+
+export type FathomMode = "daily" | "endless";
 
 interface Props {
   onBack: () => void;
   onHome: () => void;
   /** A finished game to show (its startedAt), from Past runs. */
   run?: number;
+  mode?: FathomMode;
+  /** The player's local date: Today's Fathom's day. */
+  today?: string;
 }
+
+/** Fathom #1's date, for a day the schedule file doesn't cover when there is no file at all. */
+const DAY_ONE = "2026-11-14";
+const SCHEDULE_URL = `${import.meta.env.BASE_URL}fathom/daily.json`;
+
+/** The schedule of Today's Fathom ([] when it isn't there: each day is then seeded by its date). */
+async function loadDays(): Promise<FathomDailyEntry[]> {
+  try {
+    const res = await fetch(SCHEDULE_URL);
+    return res.ok ? readSchedule(await res.json()) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** A day's game under way, as the screen plays it. */
+const fromLocal = (l: DailyLocal): FathomGame => ({ ids: l.ids, guesses: l.guesses, at: l.at, startedAt: l.startedAt, ...(l.picks && { picks: l.picks }) });
 
 /** The share text's link: Fathom itself. */
 const fathomUrl = () => `${location.origin}${location.pathname}#fathom`;
@@ -108,7 +150,7 @@ function freshGame(bank: readonly FathomQuestion[]): FathomGame {
  * A game whose last guess is in, recorded in the player's save (once: Past runs, Stats, the sync), with each question's
  * points as scored now. A game from before games were dated gets its date first.
  */
-function recordFinished(game: FathomGame, bank: readonly FathomQuestion[]): void {
+function recordFinished(game: FathomGame, bank: readonly FathomQuestion[], day?: FathomDay): void {
   if (!finished(game) || game.startedAt === undefined) return;
   const scored = scoreGame(game, bank);
   if (scored.length !== game.ids.length) return;
@@ -119,6 +161,7 @@ function recordFinished(game: FathomGame, bank: readonly FathomQuestion[]): void
     guesses: game.guesses,
     ...(game.picks && { picks: game.picks }),
     points: scored.map((x) => x.points),
+    ...(day && { daily: day }),
   };
   const before = load();
   // A game from before a reset made on another device stays out (the sync would only prune it again).
@@ -202,9 +245,12 @@ function useShort(): boolean {
   return short;
 }
 
-export default function Fathom({ onBack, onHome, run }: Props) {
+export default function Fathom({ onBack, onHome, run, mode = "daily", today = localDate() }: Props) {
   const [data, setData] = useState<Loaded | null | "missing">(null);
   const [game, setGame] = useState<FathomGame | null>(null);
+  /** Today's Fathom: its day; and its finished game when it was played elsewhere (one try, on any device). */
+  const [day, setDay] = useState<FathomDay>();
+  const [playedRun, setPlayedRun] = useState<FathomRun>();
   // The matcher's lexicon (TENtacle's, the app already has it cached): what was typed is a real name of its own, so it
   // is never "corrected" into a different one. Optional: without it, a name still reads.
   const [lex, setLex] = useState<Lexicon>();
@@ -214,13 +260,33 @@ export default function Fathom({ onBack, onHome, run }: Props) {
 
   useEffect(() => {
     let live = true;
-    loadBank().then((loaded) => {
+    Promise.all([loadBank(), loadDays()]).then(([loaded, schedule]) => {
       if (!live) return;
       if (!loaded) return setData("missing");
       const b = loaded.bank;
       // A past game from Past runs: only its results, nothing drawn.
-      if (run === undefined) {
-        // Pick up the game on screen, unfinished or on its results (a reload, the phone dropping the tab); otherwise a
+      if (run !== undefined) {
+        // (Nothing to start.)
+      } else if (mode === "daily") {
+        // Today's Fathom: the day's five; its game under way here, or a new one; once finished anywhere, its results.
+        const d = dayFor(schedule, b, today, schedule[0]?.date ?? DAY_ONE);
+        const have = new Set(b.map((q) => q.id));
+        const local = loadDailyLocal();
+        const mine = local && local.day.date === today && local.ids.every((id) => have.has(id)) ? fromLocal(local) : undefined;
+        const played = dailyRun(load().fathom, today);
+        if (played && !(mine && finished(mine))) setPlayedRun(played);
+        else if (mine && local) {
+          setDay(local.day);
+          setGame(mine);
+          recordFinished(mine, b, local.day);
+        } else {
+          const fresh: FathomGame = { ids: d.ids, guesses: [], at: 0, startedAt: Date.now() };
+          saveDailyLocal({ day: { date: d.date, n: d.n }, ids: fresh.ids, guesses: [], at: 0, startedAt: fresh.startedAt! });
+          setDay({ date: d.date, n: d.n });
+          setGame(fresh);
+        }
+      } else {
+        // Endless: the game on screen, unfinished or on its results (a reload, the phone dropping the tab); otherwise a
         // new draw. A game from before games were dated is dated now, and recorded if it is over.
         const local = loadFathom();
         let resumed = resumable(local, b);
@@ -229,9 +295,6 @@ export default function Fathom({ onBack, onHome, run }: Props) {
           saveFathom({ ...local, game: resumed });
         }
         if (resumed) recordFinished(resumed, b);
-        // From Home's key or the menu's tile, a finished game makes way for new questions (free play is new every
-        // time, UX 14); a game under way goes on, and a reload on the results keeps them.
-        if (takeFreshFathom() && resumed && finished(resumed)) resumed = undefined;
         setGame(resumed ?? freshGame(b));
       }
       setData(loaded);
@@ -242,9 +305,12 @@ export default function Fathom({ onBack, onHome, run }: Props) {
     };
   }, []);
 
+  const number = day?.n ?? playedRun?.daily?.n;
   const head = (
     <ScreenHead onBack={onBack} onHome={onHome}>
-      <span className="label mode">Fathom</span>
+      <span className="label mode" data-testid="fathom-mode" data-mode={run !== undefined ? "past" : mode} data-n={number}>
+        {mode === "daily" && number && run === undefined ? `Fathom #${number}` : "Fathom"}
+      </span>
     </ScreenHead>
   );
 
@@ -261,6 +327,7 @@ export default function Fathom({ onBack, onHome, run }: Props) {
     );
   }
   if (data && run !== undefined) return <PastGame head={head} run={run} bank={data.bank} />;
+  if (data && playedRun) return <PastGame head={head} run={playedRun.startedAt} bank={data.bank} today />;
   if (!data || !game) return <Loading />;
   const { bank, lists } = data;
 
@@ -271,8 +338,9 @@ export default function Fathom({ onBack, onHome, run }: Props) {
 
   const update = (next: FathomGame) => {
     setGame(next);
-    saveFathom({ ...loadFathom(), game: next });
-    recordFinished(next, bank);
+    if (day) saveDailyLocal({ day, ids: next.ids, guesses: next.guesses, at: next.at, startedAt: next.startedAt ?? Date.now(), ...(next.picks && { picks: next.picks }) });
+    else saveFathom({ ...loadFathom(), game: next });
+    recordFinished(next, bank, day);
   };
   // LOCK IN: a click, the ping and the band's sound (with sound on), the guess sent (with a backend), then the reveal.
   // A name-it round's guess is the figure of the thing named, kept with its name, and that figure is what's sent.
@@ -323,7 +391,7 @@ export default function Fathom({ onBack, onHome, run }: Props) {
         {said}
       </p>
       {phase === "results" ? (
-        <Results scored={scored} onAgain={again} />
+        <Results scored={scored} onAgain={day ? undefined : again} n={day?.n} />
       ) : (
         <>
           <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id} data-round={round}>
@@ -333,6 +401,7 @@ export default function Fathom({ onBack, onHome, run }: Props) {
               </span>
               <Pips bands={scored.map((s) => s.band)} at={game.at} />
             </div>
+            <ScoreBar scored={scored} />
             <h1>{question.question}</h1>
             {question.definition && <p className="caption">{question.definition}</p>}
           </section>
@@ -707,22 +776,24 @@ function Figure({ parts }: { parts: { n: string; unit?: string } }) {
 }
 
 /** The share text of a game: the total, the five bands, the link to Fathom; lines that keep in a Reddit comment. */
-const shareOf = (scored: readonly Scored[]) => pasteable(shareText(scored, fathomUrl()));
+const shareOf = (scored: readonly Scored[], n?: number) => pasteable(shareText(scored, fathomUrl(), n));
+
+/** "played Nov 14, 21:40". */
+function playedAt(ms: number): string {
+  const when = new Date(ms);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `played ${when.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${pad(when.getHours())}:${pad(when.getMinutes())}`;
+}
 
 /**
- * A finished game from Past runs (#fathom/run-<startedAt>): its results as they were scored (each question's points
- * kept with the game), the recap of the questions still in the bank, and the way back to playing: RESUME GAME while a
- * game is under way, else NEW QUESTIONS. A game no longer kept here (another device's, pruned) says so.
+ * A finished game kept in the save: from Past runs (#fathom/run-<startedAt>), or Today's Fathom finished on another of
+ * the player's devices (`today`). Its results as they were scored (each question's points kept with the game), the
+ * recap of the questions still in the bank, and from Past runs the way to Today's Fathom. A game no longer kept here
+ * (another device's, pruned) says so.
  */
-function PastGame({ head, run: at, bank }: { head: ReactNode; run: number; bank: FathomQuestion[] }) {
+function PastGame({ head, run: at, bank, today = false }: { head: ReactNode; run: number; bank: FathomQuestion[]; today?: boolean }) {
   const run = findRun(load().fathom, at);
-  const local = loadFathom();
-  const underWay = resumable(local, bank);
-  const resume = !!underWay && !finished(underWay);
-  const play = () => {
-    if (!resume) freshGame(bank);
-    location.hash = "#fathom";
-  };
+  const toToday = () => (location.hash = "#fathom");
   if (!run) {
     return (
       <main className="screen fathom" data-testid="fathom" data-phase="gone">
@@ -731,8 +802,8 @@ function PastGame({ head, run: at, bank }: { head: ReactNode; run: number; bank:
           <p className="label pink">Not here</p>
           <h1>That game isn't kept here.</h1>
           <div className="results-actions">
-            <button type="button" className="key key-pink" data-testid="fathom-again" onClick={play}>
-              {resume ? FATHOM_BACK : "New questions"}
+            <button type="button" className="key key-pink" data-testid="fathom-again" onClick={toToday}>
+              {FATHOM_TODAY}
             </button>
           </div>
         </section>
@@ -747,20 +818,18 @@ function PastGame({ head, run: at, bank }: { head: ReactNode; run: number; bank:
     return [{ question, guess: run.guesses[i], points: run.points[i], band: bandOf(run.points[i]), ...(pick !== undefined && { pick }) }];
   });
   const bands = run.points.map(bandOf);
-  const share = pasteable([`Fathom ${runTotal(run)}/${MAX_TOTAL}`, bands.map((b) => BAND_CHARS[b]).join(" "), fathomUrl()].join("\n"));
-  const when = new Date(run.finishedAt);
-  const pad = (n: number) => String(n).padStart(2, "0");
+  const share = pasteable(shareLines(runTotal(run), bands, fathomUrl(), run.daily?.n));
   return (
-    <main className="screen fathom" data-testid="fathom" data-phase="past" data-run={run.startedAt}>
+    <main className="screen fathom" data-testid="fathom" data-phase={today ? "results" : "past"} data-run={run.startedAt}>
       {head}
       <Results
         scored={scored}
         total={runTotal(run)}
         bands={bands}
         share={share}
-        onAgain={play}
-        againLabel={resume ? FATHOM_BACK : "New questions"}
-        when={`played ${when.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${pad(when.getHours())}:${pad(when.getMinutes())}`}
+        onAgain={today ? undefined : toToday}
+        againLabel={FATHOM_TODAY}
+        when={today ? undefined : playedAt(run.finishedAt)}
         count={false}
       />
     </main>
@@ -768,22 +837,26 @@ function PastGame({ head, run: at, bank }: { head: ReactNode; run: number; bank:
 }
 
 /**
- * The end: the total, the five bands in a row, the scoring rules again (one line for each round played), NEW
- * QUESTIONS and COPY RESULT, then each question with guess and answer. A past game passes its own total, bands and
- * share text (a question gone from the bank has no row), when it was played, and its key's label.
+ * The end: the total and the five bands in a row; NEW QUESTIONS (endless) or the time to the next Fathom (Today's:
+ * one try), and SHARE; then each question with guess and answer. A past game passes its own total, bands and share
+ * text (a question gone from the bank has no row), when it was played, and its key's label.
  */
 function Results({
   scored,
   onAgain,
+  n,
   total = totalOf(scored),
   bands = scored.map((s) => s.band),
-  share = shareOf(scored),
+  share = shareOf(scored, n),
   againLabel = "New questions",
   when,
   count = true,
 }: {
   scored: Scored[];
-  onAgain: () => void;
+  /** No key for new questions on Today's Fathom: one try a day. */
+  onAgain?: () => void;
+  /** Today's Fathom's number, for the share text. */
+  n?: number;
   total?: number;
   bands?: Band[];
   share?: string;
@@ -834,10 +907,13 @@ function Results({
             {when}
           </p>
         )}
+        {!onAgain && <Countdown className="fathom-next-day" label="next Fathom in" />}
         <div className="results-actions">
-          <button type="button" className="key key-pink" data-testid="fathom-again" onClick={onAgain}>
-            {againLabel}
-          </button>
+          {onAgain && (
+            <button type="button" className="key key-pink" data-testid="fathom-again" onClick={onAgain}>
+              {againLabel}
+            </button>
+          )}
           <button ref={copyKey} type="button" className="key" data-testid="fathom-share" onClick={shareIt}>
             <SwapLabel off="Share" on="Copied" active={copied} />
           </button>
@@ -891,6 +967,43 @@ function BandWord({ band }: { band: Band }) {
     <p className="band-word" data-band={band} data-testid="fathom-band">
       {band === "dead-on" ? `${bandLabel(band)}!` : bandLabel(band)}
     </p>
+  );
+}
+
+/**
+ * The running score (owner, Nov 14: "add points to a visible counter with some sort of visual that lets u know ur
+ * current score some kind of bar at the top ... sleek and minimalistic"): the total out of 500 and a thin pixel bar under
+ * the card's header, filled by each round's points in its band's colour. The total counts up as a reveal adds to it
+ * (not with reduced motion), and the newest stretch grows in; the row is there from the first question, empty, so
+ * nothing moves when points land.
+ */
+function ScoreBar({ scored }: { scored: Scored[] }) {
+  const total = totalOf(scored);
+  const before = useRef(total);
+  const from = before.current;
+  useEffect(() => {
+    before.current = total;
+  }, [total]);
+  return (
+    <div className="fathom-score" data-testid="fathom-score" data-total={total}>
+      <span className="score-track" role="img" aria-label={`Score so far: ${total} out of ${MAX_TOTAL}`}>
+        {scored.map((s, i) => (
+          <span
+            key={i}
+            className="score-fill"
+            data-band={s.band}
+            data-new={i === scored.length - 1 && total !== from ? "" : undefined}
+            style={{ width: `${(s.points / MAX_TOTAL) * 100}%` }}
+          />
+        ))}
+      </span>
+      <span className="score-sum" aria-hidden="true">
+        <span key={total} className="score-n" data-count={total !== from ? "" : undefined} style={{ "--from": from, "--to": total } as React.CSSProperties}>
+          <span>{total}</span>
+        </span>
+        <span className="score-of">/{MAX_TOTAL}</span>
+      </span>
+    </div>
   );
 }
 

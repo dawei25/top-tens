@@ -14,24 +14,11 @@ export const FATHOM_MAX = 500;
 /** The game on screen, in this browser only (loadFathom in fathom.ts reads it). */
 export const FATHOM_KEY = "tentacle:fathom";
 
-/**
- * Home's Fathom key and the menu's tile ask for new questions if the game on screen is over (free play is new every
- * time, UX 14); Fathom takes the ask when it opens. In memory only: a reload on the results keeps them.
- */
-let freshWanted = false;
-export function wantFreshFathom(): void {
-  freshWanted = true;
-}
-export function takeFreshFathom(): boolean {
-  const w = freshWanted;
-  freshWanted = false;
-  return w;
-}
-
-/** Settings' reset: the game on screen goes with the rest of the progress. */
+/** Settings' reset: the games under way (endless and today's) go with the rest of the progress. */
 export function clearFathomGame(): void {
   try {
     localStorage.removeItem(FATHOM_KEY);
+    localStorage.removeItem(FATHOM_DAILY_KEY);
   } catch {
     // No storage: nothing kept to clear.
   }
@@ -73,6 +60,14 @@ export interface FathomRun {
   picks?: Record<string, string>;
   /** Each question's points as they were scored: the bank may change after. */
   points: number[];
+  /** A day's Fathom: its date (the player's) and number ("Fathom #12"). Absent for an endless game. */
+  daily?: FathomDay;
+}
+
+/** Which day's Fathom a game was: the date everyone played those five on, and its number. */
+export interface FathomDay {
+  date: string;
+  n: number;
 }
 
 /** A game drawn (finished or not): its questions, held back from the next HOLD_GAMES draws. */
@@ -113,6 +108,60 @@ export function noteDraw(rec: FathomRecord | undefined, draw: FathomDraw): Fatho
 /** The question ids of the last games drawn, newest first (what the draw holds back). */
 export const recentIds = (rec: FathomRecord | undefined): string[][] => (rec?.recent ?? []).map((d) => d.ids);
 
+/** The finished game of a day's Fathom (one try a day: on any of the player's devices), if it was played. */
+export const dailyRun = (rec: FathomRecord | undefined, date: string): FathomRun | undefined => rec?.runs?.find((r) => r.daily?.date === date);
+
+/* ---------- Today's Fathom, under way on this device ---------- */
+
+/** A day's game under way in this browser (finished, it is a run in the save): the day and the game's state. */
+export interface DailyLocal {
+  day: FathomDay;
+  ids: string[];
+  guesses: number[];
+  at: number;
+  picks?: Record<string, string>;
+  startedAt: number;
+}
+
+export const FATHOM_DAILY_KEY = "tentacle:fathom-daily";
+
+type Store = Pick<Storage, "getItem" | "setItem">;
+const defaultStore = (): Store | undefined => {
+  try {
+    return typeof localStorage === "undefined" ? undefined : localStorage;
+  } catch {
+    return undefined;
+  }
+};
+
+/** The day's game under way here, if any (junk and other shapes read as none). */
+export function loadDailyLocal(store: Store | undefined = defaultStore()): DailyLocal | undefined {
+  try {
+    const x = JSON.parse(store?.getItem(FATHOM_DAILY_KEY) ?? "null") as Record<string, unknown> | null;
+    if (!x || !isDay(x.day) || !isIds(x.ids) || !Array.isArray(x.guesses) || !x.guesses.every((g) => isNum(g) && g >= 0)) return undefined;
+    if (!isNum(x.at) || !Number.isInteger(x.at) || !isNum(x.startedAt)) return undefined;
+    const picks = isObj(x.picks) ? (Object.fromEntries(Object.entries(x.picks).filter(([, n]) => typeof n === "string")) as Record<string, string>) : undefined;
+    return { day: x.day, ids: x.ids, guesses: x.guesses as number[], at: x.at, startedAt: x.startedAt, ...(picks && Object.keys(picks).length && { picks }) };
+  } catch {
+    return undefined;
+  }
+}
+
+export function saveDailyLocal(game: DailyLocal, store: Store | undefined = defaultStore()): void {
+  try {
+    store?.setItem(FATHOM_DAILY_KEY, JSON.stringify(game));
+  } catch {
+    // Not kept: the day's game still plays, and its finished run is in the save.
+  }
+}
+
+/** Today's Fathom as Home's key and the menu's tile show it: "new", "playing", or the score ("312/500"). */
+export function fathomTodayStatus(rec: FathomRecord | undefined, date: string, local: DailyLocal | undefined = loadDailyLocal()): { status: string; done: boolean } {
+  const run = dailyRun(rec, date);
+  if (run) return { status: `${runTotal(run)}/${FATHOM_MAX}`, done: true };
+  return { status: local?.day.date === date && local.guesses.length > 0 ? "playing" : "new", done: false };
+}
+
 /** One finished game, by its startedAt. */
 export const findRun = (rec: FathomRecord | undefined, startedAt: number): FathomRun | undefined =>
   rec?.runs?.find((r) => r.startedAt === startedAt);
@@ -149,8 +198,12 @@ function readRun(x: unknown): FathomRun | null {
     guesses: x.guesses as number[],
     ...(Object.keys(picks).length && { picks: picks as Record<string, string> }),
     points: x.points as number[],
+    ...(isDay(x.daily) && { daily: { date: x.daily.date, n: x.daily.n } }),
   };
 }
+
+const isDay = (x: unknown): x is FathomDay =>
+  isObj(x) && typeof x.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(x.date) && isNum(x.n) && Number.isInteger(x.n) && x.n > 0;
 
 /** Fathom's part of a save as it can be trusted (bad entries dropped), or undefined when there is none. */
 export function sanitizeFathom(x: unknown): FathomRecord | undefined {

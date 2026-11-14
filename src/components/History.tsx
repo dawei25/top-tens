@@ -51,7 +51,9 @@ function href(p: Play): string {
  */
 function tag(p: Play): string {
   if (p.kind === "list") return p.run.daily ? `List #${p.run.daily}` : "List";
-  return p.kind === "fathom" ? "Fathom" : "Blitz";
+  // A day's Fathom by its number ("Fathom #12", as Today's list's "List #22"); an endless game plain "Fathom".
+  if (p.kind === "fathom") return p.run.daily ? `Fathom #${p.run.daily.n}` : "Fathom";
+  return "Blitz";
 }
 
 /**

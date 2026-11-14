@@ -612,7 +612,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 <span className={`score-n ${game.status === "won" ? "gold" : ""}`}><CountUp value={game.found.length} /></span>
                 <span className="score-of">/10</span>
               </p>
-              {par && <ParBlock list={par} score={game.found.length} id={puzzle.id} />}
+              {par && <ParBlock list={par} score={game.found.length} id={puzzle.id} today={daily?.date === today} />}
               <p className="caption">
                 {game.status === "won"
                   ? `with ${game.lives} ${game.lives === 1 ? "life" : "lives"} to spare.`

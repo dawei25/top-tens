@@ -1,0 +1,673 @@
+[
+ {
+  "n": 1,
+  "date": "2026-11-14",
+  "ids": [
+   "hen-eggs-per-year",
+   "name-country-10m-people",
+   "ring-of-fire-earthquakes",
+   "record-painting-price",
+   "first-underground-railway"
+  ]
+ },
+ {
+  "n": 2,
+  "date": "2026-11-15",
+  "ids": [
+   "left-handed-share",
+   "hummingbird-heart-rate",
+   "first-email",
+   "name-country-as-big-as-france",
+   "perseverance-trip"
+  ]
+ },
+ {
+  "n": 3,
+  "date": "2026-11-16",
+  "ids": [
+   "moonwalkers",
+   "name-country-50m-people",
+   "everest-first-ascent",
+   "wild-mammals-share",
+   "neapolitan-pizza-oven"
+  ]
+ },
+ {
+  "n": 4,
+  "date": "2026-11-17",
+  "ids": [
+   "adult-bones",
+   "forest-cover-share",
+   "titanic-sinking",
+   "name-country-3-borders",
+   "everest-boiling-point"
+  ]
+ },
+ {
+  "n": 5,
+  "date": "2026-11-18",
+  "ids": [
+   "oldest-person-age",
+   "name-country-no-land-borders",
+   "fresh-water-share",
+   "wright-first-flight-year",
+   "us-penny-cost"
+  ]
+ },
+ {
+  "n": 6,
+  "date": "2026-11-19",
+  "ids": [
+   "first-iphone",
+   "hot-dog-eating-record",
+   "iss-orbit-time",
+   "amazon-in-brazil",
+   "name-city-10m-people"
+  ]
+ },
+ {
+  "n": 7,
+  "date": "2026-11-20",
+  "ids": [
+   "tallest-person",
+   "first-text-message",
+   "name-city-20m-people",
+   "southern-hemisphere-people",
+   "van-gogh-oil-paintings"
+  ]
+ },
+ {
+  "n": 8,
+  "date": "2026-11-21",
+  "ids": [
+   "first-harry-potter-book",
+   "mars-gravity-share",
+   "elephant-pregnancy",
+   "name-country-6-borders",
+   "marathon-distance"
+  ]
+ },
+ {
+  "n": 9,
+  "date": "2026-11-22",
+  "ids": [
+   "high-jump-record",
+   "first-bitcoins",
+   "air-oxygen-share",
+   "name-country-1m-people",
+   "lunar-day"
+  ]
+ },
+ {
+  "n": 10,
+  "date": "2026-11-23",
+  "ids": [
+   "dinosaur-extinction",
+   "f1-fastest-pit-stop",
+   "sputnik-launch",
+   "name-country-100m-people",
+   "red-green-colour-blind-men"
+  ]
+ },
+ {
+  "n": 11,
+  "date": "2026-11-24",
+  "ids": [
+   "cheetah-top-speed",
+   "moon-visible-share",
+   "first-modern-olympics",
+   "name-country-as-big-as-uk",
+   "horizon-distance"
+  ]
+ },
+ {
+  "n": 12,
+  "date": "2026-11-25",
+  "ids": [
+   "piano-keys",
+   "skydiver-fall-speed",
+   "name-country-9-borders",
+   "internet-users-share",
+   "coca-cola-invented"
+  ]
+ },
+ {
+  "n": 13,
+  "date": "2026-11-26",
+  "ids": [
+   "moonwalkers",
+   "first-underground-railway",
+   "name-country-6-borders",
+   "forest-cover-share",
+   "speed-of-sound"
+  ]
+ },
+ {
+  "n": 14,
+  "date": "2026-11-27",
+  "ids": [
+   "body-water-share",
+   "name-country-no-land-borders",
+   "first-bitcoins",
+   "venus-surface-temperature",
+   "record-painting-price"
+  ]
+ },
+ {
+  "n": 15,
+  "date": "2026-11-28",
+  "ids": [
+   "adult-blood-volume",
+   "empire-state-build-time",
+   "moon-visible-share",
+   "penicillin-discovery",
+   "name-country-100m-people"
+  ]
+ },
+ {
+  "n": 16,
+  "date": "2026-11-29",
+  "ids": [
+   "oldest-person-age",
+   "everest-first-ascent",
+   "elephant-pregnancy",
+   "name-country-1m-people",
+   "netherlands-below-sea-level"
+  ]
+ },
+ {
+  "n": 17,
+  "date": "2026-11-30",
+  "ids": [
+   "first-iphone",
+   "f1-fastest-pit-stop",
+   "ring-of-fire-earthquakes",
+   "iss-orbit-time",
+   "name-country-as-big-as-uk"
+  ]
+ },
+ {
+  "n": 18,
+  "date": "2026-12-01",
+  "ids": [
+   "dinosaur-extinction",
+   "us-penny-cost",
+   "beetle-share-of-animals",
+   "first-heart-transplant",
+   "name-city-20m-people"
+  ]
+ },
+ {
+  "n": 19,
+  "date": "2026-12-02",
+  "ids": [
+   "amazon-in-brazil",
+   "van-gogh-oil-paintings",
+   "lunar-day",
+   "first-text-message",
+   "name-country-10m-people"
+  ]
+ },
+ {
+  "n": 20,
+  "date": "2026-12-03",
+  "ids": [
+   "first-star-wars-film",
+   "bolt-top-speed",
+   "name-country-50m-people",
+   "wild-mammals-share",
+   "longest-space-stay"
+  ]
+ },
+ {
+  "n": 21,
+  "date": "2026-12-04",
+  "ids": [
+   "new-york-city-population",
+   "name-country-3-borders",
+   "air-oxygen-share",
+   "coca-cola-invented",
+   "longest-tennis-match"
+  ]
+ },
+ {
+  "n": 22,
+  "date": "2026-12-05",
+  "ids": [
+   "piano-keys",
+   "first-modern-olympics",
+   "greenland-ice-share",
+   "name-country-as-big-as-france",
+   "fingernail-growth"
+  ]
+ },
+ {
+  "n": 23,
+  "date": "2026-12-06",
+  "ids": [
+   "football-pitch-length",
+   "fresh-water-share",
+   "name-city-10m-people",
+   "neapolitan-pizza-oven",
+   "wright-first-flight-year"
+  ]
+ },
+ {
+  "n": 24,
+  "date": "2026-12-07",
+  "ids": [
+   "marathon-distance",
+   "southern-hemisphere-people",
+   "breath-hold-record",
+   "sputnik-launch",
+   "name-country-9-borders"
+  ]
+ },
+ {
+  "n": 25,
+  "date": "2026-12-08",
+  "ids": [
+   "eiffel-tower-height",
+   "moonwalkers",
+   "name-city-20m-people",
+   "everest-first-ascent",
+   "red-green-colour-blind-men"
+  ]
+ },
+ {
+  "n": 26,
+  "date": "2026-12-09",
+  "ids": [
+   "first-modern-olympics",
+   "internet-users-share",
+   "deepest-hole",
+   "name-country-9-borders",
+   "horizon-distance"
+  ]
+ },
+ {
+  "n": 27,
+  "date": "2026-12-10",
+  "ids": [
+   "first-star-wars-film",
+   "bolt-top-speed",
+   "name-country-100m-people",
+   "earth-spin-speed",
+   "beetle-share-of-animals"
+  ]
+ },
+ {
+  "n": 28,
+  "date": "2026-12-11",
+  "ids": [
+   "piano-keys",
+   "ring-of-fire-earthquakes",
+   "coca-cola-invented",
+   "mars-year",
+   "name-country-1m-people"
+  ]
+ },
+ {
+  "n": 29,
+  "date": "2026-12-12",
+  "ids": [
+   "amazon-in-brazil",
+   "wright-first-flight-year",
+   "all-gold-mined",
+   "breath-hold-record",
+   "name-country-6-borders"
+  ]
+ },
+ {
+  "n": 30,
+  "date": "2026-12-13",
+  "ids": [
+   "hen-eggs-per-year",
+   "forest-cover-share",
+   "name-country-as-big-as-france",
+   "us-penny-cost",
+   "penicillin-discovery"
+  ]
+ },
+ {
+  "n": 31,
+  "date": "2026-12-14",
+  "ids": [
+   "football-pitch-length",
+   "neapolitan-pizza-oven",
+   "name-country-10m-people",
+   "first-youtube-video-year",
+   "air-oxygen-share"
+  ]
+ },
+ {
+  "n": 32,
+  "date": "2026-12-15",
+  "ids": [
+   "adult-bones",
+   "name-country-50m-people",
+   "longest-tennis-match",
+   "wild-mammals-share",
+   "first-text-message"
+  ]
+ },
+ {
+  "n": 33,
+  "date": "2026-12-16",
+  "ids": [
+   "dinosaur-extinction",
+   "elephant-pregnancy",
+   "name-country-as-big-as-uk",
+   "greenland-ice-share",
+   "first-iphone"
+  ]
+ },
+ {
+  "n": 34,
+  "date": "2026-12-17",
+  "ids": [
+   "new-york-city-population",
+   "fingernail-growth",
+   "moon-visible-share",
+   "name-country-3-borders",
+   "first-email"
+  ]
+ },
+ {
+  "n": 35,
+  "date": "2026-12-18",
+  "ids": [
+   "adult-blood-volume",
+   "first-underground-railway",
+   "speed-of-sound",
+   "mars-gravity-share",
+   "name-city-10m-people"
+  ]
+ },
+ {
+  "n": 36,
+  "date": "2026-12-19",
+  "ids": [
+   "record-transfer-fee",
+   "southern-hemisphere-people",
+   "record-painting-price",
+   "name-country-no-land-borders",
+   "first-bitcoins"
+  ]
+ },
+ {
+  "n": 37,
+  "date": "2026-12-20",
+  "ids": [
+   "marathon-distance",
+   "name-country-100m-people",
+   "czech-beer",
+   "first-iphone",
+   "forest-cover-share"
+  ]
+ },
+ {
+  "n": 38,
+  "date": "2026-12-21",
+  "ids": [
+   "body-water-share",
+   "moon-landing-audience",
+   "first-underground-railway",
+   "longest-space-stay",
+   "name-country-no-land-borders"
+  ]
+ },
+ {
+  "n": 39,
+  "date": "2026-12-22",
+  "ids": [
+   "left-handed-share",
+   "iss-orbit-time",
+   "titanic-sinking",
+   "name-country-as-big-as-uk",
+   "concorde-speed"
+  ]
+ },
+ {
+  "n": 40,
+  "date": "2026-12-23",
+  "ids": [
+   "tallest-person",
+   "name-country-1m-people",
+   "bolt-top-speed",
+   "moon-visible-share",
+   "lego-brick-patent"
+  ]
+ },
+ {
+  "n": 41,
+  "date": "2026-12-24",
+  "ids": [
+   "piano-keys",
+   "sputnik-launch",
+   "speed-of-sound",
+   "greenland-ice-share",
+   "name-city-20m-people"
+  ]
+ },
+ {
+  "n": 42,
+  "date": "2026-12-25",
+  "ids": [
+   "football-pitch-length",
+   "ring-of-fire-earthquakes",
+   "name-city-10m-people",
+   "coca-cola-invented",
+   "perseverance-trip"
+  ]
+ },
+ {
+  "n": 43,
+  "date": "2026-12-26",
+  "ids": [
+   "high-jump-record",
+   "brain-energy-share",
+   "wright-first-flight-year",
+   "hot-dog-eating-record",
+   "name-country-50m-people"
+  ]
+ },
+ {
+  "n": 44,
+  "date": "2026-12-27",
+  "ids": [
+   "record-transfer-fee",
+   "netherlands-below-sea-level",
+   "name-country-10m-people",
+   "lunar-day",
+   "first-email"
+  ]
+ },
+ {
+  "n": 45,
+  "date": "2026-12-28",
+  "ids": [
+   "new-york-city-population",
+   "beetle-share-of-animals",
+   "oldest-bread",
+   "name-country-as-big-as-france",
+   "first-harry-potter-book"
+  ]
+ },
+ {
+  "n": 46,
+  "date": "2026-12-29",
+  "ids": [
+   "first-star-wars-film",
+   "air-oxygen-share",
+   "venus-surface-temperature",
+   "name-country-6-borders",
+   "elephant-daily-food"
+  ]
+ },
+ {
+  "n": 47,
+  "date": "2026-12-30",
+  "ids": [
+   "adult-bones",
+   "name-country-9-borders",
+   "avocado-fat-share",
+   "penicillin-discovery",
+   "dinosaur-extinction"
+  ]
+ },
+ {
+  "n": 48,
+  "date": "2026-12-31",
+  "ids": [
+   "oldest-person-age",
+   "earth-spin-speed",
+   "name-country-3-borders",
+   "first-bitcoins",
+   "amazon-in-brazil"
+  ]
+ },
+ {
+  "n": 49,
+  "date": "2027-01-01",
+  "ids": [
+   "new-york-city-population",
+   "oldest-bread",
+   "fresh-water-share",
+   "name-country-10m-people",
+   "first-youtube-video-year"
+  ]
+ },
+ {
+  "n": 50,
+  "date": "2027-01-02",
+  "ids": [
+   "left-handed-share",
+   "neapolitan-pizza-oven",
+   "name-country-50m-people",
+   "moon-landing-audience",
+   "first-underground-railway"
+  ]
+ },
+ {
+  "n": 51,
+  "date": "2027-01-03",
+  "ids": [
+   "piano-keys",
+   "forest-cover-share",
+   "speed-of-sound",
+   "first-text-message",
+   "name-country-6-borders"
+  ]
+ },
+ {
+  "n": 52,
+  "date": "2027-01-04",
+  "ids": [
+   "tallest-person",
+   "lego-brick-patent",
+   "lunar-day",
+   "amazon-in-brazil",
+   "name-country-1m-people"
+  ]
+ },
+ {
+  "n": 53,
+  "date": "2027-01-05",
+  "ids": [
+   "hen-eggs-per-year",
+   "skydiver-fall-speed",
+   "avocado-fat-share",
+   "name-country-3-borders",
+   "wright-first-flight-year"
+  ]
+ },
+ {
+  "n": 54,
+  "date": "2027-01-06",
+  "ids": [
+   "high-jump-record",
+   "titanic-sinking",
+   "name-country-as-big-as-uk",
+   "internet-users-share",
+   "breath-hold-record"
+  ]
+ },
+ {
+  "n": 55,
+  "date": "2027-01-07",
+  "ids": [
+   "dinosaur-extinction",
+   "first-modern-olympics",
+   "name-city-20m-people",
+   "hummingbird-heart-rate",
+   "southern-hemisphere-people"
+  ]
+ },
+ {
+  "n": 56,
+  "date": "2027-01-08",
+  "ids": [
+   "record-transfer-fee",
+   "air-oxygen-share",
+   "name-country-100m-people",
+   "empire-state-build-time",
+   "first-harry-potter-book"
+  ]
+ },
+ {
+  "n": 57,
+  "date": "2027-01-09",
+  "ids": [
+   "adult-bones",
+   "name-country-9-borders",
+   "ring-of-fire-earthquakes",
+   "czech-beer",
+   "penicillin-discovery"
+  ]
+ },
+ {
+  "n": 58,
+  "date": "2027-01-10",
+  "ids": [
+   "oldest-person-age",
+   "first-iphone",
+   "moon-visible-share",
+   "name-country-no-land-borders",
+   "youtube-new-video"
+  ]
+ },
+ {
+  "n": 59,
+  "date": "2027-01-11",
+  "ids": [
+   "eiffel-tower-height",
+   "record-painting-price",
+   "name-country-as-big-as-france",
+   "first-email",
+   "wild-mammals-share"
+  ]
+ },
+ {
+  "n": 60,
+  "date": "2027-01-12",
+  "ids": [
+   "first-star-wars-film",
+   "football-pitch-length",
+   "brain-energy-share",
+   "concorde-speed",
+   "name-city-10m-people"
+  ]
+ },
+ {
+  "n": 61,
+  "date": "2027-01-13",
+  "ids": [
+   "titanic-sinking",
+   "marathon-distance",
+   "neapolitan-pizza-oven",
+   "name-country-1m-people",
+   "mars-gravity-share"
+  ]
+ }
+]

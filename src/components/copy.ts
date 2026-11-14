@@ -71,11 +71,15 @@ export const RECORD_PLAYED = "lists played";
 
 /** Fathom's key on Stats before the first game: what it does (UX 1). */
 export const FATHOM_PLAY = "Play Fathom";
-/** An old Fathom game from Past runs, while another is under way: back to that one. */
-export const FATHOM_BACK = "Back to your game";
-/** Home's Fathom key, where the other free-play keys count their lists; on the narrowest phones only its end. */
-export const FATHOM_LINE = "Guess the number: 5 questions";
-export const FATHOM_LINE_SHORT = "5 questions";
+/** The day's Fathom (owner, Nov 14): Home's key under Today's list, the menu's tile, a past game's way back to it. */
+export const FATHOM_TODAY = "Today's Fathom";
+
+/**
+ * Where a game stands against other players, under the histogram: "better than 36% of players", and "today" on a
+ * daily on its own day (owner, Nov 14: "dont specify estimated just say you did better than xx% of players today with a
+ * histogram"). Never "estimated", whatever the crowd is made of.
+ */
+export const playersLine = (p: number, today: boolean): string => `better than ${p}% of players${today ? " today" : ""}`;
 
 /** "No life lost.", wrapping as one piece: onto its own line when the sentence before it fills the first. */
 export const NO_LIFE_LOST = ["No", "life", "lost."].join(NBSP);

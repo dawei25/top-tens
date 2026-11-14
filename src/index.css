@@ -527,6 +527,7 @@ a {
 .today-stack {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 /* Wide enough: a key that wide doesn't need its phone height. */
 @media (min-width: 640px) {
@@ -700,44 +701,17 @@ a {
 .free-key.blitz {
   --accent: var(--gold);
 }
-/* Fathom: no categories, so its key stands alone; side by side, it takes the row under the pair, as tall as its content
-   (a free-play key's height without the strip). Its line says what it is, and wraps on the narrowest phones. */
-.free-key.fathom {
-  --accent: var(--cyan);
-}
+/* Today's Fathom (owner, Nov 14): under Today's list, a key as tall as free play's, quiet like them; its state in
+   cyan until it's played, then settled. */
 .mode-key.fathom {
   --accent: var(--cyan);
 }
-.mode-key.fathom .key-sub {
-  white-space: nowrap;
-  text-align: right;
+.today-stack .mode-key.fathom .key-sub {
+  font-size: 17px;
+  color: var(--cyan);
 }
-/* Narrower than a 390 phone only "5 questions": the whole line wrapped at 320 and made the key taller than its
-   neighbours (UX 8); from 390 it fits on one line. */
-.mode-key.fathom .sub-short {
-  display: none;
-}
-@media (max-width: 389px) {
-  .mode-key.fathom .sub-long {
-    display: none;
-  }
-  .mode-key.fathom .sub-short {
-    display: inline;
-  }
-}
-@media (min-width: 640px) {
-  .mode-pair > .free-key.fathom {
-    grid-column: 1 / -1;
-  }
-  /* The whole row is room enough for one line: the title at the left, its line at the right. */
-  .mode-key.fathom {
-    flex-direction: row-reverse;
-    align-items: center;
-    min-height: 0;
-  }
-  .mode-key.fathom .mode-key-top {
-    flex: 1;
-  }
+.today-stack .mode-key.fathom.done .key-sub {
+  color: var(--label);
 }
 .cat-strip {
   display: flex;

@@ -14,7 +14,6 @@ import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
 import { freshBlitz } from "./game/blitz";
 import { freshList, lastPlayed } from "./game/history";
-import { wantFreshFathom } from "./game/fathom-history";
 import {
   blitzOfTheDay,
   rollHoldouts,
@@ -43,7 +42,7 @@ type Route =
   | { screen: "stats" }
   | { screen: "privacy" }
   | { screen: "settings" }
-  | { screen: "fathom"; run?: number }
+  | { screen: "fathom"; mode: "daily" | "endless"; run?: number }
   /** An old link to a date's Blitz (from before Nov 10, when each day also had one): replaced on arrival, see App. */
   | { screen: "dailyblitz"; date: string; runs: boolean; run?: number };
 
@@ -53,10 +52,12 @@ function readHash(): Route {
   if (h === "#stats") return { screen: "stats" };
   if (h === "#privacy") return { screen: "privacy" };
   if (h === "#settings") return { screen: "settings" };
-  // Fathom, the estimation game (Home's Free play, the menu), and one of its finished games from Past runs.
-  if (h === "#fathom") return { screen: "fathom" };
+  // Today's Fathom (Home's key under Today's list, the menu); endless Fathom, hidden (owner, Nov 14: "remove the
+  // unlimited fathom play for now- keep access to it via a hidden url"), linked nowhere; one finished game from Past runs.
+  if (h === "#fathom") return { screen: "fathom", mode: "daily" };
+  if (h === "#fathom-endless") return { screen: "fathom", mode: "endless" };
   const fathomRun = h.match(/^#fathom\/run-(\d+)$/);
-  if (fathomRun) return { screen: "fathom", run: Number(fathomRun[1]) };
+  if (fathomRun) return { screen: "fathom", mode: "daily", run: Number(fathomRun[1]) };
   // The Blitz-only runs screen became Past runs, which lists list games and Blitz rounds together.
   if (h === "#blitz-history") history.replaceState(null, "", "#history");
   if (h === "#history" || h === "#blitz-history") return { screen: "history" };
@@ -133,9 +134,8 @@ function NoList({ text, onHome }: { text: string; onHome: () => void }) {
   );
 }
 
-/** Fathom from Home's key or the menu's tile: new questions if the last game is over, else that game, where it was. */
+/** Today's Fathom, from Home's key under Today's list and the menu's tile. */
 function openFathom() {
-  wantFreshFathom();
   location.hash = "#fathom";
 }
 
@@ -318,6 +318,7 @@ function Screens() {
   const blitzOnScreen = route.screen === "blitz" ? route.id : undefined;
   const nav: MenuNav = {
     current: menuScreen(route, current?.date),
+    today,
     entry: current,
     blitzOpen: openBlitz().length,
     blitzOnScreen,
@@ -371,7 +372,7 @@ function Screens() {
 
     if (route.screen === "settings") return <Settings onBack={back} onHome={home} />;
 
-    if (route.screen === "fathom") return <FathomScreen onBack={back} onHome={home} run={route.run} />;
+    if (route.screen === "fathom") return <FathomScreen onBack={back} onHome={home} run={route.run} mode={route.mode} today={today} />;
 
     if (route.screen === "stats") {
       return <Knowledge index={index} entry={todayEntry(schedule, today)} onBack={back} onHome={home} />;
@@ -422,6 +423,7 @@ function Screens() {
         freeLists={rollableLists(schedule, index, load(), today)}
         onArchive={() => (location.hash = "#archive")}
         onFathom={openFathom}
+        today={today}
       />
     );
   };
@@ -443,9 +445,9 @@ function menuScreen(route: Route, dailyDate?: string): MenuScreen | undefined {
     case "settings":
     case "privacy":
       return route.screen;
-    // A game, not a past one (that is Past runs' row).
+    // Today's Fathom, not a past game (that is Past runs' row) or the hidden endless one.
     case "fathom":
-      return route.run === undefined ? "fathom" : undefined;
+      return route.run === undefined && route.mode === "daily" ? "today-fathom" : undefined;
     default:
       return undefined;
   }

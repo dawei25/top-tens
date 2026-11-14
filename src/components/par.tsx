@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { loadPar, percentileLabel, type ListPar, type ParFile } from "../game/par";
+import { loadPar, type ListPar, type ParFile } from "../game/par";
 import { useListStats } from "../net";
-import { blendAverage, blendCounts, formatCount, standing } from "../net/crowd";
+import { blendAverage, blendCounts, standing } from "../net/crowd";
+import { playersLine } from "./copy";
 
 // Players see this figure as the players' average ("avg"), and only once a game is over: the results, Past runs and
 // Stats. The code keeps the data's name for it, par (par.json).
@@ -71,16 +72,16 @@ export function ParHistogram({ counts, par, score }: { counts: number[]; par: nu
 
 /**
  * The results panel's average block: what players average on the list, the histogram, and where the score stands.
- * It reads at a glance, with nothing to hover: "PLAYERS AVG 6", "top 45% of players", and "(estimated)" in plain
- * words while the numbers lean on simulated players rather than real ones. With a backend (and the list's id), real
- * players join the estimate as they finish the list (net/crowd's blend: the estimate counts as ESTIMATE_WEIGHT
- * players), and once they outweigh it the line names them: "better than 12% of 1,203 players".
+ * It reads at a glance, with nothing to hover: "PLAYERS AVG 6", "better than 36% of players", and "today" on a daily
+ * on its own day (`today`). With a backend (and the list's id), real players join the estimate as they finish the
+ * list (net/crowd's blend: the estimate counts as ESTIMATE_WEIGHT players). Never "(estimated)" (owner, Nov 14: "dont
+ * specify estimated just say you did better than xx% of players today with a histogram").
  */
-export function ParBlock({ list, score, id }: { list: ListPar; score: number; id?: string }) {
+export function ParBlock({ list, score, id, today = false }: { list: ListPar; score: number; id?: string; today?: boolean }) {
   const real = useListStats(id, "list");
   const counts = blendCounts(list.counts, real);
   // (Null only for an entry with no counts at all, which par.json never has.)
-  const { p, n, estimated } = standing(list.counts, real, score) ?? { p: 0, n: 0, estimated: true };
+  const { p, estimated } = standing(list.counts, real, score) ?? { p: 0, estimated: true };
   const avg = Math.round((blendAverage(list.par, real) ?? list.par) * 10) / 10;
   return (
     <div
@@ -98,14 +99,9 @@ export function ParBlock({ list, score, id }: { list: ListPar; score: number; id
         </p>
         <ParHistogram counts={counts} par={avg} score={score} />
       </div>
-      <p className="par-line">
-        {/* One text node, as before real players: split nodes shape the pixel font a little differently. */}
-        <span>{`${percentileLabel(p)} of ${estimated ? "" : formatCount(n) + " "}players`}</span>{" "}
-        {estimated && list.estimated && (
-          <span className="par-est" data-testid="par-est">
-            (estimated)
-          </span>
-        )}
+      <p className="par-line" data-testid="par-line">
+        {/* One text node: split nodes shape the pixel font a little differently. */}
+        <span>{playersLine(p, today)}</span>
       </p>
     </div>
   );
