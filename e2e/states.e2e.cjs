@@ -96,11 +96,13 @@ const SCREENS = [
     },
   },
   {
+    // Ranks 11 to 20 show under the board at once (no key since Nov 14): they hold still through every state too.
     name: "list game over",
     setup: async (page) => {
       // Escape closes the clue confirm (if it's still open; without it, Escape would mean Back).
       if (await page.getByTestId("hint-yes").count()) await page.keyboard.press("Escape");
       await giveUp(page);
+      await page.getByTestId("more-rank").first().waitFor();
       await tick(page);
     },
   },
@@ -109,14 +111,6 @@ const SCREENS = [
     setup: async (page) => {
       await page.locator('[data-testid="slot"][data-rank="1"]').click();
       await page.locator(".slot.fact-open").first().waitFor();
-    },
-  },
-  {
-    // Ranks 11 to 20 open under the board: its key (now Hide) and the rows hold still through every state.
-    name: "list game over, ranks 11 to 20 open",
-    setup: async (page) => {
-      await page.getByTestId("more-ranks-toggle").click();
-      await page.getByTestId("more-rank").first().waitFor();
     },
   },
   {

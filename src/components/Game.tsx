@@ -533,7 +533,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
               );
             })}
           </ol>
-          {/* Under the board: GIVE UP while playing; once over, ranks 11 to 20 behind a key, the guessed ones marked. */}
+          {/* Under the board: GIVE UP while playing; once over, ranks 11 to 20 below a divider, the guessed ones marked. */}
           {over && <MoreRanks puzzle={puzzle} guessed={new Set(misses.map((m) => m.rank))} />}
           {!over && (
             <div className="board-foot">

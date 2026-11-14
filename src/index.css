@@ -1355,9 +1355,12 @@ a {
 .board {
   padding: 8px 0 6px;
 }
-/* Shared by the header and the rows (in px, so the header's smaller type doesn't shift its columns). */
+/* Shared by the header and the rows (in px, so the header's smaller type doesn't shift its columns), and by ranks 11 to
+   20 under a finished board (their divider sets its own display). */
 .board-head,
-.slot {
+.slot,
+.ranks-divider,
+.next-rank {
   --slot-pad: 16px;
   --rank-col: 75px;
   --slot-gap: 12px;
@@ -1630,25 +1633,84 @@ a {
 .slot.missed .value {
   color: var(--muted);
 }
-/* Ranks 11 to 20 under a finished board (MoreRanks): rows like the missed ones, below their key; the ones the player
-   guessed (a life each) in the misses' pink, on the chips' tint. */
-.more-ranks {
-  border-top: 1px dashed var(--hairline);
-  margin-top: 6px;
-  padding-top: 2px;
-}
-.slot.extra .rank,
-.slot.extra .name,
-.slot.extra .value {
+/* Ranks 11 to 20 under a finished board (MoreRanks), shown directly (owner, Nov 14: "be sure to differentiate the top
+   10 from 11-20"): a divider row with its label in the header's small caps, then rows a step smaller and dimmer than
+   the top 10's, with no row lines or minimum height, so the top 10 stays the hero. Same columns as the board, so the
+   names line up. Rank and figure dimmer than the name (still about 4.6:1); the ones the player guessed (a life each)
+   in the misses' pink, on the chips' tint. */
+.ranks-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 0 0 4px;
+  font-size: 14px;
+  line-height: 1.15;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
   color: var(--muted);
 }
-.slot.extra.guessed {
+.ranks-divider::before,
+.ranks-divider::after {
+  content: "";
+  flex: 1 1 0;
+  border-top: 1px dashed var(--hairline);
+}
+/* The rule runs edge to edge, like the header's; the label starts where the names do. */
+.ranks-divider::before {
+  flex: 0 0 calc(var(--slot-pad) + var(--rank-col) + var(--slot-gap) - 12px);
+}
+.next-ranks {
+  list-style: none;
+  padding: 0 0 4px;
+}
+.next-rank {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.next-rank .rank,
+.next-rank .value {
+  color: rgba(125, 147, 184, 0.85);
+}
+.next-rank .rank {
+  font-size: 20px;
+}
+.next-rank .name {
+  font-size: 21px;
+  color: var(--muted);
+}
+.next-rank .value {
+  font-size: 17px;
+}
+.next-rank.guessed {
   background: rgba(255, 93, 143, 0.08);
 }
-.slot.extra.guessed .rank,
-.slot.extra.guessed .name,
-.slot.extra.guessed .value {
+.next-rank.guessed .rank,
+.next-rank.guessed .name,
+.next-rank.guessed .value {
   color: var(--pink);
+}
+@media (min-width: 640px) {
+  .next-rank .rank {
+    font-size: 22px;
+  }
+  .next-rank .name {
+    font-size: 22px;
+  }
+  .next-rank .value {
+    font-size: 19px;
+  }
+}
+@media (max-width: 420px) {
+  .next-rank .rank {
+    font-size: 18px;
+  }
+  .next-rank .name {
+    font-size: 19px;
+  }
+  .next-rank .value {
+    font-size: 16px;
+  }
 }
 
 .type-cursor {
@@ -2302,7 +2364,9 @@ a {
     padding-top: 24px;
   }
   .board-head,
-  .slot {
+  .slot,
+  .ranks-divider,
+  .next-rank {
     --slot-pad: 22px;
     --rank-col: 79px;
     --slot-gap: 18px;
@@ -2337,7 +2401,9 @@ a {
     padding-bottom: 4px;
   }
   .board-head,
-  .slot {
+  .slot,
+  .ranks-divider,
+  .next-rank {
     --slot-pad: 12px;
     --rank-col: 64px;
     --slot-gap: 10px;
