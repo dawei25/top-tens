@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import {
   amountText,
@@ -388,8 +388,11 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
   // Fetched with the bank, so it is there by the name-it round; a name read before it arrives waits for it.
   const [lexicon] = useState(loadLexicon);
   const short = useShort();
-  // The field on screen's lock-in for when its time is up (Ask and AskName set it).
+  // The field on screen's lock-in for when its time is up (Ask and AskName hand it over with `onExpire`).
   const expire = useRef<(() => boolean) | null>(null);
+  const onExpire = useCallback((fn: (() => boolean) | null) => {
+    expire.current = fn;
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -566,10 +569,10 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
                 lex={lex}
                 lexicon={lexicon}
                 onLock={lock}
-                expire={expire}
+                onExpire={onExpire}
               />
             ) : (
-              <Ask key={question.id} question={question} onLock={lock} expire={expire} />
+              <Ask key={question.id} question={question} onLock={lock} onExpire={onExpire} />
             )
           ) : (
             <Reveal
@@ -592,7 +595,7 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
  * line for what's wrong or what was read when the field doesn't show it, and LOCK IN. A phone gets a decimal keypad, or
  * for a year a plain number pad.
  */
-function Ask({ question, onLock, expire }: { question: FathomQuestion; onLock: (value: number) => void; expire: Expire }) {
+function Ask({ question, onLock, onExpire }: { question: FathomQuestion; onLock: (value: number) => void; onExpire: OnExpire }) {
   const [text, setText] = useState("");
   const [error, setError] = useState<NumberError | null>(null);
   const round = roundOf(question);
@@ -600,18 +603,13 @@ function Ask({ question, onLock, expire }: { question: FathomQuestion; onLock: (
   const value = "value" in reading ? reading.value : null;
   // At 0 seconds: a guess that reads locks in.
   useEffect(() => {
-    expire.current = () => {
+    onExpire(() => {
       if (value === null) return false;
       onLock(value);
       return true;
-    };
+    });
   });
-  useEffect(
-    () => () => {
-      expire.current = null;
-    },
-    [expire],
-  );
+  useEffect(() => () => onExpire(null), [onExpire]);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -687,10 +685,10 @@ function Ask({ question, onLock, expire }: { question: FathomQuestion; onLock: (
 }
 
 /**
- * What the field on screen does when the time is up: locks in what's typed if it reads, and says whether it did. The
- * field sets it; the clock calls it.
+ * Hands the game what the field on screen does when the time is up: lock in what's typed if it reads, and say whether
+ * it did (null when the field goes). The clock calls it.
  */
-type Expire = { current: (() => boolean) | null };
+type OnExpire = (fn: (() => boolean) | null) => void;
 
 /** How long a name waits for the lexicon still on its way before it is read without it. */
 const LEXICON_WAIT_MS = 1500;
@@ -712,7 +710,7 @@ function AskName({
   lex,
   lexicon,
   onLock,
-  expire,
+  onExpire,
 }: {
   question: FathomQuestion;
   list: NameList;
@@ -721,7 +719,7 @@ function AskName({
   /** The lexicon on its way, if `lex` isn't here yet: a name read before it arrives waits for it (a moment at most). */
   lexicon?: Promise<Lexicon | undefined>;
   onLock: (value: number, pick: string) => void;
-  expire: Expire;
+  onExpire: OnExpire;
 }) {
   const [text, setText] = useState("");
   const [read, setRead] = useState<NameRead | null>(null);
@@ -731,20 +729,15 @@ function AskName({
   // At 0 seconds: a name the list has locks in, as LOCK IN would take it, and a misspelling of one thing too (it
   // would only have asked to confirm); several readings, another kind or nothing that reads scores 0.
   useEffect(() => {
-    expire.current = () => {
+    onExpire(() => {
       if (!text.trim()) return false;
       const r = readName(text, list, others, { lex, offered: offered.current, except: question.nameIt?.except });
       if (r.kind !== "answer" && r.kind !== "confirm") return false;
       onLock(r.entry.value, r.entry.name);
       return true;
-    };
+    });
   });
-  useEffect(
-    () => () => {
-      expire.current = null;
-    },
-    [expire],
-  );
+  useEffect(() => () => onExpire(null), [onExpire]);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
