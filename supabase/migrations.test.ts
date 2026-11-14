@@ -7,8 +7,9 @@ import { cleanMiss, looksPersonal } from "../src/net/misses";
 /**
  * The migrations, run in PGlite (Postgres in WebAssembly) against small stand-ins for what Supabase provides: the
  * anon, authenticated and service_role roles, auth.users and auth.uid(). Checks the contract the game relies on: who
- * can touch what, what submit_play, rate_list, submit_feedback, submit_fathom_guess and submit_miss accept, what the
- * stats, ratings and Fathom comparison functions return (every player counted, the owners and testers included), that
+ * can touch what, what submit_play, rate_list, submit_feedback, submit_fathom_guess, submit_fathom_play and submit_miss
+ * accept, what the stats, ratings, Fathom comparison and day totals functions return (every player counted, the owners
+ * and testers included), that
  * notes and missed guesses are read only with the reader key (list_feedback, list_misses), that a miss is normalized
  * as the game normalizes it and linked to nobody, the save's version check, and what account deletion
  * (api/delete-account.ts, as service_role) needs.
@@ -100,6 +101,13 @@ function suite(exposeNewTables: boolean) {
     db.query<{ ok: boolean }>("select public.submit_fathom_guess($1, $2, $3) as ok", [
       args.question === undefined ? "eiffel-tower-height" : args.question,
       args.guess === undefined ? 300 : args.guess,
+      args.client === undefined ? client(1) : args.client,
+    ]);
+
+  const fathomPlay = (args: { date?: string | null; total?: number | null; client?: string | null }) =>
+    db.query<{ ok: boolean }>("select public.submit_fathom_play($1, $2, $3) as ok", [
+      args.date === undefined ? utcDay() : args.date,
+      args.total === undefined ? 312 : args.total,
       args.client === undefined ? client(1) : args.client,
     ]);
 
@@ -816,6 +824,126 @@ function suite(exposeNewTables: boolean) {
       await db.query("delete from auth.users where id = $1", [F]);
       expect((await db.query("select * from public.fathom_guesses where user_id = $1", [F])).rows).toEqual([]);
       expect((await db.query<{ n: number }>("select count(*)::int as n from public.fathom_guesses where user_id is null")).rows[0].n).toBe(anonymous.rows[0].n);
+    });
+  });
+
+  describe("Today's Fathom totals", () => {
+    // P plays on two browsers; Q is anyone signed in.
+    const P = "78787878-7878-4787-8787-787878787878";
+    const Q = "9a9a9a9a-9a9a-49a9-89a9-9a9a9a9a9a9a";
+    type Row = { daily_date: string; total: number; user_id: string | null; client_id: string };
+    const rows = (from: number, to: number) =>
+      db.query<Row>(
+        "select to_char(daily_date, 'YYYY-MM-DD') as daily_date, total, user_id, client_id from public.fathom_plays where client_id between $1 and $2 order by id",
+        [client(from), client(to)],
+      );
+    type Day = { n: number; counts: number[]; avg: number | null };
+    /** fathom_day_stats as the game asks it: with the public key, signed out unless `user` is given. */
+    const day = async (date: string | null, user: string | null = null) =>
+      (await as(user ? "authenticated" : "anon", user, () => db.query<{ d: Day }>("select public.fathom_day_stats($1) as d", [date]))).rows[0].d;
+    const bins = (pairs: [bin: number, players: number][]) => {
+      const counts = Array<number>(50).fill(0);
+      for (const [bin, players] of pairs) counts[bin] += players;
+      return counts;
+    };
+    /** A date nobody else in these tests plays: tomorrow's, as a player ahead of UTC has it. */
+    const D = utcDay(1);
+
+    beforeAll(async () => {
+      await db.query("insert into auth.users (id, email) values ($1, 'p@example.com'), ($2, 'q@example.com')", [P, Q]);
+    });
+
+    it("keeps a browser's first total on a date, linked to the account while signed in", async () => {
+      await as("anon", null, async () => {
+        expect((await fathomPlay({ total: 312, client: client(3001) })).rows[0].ok).toBe(true);
+        // The same day again (another tab, a retry): the first total stays.
+        expect((await fathomPlay({ total: 480, client: client(3001) })).rows[0].ok).toBe(false);
+        // Yesterday's, as a player behind UTC has it: its own day.
+        expect((await fathomPlay({ date: utcDay(-1), total: 0, client: client(3001) })).rows[0].ok).toBe(true);
+      });
+      await as("authenticated", Q, () => fathomPlay({ total: 500, client: client(3002) }));
+      expect((await rows(3001, 3002)).rows).toEqual([
+        { daily_date: utcDay(), total: 312, user_id: null, client_id: client(3001) },
+        { daily_date: utcDay(-1), total: 0, user_id: null, client_id: client(3001) },
+        { daily_date: utcDay(), total: 500, user_id: Q, client_id: client(3002) },
+      ]);
+    });
+
+    it("refuses malformed totals with invalid_parameter_value (a 400 from the API)", async () => {
+      await as("anon", null, async () => {
+        const bad = [{ date: utcDay(-2) }, { date: utcDay(2) }, { date: null }, { total: -1 }, { total: 501 }, { total: null }, { client: null }];
+        for (const args of bad) expect(await code(fathomPlay({ client: client(3010), ...args })), JSON.stringify(args)).toBe("22023");
+      });
+      expect((await rows(3010, 3010)).rows).toEqual([]);
+    });
+
+    it("gives players no direct access to the table", async () => {
+      for (const [role, user] of [["anon", null], ["authenticated", Q]] as const) {
+        await as(role, user, async () => {
+          expect(await code(db.query("select * from public.fathom_plays"))).toBe("42501");
+          expect(await code(db.query("insert into public.fathom_plays (daily_date, total, client_id) values (current_date, 1, $1)", [client(3020)]))).toBe("42501");
+          expect(await code(db.query("update public.fathom_plays set total = 500"))).toBe("42501");
+          expect(await code(db.query("delete from public.fathom_plays"))).toBe("42501");
+        });
+      }
+    });
+
+    it("counts each player's first total on a date, in bins of 10 (500 with 490-499), everyone included", async () => {
+      await as("anon", null, async () => {
+        for (const [i, total] of [0, 9, 10, 255, 259, 499, 500].entries()) await fathomPlay({ date: D, total, client: client(3100 + i) });
+        // Another date's total is another day.
+        await fathomPlay({ date: utcDay(), total: 100, client: client(3100) });
+      });
+      // P: 300 on one browser, then 100 on another, later. One player: the first counts.
+      await as("authenticated", P, () => fathomPlay({ date: D, total: 300, client: client(3110) }));
+      await db.query("update public.fathom_plays set created_at = now() - interval '10 minutes' where client_id = $1", [client(3110)]);
+      await as("authenticated", P, () => fathomPlay({ date: D, total: 100, client: client(3111) }));
+      const expected = {
+        n: 8,
+        counts: bins([
+          [0, 2],
+          [1, 1],
+          [25, 2],
+          [30, 1],
+          [49, 2],
+        ]),
+        avg: Math.round(((0 + 9 + 10 + 255 + 259 + 499 + 500 + 300) / 8) * 100) / 100,
+      };
+      expect(await day(D)).toEqual(expected);
+      // The same for whoever asks: anyone signed in, or P themselves.
+      expect(await day(D, Q)).toEqual(expected);
+      expect(await day(D, P)).toEqual(expected);
+    });
+
+    it("answers the public key, with zeros for a date nobody played, and keeps its signature", async () => {
+      expect(await day("2026-01-01")).toEqual({ n: 0, counts: Array(50).fill(0), avg: null });
+      expect(await day(null)).toEqual({ n: 0, counts: Array(50).fill(0), avg: null });
+      const sig = await db.query<{ name: string; args: string; result: string }>(
+        `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
+         from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('fathom_day_stats', 'submit_fathom_play') order by 1`,
+      );
+      expect(sig.rows).toEqual([
+        { name: "fathom_day_stats", args: "p_date date", result: "json" },
+        { name: "submit_fathom_play", args: "p_date date, p_total integer, p_client_id uuid", result: "boolean" },
+      ]);
+    });
+
+    it("is safe to run again on a project that has it, and keeps what's there", async () => {
+      const before = await day(D);
+      await db.exec(readFileSync(join(dir, "20261114120000_fathom_plays.sql"), "utf8"));
+      expect(await day(D)).toEqual(before);
+      // And players still can't touch the table.
+      await as("anon", null, async () => expect(await code(db.query("select * from public.fathom_plays"))).toBe("42501"));
+    });
+
+    it("goes with the account when it is deleted, and account deletion (service_role) may clear it", async () => {
+      await as("service_role", null, async () => {
+        expect((await db.query("delete from public.fathom_plays where user_id = $1", [Q])).affectedRows).toBe(1);
+      });
+      const anonymous = await db.query<{ n: number }>("select count(*)::int as n from public.fathom_plays where user_id is null");
+      await db.query("delete from auth.users where id = $1", [P]);
+      expect((await db.query("select * from public.fathom_plays where user_id = $1", [P])).rows).toEqual([]);
+      expect((await db.query<{ n: number }>("select count(*)::int as n from public.fathom_plays where user_id is null")).rows[0].n).toBe(anonymous.rows[0].n);
     });
   });
 
