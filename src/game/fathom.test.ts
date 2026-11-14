@@ -42,10 +42,14 @@ import {
   roundOf,
   saveFathom,
   scoreFor,
+  QUESTION_SECONDS,
+  QUESTIONS_PER_GAME,
   scoreGame,
+  shareLines,
   shareText,
   startGame,
   timesOff,
+  timeUp,
   totalOf,
   unitShown,
   yearScore,
@@ -936,17 +940,18 @@ const KINDS: FathomKind[] = ["body", "animals", "landmarks", "places", "space", 
 const BANK = KINDS.map((kind, i) => q(`q${i}`, kind, { easy: i % 4 === 0 }));
 
 describe("the draw", () => {
-  it("draws five, no two of a kind, the first one easy", () => {
+  it("draws ten, no two of a kind while the bank has others, the first one easy", () => {
+    expect(QUESTIONS_PER_GAME).toBe(10);
     for (let seed = 1; seed <= 200; seed++) {
       const drawn = drawQuestions(BANK, [], seeded(seed));
-      expect(drawn).toHaveLength(5);
-      expect(new Set(drawn.map((d) => d.kind)).size).toBe(5);
+      expect(drawn).toHaveLength(10);
+      expect(new Set(drawn.map((d) => d.kind)).size).toBe(10);
       expect(drawn[0].easy).toBe(true);
     }
   });
   it("holds back the last three games' questions while the bank allows", () => {
-    // Three of each kind: with three games (15 questions) held back, at least seven kinds still have a fresh one.
-    const bank = [0, 1, 2].flatMap((n) => KINDS.map((kind, i) => q(`${n}-${i}`, kind, { easy: true })));
+    // Five of each kind: with three games (30 questions) held back, 30 are still fresh.
+    const bank = [0, 1, 2, 3, 4].flatMap((n) => KINDS.map((kind, i) => q(`${n}-${i}`, kind, { easy: true })));
     const rand = seeded(7);
     let recent: string[][] = [];
     for (let game = 0; game < 8; game++) {
@@ -956,13 +961,14 @@ describe("the draw", () => {
     }
   });
   it("brings back the oldest held-back questions first when it must", () => {
-    const bank = BANK.slice(0, 7).map((x) => ({ ...x, easy: true }));
-    const recent = [["q0", "q1", "q2"], ["q3", "q4"], ["q5"]];
+    const bank = BANK.map((x) => ({ ...x, easy: true }));
+    const recent = [["q0", "q1", "q2", "q3", "q4"], ["q5", "q6", "q7", "q8"], ["q9", "q10"]];
     const ids = drawQuestions(bank, recent, seeded(3)).map((d) => d.id);
-    // q6 (never played) first, then q5 (three games ago) and q3, q4 (two ago), and one from the last game.
-    expect(ids[0]).toBe("q6");
-    expect(ids.filter((id) => ["q3", "q4", "q5", "q6"].includes(id)).sort()).toEqual(["q3", "q4", "q5", "q6"]);
-    expect(ids.filter((id) => ["q0", "q1", "q2"].includes(id))).toHaveLength(1);
+    // q11 (never played) first, then q9, q10 (three games ago) and q5 to q8 (two ago), and three from the last game.
+    expect(ids[0]).toBe("q11");
+    const older = ["q5", "q6", "q7", "q8", "q9", "q10", "q11"];
+    expect(ids.filter((id) => older.includes(id)).sort()).toEqual([...older].sort());
+    expect(ids.filter((id) => recent[0].includes(id))).toHaveLength(3);
   });
   it("prefers an easy question for the first, even a recent one", () => {
     const bank = BANK.map((x) => ({ ...x, easy: x.id === "q4" }));
@@ -970,12 +976,17 @@ describe("the draw", () => {
     expect(drawn[0].id).toBe("q4");
   });
   it("repeats a kind rather than come up short, and copes with no easy question", () => {
-    const bank = [q("a", "food"), q("b", "food"), q("c", "food"), q("d", "body"), q("e", "body")];
+    const bank = "abcdefghij".split("").map((id, i) => q(id, i < 6 ? "food" : "body"));
     const drawn = drawQuestions(bank, [], seeded(9));
-    expect(drawn.map((d) => d.id).sort()).toEqual(["a", "b", "c", "d", "e"]);
-    // Kinds repeat only once the bank runs out of others: with a third kind, all three are in.
-    const wider = [...bank, q("f", "space")];
-    for (let seed = 1; seed <= 50; seed++) expect(new Set(drawQuestions(wider, [], seeded(seed)).map((d) => d.kind)).size).toBe(3);
+    expect(drawn.map((d) => d.id).sort()).toEqual("abcdefghij".split(""));
+    // Kinds repeat only once the bank runs out of others, and as evenly as it allows: with a third kind, all three are
+    // in, none more than four times.
+    const wider = [...bank, q("k", "space"), q("l", "space"), q("m", "space"), q("n", "space")];
+    for (let seed = 1; seed <= 50; seed++) {
+      const kinds = drawQuestions(wider, [], seeded(seed)).map((d) => d.kind);
+      expect(new Set(kinds).size).toBe(3);
+      for (const k of new Set(kinds)) expect(kinds.filter((x) => x === k).length, `seed ${seed}: ${k}`).toBeLessThanOrEqual(4);
+    }
   });
   it("is random", () => {
     const firsts = new Set(Array.from({ length: 60 }, (_, s) => drawQuestions(BANK, [], seeded(s + 1)).map((d) => d.id).join()));
@@ -994,52 +1005,55 @@ const MIXED = KINDS.flatMap((kind, i) => [
   yr(`y${i}`, KINDS[(i + 2) % 12], { easy: i % 4 === 1 }),
 ]);
 
-// The owner's revamp plan: five rounds a game, two estimates, a percent, a year, and a name-it round (another estimate
-// when the bank has none); a mixed order with an easy one first; at most two how tall / how heavy.
+// The owner's revamp plan, at ten questions since Nov 14 ("change it to 10 questions"): five estimates, two percents,
+// two years, and a name-it round (another estimate when the bank has none); a mixed order with an easy one first; at
+// most three how tall / how heavy.
 describe("the game's shape", () => {
   const rounds = (drawn: FathomQuestion[]) => drawn.map(roundOf);
   const count = (drawn: FathomQuestion[], round: Round) => rounds(drawn).filter((r) => r === round).length;
 
-  it("is two estimates, a percent, a year, and a fifth that is an estimate while the bank has no name-it round", () => {
-    expect(GAME_ROUNDS).toEqual(["estimate", "estimate", "percent", "year", "name"]);
+  it("is five estimates, two percents, two years, and a tenth that is an estimate while the bank has no name-it round", () => {
+    expect(GAME_ROUNDS).toEqual(["estimate", "estimate", "estimate", "estimate", "estimate", "percent", "percent", "year", "year", "name"]);
+    expect(GAME_ROUNDS).toHaveLength(QUESTIONS_PER_GAME);
     for (let seed = 1; seed <= 200; seed++) {
       const drawn = drawQuestions(MIXED, [], seeded(seed));
-      expect(drawn).toHaveLength(5);
-      expect([count(drawn, "estimate"), count(drawn, "percent"), count(drawn, "year")], `seed ${seed}`).toEqual([3, 1, 1]);
+      expect(drawn).toHaveLength(10);
+      expect([count(drawn, "estimate"), count(drawn, "percent"), count(drawn, "year")], `seed ${seed}`).toEqual([6, 2, 2]);
       expect(drawn[0].easy, `seed ${seed}`).toBe(true);
-      expect(new Set(drawn.map((d) => d.kind)).size, `seed ${seed}: five kinds`).toBe(5);
+      expect(new Set(drawn.map((d) => d.kind)).size, `seed ${seed}: ten kinds`).toBe(10);
     }
   });
-  it("mixes the order: the percent and the year turn up anywhere after the first", () => {
+  it("mixes the order: the percents and the years turn up anywhere after the first", () => {
     const at = (round: Round) => new Set(Array.from({ length: 200 }, (_, s) => rounds(drawQuestions(MIXED, [], seeded(s + 1))).indexOf(round)));
-    for (const round of ["percent", "year"] as const) for (const i of [1, 2, 3, 4]) expect(at(round).has(i), `${round} at ${i}`).toBe(true);
+    for (const round of ["percent", "year"] as const) for (const i of [1, 2, 3, 4, 5, 6, 7, 8]) expect(at(round).has(i), `${round} at ${i}`).toBe(true);
   });
   it(`has at most ${MAX_SIZE_PER_GAME} how tall / how heavy questions while the bank has others`, () => {
-    expect(MAX_SIZE_PER_GAME).toBe(2);
+    expect(MAX_SIZE_PER_GAME).toBe(3);
     // Half of MIXED's estimates are, so a draw that ignored them would often take three.
     for (let seed = 1; seed <= 300; seed++) {
       const drawn = drawQuestions(MIXED, [], seeded(seed));
       expect(drawn.filter(isSizeQuestion).length, `seed ${seed}`).toBeLessThanOrEqual(MAX_SIZE_PER_GAME);
     }
     // A bank of nothing else still fills a game.
-    const tall = KINDS.slice(0, 5).map((kind, i) => q(`t${i}`, kind, { question: `How tall is thing ${i}?`, unit: "metres", easy: true }));
-    expect(drawQuestions(tall, [], seeded(1))).toHaveLength(5);
+    const tall = KINDS.slice(0, 10).map((kind, i) => q(`t${i}`, kind, { question: `How tall is thing ${i}?`, unit: "metres", easy: true }));
+    expect(drawQuestions(tall, [], seeded(1))).toHaveLength(10);
   });
   it("fills a round the bank lacks with estimates, rather than come up short", () => {
     const noYear = MIXED.filter((x) => roundOf(x) !== "year");
     for (let seed = 1; seed <= 50; seed++) {
       const drawn = drawQuestions(noYear, [], seeded(seed));
-      expect([count(drawn, "estimate"), count(drawn, "percent"), count(drawn, "year")]).toEqual([4, 1, 0]);
+      expect([count(drawn, "estimate"), count(drawn, "percent"), count(drawn, "year")]).toEqual([8, 2, 0]);
     }
-    expect(rounds(drawQuestions(BANK, [], seeded(1)))).toEqual(["estimate", "estimate", "estimate", "estimate", "estimate"]);
-    // A bank with only percent and year questions besides one estimate: five all the same.
+    expect(rounds(drawQuestions(BANK, [], seeded(1)))).toEqual(Array(10).fill("estimate"));
+    // A bank with only percent and year questions besides one estimate, fewer than a game: all of them.
     const few = [q("a", "body", { easy: true }), pct("p1", "food"), pct("p2", "space"), yr("y1", "sports"), yr("y2", "culture")];
     expect(drawQuestions(few, [], seeded(2)).map((d) => d.id).sort()).toEqual(["a", "p1", "p2", "y1", "y2"]);
   });
   it("holds back the last games' percent and year questions while the bank has others, and brings back the oldest", () => {
     const rand = seeded(11);
     let recent: string[][] = [];
-    for (let game = 0; game < 6; game++) {
+    // MIXED holds four games' worth of percents and years (12 each, two a game).
+    for (let game = 0; game < 4; game++) {
       const ids = drawQuestions(MIXED, recent, rand).map((d) => d.id);
       expect(ids.filter((id) => recent.flat().includes(id))).toEqual([]);
       recent = [ids, ...recent].slice(0, 3);
@@ -1070,15 +1084,39 @@ describe("a game", () => {
     expect(totalOf(scored)).toBe(263);
     expect(scored.map((s) => s.band)).toEqual(["near", "dead-on", "far", "lost", "dead-on"]);
   });
-  it("shares the total and five plain characters, no emoji", () => {
-    let g = newGame(bank.slice(0, 5).map((x) => x.id));
-    for (const guess of [200, 100, 400, 1e9, 130]) g = nextQuestion(lockIn(g, guess));
+  it("shares the total out of 1000 and a square a question", () => {
+    let g = newGame(bank.slice(0, 10).map((x) => x.id));
+    for (const guess of [200, 100, 400, 1e9, 130, 100, 100, 100, 100, 100]) g = nextQuestion(lockIn(g, guess));
     const text = shareText(scoreGame(g, bank));
     // Squares in the results' colours, as a list's share has them (the review, Nov 9).
-    expect(text).toBe(`Fathom 244/${MAX_TOTAL}\n🟪 🟨 🟥 ⬛ 🟦`);
-    // Out of beta (Nov 9): the name alone, and the link to the game on a line of its own.
-    expect(shareText(scoreGame(g, bank), "https://toptentacle.io/#fathom")).toBe(`Fathom 244/${MAX_TOTAL}\n🟪 🟨 🟥 ⬛ 🟦\nhttps://toptentacle.io/#fathom`);
+    expect(text).toBe(`Fathom 744/${MAX_TOTAL}\n🟪 🟨 🟥 ⬛ 🟦 🟨 🟨 🟨 🟨 🟨`);
+    expect(MAX_TOTAL).toBe(1000);
+    // Out of beta (Nov 9): the name alone, and the link to the game on a line of its own; a day's game by its number.
+    expect(shareText(scoreGame(g, bank), "https://toptentacle.io/#fathom", 12)).toBe(`Fathom #12 744/1000\n🟪 🟨 🟥 ⬛ 🟦 🟨 🟨 🟨 🟨 🟨\nhttps://toptentacle.io/#fathom`);
     expect(text).not.toMatch(/beta/i);
+    // A game of five from before Nov 14 (Past runs) shares as it was: out of 500.
+    expect(shareLines(244, ["near", "dead-on", "far", "lost", "close"])).toBe("Fathom 244/500\n🟪 🟨 🟥 ⬛ 🟦");
+  });
+  // The owner, Nov 14: "add a timer per question (maybe like 20s)". At 0 with nothing to lock in, the round scores 0.
+  it("times a question out: 0 points, lost at sea, kept apart from a guess of 0", () => {
+    expect(QUESTION_SECONDS).toBe(20);
+    const share = pct("share", "body", { answer: 2 });
+    const bank = [share, ...BANK.slice(0, 9)];
+    let g = newGame(bank.map((x) => x.id));
+    g = timeUp(g);
+    expect(phaseOf(g)).toBe("reveal");
+    expect(g.timeouts).toEqual(["share"]);
+    // Only a question on screen times out.
+    expect(timeUp(g)).toBe(g);
+    const [out] = scoreGame(g, bank);
+    expect(out).toMatchObject({ points: 0, band: "lost", timedOut: true });
+    // A guess of 0% on a 2% share is a real guess, and scores.
+    expect(scoreGame(lockIn(newGame(bank.map((x) => x.id)), 0), bank)[0].points).toBeGreaterThan(0);
+    // The time-out goes with the game through a reload.
+    const m = new Map<string, string>();
+    const store = { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v) };
+    saveFathom({ recent: [], game: nextQuestion(g) }, store);
+    expect(loadFathom(store).game?.timeouts).toEqual(["share"]);
   });
   // Nov 5 review: lost at sea shared as "□", which reads as a question not played. Every band has its own mark, and
   // none of them is an empty box.
@@ -1145,7 +1183,7 @@ describe("the save", () => {
   it("reopens a finished game on its results", () => {
     const save = startGame({ recent: [] }, BANK, seeded(2));
     let done = save.game!;
-    for (let i = 0; i < 5; i++) done = nextQuestion(lockIn(done, 10));
+    for (let i = 0; i < QUESTIONS_PER_GAME; i++) done = nextQuestion(lockIn(done, 10));
     expect(phaseOf(done)).toBe("results");
     expect(resumable({ ...save, game: done }, BANK)).toEqual(done);
     // Not one whose questions have gone from the bank.
@@ -1504,22 +1542,22 @@ describe("name-it: the questions", () => {
 describe("name-it: a game", () => {
   const NUMBERS = MIXED;
   const withNames = [...NUMBERS, ...named];
-  it("plays the name-it round fifth in the shape, never first, when the bank has one", () => {
+  it("plays one name-it round in the shape, never first, when the bank has one", () => {
     for (let seed = 1; seed <= 200; seed++) {
       const drawn = drawQuestions(withNames, [], seeded(seed));
       expect(drawn.map(roundOf).filter((r) => r === "name"), `seed ${seed}`).toHaveLength(1);
       expect(roundOf(drawn[0]), `seed ${seed}`).not.toBe("name");
-      expect(drawn.map(roundOf).sort()).toEqual(["estimate", "estimate", "name", "percent", "year"]);
+      expect(drawn.map(roundOf).sort()).toEqual([...GAME_ROUNDS].sort());
     }
     // Anywhere after the first.
-    const at = new Set(Array.from({ length: 200 }, (_, s) => drawQuestions(withNames, [], seeded(s + 1)).findIndex((x) => roundOf(x) === "name")));
-    expect([...at].sort()).toEqual([1, 2, 3, 4]);
+    const at = new Set(Array.from({ length: 300 }, (_, s) => drawQuestions(withNames, [], seeded(s + 1)).findIndex((x) => roundOf(x) === "name")));
+    expect([...at].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     // Even an easy one never opens.
     const easy = named.map((x) => ({ ...x, easy: true }));
     for (let seed = 1; seed <= 50; seed++) expect(roundOf(drawQuestions([...NUMBERS, ...easy], [], seeded(seed))[0])).not.toBe("name");
   });
   it("is an estimate when the bank has none (its lists didn't load)", () => {
-    for (let seed = 1; seed <= 50; seed++) expect(drawQuestions(readFullBank({ version: 1, questions: [...NUMBERS, ...NAME_BANK.questions] }, new Map())!, [], seeded(seed)).map(roundOf).sort()).toEqual(["estimate", "estimate", "estimate", "percent", "year"]);
+    for (let seed = 1; seed <= 50; seed++) expect(drawQuestions(readFullBank({ version: 1, questions: [...NUMBERS, ...NAME_BANK.questions] }, new Map())!, [], seeded(seed)).map(roundOf).sort()).toEqual([...Array(6).fill("estimate"), "percent", "percent", "year", "year"]);
   });
   it("locks one answer, keeps what was named, scores its figure, and shares like any round", () => {
     const bank = [q("a", "body"), nameQ("name-country-50m-people"), q("b", "food"), q("c", "space"), q("d", "sports")];

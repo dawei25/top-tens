@@ -842,7 +842,7 @@ function suite(exposeNewTables: boolean) {
     const day = async (date: string | null, user: string | null = null) =>
       (await as(user ? "authenticated" : "anon", user, () => db.query<{ d: Day }>("select public.fathom_day_stats($1) as d", [date]))).rows[0].d;
     const bins = (pairs: [bin: number, players: number][]) => {
-      const counts = Array<number>(50).fill(0);
+      const counts = Array<number>(100).fill(0);
       for (const [bin, players] of pairs) counts[bin] += players;
       return counts;
     };
@@ -861,17 +861,17 @@ function suite(exposeNewTables: boolean) {
         // Yesterday's, as a player behind UTC has it: its own day.
         expect((await fathomPlay({ date: utcDay(-1), total: 0, client: client(3001) })).rows[0].ok).toBe(true);
       });
-      await as("authenticated", Q, () => fathomPlay({ total: 500, client: client(3002) }));
+      await as("authenticated", Q, () => fathomPlay({ total: 1000, client: client(3002) }));
       expect((await rows(3001, 3002)).rows).toEqual([
         { daily_date: utcDay(), total: 312, user_id: null, client_id: client(3001) },
         { daily_date: utcDay(-1), total: 0, user_id: null, client_id: client(3001) },
-        { daily_date: utcDay(), total: 500, user_id: Q, client_id: client(3002) },
+        { daily_date: utcDay(), total: 1000, user_id: Q, client_id: client(3002) },
       ]);
     });
 
     it("refuses malformed totals with invalid_parameter_value (a 400 from the API)", async () => {
       await as("anon", null, async () => {
-        const bad = [{ date: utcDay(-2) }, { date: utcDay(2) }, { date: null }, { total: -1 }, { total: 501 }, { total: null }, { client: null }];
+        const bad = [{ date: utcDay(-2) }, { date: utcDay(2) }, { date: null }, { total: -1 }, { total: 1001 }, { total: null }, { client: null }];
         for (const args of bad) expect(await code(fathomPlay({ client: client(3010), ...args })), JSON.stringify(args)).toBe("22023");
       });
       expect((await rows(3010, 3010)).rows).toEqual([]);
@@ -888,9 +888,9 @@ function suite(exposeNewTables: boolean) {
       }
     });
 
-    it("counts each player's first total on a date, in bins of 10 (500 with 490-499), everyone included", async () => {
+    it("counts each player's first total on a date, in bins of 10 (1000 with 990-999), everyone included", async () => {
       await as("anon", null, async () => {
-        for (const [i, total] of [0, 9, 10, 255, 259, 499, 500].entries()) await fathomPlay({ date: D, total, client: client(3100 + i) });
+        for (const [i, total] of [0, 9, 10, 255, 259, 999, 1000].entries()) await fathomPlay({ date: D, total, client: client(3100 + i) });
         // Another date's total is another day.
         await fathomPlay({ date: utcDay(), total: 100, client: client(3100) });
       });
@@ -905,9 +905,9 @@ function suite(exposeNewTables: boolean) {
           [1, 1],
           [25, 2],
           [30, 1],
-          [49, 2],
+          [99, 2],
         ]),
-        avg: Math.round(((0 + 9 + 10 + 255 + 259 + 499 + 500 + 300) / 8) * 100) / 100,
+        avg: Math.round(((0 + 9 + 10 + 255 + 259 + 999 + 1000 + 300) / 8) * 100) / 100,
       };
       expect(await day(D)).toEqual(expected);
       // The same for whoever asks: anyone signed in, or P themselves.
@@ -916,8 +916,8 @@ function suite(exposeNewTables: boolean) {
     });
 
     it("answers the public key, with zeros for a date nobody played, and keeps its signature", async () => {
-      expect(await day("2026-01-01")).toEqual({ n: 0, counts: Array(50).fill(0), avg: null });
-      expect(await day(null)).toEqual({ n: 0, counts: Array(50).fill(0), avg: null });
+      expect(await day("2026-01-01")).toEqual({ n: 0, counts: Array(100).fill(0), avg: null });
+      expect(await day(null)).toEqual({ n: 0, counts: Array(100).fill(0), avg: null });
       const sig = await db.query<{ name: string; args: string; result: string }>(
         `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
          from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('fathom_day_stats', 'submit_fathom_play') order by 1`,

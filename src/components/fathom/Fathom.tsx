@@ -989,11 +989,10 @@ function BandWord({ band }: { band: Band }) {
  */
 function ScoreBar({ scored }: { scored: Scored[] }) {
   const total = totalOf(scored);
-  const before = useRef(total);
-  const from = before.current;
-  useEffect(() => {
-    before.current = total;
-  }, [total]);
+  // The total before the last change, kept from the render before (React's "information from previous renders").
+  const [seen, setSeen] = useState({ total, from: total });
+  if (seen.total !== total) setSeen({ total, from: seen.total });
+  const from = seen.total === total ? seen.from : seen.total;
   return (
     <div className="fathom-score" data-testid="fathom-score" data-total={total}>
       <span className="tally-track" role="img" aria-label={`Score so far: ${total} out of ${MAX_TOTAL}`}>

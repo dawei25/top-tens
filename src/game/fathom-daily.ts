@@ -1,18 +1,19 @@
 /**
- * Today's Fathom (owner, Nov 14: "id like fathom to have a today's fathom"): every day the same five questions for
+ * Today's Fathom (owner, Nov 14: "id like fathom to have a today's fathom"): every day the same ten questions for
  * everyone, one try, numbered from the first day ("Fathom #1"). The days are chosen ahead in a schedule file
  * (public/fathom/daily.json, written by scripts/fathom/daily.ts); a day the schedule hasn't reached gets a pick seeded by
- * its date, by the same rules, so every player still gets the same five.
+ * its date, by the same rules, so every player still gets the same ten.
  *
- * The rules of a day's pick: a game's round mix and draw rules (`drawQuestions`: an easy number first, two estimates, a
- * percent, a year and a name-it round, no two of a kind), and no question again until the bank has run out of them
- * (then the bank starts over, holding back the last few days). Pure functions only; the script and the game share them,
- * so a scheduled day and a seeded one are the same pick for the same bank.
+ * The rules of a day's pick: a game's round mix and draw rules (`drawQuestions`: an easy number first, five estimates,
+ * two percents, two years and a name-it round, kinds spread), and no question again until the bank has run out of them.
+ * The script stops there and says so (`freshDay` is null); a seeded day in the game starts the bank over instead,
+ * holding back the last few days, so a player always gets a game. Pure functions only; the script and the game share
+ * them, so a scheduled day and a seeded one are the same pick for the same bank.
  */
-import { drawQuestions, GAME_ROUNDS, roundOf, type FathomQuestion } from "./fathom";
+import { drawQuestions, GAME_ROUNDS, QUESTIONS_PER_GAME, roundOf, type FathomQuestion } from "./fathom";
 import type { FathomDay } from "./fathom-history";
 
-/** One day of the schedule: its date, its number and its five questions, in order. */
+/** One day of the schedule: its date, its number and its ten questions, in order. */
 export interface FathomDailyEntry {
   n: number;
   date: string;
@@ -27,7 +28,7 @@ export function readSchedule(json: unknown): FathomDailyEntry[] {
   return json
     .filter(
       (e): e is FathomDailyEntry =>
-        !!e && typeof e === "object" && typeof e.date === "string" && DATE.test(e.date) && Number.isInteger(e.n) && e.n > 0 && Array.isArray(e.ids) && e.ids.length === 5 && e.ids.every((id: unknown) => typeof id === "string"),
+        !!e && typeof e === "object" && typeof e.date === "string" && DATE.test(e.date) && Number.isInteger(e.n) && e.n > 0 && Array.isArray(e.ids) && e.ids.length === QUESTIONS_PER_GAME && e.ids.every((id: unknown) => typeof id === "string"),
     )
     .map((e) => ({ n: e.n, date: e.date, ids: [...e.ids] }))
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
@@ -63,7 +64,7 @@ export function seeded(seed: string): () => number {
   };
 }
 
-/** Whether five questions are a whole game: the round mix of GAME_ROUNDS, an easy number question first. */
+/** Whether these questions are a whole game: the round mix of GAME_ROUNDS, an easy number question first. */
 export function fullGame(qs: readonly FathomQuestion[]): boolean {
   if (qs.length !== GAME_ROUNDS.length || !qs[0]?.easy || roundOf(qs[0]) === "name") return false;
   const rounds = (rs: readonly string[]) => [...rs].sort().join();
@@ -82,18 +83,25 @@ function askedThisCycle(before: readonly (readonly string[])[]): Set<string> {
 }
 
 /**
- * A day's five, given the days before it (oldest first): from the questions not asked since the bank last started
- * over, while they make a whole game; once they don't, from the whole bank again, the last few days held back.
+ * A day's ten from the questions not asked since the bank last started over (the days before, oldest first), or null
+ * once those don't make a whole game: the bank has run out.
  */
-export function pickDay(bank: readonly FathomQuestion[], before: readonly (readonly string[])[], date: string): string[] {
+export function freshDay(bank: readonly FathomQuestion[], before: readonly (readonly string[])[], date: string): string[] | null {
   const asked = askedThisCycle(before);
   const fresh = drawQuestions(
     bank.filter((q) => !asked.has(q.id)),
     [],
     seeded(date),
   );
-  if (fullGame(fresh)) return fresh.map((q) => q.id);
-  return drawQuestions(bank, [...before].reverse(), seeded(date)).map((q) => q.id);
+  return fullGame(fresh) ? fresh.map((q) => q.id) : null;
+}
+
+/**
+ * A day's ten, given the days before it (oldest first): freshDay while the bank lasts; once it has run out, from the
+ * whole bank again, the last few days held back (the game's seeded days: a player always gets a game).
+ */
+export function pickDay(bank: readonly FathomQuestion[], before: readonly (readonly string[])[], date: string): string[] {
+  return freshDay(bank, before, date) ?? drawQuestions(bank, [...before].reverse(), seeded(date)).map((q) => q.id);
 }
 
 /** How far ahead a game works out seeded days past the schedule's end (a schedule that stopped long ago restarts). */

@@ -327,7 +327,7 @@ describe("Today's Fathom totals", () => {
   });
 
   it("reads a day's totals from fathom_day_stats (a read, GET), once, and nothing it can't read", async () => {
-    const counts = Array<number>(50).fill(0);
+    const counts = Array<number>(100).fill(0);
     counts[31] = 40;
     fake.answers.rpc = (fn) => (fn === "fathom_day_stats" ? { data: { n: 40, counts, avg: 315.5 }, error: null, status: 200 } : { data: true, error: null, status: 200 });
     const svc = await import("./service");

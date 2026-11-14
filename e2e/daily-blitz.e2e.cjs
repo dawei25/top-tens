@@ -35,7 +35,8 @@ for (const vp of VIEWPORTS) {
     await page.getByTestId("today-list").waitFor();
     const group = page.getByTestId("today-group");
     assert.equal(await page.getByTestId("today-blitz").count(), 0);
-    assert.equal(await group.locator("button, a").count(), 1, "the Today card holds one key");
+    // Today's list and, under it, Today's Fathom (owner, Nov 14): no daily Blitz.
+    assert.deepEqual(await group.locator("button, a").evaluateAll((els) => els.map((e) => e.dataset.testid)), ["today-list", "today-fathom"]);
     // It takes the whole row the pair had (UX 6): the card's full content width.
     const spare = await page.getByTestId("today-list").evaluate((key) => {
       const card = key.closest('[data-testid="today-group"]');
