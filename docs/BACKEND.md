@@ -5,9 +5,10 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
 
 ## How it fits together
 
-- **Supabase** (Postgres + Auth, free plan) holds six tables: `plays` (one row per finished game, anonymous),
+- **Supabase** (Postgres + Auth, free plan) holds seven tables: `plays` (one row per finished game, anonymous),
   `ratings` (a thumbs up or down per player, list and mode, anonymous), `feedback` (notes on lists, free text, read
   only with a private key), `fathom_guesses` (the Fathom beta's guesses, one per browser and question, anonymous),
+  `fathom_plays` (each browser's Today's Fathom total per day, anonymous),
   `missed_guesses` (what players type that the game doesn't take, linked to nobody, read only with the same private
   key) and `saves` (one row per signed-in player: their save), plus `owners` (the owner's account, so his notes come
   first). Schema and functions: `supabase/migrations/`.
@@ -177,8 +178,17 @@ regulars can't lift every average.
       on the mountains list); the network tab shows `rpc/submit_miss` answering `true`, and in the SQL Editor
       `select * from list_misses('<your reader key>');` has a row `mountains | list | unknown | pizza | 1 | <now>`.
 
-   7 and 8 don't depend on each other (8 needs only 5 and 6): run them in either order. The live project has 1 to 6
-   (Nov 9), so 7 and 8 are what's left.
+   9. `supabase/migrations/20261114120000_fathom_plays.sql` (after 7; run once, safe to run twice): Today's Fathom
+      totals, for "better than X% of players today". Adds the `fathom_plays` table (date, a random per-browser id,
+      the account if signed in, the total 0-500; one row per browser per date; players can't read or touch it;
+      deleted with the account), `submit_fathom_play(p_date, p_total, p_client_id)` (refuses a date more than a day
+      from today, a total outside 0-500, a missing id) and `fathom_day_stats(p_date)`, which returns
+      `{"n", "counts": [50 bins of 10 points], "avg"}` for that date, one total per player, everyone counted, callable
+      with the public key. The game works before it runs: until then the day's line shows only the simulated crowd.
+      Check it took: finish Today's Fathom; Table Editor > `fathom_plays` has a row, and
+      `select fathom_day_stats(current_date);` returns `{"n": 1, ...}`.
+
+   The live project has 1 to 8 (missed_guesses Nov 9, fathom_guesses Nov 14), so 9 is what's left.
 
    Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the one-time steps above still go
    in the SQL Editor). Stats alone only need the first.
