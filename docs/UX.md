@@ -23,10 +23,12 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
    header or a column (the archive's LIST/BLITZ pill on every row; the Blitz title card repeating the header's
    BLITZ).
 5. **Every element earns its place.** Info that doesn't help the next decision goes ("5 lives" and "90 s" boxes on
-   free play read as random).
+   free play read as random). A key's description must stay true and short: Fathom's "Guess the number: 5 questions"
+   went (owner, Nov 14: "doesnt apply anymore ... some answer are not numbers and also its doing too much").
 6. **The main thing gets the most room.** Today's list is the main feature: the one daily, its key across the whole
    row (it once shared the row with Today's Blitz, two thirds to one; the owner retired Today's Blitz on Nov 9).
-   **Fewer modes beat more:** a second daily split attention; Blitz lives in free play.
+   **Fewer modes beat more:** a second daily split attention; Blitz lives in free play. Today's Fathom (owner, Nov 14)
+   is a different game, not a second list: it sits under Today's list, smaller, and Today's list keeps the big key.
 7. **Compact by default.** Keys no taller than their content needs; side by side when the width allows ("takes up
    too much space", "the height is still too tall"). A key beside a panel is as tall as the row it sits by, not the
    whole panel, and its label is short enough to read without squeezing: "Roll another list" stretched to the Blitz
@@ -93,8 +95,10 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
     numbers get less, down to 10." (the owner: "dont change the blitz"). The line must be true (a closer guess never
     scores less; tests check it on every round and every Blitz list), and never a number someone made up: Fathom once scored against a judge's guess of how far off people
     usually are ("most people miss by about 1.3x"), and the owner: "feels made up". Whatever reads "spot on" scores
-    100, and a miss reads plainly ("30% low", "3x too high"). Other players come in only as real players, once there
-    are 20 of them on a question. (`src/game/fathom.test.ts`, `src/components/copy.test.ts`.)
+    100, and a miss reads plainly ("30% low", "3x too high"). Where you stand against other players reads as one plain line with a histogram, "you did better than 81% of players
+    today", with no "estimated" tag (owner, Nov 14: "dont specify estimated just say you did better than xx% of players
+    today with a histogram"): a simulated crowd around the judges' expected score fills it until real players outweigh
+    it (docs/BACKEND.md, How the averages blend). (`src/game/fathom.test.ts`, `src/components/copy.test.ts`.)
 
 ## Scope
 
