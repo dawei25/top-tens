@@ -99,11 +99,12 @@ sync with an account like list games. No daily Fathom (owner: maybe later, if it
    Blitz's title card shows the prompt only when it adds words beyond the title, "name as many <noun> as you can", and
    its scoring rule ("#1 gets 100, smaller numbers get less, down to 10"), repeated on the results. A found row opens
    its fact on a tap; no caption says so (owner, Nov 8).
-3. **Results:** score, the average and histogram (where you stand), full list with values, a quiet "See 11 to 20" key
-   under the board that opens the next ten ranks with their figures (life-costing guesses in pink; "See 11 to 15" when
-   the list stops sooner; none on Blitz), source link, share, Roll new list (a new random game), and Play Blitz on a
-   list's results. A Blitz's results never offer its own list as a list game: it's spoiled (UX 15).
-   A finished daily offers Play Blitz on the same list (a list game doesn't spoil its Blitz) and Random list. The
+3. **Results:** score, the average and histogram (where you stand: "better than 36% of players", "... today" on a
+   daily), full list with values, then ranks 11 to 20 shown directly under a divider labelled "11 to 20", quieter than
+   the top 10 (life-costing guesses in pink; "11 to 15" when the list stops sooner; none on Blitz; owner, Nov 14: "just
+   show it directly"), source link, share, and the next game of the same mode: Roll new list (a new random game) in
+   free play, Random list after a daily. **The modes stay separate** (owner, Nov 14: "moving in a direction to keep the
+   game modes separate"): a list's results never offer Blitz, and a Blitz's results never offer its list (UX 15). The
    archive is a table, one row per date: number, date, the list's title and its score or "not played"; each row opens
    its own one-try game.
 4. **Past runs:** every game played, under a header per day, one tag per row ("List #22", "Blitz #22", "Fathom", never wrapping). Each row opens its own run (the board

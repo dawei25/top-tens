@@ -16,6 +16,8 @@ automated. Judges read this file before scoring a candidate (docs/JUDGE.md).
 | 2026-11-14 | Today's Fathom | added; endless Fathom hidden (its URL still works) | wants a daily Fathom with "better than xx% of players today" and a histogram, no "estimated" tag; the simulated crowd kept simple (a right-skewed spread around the expected score) |
 | 2026-11-14 | Fathom questions | prefers questions you can figure out; cut pure recall | liked reason-from-yourself, Fermi, check-it and surprising-superlative questions; disliked a physics constant (speed of sound) |
 | 2026-11-14 | Free play | sign in with Google after 2 free-play games | "encourages user signups"; dailies stay open (coordinator's call). Google app moved to production the same day |
+| 2026-11-14 | Play Blitz on list results | removed | "moving in a direction to keep the game modes separate" |
+| 2026-11-14 | Fathom | 10 questions, a 20 s timer each | "keep in line with the 10 theme" |
 | 2026-11-04 | national-parks | liked (rated well) | wanted each park's state in its fact |
 | 2026-11-05 | lakes | vetoed as a daily | not a great list; it had already been in free play; third Geography daily in a row |
 | 2026-11-05 | x-accounts | dropped | same problem as Facebook (follower counts) |
