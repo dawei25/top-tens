@@ -629,12 +629,12 @@ describe("Fathom", { concurrency: true }, () => {
   test("Dead on and Close celebrate, the others don't, and never with reduced motion (phone)", async () => {
     const vp = VIEWPORTS.find((v) => v.name === "phone");
     const ids = ["eiffel-tower-height", "adult-bones", "octopus-hearts", "moon-distance", "everest-height"];
-    // Dead on, 30% high (Close), double (Near), 4x (Far).
+    // Dead on, 30% high (Close), double (Near), 10x (Far: 30 points since the curve's long tail, Nov 14).
     const plays = [
       [1, "dead-on"],
       [1.3, "close"],
       [2, "near"],
-      [4, "far"],
+      [10, "far"],
     ];
     for (const reducedMotion of ["no-preference", "reduce"]) {
       const { ctx, page } = await openFathom(vp, { save: { recent: [], game: { ids, guesses: [], at: 0 } }, reducedMotion });
