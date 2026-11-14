@@ -55,8 +55,8 @@
     "judgedAt": "2026-11-07"
   },
   "eiffel-tower-height": {
-    "verdict": "fix",
-    "why": "fact reworded without the Chrysler Building's year, now a year question's answer (first-world-cup)",
+    "verdict": "keep",
+    "why": "Re-judged after the fact fix: storeys are the way in, and 330 m to the tip and the 41 years until the Chrysler Building are on the page; the fact no longer states first-world-cup's year.",
     "judgedAt": "2026-11-14"
   },
   "statue-of-liberty-height": {
@@ -110,8 +110,8 @@
     "judgedAt": "2026-11-07"
   },
   "iss-orbit-time": {
-    "verdict": "fix",
-    "why": "Nov 14 bar: the orbit time alone is a constant; with the speed (from the source) in the definition it's Fermi arithmetic, 40,000 km at 27,600 km/h",
+    "verdict": "keep",
+    "why": "Fermi from two anchors once the speed is in the definition: 40,000 km round at 27,600 km/h is about 90 minutes; 92.9 min and the 16 sunrises a day confirmed.",
     "judgedAt": "2026-11-14"
   },
   "venus-rotation": {
@@ -120,8 +120,8 @@
     "judgedAt": "2026-11-05"
   },
   "moonwalkers": {
-    "verdict": "fix",
-    "why": "the fact now explains the 12: six landings, two walkers each (Apollo program)",
+    "verdict": "keep",
+    "why": "Apollo 11 to 17 less 13 is six landings of two; the page's 'in these six spaceflights, twelve people walked on the Moon' confirms the 12 and the new fact.",
     "judgedAt": "2026-11-14"
   },
   "challenger-deep-depth": {
@@ -195,8 +195,8 @@
     "judgedAt": "2026-11-07"
   },
   "marathon-distance": {
-    "verdict": "fix",
-    "why": "'How long' reads two ways (distance or time): the owner's Nov 14 rule on key words",
+    "verdict": "keep",
+    "why": "'How far' now names the measure; a fit runner's 10 km an hour for four hours is the way in, and 42.195 km fixed in 1921 from the 1908 course is confirmed.",
     "judgedAt": "2026-11-14"
   },
   "basketball-hoop-height": {
@@ -340,8 +340,8 @@
     "judgedAt": "2026-11-07"
   },
   "antarctica-winter-population": {
-    "verdict": "fix",
-    "why": "fact reworded without '4,000', now another question's answer (last-woolly-mammoths)",
+    "verdict": "keep",
+    "why": "Fermi from bases times their winter crews; 1,000 in winter and about 4,000 in summer confirmed, and 'four times that' no longer states last-woolly-mammoths' number.",
     "judgedAt": "2026-11-14"
   },
   "sun-width-in-earths": {
@@ -575,8 +575,8 @@
     "judgedAt": "2026-11-06"
   },
   "oldest-bread": {
-    "verdict": "fix",
-    "why": "fact reworded without '10,000 BC', now another question's answer (north-pole-to-equator)",
+    "verdict": "keep",
+    "why": "Farming began 10,000 to 12,000 years ago, so a fair guess lands within 3x; the 14,500-year-old Natufian site confirmed, and bread older than farming is the surprise.",
     "judgedAt": "2026-11-14"
   },
   "us-penny-cost": {
@@ -655,8 +655,8 @@
     "judgedAt": "2026-11-06"
   },
   "van-gogh-oil-paintings": {
-    "verdict": "fix",
-    "why": "Nov 14 bar: 'just over a decade' (from the source) in the definition gives it a way in, a painting every few days",
+    "verdict": "keep",
+    "why": "With 'just over ten years' in the definition it's arithmetic, a painting every few days; 'in just over a decade ... around 860 oil paintings' and the 2,100 works confirmed.",
     "judgedAt": "2026-11-14"
   },
   "record-painting-price": {
@@ -810,8 +810,8 @@
     "judgedAt": "2026-11-06"
   },
   "first-bitcoins": {
-    "verdict": "fix",
-    "why": "fact reworded to 'ten thousand bitcoins' in words: the digits read as another question's answer (north-pole-to-equator)",
+    "verdict": "keep",
+    "why": "Out of the 2008 crash, years before the price headlines; the genesis block of 3 January 2009 and the 10,000-bitcoin pizzas the next year confirmed, the number now in words.",
     "judgedAt": "2026-11-14"
   },
   "titanic-sinking": {
@@ -930,13 +930,13 @@
     "judgedAt": "2026-11-07"
   },
   "name-country-as-big-as-france": {
-    "verdict": "fix",
-    "why": "'as big as' reads two ways (area or people): now 'about the same area as', the owner's Nov 14 rule on key words",
+    "verdict": "keep",
+    "why": "Target is the page's metropolitan France, 551,500 km2, mid-list; 27 answers score 70+ (Kenya, Spain, Ukraine, Thailand, Sweden 83); Spain, Türkiye, Burma, PNG, CAR, Siam lock, 'Spian' confirms, Corsica, Texas and Paris say what they are.",
     "judgedAt": "2026-11-14"
   },
   "name-country-as-big-as-uk": {
-    "verdict": "fix",
-    "why": "'as big as' reads two ways (area or people): now 'about the same area as', the owner's Nov 14 rule on key words",
+    "verdict": "keep",
+    "why": "Target is the UK's 244,376 km2, mid-list; 26 answers score 70+ (Uganda, Romania, Ghana, New Zealand, Italy 82); NZ, Byelorussia, Czechia, Holland, Côte d'Ivoire, Viet Nam lock; Britain, England and Scotland say why they don't count.",
     "judgedAt": "2026-11-14"
   },
   "name-city-10m-people": {
@@ -982,6 +982,241 @@
   "name-country-as-big-as-switzerland": {
     "verdict": "drop",
     "why": "the e2e fixture lists hold no small countries, so it can't be played there (check.test.ts, fathom-name.e2e.cjs); written Nov 14, never in the bank",
+    "judgedAt": "2026-11-14"
+  },
+  "heartbeats-in-a-lifetime": {
+    "verdict": "keep",
+    "why": "Reason from yourself: your pulse of about 70 a minute times the minutes in 80 years is about 3 billion; 'more than 2.8 billion times in an average lifetime' confirmed on Heart rate.",
+    "judgedAt": "2026-11-14"
+  },
+  "heart-pumps-a-day": {
+    "verdict": "keep",
+    "why": "Reason from yourself: a fist-sized heart squeezing out a small glass 70 times a minute; 5 L a minute at rest (about 70 ml a beat) confirmed, 7,200 L a day surprises. A pulse question like heartbeats-in-a-lifetime, but another measure and never in the same game (both body).",
+    "judgedAt": "2026-11-14"
+  },
+  "adult-teeth": {
+    "verdict": "keep",
+    "why": "Check it yourself with your tongue; 32 permanent and 20 baby teeth, wisdom teeth at 17 to 25, confirmed. An easy opener.",
+    "judgedAt": "2026-11-14"
+  },
+  "blinks-per-minute": {
+    "verdict": "keep",
+    "why": "Check it yourself: a blink every few seconds; 'around 17 blinks per minute in a laboratory setting' and 4 or 5 when reading confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "billion-dollars-a-second": {
+    "verdict": "keep",
+    "why": "Fermi: a year is about 31.5 million seconds; the page's gigasecond ('over 31 years and 287 days', within 1% of 31.69) and megasecond (11 d 13 h) confirm the answer and the fact.",
+    "judgedAt": "2026-11-14"
+  },
+  "world-cup-2026-matches": {
+    "verdict": "keep",
+    "why": "Fermi from the definition: 12 groups of 6 matches, then a 32-team knockout; 104 matches, up from 64, confirmed now the tournament is over.",
+    "judgedAt": "2026-11-14"
+  },
+  "monopoly-board-spaces": {
+    "verdict": "keep",
+    "why": "Check it yourself: four corners and nine squares a side; 'forty spaces containing twenty-eight properties' confirmed. An easy opener.",
+    "judgedAt": "2026-11-14"
+  },
+  "football-panels": {
+    "verdict": "keep",
+    "why": "Check it yourself: picture each black patch ringed by white ones; twelve pentagons and twenty hexagons, the Telstar pattern, confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "smartphones-shipped": {
+    "verdict": "keep",
+    "why": "Fermi: a few billion owners replacing a phone every two or three years; 1.54 billion in 2019 and the first billion (55% of phones) in 2013 confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "cars-in-the-world": {
+    "verdict": "keep",
+    "why": "Fermi from cars per person, rich countries against the rest; 1.644 billion in January 2025 and the trillion litres of fuel confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "big-mac-calories": {
+    "verdict": "keep",
+    "why": "Reason from yourself: a burger is a big part of one meal of a 2,000-a-day diet; 580 kcal in the US and 306 of them from fat confirmed. An easy opener.",
+    "judgedAt": "2026-11-14"
+  },
+  "italian-pasta-per-year": {
+    "verdict": "keep",
+    "why": "Fermi from your own plate, about 100 g on most days; 23.5 kg a person in 2015, ahead of Tunisia's 16, confirmed (the page's 2008 'over 27' is within 1.5x).",
+    "judgedAt": "2026-11-14"
+  },
+  "vatican-population": {
+    "verdict": "keep",
+    "why": "Fermi from its size, a few city blocks round a basilica: hundreds, not thousands; 882 residents in 2024 confirmed, and who they are explains the number.",
+    "judgedAt": "2026-11-14"
+  },
+  "last-woolly-mammoths": {
+    "verdict": "keep",
+    "why": "Ice Age animals, so a guess of 10,000 years is within 3x; the last ones on Wrangel Island until 4,000 years ago (the mainland's 10,000) confirmed: a real surprise.",
+    "judgedAt": "2026-11-14"
+  },
+  "north-pole-to-equator": {
+    "verdict": "keep",
+    "why": "Fermi: a quarter of Earth's 40,000 km; the metre as a ten-millionth of it ('setting 10000 km') confirmed, and why it's so round is the reveal.",
+    "judgedAt": "2026-11-14"
+  },
+  "russia-time-zones": {
+    "verdict": "fix",
+    "why": "Fact was beside the point (its fourteen neighbours); now the page's 9,000 km and 172 degrees of longitude (19 E to 169 W), which explain the 11. Eleven confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "countries-in-africa": {
+    "verdict": "keep",
+    "why": "Go round the map, or a quarter of the world's countries; 54 fully recognised states confirmed, and keeping the colonial borders explains why so many.",
+    "judgedAt": "2026-11-14"
+  },
+  "birthday-pairs": {
+    "verdict": "keep",
+    "why": "Reason from yourself: most school classes of 25 to 30 had two with the same birthday; 23 and its 253 pairs confirmed, the classic surprise against the 183 of first instinct.",
+    "judgedAt": "2026-11-14"
+  },
+  "coca-cola-can-sugar": {
+    "verdict": "keep",
+    "why": "Reason from sugar cubes of about 4 g, ten or so a can; 39 g in a 355 ml can with no fat and 140 calories confirmed (38 g in another line, within 3%).",
+    "judgedAt": "2026-11-14"
+  },
+  "ball-in-play-minutes": {
+    "verdict": "keep",
+    "why": "Reason from watching: throw-ins, free kicks and injuries; 'a 90-minute game typically involves about an hour of effective playing time' confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "new-zealand-sheep": {
+    "verdict": "keep",
+    "why": "Fermi from its 5 million people and the famous sheep; 23.3 million in June 2024 and the 39 million (about 10 a person) of 2007 confirmed, forestry named as the cause.",
+    "judgedAt": "2026-11-14"
+  },
+  "formula-one-race-distance": {
+    "verdict": "fix",
+    "why": "Monaco's 260 km in the fact isn't on the source; now the page's own point, laps set to make up the distance. Fermi from 1.5 hours at about 200 km/h; 305 km confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "a4-sheets-per-square-metre": {
+    "verdict": "keep",
+    "why": "Check it yourself: 21 by 30 cm, about 16 to a square metre; A0 defined as 1 m2 and A4 a sixteenth of it confirmed: arithmetic with a reveal.",
+    "judgedAt": "2026-11-14"
+  },
+  "us-mcdonalds": {
+    "verdict": "keep",
+    "why": "Fermi from a McDonald's for every town of 20,000 to 30,000; 13,697 in the list's table (December 2025), China's 7,700 and Japan's 3,025 confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "english-speakers": {
+    "verdict": "keep",
+    "why": "Fermi from the native-speaking countries plus India, Nigeria and learners; Ethnologue 2026's 1,493 million and the 450 million native confirmed; the page's 'as many as two billion' is 1.34x, inside 1.5x.",
+    "judgedAt": "2026-11-14"
+  },
+  "london-underground-underground": {
+    "verdict": "keep",
+    "why": "Picture the map: deep tunnels in the middle, long open branches; 'only 45% of the network is underground' confirmed, and the Tube being mostly above ground is the surprise.",
+    "judgedAt": "2026-11-14"
+  },
+  "pacific-ocean-share": {
+    "verdict": "keep",
+    "why": "Fermi: water covers about 70% and the Pacific is nearly half of it; 32% of the surface, larger than all the land combined, confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "brazil-coffee-share": {
+    "verdict": "keep",
+    "why": "The biggest grower among dozens of tropical countries: big, not a majority; 31% in 2023 and about 70% of exports in the 1910s confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "canada-maple-syrup-share": {
+    "verdict": "fix",
+    "why": "Was quebec-maple-syrup-share: Quebec's 72% is undated, and the page's 2025 figures (Canada over 75%, 90% of it Quebec's) put it near 68, over 3 points off; now Canada's dated share, 75% in 2025 with the US about 25%, Quebec in the fact.",
+    "judgedAt": "2026-11-14"
+  },
+  "penalties-scored-share": {
+    "verdict": "keep",
+    "why": "Reason from watching: most go in, but you've seen saves; 74.25% in the Bundesliga 1963-2004 confirmed (recent leagues 76.5 to 79.8), and World Cup shootouts' 69.4% teaches.",
+    "judgedAt": "2026-11-14"
+  },
+  "drive-on-the-left-share": {
+    "verdict": "keep",
+    "why": "Fermi: India alone is a sixth of the world, then Indonesia, Pakistan, Bangladesh, Japan, the UK; 'about a third of its population' and a sixth of the land confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "reykjavik-share": {
+    "verdict": "fix",
+    "why": "A population share carries its year: '2026' added from the page (1 January 2026); 64%, the city's 140,000 and the six municipalities around it confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "swiss-alps-share": {
+    "verdict": "keep",
+    "why": "Picture the map: mountains across the middle and the south; 'about 60% of the country's area' confirmed, and most people on the plateau is the twist.",
+    "judgedAt": "2026-11-14"
+  },
+  "canada-near-border-share": {
+    "verdict": "keep",
+    "why": "Picture the map: Toronto, Montreal, Vancouver and Ottawa all near the border; 'about 80 percent ... within 150 kilometres' confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "iceberg-underwater-share": {
+    "verdict": "keep",
+    "why": "Check it yourself with an ice cube in a glass; about a tenth above water, from 920 against 1,025 kg a cubic metre, confirmed. An easy opener.",
+    "judgedAt": "2026-11-14"
+  },
+  "pluto-demoted": {
+    "verdict": "keep",
+    "why": "Your own life: eight planets at school or nine; the IAU's August 2006 definition, after Eris, confirmed. An easy opener.",
+    "judgedAt": "2026-11-14"
+  },
+  "euro-cash-arrives": {
+    "verdict": "keep",
+    "why": "Your own life or your parents': just after 2000; coins and notes on 1 January 2002, after the 1999 accounting euro, confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "first-traffic-lights": {
+    "verdict": "keep",
+    "why": "Horse-drawn traffic means before cars: Victorian London; December 1868 on Parliament Square and the constable's semaphore arms and lamps confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "first-world-cup": {
+    "verdict": "keep",
+    "why": "Between the wars, decades before any World Cup you remember; 1930 in Uruguay, for the centenary of its independence, confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "world-population-4-billion": {
+    "verdict": "keep",
+    "why": "Fermi: 8 billion in 2022 and a doubling in about 50 years; 1974 (the milestone table, and April 1974 by the Census Bureau) and the 48 years to 8 billion confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "first-balloon-flight": {
+    "verdict": "keep",
+    "why": "Before railways and planes, in the France of the Montgolfiers; Étienne's tethered ascent from the Réveillon yard in October 1783 confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "elizabeth-ii-becomes-queen": {
+    "verdict": "keep",
+    "why": "Arithmetic from the 70-year reign that ended in 2022; queen from 6 February 1952, aged 25, confirmed (the 1953 coronation is a year off and still scores 98). An easy opener.",
+    "judgedAt": "2026-11-14"
+  },
+  "web-goes-public": {
+    "verdict": "fix",
+    "why": "Dated two ways on its page: the lead's 'opened to the public in 1993' against the release 'to the whole Internet on 23 August 1991'; now asks for that release, and the fact no longer repeats it.",
+    "judgedAt": "2026-11-14"
+  },
+  "last-moonwalk": {
+    "verdict": "keep",
+    "why": "From the first landing in 1969 and a handful of missions after; Apollo 17 in December 1972, and nobody past low orbit until April 2026, confirmed. An easy opener.",
+    "judgedAt": "2026-11-14"
+  },
+  "first-selfie": {
+    "verdict": "fix",
+    "why": "'Selfie' read two ways (a phone picture, or any photo of yourself), a gotcha that sent phone-age guesses to 0; the definition now says any camera, so photography's start is the way in. 1839 and Cornelius's note confirmed.",
+    "judgedAt": "2026-11-14"
+  },
+  "name-country-as-big-as-egypt": {
+    "verdict": "keep",
+    "why": "Target is Egypt's 1,001,450 km2, mid-list with answers on both sides; 19 score 70+ (Mauritania, Tanzania, Nigeria, Ethiopia, Bolivia); Persia locks, 'Ethopia' and Abyssinia confirm, Congo offers both, Texas and Sinai cost nothing; neighbours Libya and Sudan score 53 to 57.",
+    "judgedAt": "2026-11-14"
+  },
+  "name-country-5m-people": {
+    "verdict": "keep",
+    "why": "Mid-list target, answers on both sides and only two within 2% (Mauritania, Kuwait); Norway, Ireland, New Zealand, Finland, Slovakia, Costa Rica 89 to 96; Eire, NZ, Norge, Suomi lock, Danmark confirms; Scotland, Hong Kong, Puerto Rico, Tasmania say what they are.",
     "judgedAt": "2026-11-14"
   }
 }

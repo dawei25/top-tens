@@ -70,7 +70,8 @@
     "url": "https://en.wikipedia.org/wiki/Eiffel_Tower"
    },
    "typical": 2,
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "new-york-city-population",
@@ -100,7 +101,8 @@
    },
    "typical": 3,
    "easy": false,
-   "definition": "at about 27,600 km/h"
+   "definition": "at about 27,600 km/h",
+   "verified": true
   },
   {
    "id": "moonwalkers",
@@ -114,7 +116,8 @@
     "url": "https://en.wikipedia.org/wiki/Apollo_program"
    },
    "typical": 2,
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "neapolitan-pizza-oven",
@@ -172,7 +175,8 @@
     "url": "https://en.wikipedia.org/wiki/Marathon"
    },
    "typical": 1.3,
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "longest-tennis-match",
@@ -290,7 +294,8 @@
     "url": "https://en.wikipedia.org/wiki/Demographics_of_Antarctica"
    },
    "typical": 5,
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "hot-dog-eating-record",
@@ -785,7 +790,7 @@
     "title": "Heart rate",
     "url": "https://en.wikipedia.org/wiki/Heart_rate"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -800,7 +805,7 @@
     "title": "Cardiac output",
     "url": "https://en.wikipedia.org/wiki/Cardiac_output"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -815,7 +820,7 @@
     "title": "Human tooth",
     "url": "https://en.wikipedia.org/wiki/Human_tooth"
    },
-   "verified": false,
+   "verified": true,
    "easy": true
   },
   {
@@ -830,7 +835,7 @@
     "title": "Blinking",
     "url": "https://en.wikipedia.org/wiki/Blinking"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -844,7 +849,7 @@
     "title": "Orders of magnitude (time)",
     "url": "https://en.wikipedia.org/wiki/Orders_of_magnitude_(time)"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -859,7 +864,7 @@
     "title": "2026 FIFA World Cup",
     "url": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -873,7 +878,7 @@
     "title": "Monopoly (game)",
     "url": "https://en.wikipedia.org/wiki/Monopoly_(game)"
    },
-   "verified": false,
+   "verified": true,
    "easy": true
   },
   {
@@ -887,7 +892,7 @@
     "title": "Ball (association football)",
     "url": "https://en.wikipedia.org/wiki/Ball_(association_football)"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -901,7 +906,7 @@
     "title": "Smartphone",
     "url": "https://en.wikipedia.org/wiki/Smartphone"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -916,7 +921,7 @@
     "title": "Car",
     "url": "https://en.wikipedia.org/wiki/Car"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -931,7 +936,7 @@
     "title": "Big Mac",
     "url": "https://en.wikipedia.org/wiki/Big_Mac"
    },
-   "verified": false,
+   "verified": true,
    "easy": true
   },
   {
@@ -946,7 +951,7 @@
     "title": "Pasta",
     "url": "https://en.wikipedia.org/wiki/Pasta"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -961,7 +966,7 @@
     "title": "Vatican City",
     "url": "https://en.wikipedia.org/wiki/Vatican_City"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -975,7 +980,7 @@
     "title": "Woolly mammoth",
     "url": "https://en.wikipedia.org/wiki/Woolly_mammoth"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -989,7 +994,7 @@
     "title": "Metre",
     "url": "https://en.wikipedia.org/wiki/Metre"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -998,12 +1003,12 @@
    "question": "How many time zones does Russia span?",
    "unit": "time zones",
    "answer": 11,
-   "fact": "It is the largest country in the world, and it borders fourteen others.",
+   "fact": "It stretches some 9,000 km from west to east, across 172 of the world's 360 degrees of longitude.",
    "source": {
     "title": "Russia",
     "url": "https://en.wikipedia.org/wiki/Russia"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1018,7 +1023,7 @@
     "title": "Africa",
     "url": "https://en.wikipedia.org/wiki/Africa"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1032,7 +1037,7 @@
     "title": "Birthday problem",
     "url": "https://en.wikipedia.org/wiki/Birthday_problem"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1047,7 +1052,7 @@
     "title": "Coca-Cola",
     "url": "https://en.wikipedia.org/wiki/Coca-Cola"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1062,7 +1067,7 @@
     "title": "Association football",
     "url": "https://en.wikipedia.org/wiki/Association_football"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1077,7 +1082,7 @@
     "title": "Sheep farming in New Zealand",
     "url": "https://en.wikipedia.org/wiki/Sheep_farming_in_New_Zealand"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1087,12 +1092,12 @@
    "unit": "kilometres",
    "answer": 305,
    "definition": "the standard race distance",
-   "fact": "Monaco, on narrow city streets, is the one exception, at 260 km.",
+   "fact": "Lap lengths vary from track to track, so each race sets its number of laps to make up the distance.",
    "source": {
     "title": "Formula One",
     "url": "https://en.wikipedia.org/wiki/Formula_One"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1106,7 +1111,7 @@
     "title": "Paper size",
     "url": "https://en.wikipedia.org/wiki/Paper_size"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1121,7 +1126,7 @@
     "title": "List of countries with McDonald's restaurants",
     "url": "https://en.wikipedia.org/wiki/List_of_countries_with_McDonald%27s_restaurants"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1136,7 +1141,7 @@
     "title": "List of languages by total number of speakers",
     "url": "https://en.wikipedia.org/wiki/List_of_languages_by_total_number_of_speakers"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1382,7 +1387,7 @@
     "title": "London Underground",
     "url": "https://en.wikipedia.org/wiki/London_Underground"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1397,7 +1402,7 @@
     "title": "Pacific Ocean",
     "url": "https://en.wikipedia.org/wiki/Pacific_Ocean"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1413,22 +1418,23 @@
     "title": "Coffee",
     "url": "https://en.wikipedia.org/wiki/Coffee"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
-   "id": "quebec-maple-syrup-share",
+   "id": "canada-maple-syrup-share",
    "round": "percent",
    "kind": "food",
-   "question": "How much of the world's maple syrup comes from Quebec?",
+   "question": "How much of the world's maple syrup comes from Canada?",
    "unit": "percent",
-   "answer": 72,
-   "fact": "Almost all the rest comes from the rest of Canada and from the United States.",
+   "answer": 75,
+   "definition": "2025",
+   "fact": "Quebec alone makes 90% of Canada's, and nearly all the rest of the world's comes from the United States.",
    "source": {
     "title": "Maple syrup",
     "url": "https://en.wikipedia.org/wiki/Maple_syrup"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1444,7 +1450,7 @@
     "title": "Penalty kick (association football)",
     "url": "https://en.wikipedia.org/wiki/Penalty_kick_(association_football)"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1459,7 +1465,7 @@
     "title": "Left- and right-hand traffic",
     "url": "https://en.wikipedia.org/wiki/Left-_and_right-hand_traffic"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1469,13 +1475,13 @@
    "question": "What share of Icelanders live in and around Reykjavík?",
    "unit": "percent",
    "answer": 64,
-   "definition": "its Capital Region",
+   "definition": "its Capital Region, 2026",
    "fact": "The city itself has about 140,000 people, and six towns around it make up the rest.",
    "source": {
     "title": "Reykjavík",
     "url": "https://en.wikipedia.org/wiki/Reykjav%C3%ADk"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1490,7 +1496,7 @@
     "title": "Switzerland",
     "url": "https://en.wikipedia.org/wiki/Switzerland"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1505,7 +1511,7 @@
     "title": "Canada",
     "url": "https://en.wikipedia.org/wiki/Canada"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1521,7 +1527,7 @@
     "title": "Iceberg",
     "url": "https://en.wikipedia.org/wiki/Iceberg"
    },
-   "verified": false,
+   "verified": true,
    "easy": true
   },
   {
@@ -1746,7 +1752,7 @@
     "title": "Pluto",
     "url": "https://en.wikipedia.org/wiki/Pluto"
    },
-   "verified": false,
+   "verified": true,
    "easy": true
   },
   {
@@ -1761,7 +1767,7 @@
     "title": "Euro",
     "url": "https://en.wikipedia.org/wiki/Euro"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1777,7 +1783,7 @@
     "title": "Traffic light",
     "url": "https://en.wikipedia.org/wiki/Traffic_light"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1792,7 +1798,7 @@
     "title": "FIFA World Cup",
     "url": "https://en.wikipedia.org/wiki/FIFA_World_Cup"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1807,7 +1813,7 @@
     "title": "World population",
     "url": "https://en.wikipedia.org/wiki/World_population"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1822,7 +1828,7 @@
     "title": "Montgolfier brothers",
     "url": "https://en.wikipedia.org/wiki/Montgolfier_brothers"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1837,22 +1843,22 @@
     "title": "Elizabeth II",
     "url": "https://en.wikipedia.org/wiki/Elizabeth_II"
    },
-   "verified": false,
+   "verified": true,
    "easy": true
   },
   {
    "id": "web-goes-public",
    "round": "year",
    "kind": "everyday",
-   "question": "When did the World Wide Web open to everyone?",
+   "question": "When was the World Wide Web released to the whole internet?",
    "unit": "year",
    "answer": 1991,
-   "fact": "Tim Berners-Lee had it running at CERN by the end of 1990, then released it to the whole internet.",
+   "fact": "Tim Berners-Lee had it running at CERN by the end of 1990; other research labs got it some months before everyone else.",
    "source": {
     "title": "World Wide Web",
     "url": "https://en.wikipedia.org/wiki/World_Wide_Web"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -1867,7 +1873,7 @@
     "title": "Apollo 17",
     "url": "https://en.wikipedia.org/wiki/Apollo_17"
    },
-   "verified": false,
+   "verified": true,
    "easy": true
   },
   {
@@ -1877,12 +1883,13 @@
    "question": "When was the first selfie taken?",
    "unit": "year",
    "answer": 1839,
+   "definition": "a photo of yourself, with any camera",
    "fact": "Robert Cornelius, an American photography pioneer, took it, and wrote on the back that it was 'the first light picture ever taken'.",
    "source": {
     "title": "Selfie",
     "url": "https://en.wikipedia.org/wiki/Selfie"
    },
-   "verified": false,
+   "verified": true,
    "easy": false
   },
   {
@@ -2007,7 +2014,7 @@
     "Egypt"
    ],
    "easy": false,
-   "verified": false
+   "verified": true
   },
   {
    "id": "name-country-5m-people",
@@ -2017,7 +2024,7 @@
    "target": 5000000,
    "question": "Name a country with about 5 million people",
    "easy": false,
-   "verified": false
+   "verified": true
   }
  ]
 }
