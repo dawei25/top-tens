@@ -139,6 +139,33 @@ much can bamboo grow in a day?"), a duration, a count, an area, a percent or a y
 the bank should hold no more than one in five (`check.ts` reports it as a warning until the rebuilt bank lands; the
 old bank had 43 of 94).
 
+## Where you stand (simulated crowd)
+
+Today's Fathom gives everyone the same five questions, so its results say "you did better than 81% of players today"
+over a histogram of the day's totals, with no "estimated" tag (owner, Nov 14). The maths is `src/game/fathom-crowd.ts`;
+the backend calls are `reportFathomDaily` and `useFathomDay` (`src/net`), on
+`supabase/migrations/20261114120000_fathom_plays.sql`.
+
+- **What's simulated** (owner: "just simulate a relatively normal distribution around [a proxy average] (albeit
+  skewing to the right cause some ppl do rly good)"): the day's expected total is its questions' expected points,
+  summed: 65 for an easy question, else 35 for an estimate (the writers' typical miss, about 2.3x on the questions
+  that aren't openers), 55 for a percent or a year, 60 for a name-it round. The usual day (an easy opener, an
+  estimate, a percent, a year, a name-it round) expects 270, and every day the bank can draw expects 175 to 325.
+  Around it, a two-piece normal curve, its standard deviation 70 points below its peak and 120 above, placed so half
+  the simulated players score under the expected total: the middle 80% run from about 110 under it to 130 over, the
+  mean sits about 5 over, and nothing falls outside 0 to 500 (the curve is cut there). Bins of 10 points (500 shares
+  the last with 490-499), the same every time (no randomness).
+- **How it's labelled**: it isn't. The line counts the simulated players as players; `n` (the real ones) comes with
+  the standing for a screen that wants it.
+- **How real players replace it**: each finished Today's Fathom sends its total once per browser and date
+  (`submit_fathom_play`, offline it waits); `fathom_day_stats` gives that date's totals in the same bins, one per
+  player (their first that day), everyone counted. The simulation counts as W = 30 virtual players (`ESTIMATE_WEIGHT`)
+  and every real total joins it, as lists blend (docs/BACKEND.md, How the averages blend): 30 real players weigh as
+  much as the simulation, 300 make the curve about 91% real. Without a backend, or before the migration has run, the
+  curve is the simulation alone.
+- **The line's number**: the share of the day's players below the total's bin, plus half of those in it (par.ts's
+  `percentile`), at most 99: nobody beats everyone.
+
 ## The bar: what gets in
 
 The owner: "Too many are how much does xx weigh, how tall is xx." A question gets in only if a curious person can
