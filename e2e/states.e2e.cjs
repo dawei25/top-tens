@@ -214,8 +214,8 @@ const SCREENS = [
     },
   },
   {
-    // Fathom (beta, #fathom), on the fixture bank: a long number typed (grouped as it's typed), its reveal, then the
-    // results.
+    // Today's Fathom (#fathom), on the fixture bank (the day seeded by its date): a long number typed (grouped as it's
+    // typed), its reveal, then the results.
     name: "Fathom, a number typed",
     setup: async (page) => {
       await page.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: FATHOM_BANK, contentType: "application/json" }));
@@ -235,7 +235,8 @@ const SCREENS = [
   {
     name: "Fathom, results",
     setup: async (page) => {
-      for (let i = 0; i < 4; i++) {
+      // The nine questions after the first (ten a game since Nov 14).
+      for (let i = 0; i < 9; i++) {
         await page.getByTestId("fathom-next").click();
         await page.getByTestId("fathom-input").fill("12");
         await page.getByTestId("fathom-lock").click();

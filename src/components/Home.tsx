@@ -6,7 +6,8 @@ import { recentPlays } from "../game/history";
 import { Countdown } from "./Countdown";
 import { HowToPlay } from "./HowToPlay";
 import { EnterHint, type Mode } from "./pixel";
-import { FATHOM_LINE, FATHOM_LINE_SHORT, RECORD_PLAYED, STREAK_NOTE } from "./copy";
+import { FATHOM_TODAY, RECORD_PLAYED, STREAK_NOTE } from "./copy";
+import { fathomTodayStatus } from "../game/fathom-history";
 import { FloatNote } from "./Note";
 import { SoundToggle } from "./sound/SoundToggle";
 import { HomeAccountKey, PrivacyLink } from "./account";
@@ -89,9 +90,11 @@ interface Props {
   onArchive: () => void;
   /** Fathom, the estimation game: a game under way, or a new one. */
   onFathom: () => void;
+  /** The player's local date: Today's Fathom's day. */
+  today: string;
 }
 
-export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDaily, onRoll, onBlitz, onArchive, onFathom }: Props) {
+export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDaily, onRoll, onBlitz, onArchive, onFathom, today }: Props) {
   const [noBlitz, setNoBlitz] = useState(false);
   /** The open "by category" picker, if any (one at a time). */
   const [picker, setPicker] = useState<Pick | null>(null);
@@ -108,6 +111,7 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
   const helpKey = useRef<HTMLButtonElement>(null);
   const dailyRef = useRef<HTMLButtonElement>(null);
   const status = todayStatus(saved, entry);
+  const fathom = fathomTodayStatus(saved.fathom, today);
   // Keyboard-first: Enter starts (or reopens) today's list. Focus without scrolling so the title stays in view. The
   // focused today key is the one loud element on the screen.
   // Touch screens have no Enter to press, so they get no auto focus (and no focus ring on a key nobody chose).
@@ -310,9 +314,11 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
           <h2 id="today-title" className="label">
             Today{entry ? ` · #${entry.n}` : ""}
           </h2>
-          <Countdown />
+          {/* Both of today's games change at midnight. */}
+          <Countdown label="new in" />
         </div>
-        {/* The one daily, across the whole card (UX 6: the main thing gets the most room). */}
+        {/* Today's list across the whole card, the big key (UX 6: the main thing gets the most room); Today's Fathom
+            under it, a key as tall as free play's, its state and no description (owner, Nov 14). */}
         <div className="today-stack">
           <ModeKey
             mode="classic"
@@ -325,6 +331,7 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
             disabled={!entry}
             onClick={onDaily}
           />
+          <ModeKey mode="fathom" testId="today-fathom" title={FATHOM_TODAY} status={fathom.status} done={fathom.done} onClick={onFathom} />
         </div>
       </section>
 
@@ -336,7 +343,7 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
               Free play
             </h2>
           </div>
-          {/* Each list key rolls at once; the strip under it opens that mode's categories (a chip rolls in that one). */}
+          {/* Each key rolls at once; the strip under it opens that mode's categories (a chip rolls in that one). */}
           <div className="mode-pair">
             {freeKey(
               "list",
@@ -362,22 +369,6 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
               blitzCats,
               blitzStrip,
             )}
-            {/* Fathom has no lists, so no categories: its key alone, its line where the others count their lists. */}
-            <div className="free-key fathom">
-              <ModeKey
-                mode="fathom"
-                testId="fathom-key"
-                title="Fathom"
-                // On the narrowest phones only its end, so the key stays as tall as its neighbours (UX 8).
-                status={
-                  <>
-                    <span className="sub-long">{FATHOM_LINE}</span>
-                    <span className="sub-short">{FATHOM_LINE_SHORT}</span>
-                  </>
-                }
-                onClick={onFathom}
-              />
-            </div>
           </div>
           {noBlitz && <p className="caption blitz-none">no lists are open for blitz yet.</p>}
         </section>

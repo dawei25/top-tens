@@ -1,8 +1,9 @@
-// Fathom, the estimation game (#fathom): five questions that ask for a number. The questions come from
+// Fathom, the estimation game, endless (#fathom-endless, hidden since Nov 14; Today's Fathom, #fathom, is
+// fathom-daily.e2e.cjs): five questions that ask for a number. The questions come from
 // e2e/fixtures/fathom/questions.json (twelve real facts, one per kind, all estimates, so a draw from it fills the
 // percent and year rounds with estimates), served in place of public/fathom/questions.json; the percent and year
 // rounds add two real questions of their own (PERCENT, YEAR).
-// - A full game on phone and desktop: the draw (five kinds, the first easy), no scoring line anywhere (the owner, Nov
+// - A full game of ten on phone and desktop: the draw (ten kinds, the first easy), no scoring line anywhere (the owner, Nov
 //   14; How to play explains it), the field (no scale keys or words, the number grouped with commas
 //   as it's typed and the caret after the same digit, "2.5m" still read), invalid input, the reveal (plain closeness,
 //   the same for every question; no "most people miss by" line), the running total from the second question, the
@@ -39,7 +40,7 @@ const FIXTURE = path.join(__dirname, "fixtures", "fathom", "questions.json");
 const BANK = JSON.parse(fs.readFileSync(FIXTURE, "utf8")).questions;
 const byId = new Map(BANK.map((q) => [q.id, q]));
 const KEY = "tentacle:fathom";
-const QUESTIONS = 5;
+const QUESTIONS = 10;
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -51,9 +52,9 @@ const bank =
   (ctx) =>
     ctx.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill(fulfill));
 
-/** Opens #fathom with the fixture bank, and Fathom's own save seeded once (`save`), if given. */
+/** Opens endless Fathom with the fixture bank, and its own save seeded once (`save`), if given. */
 function openFathom(vp, { save, serve = bank(), setup, ...opts } = {}) {
-  return open(browser, vp, "#fathom", undefined, {
+  return open(browser, vp, "#fathom-endless", undefined, {
     ...opts,
     setup: async (ctx) => {
       await serve(ctx);
@@ -243,13 +244,14 @@ describe("Fathom", { concurrency: true }, () => {
       // NEXT takes focus a beat after the reveal (so a held Enter presses nothing), then Enter moves on.
       await page.waitForFunction(() => document.activeElement?.dataset.testid === "fathom-next");
 
-      // Four more: typed with separators, a third of the answer, plain digits (grouped as typed), and far off (a short
-      // form, read silently).
+      // Nine more: typed with separators, a third of the answer, plain digits (grouped as typed), far off (a short
+      // form, read silently), and the answers.
       const guesses = [
         (q) => ({ text: Math.round(q.answer * 2).toLocaleString("en-US"), value: Math.round(q.answer * 2) }),
         (q) => ({ text: `${q.answer / 3}`, value: q.answer / 3 }),
         () => ({ text: "4000", shown: "4,000", value: 4000 }),
         () => ({ text: "1.5bn", value: 1.5e9 }),
+        ...Array.from({ length: 5 }, () => (q) => ({ text: String(q.answer), value: q.answer })),
       ];
       for (const make of guesses) {
         await page.keyboard.press("Enter");
@@ -271,13 +273,13 @@ describe("Fathom", { concurrency: true }, () => {
         assert.equal(Number(await attr(page, "fathom-running", "data-total")), sum, `${q.id}: the running total`);
         await page.waitForFunction(() => document.activeElement?.dataset.testid === "fathom-next");
       }
-      assert.equal(new Set(played.map((q) => q.kind)).size, 5, "five questions, five kinds");
+      assert.equal(new Set(played.map((q) => q.kind)).size, 10, "ten questions, ten kinds");
 
-      // The results: the total is the sum of the five, and each question is there with the guess.
+      // The results: the total is the sum of the ten, and each question is there with the guess.
       await page.keyboard.press("Enter");
       await page.getByTestId("fathom-results").waitFor();
       const rows = page.getByTestId("fathom-row");
-      assert.equal(await rows.count(), 5);
+      assert.equal(await rows.count(), 10);
       const rowPoints = await rows.evaluateAll((els) => els.map((el) => Number(el.dataset.points)));
       assert.deepEqual(rowPoints, expected);
       const total = Number(await attr(page, "fathom-total", "data-total"));
@@ -286,7 +288,8 @@ describe("Fathom", { concurrency: true }, () => {
         await rows.evaluateAll((els) => els.map((el) => el.dataset.question)),
         played.map((q) => q.id),
       );
-      assert.equal(await page.getByTestId("fathom-bands").locator("[data-band]").count(), 5);
+      assert.equal(await page.getByTestId("fathom-bands").locator("[data-band]").count(), 10);
+      assert.equal(await attr(page, "fathom-total", "data-max"), "1000");
       assert.equal(await noHScroll(page), true);
       // Neither a rule line nor "a typical guesser scores about 250".
       assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line on the results");
@@ -294,21 +297,22 @@ describe("Fathom", { concurrency: true }, () => {
       // The key that draws new questions says so: "Play again" read as the same five again (UX.md 1 and 14).
       assert.doesNotMatch(await page.getByTestId("fathom-again").innerText(), /again/i);
 
-      // SHARE: "Fathom <total>/500", five squares in the bands' colours and the link (two spaces end each line but the
+      // SHARE: "Fathom <total>/1000", ten squares in the bands' colours and the link (two spaces end each line but the
       // last, so a Reddit comment keeps them).
       if (vp.name === "desktop") {
         await page.getByTestId("fathom-share").click();
         const text = await page.evaluate(() => navigator.clipboard.readText());
-        assert.match(text, new RegExp(`^Fathom ${total}/500  \\n(\\p{Extended_Pictographic} ){4}\\p{Extended_Pictographic}  \\nhttps?://\\S+/#fathom$`, "u"));
+        assert.match(text, new RegExp(`^Fathom ${total}/1000  \\n(\\p{Extended_Pictographic} ){9}\\p{Extended_Pictographic}  \\nhttps?://\\S+/#fathom$`, "u"));
       }
 
-      // NEW QUESTIONS: a new draw, none of the five just played (the bank has room).
+      // NEW QUESTIONS: a new draw, the two the twelve-question bank held back from the last game first in line.
       const firstIds = played.map((q) => q.id);
       await page.getByTestId("fathom-again").click();
       await page.getByTestId("fathom-input").waitFor();
       const saved = JSON.parse(await page.evaluate((k) => localStorage.getItem(k), KEY));
-      assert.equal(saved.game.ids.length, 5);
-      assert.deepEqual(saved.game.ids.filter((id) => firstIds.includes(id)), [], "NEW QUESTIONS holds back the last game's questions");
+      assert.equal(saved.game.ids.length, 10);
+      const unplayed = BANK.map((q) => q.id).filter((id) => !firstIds.includes(id));
+      assert.deepEqual(unplayed.filter((id) => !saved.game.ids.includes(id)), [], "NEW QUESTIONS takes what the last game didn't ask");
       assert.equal(saved.game.ids[0], (await shownQuestion(page)).id);
       assert.equal((await shownQuestion(page)).easy, true);
       assert.deepEqual(saved.recent[1], firstIds, "the last games are remembered, newest first");
@@ -317,7 +321,7 @@ describe("Fathom", { concurrency: true }, () => {
       const kept = await store(page);
       assert.deepEqual({ ...kept, fathom: undefined }, { ...before, fathom: undefined });
       assert.deepEqual(kept.fathom.runs.map((r) => r.ids), [firstIds]);
-      assert.deepEqual(Object.values(kept.fathom.totals), [total]);
+      assert.deepEqual(Object.values(kept.fathom.totals10), [total]);
       assert.deepEqual(kept.fathom.recent.map((d) => d.ids).slice(0, 2), [saved.game.ids, firstIds]);
       // Without a backend, no guess was sent or queued.
       assert.deepEqual(away, [], "requests off the site");
@@ -559,7 +563,7 @@ describe("Fathom", { concurrency: true }, () => {
     const vp = VIEWPORTS.find((v) => v.name === "phone");
     const { ctx, page } = await openFathom(vp, { reducedMotion: "reduce" });
     await page.getByTestId("fathom-input").waitFor();
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < QUESTIONS; i++) {
       await lockIn(page, "42");
       await next(page);
     }
@@ -569,7 +573,7 @@ describe("Fathom", { concurrency: true }, () => {
     await page.reload();
     await page.getByTestId("fathom-results").waitFor();
     assert.equal(await attr(page, "fathom-total", "data-total"), total, "the same score");
-    assert.equal(await page.getByTestId("fathom-row").count(), 5);
+    assert.equal(await page.getByTestId("fathom-row").count(), QUESTIONS);
     assert.equal(await page.evaluate((k) => localStorage.getItem(k), KEY), saved, "no new draw on a reload");
     await page.getByTestId("fathom-again").click();
     await page.getByTestId("fathom-input").waitFor();
@@ -710,10 +714,10 @@ describe("Fathom", { concurrency: true }, () => {
     await lockIn(page, "1e15");
     assert.equal(await attr(page, "fathom-band", "data-band"), "lost");
     await next(page);
-    // The progress squares: the first lost, the second on screen, the rest empty.
-    const pips = page.locator(".fathom-pips .pip");
-    assert.ok(await standsOut(page, pips.nth(0), await meanColor(pips.nth(3))), "the lost square looks like an empty one");
-    for (let i = 1; i < 5; i++) {
+    // The progress cells: the first lost (its ring in the label colour), the second on screen, the rest empty.
+    const cells = page.getByTestId("fathom-cell");
+    assert.ok(await standsOut(page, cells.nth(0), await meanColor(cells.nth(3))), "the lost cell looks like an empty one");
+    for (let i = 1; i < QUESTIONS; i++) {
       await lockIn(page, "42");
       await next(page);
     }

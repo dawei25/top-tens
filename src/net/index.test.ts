@@ -403,7 +403,7 @@ describe("with a backend", () => {
       // The player's own day may be a day either side of UTC's.
       expect(net.reportFathomDaily("2026-11-13", 0)).toBe(true);
       expect(net.reportFathomDaily("2026-11-11", 250)).toBe(false);
-      expect(net.reportFathomDaily("2026-11-15", 501)).toBe(false);
+      expect(net.reportFathomDaily("2026-11-15", 1001)).toBe(false);
       expect(net.reportFathomDaily("2026-11-15", 99.5)).toBe(false);
       expect(JSON.parse(store.get("top-tens:fathom-play-outbox")!).pending).toEqual([
         { date: "2026-11-14", total: 312, at: now },

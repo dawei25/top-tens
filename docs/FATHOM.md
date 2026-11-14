@@ -1,36 +1,106 @@
 # Fathom
 
-The estimation game (`#fathom`), a full game mode since Nov 9 (the owner: "ship it now"; no daily Fathom for now): each
-game shows 5 questions, the player types a number (or, in the name-it round, a name), and the score is plain closeness,
-by one rule for each round (`scoreFor`, `src/game/fathom.ts`), out of 500. Games are endless: NEW QUESTIONS draws
-another. The questions live in `public/fathom/questions.json`; the name-it round's lists in
-`public/fathom/lists/<id>.json` (built by `scripts/fathom/lists.ts`).
+The estimation game, a full game mode since Nov 9 (the owner: "ship it now") and a daily since Nov 14: **Today's
+Fathom** (`#fathom`), ten questions a day, the same for everyone, one try, 20 seconds a question. The player types a
+number (or, in the name-it round, a name), and the score is plain closeness, by one rule for each round (`scoreFor`,
+`src/game/fathom.ts`), out of 1000. Ten since Nov 14 (owner: "change it to 10 questions to keep in line with the 10
+theme"), five before: those games keep their own total out of 500. Endless Fathom (NEW QUESTIONS draws another game)
+stays playable at a hidden address, `#fathom-endless`, linked from nowhere (owner, Nov 14: "remove the unlimited
+fathom play for now- keep access to it via a hidden url"). The questions live in `public/fathom/questions.json`; the
+name-it round's lists in `public/fathom/lists/<id>.json` (built by `scripts/fathom/lists.ts`); the days in
+`public/fathom/daily.json` (written by `scripts/fathom/daily.ts`).
 
 ## Where it lives
 
-- **Home**: a Fathom key in Free play, beside Random list and Random Blitz, the same keycap, its line "Guess the
-  number: 5 questions" where they count their lists (it has no categories, so no strip). Under them on a phone; the
-  row under the pair from 640px, one line high.
-- **The menu**: a Fathom tile in Play (a sonar's rings), marked while Fathom is on show.
-- **How to play**: rule 7, Fathom in the game's own words and its scoring rule (the only place it's written).
-- **Stats**: a Fathom card under the lists' sections: games, avg / 500, best / 500 over every finished game; "0",
-  "--", "--" and a key to play before the first.
-- **Past runs**: each finished game under its day, tagged FATHOM, its five squares for a title and its total; the row
-  opens that game's results (`#fathom/run-<startedAt>`: the total, the squares, the rules, when it was played, the
-  recap of the questions still in the bank, SHARE, and NEW QUESTIONS, or BACK TO YOUR GAME while a game is under way).
-  Home's key and the menu's tile start new questions once the last game is over (free play is new every time, UX 14),
-  and go back to a game under way; a reload on the results keeps them.
-- **The share text** (SHARE, as on lists and Blitz: the phone's share sheet, else a copy and "Copied"): "Fathom
-  312/500", the five squares in the results' colours (🟨 dead on, 🟦 close, 🟪 near, 🟥 far, ⬛ lost at sea), and the link to `#fathom`,
-  each line but the last ending in two spaces so a Reddit comment keeps them (`pasteable`, src/components/share.ts).
+- **Home**: Today's Fathom in the Today panel, under Today's list and as wide (Today's list keeps its big key), a key
+  as tall as a free-play key with no description line, only its state: "new", "playing", then the total ("712/1000").
+  The panel's countdown ("new in 06:29:10") is for both. Nothing of Fathom in Free play.
+- **The menu**: a Today's Fathom tile in Play (a sonar's rings) with the same state, marked while it's on show; no
+  endless tile.
+- **How to play**: rule 7, Today's Fathom in the game's own words (ten a day, 20 seconds each) and its scoring rule
+  (the only place it's written).
+- **Stats**: a Fathom card under the lists' sections: games, avg / 1000, best / 1000 over every finished game of ten;
+  "0", "--", "--" and a key to play before the first. The games of five from before Nov 14 stay out (a total out of
+  500 doesn't average with ones out of 1000): their totals are kept apart (`totals`; ten-question games in
+  `totals10`), and Past runs still shows them.
+- **Past runs**: each finished game under its day, a square a question for a title (ten, smaller, or the old five)
+  and its total out of its own maximum, tagged FATHOM #12 (a day's game, by its number, as Today's list's rows are) or
+  FATHOM (endless); the row opens that game's results (`#fathom/run-<startedAt>`: the total, the squares, when it was
+  played, the recap of the questions still in the bank, SHARE, and a TODAY'S FATHOM key to the day's game, where it
+  is).
+- **The share text** (SHARE, as on lists and Blitz: the phone's share sheet, else a copy and "Copied"): "Fathom #12
+  712/1000" ("Fathom 712/1000" for an endless game; "/500" for a game of five), a square a question in the results'
+  colours (🟨 dead on, 🟦 close, 🟪 near, 🟥 far, ⬛ lost at sea or time's up), and the link to `#fathom`, each line but
+  the last ending in two spaces so a Reddit comment keeps them (`pasteable`, src/components/share.ts).
+
+## Today's Fathom
+
+- **The schedule** (`public/fathom/daily.json`: `{ n, date, ids }` a day, ten ids, Fathom #1 on 2026-11-14): written
+  by `NODE_NO_WARNINGS=1 npx tsx scripts/fathom/daily.ts --days 7`. Each day is a full game in the round mix (an easy
+  number first, then by the draw's own rules), no question comes back, and today's and tomorrow's entries are never
+  changed once written; the days after them are chosen again on each run. Ten a day uses the bank twice as fast as
+  five, so the script always says how many days the bank covers with questions not asked yet (137 questions on Nov
+  14: 12 days, through Nov 25, the 12 name-it questions running out first), and fails loudly, writing nothing, when
+  the days asked for go past that: add questions, ask for fewer days, or pass `--repeat` to let the bank start over
+  (the last few days held back). It also fails when today's or tomorrow's entry asks a question the bank no longer has
+  (put it back, or rewrite that day by hand); a past day's is only a warning. `scripts/fathom/daily.test.ts` holds the
+  committed file to all of it, every scheduled id from today on in the bank included: a question renamed or dropped
+  fails `npm test` until the script is re-run; a file short of a week ahead fails it while the bank has another day.
+- **A day the file doesn't cover** (it ran out, or didn't load): the game seeds that day by its date from the bank, by
+  the same rules, continuing from the file's last day (`dayFor`, `src/game/fathom-daily.ts`: the same code the script
+  uses), so everyone still gets the same ten; it is numbered by days since Fathom #1. Unlike the script, it never
+  stops: once the bank has run out it starts over, holding back the last few days. A scheduled day whose questions
+  aren't all in the bank is seeded the same way.
+- **One try**: the day's game under way is this browser's (`tentacle:fathom-daily`, with its day): a reload, Home's
+  key or the menu's tile resumes it; yesterday's unfinished game is dropped at midnight (and a day's game of five from
+  before the switch starts over as the day's ten). Once finished, the run is in the save tagged with its day
+  (`daily: { date, n }`), so the day reopens on its results on every device: no key for new questions, "next Fathom
+  in 06:29:10" instead. The day's game never sits behind a sign-in.
+- **The clock** (owner, Nov 14: "add a timer per question (maybe like 20s)"): `QUESTION_SECONDS`, 20, from when the
+  question shows and the field takes typing. "0:17" at the end of the card's header, quiet (the muted label colour),
+  pink for the last five seconds (`WARN_SECONDS`); four tabular characters, no animation, its box kept (hidden) on the
+  reveal, so nothing moves. Paused while the tab is hidden; the time a question has used is kept in this browser
+  (`tentacle:fathom-clock`), so a reload doesn't give it back. At 0 a guess that reads locks in, as LOCK IN would (a
+  name-it round: a name the list has, or a misspelling of one thing it would have asked to confirm); anything else
+  scores 0, and the reveal says "Time's up" with the answer, the fact and the source (a name-it round's best answers
+  too), no guess and no sonar. The round's id goes in the game's and the run's `timeouts`; its square is lost at sea's,
+  and the recap reads "time's up · answer 126 litres". The name-it round keeps the same 20 seconds for now (not yet
+  play-tested by a person against the clock; the browser suite's name-it rounds lock well inside it).
+- **The running score** (owner, Nov 14: "add points to a visible counter ... some kind of bar at the top ... sleek and
+  minimalistic"): under the question card's header, the total out of 1000 and ten pixel cells, one a question and its
+  100 points, each filled by what it scored in its band's colour, the one on screen outlined, a played one ringed in
+  its band's colour (lost at sea's in the label colour, so a 0 reads as played). The cells are the progress squares
+  too: ten pips beside "Question 1 of 10" took 314px of a 250px card at 320. On each reveal the total counts up and
+  the new fill grows in (neither with reduced motion). It is there, empty, from the first question, and its total sits
+  over a hidden "1000/1000", so nothing moves or resizes as points land or the clock ticks (e2e/fathom-daily.e2e.cjs
+  measures it at 320, 390 and 1440). With the keyboard up (little height) it gives its row to the question and the
+  field; the clock stays.
+- **Where you stand**: the day's results end with the players' average, the players' curve over 0 to 1000 (below; the
+  player's marker at their total, a caret under the average) and "you did better than 81% of players today". Endless
+  Fathom's results and a past game show none.
+
+## The players' curve
+
+Owner, Nov 14: "for histogram instead of a bar chart style can you do a actual curve? apply this style throughout but
+keep it within thematic style". One component, `CrowdCurve` (src/components/CrowdCurve.tsx, its maths in
+crowd-curve.ts), draws every players' distribution: a list's results (11 scores) and Today's Fathom's (100 bins of
+10 points); Stats and Blitz draw none. The counts are read as a density, each bin's players spread evenly over its
+width, then a Gaussian blur of half a list bin (the same width on both), reflected at both ends: the area stays the
+counts' and a blur makes no new peak, so the curve never shows a bump the counts don't have. It is sampled in 50
+columns of 3px, each height snapped to 3px steps (the old bars' step): a stepped pixel curve 150 x 39 on the bars'
+hairline baseline, 150 x 42 in all, where the 11 bars were. The area is the bars' slate, a little brighter from the
+left edge to the player's score (the players they did better than); the player is a thin pink line and a 6px pink
+square on the curve (the old bar's pink and glow), never clipped at 0 or the maximum; the average is the gold caret
+under the baseline; the scale's ends under it (0 and 10, 0 and 1000). No animation; the aria-label says the line.
 
 ## The save and the sync
 
-The game on screen (its questions, guesses, picks and when it was drawn) is this browser's own (`tentacle:fathom`):
-a reload picks it up, results included. Everything else is in the player's save (`Saved.fathom`, `top-tens:v1`,
+The game on screen (its questions, guesses, picks and when it was drawn) is this browser's own (`tentacle:fathom` for
+endless, `tentacle:fathom-daily` for the day's): a reload picks it up, results included. Everything else is in the player's save (`Saved.fathom`, `top-tens:v1`,
 `src/game/fathom-history.ts`), so it travels with an account like list games, with no new table (the account's save
 is one JSON object): every finished game (Past runs, the last 100, each question's points kept as scored), every
-finished game's total (Stats, never pruned), and the last 3 games drawn (held back from the next draw on every device).
+finished game's total (Stats, never pruned), and the last 3 endless games drawn (held back from the next draw on every
+device). A day's game carries its day (`daily`), which is how another device knows it's played.
 The sync merges two devices' copies as the union, one game per start (`mergeFathom`, called from
 `src/net/sync/merge.ts`), a reset on another device prunes it, and a game finished here asks for a sync
 (`reportFathom`). Settings' reset clears both.
@@ -124,37 +194,42 @@ register". **A fair answer must always register**, and one answer locks per roun
 
 ## A game
 
-Five rounds (`GAME_ROUNDS`): two estimates, a percent, a year, and a name-it round (an estimate when the bank has none
-whose list loaded). No timer. The first question is an easy one, and a number to type (never the name-it round); the
-other four come in a random order. Within that, no
-two of the same kind, at most two how tall / how heavy questions, and none from the last 3 games while the bank has
-others (then the oldest come back first). A round the bank has none of is played as an estimate, so a small bank never
-breaks a game.
+Ten rounds (`GAME_ROUNDS`): five estimates, two percents, two years, and a name-it round (an estimate when the bank
+has none whose list loaded); five before Nov 14 (two estimates, a percent, a year, a name-it round). One name-it
+round, not two: the bank's 12 would last six days at two a day, and a name against the clock is the slowest round.
+20 seconds a question (The clock, above). The first question is an easy one, and a number to type (never the name-it
+round); the other nine come in a random order. Within that: none from the last 3 games while the bank has others
+(then the oldest come back first), kinds as spread as the bank allows (a kind not in the game yet, then the least
+used), and at most three how tall / how heavy questions. A round the bank has none of is played as an estimate, so a
+small bank never breaks a game.
 
 **A how tall / how heavy question** (`isSizeQuestion`): an estimate whose unit is a length or a mass (any scale word in
 front) and that asks how tall, long, high, deep, wide, big or heavy something is, or what it weighs ("How tall is the
 Eiffel Tower?", "How long is a marathon?", "How much does an ostrich egg weigh?", "What weight of tomatoes..."). Not
 one: a distance ("How far away is the Moon?"), an amount used or grown ("How much tea does Turkey get through?", "How
-much can bamboo grow in a day?"), a duration, a count, an area, a percent or a year. The draw takes at most two a game;
+much can bamboo grow in a day?"), a duration, a count, an area, a percent or a year. The draw takes at most three a
+game (two of five before Nov 14);
 the bank should hold no more than one in five (`check.ts` reports it as a warning until the rebuilt bank lands; the
 old bank had 43 of 94).
 
 ## Where you stand (simulated crowd)
 
-Today's Fathom gives everyone the same five questions, so its results say "you did better than 81% of players today"
-over a histogram of the day's totals, with no "estimated" tag (owner, Nov 14). The maths is `src/game/fathom-crowd.ts`;
+Today's Fathom gives everyone the same ten questions, so its results say "you did better than 81% of players today"
+over the players' curve of the day's totals, with no "estimated" tag (owner, Nov 14). The maths is `src/game/fathom-crowd.ts`;
 the backend calls are `reportFathomDaily` and `useFathomDay` (`src/net`), on
 `supabase/migrations/20261114120000_fathom_plays.sql`.
 
 - **What's simulated** (owner: "just simulate a relatively normal distribution around [a proxy average] (albeit
   skewing to the right cause some ppl do rly good)"): the day's expected total is its questions' expected points,
-  summed: 65 for an easy question, else 35 for an estimate (the writers' typical miss, about 2.3x on the questions
-  that aren't openers), 55 for a percent or a year, 60 for a name-it round. The usual day (an easy opener, an
-  estimate, a percent, a year, a name-it round) expects 270, and every day the bank can draw expects 175 to 325.
-  Around it, a two-piece normal curve, its standard deviation 70 points below its peak and 120 above, placed so half
-  the simulated players score under the expected total: the middle 80% run from about 110 under it to 130 over, the
-  mean sits about 5 over, and nothing falls outside 0 to 500 (the curve is cut there). Bins of 10 points (500 shares
-  the last with 490-499), the same every time (no randomness).
+  summed, the scoring agent's numbers for a typical miss on the gentler curve: 66 for an easy question, else 47 for
+  an estimate (the writers' typical miss, about 2.3x on the questions that aren't openers), 58 for a percent, 55 for a
+  year, 60 for a name-it round. The usual day of ten (an easy opener, four estimates, two percents, two years, a
+  name-it round) expects 540, and every day the 137-question bank draws expects about 530 to 615. Around it, a two-piece normal curve, its standard deviation 140 points below its peak and 240 above (twice the
+  five-question game's 70 and 120: a player's knack carries across the day's questions, so ten spread totals about
+  twice as far), placed so half the simulated players score under the expected total: the middle 80% run from about
+  215 under it to 260 over, the mean sits about 11 over, and nothing falls outside 0 to 1000 (the curve is cut there).
+  100 bins of 10 points (1000 shares the last with 990-999; 10, not 20, so totals 10 apart rank apart), the same every
+  time (no randomness). The curve on screen blurs them (The players' curve).
 - **How it's labelled**: it isn't. The line counts the simulated players as players; `n` (the real ones) comes with
   the standing for a screen that wants it.
 - **How real players replace it**: each finished Today's Fathom sends its total once per browser and date

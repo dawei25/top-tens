@@ -109,27 +109,30 @@ export function parseCompare(raw: unknown): FathomCrowd | null {
 /* ---------- Today's Fathom: a day's totals ---------- */
 
 /**
- * Today's Fathom, finished: the day's five questions are the same for everyone, so its total (0 to 500) stands
+ * Today's Fathom, finished: the day's ten questions are the same for everyone, so its total (0 to 1,000) stands
  * against everyone else's that day ("you did better than 81% of players today"). Sent once per date, to
  * submit_fathom_play (supabase/migrations/20261114120000_fathom_plays.sql); the database checks the same things.
  */
 export interface FathomPlay {
   /** The day it was that day's Fathom, played on its day: YYYY-MM-DD, the player's own date (game/daily's localDate). */
   date: string;
-  /** The game's total, a whole number 0 to 500. */
+  /** The game's total, a whole number 0 to 1,000. */
   total: number;
   /** Epoch ms it finished. */
   at: number;
 }
 
-/** The most a game can total (five questions of 100). */
-export const FATHOM_MAX_TOTAL = 500;
-/** Totals are counted in bins this many points wide (0-9, 10-19, ...)... */
+/** The most a game can total (ten questions of 100, since Nov 14). */
+export const FATHOM_MAX_TOTAL = 1000;
+/**
+ * Totals are counted in bins this many points wide (0-9, 10-19, ...): 10, not 20, so two totals 10 points apart
+ * rank apart...
+ */
 export const FATHOM_BIN = 10;
-/** ...this many of them, 500 in the last with 490-499 (fathom_day_stats bins the same way). */
+/** ...this many of them, 1,000 in the last with 990-999 (fathom_day_stats bins the same way). */
 export const FATHOM_BINS = FATHOM_MAX_TOTAL / FATHOM_BIN;
 
-/** The bin a total falls in: 0 for 0-9, 49 for 490 to 500. */
+/** The bin a total falls in: 0 for 0-9, 99 for 990 to 1,000. */
 export const totalBin = (total: number): number => Math.max(0, Math.min(FATHOM_BINS - 1, Math.floor(total / FATHOM_BIN)));
 
 /** Why the server would refuse this day's total, or null if it's fine. A date over a day from today has gone stale. */

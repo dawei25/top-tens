@@ -527,6 +527,7 @@ a {
 .today-stack {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 /* Wide enough: a key that wide doesn't need its phone height. */
 @media (min-width: 640px) {
@@ -700,44 +701,17 @@ a {
 .free-key.blitz {
   --accent: var(--gold);
 }
-/* Fathom: no categories, so its key stands alone; side by side, it takes the row under the pair, as tall as its content
-   (a free-play key's height without the strip). Its line says what it is, and wraps on the narrowest phones. */
-.free-key.fathom {
-  --accent: var(--cyan);
-}
+/* Today's Fathom (owner, Nov 14): under Today's list, a key as tall as free play's, quiet like them; its state in
+   cyan until it's played, then settled. */
 .mode-key.fathom {
   --accent: var(--cyan);
 }
-.mode-key.fathom .key-sub {
-  white-space: nowrap;
-  text-align: right;
+.today-stack .mode-key.fathom .key-sub {
+  font-size: 17px;
+  color: var(--cyan);
 }
-/* Narrower than a 390 phone only "5 questions": the whole line wrapped at 320 and made the key taller than its
-   neighbours (UX 8); from 390 it fits on one line. */
-.mode-key.fathom .sub-short {
-  display: none;
-}
-@media (max-width: 389px) {
-  .mode-key.fathom .sub-long {
-    display: none;
-  }
-  .mode-key.fathom .sub-short {
-    display: inline;
-  }
-}
-@media (min-width: 640px) {
-  .mode-pair > .free-key.fathom {
-    grid-column: 1 / -1;
-  }
-  /* The whole row is room enough for one line: the title at the left, its line at the right. */
-  .mode-key.fathom {
-    flex-direction: row-reverse;
-    align-items: center;
-    min-height: 0;
-  }
-  .mode-key.fathom .mode-key-top {
-    flex: 1;
-  }
+.today-stack .mode-key.fathom.done .key-sub {
+  color: var(--label);
 }
 .cat-strip {
   display: flex;
@@ -3095,6 +3069,14 @@ a.arch-cell:active .arch-name {
 .play-band[data-band="far"] {
   --band: var(--pink);
 }
+/* Ten questions a game since Nov 14: smaller squares, closer, so the row stays the width five had. */
+.play-bands[data-count="10"] {
+  gap: 3px;
+}
+.play-bands[data-count="10"] .play-band {
+  width: 10px;
+  height: 10px;
+}
 /* Lost at sea: a crossed outline, so it reads as played and missed (fathom.css, Nov 5). */
 .play-band[data-band="lost"] {
   background: transparent;
@@ -3337,35 +3319,46 @@ a.arch-cell:active .arch-name {
   flex-direction: column;
   gap: 2px;
 }
-.histo-bars {
-  display: grid;
-  grid-template-columns: repeat(11, 12px);
-  column-gap: 2px;
-  align-items: end;
+/*
+ * The players' curve (owner, Nov 14: "an actual curve ... within thematic style"; CrowdCurve.tsx): a stepped pixel
+ * curve, 3px squares, as tall and wide as the 11 bars were, on the same hairline baseline. Its area in the bars'
+ * slate, brighter up to the player's score; the player a thin pink line and a pink square on the curve with the old
+ * bar's glow; the average a gold caret under the baseline.
+ */
+.curve-plot {
+  display: flex;
+  align-items: flex-end;
   height: 42px;
   border-bottom: 2px solid var(--hairline);
 }
-.histo-col {
+.curve-area {
   position: relative;
-  display: flex;
-  align-items: flex-end;
-  height: 100%;
+  width: 150px;
+  height: 39px;
 }
-.histo-bar {
-  width: 100%;
-  background: var(--faint);
+.curve-area svg {
+  display: block;
 }
-.histo-col[data-you] .histo-bar {
+.curve-fill {
+  fill: var(--faint);
+}
+.curve-below {
+  fill: color-mix(in srgb, var(--faint) 55%, var(--label));
+}
+.curve-line {
+  fill: var(--pink);
+  opacity: 0.75;
+}
+.curve-you {
+  position: absolute;
+  width: 6px;
+  height: 6px;
   background: var(--pink);
   box-shadow: 0 0 8px var(--pink-glow);
 }
-/* The players' average: a gold pixel caret under its bar. */
-.histo-col[data-par]::after {
-  content: "";
+.curve-avg {
   position: absolute;
-  left: 50%;
   bottom: -9px;
-  translate: -50% 0;
   border-inline: 4px solid transparent;
   border-bottom: 5px solid var(--gold);
 }
@@ -3381,12 +3374,6 @@ a.arch-cell:active .arch-name {
   font-size: 19px;
   letter-spacing: 0.06em;
   color: var(--text);
-}
-/* "(estimated)": plain words, quieter than the line it qualifies, wrapping as one piece. */
-.par-est {
-  font-size: 16px;
-  color: var(--muted);
-  white-space: nowrap;
 }
 
 /*

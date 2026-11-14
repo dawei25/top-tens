@@ -1,9 +1,10 @@
 // The backend switched on: this spec builds its own copy with fake Supabase env vars, serves it on a free port, and
 // answers Supabase's endpoints itself. Checks: each finished game is sent once with the right payload; results blend
-// real players into the estimate (named from 30 players, "(estimated)" below); a list rating goes to rate_list (and
+// real players into the estimate (never "(estimated)", owner Nov 14); a list rating goes to rate_list (and
 // waits while offline); a Fathom guess goes to submit_fathom_guess once (and waits while offline), and its reveal says
 // how real players guessed from 20 of them (fathom_compare asked with the round); a name-it round sends the figure of
-// the thing named; Home's
+// the thing named; Today's Fathom's total goes to submit_fathom_play once, and its results draw the day's real players
+// (fathom_day_stats) with the simulated crowd; Home's
 // account key in its header (signed out, signing in, signed in by name and never by address, the pink dot for sync
 // trouble, each in its icon, name and title; nothing between Today and Free play), the menu without an account
 // section and its Feedback, the sign-in sheet in both modes and privacy page; and a signed-in session syncing its save
@@ -19,7 +20,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { VIEWPORTS, NOW, TODAY, guess, noHScroll } = require("./helpers.cjs");
 const { BACKEND_ENV } = require("./backend-env.cjs");
-const { SUPA, STATS, serveBuild, opener, openMenu, openSignIn, accountKey, KEY_COLORS, homeSignedIn, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
+const { SUPA, STATS, FATHOM_DAY, serveBuild, opener, openMenu, openSignIn, accountKey, KEY_COLORS, homeSignedIn, TOKEN, SESSION, PASSWORD, FRESH, UUID, until, settle } = require("./backend-lib.cjs");
 
 const desktop = VIEWPORTS.find((v) => v.name === "desktop");
 const phone = VIEWPORTS.find((v) => v.name === "phone");
@@ -61,17 +62,20 @@ test("finished games are sent once, and results blend in real players (desktop)"
   await page.getByTestId("give-up").click();
   await page.getByTestId("give-up").click();
 
-  // 120 real players averaging 5.2 (STATS in backend-lib), blended with the estimate's 30: their number named, and no
-  // "(estimated)".
+  // 120 real players averaging 5.2 (STATS in backend-lib), blended with the estimate's 30: their number named.
   const want = blended(pars.mountains, STATS.list, 2);
   const block = page.locator('[data-testid="results"] [data-testid="par"][data-source="players"]');
   await block.waitFor();
   assert.equal(await block.getAttribute("data-n"), "120");
   assert.equal(Number(await block.getAttribute("data-par")), want.avg);
   assert.equal(Number(await block.getAttribute("data-p")), want.p);
-  assert.equal(await block.getByTestId("par-est").count(), 0);
-  assert.equal(await block.getByTestId("histogram").locator("[data-par]").getAttribute("data-score"), String(Math.round(want.avg)));
-  assert.equal(await block.getByTestId("histogram").locator("[data-you]").getAttribute("data-score"), "2");
+  assert.equal(await block.getByTestId("par-line").textContent(), `better than ${want.p}% of players`);
+  // The players' curve: the average's caret and the player's marker in their scores' columns (a score is the middle of
+  // its bin, 11 bins across 50 columns).
+  const curve = block.getByTestId("crowd-curve");
+  const col = (score) => String(Math.floor(((score + 0.5) / 11) * 50));
+  assert.equal(await curve.getByTestId("curve-avg").getAttribute("data-col"), col(want.avg));
+  assert.equal(await curve.getByTestId("curve-you").getAttribute("data-col"), col(2));
 
   await until(() => calls.submit.length > 0);
   await settle();
@@ -119,7 +123,8 @@ test("finished games are sent once, and results blend in real players (desktop)"
   await ctx.close();
 });
 
-test("a few real players move the estimate a little, and it still says (estimated) (phone)", async () => {
+// Owner, Nov 14: "dont specify estimated just say you did better than xx% of players today with a histogram".
+test("a few real players move the estimate a little, and nothing says estimated (phone)", async () => {
   const { ctx, page } = await open(phone, "#p-airports", FRESH);
   const pars = await page.evaluate(async () => (await fetch("puzzles/par.json")).json());
   await page.getByTestId("give-up").click();
@@ -133,7 +138,8 @@ test("a few real players move the estimate a little, and it still says (estimate
   assert.equal(Number(await block.getAttribute("data-par")), want.avg);
   assert.ok(want.avg > pars.airports.par && want.avg < STATS.few.avg);
   assert.equal(Number(await block.getAttribute("data-p")), want.p);
-  assert.ok(await block.getByTestId("par-est").isVisible());
+  assert.equal(await block.getByTestId("par-line").textContent(), `better than ${want.p}% of players`);
+  assert.doesNotMatch(await page.getByTestId("results").innerText(), /estimat/i);
   assert.ok(await noHScroll(page));
   await ctx.close();
 });
@@ -259,7 +265,7 @@ test("a guess the game doesn't take goes to submit_miss once, lowercase, linked 
 test("Fathom: each guess is sent once, and a reveal says how players guessed from 20 of them (phone)", async () => {
   const bank = path.join(__dirname, "fixtures", "fathom", "questions.json");
   const ids = ["eiffel-tower-height", "adult-bones", "octopus-hearts", "moon-distance", "everest-height"];
-  const { ctx, page, calls } = await open(phone, "#fathom", { ...FRESH, "tentacle:fathom": { recent: [], game: { ids, guesses: [], at: 0 } } }, undefined, (c) =>
+  const { ctx, page, calls } = await open(phone, "#fathom-endless", { ...FRESH, "tentacle:fathom": { recent: [], game: { ids, guesses: [], at: 0 } } }, undefined, (c) =>
     c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: bank, contentType: "application/json" })),
   );
   const lockIn = async (text) => {
@@ -322,6 +328,51 @@ test("Fathom: each guess is sent once, and a reveal says how players guessed fro
   await ctx.close();
 });
 
+// Today's Fathom (owner, Nov 14): its total goes to submit_fathom_play once, when the day's game finishes (a reload
+// sends nothing again), and the results draw the day's real players (fathom_day_stats) with the simulated crowd.
+test("Today's Fathom: the day's total is sent once, and its results count the day's real players (phone)", async () => {
+  const bank = path.join(__dirname, "fixtures", "fathom", "questions.json");
+  const fixture = JSON.parse(fs.readFileSync(bank, "utf8")).questions;
+  // The day's ten, the last of them Everest's height.
+  const ids = [...fixture.map((q) => q.id).filter((id) => id !== "everest-height").slice(0, 9), "everest-height"];
+  const day = { day: { date: TODAY, n: 2 }, ids, guesses: ids.slice(0, 9).map((id) => fixture.find((q) => q.id === id).answer), at: 8, startedAt: NOW.getTime() - 60_000 };
+  const { ctx, page, calls } = await open(phone, "#fathom", { ...FRESH, "tentacle:fathom-daily": day }, undefined, (c) =>
+    c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: bank, contentType: "application/json" })),
+  );
+  await page.getByTestId("fathom-reveal").waitFor();
+  await settle();
+  assert.deepEqual(calls.fathomPlay, [], "nothing before the day's game is over");
+  await page.getByTestId("fathom-next").click();
+  await page.getByTestId("fathom-input").fill("8848");
+  await page.getByTestId("fathom-lock").click();
+  await page.getByTestId("fathom-reveal").waitFor();
+  await until(() => calls.fathomPlay.length === 1);
+  await page.getByTestId("fathom-next").click();
+  await page.getByTestId("fathom-results").waitFor();
+  const total = Number(await page.getByTestId("fathom-total").getAttribute("data-total"));
+  assert.deepEqual(calls.fathomPlay[0], { p_date: TODAY, p_total: total, p_client_id: calls.fathomPlay[0].p_client_id });
+  assert.match(calls.fathomPlay[0].p_client_id, UUID);
+  // The day's real players join the simulated crowd: the curve peaks where they are (400-409, column 20 of 50); the
+  // line counts them.
+  const crowd = page.locator(`[data-testid="fathom-crowd"][data-n="${FATHOM_DAY.n}"]`);
+  await crowd.waitFor();
+  assert.ok(calls.fathomDay.includes(TODAY));
+  const peak = await crowd.locator(".curve-fill").evaluate((p) => {
+    const cols = [...p.getAttribute("d").matchAll(/V([\d.]+)H([\d.]+)/g)].map((m) => ({ top: Number(m[1]), end: Number(m[2]) }));
+    const top = Math.min(...cols.map((c) => c.top));
+    return cols.filter((c) => c.top === top).map((c) => c.end / 3 - 1);
+  });
+  assert.ok(peak.some((c) => Math.abs(c - 20) <= 1), `the curve peaks at the real players: columns ${peak}`);
+  assert.match(await crowd.getByTestId("fathom-crowd-line").textContent(), /^you did better than \d+% of players today$/);
+  assert.doesNotMatch(await page.locator("main").innerText(), /estimat/i);
+  // A reload (the results again) sends nothing again.
+  await page.reload();
+  await page.getByTestId("fathom-results").waitFor();
+  await settle();
+  assert.equal(calls.fathomPlay.length, 1);
+  await ctx.close();
+});
+
 // A name-it round sends the figure of the thing named, like any guess (the owner will score questions by how real
 // players do): an island on a land-borders round is a 0. It asks for no players' line.
 test("Fathom: a name-it round sends the figure of the thing named, 0 land borders included (desktop)", async () => {
@@ -330,7 +381,7 @@ test("Fathom: a name-it round sends the figure of the thing named, 0 land border
   const questions = [...questionsIn("questions.json"), ...questionsIn("name-questions.json")];
   const ids = ["eiffel-tower-height", "name-country-6-borders", "adult-bones", "octopus-hearts", "piano-keys"];
   const seed = { ...FRESH, "tentacle:fathom": { recent: [], game: { ids, guesses: [330], at: 1 } } };
-  const { ctx, page, calls } = await open(desktop, "#fathom", seed, undefined, async (c) => {
+  const { ctx, page, calls } = await open(desktop, "#fathom-endless", seed, undefined, async (c) => {
     await c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ version: 1, questions }) }));
     await c.route(/\/fathom\/lists\/[a-z0-9-]+\.json(\?.*)?$/, (route) => {
       const file = path.join(fixtures, "lists", path.basename(new URL(route.request().url()).pathname));
@@ -795,12 +846,14 @@ test("signed in: Fathom's games, totals and draws sync both ways, and a game fin
   await page.getByTestId("history-key").click();
   await page.locator('[data-testid="history-row"][data-kind="fathom"]').nth(1).waitFor();
   await page.getByTestId("nav-home").click();
+  // Stats counts ten-question games only: these two are games of five from before Nov 14 (Past runs has them).
   await page.getByTestId("stats-key").click();
-  await page.getByTestId("know-fathom-games").filter({ hasText: "2" }).waitFor();
+  await page.getByTestId("know-fathom-games").filter({ hasText: "0" }).waitFor();
 
   // A game here: none of the last draws' questions (on either device), and once it's over the account has it.
-  await page.evaluate(() => (location.hash = "#fathom"));
-  for (let i = 0; i < 5; i++) {
+  // (Endless Fathom: its draw holds back the last games'.)
+  await page.evaluate(() => (location.hash = "#fathom-endless"));
+  for (let i = 0; i < 10; i++) {
     await page.getByTestId("fathom-input").waitFor();
     await page.getByTestId("fathom-input").fill("42");
     await page.getByTestId("fathom-lock").click();
@@ -810,7 +863,8 @@ test("signed in: Fathom's games, totals and draws sync both ways, and a game fin
   await page.getByTestId("fathom-results").waitFor();
   await page.clock.runFor(2000);
   await until(() => (row().data.fathom?.runs?.length ?? 0) === 3);
-  assert.equal(Object.keys(row().data.fathom.totals).length, 3);
+  assert.equal(Object.keys(row().data.fathom.totals).length, 2);
+  assert.equal(Object.keys(row().data.fathom.totals10).length, 1);
   // The draw held back both devices' last games: the two questions neither played are in this one.
   const played = row().data.fathom.runs[0].ids;
   assert.deepEqual(row().data.fathom.recent.map((d) => d.ids), [played, mine.ids, theirs.ids]);
