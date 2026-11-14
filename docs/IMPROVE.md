@@ -56,6 +56,11 @@ approve or disapprove ... I'll tell you which specific ones to swap out ... effi
    the coordinator, titles and difficulty to a judge. A theme on two or more lists is a method fix (step 7). Log the
    themes with their counts and what was done, even when nothing was. Notes are players' free text and this repo is
    public: paraphrase them in logs and commits, never paste them.
+   **Fathom's ratings and notes** come through the same `list_ratings` and `list_feedback` with mode `fathom` and the
+   question's id as the list (once the fathom_feedback migration runs). Owner notes on a question are acted on that
+   cycle (cut, reword, or a scoring change); everyone else's go to the fathom-judge with the brief in docs/FATHOM.md,
+   "Judging questions". A question with clearly more downs than ups (as for lists) is re-judged and leaves the bank if
+   it fails; never one scheduled for today or tomorrow.
    **Read the missed guesses** (what players typed that the game didn't take; owner, Nov 8: "real data instead of
    agents guessing what people type"): `list_misses(p_reader => '', p_since => <last check>)` with the public key, the
    proxy adding the reader key as for notes (docs/BACKEND.md, Running it), gives per list, mode and text how many

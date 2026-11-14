@@ -18,6 +18,10 @@ automated. Judges read this file before scoring a candidate (docs/JUDGE.md).
 | 2026-11-14 | Free play | sign in with Google after 2 free-play games | "encourages user signups"; dailies stay open (coordinator's call). Google app moved to production the same day |
 | 2026-11-14 | Play Blitz on list results | removed | "moving in a direction to keep the game modes separate" |
 | 2026-11-14 | Fathom | 10 questions, a 20 s timer each | "keep in line with the 10 theme" |
+| 2026-11-14 | Fathom: name a country with no land borders | cut | "basically its to name an island? to easy ... too ez to get deadon": a name-it target many answers hit exactly is too easy |
+| 2026-11-14 | Fathom: share of the body's energy the brain uses | cut | "kinda ambigious ... what exactly is energy?": a key word a player can read two ways |
+| 2026-11-14 | Fathom scoring | gentler far end: 10x off scores about 30, not 0 | "we were within one magnitude should get more like 25-40 points" |
+| 2026-11-14 | Fathom feedback | the same "Good question?" thumbs and notes as lists, same tables | wanted to leave notes on single questions |
 | 2026-11-04 | national-parks | liked (rated well) | wanted each park's state in its fact |
 | 2026-11-05 | lakes | vetoed as a daily | not a great list; it had already been in free play; third Geography daily in a row |
 | 2026-11-05 | x-accounts | dropped | same problem as Facebook (follower counts) |
