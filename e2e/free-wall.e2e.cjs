@@ -145,10 +145,11 @@ test("a link to a free list counts, and one past the free ones gets the wall alo
   const { ctx, page } = await open(desktop, "", seed, undefined, withGoogle({}));
   await page.getByTestId("today-list").waitFor();
 
-  // A link to a free list (here typed in): game 2, played.
-  await page.evaluate(() => (location.hash = "#p-countries-area"));
+  // A link to a free list (here typed in): game 2, played. The list ran as a daily (Oct 22) and that daily wasn't
+  // played: the game under way shares the list's save with it, and counts as free play by the mark it starts with.
+  await page.evaluate(() => (location.hash = "#p-mountains"));
   await page.getByTestId("title-card").waitFor();
-  await findTop(page, "countries-area");
+  await findTop(page, "mountains");
 
   // The next link (the list opened and left alone, then a new one): the wall alone, no game behind it; closing goes
   // back to the screen the player came from.
@@ -160,7 +161,7 @@ test("a link to a free list counts, and one past the free ones gets the wall alo
     assert.equal(await page.getByLabel("Your guess").count(), 0);
     await page.getByTestId("free-wall-close").click();
     await gone(page);
-    await page.waitForFunction(() => location.hash === "#p-countries-area");
+    await page.waitForFunction(() => location.hash === "#p-mountains");
     await page.locator('[data-testid="slot"][data-rank="1"][data-state="found"]').waitFor();
   }
   const saved = await store(page);
@@ -188,7 +189,7 @@ test("a link to a free list counts, and one past the free ones gets the wall alo
   assert.equal(await page.getByTestId("free-wall-alt").getAttribute("data-go"), "today");
   await page.getByTestId("free-wall-close").click();
   await gone(page);
-  assert.equal(await hashOf(page), "#p-countries-area");
+  assert.equal(await hashOf(page), "#p-mountains");
   await page.getByTestId("results").waitFor();
 
   // So does the menu's Random list.
@@ -197,7 +198,7 @@ test("a link to a free list counts, and one past the free ones gets the wall alo
   await walled(page);
   await page.keyboard.press("Escape");
   await gone(page);
-  assert.equal(await hashOf(page), "#p-countries-area");
+  assert.equal(await hashOf(page), "#p-mountains");
 
   // Past runs open, and so does a run; its Play again asks.
   await page.evaluate(() => (location.hash = "#history"));

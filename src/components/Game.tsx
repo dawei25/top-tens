@@ -46,6 +46,8 @@ import { MoreRanks } from "./MoreRanks";
 import { ParBlock, usePar } from "./par";
 import { reportGuess, reportList } from "../net";
 import { RateList } from "./rate/RateList";
+import { markFreeStart } from "./freeplay";
+import { wallOn } from "./account/wall";
 
 interface Props {
   id: string;
@@ -134,7 +136,12 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
         setPuzzle(p);
         // A daily is one try: once finished, it always opens on its result.
         const s = load();
-        setGame((daily ? dailyGame(s, daily) : s.games[id]) ?? newGame(p));
+        const kept = daily ? dailyGame(s, daily) : s.games[id];
+        const g = kept ?? newGame(p);
+        // A new free game is marked as free play's, for the free-play counter (./freeplay): a daily on the same list
+        // shares its save while under way.
+        if (wallOn && !daily && !kept && g.startedAt) markFreeStart(id, g.startedAt);
+        setGame(g);
       })
       .catch((e) => setError(String(e.message ?? e)));
     // The daily is fixed for this screen (App keys it by date).

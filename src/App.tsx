@@ -33,7 +33,7 @@ import { FreeWall, PrivacyScreen } from "./components/account";
 import { dropAsk, keepAsk, peekAsk, wallOn, type FreeAsk } from "./components/account/wall";
 import { wallAlt } from "./components/account/labels";
 import { FathomScreen } from "./components/fathom";
-import { openBlitzLists, rollableLists } from "./components/freeplay";
+import { freeStarts, openBlitzLists, rollableLists } from "./components/freeplay";
 import { todayStatus } from "./components/today";
 
 type Route =
@@ -345,7 +345,8 @@ function Screens() {
   // Free play without an account (src/game/free-games.ts): past the free games, a new one asks the player to sign in.
   // Every way into a new free game comes through here (Home's keys and category chips, the menu's tiles, Roll new list,
   // Play again, Play Blitz); a link to one is checked as it arrives (linkWalled, below). Dailies never are.
-  const mustSignIn = (saved = load()) => wallOn && signInToPlay(saved, { schedule, today, signedIn: account.status === "in", accounts: true });
+  const mustSignIn = (saved = load()) =>
+    wallOn && signInToPlay(saved, { schedule, today, signedIn: account.status === "in", accounts: true, freeStarts: freeStarts() });
   /** Opens the wall over the screen instead of starting `a`, if it must: true when it did. */
   const askFirst = (a: FreeAsk): boolean => {
     const saved = load();
@@ -402,7 +403,7 @@ function Screens() {
     // A Blitz that's closed (it would spoil a daily) says so on its own screen: no game starts there.
     if (mode === "blitz" && !blitzAvailable({ id: meta.id, blitz: !!meta.blitz }, schedule, today, saved)) return false;
     if (opensPlayedGame(saved, mode, r.id)) return false;
-    return signInToPlay(saved, { schedule, today, signedIn: false, accounts: true });
+    return signInToPlay(saved, { schedule, today, signedIn: false, accounts: true, freeStarts: freeStarts() });
   };
   // Decided once per arrival (see linkGate); while a sign-in is still coming back, the screen waits to know.
   if (linkGate.current?.route !== route && account.status !== "loading") {
@@ -527,6 +528,7 @@ function Screens() {
 
   // The wall's quiet way out: today's list while it waits to be played, else Home (none over Home itself then).
   const alt = (() => {
+    if (!wall && !linkWall) return null;
     const a = wallAlt(!current || todayStatus(load(), current).done);
     if (a.go === "today" && current) return { ...a, hash: `#daily-${current.date}` };
     return route.screen === "home" ? null : { ...a, hash: "" };

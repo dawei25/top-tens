@@ -70,6 +70,19 @@ describe("the free-play counter", () => {
     const s: Saved = { ...empty, dailyGames: locked, games: { old: game("old", 100, { log: [guessed] }), later: game("later", 200, { log: [guessed] }) } };
     expect(count(s)).toBe(2);
   });
+
+  // A roll lands on an old daily's list as often as on any other (a day's list joins free play the next day), and its
+  // game under way shares the list's save with that day's daily: the free one counts by the mark free play left on it
+  // (the e2e suite caught a second free game going uncounted on the airports list, a past daily).
+  it("counts a free game under way on an old daily's list by its free-play mark, never today's list", () => {
+    const s: Saved = { ...empty, games: { old: game("old", 100, { log: [guessed] }), today: game("today", 200, { log: [guessed] }) } };
+    expect(count(s)).toBe(0);
+    expect(freeGamesPlayed(s, schedule, TODAY, new Set(["old:100"]))).toBe(1);
+    // The mark names one game: a later game on the list (an archive daily, say) isn't it.
+    expect(freeGamesPlayed(s, schedule, TODAY, new Set(["old:99"]))).toBe(0);
+    expect(freeGamesPlayed(s, schedule, TODAY, new Set(["old:100", "today:200"]))).toBe(1);
+    expect(signInToPlay({ ...s, listRuns: [run("a", 50)] }, { schedule, today: TODAY, signedIn: false, accounts: true, freeStarts: new Set(["old:100"]) })).toBe(true);
+  });
 });
 
 describe("signing in to play", () => {
