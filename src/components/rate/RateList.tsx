@@ -4,6 +4,7 @@ import { backendOn, rateList, useSaveVersion } from "../../net";
 import { RATING_REASONS, ratingOf, type RatingMode, type RatingReason } from "../../net/ratings";
 import { pixels } from "../pixel";
 import { AddNote } from "./AddNote";
+import { placeReasons } from "./place";
 import { RATE_WORDS, type RatedKind } from "./words";
 import "./rate.css";
 
@@ -43,7 +44,9 @@ export function Thumb({ down }: { down?: boolean }) {
  * Under the row, in a build with a backend: "add a note" (./AddNote), a few words on the list, before or after rating.
  *
  * `kind` "question": a Fathom question (mode "fathom", its id for the list's), "Good question?" with its own words for
- * the reasons (./words); `onRate` hears each change (a Fathom row shows the rating on its own key).
+ * the reasons (./words), and the reasons open below the row, over the rows after it (./place: above only without room
+ * below, and then above the whole question, its `[data-rate-anchor]`); `onRate` hears each change (a Fathom row shows
+ * the rating on its own key).
  */
 export function RateList({
   listId,
@@ -122,12 +125,27 @@ export function RateList({
     };
   }, [asking]);
 
-  // Above the row, over the card; below it only when the top of the screen would cut it off.
+  // A list's: above the row, over the card; below it only when the top of the screen would cut it off. A question's:
+  // below, over the rows after it, while the page has room; else above the question it rates.
   useLayoutEffect(() => {
     const el = pop.current;
     const row = wrap.current?.getBoundingClientRect();
     if (!asking || !el || !row) return;
-    el.dataset.down = String(row.top - el.offsetHeight - 8 < 0 && row.bottom + el.offsetHeight + 8 <= innerHeight);
+    const below = kind === "question";
+    const page = below ? document.querySelector("main")?.getBoundingClientRect().bottom : undefined;
+    const place = placeReasons({
+      prefer: below ? "below" : "above",
+      rowTop: row.top,
+      rowBottom: row.bottom,
+      height: el.offsetHeight,
+      limit: below ? (page ?? document.documentElement.scrollHeight - scrollY) : innerHeight,
+      ceiling: below ? -scrollY : 0,
+      anchorTop: wrap.current?.closest("[data-rate-anchor]")?.getBoundingClientRect().top,
+    });
+    el.dataset.down = String(place.down);
+    el.style.bottom = place.down ? "" : `calc(100% + ${place.up}px)`;
+    // Below the row they may start past the screen's edge: into view, the row staying where it is if it can.
+    if (below && place.down) el.scrollIntoView({ block: "nearest" });
     if (focusReasons.current) {
       focusReasons.current = false;
       (el.querySelector<HTMLElement>('.rate-reason[aria-pressed="true"]') ?? el.querySelector<HTMLElement>(".rate-reason"))?.focus({

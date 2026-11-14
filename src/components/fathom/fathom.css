@@ -892,18 +892,26 @@
   outline: 2px solid var(--text);
   outline-offset: 2px;
 }
-/* "Good question?" under its row, across it: the list's row, its reasons and its note. */
+/*
+ * "Good question?" right under the question it rates, in line with its words (the list's row, its reasons and its
+ * note), no line between them: part of that question's row. On a phone the words take their own line over the thumbs;
+ * from 640px all in one.
+ */
 .recap-rate {
-  grid-column: 1 / -1;
-  margin-top: -6px;
+  grid-column: 2 / -1;
+  margin-top: -2px;
 }
 .recap-rate .rate {
+  flex-wrap: wrap;
+  row-gap: 6px;
+  min-height: 0;
   margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
-/* The narrowest phones: "GOOD QUESTION?" and both thumbs on one row (its letters closer, as the question card's). */
-@media (max-width: 379px) {
+@media (max-width: 639px) {
   .recap-rate .rate-q {
-    letter-spacing: 0.14em;
+    flex-basis: 100%;
   }
 }
 

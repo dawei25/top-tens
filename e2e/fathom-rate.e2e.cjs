@@ -149,8 +149,54 @@ test("at 320 the keys don't crowd the rows; the open rating fits; every control 
   await page.getByTestId("fathom-rate").nth(2).click();
   const rate = page.getByTestId("fathom-rate-panel").getByTestId("rate");
   await rate.waitFor();
-  assert.ok(await rate.evaluate((el) => el.scrollWidth <= el.clientWidth + 0.5), "Good question? and its thumbs on one row");
-  assert.equal(await rate.evaluate((el) => Math.round(el.getBoundingClientRect().height)), 46, "one row, as the list's");
+  assert.ok(await rate.evaluate((el) => el.scrollWidth <= el.clientWidth + 0.5), "Good question? and its thumbs inside the row");
+  // On a phone the words over the thumbs, both thumbs on one line.
+  const [q, up, down] = await Promise.all([rate.locator(".rate-q"), rate.getByTestId("rate-up"), rate.getByTestId("rate-down")].map((l) => l.boundingBox()));
+  assert.ok(q.y + q.height <= up.y, "the words over the thumbs");
+  assert.equal(Math.round(up.y), Math.round(down.y), "both thumbs on one line");
   assert.ok(await noHScroll(page));
   await ctx.close();
 });
+
+// The coordinator's review (Nov 14): after a thumbs down on the first question, the reasons floated up over that
+// question's words and the Share key, and the rating row read as the row above's. Now the rating sits under its own
+// question's "you ... answer" line, and the reasons float down over the rows after it, or (the last rows, no room
+// below) up over the rows before it: never over the question being rated or Share.
+for (const width of [320, 390]) {
+  test(`the reasons never cover the question being rated or Share: the first and the last question (${width})`, async () => {
+    const { ctx, page } = await open(browser, at(width), "#fathom", undefined, { setup, reducedMotion: "reduce" });
+    await page.getByTestId("fathom-next").click();
+    await page.getByTestId("fathom-results").waitFor();
+    for (const i of [0, 9]) {
+      await page.getByTestId("fathom-rate").nth(i).click();
+      const panel = row(page, i).getByTestId("fathom-rate-panel");
+      await panel.waitFor();
+      // Right under its question's "you ... answer" line, in line with its words.
+      const [nums, pnl, words] = await Promise.all([row(page, i).getByTestId("fathom-row-nums"), panel, row(page, i).locator(".recap-q")].map((l) => l.boundingBox()));
+      assert.ok(pnl.y >= nums.y + nums.height - 1 && pnl.y - (nums.y + nums.height) <= 16, `question ${i + 1}: the rating right under its numbers`);
+      assert.ok(Math.abs(pnl.x - words.x) <= 1, `question ${i + 1}: the rating in line with the question's words`);
+      await panel.getByTestId("rate-down").click();
+      await page.getByTestId("rate-reasons").waitFor();
+      // Nothing over the middle of the question's first line, or of Share (elementFromPoint finds them).
+      for (const [what, el] of [
+        [`question ${i + 1}'s words`, row(page, i).locator(".recap-q")],
+        ["Share", page.getByTestId("fathom-share")],
+      ]) {
+        await el.scrollIntoViewIfNeeded();
+        const hit = await el.evaluate((e) => {
+          const r = e.getClientRects()[0];
+          const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          return { ok: !!at && (at === e || e.contains(at)), at: at?.className ?? null };
+        });
+        assert.ok(hit.ok, `${width}px, reasons open on question ${i + 1}: ${what} covered by ${hit.at}`);
+      }
+      assert.equal(await page.getByTestId("rate-reasons").count(), 1, "the reasons still open");
+      // Closed again (skip), and the row's own key closes the rating.
+      await page.getByTestId("rate-skip").click();
+      await page.getByTestId("fathom-rate").nth(i).click();
+      await panel.waitFor({ state: "detached" });
+    }
+    assert.ok(await noHScroll(page));
+    await ctx.close();
+  });
+}

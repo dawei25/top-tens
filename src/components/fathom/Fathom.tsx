@@ -1153,6 +1153,8 @@ function Results({
                 data-band={s.band}
                 data-timeout={s.timedOut || undefined}
                 data-rating-open={rating === s.question.id || undefined}
+                // The reasons after a thumbs down never cover this question (RateList, ./rate/place).
+                data-rate-anchor=""
               >
                 <span className="band-sq" data-band={s.band} aria-hidden="true" />
                 <span className="recap-body">
@@ -1183,7 +1185,8 @@ function Results({
                   <RateKey id={s.question.id} open={rating === s.question.id} onClick={() => setRating(rating === s.question.id ? null : s.question.id)} />
                 </span>
                 {/* The list results' "Good list?" for this question (its id for the list's, mode fathom): the same
-                    thumbs, reasons and note, under the row, pushing the rows below down (a deliberate tap). */}
+                    thumbs, reasons and note, right under its "you ... answer" line, pushing the rows below down (a
+                    deliberate tap). */}
                 {rating === s.question.id && (
                   <div className="recap-rate" id={`recap-rate-${s.question.id}`} data-testid="fathom-rate-panel">
                     <RateList listId={s.question.id} mode="fathom" kind="question" onRate={() => rated((n) => n + 1)} />

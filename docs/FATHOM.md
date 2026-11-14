@@ -85,12 +85,15 @@ Owner, Nov 14: "add the same feedback system for fathom that we currently have f
 same mechanics and tables" (he wanted to flag single questions: one too easy, one ambiguous). Each row of Fathom's
 results (Today's, endless, a finished game from Past runs; never a question or a reveal) has a small key under its
 points (beside them from 640px), 44px to the finger: both thumbs, small, until the question is rated, then the one
-chosen on cyan (up) or pink (down). It opens the list results' own "Good list?" under that row, one row at a time:
+chosen on cyan (up) or pink (down). It opens the list results' own "Good list?" right under that question's "you ...
+answer" line, in line with its words (on a phone the words over the thumbs), one row at a time:
 "Good question?", the same thumbs and reasons (stored by the same codes; worded for a question: too hard, too easy,
 boring, unclear, wrong answer: src/components/rate/words.ts) and, with a backend, "add a note". Everything goes where
 a list's does, mode `fathom` with the question's id for the list's: the save's `ratings["fathom:<id>"]` (synced),
 `rate_list` and `submit_feedback` (supabase/migrations/20261114130000_fathom_feedback.sql; until it has run both
-answer 404 and the screen goes on as it was).
+answer 404 and the screen goes on as it was). After a thumbs down the reasons float down over the rows after it; only
+without room below (the last rows) up, and then above the whole question: never over the question being rated or the
+Share key (src/components/rate/place.ts; a list's still float up over its card).
 
 ## The players' curve
 
