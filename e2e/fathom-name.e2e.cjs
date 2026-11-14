@@ -73,8 +73,11 @@ function openFathom(vp, { questions = [...BANK, ...NAMES], lists = true, save, s
 const gameAt = (ids, at) => ({ recent: [], game: { ids, guesses: ids.slice(0, at).map((id) => BANK.find((q) => q.id === id).answer), at } });
 
 /** The scoring rules (src/game/fathom.ts), to check the screen against. */
-const ratioPoints = (figure, target) =>
-  Math.abs(figure - target) <= target * 0.01 ? 100 : Math.min(99, Math.round(100 * Math.max(0, 1 - Math.abs(Math.log10(figure / target))) ** 2));
+const ratioPoints = (figure, target) => {
+  if (Math.abs(figure - target) <= target * 0.01) return 100;
+  const d = Math.abs(Math.log10(figure / target));
+  return Math.min(99, Math.round(Math.max(100 * Math.max(0, 1 - d) ** 2, 30 * Math.max(0, 2 - d))));
+};
 const stepPoints = (figure, target) => Math.max(0, 100 - 30 * Math.abs(figure - target));
 
 const attr = (page, testId, name) => page.getByTestId(testId).getAttribute(name);

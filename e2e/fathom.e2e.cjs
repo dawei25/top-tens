@@ -74,9 +74,10 @@ function openFathom(vp, { save, serve = bank(), setup, ...opts } = {}) {
 
 /**
  * The scoring rule (src/game/fathom.ts), to check the screen against: plain closeness, the same for every question.
- * Spot on (within 1%) is 100, and only that; otherwise 100 x (1 - d)^2 with d the distance in powers of ten, 0 from 10x.
+ * Spot on (within 1%) is 100, and only that; otherwise the larger of 100 x (1 - d)^2 and 30 x (2 - d), with d the
+ * distance in powers of ten: 30 at 10x, 0 from 100x.
  */
-const curve = (d) => Math.round(100 * Math.max(0, 1 - Math.abs(d)) ** 2);
+const curve = (d) => Math.round(Math.max(100 * Math.max(0, 1 - Math.abs(d)) ** 2, 30 * Math.max(0, 2 - Math.abs(d))));
 const points = (guess, answer) => (Math.abs(guess - answer) <= answer * 0.01 ? 100 : Math.min(99, curve(Math.log10(guess / answer))));
 /**
  * A percent: the average of points off (100 - 3 a point, never under 0) and the curve on how many powers of ten off it
