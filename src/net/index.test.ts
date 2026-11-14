@@ -189,6 +189,13 @@ describe("without a backend (no env)", () => {
     expect(imported).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();
 
+    // Today's Fathom total: nothing sent, nothing queued.
+    expect(net.reportFathomDaily(new Date().toISOString().slice(0, 10), 312)).toBe(false);
+    await new Promise((r) => setTimeout(r, 10));
+    expect([...store.keys()]).toEqual(["top-tens:v1"]);
+    expect(imported).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+
     // A guess the game didn't take, on a list or a Blitz round: nothing sent, nothing queued, no id made.
     expect(net.reportGuess("mountains", "list", "pizza", { kind: "unknown", junk: false })).toBe(false);
     expect(net.reportGuess("airports", "blitz", "xqzzvkw", { kind: "none", junk: true })).toBe(false);
@@ -344,6 +351,63 @@ describe("with a backend", () => {
     await vi.waitFor(() => expect(svc.start).toHaveBeenCalled());
     handlers.get("online")!();
     await vi.waitFor(() => expect(svc.flushFathom).toHaveBeenCalled());
+  });
+
+  it("queues Today's Fathom total in its own outbox before the backend code loads, once per date, then sends it and reads the day", async () => {
+    configure();
+    let release!: () => void;
+    const loaded = new Promise<void>((r) => (release = r));
+    const order: string[] = [];
+    const svc = {
+      start: vi.fn(),
+      flushFathomPlays: vi.fn(async () => void order.push("flush")),
+      fathomDay: vi.fn(async (date: string) => (order.push(`read ${date}`), null)),
+    };
+    vi.doMock("./service", async () => (await loaded, svc));
+    const { store } = fakeBrowser();
+    const now = Date.UTC(2026, 10, 14, 12);
+    vi.useFakeTimers({ now, toFake: ["Date"] });
+    try {
+      const net = await import("./index");
+      expect(net.reportFathomDaily("2026-11-14", 312)).toBe(true);
+      // The same day again (a reload, another tab): the first total is the one that counts.
+      expect(net.reportFathomDaily("2026-11-14", 480)).toBe(false);
+      // The player's own day may be a day either side of UTC's.
+      expect(net.reportFathomDaily("2026-11-13", 0)).toBe(true);
+      expect(net.reportFathomDaily("2026-11-11", 250)).toBe(false);
+      expect(net.reportFathomDaily("2026-11-15", 501)).toBe(false);
+      expect(net.reportFathomDaily("2026-11-15", 99.5)).toBe(false);
+      expect(JSON.parse(store.get("top-tens:fathom-play-outbox")!).pending).toEqual([
+        { date: "2026-11-14", total: 312, at: now },
+        { date: "2026-11-13", total: 0, at: now },
+      ]);
+      expect(svc.flushFathomPlays).not.toHaveBeenCalled();
+      release();
+      await vi.waitFor(() => expect(svc.fathomDay).toHaveBeenCalledTimes(2));
+      expect(svc.start).toHaveBeenCalled();
+      // The day's totals are read after the total is sent, so they count it.
+      expect(order).toEqual(["flush", "flush", "read 2026-11-14", "read 2026-11-13"]);
+      // Not in the game's save, nor Fathom's, nor the guesses' outbox.
+      expect(store.get("top-tens:v1")).toBeUndefined();
+      expect(store.get("top-tens:fathom-outbox")).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("loads the backend code at startup when Today's Fathom totals are waiting, and sends them when the browser comes online", async () => {
+    configure();
+    const svc = { start: vi.fn(), flushPlays: vi.fn(), flushRatings: vi.fn(), flushFeedback: vi.fn(), flushFathom: vi.fn(), flushMisses: vi.fn(), flushFathomPlays: vi.fn() };
+    vi.doMock("./service", () => svc);
+    const { store } = fakeBrowser();
+    const handlers = new Map<string, () => void>();
+    vi.stubGlobal("addEventListener", (type: string, fn: () => void) => handlers.set(type, fn));
+    store.set("top-tens:fathom-play-outbox", JSON.stringify({ pending: [{ date: "2026-11-14", total: 312, at: 1 }], sent: [] }));
+    const net = await import("./index");
+    net.startNet();
+    await vi.waitFor(() => expect(svc.start).toHaveBeenCalled());
+    handlers.get("online")!();
+    await vi.waitFor(() => expect(svc.flushFathomPlays).toHaveBeenCalled());
   });
 
   it("queues a guess the game didn't take in its own outbox before the backend code loads; never one it took or offered", async () => {

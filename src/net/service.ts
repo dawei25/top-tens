@@ -4,7 +4,21 @@ import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import { accountsOn, BACKEND } from "./config";
 import { parseAverages, parseStats, type CrowdStats, type ListAverages } from "./crowd";
-import { compareArgs, compareKey, FATHOM_GUESSES, guessArgs, parseCompare, type CompareRound, type FathomCrowd, type FathomGuess } from "./fathom";
+import {
+  compareArgs,
+  compareKey,
+  FATHOM_GUESSES,
+  FATHOM_PLAYS,
+  fathomDayKey,
+  fathomPlayArgs,
+  guessArgs,
+  parseCompare,
+  parseFathomDay,
+  type CompareRound,
+  type FathomCrowd,
+  type FathomGuess,
+  type FathomPlay,
+} from "./fathom";
 import { FEEDBACK, feedbackArgs, type Feedback } from "./feedback";
 import { takeGoogleReturn, type GoogleOutcome } from "./google";
 import { missArgs, missClientId, MISSES, type Miss } from "./misses";
@@ -188,6 +202,37 @@ export async function flushFathom(): Promise<void> {
   }
 }
 
+/**
+ * Today's Fathom totals waiting to be sent, one per date, retried like plays. The facade (./index.ts) queues them in
+ * this store before this code has even loaded; this only sends.
+ */
+const fathomPlayBox = new Outbox<FathomPlay>(
+  localOutboxStore<FathomPlay>(globalThis.localStorage, KEYS.fathomPlayOutbox),
+  async (p) => {
+    const { error, status } = await sb().rpc("submit_fathom_play", fathomPlayArgs(p, clientId()));
+    return sendResult(status, error);
+  },
+  Date.now,
+  FATHOM_PLAYS,
+);
+
+let fathomPlayRetries = 0;
+let fathomPlayTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Send the day totals waiting, with the same backoff as plays. */
+export async function flushFathomPlays(): Promise<void> {
+  clearTimeout(fathomPlayTimer);
+  try {
+    if ((await fathomPlayBox.flush()) === "retry") {
+      fathomPlayRetries++;
+      clearTimeout(fathomPlayTimer);
+      fathomPlayTimer = setTimeout(() => void flushFathomPlays(), retryDelay(fathomPlayRetries));
+    } else fathomPlayRetries = 0;
+  } catch {
+    // Never let Fathom get in the way.
+  }
+}
+
 // ---------- Missed guesses ----------
 
 /**
@@ -290,6 +335,17 @@ export function fathomCompare(questionId: string, guess: number, answer: number,
   });
 }
 
+/**
+ * Real players' totals on a date's Fathom (one per player, their first: fathom_day_stats), in totalBin's bins; null
+ * when the server can't say.
+ */
+export function fathomDay(date: string): Promise<CrowdStats | null> {
+  return cached(fathomDayKey(date), STATS_TTL, async () => {
+    const { data, error } = await sb().rpc("fathom_day_stats", { p_date: date }, { get: true });
+    return error ? null : parseFathomDay(data);
+  });
+}
+
 // ---------- Account ----------
 
 const userOf = (session: Session): AccountUser => accountUser(session.user);
@@ -355,6 +411,7 @@ export async function start(): Promise<void> {
   void flushFeedback();
   void flushFathom();
   void flushMisses();
+  void flushFathomPlays();
   if (!accountsOn) return;
   try {
     const hadVerifier = verifierWaiting();

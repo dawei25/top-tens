@@ -1,6 +1,27 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { COMPARE_ROUNDS, compareArgs, compareKey, compareRound, FATHOM_GUESSES, guessArgs, invalidGuess, MAX_GUESS, parseCompare, type FathomGuess } from "./fathom";
+import {
+  COMPARE_ROUNDS,
+  compareArgs,
+  compareKey,
+  compareRound,
+  FATHOM_BIN,
+  FATHOM_BINS,
+  FATHOM_GUESSES,
+  FATHOM_MAX_TOTAL,
+  FATHOM_PLAYS,
+  fathomDayKey,
+  fathomPlayArgs,
+  guessArgs,
+  invalidFathomPlay,
+  invalidGuess,
+  MAX_GUESS,
+  parseCompare,
+  parseFathomDay,
+  totalBin,
+  type FathomGuess,
+  type FathomPlay,
+} from "./fathom";
 import { enqueue, Outbox, type OutboxData, type SendResult } from "./outbox";
 
 const T = Date.UTC(2026, 10, 5, 12);
@@ -121,5 +142,93 @@ describe("how real players guessed", () => {
     for (const bad of [null, "nope", [], { n: -1 }, { n: "x" }, { n: 2, median: -4, further_off: 0.5 }, { n: 2, median: 4, further_off: 2 }]) {
       expect(parseCompare(bad), JSON.stringify(bad)).toBeNull();
     }
+  });
+});
+
+describe("Today's Fathom: a day's total", () => {
+  const day = (offset = 0) => new Date(T + offset * 86_400_000).toISOString().slice(0, 10);
+  const play = (over: Partial<FathomPlay> = {}): FathomPlay => ({ date: day(), total: 312, at: T, ...over });
+
+  it("is checked as the database checks it: a whole total 0 to 500, a date within a day of today", () => {
+    expect(invalidFathomPlay(play(), T)).toBeNull();
+    for (const total of [0, 500, 1]) expect(invalidFathomPlay(play({ total }), T)).toBeNull();
+    // The player's own day may be a day either side of the server's (time zones).
+    expect(invalidFathomPlay(play({ date: day(-1) }), T)).toBeNull();
+    expect(invalidFathomPlay(play({ date: day(1) }), T)).toBeNull();
+    for (const date of [day(-2), day(2), "2026-02-31", "2026-11-5", "", null as unknown as string]) {
+      expect(invalidFathomPlay(play({ date }), T), String(date)).toBe("date");
+    }
+    for (const total of [-1, 501, 312.5, NaN, Infinity, "312" as unknown as number, null as unknown as number]) {
+      expect(invalidFathomPlay(play({ total }), T), String(total)).toBe("total");
+    }
+    expect(invalidFathomPlay(play({ at: NaN }), T)).toBe("at");
+  });
+
+  it("goes to submit_fathom_play with this browser's id", () => {
+    expect(fathomPlayArgs(play({ total: 0 }), "c-1")).toEqual({ p_date: day(), p_total: 0, p_client_id: "c-1" });
+    expect(fathomDayKey("2026-11-14")).toBe("fathom-day:2026-11-14");
+  });
+
+  it("is queued once per date, and goes stale two days on", async () => {
+    let data: OutboxData<FathomPlay> = { pending: [], sent: [] };
+    const store = { read: () => structuredClone(data), write: (d: OutboxData<FathomPlay>) => void (data = structuredClone(d)) };
+    expect(enqueue(store, FATHOM_PLAYS, play(), T)).toBe(true);
+    // The same day played again (another tab, a reload): the first total is the one sent.
+    expect(enqueue(store, FATHOM_PLAYS, play({ total: 480 }), T)).toBe(false);
+    expect(enqueue(store, FATHOM_PLAYS, play({ date: day(-1), total: 200 }), T)).toBe(true);
+    expect(enqueue(store, FATHOM_PLAYS, play({ total: 501, date: day(1) }), T)).toBe(false);
+    expect(data.pending.map((p) => [p.date, p.total])).toEqual([
+      [day(), 312],
+      [day(-1), 200],
+    ]);
+    // Offline until two days on: what waited would only be refused, so it is dropped.
+    const sent: FathomPlay[] = [];
+    const send = async (p: FathomPlay): Promise<SendResult> => {
+      sent.push(p);
+      return "ok";
+    };
+    const box = new Outbox<FathomPlay>(store, send, () => T + 2 * 86_400_000, FATHOM_PLAYS);
+    expect(await box.flush()).toBe("done");
+    expect(sent).toEqual([]);
+    expect(data.pending).toEqual([]);
+  });
+
+  it("bins totals by 10 into 50 bins, 500 with 490-499", () => {
+    expect([FATHOM_BIN, FATHOM_BINS, FATHOM_MAX_TOTAL]).toEqual([10, 50, 500]);
+    expect([0, 9, 10, 99, 100, 312, 489, 490, 500, -3, 900].map(totalBin)).toEqual([0, 0, 1, 9, 10, 31, 48, 49, 49, 0, 49]);
+  });
+
+  it("reads fathom_day_stats' answer, and nothing else", () => {
+    const counts = Array<number>(50).fill(0);
+    counts[31] = 2;
+    counts[49] = 1;
+    expect(parseFathomDay({ n: 3, counts, avg: 374.67 })).toEqual({ n: 3, counts, avg: 374.67 });
+    expect(parseFathomDay(JSON.stringify({ n: 3, counts, avg: "374.67" }))).toEqual({ n: 3, counts, avg: 374.67 });
+    expect(parseFathomDay({ n: 0, counts: Array(50).fill(0), avg: null })).toEqual({ n: 0, counts: Array(50).fill(0), avg: null });
+    // A short answer is padded to 50 bins.
+    expect(parseFathomDay({ n: 1, counts: [0, 1], avg: 12 })).toEqual({ n: 1, counts: [0, 1, ...Array(48).fill(0)], avg: 12 });
+    for (const bad of [
+      null,
+      "nope",
+      [],
+      { n: -1, counts },
+      { n: 3 },
+      { n: 3, counts: [...counts, 0] },
+      { n: 3, counts: counts.map((c) => c || -0.5) },
+      // Every player is in one bin.
+      { n: 4, counts, avg: 300 },
+      { n: 3, counts, avg: 600 },
+    ]) {
+      expect(parseFathomDay(bad), JSON.stringify(bad)).toBeNull();
+    }
+  });
+
+  it("has the limits and the bins the database has (supabase/migrations, fathom_plays)", () => {
+    const sql = readFileSync(new URL("../../supabase/migrations/20261114120000_fathom_plays.sql", import.meta.url), "utf8");
+    expect(sql).toContain(`check (total >= 0 and total <= ${FATHOM_MAX_TOTAL})`);
+    expect(sql).toContain(`p_total < 0 or p_total > ${FATHOM_MAX_TOTAL}`);
+    expect(sql).toContain("p_date < today - 1 or p_date > today + 1");
+    expect(sql).toContain(`least(f.total / ${FATHOM_BIN}, ${FATHOM_BINS - 1})`);
+    expect(sql).toContain(`generate_series(0, ${FATHOM_BINS - 1})`);
   });
 });
