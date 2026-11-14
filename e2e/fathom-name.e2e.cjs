@@ -3,11 +3,11 @@
 // e2e/fixtures/fathom/lists (a subset of each real list, in the data agent's format), served in place of
 // public/fathom/lists; the questions are e2e/fixtures/fathom/name-questions.json beside the fixture bank (or, for the
 // keyboard check, the real bank's own name-it questions).
-// - A round on phone and desktop: its rule in view before the answer, a name field (no unit), a thing of another kind
+// - A round on phone and desktop: no scoring line (the owner, Nov 14), a name field (no unit), a thing of another kind
 //   and a name we don't know cost nothing and say so, a misspelling goes in the box to confirm, a name several things
 //   share offers them to tap, an alias locks; the reveal shows the target, the pick and its figure, the points by the
 //   rule, the miss in plain words, the best answers with their figures, the list's source; the results' recap names the
-//   pick, the rule is said again, and the share text has five squares.
+//   pick, and the share text has five squares.
 // - A steps list (land borders): points by steps off, the miss in borders, the squid on the steps scale.
 // - A country on a city question, and the question's own yardstick ("about as big as the UK": not the UK).
 // - The draw: the fifth round is name-it when the bank has one and its list loads, never first; an estimate otherwise.
@@ -120,12 +120,8 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
       await field.waitFor();
       assert.equal(await attr(page, "fathom-question", "data-round"), "name");
 
-      // Its rule, one plain line, in view before the answer (UX 21).
-      const rule = page.getByTestId("fathom-rule");
-      assert.equal(await rule.getAttribute("data-round"), "name");
-      assert.equal(await text(page, "fathom-rule"), "The closer to the target, the more points.");
-      const box = await rule.boundingBox();
-      assert.ok(box.y >= 0 && box.y + box.height <= vp.viewport.height && box.y < (await field.boundingBox()).y, "the rule in view, before the field");
+      // No scoring line (the owner, Nov 14: How to play explains it).
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line");
 
       // A name field: a phone's own keyboard, no unit, a placeholder that says what to name, LOCK IN waiting for it.
       assert.equal(await field.getAttribute("inputmode"), "text");
@@ -199,7 +195,7 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
       ]);
       assert.equal(await page.getByTestId("fathom-source").getAttribute("href"), POP.source.url);
       assert.equal(await page.getByTestId("fathom-players").count(), 0, "no players' line on a name-it round");
-      assert.equal(await page.getByTestId("fathom-rule").count(), 1, "the rule stays with the reveal");
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line on the reveal");
       assert.equal((await saved(page)).game.picks["name-country-50m-people"], pick);
       assert.equal(await noHScroll(page), true);
 
@@ -219,7 +215,7 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
       assert.match((await row.getByTestId("fathom-row-nums").textContent()).replace(/\s+/g, " "), /^you Colombia 52\.89 million · target 50 million people$/);
       const total = 400 + want;
       assert.equal(Number(await attr(page, "fathom-total", "data-total")), total);
-      assert.deepEqual(await page.getByTestId("fathom-rule").evaluateAll((els) => els.map((el) => el.dataset.round)), ["estimate", "name"]);
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line on the results");
       assert.equal(await noHScroll(page), true);
       if (vp.name === "desktop") {
         await page.getByTestId("fathom-share").click();
@@ -235,7 +231,6 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
     const ids = ["eiffel-tower-height", "name-country-6-borders", "adult-bones", "octopus-hearts", "piano-keys"];
     const { ctx, page } = await openFathom(vp, { save: gameAt(ids, 1) });
     await page.getByTestId("fathom-input").waitFor();
-    assert.equal(await text(page, "fathom-rule"), "The closer to the target, the more points.");
     // "Congo": two countries are called that.
     const congo = await say(page, "Congo");
     assert.equal(congo.read, "choose");

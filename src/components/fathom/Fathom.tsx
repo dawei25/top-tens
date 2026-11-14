@@ -22,9 +22,6 @@ import {
   readGuess,
   resumable,
   roundOf,
-  ROUNDS,
-  ruleFor,
-  ruleShownAt,
   saveFathom,
   scoreFor,
   scoreGame,
@@ -317,16 +314,8 @@ export default function Fathom({ onBack, onHome, run }: Props) {
       ? `Your total: ${total} out of ${MAX_TOTAL}.`
       : "";
   const list = question?.nameIt ? lists.get(question.nameIt.list) : undefined;
-  // The round's scoring rule, read with the first question of that round, before its first answer (the estimate's on
-  // the first estimate, the percent's on the percent). With little height (a small phone, or the keyboard up) it goes
-  // under LOCK IN, so the question, the field and LOCK IN still fit.
+  // No scoring line on the card (the owner, Nov 14: "self intuitive already enough"; How to play explains it).
   const round = question && roundOf(question);
-  const rule = ruleShownAt(questions, game.at) && (
-    <p className="fathom-rule" data-testid="fathom-rule" data-round={round}>
-      {ruleFor(question)}
-    </p>
-  );
-  const ruleBelow = short && phase === "question";
   return (
     <main className="screen fathom" data-testid="fathom" data-phase={phase} data-short={short || undefined}>
       {head}
@@ -346,7 +335,6 @@ export default function Fathom({ onBack, onHome, run }: Props) {
             </div>
             <h1>{question.question}</h1>
             {question.definition && <p className="caption">{question.definition}</p>}
-            {!ruleBelow && rule}
           </section>
           {phase === "question" ? (
             list ? (
@@ -358,10 +346,9 @@ export default function Fathom({ onBack, onHome, run }: Props) {
                 lex={lex}
                 lexicon={lexicon}
                 onLock={lock}
-                footer={ruleBelow && rule ? rule : undefined}
               />
             ) : (
-              <Ask key={question.id} question={question} onLock={lock} footer={ruleBelow && rule ? rule : undefined} />
+              <Ask key={question.id} question={question} onLock={lock} />
             )
           ) : (
             <Reveal
@@ -381,10 +368,10 @@ export default function Fathom({ onBack, onHome, run }: Props) {
 
 /**
  * The question on screen: the field with its unit (the number grouped with commas as it's typed; a year as typed), a
- * line for what's wrong or what was read when the field doesn't show it, LOCK IN, and `footer` under them (the scoring
- * rule, when there's little height). A phone gets a decimal keypad, or for a year a plain number pad.
+ * line for what's wrong or what was read when the field doesn't show it, and LOCK IN. A phone gets a decimal keypad, or
+ * for a year a plain number pad.
  */
-function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (value: number) => void; footer?: ReactNode }) {
+function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: number) => void }) {
   const [text, setText] = useState("");
   const [error, setError] = useState<NumberError | null>(null);
   const round = roundOf(question);
@@ -460,7 +447,6 @@ function Ask({ question, onLock, footer }: { question: FathomQuestion; onLock: (
           Lock in
         </button>
       </div>
-      {footer}
     </form>
   );
 }
@@ -473,7 +459,7 @@ const toneOf = (r: NameRead) => (r.kind === "choose" ? "choose" : r.kind === "co
 
 /**
  * A name-it round on screen: the field for a name (a phone's own keyboard, with its Return key), a line for what was
- * read when it didn't lock, LOCK IN, and `footer` (the rule, when there's little height). Only a name the list knows
+ * read when it didn't lock, and LOCK IN. Only a name the list knows
  * locks: a misspelling goes in the box to confirm ("France? Lock in to confirm."), several readings are offered to tap
  * (the tap fills the box), and a thing of another kind, an unknown name or a word too many names share says so and
  * costs nothing ("Paris is a city, not a country. Try again.").
@@ -485,7 +471,6 @@ function AskName({
   lex,
   lexicon,
   onLock,
-  footer,
 }: {
   question: FathomQuestion;
   list: NameList;
@@ -494,7 +479,6 @@ function AskName({
   /** The lexicon on its way, if `lex` isn't here yet: a name read before it arrives waits for it (a moment at most). */
   lexicon?: Promise<Lexicon | undefined>;
   onLock: (value: number, pick: string) => void;
-  footer?: ReactNode;
 }) {
   const [text, setText] = useState("");
   const [read, setRead] = useState<NameRead | null>(null);
@@ -568,7 +552,6 @@ function AskName({
           Lock in
         </button>
       </div>
-      {footer}
     </form>
   );
 }
@@ -833,12 +816,6 @@ function Results({
       // The share sheet dismissed, or no clipboard here (an insecure page, a refusal): nothing to say.
     }
   };
-  // Each round's rule once, from the first question of that round (a name-it round's is its list's).
-  // Rounds that share a rule say it once.
-  const played = ROUNDS.flatMap((r) => {
-    const first = scored.find((s) => roundOf(s.question) === r);
-    return first ? [{ r, rule: ruleFor(first.question) }] : [];
-  }).filter((p, i, all) => all.findIndex((q) => q.rule === p.rule) === i);
   return (
     <>
       <section className="panel results enter fathom-results" data-glass data-testid="fathom-results">
@@ -852,11 +829,6 @@ function Results({
             <span key={i} className="band-sq" data-band={b} />
           ))}
         </div>
-        {played.map(({ r, rule }) => (
-          <p key={r} className="caption fathom-rule-end" data-testid="fathom-rule" data-round={r}>
-            {rule}
-          </p>
-        ))}
         {when && (
           <p className="caption fathom-when" data-testid="fathom-when">
             {when}

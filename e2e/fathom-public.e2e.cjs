@@ -106,16 +106,14 @@ for (const vp of VIEWPORTS) {
   });
 }
 
-test("How to play has a Fathom rule with the game's own scoring line", async () => {
+// The game itself says no scoring line since Nov 14 (the owner): How to play is where it is explained.
+test("How to play has a Fathom rule that says how it scores", async () => {
   const vp = VIEWPORTS.find((v) => v.name === "phone");
-  const { ctx, page } = await open(browser, vp, "#fathom", undefined, { setup: serveBank, reducedMotion: "reduce" });
-  const rule = (await page.getByTestId("fathom-rule").textContent()).trim();
-  await page.getByTestId("nav-home").click();
+  const { ctx, page } = await open(browser, vp, "", undefined, { setup: serveBank, reducedMotion: "reduce" });
   await page.getByTestId("howto-key").click();
   const section = page.getByTestId("howto-fathom");
   await section.waitFor();
-  const text = await section.textContent();
-  assert.ok(text.includes(rule), `"${rule}" in "${text}"`);
+  assert.match(await section.textContent(), /the closer your guess, the more points/i);
   await noBeta(page, "How to play");
   // Whole on a phone: no sideways scroll in the rules.
   assert.ok(await page.getByTestId("howto").evaluate((el) => el.scrollWidth <= el.clientWidth + 1));

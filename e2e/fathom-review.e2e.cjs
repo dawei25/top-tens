@@ -1,8 +1,9 @@
 // The first-time-player review before launch (Nov 9), in the browser on the real bank:
 // - The unit never squeezes the field: at 320 and 390, for every unit in the bank, the placeholder shows whole, the
 //   unit takes one line, and the answer typed in full ("8,804,190" for a city in million people) shows whole.
-// - Each scoring line once a game, on the first question that has it (the first estimate's covers the percent and
-//   the year; the name-it round says its own).
+// - No scoring line on Fathom's screens (owner, Nov 14: "doesnt need to be repeated after every question its
+//   overkill ... id just remove it"): no question card, reveal or results says one, in any round; How to play still
+//   explains the score, and Blitz keeps its own line.
 // - Home's Fathom key and the menu's tile start new questions after a finished game (free play is new every time,
 //   UX 14); a game under way resumes; a reload on the results keeps them.
 // - SHARE as on lists and Blitz: the phone's share sheet, else a copy and "Copied".
@@ -100,28 +101,41 @@ test("the unit never squeezes the field: placeholder whole, unit one line, the t
   assert.deepEqual(fails, []);
 });
 
-// The rule showed on Q1, Q2 and Q4 (the first estimate, percent and year: the same words) but not Q3, which read as a bug.
-test("each scoring line once a game, on the first question that has it; the name-it round has its own", async () => {
+// The owner, Nov 14: "the 'the closer you guess...' line doesnt need to be repeated after every question its overkill- i
+// feel like its self intuitive already enough id just remove it."
+const SCORING_LINE = /the more points/i;
+test("no scoring line on Fathom's question cards, reveals or results, in any round; How to play explains it; Blitz keeps its own", async () => {
   const est = REAL.filter((q) => !q.round && q.easy);
   const pct = REAL.find((q) => q.round === "percent");
   const year = REAL.find((q) => q.round === "year");
   const name = REAL.find((q) => q.round === "name");
-  const ids = [est[0].id, pct.id, est[1].id, year.id, name.id];
+  const ids = [est[0].id, pct.id, year.id, name.id, est[1].id];
   const { ctx, page } = await open(browser, phone, "#fathom", undefined, { reducedMotion: "reduce", setup: seedFathom(gameAt(ids, 0)) });
-  const shown = [];
+  const said = async (where) => {
+    assert.equal(await page.getByTestId("fathom-rule").count(), 0, `${where}: a rule line`);
+    assert.doesNotMatch(await page.locator("main").innerText(), SCORING_LINE, `${where}: a scoring line`);
+  };
   for (let i = 0; i < 5; i++) {
     await page.getByTestId("fathom-input").waitFor();
     assert.equal(await page.getByTestId("fathom-question").getAttribute("data-question"), ids[i]);
-    shown.push(await page.getByTestId("fathom-rule").count());
-    if (i < 4) {
-      const q = REAL.find((x) => x.id === ids[i]);
-      await page.getByTestId("fathom-input").fill(String(q.answer));
-      await page.getByTestId("fathom-lock").click();
-      await page.getByTestId("fathom-reveal").waitFor();
-      await page.getByTestId("fathom-next").click();
-    }
+    await said(`question ${i + 1}`);
+    if (i === 3) await page.getByTestId("fathom-input").fill(name.id.startsWith("name-city") ? "Tokyo" : "Japan");
+    else await page.getByTestId("fathom-input").fill(String(REAL.find((x) => x.id === ids[i]).answer));
+    await page.getByTestId("fathom-lock").click();
+    await page.getByTestId("fathom-reveal").waitFor();
+    await said(`reveal ${i + 1}`);
+    await page.getByTestId("fathom-next").click();
   }
-  assert.deepEqual(shown, [1, 0, 0, 0, 1]);
+  await page.getByTestId("fathom-results").waitFor();
+  await said("the results");
+  // How to play still says how Fathom scores.
+  await page.getByTestId("nav-home").click();
+  await page.getByTestId("howto-key").click();
+  assert.match(await page.getByTestId("howto-fathom").textContent(), SCORING_LINE);
+  await page.keyboard.press("Escape");
+  // Blitz keeps its line ("#1 gets 100, smaller numbers get less, down to 10.").
+  await page.getByTestId("random-blitz").click();
+  assert.match(await page.getByTestId("blitz-rule").textContent(), /#1 gets 100/);
   await ctx.close();
 });
 

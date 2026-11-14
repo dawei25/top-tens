@@ -14,13 +14,12 @@ import {
   missText,
   pointsOff,
   readBank,
-  ruleFor,
-  ruleShownAt,
   shareText,
   type Band,
   type FathomQuestion,
   type Scored,
 } from "./fathom";
+import * as fathom from "./fathom";
 import { LINE_MAX, nameLine, PLACES, readFullBank, readList, readName, type NameList } from "./fathom-name";
 
 const PUBLIC = join(import.meta.dirname, "..", "..", "public", "fathom");
@@ -57,18 +56,10 @@ describe("the first-time review (Nov 9)", () => {
     for (const q of BANK.filter((x) => x.round === "percent")) for (const g of [0, 10, 50, 99]) expect(missText(q, g), q.id).not.toMatch(/points?/);
   });
 
-  // The rule showed on the first estimate, the first percent and the first year (all the same words), so a game whose
-  // third question was a second estimate looked as if it had lost its line.
-  it("says each scoring line once a game, on the first question that has it", () => {
-    const est = { round: undefined, unit: "metres" } as Pick<FathomQuestion, "round" | "unit" | "nameIt">;
-    const pct = { round: "percent", unit: "percent" } as const;
-    const year = { round: "year", unit: "year" } as const;
-    const name = BANK.find((q) => q.round === "name")!;
-    const game = [est, pct, est, year, name];
-    expect(game.map((_, i) => ruleShownAt(game, i))).toEqual([true, false, false, false, true]);
-    expect(ruleFor(name)).not.toBe(ruleFor(est));
-    const pctFirst = [pct, est, year, est, name];
-    expect(pctFirst.map((_, i) => ruleShownAt(pctFirst, i))).toEqual([true, false, false, false, true]);
+  // The owner, Nov 14: the scoring line "doesnt need to be repeated after every question its overkill ... id just remove
+  // it". The game says no scoring line any more (How to play explains it: fathom-review.e2e.cjs): nothing to show one.
+  it("has no scoring line to show", () => {
+    expect(Object.keys(fathom).filter((k) => /^(rule|RULE|CLOSER|nameRule)/.test(k))).toEqual([]);
   });
 
   // The share text: squares in the colours the results show, the emoji the list share uses where they match.

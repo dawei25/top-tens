@@ -3,8 +3,8 @@
  * player to name a thing whose figure is close to a target (the name-it round, src/game/fathom-name.ts reads the name).
  * Each scores by how close it is, on one curve (`curve`) with a distance for each round: an estimate by how many times
  * off, a percent by points off and how many times off on the answer's side of 50 (the average), a year by how many
- * times off how long ago it was, a name-it round by its list's figure against the target (a ratio, or steps off). On
- * screen, one plain line (ruleFor).
+ * times off how long ago it was, a name-it round by its list's figure against the target (a ratio, or steps off). The
+ * game says no scoring line (the owner, Nov 14: "self intuitive already enough"); How to play explains it in one.
  *
  * Pure functions only: reading numbers, scoring, the draw, the share text, and the game on screen (its own localStorage
  * key). Finished games, their totals and the last draws are kept in the player's save, which syncs with an account
@@ -222,18 +222,6 @@ export function scoreFor(q: Pick<FathomQuestion, "round" | "answer" | "nameIt">,
   return fathomScore(guess, q.answer);
 }
 
-/**
- * The scoring rule, said where the player looks before answering (the first question of a round in a game) and on the
- * results: one plain line, no arithmetic. The owner, Nov 8: "keep it simple, just say closer the guess the more points
- * you get". The numbers behind it (the curve, each round's distance, steps) stay in the code and docs/FATHOM.md; the
- * line only has to be true, and it is in every round: a closer guess never scores less (fathom.test.ts).
- */
-export const CLOSER = "The closer your guess, the more points.";
-export const RULES: Record<Exclude<Round, "name">, string> = { estimate: CLOSER, percent: CLOSER, year: CLOSER };
-
-/** The estimate's rule (RULES.estimate). */
-export const RULE = RULES.estimate;
-
 /** "land borders" as one: "land border". */
 export function singular(unit: string): string {
   if (/(?:ss|us|is)$/.test(unit)) return unit;
@@ -241,25 +229,6 @@ export function singular(unit: string): string {
   if (/(?:ch|sh|x)es$/.test(unit)) return unit.replace(/es$/, "");
   return unit.replace(/s$/, "");
 }
-
-/** A name-it round's rule: the same plain line, said against the target. */
-export function nameRule(_q: Pick<FathomQuestion, "unit" | "nameIt">): string {
-  return "The closer to the target, the more points.";
-}
-
-/** A question's scoring rule, by its round. */
-export const ruleFor = (q: Pick<FathomQuestion, "round" | "unit" | "nameIt">): string => {
-  const round = roundOf(q);
-  return round === "name" ? nameRule(q) : RULES[round];
-};
-
-/**
- * Whether the question at `at` says its scoring line: the first in the game with that line, once a game for each
- * line. The estimate, the percent and the year say the same words, so only the first of them does (the review, Nov 9:
- * a line on the first, second and fourth questions but not the third read as a bug); the name-it round has its own.
- */
-export const ruleShownAt = (questions: readonly Pick<FathomQuestion, "round" | "unit" | "nameIt">[], at: number): boolean =>
-  !!questions[at] && questions.findIndex((q) => ruleFor(q) === ruleFor(questions[at])) === at;
 
 // The bands live with the history (Past runs shows a game's five squares without this module).
 export { BANDS, bandLabel, bandOf, type Band };

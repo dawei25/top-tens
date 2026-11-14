@@ -40,8 +40,6 @@ import {
   readNumber,
   resumable,
   roundOf,
-  RULE,
-  RULES,
   saveFathom,
   scoreFor,
   scoreGame,
@@ -57,7 +55,6 @@ import {
   PER_POINT,
   PER_STEP,
   YEAR_STRETCH,
-  ruleFor,
   singular,
   stepsScore,
   type FathomKind,
@@ -156,11 +153,9 @@ describe("scoring: plain closeness, the same rule for every question", () => {
   });
 });
 
-describe("the rule on screen", () => {
-  // Stated where the player looks before the first answer, and on the results, in words that agree with the numbers.
-  // The owner, Nov 8: "keep it simple, just say closer the guess the more points you get". The line has to be true.
-  it("says it plainly, and a closer guess never scores less", () => {
-    expect(RULE).toBe("The closer your guess, the more points.");
+describe("How to play's line: the closer your guess, the more points", () => {
+  // The game says no scoring line since Nov 14 (the owner); How to play's has to be true.
+  it("holds: a closer guess never scores less", () => {
     const guesses = [100, 120, 150, 200, 400, 1000];
     const pts = guesses.map((g) => fathomScore(g, 100));
     for (let i = 1; i < pts.length; i++) expect(pts[i]).toBeLessThanOrEqual(pts[i - 1]);
@@ -275,21 +270,14 @@ describe("rounds", () => {
     }
   });
 
-  // UX 21: each round says its rule in one plain line before the answer, and the scores behind it agree.
-  it("each round's rule is one plain line that the numbers bear out", () => {
-    expect(RULES.estimate).toBe(RULE);
-    expect(RULES.percent).toBe(RULE);
-    expect(RULES.year).toBe(RULE);
+  // UX 21: How to play's plain line, borne out by each round's numbers.
+  it("bears out the plain line in each round", () => {
     expect(percentScore(60, 50)).toBe(78);
     expect(percentScore(40, 50)).toBe(76);
     expect(percentScore(51, 50)).toBe(98);
     expect(yearScore(1910, 1900, NOW)).toBe(86);
     expect(yearScore(1890, 1900, NOW)).toBe(87);
     expect(yearScore(1901, 1900, NOW)).toBe(99);
-    for (const rule of Object.values(RULES)) {
-      expect(rule).not.toMatch(/—|\p{Extended_Pictographic}/u);
-      expect(rule.length).toBeLessThanOrEqual(70);
-    }
   });
 
   it("says a percent's miss in points, a year's in years early or late", () => {
@@ -1413,19 +1401,13 @@ describe("name-it: scoring", () => {
     const steps = nameQ("name-country-6-borders");
     expect([6, 7, 9].map((n) => scoreFor(steps, n))).toEqual([100, 70, 10]);
   });
-  // UX 21: the rule says how points are counted, in words that agree with the numbers, before the answer.
-  it("says its rule in one plain line that the numbers bear out", () => {
+  // UX 21: closer to the target scores more, as How to play says.
+  it("bears out the plain line against the target", () => {
     const pop = nameQ("name-country-50m-people");
-    expect(ruleFor(pop)).toBe("The closer to the target, the more points.");
     expect(Math.abs(scoreFor(pop, 100e6) - 50)).toBeLessThanOrEqual(1);
     expect(Math.abs(scoreFor(pop, 25e6) - 50)).toBeLessThanOrEqual(1);
     const steps = nameQ("name-country-6-borders");
-    expect(ruleFor(steps)).toBe("The closer to the target, the more points.");
     expect([6, 7, 8, 9].map((n) => scoreFor(steps, n))).toEqual([100, 70, 40, 10]);
-    for (const q of named) {
-      expect(ruleFor(q).length, q.id).toBeLessThanOrEqual(70);
-      expect(ruleFor(q)).not.toMatch(/—|\p{Extended_Pictographic}/u);
-    }
   });
   it("says the miss plainly", () => {
     const pop = nameQ("name-country-50m-people");
