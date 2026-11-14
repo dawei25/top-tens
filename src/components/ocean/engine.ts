@@ -19,8 +19,13 @@
  * The easter egg: a tap or click on the squid's own pixels (never on a control over it, nor one the browser hands
  * the tap's click to, never while a dialog is open) makes it blush, flinch and wave a tentacle, with a pixel heart; a
  * third tap in a row and it spins, then darts off with a puff of ink (ink always comes out with a dart, never in place:
- * see inkAndFlee). With reduced motion it only blushes for a moment. The layer still takes no pointer itself: the taps are read on the window, passively, and the page under the
- * finger gets them as ever.
+ * see inkAndFlee). With reduced motion it only blushes for a moment. The layer still takes no pointer itself: the taps
+ * are read on the window, passively, and the page under the finger gets them as ever.
+ *
+ * A click or tap on open water (the ocean itself: no glass, control, text, picture or squid under it, nothing open
+ * over the page, no drag, scroll or selection) sends the squid darting there, a hard dart that brakes into the point;
+ * another retargets it. The same three listeners read it, and it is checked only once the tap settles, so nothing runs
+ * per frame. Reduced motion: nothing.
  */
 import { onPlay, type PlayEvent } from "../../game/events";
 import { reducedMotion } from "../pixel";
@@ -80,6 +85,10 @@ const CONTROL =
   'a[href], button, input, select, textarea, label, summary, dialog, [role="button"], [role="link"], [role="switch"], ' +
   '[role="checkbox"], [role="radio"], [role="tab"], [role="menuitem"], [role="option"], [role="slider"], [role="dialog"], ' +
   '[contenteditable]:not([contenteditable="false"]), [tabindex]:not([tabindex^="-"]), .slot.has-fact, .slot.hintable';
+/** Something open over the page (a dialog, a sheet, a popover): a click anywhere is its, never the water's. */
+const OPEN = 'dialog[open], [aria-modal="true"], [aria-expanded="true"]';
+/** Never bare water, whatever its cursor: pictures, drawings, media. */
+const MEDIA = "canvas, svg, img, video, picture, iframe";
 /** How near the squid's pixels a tap counts (sprite px): a fingertip gets more room than a mouse pointer. */
 const TAP_TOL_TOUCH = 2.5;
 const TAP_TOL_MOUSE = 0.75;
@@ -983,7 +992,7 @@ export function startOcean(els: OceanEls): Ocean {
 
   /** Reactions are counted, and the one playing named, on the squid's DOM stand-in (for tests and tools). */
   let reacting = 0;
-  const count = (k: "finds" | "pokes" | "inks") => (squid.dataset[k] = String(Number(squid.dataset[k] ?? 0) + 1));
+  const count = (k: "finds" | "pokes" | "inks" | "darts") => (squid.dataset[k] = String(Number(squid.dataset[k] ?? 0) + 1));
   function reactFor(kind: string, s: number, still = false) {
     const id = ++reacting;
     squid.dataset.react = kind;
@@ -1132,11 +1141,16 @@ export function startOcean(els: OceanEls): Ocean {
 
   /* ---------------- the tap easter egg ---------------- */
 
-  /** A press that landed on the squid, waiting to see if it lifts as a tap. */
-  let down: { id: number; x: number; y: number; at: number } | null = null;
-  /** A tap on the squid, waiting for its click: the browser may hand that click to a control nearby (a phone's touch
-   *  adjustment snaps a tap to a key within the finger's reach), and then the tap was the control's. */
-  let tapped: { x: number; timer: ReturnType<typeof setTimeout> } | null = null;
+  /**
+   * A press, waiting to see if it lifts as a tap: on the squid's own pixels (the easter egg), or anywhere else (it may
+   * be on open water: a dart there; checked only once it is a tap).
+   */
+  let down: { id: number; x: number; y: number; at: number; squid: boolean } | null = null;
+  /**
+   * A tap (viewport CSS px), waiting for its click: the browser may hand that click to a control nearby (a phone's
+   * touch adjustment snaps a tap to a key within the finger's reach), and then the tap was the control's.
+   */
+  let tapped: { squid: boolean; x: number; y: number; el: Element | null; timer: ReturnType<typeof setTimeout> } | null = null;
   let streak = 0;
   let lastPoke = -Infinity;
 
@@ -1146,17 +1160,19 @@ export function startOcean(els: OceanEls): Ocean {
     const cursor = getComputedStyle(el).cursor;
     return cursor === "pointer" || cursor === "help";
   }
-  /** The squid takes this press: it is on its own pixels, and on nothing the player could mean instead. */
-  function onSquid(e: PointerEvent) {
-    const tol = e.pointerType === "mouse" ? TAP_TOL_MOUSE : TAP_TOL_TOUCH;
-    if (!body.hits(e.clientX / px, e.clientY / px, tol)) return false;
+  /** The squid takes this press on its pixels: nothing the player could mean instead is there. */
+  function squidTakes(e: PointerEvent) {
     const el = e.target instanceof Element ? e.target : null;
     return !!el && !document.querySelector('dialog[open], [aria-modal="true"]') && !pressable(el);
   }
   function onDown(e: PointerEvent) {
     down = null;
     if (!e.isPrimary || e.button > 0) return;
-    if (onSquid(e)) down = { id: e.pointerId, x: e.clientX, y: e.clientY, at: performance.now() };
+    const tol = e.pointerType === "mouse" ? TAP_TOL_MOUSE : TAP_TOL_TOUCH;
+    const press = { id: e.pointerId, x: e.clientX, y: e.clientY, at: performance.now() };
+    if (body.hits(e.clientX / px, e.clientY / px, tol)) {
+      if (squidTakes(e)) down = { ...press, squid: true };
+    } else if (!still && !(e.shiftKey || e.ctrlKey || e.metaKey || e.altKey)) down = { ...press, squid: false };
   }
   function onUp(e: PointerEvent) {
     const d = down;
@@ -1166,19 +1182,60 @@ export function startOcean(els: OceanEls): Ocean {
     if (tapped) clearTimeout(tapped.timer);
     // Its click follows at once; a browser that sends none for a tap on bare page (Safari, outside the app) gets the
     // reaction a beat later anyway.
-    tapped = { x: e.clientX / px, timer: setTimeout(() => settleTap(true), CLICK_WAIT_MS) };
+    const el = e.target instanceof Element ? e.target : null;
+    tapped = { squid: d.squid, x: e.clientX, y: e.clientY, el, timer: setTimeout(() => settleTap(el, false), CLICK_WAIT_MS) };
   }
   function onClick(e: MouseEvent) {
-    if (tapped) settleTap(!(e.target instanceof Element && pressable(e.target)));
+    if (tapped) settleTap(e.target instanceof Element ? e.target : null, true);
   }
-  function settleTap(ours: boolean) {
+  /** The tap's click came (on `el`), or none did (`el` is what the tap lifted on). */
+  function settleTap(el: Element | null, clicked: boolean) {
     const tap = tapped;
     tapped = null;
     if (!tap) return;
     clearTimeout(tap.timer);
-    if (ours) poke(tap.x);
+    if (tap.squid) {
+      if (!clicked || !(el && pressable(el))) poke(tap.x / px);
+    } else if (openWater(tap.x, tap.y, el)) dartTo(tap.x, tap.y);
   }
   const onCancel = () => (down = null);
+
+  /**
+   * A tap on open water: the ocean itself, with nothing the player could mean instead. Not while anything is open over
+   * the page (a dialog, a sheet, a popover: the click is its), not on glass (or Home's logo and keys), a control,
+   * anything pressable, a picture or drawing, or text, not with text selected; and, by the glass as read now, outside
+   * every panel. Read once, as the tap settles: nothing here runs per frame.
+   */
+  function openWater(x: number, y: number, el: Element | null) {
+    if (still || !el || document.querySelector(OPEN)) return false;
+    if (el.closest(`${GLASS}, ${SOLID}, ${MEDIA}`) || pressable(el) || textAt(el, x, y)) return false;
+    const sel = getSelection();
+    if (sel && !sel.isCollapsed) return false;
+    const { glass, solid } = readLayout(0);
+    return clearance(x, y, [...glass, ...solid]) > 0;
+  }
+  /** Text of the element's own under (x, y), give or take a couple of px. */
+  function textAt(el: Element, x: number, y: number) {
+    for (const n of el.childNodes) {
+      if (n.nodeType !== Node.TEXT_NODE || !n.textContent?.trim()) continue;
+      const range = document.createRange();
+      range.selectNodeContents(n);
+      for (const q of range.getClientRects()) if (x >= q.left - 2 && x <= q.right + 2 && y >= q.top - 2 && y <= q.bottom + 2) return true;
+    }
+    return false;
+  }
+  /**
+   * Open water tapped: the squid darts there, a hard dart braking into the point (on wide screens, the nearest spot
+   * there it fits); a new tap retargets it. An ink's dart, a trick, the loops and an escape from glass come first.
+   */
+  function dartTo(x: number, y: number) {
+    if (swimmer.fleeing || inkDue || t < trickUntil || swimmer.escaping || swimmer.behaviour === "loop") return;
+    const p = room ? nearestFit({ x, y }) : { x, y };
+    if (!p) return;
+    swimmer.dart(p);
+    count("darts");
+    squid.dataset.dartAt = `${Math.round(p.x)},${Math.round(p.y)}`;
+  }
 
   /**
    * Tapped: a boop, or (the third tap in a row) the trick; with reduced motion, only a blush. While a trick or a dart
