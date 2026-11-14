@@ -689,6 +689,20 @@ const waterPoints = (page, clear = 0) =>
     { clear, CONTROL },
   );
 
+/**
+ * Open water at least `clear` px from everything and more than `away` px from the squid (a click on the squid is a
+ * boop), the most open first; the clock moves on until there is some (it roams).
+ */
+async function waterAway(page, clear, away) {
+  for (let i = 0; i < 150; i++) {
+    const s = await squidSpot(page);
+    const spots = s ? (await waterPoints(page, clear)).filter((p) => Math.hypot(p.x - s.x, p.y - s.y) > away) : [];
+    if (spots.length) return spots[0];
+    await page.clock.runFor(200);
+  }
+  throw new Error(`no open water ${clear} px clear and ${away} px from the squid`);
+}
+
 /** The nearest the squid's eyes come to p over the next `ms` (frozen clock, frame by frame), in its widths. */
 async function closestTo(page, p, ms) {
   let best = Infinity;
@@ -707,11 +721,9 @@ test("a click on open water sends the squid darting there; spam clicks retarget 
   await freeze(page);
   const before = await screenState(page);
   await recordClicks(page);
-  const squid = await squidWhere(page, "clear");
+  await squidWhere(page, "clear");
   // Open water with room to spare, far from where the squid is.
-  const far = (await waterPoints(page, 190)).filter((p) => Math.hypot(p.x - squid.x, p.y - squid.y) > 240);
-  assert.ok(far.length, "no open water far from the squid");
-  const p = far[0];
+  const p = await waterAway(page, 190, 240);
   await page.mouse.click(p.x, p.y);
   assert.equal(await darts(page), 1, "the click on open water didn't send the squid");
   assert.ok((await closestTo(page, p, 1500)) < 0.75, "the squid didn't get to where the water was clicked");
@@ -741,7 +753,7 @@ test("clicks meant for the page never send the squid: panels, controls, inputs, 
   await page.waitForTimeout(1600);
   await freeze(page);
   await squidWhere(page, "clear");
-  const water = (await waterPoints(page, 120))[0];
+  const water = await waterAway(page, 120, 160);
   const box = async (sel) => {
     const r = await page.locator(sel).first().boundingBox();
     return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
@@ -795,7 +807,8 @@ test("clicks meant for the page never send the squid: panels, controls, inputs, 
   // And with nothing open (a second press on the row closes it), the same water click does.
   if ((await page.locator('[aria-expanded="true"]').count()) === opened) await row.click();
   assert.equal(await page.locator('[aria-expanded="true"]').count(), 0);
-  await page.mouse.click(water.x, water.y);
+  const there = await waterAway(page, 120, 160);
+  await page.mouse.click(there.x, there.y);
   assert.equal(await darts(page), 1, "with nothing open, a click on the water didn't send the squid");
   await ctx.close();
 });
@@ -805,8 +818,7 @@ test("a tap on bare page sends the squid there on a phone; with reduced motion n
   await page.getByLabel("Your guess").waitFor();
   await page.waitForTimeout(1600);
   await freeze(page);
-  const spot = (await waterPoints(page, 0)).find((p) => p.y > 120);
-  assert.ok(spot, "no bare page on the phone's game screen");
+  const spot = await waterAway(page, 0, 100);
   await page.touchscreen.tap(spot.x, spot.y);
   await page.clock.runFor(400);
   assert.equal(await darts(page), 1, "the tap on bare page didn't send the squid");
@@ -817,7 +829,8 @@ test("a tap on bare page sends the squid there on a phone; with reduced motion n
   await still.page.waitForTimeout(300);
   await freeze(still.page);
   const mask = await squidMask(still.page);
-  const water = (await waterPoints(still.page, 120))[0];
+  // (Parked in the clearest water, it never moves: a spot well clear of it.)
+  const water = await waterAway(still.page, 60, 160);
   await still.page.mouse.click(water.x, water.y);
   await still.page.clock.runFor(1500);
   assert.equal(await darts(still.page), 0);
