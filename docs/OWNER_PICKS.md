@@ -14,6 +14,8 @@ automated. Judges read this file before scoring a candidate (docs/JUDGE.md).
 | 2026-11-09 | mlb-hits | free play only, lower average | career hits reward long-retired players; "not a great list for the casual", though a baseball fan might love it (his note) |
 | 2026-11-09 | Today's Blitz | removed; Blitz stays in free play | two dailies were confusing to keep track of, and Blitz has no stats or distribution to show how you did |
 | 2026-11-14 | Today's Fathom | added; endless Fathom hidden (its URL still works) | wants a daily Fathom with "better than xx% of players today" and a histogram, no "estimated" tag; the simulated crowd kept simple (a right-skewed spread around the expected score) |
+| 2026-11-14 | Fathom questions | prefers questions you can figure out; cut pure recall | liked reason-from-yourself, Fermi, check-it and surprising-superlative questions; disliked a physics constant (speed of sound) |
+| 2026-11-14 | Free play | sign in with Google after 2 free-play games | "encourages user signups"; dailies stay open (coordinator's call). Google app moved to production the same day |
 | 2026-11-04 | national-parks | liked (rated well) | wanted each park's state in its fact |
 | 2026-11-05 | lakes | vetoed as a daily | not a great list; it had already been in free play; third Geography daily in a row |
 | 2026-11-05 | x-accounts | dropped | same problem as Facebook (follower counts) |

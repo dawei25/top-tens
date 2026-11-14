@@ -159,6 +159,15 @@ reason their way toward the answer from something they already know. It must pas
 | How tall is a bank card? | dropped | nobody pictures it: it's in your wallet, but not a thing anyone measures |
 | How long is the Trans-Siberian Railway? | dropped | familiar name, nothing to reason from: you know it or you don't |
 | How heavy is an obscure animal? | dropped | not a familiar subject |
+| How fast does sound travel through air? | dropped (owner, Nov 14) | a physics constant: you know it or you don't, with nothing to reason from |
+
+**The owner's favourite kind** (Nov 14, from another game's questions he liked and disliked; ours are our own): the
+ones that are "actually fun to figure out". He liked a question you answer by starting from yourself (your own weight
+for the average adult's), one you work out with arithmetic from known anchors (the world's population and a rough
+birth rate for babies born a day), one you solve by checking (count the letters), and a superlative with a surprising
+winner. He disliked a physics constant and, by the same test, a release year you only recall. So prefer, in this
+order: **reason from yourself**, **Fermi arithmetic from two anchors**, **check it yourself**, **a surprising
+superlative**; and cut **pure recall** (constants, dates, a figure with no way in), however famous the subject.
 
 ## Writing questions
 
