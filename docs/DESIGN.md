@@ -67,8 +67,8 @@ list offered as a Blitz needs a deep pool, broad recognition and clean data.
 
 ## 4. Screens
 
-Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list, Random list, Random Blitz and
-Fathom; Yours: Archive, Past runs, Stats; More: Settings, How to play, Feedback, Privacy), the current screen's tile
+Every screen's header ends in the **menu** key: a panel of tiles (Play: Today's list, Today's Fathom, Random list and
+Random Blitz; Yours: Archive, Past runs, Stats; More: Settings, How to play, Feedback, Privacy), the current screen's tile
 marked. The account lives in Home's header, not in the menu and not in a row of its own (owner, Nov 5 and 6): one
 **account key** left of the sound key, the same keycap, in builds with accounts only. Its pixel player is hollow when
 signed out, lit cyan when signed in, carries a pink dot for sync trouble (offline, couldn't sync) or a sign-in that
@@ -84,13 +84,21 @@ key, and a quiet key to today's list (Home once it's played). Closing leaves the
 starts the game asked for. Never asked: dailies, Fathom, Past runs and their results, Stats, How to play; a game
 under way always resumes. Inner screens have no
 account key: their headers are full, and HOME is one press away (UX.md 19). **Settings** (`#settings`): the sound
-switch and reset all progress (Fathom's too). **Fathom** (`#fathom`), the estimation game, out of beta since Nov 9
-(owner: "ship it now"): five questions a game (estimates, a percent, a year, a name-it round), endless games, scored by
-plain closeness, with no scoring line on screen (owner, Nov 14; How to play explains it, UX 21), out of 500 (docs/FATHOM.md). Its key is
-in Home's Free play and its tile in the menu's Play group; its games are in Past runs and its totals in Stats, and they
-sync with an account like list games. No daily Fathom (owner: maybe later, if it's popular).
+switch and reset all progress (Fathom's too). **Today's Fathom** (`#fathom`), the estimation game, a daily since Nov 15 (owner, Nov 14: "id like fathom to have a
+today's fathom"): ten questions a day, the same for everyone (an easy opener, estimates, two percents, two years, a
+name-it round; `public/fathom/daily.json`, written ahead by `scripts/fathom/daily.ts`, never repeating until the bank
+runs out), one try, 20 seconds a question (at 0 a typed guess that reads locks in, else "Time's up" and 0), scored by
+plain closeness out of 1000 with no scoring line on screen (How to play explains it, UX 21; docs/FATHOM.md). The
+question card's header holds the clock and ten cells filling with each round's points and the running total. Its
+results show the players' curve and "you did better than X% of players today". Its key sits under Today's list in
+Home's Today panel, its tile in the menu's Play group; its games are in Past runs ("Fathom #12") and its ten-question
+totals in Stats (avg and best / 1000), and they sync with an account. Endless Fathom plays only at the hidden
+`#fathom-endless` (owner: "remove the unlimited fathom play for now- keep access to it via a hidden url").
 
-1. **Home:** Today's list (one key across the row), then directly Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at least 3 lists a roll can land on, and Fathom, its line "Guess the number: 5 questions" where the others count their lists ("5 questions" below 390px): under them on a phone, the row under the pair, one line high, from 640px);
+1. **Home:** the Today panel (its countdown "new in" for both games): Today's list across the row, the big key, and
+   under it Today's Fathom, as tall as a free-play key, its state only, no description (owner, Nov 14); then directly
+   Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at
+   least 3 lists a roll can land on);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ). Home never names today's list: the
    topic is the surprise (owner, Nov 7).
 2. **Game:** title card with the prompt and score (no average during play: it's revealed on the results; no Play
