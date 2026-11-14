@@ -55,10 +55,16 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
     same list).
 15. **Never offer what's already spoiled.** A Blitz's results show its whole list, so they never offer that list as a
     list game ("if someone played blitz no point to give them option to play the same list since its alr spoiled");
-    a list's results may offer its Blitz, which a list game doesn't spoil. **Never spoil a daily.** Nothing shows a list's answers before its day: random play never lands on today's or a
+    and a list's results don't offer its Blitz either: the modes stay separate (owner, Nov 14). **Never spoil a daily.** Nothing shows a list's answers before its day: random play never lands on today's or a
     future day's list (a random list once landed on the day's Blitz topic, when there was a Today's Blitz).
 16. **Generous, never unrelated.** Autocorrect helps partial knowledge ("shenzhen", "jordan") but never turns an
     unrelated word into an answer ("pope").
+24. **Ask at the door, never mid-game, and say what stays free.** A sign-in the game asks for comes before a new game
+    starts, over the screen the player is on, never during a game or over its results (a game under way always
+    resumes). Closing it leaves everything as it was. It says what an account gives and what stays free (today's
+    list), with a key there, and signing in carries on to what the player asked for. (Owner, Nov 14: "after a user
+    plays more than once in free play, they have to sign in with google to continue playing -> encourages user
+    signups!"; `e2e/free-wall.e2e.cjs`.)
 
 ## Look
 
