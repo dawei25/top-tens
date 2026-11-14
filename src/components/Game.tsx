@@ -65,6 +65,11 @@ interface Props {
    * list beside the guess panel, to skip to another list; never once play starts, so a losing game can't be dodged.
    */
   rolled?: boolean;
+  /**
+   * Play Blitz on the results was pressed (a link to the list's Blitz): App may hold the new round back for a sign-in
+   * first (src/game/free-games.ts), opening the wall over the results instead (it prevents the link's default).
+   */
+  onPlayBlitz?: (e: React.MouseEvent) => void;
 }
 
 interface Feedback {
@@ -98,7 +103,7 @@ function describe(r: GuessResult, puzzle: Puzzle, typed: string): Omit<Feedback,
   }
 }
 
-export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, rolled }: Props) {
+export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome, onRoll, rolled, onPlayBlitz }: Props) {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
@@ -646,7 +651,7 @@ export function Game({ id, meta, daily, today, schedule, lexicon, onBack, onHome
                 </button>
                 {/* A daily is one try: no replay, just somewhere else to go: this list as a Blitz, or a random list. */}
                 {blitzOpen && (
-                  <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can">
+                  <a className="key key-blitz" data-testid="blitz-key" href={`#blitz-${puzzle.id}`} title="90 seconds, as many as you can" onClick={onPlayBlitz}>
                     Play Blitz
                   </a>
                 )}
