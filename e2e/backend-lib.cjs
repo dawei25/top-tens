@@ -236,6 +236,53 @@ const until = async (fn, ms = 5000) => {
 };
 const settle = () => new Promise((r) => setTimeout(r, 400));
 
+const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
+const b64url = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+
+/**
+ * Google's endpoint, faked for the whole context (popups included), for the build with a Google client ID
+ * (backend-google.e2e.cjs, free-wall.e2e.cjs). It answers like Google's implicit flow: a redirect to the redirect_uri
+ * with the ID token (carrying the nonce it was asked with) and the state in the fragment. `google.mode` says how the
+ * next request is answered: "ok", "stay" (the chooser stays up), "denied", "forged" (another state), "refuse" (a token
+ * Supabase refuses) or "sever" (ok, but the window loses its opener on the way). `asks` holds each request's
+ * parameters, `hits` every request to Google's host.
+ */
+async function fakeGoogle(ctx) {
+  const google = { mode: "ok", asks: [], hits: [], tokens: [] };
+  await ctx.route(/^https:\/\/accounts\.google\.com\//, (route) => {
+    const url = new URL(route.request().url());
+    google.hits.push(url.href);
+    if (`${url.origin}${url.pathname}` !== GOOGLE_AUTH) return route.fulfill({ status: 404, body: "" });
+    const q = Object.fromEntries(url.searchParams);
+    google.asks.push(q);
+    const mode = google.mode;
+    if (mode === "stay") return route.fulfill({ status: 200, contentType: "text/html", body: "<title>Sign in - Google Accounts</title><p>Choose an account</p>" });
+    const iat = Math.floor(NOW.getTime() / 1000);
+    const claims = { iss: "https://accounts.google.com", azp: q.client_id, aud: q.client_id, sub: mode === "refuse" ? REFUSED_SUB : "1234", email: "dana@example.com", email_verified: true, nonce: q.nonce, iat, exp: iat + 3600 };
+    const token = [b64url({ alg: "RS256", kid: "k1", typ: "JWT" }), b64url(claims), "sig"].join(".");
+    google.tokens.push(token);
+    const state = mode === "forged" ? "0123456789abcdef0123456789abcdef" : q.state;
+    const fragment = mode === "denied" ? `error=access_denied&state=${state}` : `state=${state}&id_token=${token}&authuser=0&prompt=consent`;
+    const back = `${q.redirect_uri}#${fragment}`;
+    // The window loses its link to the game on the way (as an in-app browser's popup, or a page that cuts it, would).
+    if (mode === "sever") return route.fulfill({ status: 200, contentType: "text/html", body: `<script>window.opener = null; location.replace(${JSON.stringify(back)});</script>` });
+    return route.fulfill({ status: 302, headers: { location: back } });
+  });
+  return google;
+}
+
+/** A context's setup: Google faked, plus `more(ctx)`. Hands the fake back through `into`. */
+const withGoogle = (into, more) => async (ctx) => {
+  into.google = await fakeGoogle(ctx);
+  if (more) await more(ctx);
+};
+
+/** Presses the Google key and returns the popup it opens. */
+async function pressForPopup(page) {
+  const [popup] = await Promise.all([page.waitForEvent("popup"), page.getByTestId("sign-in-google").click()]);
+  return popup;
+}
+
 /** Opens the menu once it has slid in; returns it. */
 async function openMenu(page) {
   await page.getByTestId("menu-key").click();
@@ -319,4 +366,7 @@ module.exports = {
   accountKey,
   KEY_COLORS,
   homeSignedIn,
+  fakeGoogle,
+  withGoogle,
+  pressForPopup,
 };

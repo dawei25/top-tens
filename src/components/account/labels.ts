@@ -89,3 +89,15 @@ export function accountKeyLabel(a: Pick<AccountState, "status" | "user" | "sync"
   const trouble = a.sync === "offline" ? ", offline" : a.sync === "error" ? ", couldn't sync" : "";
   return `Account: signed in as ${homeName(a.user)}${trouble}`;
 }
+
+/**
+ * The free-play wall (./FreePlayWall), the sheet a signed-out player meets when a free-play game past the free ones would
+ * start (src/game/free-games.ts): its heading and its one line.
+ */
+export const WALL_TITLE = "Sign in to keep playing";
+export const WALL_LINE = "free play is unlimited with an account. today's list is always free.";
+
+/** The wall's quiet way out: today's list while it waits to be played, else Home. */
+export function wallAlt(todayPlayed: boolean): { go: "today" | "home"; label: string } {
+  return todayPlayed ? { go: "home", label: "Home" } : { go: "today", label: "Play today's list" };
+}
