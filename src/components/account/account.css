@@ -173,6 +173,16 @@
   color: var(--pink);
 }
 
+/* ---------- The free-play wall (./FreePlayWall): the sign-in sheet's look, the Google key, a quiet way out ---------- */
+/* The Google key's own box: only there to hear the press, so the key and its note sit in the sheet's column. */
+.wall-google {
+  display: contents;
+}
+/* Quieter than the Google key: small, no accent, and only as wide as its words. */
+.wall-alt {
+  align-self: center;
+}
+
 /* ---------- Your account (the sheet Home's account key opens, signed in) ---------- */
 .account {
   display: flex;
