@@ -245,6 +245,40 @@ describe("ink comes with a dart, never in place", () => {
     }
   });
 
+  it("a dart to a point of open water gets there, from wherever it was roaming (a click on the water)", () => {
+    // Darts once took a heading well off the point, or held, hemmed in by the glass, and never got there.
+    const water: Pt[] = [];
+    for (let y = 20; y < 900; y += 20) for (let x = 20; x < 1440; x += 20) if (room.clear(x, y) >= 190) water.push({ x, y });
+    for (let seed = 1; seed <= 300; seed++) {
+      const r = seeded(seed * 7919);
+      const pick = seeded(seed * 31 + 7);
+      const world = { ...desktop, prefer: () => ({ x: 860 + pick() * 560, y: 260 + pick() * 600 }) };
+      const s = new Swimmer(world, seeded(seed));
+      s.setWorld(world);
+      s.setRoom(room);
+      let p = { x: 0, y: 0 };
+      let tilt = 0;
+      do {
+        p = { x: 860 + r() * 560, y: 250 + r() * 640 };
+        tilt = (r() - 0.5) * 360;
+      } while (room.fit(p.x, p.y, tilt) < 0);
+      s.place(p, tilt);
+      let t = 0;
+      for (const end = r() * 8; t < end; t += DT) s.step(DT, t);
+      const far = water.filter((q) => Math.hypot(q.x - s.x, q.y - s.y) > 240);
+      if (!far.length) continue;
+      const goal = far[Math.floor(r() * far.length)];
+      const at = `seed ${seed}: from ${s.x.toFixed(0)},${s.y.toFixed(0)} heading ${s.tilt.toFixed(0)} to ${goal.x},${goal.y}`;
+      s.dart(goal);
+      let got = false;
+      for (const end = t + 2.5; t < end && !got; t += DT) {
+        s.step(DT, t);
+        got = Math.hypot(s.x - goal.x, s.y - goal.y) < 60;
+      }
+      expect(got, `${at}: not there in 2.5 s`).toBe(true);
+    }
+  });
+
   it("a find meanwhile doesn't cut the dart short", () => {
     const s = new Swimmer(desktop, seeded(7));
     s.setWorld(desktop);

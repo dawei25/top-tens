@@ -393,7 +393,11 @@ const inkFrame = (page) =>
     let sx = 0;
     let sy = 0;
     let ink = 0;
+    let inkAll = 0;
+    let nearest = Infinity;
+    let hash = 0;
     for (let i = 0; i < d.length; i += 4) {
+      hash = (Math.imul(hash, 31) + d[i] + d[i + 1] * 3 + d[i + 3] * 7) | 0;
       if (d[i + 3] !== 255) continue;
       const x = (i / 4) % c.width;
       const y = Math.floor(i / 4 / c.width);
@@ -401,7 +405,13 @@ const inkFrame = (page) =>
         sx += x;
         sy += y;
         n++;
-      } else if (at && [0x1a0f36, 0x2a1650, 0x0d0720].some((rgb) => near(i, rgb)) && Math.hypot((x + 0.5) * k - at[0], (y + 0.5) * k - at[1]) < 20 * k) ink++;
+      } else if ([0x1a0f36, 0x2a1650, 0x0d0720].some((rgb) => near(i, rgb))) {
+        inkAll++;
+        if (!at) continue;
+        const dist = Math.hypot((x + 0.5) * k - at[0], (y + 0.5) * k - at[1]);
+        nearest = Math.min(nearest, dist);
+        if (dist < 20 * k) ink++;
+      }
     }
     return {
       eye: n ? { x: (sx / n + 0.5) * k, y: (sy / n + 0.5) * k } : null,
@@ -409,6 +419,11 @@ const inkFrame = (page) =>
       inks: Number(s.dataset.inks ?? 0),
       at: at ? { x: at[0], y: at[1] } : null,
       ink,
+      // For failure messages: ink pixels anywhere, the nearest to the last puff's centre (CSS px), and a fingerprint
+      // of the canvas (does it still change from frame to frame?).
+      inkAll,
+      nearest: Math.round(nearest),
+      hash,
     };
   });
 
@@ -530,13 +545,30 @@ async function film(page, frames, each) {
   return out;
 }
 
+/** The page's errors from now on (the ocean stops on one: a still frame stays), for failure messages. */
+function pageErrors(page) {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  return errors;
+}
+/** Runs a check; if it fails, its message names the page's errors too. */
+function withErrors(errors, check) {
+  try {
+    return check();
+  } catch (e) {
+    if (errors.length) e.message += ` (page errors: ${errors.join(" | ")})`;
+    throw e;
+  }
+}
+
 /** Frames from a puff to the check that the squid is clear of it. */
 const CLEAR_FRAMES = Math.round(700 / FRAME_MS);
 
 /**
- * Every puff in a film: ink is drawn at its centre; the squid is already moving as it appears (its eyes a tenth of
- * its width on, ~100 ms after the frame before); and 700 ms on it is clear of the cloud (eyes in view, more than its
- * width from the centre). The film must run 700 ms past its last puff. Returns the frames the puffs appeared on.
+ * Every puff in a film: ink is drawn at its centre on the frame it comes out; the squid is already moving as it appears
+ * (its eyes a tenth of its width on, ~100 ms after the frame before); and 700 ms on it is clear of the cloud (eyes in
+ * view, more than its width from the centre). The film must run 700 ms past its last puff. Returns the puffs' frames.
  */
 function assertDarts(frames, label) {
   const puffs = [];
@@ -545,7 +577,10 @@ function assertDarts(frames, label) {
     const { at, w } = frames[k];
     const tag = `${label}: puff on frame ${k} at ${at.x},${at.y}`;
     assert.ok(k + CLEAR_FRAMES < frames.length, `${tag}: the film ends too soon to check it`);
-    assert.ok(frames.slice(k, k + 3).some((f) => f.ink > 0), `${tag}: no ink drawn there`);
+    // On the very frame it comes out (the jet's): the cloud's core shows at once (it once waited up to 120 ms with the
+    // rest, and a check over the next three frames failed once in a loaded run, Nov 14).
+    const seen = frames.slice(k - 1, k + 2).map((f) => `ink ${f.ink} near / ${f.inkAll} anywhere, nearest ${f.nearest} px, canvas ${f.hash}`);
+    assert.ok(frames[k].ink > 0, `${tag}: no ink drawn there as it came out (frames ${k - 1} to ${k + 1}: ${seen.join("; ")})`);
     const before = frames.slice(0, k).reverse().find((f) => f.eye)?.eye;
     const soon = frames[k + 3].eye;
     assert.ok(soon, `${tag}: 100 ms on the squid is hidden under the ink`);
@@ -564,6 +599,7 @@ for (const vp of VIEWPORTS) {
     await page.waitForTimeout(1600);
     await freeze(page);
     await recordClicks(page);
+    const errors = pageErrors(page);
     for (const where of ["open", "edge"]) {
       await squidAtEdge(page, where);
       // Spam: a tap on the squid every 100 ms for 5 s, chasing it (on its eyes, wherever they show); then 3 s more to
@@ -575,7 +611,7 @@ for (const vp of VIEWPORTS) {
         await tapSquid(page, vp, f.eye);
         taps++;
       });
-      const puffs = assertDarts(frames, where);
+      const puffs = withErrors(errors, () => assertDarts(frames, where));
       const took = (await reaction(page)).pokes - pokes;
       assert.ok(puffs.length >= 1, `${where}: the taps never made the squid ink (${taps} taps, ${took} taken)`);
       // One trick at a time: taps during a trick and its dart start no second one.
@@ -614,6 +650,194 @@ for (const vp of VIEWPORTS) {
     await ctx.close();
   });
 }
+
+/* ---------------------------------------------------------------- a click on open water */
+
+// The owner, Nov 14: "if you click onto open water the squid will dart there". A click or tap on the ocean itself (no
+// panel, control, text or input under it, not the squid) sends the squid darting there; nothing else ever does: not a
+// click meant for anything on the page, not a scroll, a drag or a text selection, not while a menu or popover is open.
+
+/** How many open-water darts so far (the stand-in's data-darts). */
+const darts = (page) => page.getByTestId("ocean").getByTestId("squid").evaluate((el) => Number(el.dataset.darts ?? 0));
+
+/**
+ * Points on bare ocean: no glass ([data-glass], Home's logo and keys), no control, nothing pressable, no text under
+ * them, at least `clear` px from all of those and from the viewport's edges; sampled on a grid, farthest-first.
+ */
+const waterPoints = (page, clear = 0) =>
+  page.evaluate(
+    ({ clear, CONTROL }) => {
+      const solid = [...document.querySelectorAll("[data-glass], .home .logo, .home-keys")].map((e) => e.getBoundingClientRect());
+      const out = [];
+      for (let y = 20; y < innerHeight; y += 20)
+        for (let x = 20; x < innerWidth; x += 20) {
+          const el = document.elementFromPoint(x, y);
+          if (!el || el.closest(`[data-glass], .home .logo, .home-keys, ${CONTROL}`) || ["pointer", "help"].includes(getComputedStyle(el).cursor)) continue;
+          let gap = Math.min(x, innerWidth - x, y, innerHeight - y);
+          for (const r of solid) gap = Math.min(gap, Math.hypot(Math.max(r.left - x, 0, x - r.right), Math.max(r.top - y, 0, y - r.bottom)));
+          if (gap < clear) continue;
+          const text = [...el.childNodes].some((n) => {
+            if (n.nodeType !== 3 || !n.textContent.trim()) return false;
+            const range = document.createRange();
+            range.selectNodeContents(n);
+            return [...range.getClientRects()].some((q) => x >= q.left - 4 && x <= q.right + 4 && y >= q.top - 4 && y <= q.bottom + 4);
+          });
+          if (!text) out.push({ x, y, gap });
+        }
+      return out.sort((a, b) => b.gap - a.gap);
+    },
+    { clear, CONTROL },
+  );
+
+/**
+ * Open water at least `clear` px from everything and more than `away` px from the squid (a click on the squid is a
+ * boop), the most open first; the clock moves on until there is some (it roams).
+ */
+async function waterAway(page, clear, away) {
+  for (let i = 0; i < 150; i++) {
+    const s = await squidSpot(page);
+    const spots = s ? (await waterPoints(page, clear)).filter((p) => Math.hypot(p.x - s.x, p.y - s.y) > away) : [];
+    if (spots.length) return spots[0];
+    await page.clock.runFor(200);
+  }
+  throw new Error(`no open water ${clear} px clear and ${away} px from the squid`);
+}
+
+/** The nearest the squid's eyes come to p over the next `ms` (frozen clock, frame by frame), in its widths. */
+async function closestTo(page, p, ms) {
+  let best = Infinity;
+  for (let t = 0; t < ms; t += FRAME_MS) {
+    await page.clock.runFor(FRAME_MS);
+    const { eye, w } = await inkFrame(page);
+    if (eye) best = Math.min(best, Math.hypot(eye.x - p.x, eye.y - p.y) / w);
+  }
+  return best;
+}
+
+test("a click on open water sends the squid darting there; spam clicks retarget it (desktop)", async () => {
+  const { ctx, page } = await open(browser, VIEWPORTS[0], `#p-${LIST}`);
+  await page.getByLabel("Your guess").waitFor();
+  await page.waitForTimeout(1600);
+  await freeze(page);
+  const before = await screenState(page);
+  await recordClicks(page);
+  await squidWhere(page, "clear");
+  // Open water with room to spare, far from where the squid is.
+  const p = await waterAway(page, 190, 240);
+  await page.mouse.click(p.x, p.y);
+  assert.equal(await darts(page), 1, "the click on open water didn't send the squid");
+  // (A dart that has to flip round by the glass, or go round it, takes a second leg: well within 2.5 s.)
+  assert.ok((await closestTo(page, p, 2500)) < 0.75, "the squid didn't get to where the water was clicked");
+  // Three clicks a tenth of a second apart, here and there (each 160 px or more from the others): it heads for the last
+  // one, the others dropped (a spot nearer the glass than it fits is taken a little way in: within 1.2 of its widths).
+  // (Not on the squid, where it now is: a click there is a boop.)
+  const now = await squidSpot(page);
+  const spots = [];
+  for (const q of await waterPoints(page, 140))
+    if (spots.length < 3 && Math.hypot(q.x - now.x, q.y - now.y) > 160 && spots.every((r) => Math.hypot(r.x - q.x, r.y - q.y) >= 160)) spots.push(q);
+  assert.equal(spots.length, 3, "no three spots of open water apart");
+  for (const q of spots) {
+    await page.mouse.click(q.x, q.y);
+    await page.clock.runFor(100);
+  }
+  assert.equal(await darts(page), 4);
+  assert.ok((await closestTo(page, spots[2], 2500)) < 1.2, "spam clicks: the squid didn't end up at the last one");
+  // None of it pressed a control or changed the screen.
+  assert.deepEqual(await controlClicks(page), []);
+  assert.deepEqual(await screenState(page), before);
+  await ctx.close();
+});
+
+test("clicks meant for the page never send the squid: panels, controls, inputs, text, scrolls, drags, selections, open popovers (desktop)", async () => {
+  const { ctx, page } = await open(browser, VIEWPORTS[0], `#p-${LIST}`);
+  await page.getByLabel("Your guess").waitFor();
+  await page.waitForTimeout(1600);
+  await freeze(page);
+  await squidWhere(page, "clear");
+  const water = await waterAway(page, 120, 160);
+  const box = async (sel) => {
+    const r = await page.locator(sel).first().boundingBox();
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  };
+  // A panel's bare glass (the prompt panel, clear of its text), a control (sound on, then off again), the guess box,
+  // and text.
+  const prompt = await page.locator('[data-glass]').nth(1).boundingBox();
+  await page.mouse.click(prompt.x + prompt.width - 6, prompt.y + prompt.height - 6);
+  await page.getByTestId("sound-toggle").click();
+  await page.getByTestId("sound-toggle").click();
+  await page.mouse.click(...Object.values(await box('[aria-label="Your guess"]')));
+  await page.mouse.click(...Object.values(await box('[data-testid="screen-title"]')));
+  await page.clock.runFor(400);
+  assert.equal(await darts(page), 0, "a click meant for the page sent the squid");
+
+  // A drag across the water, a scroll over it, a press that the browser cancels (it scrolls), a click with a modifier.
+  await page.mouse.move(water.x, water.y);
+  await page.mouse.down();
+  await page.mouse.move(water.x + 60, water.y + 30, { steps: 4 });
+  await page.mouse.up();
+  await page.mouse.wheel(0, 300);
+  await page.evaluate((p) => {
+    const at = { bubbles: true, clientX: p.x, clientY: p.y, pointerId: 11, isPrimary: true, pointerType: "touch" };
+    document.body.dispatchEvent(new PointerEvent("pointerdown", at));
+    document.body.dispatchEvent(new PointerEvent("pointercancel", at));
+  }, water);
+  await page.keyboard.down("Shift");
+  await page.mouse.click(water.x, water.y);
+  await page.keyboard.up("Shift");
+  await page.clock.runFor(400);
+  assert.equal(await darts(page), 0, "a drag, a scroll or a modified click sent the squid");
+
+  // A text selection made by dragging over the prompt, then let go over the water.
+  const title = await box('[data-testid="screen-title"]');
+  await page.mouse.move(title.x - 40, title.y);
+  await page.mouse.down();
+  await page.mouse.move(water.x, water.y, { steps: 6 });
+  await page.mouse.up();
+  await page.clock.runFor(400);
+  assert.equal(await darts(page), 0, "a text selection sent the squid");
+  await page.evaluate(() => getSelection()?.removeAllRanges());
+
+  // A popover open (a row's hint question): a click on the water is left to the page as ever, and isn't the squid's.
+  const row = page.locator(".slot.hintable").first();
+  await row.click();
+  await page.locator('[aria-expanded="true"]').first().waitFor();
+  const opened = await page.locator('[aria-expanded="true"]').count();
+  await page.mouse.click(water.x, water.y);
+  await page.clock.runFor(400);
+  assert.equal(await darts(page), 0, "a click with a popover open sent the squid");
+  // And with nothing open (a second press on the row closes it), the same water click does.
+  if ((await page.locator('[aria-expanded="true"]').count()) === opened) await row.click();
+  assert.equal(await page.locator('[aria-expanded="true"]').count(), 0);
+  const there = await waterAway(page, 120, 160);
+  await page.mouse.click(there.x, there.y);
+  assert.equal(await darts(page), 1, "with nothing open, a click on the water didn't send the squid");
+  await ctx.close();
+});
+
+test("a tap on bare page sends the squid there on a phone; with reduced motion nothing moves", async () => {
+  const { ctx, page } = await open(browser, VIEWPORTS[1], `#p-${LIST}`);
+  await page.getByLabel("Your guess").waitFor();
+  await page.waitForTimeout(1600);
+  await freeze(page);
+  const spot = await waterAway(page, 0, 100);
+  await page.touchscreen.tap(spot.x, spot.y);
+  await page.clock.runFor(400);
+  assert.equal(await darts(page), 1, "the tap on bare page didn't send the squid");
+  await ctx.close();
+
+  const still = await open(browser, VIEWPORTS[0], `#p-${LIST}`, undefined, { reducedMotion: "reduce" });
+  await still.page.getByLabel("Your guess").waitFor();
+  await still.page.waitForTimeout(300);
+  await freeze(still.page);
+  const mask = await squidMask(still.page);
+  // (Parked in the clearest water, it never moves: a spot well clear of it.)
+  const water = await waterAway(still.page, 60, 160);
+  await still.page.mouse.click(water.x, water.y);
+  await still.page.clock.runFor(1500);
+  assert.equal(await darts(still.page), 0);
+  assert.equal(await squidMask(still.page), mask, "the squid moved with reduced motion");
+  await still.ctx.close();
+});
 
 test("reduced motion: a tap only recolours the squid for a moment, nothing moves, and a find adds nothing", async () => {
   const vp = VIEWPORTS[0];
