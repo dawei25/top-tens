@@ -3,6 +3,7 @@ import { loadPar, type ListPar, type ParFile } from "../game/par";
 import { useListStats } from "../net";
 import { blendAverage, blendCounts, standing } from "../net/crowd";
 import { playersLine } from "./copy";
+import { CrowdCurve } from "./CrowdCurve";
 
 // Players see this figure as the players' average ("avg"), and only once a game is over: the results, Past runs and
 // Stats. The code keeps the data's name for it, par (par.json).
@@ -31,58 +32,8 @@ export function vsParText(diff: number, decimals = 0): string {
   return Number(diff.toFixed(decimals)) === 0 ? "same as avg" : `${signed(diff, decimals)} vs avg`;
 }
 
-/** Bar heights snap to this many px, so the histogram stays on the pixel grid. */
-const STEP = 3;
-const MAX_H = 42;
-
 /**
- * A bar for each score (11 for a list's 0 to 10; Today's Fathom's 50 bins of 10 points, 0 to 500): the player's bar
- * lit, a caret under the average's. `par` and `score` are bar indexes; `top` labels the axis's end; `label` says it in
- * words.
- */
-export function ParHistogram({
-  counts,
-  par,
-  score,
-  top = 10,
-  label = `How players score on this list, 0 to 10: they average ${par}, you got ${score}.`,
-}: {
-  counts: number[];
-  par: number;
-  score: number;
-  top?: number;
-  label?: string;
-}) {
-  const max = Math.max(1, ...counts);
-  return (
-    <div className="histogram" data-testid="histogram" data-bins={counts.length} role="img" aria-label={label}>
-      <div className="histo-bars">
-        {counts.map((c, i) => {
-          // Your bar always shows at least one step, so the highlight is never missing.
-          const h = c || i === score ? Math.max(STEP, Math.round(((c / max) * MAX_H) / STEP) * STEP) : 0;
-          return (
-            <span
-              key={i}
-              className="histo-col"
-              data-score={i}
-              data-you={i === score || undefined}
-              data-par={i === Math.round(par) || undefined}
-            >
-              <span className="histo-bar" style={{ height: h }} />
-            </span>
-          );
-        })}
-      </div>
-      <div className="histo-axis" aria-hidden="true">
-        <span>0</span>
-        <span>{top}</span>
-      </div>
-    </div>
-  );
-}
-
-/**
- * The results panel's average block: what players average on the list, the histogram, and where the score stands.
+ * The results panel's average block: what players average on the list, their curve, and where the score stands.
  * It reads at a glance, with nothing to hover: "PLAYERS AVG 6", "better than 36% of players", and "today" on a daily
  * on its own day (`today`). With a backend (and the list's id), real players join the estimate as they finish the
  * list (net/crowd's blend: the estimate counts as ESTIMATE_WEIGHT players). Never "(estimated)" (owner, Nov 14: "dont
@@ -108,7 +59,14 @@ export function ParBlock({ list, score, id, today = false }: { list: ListPar; sc
           <span className="label">Players avg</span>
           <b>{avg}</b>
         </p>
-        <ParHistogram counts={counts} par={avg} score={score} />
+        {/* A score is the middle of its bin on the curve's scale (0 to 11 bins). */}
+        <CrowdCurve
+          counts={counts}
+          you={score + 0.5}
+          avg={avg + 0.5}
+          top={10}
+          label={`You did ${playersLine(p, today)}: you got ${score} of 10, players average ${avg}.`}
+        />
       </div>
       <p className="par-line" data-testid="par-line">
         {/* One text node: split nodes shape the pixel font a little differently. */}

@@ -101,8 +101,9 @@ export function HowToPlay({ onClose }: { onClose: () => void }) {
             <span className="rule-n">7</span>
             <span>
               {/* UX 21: one plain line for the score, the same one the game says. */}
-              <b className="cyan">Today's Fathom:</b> five new questions every day, the same for everyone. Most want a
-              number; one asks you to name a country or a city. The closer your guess, the more points.
+              <b className="cyan">Today's Fathom:</b> ten new questions every day, the same for everyone, 20 seconds
+              each. Most want a number; one asks you to name a country or a city. The closer your guess, the more
+              points.
             </span>
           </li>
         </ol>

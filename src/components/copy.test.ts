@@ -8,6 +8,7 @@ import {
   alreadyGuessed,
   FATHOM_PLAY,
   FATHOM_TODAY,
+  FATHOM_TIME_UP,
   fathomDayLine,
   playersLine,
   RECORD_PLAYED,
@@ -256,6 +257,10 @@ describe("where a list game stands against other players", () => {
     expect(playersLine(81, true)).toBe("better than 81% of players today");
     expect(playersLine(0, false)).toBe("better than 0% of players");
     for (const p of [0, 12, 50, 99, 100]) for (const t of [true, false]) expect(playersLine(p, t)).not.toMatch(/estimat/i);
+  });
+  it("says a Fathom question's time ran out, dry and short, no exclamation", () => {
+    expect(FATHOM_TIME_UP).toBe("Time's up");
+    expect(FATHOM_TIME_UP).not.toMatch(/[!\u2014]/);
   });
   it("says where Today's Fathom stands in the owner's words", () => {
     expect(fathomDayLine(81)).toBe("you did better than 81% of players today");

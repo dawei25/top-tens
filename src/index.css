@@ -3010,6 +3010,14 @@ a.arch-cell:active .arch-name {
 .play-band[data-band="far"] {
   --band: var(--pink);
 }
+/* Ten questions a game since Nov 14: smaller squares, closer, so the row stays the width five had. */
+.play-bands[data-count="10"] {
+  gap: 3px;
+}
+.play-bands[data-count="10"] .play-band {
+  width: 10px;
+  height: 10px;
+}
 /* Lost at sea: a crossed outline, so it reads as played and missed (fathom.css, Nov 5). */
 .play-band[data-band="lost"] {
   background: transparent;
@@ -3252,35 +3260,46 @@ a.arch-cell:active .arch-name {
   flex-direction: column;
   gap: 2px;
 }
-.histo-bars {
-  display: grid;
-  grid-template-columns: repeat(11, 12px);
-  column-gap: 2px;
-  align-items: end;
+/*
+ * The players' curve (owner, Nov 14: "an actual curve ... within thematic style"; CrowdCurve.tsx): a stepped pixel
+ * curve, 3px squares, as tall and wide as the 11 bars were, on the same hairline baseline. Its area in the bars'
+ * slate, brighter up to the player's score; the player a thin pink line and a pink square on the curve with the old
+ * bar's glow; the average a gold caret under the baseline.
+ */
+.curve-plot {
+  display: flex;
+  align-items: flex-end;
   height: 42px;
   border-bottom: 2px solid var(--hairline);
 }
-.histo-col {
+.curve-area {
   position: relative;
-  display: flex;
-  align-items: flex-end;
-  height: 100%;
+  width: 150px;
+  height: 39px;
 }
-.histo-bar {
-  width: 100%;
-  background: var(--faint);
+.curve-area svg {
+  display: block;
 }
-.histo-col[data-you] .histo-bar {
+.curve-fill {
+  fill: var(--faint);
+}
+.curve-below {
+  fill: color-mix(in srgb, var(--faint) 55%, var(--label));
+}
+.curve-line {
+  fill: var(--pink);
+  opacity: 0.75;
+}
+.curve-you {
+  position: absolute;
+  width: 6px;
+  height: 6px;
   background: var(--pink);
   box-shadow: 0 0 8px var(--pink-glow);
 }
-/* The players' average: a gold pixel caret under its bar. */
-.histo-col[data-par]::after {
-  content: "";
+.curve-avg {
   position: absolute;
-  left: 50%;
   bottom: -9px;
-  translate: -50% 0;
   border-inline: 4px solid transparent;
   border-bottom: 5px solid var(--gold);
 }
@@ -3296,11 +3315,6 @@ a.arch-cell:active .arch-name {
   font-size: 19px;
   letter-spacing: 0.06em;
   color: var(--text);
-}
-/* Today's Fathom's day: 50 bins of 10 points, thin bars in the same height, pixel look and width as a list's 11. */
-.histogram[data-bins="50"] .histo-bars {
-  grid-template-columns: repeat(50, 2px);
-  column-gap: 1px;
 }
 
 /*

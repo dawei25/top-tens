@@ -17,6 +17,8 @@ import {
   nextQuestion,
   phaseOf,
   playersLine,
+  POINTS_PER_QUESTION,
+  QUESTION_SECONDS,
   QUESTIONS_PER_GAME,
   readGuess,
   resumable,
@@ -27,8 +29,10 @@ import {
   shareLines,
   shareText,
   startGame,
+  timeUp,
   totalOf,
   unitShown,
+  WARN_SECONDS,
   type Band,
   type FathomGame,
   type FathomQuestion,
@@ -44,6 +48,7 @@ import {
   noteDraw,
   recentIds,
   recordRun,
+  runMax,
   runTotal,
   saveDailyLocal,
   type DailyLocal,
@@ -51,7 +56,7 @@ import {
   type FathomRun,
 } from "../../game/fathom-history";
 import { localDate } from "../../game/daily";
-import { FATHOM_TODAY, fathomDayLine } from "../copy";
+import { FATHOM_TIME_UP, FATHOM_TODAY, fathomDayLine } from "../copy";
 import { Countdown } from "../Countdown";
 import { load, save } from "../../game/storage";
 import {
@@ -68,9 +73,9 @@ import {
 import type { Lexicon } from "../../game/junk";
 import { loadLexicon } from "../../game/puzzles";
 import { compareRound, reportFathom, reportFathomDaily, submitFathomGuess, useFathomCrowd, useFathomDay } from "../../net";
-import { dayCounts, dayStanding, expectedTotal, FATHOM_BIN, simulatedCounts, totalBin } from "../../game/fathom-crowd";
+import { dayCounts, dayStanding, expectedTotal, FATHOM_BIN, simulatedCounts } from "../../game/fathom-crowd";
 import { blendAverage } from "../../net/crowd";
-import { ParHistogram } from "../par";
+import { CrowdCurve } from "../CrowdCurve";
 import { Loading } from "../Game";
 import { pasteable } from "../share";
 import { CountUp } from "../motion/effects";
@@ -81,10 +86,12 @@ import { BUOY, placed, SQUID } from "./sprites";
 import "./fathom.css";
 
 /**
- * Fathom: five questions: estimates in a unit that keeps them short ("kilometres", "million people"), a percent, a
- * year, and a name-it round ("Name a country with about 50 million people", read with the game's matcher over its
- * list). Type a guess, lock it in, see how close it was on a sonar, and NEXT; five of those and the results. No timer,
- * no lives, no scoring line (How to play explains it); a running score in the question card's header.
+ * Fathom: ten questions (five before Nov 14): estimates in a unit that keeps them short ("kilometres", "million
+ * people"), percents, years, and a name-it round ("Name a country with about 50 million people", read with the game's
+ * matcher over its list). Type a guess, lock it in, see how close it was on a sonar, and NEXT; ten of those and the
+ * results. Each question has QUESTION_SECONDS (owner, Nov 14: "add a timer per question (maybe like 20s)"): at 0 what's
+ * typed locks in if it reads, else the round scores 0 ("Time's up"). No lives, no scoring line (How to play explains
+ * it); the time and the running score in the question card's header.
  *
  * Two ways to play (owner, Nov 14: "id like fathom to have a today's fathom- remove the unlimited fathom play for now-
  * keep access to it via a hidden url"):
@@ -125,7 +132,14 @@ async function loadDays(): Promise<FathomDailyEntry[]> {
 }
 
 /** A day's game under way, as the screen plays it. */
-const fromLocal = (l: DailyLocal): FathomGame => ({ ids: l.ids, guesses: l.guesses, at: l.at, startedAt: l.startedAt, ...(l.picks && { picks: l.picks }) });
+const fromLocal = (l: DailyLocal): FathomGame => ({
+  ids: l.ids,
+  guesses: l.guesses,
+  at: l.at,
+  startedAt: l.startedAt,
+  ...(l.picks && { picks: l.picks }),
+  ...(l.timeouts && { timeouts: l.timeouts }),
+});
 
 /** The share text's link: Fathom itself. */
 const fathomUrl = () => `${location.origin}${location.pathname}#fathom`;
@@ -163,6 +177,7 @@ function recordFinished(game: FathomGame, bank: readonly FathomQuestion[], day?:
     ids: game.ids,
     guesses: game.guesses,
     ...(game.picks && { picks: game.picks }),
+    ...(game.timeouts?.length && { timeouts: game.timeouts }),
     points: scored.map((x) => x.points),
     ...(day && { daily: day }),
   };
@@ -222,6 +237,110 @@ async function loadBank(): Promise<Loaded | null> {
 
 const focusGuess = () => document.querySelector<HTMLInputElement>('[data-testid="fathom-input"]')?.focus();
 
+/** A question's time in ms. */
+const QUESTION_MS = QUESTION_SECONDS * 1000;
+/** The time a question on screen has used, in this browser, so a reload doesn't hand it a fresh 20 seconds. */
+const CLOCK_KEY = "tentacle:fathom-clock";
+function readUsed(key: string): number {
+  try {
+    const x = JSON.parse(localStorage.getItem(CLOCK_KEY) ?? "null") as { key?: string; used?: number } | null;
+    return x?.key === key && typeof x.used === "number" && Number.isFinite(x.used) ? Math.max(0, Math.min(QUESTION_MS, x.used)) : 0;
+  } catch {
+    return 0;
+  }
+}
+function writeUsed(key: string, used: number): void {
+  try {
+    localStorage.setItem(CLOCK_KEY, JSON.stringify({ key, used: Math.round(used) }));
+  } catch {
+    // Not kept: a reload gives the question its time again.
+  }
+}
+
+/**
+ * A question's clock: the ms it has left, counting while the page is on show (paused while the tab is hidden), from
+ * what it had used before a reload; `onEnd` once at 0. `key` names the question in its game.
+ */
+function useQuestionClock(key: string, onEnd: () => void): number {
+  const [left, setLeft] = useState(() => QUESTION_MS - readUsed(key));
+  const end = useRef(onEnd);
+  useEffect(() => {
+    end.current = onEnd;
+  });
+  useEffect(() => {
+    let used = readUsed(key);
+    let last = Date.now();
+    let kept = Math.floor(used / 1000);
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const step = () => {
+      const now = Date.now();
+      if (!document.hidden) used += Math.max(0, now - last);
+      last = now;
+      const l = Math.max(0, QUESTION_MS - used);
+      setLeft(l);
+      // Kept each second, so a reload takes up where it was.
+      if (Math.floor(used / 1000) !== kept || l === 0) {
+        kept = Math.floor(used / 1000);
+        writeUsed(key, used);
+      }
+      if (l === 0) return end.current();
+      t = setTimeout(step, 200);
+    };
+    // Hidden: what ran until now counts, and nothing more until the page is back.
+    const shown = () => {
+      const now = Date.now();
+      if (document.hidden) {
+        used += Math.max(0, now - last);
+        writeUsed(key, used);
+      }
+      last = now;
+    };
+    document.addEventListener("visibilitychange", shown);
+    t = setTimeout(step, 200);
+    return () => {
+      clearTimeout(t);
+      document.removeEventListener("visibilitychange", shown);
+    };
+  }, [key]);
+  return left;
+}
+
+/**
+ * The question's time in the card's header, "0:17": the seconds left, quiet (the header's muted label colour), toward
+ * pink in the last WARN_SECONDS. Its width never changes (four tabular characters). No animation: it changes as a
+ * number does.
+ */
+function Clock({ left }: { left: number }) {
+  const secs = Math.ceil(left / 1000);
+  return (
+    <span
+      className="fathom-clock"
+      data-testid="fathom-clock"
+      data-left={secs}
+      data-warn={secs <= WARN_SECONDS || undefined}
+      role="timer"
+      aria-label={`${secs} ${secs === 1 ? "second" : "seconds"} left`}
+    >
+      0:{String(secs).padStart(2, "0")}
+    </span>
+  );
+}
+
+/** The question card's header: which question, and its time (counting only while the question is on screen). */
+function QuestionTop({ at, clockKey, onEnd }: { at: number; clockKey?: string; onEnd: () => void }) {
+  return (
+    <div className="prompt-top">
+      <span className="label cyan">
+        Question {at + 1} of {QUESTIONS_PER_GAME}
+      </span>
+      {clockKey ? <Ticking clockKey={clockKey} onEnd={onEnd} /> : <span className="fathom-clock" data-testid="fathom-clock" data-left={0} aria-hidden="true" />}
+    </div>
+  );
+}
+function Ticking({ clockKey, onEnd }: { clockKey: string; onEnd: () => void }) {
+  return <Clock left={useQuestionClock(clockKey, onEnd)} />;
+}
+
 /** The screen height (CSS px) at or under which a phone gets the compact layout: a small phone, or its keyboard up. */
 const SHORT = 600;
 /**
@@ -262,6 +381,8 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
   // Fetched with the bank, so it is there by the name-it round; a name read before it arrives waits for it.
   const [lexicon] = useState(loadLexicon);
   const short = useShort();
+  // The field on screen's lock-in for when its time is up (Ask and AskName set it).
+  const expire = useRef<(() => boolean) | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -343,8 +464,11 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
 
   const update = (next: FathomGame) => {
     setGame(next);
-    if (day) saveDailyLocal({ day, ids: next.ids, guesses: next.guesses, at: next.at, startedAt: next.startedAt ?? Date.now(), ...(next.picks && { picks: next.picks }) });
-    else saveFathom({ ...loadFathom(), game: next });
+    if (day) {
+      const { ids, guesses, at, picks, timeouts } = next;
+      saveDailyLocal({ day, ids, guesses, at, startedAt: next.startedAt ?? 0, ...(picks && { picks }), ...(timeouts && { timeouts }) });
+    }
+    if (!day) saveFathom({ ...loadFathom(), game: next });
     recordFinished(next, bank, day);
   };
   // LOCK IN: a click, the ping and the band's sound (with sound on), the guess sent (with a backend), then the reveal.
@@ -354,6 +478,13 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
     playFathom({ kind: "reveal", band: bandOf(scoreFor(question, value)) });
     submitFathomGuess(question.id, value);
     update(lockIn(game, value, pick));
+  };
+  // The time is up: what's typed locks in if it reads (the field registers it in `expire`), else the round scores 0.
+  const outOfTime = () => {
+    if (phaseOf(game) !== "question") return;
+    if (expire.current?.()) return;
+    playFathom({ kind: "reveal", band: "lost" });
+    update(timeUp(game));
   };
   // From a tap on NEXT, the next question's box takes focus inside the tap itself, so a phone opens its keyboard. The
   // question starts at the top of the screen, whatever the reveal had scrolled to. After the last one, the results'
@@ -377,7 +508,10 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
   const total = totalOf(scored);
   // What a screen reader hears as each verdict and the total appear (the line is there before its words change).
   const said = shown
-    ? `${bandLabel(shown.band)}, ${shown.points} points. ` +
+    ? shown.timedOut
+      ? `${FATHOM_TIME_UP}. 0 points. ${roundOf(shown.question) === "name" ? "The target" : "The answer"}: ${amountText(shown.question, shown.question.answer)}.` +
+        (game.at > 0 ? ` Total so far: ${total}.` : "")
+      : `${bandLabel(shown.band)}, ${shown.points} points. ` +
       (roundOf(shown.question) === "name"
         ? `The target: ${amountText(shown.question, shown.question.answer)}. ${shown.pick ?? "Yours"}: ` +
           `${amountText(shown.question, shown.guess)}, ${missText(shown.question, shown.guess)}.`
@@ -389,6 +523,8 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
   const list = question?.nameIt ? lists.get(question.nameIt.list) : undefined;
   // No scoring line on the card (the owner, Nov 14: "self intuitive already enough"; How to play explains it).
   const round = question && roundOf(question);
+  // A question's clock, by its game and place: a reload goes on with the time it had left.
+  const clockKey = question && phase === "question" ? `${game.startedAt ?? 0}:${game.at}:${question.id}` : undefined;
   return (
     <main className="screen fathom" data-testid="fathom" data-phase={phase} data-short={short || undefined}>
       {head}
@@ -400,13 +536,8 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
       ) : (
         <>
           <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id} data-round={round}>
-            <div className="prompt-top">
-              <span className="label cyan">
-                Question {game.at + 1} of {QUESTIONS_PER_GAME}
-              </span>
-              <Pips bands={scored.map((s) => s.band)} at={game.at} />
-            </div>
-            <ScoreBar scored={scored} />
+            <QuestionTop at={game.at} clockKey={clockKey} onEnd={outOfTime} />
+            <ScoreBar scored={scored} at={game.at} />
             <h1>{question.question}</h1>
             {question.definition && <p className="caption">{question.definition}</p>}
           </section>
@@ -420,9 +551,10 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
                 lex={lex}
                 lexicon={lexicon}
                 onLock={lock}
+                expire={expire}
               />
             ) : (
-              <Ask key={question.id} question={question} onLock={lock} />
+              <Ask key={question.id} question={question} onLock={lock} expire={expire} />
             )
           ) : (
             <Reveal
@@ -445,12 +577,26 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
  * line for what's wrong or what was read when the field doesn't show it, and LOCK IN. A phone gets a decimal keypad, or
  * for a year a plain number pad.
  */
-function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: number) => void }) {
+function Ask({ question, onLock, expire }: { question: FathomQuestion; onLock: (value: number) => void; expire: Expire }) {
   const [text, setText] = useState("");
   const [error, setError] = useState<NumberError | null>(null);
   const round = roundOf(question);
   const reading = readGuess(text, question);
   const value = "value" in reading ? reading.value : null;
+  // At 0 seconds: a guess that reads locks in.
+  useEffect(() => {
+    expire.current = () => {
+      if (value === null) return false;
+      onLock(value);
+      return true;
+    };
+  });
+  useEffect(
+    () => () => {
+      expire.current = null;
+    },
+    [expire],
+  );
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -525,6 +671,12 @@ function Ask({ question, onLock }: { question: FathomQuestion; onLock: (value: n
   );
 }
 
+/**
+ * What the field on screen does when the time is up: locks in what's typed if it reads, and says whether it did. The
+ * field sets it; the clock calls it.
+ */
+type Expire = { current: (() => boolean) | null };
+
 /** How long a name waits for the lexicon still on its way before it is read without it. */
 const LEXICON_WAIT_MS = 1500;
 
@@ -545,6 +697,7 @@ function AskName({
   lex,
   lexicon,
   onLock,
+  expire,
 }: {
   question: FathomQuestion;
   list: NameList;
@@ -553,12 +706,30 @@ function AskName({
   /** The lexicon on its way, if `lex` isn't here yet: a name read before it arrives waits for it (a moment at most). */
   lexicon?: Promise<Lexicon | undefined>;
   onLock: (value: number, pick: string) => void;
+  expire: Expire;
 }) {
   const [text, setText] = useState("");
   const [read, setRead] = useState<NameRead | null>(null);
   // The names last offered: typing or tapping one of them picks it, even after the line is gone.
   const offered = useRef<string[] | undefined>(undefined);
   const noun = list.noun;
+  // At 0 seconds: a name the list has locks in, as LOCK IN would take it, and a misspelling of one thing too (it
+  // would only have asked to confirm); several readings, another kind or nothing that reads scores 0.
+  useEffect(() => {
+    expire.current = () => {
+      if (!text.trim()) return false;
+      const r = readName(text, list, others, { lex, offered: offered.current, except: question.nameIt?.except });
+      if (r.kind !== "answer" && r.kind !== "confirm") return false;
+      onLock(r.entry.value, r.entry.name);
+      return true;
+    };
+  });
+  useEffect(
+    () => () => {
+      expire.current = null;
+    },
+    [expire],
+  );
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -659,7 +830,7 @@ function Players({ q, guess }: { q: FathomQuestion; guess: number }) {
  * after the sonar the best answers on its list with theirs.
  */
 function Reveal({ scored, list, total, last, onNext }: { scored: Scored; list?: NameList; total?: number; last: boolean; onNext: () => void }) {
-  const { question: q, guess, points, band, pick } = scored;
+  const { question: q, guess, points, band, pick, timedOut } = scored;
   const name = roundOf(q) === "name";
   const answer = figureParts(q, q.answer);
   const yours = figureParts(q, guess);
@@ -677,9 +848,17 @@ function Reveal({ scored, list, total, last, onNext }: { scored: Scored; list?: 
   }, []);
   const site = siteOf(q.source.url);
   return (
-    <section ref={card} className="panel fathom-reveal enter" data-glass data-testid="fathom-reveal" data-band={band} data-points={points}>
+    <section
+      ref={card}
+      className="panel fathom-reveal enter"
+      data-glass
+      data-testid="fathom-reveal"
+      data-band={band}
+      data-points={points}
+      data-timeout={timedOut || undefined}
+    >
       <div className="reveal-head">
-        <BandWord band={band} />
+        <BandWord band={band} timedOut={timedOut} />
         <div className="reveal-score">
           <p className="reveal-points" data-testid="fathom-points" data-points={points}>
             <b>{points}</b> {points === 1 ? "point" : "points"}
@@ -700,7 +879,8 @@ function Reveal({ scored, list, total, last, onNext }: { scored: Scored; list?: 
             <Figure parts={answer} />
           </p>
         </div>
-        <div className="figure">
+        {/* Time ran out with nothing to lock in: no guess, so only the answer, and no sonar. */}
+        {!timedOut && <div className="figure">
           <p className="label cyan">
             <Mark kind="squid" /> {name ? `Your ${q.nameIt?.noun ?? "answer"}` : "Your guess"}
           </p>
@@ -718,10 +898,10 @@ function Reveal({ scored, list, total, last, onNext }: { scored: Scored; list?: 
               <Figure parts={yours} />
             </p>
           )}
-        </div>
+        </div>}
       </div>
-      {!name && <Players q={q} guess={guess} />}
-      <Gauge guess={guess} answer={q.answer} band={band} round={roundOf(q)} unit={q.unit} nameIt={q.nameIt} />
+      {!name && !timedOut && <Players q={q} guess={guess} />}
+      {!timedOut && <Gauge guess={guess} answer={q.answer} band={band} round={roundOf(q)} unit={q.unit} nameIt={q.nameIt} />}
       {best.length > 0 && (
         <div className="fathom-best" data-testid="fathom-best">
           <p className="label gold">Best answers</p>
@@ -820,7 +1000,17 @@ function PastGame({ head, run: at, bank, today = false }: { head: ReactNode; run
     const question = byId.get(id);
     if (!question) return [];
     const pick = run.picks?.[id];
-    return [{ question, guess: run.guesses[i], points: run.points[i], band: bandOf(run.points[i]), ...(pick !== undefined && { pick }) }];
+    const timedOut = run.timeouts?.includes(id);
+    return [
+      {
+        question,
+        guess: run.guesses[i],
+        points: run.points[i],
+        band: bandOf(run.points[i]),
+        ...(pick !== undefined && { pick }),
+        ...(timedOut && { timedOut }),
+      },
+    ];
   });
   const bands = run.points.map(bandOf);
   const share = pasteable(shareLines(runTotal(run), bands, fathomUrl(), run.daily?.n));
@@ -830,6 +1020,7 @@ function PastGame({ head, run: at, bank, today = false }: { head: ReactNode; run
       <Results
         scored={scored}
         total={runTotal(run)}
+        max={runMax(run)}
         bands={bands}
         share={share}
         crowd={today && run.daily ? { date: run.daily.date, questions: run.ids.flatMap((id) => byId.get(id) ?? []) } : undefined}
@@ -853,6 +1044,7 @@ function Results({
   n,
   crowd,
   total = totalOf(scored),
+  max = MAX_TOTAL,
   bands = scored.map((s) => s.band),
   share = shareOf(scored, n),
   againLabel = "New questions",
@@ -867,6 +1059,8 @@ function Results({
   /** Today's Fathom: its day and questions, for where the total stands among the day's players. */
   crowd?: { date: string; questions: readonly FathomQuestion[] };
   total?: number;
+  /** Out of: 1000, or 500 for a game of five from before Nov 14. */
+  max?: number;
   bands?: Band[];
   share?: string;
   againLabel?: string;
@@ -902,9 +1096,9 @@ function Results({
     <>
       <section className="panel results enter fathom-results" data-glass data-testid="fathom-results">
         <p className="label cyan">Your total</p>
-        <p className="score" data-testid="fathom-total" data-total={total} aria-label={`${total} out of ${MAX_TOTAL}`}>
+        <p className="score" data-testid="fathom-total" data-total={total} data-max={max} aria-label={`${total} out of ${max}`}>
           <span className="score-n">{count ? <CountUp value={total} /> : total}</span>
-          <span className="score-of">/{MAX_TOTAL}</span>
+          <span className="score-of">/{max}</span>
         </p>
         <div className="band-row" role="img" aria-label={bands.map(bandLabel).join(", ")} data-testid="fathom-bands">
           {bands.map((b, i) => (
@@ -943,11 +1137,19 @@ function Results({
                 data-guess={s.guess}
                 data-points={s.points}
                 data-band={s.band}
+                data-timeout={s.timedOut || undefined}
               >
                 <span className="band-sq" data-band={s.band} aria-hidden="true" />
                 <span className="recap-body">
                   <span className="recap-q">{s.question.question}</span>
-                  {roundOf(s.question) === "name" ? (
+                  {s.timedOut ? (
+                    // "time's up · answer 330 metres"
+                    <span className="recap-nums" data-testid="fathom-row-nums">
+                      {FATHOM_TIME_UP.toLowerCase()} · {roundOf(s.question) === "name" ? "target" : "answer"}{" "}
+                      <b className="gold">{roundOf(s.question) === "name" ? formatAmount(s.question.answer) : figureParts(s.question, s.question.answer).n}</b>
+                      {roundOf(s.question) === "name" ? ` ${s.question.unit}` : unit && ` ${unit}`}
+                    </span>
+                  ) : roundOf(s.question) === "name" ? (
                     // "you Colombia 52.89 million · target 50 million people"
                     <span className="recap-nums" data-testid="fathom-row-nums">
                       you <b>{s.pick ?? "?"}</b> {formatAmount(s.guess)} · target <b className="gold">{formatAmount(s.question.answer)}</b> {s.question.unit}
@@ -972,10 +1174,10 @@ function Results({
 }
 
 /** The verdict in big type: "DEAD ON!", "CLOSE", "NEAR", "FAR", "LOST AT SEA". */
-function BandWord({ band }: { band: Band }) {
+function BandWord({ band, timedOut = false }: { band: Band; timedOut?: boolean }) {
   return (
-    <p className="band-word" data-band={band} data-testid="fathom-band">
-      {band === "dead-on" ? `${bandLabel(band)}!` : bandLabel(band)}
+    <p className="band-word" data-band={band} data-testid="fathom-band" data-timeout={timedOut || undefined}>
+      {timedOut ? FATHOM_TIME_UP : band === "dead-on" ? `${bandLabel(band)}!` : bandLabel(band)}
     </p>
   );
 }
@@ -987,7 +1189,7 @@ function BandWord({ band }: { band: Band }) {
  * (not with reduced motion), and the newest stretch grows in; the row is there from the first question, empty, so
  * nothing moves when points land.
  */
-function ScoreBar({ scored }: { scored: Scored[] }) {
+function ScoreBar({ scored, at }: { scored: Scored[]; at: number }) {
   const total = totalOf(scored);
   // The total before the last change, kept from the render before (React's "information from previous renders").
   const [seen, setSeen] = useState({ total, from: total });
@@ -995,18 +1197,25 @@ function ScoreBar({ scored }: { scored: Scored[] }) {
   const from = seen.total === total ? seen.from : seen.total;
   return (
     <div className="fathom-score" data-testid="fathom-score" data-total={total}>
-      <span className="tally-track" role="img" aria-label={`Score so far: ${total} out of ${MAX_TOTAL}`}>
-        {scored.map((s, i) => (
-          <span
-            key={i}
-            className="tally-fill"
-            data-band={s.band}
-            data-new={i === scored.length - 1 && total !== from ? "" : undefined}
-            style={{ width: `${(s.points / MAX_TOTAL) * 100}%` }}
-          />
-        ))}
+      {/* A cell a question, each its 100 points: filled by the points it scored, in its band's colour; the one on screen
+          outlined. The cells are the progress squares too (ten beside the header's words didn't fit a phone). */}
+      <span className="tally-track" role="img" aria-label={`Question ${at + 1} of ${QUESTIONS_PER_GAME}. Score so far: ${total} out of ${MAX_TOTAL}`}>
+        {Array.from({ length: QUESTIONS_PER_GAME }, (_, i) => {
+          const s = scored[i];
+          return (
+            <span key={i} className="tally-cell" data-testid="fathom-cell" data-band={s?.band} data-now={i === at || undefined} data-points={s?.points}>
+              {s && (
+                <span
+                  className="tally-fill"
+                  data-new={i === scored.length - 1 && total !== from ? "" : undefined}
+                  style={{ width: `${(s.points / POINTS_PER_QUESTION) * 100}%` }}
+                />
+              )}
+            </span>
+          );
+        })}
       </span>
-      {/* As wide as the widest total ("500/500") from the start: a third digit never pushes the track. */}
+      {/* As wide as the widest total ("1000/1000") from the start: another digit never pushes the track. */}
       <span className="tally-sum" aria-hidden="true">
         <span className="tally-size">
           {MAX_TOTAL}/{MAX_TOTAL}
@@ -1043,12 +1252,12 @@ function DayCrowd({ date, questions, total }: { date: string; questions: readonl
           <span className="label">Players avg</span>
           <b>{avg}</b>
         </p>
-        <ParHistogram
+        <CrowdCurve
           counts={counts}
-          par={totalBin(avg)}
-          score={totalBin(total)}
+          you={total / FATHOM_BIN}
+          avg={avg / FATHOM_BIN}
           top={MAX_TOTAL}
-          label={`How players scored on today's Fathom, 0 to ${MAX_TOTAL}: they average ${avg}, you got ${total}.`}
+          label={`${fathomDayLine(p)}: you got ${total} of ${MAX_TOTAL}, players average ${avg}.`}
         />
       </div>
       <p className="par-line" data-testid="fathom-crowd-line">
@@ -1059,15 +1268,7 @@ function DayCrowd({ date, questions, total }: { date: string; questions: readonl
 }
 
 /** Progress: a square per question, the answered ones in their band's colour, the one on screen outlined. */
-function Pips({ bands, at }: { bands: Band[]; at: number }) {
-  return (
-    <span className="fathom-pips" aria-hidden="true">
-      {Array.from({ length: QUESTIONS_PER_GAME }, (_, i) => (
-        <span key={i} className={`pip ${i === at ? "now" : ""}`} data-band={bands[i]} />
-      ))}
-    </span>
-  );
-}
+
 
 /** The gauge's two marks, small, beside the labels they stand for: the buoy (the answer) and the squid (you). */
 const MARKS = { buoy: [...BUOY, "..#..", "..#.."], squid: SQUID };

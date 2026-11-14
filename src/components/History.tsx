@@ -1,5 +1,5 @@
 import { localDate, type DailyEntry } from "../game/daily";
-import { bandLabel, bandOf, FATHOM_MAX, runTotal } from "../game/fathom-history";
+import { bandLabel, bandOf, runMax, runTotal } from "../game/fathom-history";
 import { recentPlays, type Play } from "../game/history";
 import type { PuzzleMeta } from "../game/puzzles";
 import { load } from "../game/storage";
@@ -21,7 +21,8 @@ const NB = String.fromCharCode(160);
 
 /** The score first, then how it ended. */
 function result(p: Play): { text: string; tone: string } {
-  if (p.kind === "fathom") return { text: `${runTotal(p.run)}/${FATHOM_MAX}`, tone: "cyan" };
+  // Out of its own maximum: 1000 for ten questions, 500 for a game of five from before Nov 14.
+  if (p.kind === "fathom") return { text: `${runTotal(p.run)}/${runMax(p.run)}`, tone: "cyan" };
   if (p.kind === "blitz") {
     const k = p.run.hits.length;
     return { text: `${p.run.score}${NB}pts · ${k}${NB}answer${k === 1 ? "" : "s"}`, tone: "gold" };
@@ -64,7 +65,7 @@ function title(p: Play, index: PuzzleMeta[]) {
   if (p.kind !== "fathom") return <span className="play-title">{index.find((m) => m.id === p.id)?.title ?? p.id}</span>;
   const bands = p.run.points.map(bandOf);
   return (
-    <span className="play-title play-bands" role="img" aria-label={`Fathom: ${bands.map(bandLabel).join(", ")}`} data-testid="history-bands">
+    <span className="play-title play-bands" role="img" aria-label={`Fathom: ${bands.map(bandLabel).join(", ")}`} data-testid="history-bands" data-count={bands.length}>
       {bands.map((b, i) => (
         <span key={i} className="play-band" data-band={b} />
       ))}

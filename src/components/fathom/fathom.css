@@ -40,14 +40,34 @@
   --band-text: var(--label);
 }
 
-/* The question card: "Question 2 of 5" and the progress squares on one line, then the question and what it measures. */
+/* The question card: "Question 2 of 10" and the question's time on one line, then the score, the question and what it measures. */
 .fathom-q .prompt-top {
   align-items: center;
 }
 /*
- * The running score under the header (owner, Nov 14: "some kind of bar at the top ... sleek and minimalistic"): a thin
- * pixel track filled by each round's points in its band's colour, and the total out of 500 at its end. There from the
- * first question, empty, so nothing moves as points land; quiet, so the question stays the hero.
+ * The question's time (owner, Nov 14: "add a timer per question (maybe like 20s)"): "0:17" at the header's end, in
+ * the label's size and its muted colour, pink for the last five seconds. Four tabular characters: never wider or
+ * narrower. No transition: it changes as a number does.
+ */
+.fathom-clock {
+  flex: none;
+  min-width: 4ch;
+  font-size: 17px;
+  line-height: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.fathom-clock[data-warn] {
+  color: var(--pink);
+}
+/*
+ * The running score under the header (owner, Nov 14: "some kind of bar at the top ... sleek and minimalistic"): ten
+ * pixel cells, one a question and its 100 points, each filled by what it scored in its band's colour, the one on screen
+ * outlined, and the total out of 1000 at its end. There from the first question, empty, so nothing moves as points
+ * land; quiet, so the question stays the hero. The cells are the progress squares too: ten beside the header's words
+ * didn't fit a phone.
  */
 .fathom-score {
   display: flex;
@@ -58,22 +78,35 @@
 .tally-track {
   display: flex;
   flex: 1;
+  gap: 3px;
   min-width: 0;
-  height: 6px;
+  height: 8px;
+}
+.tally-cell {
+  position: relative;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   background: #1c2a45;
   box-shadow: inset 0 0 0 1px rgba(125, 147, 184, 0.18);
 }
+/* Played: a ring in its band's colour, so a round that scored nothing reads as played (lost at sea's in the label colour). */
+.tally-cell[data-band] {
+  box-shadow: inset 0 0 0 1px var(--band);
+}
+.tally-cell[data-band="lost"] {
+  box-shadow: inset 0 0 0 1px var(--label);
+}
+.tally-cell[data-now] {
+  box-shadow: inset 0 0 0 1px var(--text);
+}
 .tally-fill {
-  flex: none;
+  display: block;
   height: 100%;
   background: var(--band);
   transform-origin: left center;
 }
-.tally-fill + .tally-fill {
-  box-shadow: inset 2px 0 0 rgba(2, 6, 15, 0.55);
-}
-/* The total sits over a hidden "500/500", so the box is the widest total's from the first question. */
+/* The total sits over a hidden "1000/1000", so the box is the widest total's from the first question. */
 .tally-sum {
   display: grid;
   flex: none;
@@ -136,38 +169,14 @@
     transform: scaleX(0);
   }
 }
-.fathom-pips {
-  display: flex;
-  gap: 6px;
-  flex: none;
-}
-.pip {
-  position: relative;
-  width: 14px;
-  height: 14px;
-  background: #1c2a45;
-}
-.pip[data-band] {
-  background: var(--band);
-}
-.pip.now {
-  box-shadow: 0 0 0 2px var(--text);
-}
 /*
- * Lost at sea, wherever its square shows (the progress, the results' row, the recap): a crossed outline in the label
- * colour, not a fill, so it reads as played and missed. Its slate fill was barely darker than a square still to play.
+ * Lost at sea, wherever its square shows (the results' row, the recap): a crossed outline in the label colour, not a
+ * fill, so it reads as played and missed. Its slate fill was barely darker than a square still to play.
  */
-.pip[data-band="lost"],
 .band-sq[data-band="lost"] {
   background: transparent;
   box-shadow: inset 0 0 0 2px var(--label);
 }
-.pip.now[data-band="lost"] {
-  box-shadow:
-    inset 0 0 0 2px var(--label),
-    0 0 0 2px var(--text);
-}
-.pip[data-band="lost"]::after,
 .band-sq[data-band="lost"]::after {
   content: "";
   position: absolute;
@@ -182,22 +191,6 @@
 }
 .fathom-q .prompt-top .label {
   white-space: nowrap;
-}
-/* The narrowest phones: "QUESTION 1 OF 5" and the squares still share one line. */
-@media (max-width: 379px) {
-  .fathom-q .prompt-top .label {
-    letter-spacing: 0.18em;
-  }
-  .fathom-pips {
-    gap: 5px;
-  }
-  .pip {
-    width: 12px;
-    height: 12px;
-  }
-  .pip[data-band="lost"]::after {
-    inset: 1px;
-  }
 }
 
 
@@ -719,28 +712,47 @@
 }
 
 /* ---- Results ---- */
+/* Ten squares across the results card: 20px on a phone (they fit 320 with room), 32px from 640px. */
 .band-row {
   display: flex;
-  gap: 8px;
+  gap: 5px;
   margin: 12px 0 6px;
 }
 /* The scoring rule again, under the five squares. */
 .band-sq {
   position: relative;
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: 20px;
+  height: 20px;
   border-radius: 2px;
   background: var(--band);
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
 }
 .band-row .band-sq[data-band="lost"] {
   box-shadow:
-    inset 0 0 0 3px var(--label),
-    0 4px 0 rgba(0, 0, 0, 0.45);
+    inset 0 0 0 2px var(--label),
+    0 3px 0 rgba(0, 0, 0, 0.45);
 }
 .band-row .band-sq[data-band="lost"]::after {
-  inset: 8px;
+  inset: 5px;
+}
+@media (min-width: 640px) {
+  .band-row {
+    gap: 8px;
+  }
+  .band-row .band-sq {
+    width: 32px;
+    height: 32px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+  }
+  .band-row .band-sq[data-band="lost"] {
+    box-shadow:
+      inset 0 0 0 3px var(--label),
+      0 4px 0 rgba(0, 0, 0, 0.45);
+  }
+  .band-row .band-sq[data-band="lost"]::after {
+    inset: 7px;
+  }
 }
 .fathom-recap {
   padding: 4px 16px 6px;

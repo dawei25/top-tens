@@ -73,9 +73,14 @@ export const RECORD_PLAYED = "lists played";
 export const FATHOM_PLAY = "Play Fathom";
 /** The day's Fathom (owner, Nov 14): Home's key under Today's list, the menu's tile, a past game's way back to it. */
 export const FATHOM_TODAY = "Today's Fathom";
+/**
+ * A Fathom question whose time ran out with nothing to lock in (owner, Nov 14: "add a timer per question"): the
+ * reveal's big word where a band goes, and the recap's line. Dry, like "Lost at sea".
+ */
+export const FATHOM_TIME_UP = "Time's up";
 
 /**
- * Where a game stands against other players, under the histogram: "better than 36% of players", and "today" on a
+ * Where a game stands against other players, under the players' curve: "better than 36% of players", and "today" on a
  * daily on its own day (owner, Nov 14: "dont specify estimated just say you did better than xx% of players today with a
  * histogram"). Never "estimated", whatever the crowd is made of.
  */
