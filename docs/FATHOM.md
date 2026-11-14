@@ -1,36 +1,69 @@
 # Fathom
 
-The estimation game (`#fathom`), a full game mode since Nov 9 (the owner: "ship it now"; no daily Fathom for now): each
-game shows 5 questions, the player types a number (or, in the name-it round, a name), and the score is plain closeness,
-by one rule for each round (`scoreFor`, `src/game/fathom.ts`), out of 500. Games are endless: NEW QUESTIONS draws
-another. The questions live in `public/fathom/questions.json`; the name-it round's lists in
-`public/fathom/lists/<id>.json` (built by `scripts/fathom/lists.ts`).
+The estimation game, a full game mode since Nov 9 (the owner: "ship it now") and a daily since Nov 14: **Today's
+Fathom** (`#fathom`), five questions a day, the same for everyone, one try. The player types a number (or, in the
+name-it round, a name), and the score is plain closeness, by one rule for each round (`scoreFor`,
+`src/game/fathom.ts`), out of 500. Endless Fathom (NEW QUESTIONS draws another game) stays playable at a hidden
+address, `#fathom-endless`, linked from nowhere (owner, Nov 14: "remove the unlimited fathom play for now- keep access
+to it via a hidden url"). The questions live in `public/fathom/questions.json`; the name-it round's lists in
+`public/fathom/lists/<id>.json` (built by `scripts/fathom/lists.ts`); the days in `public/fathom/daily.json` (written
+by `scripts/fathom/daily.ts`).
 
 ## Where it lives
 
-- **Home**: a Fathom key in Free play, beside Random list and Random Blitz, the same keycap, its line "Guess the
-  number: 5 questions" where they count their lists (it has no categories, so no strip). Under them on a phone; the
-  row under the pair from 640px, one line high.
-- **The menu**: a Fathom tile in Play (a sonar's rings), marked while Fathom is on show.
-- **How to play**: rule 7, Fathom in the game's own words and its scoring rule (the only place it's written).
+- **Home**: Today's Fathom in the Today panel, under Today's list and as wide (Today's list keeps its big key), a key
+  as tall as a free-play key with no description line, only its state: "new", "playing", then the total ("312/500").
+  The panel's countdown ("new in 06:29:10") is for both. Nothing of Fathom in Free play.
+- **The menu**: a Today's Fathom tile in Play (a sonar's rings) with the same state, marked while it's on show; no
+  endless tile.
+- **How to play**: rule 7, Today's Fathom in the game's own words and its scoring rule (the only place it's written).
 - **Stats**: a Fathom card under the lists' sections: games, avg / 500, best / 500 over every finished game; "0",
   "--", "--" and a key to play before the first.
-- **Past runs**: each finished game under its day, tagged FATHOM, its five squares for a title and its total; the row
-  opens that game's results (`#fathom/run-<startedAt>`: the total, the squares, the rules, when it was played, the
-  recap of the questions still in the bank, SHARE, and NEW QUESTIONS, or BACK TO YOUR GAME while a game is under way).
-  Home's key and the menu's tile start new questions once the last game is over (free play is new every time, UX 14),
-  and go back to a game under way; a reload on the results keeps them.
-- **The share text** (SHARE, as on lists and Blitz: the phone's share sheet, else a copy and "Copied"): "Fathom
-  312/500", the five squares in the results' colours (🟨 dead on, 🟦 close, 🟪 near, 🟥 far, ⬛ lost at sea), and the link to `#fathom`,
-  each line but the last ending in two spaces so a Reddit comment keeps them (`pasteable`, src/components/share.ts).
+- **Past runs**: each finished game under its day, its five squares for a title and its total, tagged FATHOM #12 (a
+  day's game, by its number, as Today's list's rows are) or FATHOM (endless); the row opens that game's results
+  (`#fathom/run-<startedAt>`: the total, the squares, when it was played, the recap of the questions still in the
+  bank, SHARE, and a TODAY'S FATHOM key to the day's game, where it is).
+- **The share text** (SHARE, as on lists and Blitz: the phone's share sheet, else a copy and "Copied"): "Fathom #12
+  312/500" ("Fathom 312/500" for an endless game), the five squares in the results' colours (🟨 dead on, 🟦 close, 🟪
+  near, 🟥 far, ⬛ lost at sea), and the link to `#fathom`, each line but the last ending in two spaces so a Reddit
+  comment keeps them (`pasteable`, src/components/share.ts).
+
+## Today's Fathom
+
+- **The schedule** (`public/fathom/daily.json`: `{ n, date, ids }` a day, Fathom #1 on 2026-11-14): written by
+  `NODE_NO_WARNINGS=1 npx tsx scripts/fathom/daily.ts --days 60` for the next N days. Each day is a full game in the
+  round mix (an easy number first, then two estimates, a percent, a year, a name-it round, by the draw's own rules), no
+  question comes back until the bank has run out of fresh ones (then a new cycle starts), and today's and tomorrow's
+  entries are never changed once written; the days after them are chosen again on each run. It fails loudly when
+  today's or tomorrow's entry asks a question the bank no longer has (put it back, or rewrite that day by hand); a
+  past day's is only a warning. `scripts/fathom/daily.test.ts` holds the committed file to all of it, every scheduled
+  id from today on in the bank included: a question renamed or dropped fails `npm test` until the script is re-run.
+- **A day the file doesn't cover** (it ran out, or didn't load): the game seeds that day by its date from the bank, by
+  the same rules, continuing from the file's last day (`dayFor`, `src/game/fathom-daily.ts`: the same code the script
+  uses), so everyone still gets the same five; it is numbered by days since Fathom #1. A scheduled day whose questions
+  aren't all in the bank is seeded the same way.
+- **One try**: the day's game under way is this browser's (`tentacle:fathom-daily`, with its day): a reload, Home's
+  key or the menu's tile resumes it; yesterday's unfinished game is dropped at midnight. Once finished, the run is in
+  the save tagged with its day (`daily: { date, n }`), so the day reopens on its results on every device: no key for
+  new questions, "next Fathom in 06:29:10" instead. The day's game never sits behind a sign-in.
+- **The running score** (owner, Nov 14: "add points to a visible counter ... some kind of bar at the top ... sleek and
+  minimalistic"): under the question card's header, the total out of 500 and a 6px pixel track, filled by each
+  round's points in its band's colour. On each reveal the total counts up and the new stretch grows in (neither with
+  reduced motion). It is there, empty, from the first question, and its total sits over a hidden "500/500", so nothing
+  moves or resizes as points land (e2e/fathom-daily.e2e.cjs measures it at 320, 390 and 1440). With the keyboard up
+  (little height) it gives its row to the question and the field.
+- **Where you stand**: the day's results end with the players' average, the list results' pixel histogram in 50 bins
+  of 10 points (0 to 500, the player's bin lit, a caret under the average's) and "you did better than 81% of players
+  today" (below). Endless Fathom's results and a past game show none.
 
 ## The save and the sync
 
-The game on screen (its questions, guesses, picks and when it was drawn) is this browser's own (`tentacle:fathom`):
-a reload picks it up, results included. Everything else is in the player's save (`Saved.fathom`, `top-tens:v1`,
+The game on screen (its questions, guesses, picks and when it was drawn) is this browser's own (`tentacle:fathom` for
+endless, `tentacle:fathom-daily` for the day's): a reload picks it up, results included. Everything else is in the player's save (`Saved.fathom`, `top-tens:v1`,
 `src/game/fathom-history.ts`), so it travels with an account like list games, with no new table (the account's save
 is one JSON object): every finished game (Past runs, the last 100, each question's points kept as scored), every
-finished game's total (Stats, never pruned), and the last 3 games drawn (held back from the next draw on every device).
+finished game's total (Stats, never pruned), and the last 3 endless games drawn (held back from the next draw on every
+device). A day's game carries its day (`daily`), which is how another device knows it's played.
 The sync merges two devices' copies as the union, one game per start (`mergeFathom`, called from
 `src/net/sync/merge.ts`), a reset on another device prunes it, and a game finished here asks for a sync
 (`reportFathom`). Settings' reset clears both.

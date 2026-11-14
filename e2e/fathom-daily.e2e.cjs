@@ -56,7 +56,6 @@ before(async () => (browser = await chromium.launch()));
 after(() => browser.close());
 
 const box = (page, id) => page.getByTestId(id).boundingBox();
-const round = (b) => b && Object.fromEntries(Object.entries(b).map(([k, v]) => [k, Math.round(v)]));
 const questionId = (page) => page.getByTestId("fathom-question").getAttribute("data-question");
 
 /** Locks in a guess a little high on the question on screen and waits for its reveal. */

@@ -17,7 +17,7 @@ const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { chromium, VIEWPORTS, open, go, hash } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, open } = require("./helpers.cjs");
 const { textLines } = require("./fathom-lib.cjs");
 
 const REAL = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "public", "fathom", "questions.json"), "utf8")).questions;
@@ -44,14 +44,6 @@ const seedFathom = (save) => (ctx) =>
     },
     [KEY, JSON.stringify(save)],
   );
-/** Locks in a guess on the question on screen: a number, or on a name-it round a name its list has. */
-async function lockAny(page) {
-  const id = await page.getByTestId("fathom-question").getAttribute("data-question");
-  const round = await page.getByTestId("fathom-question").getAttribute("data-round");
-  await page.getByTestId("fathom-input").fill(round !== "name" ? "42" : id.startsWith("name-city") ? "Tokyo" : "Japan");
-  await page.getByTestId("fathom-lock").click();
-  await page.getByTestId("fathom-reveal").waitFor();
-}
 
 /** The answer as a player types the whole amount: "8,804,190" for 8.80419 million people. */
 function typed(q) {
