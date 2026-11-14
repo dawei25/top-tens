@@ -76,6 +76,8 @@ import { compareRound, reportFathom, reportFathomDaily, submitFathomGuess, useFa
 import { dayCounts, dayStanding, expectedTotal, FATHOM_BIN, simulatedCounts } from "../../game/fathom-crowd";
 import { blendAverage } from "../../net/crowd";
 import { CrowdCurve } from "../CrowdCurve";
+import { RateList, Thumb } from "../rate/RateList";
+import { ratingOf } from "../../net/ratings";
 import { Loading } from "../Game";
 import { pasteable } from "../share";
 import { CountUp } from "../motion/effects";
@@ -1078,6 +1080,10 @@ function Results({
 }) {
   const [copied, setCopied] = useState(false);
   const copyKey = useRef<HTMLButtonElement>(null);
+  // The question whose "Good question?" is open under its row (one at a time), and a tick when a rating changes, so
+  // the rows' keys show it.
+  const [rating, setRating] = useState<string | null>(null);
+  const [, rated] = useState(0);
   // COPY RESULT takes focus a beat after the end, never at once: an Enter still held from NEXT lands on nothing.
   useEffect(() => {
     const t = setTimeout(() => copyKey.current?.focus({ preventScroll: true }), END_FOCUS_MS);
@@ -1146,6 +1152,7 @@ function Results({
                 data-points={s.points}
                 data-band={s.band}
                 data-timeout={s.timedOut || undefined}
+                data-rating-open={rating === s.question.id || undefined}
               >
                 <span className="band-sq" data-band={s.band} aria-hidden="true" />
                 <span className="recap-body">
@@ -1169,15 +1176,57 @@ function Results({
                     </span>
                   )}
                 </span>
-                <span className="recap-points" aria-label={`${s.points} points, ${bandLabel(s.band)}`}>
-                  {s.points}
+                <span className="recap-side">
+                  <span className="recap-points" aria-label={`${s.points} points, ${bandLabel(s.band)}`}>
+                    {s.points}
+                  </span>
+                  <RateKey id={s.question.id} open={rating === s.question.id} onClick={() => setRating(rating === s.question.id ? null : s.question.id)} />
                 </span>
+                {/* The list results' "Good list?" for this question (its id for the list's, mode fathom): the same
+                    thumbs, reasons and note, under the row, pushing the rows below down (a deliberate tap). */}
+                {rating === s.question.id && (
+                  <div className="recap-rate" id={`recap-rate-${s.question.id}`} data-testid="fathom-rate-panel">
+                    <RateList listId={s.question.id} mode="fathom" kind="question" onRate={() => rated((n) => n + 1)} />
+                  </div>
+                )}
               </li>
             );
           })}
         </ol>
       </section>
     </>
+  );
+}
+
+/**
+ * A row's way to rate its question (owner, Nov 14: "add the same feedback system for fathom ... he wanted to flag
+ * single questions"): a small key under its points that opens "Good question?" under the row. It shows the rating:
+ * the two thumbs, small, until there is one; then that thumb on its colour (cyan up, pink down), as the list's keys
+ * mark it. 44px to the finger; the rows stay quiet (UX 7), and nothing means something only on hover (UX 12).
+ */
+function RateKey({ id, open, onClick }: { id: string; open: boolean; onClick: () => void }) {
+  const r = ratingOf(load(), "fathom", id)?.rating ?? 0;
+  return (
+    <button
+      type="button"
+      className="key recap-rate-key"
+      data-testid="fathom-rate"
+      data-question={id}
+      data-rating={r}
+      aria-expanded={open}
+      aria-controls={open ? `recap-rate-${id}` : undefined}
+      aria-label={`Rate this question${r === 1 ? ": good" : r === -1 ? ": not good" : ""}`}
+      onClick={onClick}
+    >
+      {r === 0 ? (
+        <span className="recap-thumbs" aria-hidden="true">
+          <Thumb />
+          <Thumb down />
+        </span>
+      ) : (
+        <Thumb down={r === -1} />
+      )}
+    </button>
   );
 }
 

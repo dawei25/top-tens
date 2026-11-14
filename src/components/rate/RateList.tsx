@@ -4,18 +4,8 @@ import { backendOn, rateList, useSaveVersion } from "../../net";
 import { RATING_REASONS, ratingOf, type RatingMode, type RatingReason } from "../../net/ratings";
 import { pixels } from "../pixel";
 import { AddNote } from "./AddNote";
+import { RATE_WORDS, type RatedKind } from "./words";
 import "./rate.css";
-
-/** The reasons a thumbs down can give, as the picker says them. */
-const REASONS: Record<RatingReason, string> = {
-  "too-hard": "too hard",
-  "too-easy": "too easy",
-  boring: "boring",
-  unfair: "answers felt unfair",
-  "wrong-data": "wrong data",
-};
-/** The picked reason as the row repeats it: short enough to share a phone's row with the keys. */
-const PICKED: Record<RatingReason, string> = { ...REASONS, unfair: "unfair" };
 
 /** A thumb, 10 x 10: the cuff on the left, the fist with its knuckles, the thumb up. Down is it upside down. */
 const THUMB = [
@@ -33,7 +23,7 @@ const THUMB = [
 const THUMB_UP = pixels(THUMB);
 const THUMB_DOWN = pixels([...THUMB].reverse());
 
-function Thumb({ down }: { down?: boolean }) {
+export function Thumb({ down }: { down?: boolean }) {
   return (
     <svg className="thumb" viewBox="0 0 10 10" shapeRendering="crispEdges" aria-hidden="true">
       <path d={down ? THUMB_DOWN : THUMB_UP} fill="currentColor" />
@@ -51,8 +41,24 @@ function Thumb({ down }: { down?: boolean }) {
  * and the row names it; "why?" brings them back. Escape, a press elsewhere or "skip" closes them.
  *
  * Under the row, in a build with a backend: "add a note" (./AddNote), a few words on the list, before or after rating.
+ *
+ * `kind` "question": a Fathom question (mode "fathom", its id for the list's), "Good question?" with its own words for
+ * the reasons (./words); `onRate` hears each change (a Fathom row shows the rating on its own key).
  */
-export function RateList({ listId, mode }: { listId: string; mode: RatingMode }) {
+export function RateList({
+  listId,
+  mode,
+  kind = "list",
+  onRate,
+}: {
+  listId: string;
+  mode: RatingMode;
+  kind?: RatedKind;
+  onRate?: () => void;
+}) {
+  const words = RATE_WORDS[kind];
+  // Ids for this list in this mode: a page of Fathom rows has many.
+  const slot = `${mode}-${listId}`;
   const version = useSaveVersion();
   const [mine, setMine] = useState(() => ratingOf(load(), mode, listId));
   // Another list, or a sync that brought this list's rating from another device: read the save again.
@@ -71,6 +77,7 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
   const rate = (rating: -1 | 0 | 1, reason?: RatingReason) => {
     rateList(listId, mode, rating, reason);
     setMine(ratingOf(load(), mode, listId));
+    onRate?.();
   };
   /** Close the reasons; `refocus` when focus was in them (a pick, Escape, skip), so it doesn't fall to the page. */
   const close = (refocus: boolean) => {
@@ -136,7 +143,7 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
         ref={wrap}
         className="rate"
         role="group"
-        aria-labelledby={`rate-q-${mode}`}
+        aria-labelledby={`rate-q-${slot}`}
         data-testid="rate"
         data-rating={rating}
         data-reason={mine?.reason}
@@ -146,10 +153,10 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
           if (asking && to && !e.currentTarget.contains(to)) setAsking(false);
         }}
       >
-        <span className="label rate-q" id={`rate-q-${mode}`}>
-          Good list?
+        <span className="label rate-q" id={`rate-q-${slot}`}>
+          {words.ask}
         </span>
-        <button type="button" className="key rate-key up" data-testid="rate-up" aria-label="good list" aria-pressed={rating === 1} onClick={up}>
+        <button type="button" className="key rate-key up" data-testid="rate-up" aria-label={words.up} aria-pressed={rating === 1} onClick={up}>
           <Thumb />
         </button>
         <button
@@ -157,10 +164,10 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
           type="button"
           className="key rate-key down"
           data-testid="rate-down"
-          aria-label="not a good list"
+          aria-label={words.down}
           aria-pressed={rating === -1}
           aria-expanded={asking}
-          aria-controls={`rate-reasons-${mode}`}
+          aria-controls={`rate-reasons-${slot}`}
           onClick={down}
         >
           <Thumb down />
@@ -177,12 +184,12 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
                 setAsking(true);
               }}
             >
-              {mine?.reason ? PICKED[mine.reason] : "why?"}
+              {mine?.reason ? words.picked[mine.reason] : "why?"}
             </button>
           )}
         </span>
         {asking && (
-          <div ref={pop} className="rate-reasons" id={`rate-reasons-${mode}`} role="group" aria-label="Why not?" data-testid="rate-reasons">
+          <div ref={pop} className="rate-reasons" id={`rate-reasons-${slot}`} role="group" aria-label="Why not?" data-testid="rate-reasons">
             <div className="rate-reasons-head">
               <span className="label">Why not?</span>
               <button type="button" className="text-btn" data-testid="rate-skip" onClick={() => close(true)}>
@@ -200,7 +207,7 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
                   aria-pressed={mine?.reason === r}
                   onClick={() => pick(r)}
                 >
-                  {REASONS[r]}
+                  {words.reasons[r]}
                 </button>
               ))}
             </div>
@@ -208,7 +215,7 @@ export function RateList({ listId, mode }: { listId: string; mode: RatingMode })
         )}
       </div>
       {/* Only with somewhere to send it; keyed, so another list or mode starts from its own note. */}
-      {backendOn && <AddNote key={`${mode}:${listId}`} listId={listId} mode={mode} rating={rating === 0 ? null : rating} />}
+      {backendOn && <AddNote key={`${mode}:${listId}`} listId={listId} mode={mode} kind={kind} rating={rating === 0 ? null : rating} />}
     </>
   );
 }

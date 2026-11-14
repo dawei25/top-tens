@@ -79,6 +79,19 @@ name-it round's lists in `public/fathom/lists/<id>.json` (built by `scripts/fath
   player's marker at their total, a caret under the average) and "you did better than 81% of players today". Endless
   Fathom's results and a past game show none.
 
+## Rating a question
+
+Owner, Nov 14: "add the same feedback system for fathom that we currently have for lists/blitz- ideally we keep the
+same mechanics and tables" (he wanted to flag single questions: one too easy, one ambiguous). Each row of Fathom's
+results (Today's, endless, a finished game from Past runs; never a question or a reveal) has a small key under its
+points (beside them from 640px), 44px to the finger: both thumbs, small, until the question is rated, then the one
+chosen on cyan (up) or pink (down). It opens the list results' own "Good list?" under that row, one row at a time:
+"Good question?", the same thumbs and reasons (stored by the same codes; worded for a question: too hard, too easy,
+boring, unclear, wrong answer: src/components/rate/words.ts) and, with a backend, "add a note". Everything goes where
+a list's does, mode `fathom` with the question's id for the list's: the save's `ratings["fathom:<id>"]` (synced),
+`rate_list` and `submit_feedback` (supabase/migrations/20261114130000_fathom_feedback.sql; until it has run both
+answer 404 and the screen goes on as it was).
+
 ## The players' curve
 
 Owner, Nov 14: "for histogram instead of a bar chart style can you do a actual curve? apply this style throughout but
