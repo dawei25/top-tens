@@ -12,12 +12,12 @@ export const wallOn: boolean = accountsOn && !!BACKEND?.signIn.includes("google"
 
 /**
  * A free-play game the player asked for: a roll (Random list or Random Blitz, from Home, the menu or Roll new list, in a
- * category if one was picked, never landing on `leave`), Play again on a past run, or a list's own Blitz (Play Blitz).
+ * category if one was picked, never landing on `leave`), or Play again on a past run. (A list's results offered its
+ * Blitz, an "open" ask, until the owner kept the modes separate, Nov 14: one kept from then reads as no ask.)
  */
 export type FreeAsk =
   | { kind: "roll"; mode: "list" | "blitz"; category?: string; leave?: string }
-  | { kind: "replay"; mode: "list" | "blitz"; id: string }
-  | { kind: "open"; mode: "list" | "blitz"; id: string };
+  | { kind: "replay"; mode: "list" | "blitz"; id: string };
 
 /**
  * sessionStorage: the game asked for, kept while a sign-in from the wall leaves the page (a blocked popup takes the tab
@@ -39,7 +39,7 @@ export function readAsk(raw: unknown, now: number): FreeAsk | null {
   if (a.kind === "roll" && optStr(a.category) && optStr(a.leave)) {
     return { kind: "roll", mode, ...(a.category ? { category: a.category as string } : {}), ...(a.leave ? { leave: a.leave as string } : {}) };
   }
-  if ((a.kind === "replay" || a.kind === "open") && typeof a.id === "string" && /^[\w-]+$/.test(a.id)) return { kind: a.kind, mode, id: a.id };
+  if (a.kind === "replay" && typeof a.id === "string" && /^[\w-]+$/.test(a.id)) return { kind: a.kind, mode, id: a.id };
   return null;
 }
 

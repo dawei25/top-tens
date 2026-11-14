@@ -344,23 +344,19 @@ function Screens() {
 
   // Free play without an account (src/game/free-games.ts): past the free games, a new one asks the player to sign in.
   // Every way into a new free game comes through here (Home's keys and category chips, the menu's tiles, Roll new list,
-  // Play again, Play Blitz); a link to one is checked as it arrives (linkWalled, below). Dailies never are.
+  // Play again); a link to one is checked as it arrives (linkWalled, below). Dailies never are.
   const mustSignIn = (saved = load()) =>
     wallOn && signInToPlay(saved, { schedule, today, signedIn: account.status === "in", accounts: true, freeStarts: freeStarts() });
   /** Opens the wall over the screen instead of starting `a`, if it must: true when it did. */
   const askFirst = (a: FreeAsk): boolean => {
-    const saved = load();
-    // A list's own game under way (or its result) isn't a new game: it opens as it is.
-    if (a.kind === "open" && opensPlayedGame(saved, a.mode, a.id)) return false;
-    if (!mustSignIn(saved)) return false;
+    if (!mustSignIn()) return false;
     setWall(a);
     return true;
   };
   /** Starts a free game asked for (after signing in at the wall, too). */
   const start = (a: FreeAsk) => {
     if (a.kind === "roll") return a.mode === "list" ? roll(a.category, a.leave) : void blitzRoll(a.category, a.leave);
-    if (a.kind === "replay") return held(a.id) ? undefined : replayNow(a.mode, a.id);
-    location.hash = a.mode === "list" ? `#p-${a.id}` : `#blitz-${a.id}`;
+    return held(a.id) ? undefined : replayNow(a.mode, a.id);
   };
   startAsk.current = start;
   const freeRoll = (category?: string, leave?: string) => {
@@ -380,10 +376,6 @@ function Screens() {
     return () => {
       if (!askFirst({ kind: "replay", mode, id })) replayNow(mode, id);
     };
-  };
-  /** Play Blitz on a list's results (a link): the wall instead, over the results, when a new round must wait. */
-  const playBlitz = (id: string) => (e: React.MouseEvent) => {
-    if (askFirst({ kind: "open", mode: "blitz", id })) e.preventDefault();
   };
 
   /**
@@ -497,7 +489,6 @@ function Screens() {
           meta={index.find((p) => p.id === id)}
           daily={entry}
           today={today}
-          schedule={schedule}
           lexicon={lexicon}
           onBack={back}
           onHome={home}
@@ -505,7 +496,6 @@ function Screens() {
           // daily offers a plain random list instead.
           onRoll={() => freeRoll(entry ? undefined : rolledIn.current.get(`#p-${id}`), id)}
           rolled={!entry && rolledIn.current.has(`#p-${id}`)}
-          onPlayBlitz={playBlitz(id)}
         />
       );
     }

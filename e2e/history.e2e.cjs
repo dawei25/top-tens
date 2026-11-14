@@ -4,7 +4,7 @@
 // runs open; a list run: Past runs).
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { chromium, VIEWPORTS, TODAY, open, openTab, go, hash, store, noHScroll, guess } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, TODAY, open, openTab, go, hash, store, noHScroll, guess, todaysDaily } = require("./helpers.cjs");
 
 let browser;
 before(async () => (browser = await chromium.launch()));
@@ -20,8 +20,8 @@ for (const vp of VIEWPORTS) {
     await page.getByTestId("give-up").click();
     await page.getByTestId("results").waitFor();
     await page.clock.runFor(60_000);
-    // Then a Blitz round on the same list, from the results' PLAY BLITZ key.
-    await page.getByTestId("blitz-key").click();
+    // Then a Blitz round on the same list, by its link.
+    await go(page, `#blitz-${LIST}`);
     await page.getByTestId("blitz-clock").waitFor();
     await guess(page, "Dubai");
     await page.clock.fastForward(91_000);
@@ -115,8 +115,8 @@ test("today's list and its Blitz in Past runs: each tag on one line at 320 and 3
     await page.getByTestId("give-up").click();
     await page.getByTestId("give-up").click();
     await page.getByTestId("results").waitFor();
-    // The daily's results offer its list as a Blitz.
-    await page.getByTestId("blitz-key").click();
+    // Then its list as a Blitz, by its link.
+    await go(page, `#blitz-${(await todaysDaily(page)).id}`);
     const screen = page.getByTestId("blitz-screen");
     await screen.waitFor();
     const list = await page.evaluate(async (id) => (await fetch(`puzzles/${id}.json`)).json(), await screen.getAttribute("data-list"));
