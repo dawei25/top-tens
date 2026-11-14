@@ -51,7 +51,7 @@ import {
   type FathomRun,
 } from "../../game/fathom-history";
 import { localDate } from "../../game/daily";
-import { FATHOM_TODAY } from "../copy";
+import { FATHOM_TODAY, fathomDayLine } from "../copy";
 import { Countdown } from "../Countdown";
 import { load, save } from "../../game/storage";
 import {
@@ -67,7 +67,10 @@ import {
 } from "../../game/fathom-name";
 import type { Lexicon } from "../../game/junk";
 import { loadLexicon } from "../../game/puzzles";
-import { compareRound, reportFathom, submitFathomGuess, useFathomCrowd } from "../../net";
+import { compareRound, reportFathom, reportFathomDaily, submitFathomGuess, useFathomCrowd, useFathomDay } from "../../net";
+import { dayCounts, dayStanding, expectedTotal, FATHOM_BIN, simulatedCounts, totalBin } from "../../game/fathom-crowd";
+import { blendAverage } from "../../net/crowd";
+import { ParHistogram } from "../par";
 import { Loading } from "../Game";
 import { pasteable } from "../share";
 import { CountUp } from "../motion/effects";
@@ -171,6 +174,8 @@ function recordFinished(game: FathomGame, bank: readonly FathomQuestion[], day?:
   if (fathom === before.fathom) return;
   save({ ...before, fathom });
   reportFathom();
+  // Today's Fathom joins the day's players (with a backend), once: the run is recorded once.
+  if (day) reportFathomDaily(day.date, runTotal(run));
 }
 
 const BANK_URL = `${import.meta.env.BASE_URL}fathom/questions.json`;
@@ -391,7 +396,7 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
         {said}
       </p>
       {phase === "results" ? (
-        <Results scored={scored} onAgain={day ? undefined : again} n={day?.n} />
+        <Results scored={scored} onAgain={day ? undefined : again} n={day?.n} crowd={day ? { date: day.date, questions } : undefined} />
       ) : (
         <>
           <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id} data-round={round}>
@@ -827,6 +832,7 @@ function PastGame({ head, run: at, bank, today = false }: { head: ReactNode; run
         total={runTotal(run)}
         bands={bands}
         share={share}
+        crowd={today && run.daily ? { date: run.daily.date, questions: run.ids.flatMap((id) => byId.get(id) ?? []) } : undefined}
         onAgain={today ? undefined : toToday}
         againLabel={FATHOM_TODAY}
         when={today ? undefined : playedAt(run.finishedAt)}
@@ -845,6 +851,7 @@ function Results({
   scored,
   onAgain,
   n,
+  crowd,
   total = totalOf(scored),
   bands = scored.map((s) => s.band),
   share = shareOf(scored, n),
@@ -857,6 +864,8 @@ function Results({
   onAgain?: () => void;
   /** Today's Fathom's number, for the share text. */
   n?: number;
+  /** Today's Fathom: its day and questions, for where the total stands among the day's players. */
+  crowd?: { date: string; questions: readonly FathomQuestion[] };
   total?: number;
   bands?: Band[];
   share?: string;
@@ -907,6 +916,7 @@ function Results({
             {when}
           </p>
         )}
+        {crowd && <DayCrowd date={crowd.date} questions={crowd.questions} total={total} />}
         {!onAgain && <Countdown className="fathom-next-day" label="next Fathom in" />}
         <div className="results-actions">
           {onAgain && (
@@ -1003,6 +1013,42 @@ function ScoreBar({ scored }: { scored: Scored[] }) {
         </span>
         <span className="score-of">/{MAX_TOTAL}</span>
       </span>
+    </div>
+  );
+}
+
+/**
+ * Where Today's Fathom's total stands among the day's players (owner, Nov 14: "you did better than xx% of players
+ * today with a histogram"): their average, the day's totals in bins of 10 (the player's lit), and the line. A simulated
+ * crowd around the day's expected total draws it until real players join (fathom-crowd.ts); never "estimated".
+ */
+function DayCrowd({ date, questions, total }: { date: string; questions: readonly FathomQuestion[]; total: number }) {
+  const real = useFathomDay(date);
+  const expected = expectedTotal(questions);
+  const counts = dayCounts(expected, real);
+  const { p, n } = dayStanding(expected, real, total);
+  // The simulated crowd's mean (its bins' middles), joined by the real players' as lists' averages are.
+  const sim = simulatedCounts(expected);
+  const simAvg = sim.reduce((sum, c, i) => sum + c * (i * FATHOM_BIN + (FATHOM_BIN - 1) / 2), 0) / sim.reduce((a, b) => a + b, 0);
+  const avg = Math.round(blendAverage(simAvg, real) ?? simAvg);
+  return (
+    <div className="par-block fathom-crowd" data-testid="fathom-crowd" data-p={p} data-n={n} data-avg={avg}>
+      <div className="par-row">
+        <p className="par-stat">
+          <span className="label">Players avg</span>
+          <b>{avg}</b>
+        </p>
+        <ParHistogram
+          counts={counts}
+          par={totalBin(avg)}
+          score={totalBin(total)}
+          top={MAX_TOTAL}
+          label={`How players scored on today's Fathom, 0 to ${MAX_TOTAL}: they average ${avg}, you got ${total}.`}
+        />
+      </div>
+      <p className="par-line" data-testid="fathom-crowd-line">
+        {fathomDayLine(p)}
+      </p>
     </div>
   );
 }

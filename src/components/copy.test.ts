@@ -8,6 +8,7 @@ import {
   alreadyGuessed,
   FATHOM_PLAY,
   FATHOM_TODAY,
+  fathomDayLine,
   playersLine,
   RECORD_PLAYED,
   BLITZ_SCORING,
@@ -255,5 +256,9 @@ describe("where a list game stands against other players", () => {
     expect(playersLine(81, true)).toBe("better than 81% of players today");
     expect(playersLine(0, false)).toBe("better than 0% of players");
     for (const p of [0, 12, 50, 99, 100]) for (const t of [true, false]) expect(playersLine(p, t)).not.toMatch(/estimat/i);
+  });
+  it("says where Today's Fathom stands in the owner's words", () => {
+    expect(fathomDayLine(81)).toBe("you did better than 81% of players today");
+    expect(fathomDayLine(3)).not.toMatch(/estimat/i);
   });
 });

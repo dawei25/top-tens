@@ -3297,11 +3297,10 @@ a.arch-cell:active .arch-name {
   letter-spacing: 0.06em;
   color: var(--text);
 }
-/* "(estimated)": plain words, quieter than the line it qualifies, wrapping as one piece. */
-.par-est {
-  font-size: 16px;
-  color: var(--muted);
-  white-space: nowrap;
+/* Today's Fathom's day: 50 bins of 10 points, thin bars in the same height, pixel look and width as a list's 11. */
+.histogram[data-bins="50"] .histo-bars {
+  grid-template-columns: repeat(50, 2px);
+  column-gap: 1px;
 }
 
 /*

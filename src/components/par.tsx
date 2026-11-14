@@ -35,16 +35,27 @@ export function vsParText(diff: number, decimals = 0): string {
 const STEP = 3;
 const MAX_H = 42;
 
-/** 11 bars for scores 0 to 10: the player's bar lit, a caret under the average. */
-export function ParHistogram({ counts, par, score }: { counts: number[]; par: number; score: number }) {
+/**
+ * A bar for each score (11 for a list's 0 to 10; Today's Fathom's 50 bins of 10 points, 0 to 500): the player's bar
+ * lit, a caret under the average's. `par` and `score` are bar indexes; `top` labels the axis's end; `label` says it in
+ * words.
+ */
+export function ParHistogram({
+  counts,
+  par,
+  score,
+  top = 10,
+  label = `How players score on this list, 0 to 10: they average ${par}, you got ${score}.`,
+}: {
+  counts: number[];
+  par: number;
+  score: number;
+  top?: number;
+  label?: string;
+}) {
   const max = Math.max(1, ...counts);
   return (
-    <div
-      className="histogram"
-      data-testid="histogram"
-      role="img"
-      aria-label={`How players score on this list, 0 to 10: they average ${par}, you got ${score}.`}
-    >
+    <div className="histogram" data-testid="histogram" data-bins={counts.length} role="img" aria-label={label}>
       <div className="histo-bars">
         {counts.map((c, i) => {
           // Your bar always shows at least one step, so the highlight is never missing.
@@ -64,7 +75,7 @@ export function ParHistogram({ counts, par, score }: { counts: number[]; par: nu
       </div>
       <div className="histo-axis" aria-hidden="true">
         <span>0</span>
-        <span>10</span>
+        <span>{top}</span>
       </div>
     </div>
   );

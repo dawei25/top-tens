@@ -81,6 +81,9 @@ export const FATHOM_TODAY = "Today's Fathom";
  */
 export const playersLine = (p: number, today: boolean): string => `better than ${p}% of players${today ? " today" : ""}`;
 
+/** Today's Fathom's results, under its histogram: the owner's own words (Nov 14), never "estimated". */
+export const fathomDayLine = (p: number): string => `you did better than ${p}% of players today`;
+
 /** "No life lost.", wrapping as one piece: onto its own line when the sentence before it fills the first. */
 export const NO_LIFE_LOST = ["No", "life", "lost."].join(NBSP);
 
