@@ -73,6 +73,16 @@ async function shown(page, p, where, { near, label = "11 to 20" } = {}) {
     .sort((a, b) => a.rank - b.rank)
     .map((e) => ({ rank: e.rank, name: e.name, value: shownValue(e), guessed: e.rank === near?.rank, pink: e.rank === near?.rank }));
   assert.deepEqual(await rows(page), want, where);
+  // The top 10's missed rows fade in after a give-up (1ms with reduced motion, but a busy machine can measure that
+  // first millisecond, their ink still dim): measured once every animation that ends has ended.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => {})),
+    ),
+  );
   const l = await layout(page);
   assert.ok(l.ordered, `${where}: the divider sits between the 10th row and the 11th`);
   assert.ok(l.smaller, `${where}: ranks 11+ as big as the top 10`);
