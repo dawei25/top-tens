@@ -45,10 +45,28 @@ describe("a note", () => {
     });
   });
 
-  it("has the length limit the database has (supabase/migrations, feedback)", () => {
+  it("has the length limit the database has (supabase/migrations, feedback, and Fathom's)", () => {
     const sql = readFileSync(new URL("../../supabase/migrations/20261104120000_feedback.sql", import.meta.url), "utf8");
     expect(sql).toContain(`char_length(text) between 1 and ${MAX_NOTE}`);
     expect(sql).toContain(`char_length(body) > ${MAX_NOTE}`);
+    const fathom = readFileSync(new URL("../../supabase/migrations/20261114130000_fathom_feedback.sql", import.meta.url), "utf8");
+    expect(fathom).toContain(`char_length(body) > ${MAX_NOTE}`);
+  });
+
+  // The owner, Nov 14: "add the same feedback system for fathom that we currently have for lists/blitz".
+  it("takes a note on a Fathom question as on a list, in mode fathom with the question's id", () => {
+    const f = note({ listId: "first-homo-sapiens", mode: "fathom", rating: -1, text: "the definition gave it away" });
+    expect(invalidFeedback(f)).toBeNull();
+    expect(invalidFeedback(note({ mode: "fathom", rating: null }))).toBeNull();
+    expect(invalidFeedback(note({ mode: "Fathom" as "fathom" }))).toBe("mode");
+    expect(invalidFeedback(note({ mode: "fathom", rating: 0 as 1 }))).toBe("rating");
+    expect(feedbackArgs(f, "c-1")).toEqual({
+      p_list_id: "first-homo-sapiens",
+      p_mode: "fathom",
+      p_rating: -1,
+      p_text: "the definition gave it away",
+      p_client_id: "c-1",
+    });
   });
 });
 
@@ -89,6 +107,15 @@ describe("the notes outbox", () => {
     const box = new Outbox<Feedback>(store, async (f) => (got.push(f.text), "ok"), () => T, FEEDBACK);
     expect(await box.flush()).toBe("done");
     expect(got).toEqual(["a note"]);
+  });
+
+  it("keeps a Fathom question's notes waiting beside a list's of the same id", () => {
+    const store = memoryStore();
+    expect(enqueue(store, FEEDBACK, note({ listId: "first-homo-sapiens", mode: "fathom", text: "fun one" }), T)).toBe(true);
+    expect(enqueue(store, FEEDBACK, note({ listId: "first-homo-sapiens", mode: "list", text: "fun one" }), T)).toBe(true);
+    expect(enqueue(store, FEEDBACK, note({ listId: "first-homo-sapiens", mode: "fathom", text: "fun one" }), T)).toBe(false);
+    expect(enqueue(store, FEEDBACK, note({ listId: "first-homo-sapiens", mode: "quiz" as "fathom", text: "x", at: T + 1 }), T)).toBe(false);
+    expect(store.data.pending.map((f) => `${f.mode}:${f.listId}`)).toEqual(["fathom:first-homo-sapiens", "list:first-homo-sapiens"]);
   });
 
   it("drops a note the server refuses for good, and keeps going", async () => {
