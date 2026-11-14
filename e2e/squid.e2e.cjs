@@ -393,7 +393,11 @@ const inkFrame = (page) =>
     let sx = 0;
     let sy = 0;
     let ink = 0;
+    let inkAll = 0;
+    let nearest = Infinity;
+    let hash = 0;
     for (let i = 0; i < d.length; i += 4) {
+      hash = (Math.imul(hash, 31) + d[i] + d[i + 1] * 3 + d[i + 3] * 7) | 0;
       if (d[i + 3] !== 255) continue;
       const x = (i / 4) % c.width;
       const y = Math.floor(i / 4 / c.width);
@@ -401,7 +405,13 @@ const inkFrame = (page) =>
         sx += x;
         sy += y;
         n++;
-      } else if (at && [0x1a0f36, 0x2a1650, 0x0d0720].some((rgb) => near(i, rgb)) && Math.hypot((x + 0.5) * k - at[0], (y + 0.5) * k - at[1]) < 20 * k) ink++;
+      } else if ([0x1a0f36, 0x2a1650, 0x0d0720].some((rgb) => near(i, rgb))) {
+        inkAll++;
+        if (!at) continue;
+        const dist = Math.hypot((x + 0.5) * k - at[0], (y + 0.5) * k - at[1]);
+        nearest = Math.min(nearest, dist);
+        if (dist < 20 * k) ink++;
+      }
     }
     return {
       eye: n ? { x: (sx / n + 0.5) * k, y: (sy / n + 0.5) * k } : null,
@@ -409,6 +419,11 @@ const inkFrame = (page) =>
       inks: Number(s.dataset.inks ?? 0),
       at: at ? { x: at[0], y: at[1] } : null,
       ink,
+      // For failure messages: ink pixels anywhere, the nearest to the last puff's centre (CSS px), and a fingerprint
+      // of the canvas (does it still change from frame to frame?).
+      inkAll,
+      nearest: Math.round(nearest),
+      hash,
     };
   });
 
@@ -530,13 +545,30 @@ async function film(page, frames, each) {
   return out;
 }
 
+/** The page's errors from now on (the ocean stops on one: a still frame stays), for failure messages. */
+function pageErrors(page) {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  return errors;
+}
+/** Runs a check; if it fails, its message names the page's errors too. */
+function withErrors(errors, check) {
+  try {
+    return check();
+  } catch (e) {
+    if (errors.length) e.message += ` (page errors: ${errors.join(" | ")})`;
+    throw e;
+  }
+}
+
 /** Frames from a puff to the check that the squid is clear of it. */
 const CLEAR_FRAMES = Math.round(700 / FRAME_MS);
 
 /**
- * Every puff in a film: ink is drawn at its centre; the squid is already moving as it appears (its eyes a tenth of
- * its width on, ~100 ms after the frame before); and 700 ms on it is clear of the cloud (eyes in view, more than its
- * width from the centre). The film must run 700 ms past its last puff. Returns the frames the puffs appeared on.
+ * Every puff in a film: ink is drawn at its centre on the frame it comes out; the squid is already moving as it appears
+ * (its eyes a tenth of its width on, ~100 ms after the frame before); and 700 ms on it is clear of the cloud (eyes in
+ * view, more than its width from the centre). The film must run 700 ms past its last puff. Returns the puffs' frames.
  */
 function assertDarts(frames, label) {
   const puffs = [];
@@ -545,7 +577,10 @@ function assertDarts(frames, label) {
     const { at, w } = frames[k];
     const tag = `${label}: puff on frame ${k} at ${at.x},${at.y}`;
     assert.ok(k + CLEAR_FRAMES < frames.length, `${tag}: the film ends too soon to check it`);
-    assert.ok(frames.slice(k, k + 3).some((f) => f.ink > 0), `${tag}: no ink drawn there`);
+    // On the very frame it comes out (the jet's): the cloud's core shows at once (it once waited up to 120 ms with the
+    // rest, and a check over the next three frames failed once in a loaded run, Nov 14).
+    const seen = frames.slice(k - 1, k + 2).map((f) => `ink ${f.ink} near / ${f.inkAll} anywhere, nearest ${f.nearest} px, canvas ${f.hash}`);
+    assert.ok(frames[k].ink > 0, `${tag}: no ink drawn there as it came out (frames ${k - 1} to ${k + 1}: ${seen.join("; ")})`);
     const before = frames.slice(0, k).reverse().find((f) => f.eye)?.eye;
     const soon = frames[k + 3].eye;
     assert.ok(soon, `${tag}: 100 ms on the squid is hidden under the ink`);
@@ -564,6 +599,7 @@ for (const vp of VIEWPORTS) {
     await page.waitForTimeout(1600);
     await freeze(page);
     await recordClicks(page);
+    const errors = pageErrors(page);
     for (const where of ["open", "edge"]) {
       await squidAtEdge(page, where);
       // Spam: a tap on the squid every 100 ms for 5 s, chasing it (on its eyes, wherever they show); then 3 s more to
@@ -575,7 +611,7 @@ for (const vp of VIEWPORTS) {
         await tapSquid(page, vp, f.eye);
         taps++;
       });
-      const puffs = assertDarts(frames, where);
+      const puffs = withErrors(errors, () => assertDarts(frames, where));
       const took = (await reaction(page)).pokes - pokes;
       assert.ok(puffs.length >= 1, `${where}: the taps never made the squid ink (${taps} taps, ${took} taken)`);
       // One trick at a time: taps during a trick and its dart start no second one.

@@ -108,11 +108,14 @@ export class Fx {
     this.hearts = [];
   }
 
-  /** An ink cloud at (x, y); `size` is the cloud's reach in canvas px; `n` blobs (a puff has a few). */
+  /**
+   * An ink cloud at (x, y); `size` is the cloud's reach in canvas px; `n` blobs (a puff has a few). The blobs come out
+   * over a moment, the farther ones later; the core (the first) at once, so the ink shows on the frame it is squirted.
+   */
   ink(x: number, y: number, size: number, big: boolean, n = big ? 34 : 14) {
     for (let k = 0; k < n; k++) {
       const a = Math.random() * Math.PI * 2;
-      const d = Math.random() ** 0.7;
+      const d = k === 0 ? 0 : Math.random() ** 0.7;
       const speed = size * (0.25 + 0.75 * d) * (big ? 0.9 : 1.1);
       this.blobs.push({
         x,
