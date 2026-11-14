@@ -2,15 +2,14 @@
 // e2e/fixtures/fathom/questions.json (twelve real facts, one per kind, all estimates, so a draw from it fills the
 // percent and year rounds with estimates), served in place of public/fathom/questions.json; the percent and year
 // rounds add two real questions of their own (PERCENT, YEAR).
-// - A full game on phone and desktop: the draw (five kinds, the first easy), the scoring rule in view on the first
-//   question before answering (and on the results), the field (no scale keys or words, the number grouped with commas
+// - A full game on phone and desktop: the draw (five kinds, the first easy), no scoring line anywhere (the owner, Nov
+//   14; How to play explains it), the field (no scale keys or words, the number grouped with commas
 //   as it's typed and the caret after the same digit, "2.5m" still read), invalid input, the reveal (plain closeness,
 //   the same for every question; no "most people miss by" line), the running total from the second question, the
-//   results (the total is the sum), COPY RESULT (the total, the squares and the link, lines that keep in a Reddit
+//   results (the total is the sum), SHARE (the total, the squares and the link, lines that keep in a Reddit
 //   comment), NEW QUESTIONS draws new questions, the player's save gains only Fathom's part (the finished game, its
 //   total, the draws), and a build without a backend sends and queues nothing.
-// - A percent round and a year round on phone and desktop: each one's rule in view before its answer (and all three on
-//   the results), the field (a decimal keypad and "%" for a percent, 0 to 100; a number pad for a year, never grouped
+// - A percent round and a year round on phone and desktop: no rule line on either or on the results, the field (a decimal keypad and "%" for a percent, 0 to 100; a number pad for a year, never grouped
 //   as "2,007"), the points by each round's rule (a percent by points off and times off its share, or past 50 what's
 //   left; a year by how long ago it was), the miss in points or years, the sonar on the distance the points come from, the
 //   results and the share text; at 320px every message on one line, no sideways scroll, and every control 44px.
@@ -169,11 +168,8 @@ describe("Fathom", { concurrency: true }, () => {
       assert.equal(first.easy, true, "the first question is an easy one");
       assert.ok((await page.getByTestId("fathom-unit").textContent()).trim().length > 0, "the unit shows beside the field");
       assert.equal(await noHScroll(page), true);
-      // The scoring rule, one plain line, in view where the player looks before the first answer (owner, after playing
-      // the beta: one rule for every question, said on screen).
-      const rule = await page.getByTestId("fathom-rule").boundingBox();
-      assert.ok(rule && rule.y >= 0 && rule.y + rule.height <= vp.viewport.height, "the rule is in view on the first question");
-      assert.ok(rule.y < (await page.getByTestId("fathom-input").boundingBox()).y, "the rule comes before the field");
+      // No scoring line on the card (the owner, Nov 14: "self intuitive already enough"; How to play explains it).
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line on the first question");
 
       // Nov 5 (owner): no thousand, million or billion option; the player types the number. Nothing on the ask card
       // offers a scale: LOCK IN is its only key, and no scale word shows.
@@ -233,10 +229,10 @@ describe("Fathom", { concurrency: true }, () => {
       for (const id of ["fathom-points", "fathom-off", "fathom-fact"]) {
         assert.ok((await page.getByTestId(id).textContent()).trim(), `${id} says something`);
       }
-      // No made-up yardstick ("most people miss by about x feels made up"): one rule for every question, still on screen
-      // with the first question's reveal. No running total yet: it would only repeat the points.
+      // No made-up yardstick ("most people miss by about x feels made up"), and no rule line. No running total yet: it
+      // would only repeat the points.
       assert.equal(await page.getByTestId("fathom-typical").count(), 0, "no typical-miss line");
-      assert.equal(await page.getByTestId("fathom-rule").count(), 1, "the rule stays with the first reveal");
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line on the reveal");
       assert.equal(await page.getByTestId("fathom-running").count(), 0, "no running total on the first question");
       assert.equal(await page.getByTestId("fathom-gauge").locator("svg").count(), 1, "the sonar is drawn");
       const source = page.getByTestId("fathom-source");
@@ -257,7 +253,7 @@ describe("Fathom", { concurrency: true }, () => {
       for (const make of guesses) {
         await page.keyboard.press("Enter");
         await page.getByTestId("fathom-input").waitFor();
-        assert.equal(await page.getByTestId("fathom-rule").count(), 0, "the rule is said on its round's first question only (all estimates here)");
+        assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line");
         const q = await shownQuestion(page);
         played.push(q);
         const g = make(q);
@@ -291,8 +287,8 @@ describe("Fathom", { concurrency: true }, () => {
       );
       assert.equal(await page.getByTestId("fathom-bands").locator("[data-band]").count(), 5);
       assert.equal(await noHScroll(page), true);
-      // The rule again, in place of "a typical guesser scores about 250".
-      assert.equal(await page.getByTestId("fathom-rule").count(), 1, "the results say the rule");
+      // Neither a rule line nor "a typical guesser scores about 250".
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line on the results");
       assert.equal(await page.getByTestId("fathom-typical-total").count(), 0, "no typical-guesser line");
       // The key that draws new questions says so: "Play again" read as the same five again (UX.md 1 and 14).
       assert.doesNotMatch(await page.getByTestId("fathom-again").innerText(), /again/i);
@@ -382,15 +378,6 @@ describe("Fathom", { concurrency: true }, () => {
       if (vp.name === "desktop") await ctx.grantPermissions(["clipboard-read", "clipboard-write"]);
       const field = page.getByTestId("fathom-input");
       await field.waitFor();
-      /** The round's rule: one line, in view, above the field, before the answer. */
-      const ruleBefore = async (round) => {
-        const rules = page.getByTestId("fathom-rule");
-        assert.equal(await rules.count(), 1, `${round}: one rule`);
-        assert.equal(await rules.getAttribute("data-round"), round);
-        const box = await rules.boundingBox();
-        assert.ok(box.y >= 0 && box.y + box.height <= vp.viewport.height, `${round}: the rule in view`);
-        assert.ok(box.y < (await field.boundingBox()).y, `${round}: the rule before the field`);
-      };
       /** The squid's place on the sonar, from -1 (the left edge, where the score is 0) to 1. */
       const squidAt = () =>
         page.getByTestId("fathom-gauge").evaluate((el) => {
@@ -399,15 +386,14 @@ describe("Fathom", { concurrency: true }, () => {
           return (Number(el.querySelector(".g-squid").dataset.x) - mid) / (mid - 4);
         });
 
-      // The estimate first, with its own rule.
-      await ruleBefore("estimate");
+      // The estimate first: no rule line on any round (the owner, Nov 14).
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "estimate: no rule line");
       await lockIn(page, "330");
       await next(page);
 
       // The percent: "%" beside a decimal keypad, its rule, 0 to 100.
       assert.equal(await attr(page, "fathom-question", "data-round"), "percent");
-      // The percent says the same words as the estimate: said once, on the first question (the review, Nov 9).
-      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "percent: the rule was said on the estimate");
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "percent: no rule line");
       assert.equal((await page.getByTestId("fathom-unit").textContent()).trim(), "%");
       assert.equal(await field.getAttribute("inputmode"), "decimal");
       for (const [text, want] of [["59%", 59], ["59.5", 59.5], ["0", 0]]) {
@@ -434,14 +420,14 @@ describe("Fathom", { concurrency: true }, () => {
       assert.equal((await page.getByTestId("fathom-guess").textContent()).trim(), "53%");
       assert.match(await page.getByTestId("fathom-off").textContent(), /^6 too low$/, "the miss in percentage points, without the word");
       assert.ok(Math.abs((await squidAt()) - percentOff(53, PERCENT.answer)) < 0.05, "the squid left, by the distance the points come from");
-      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule on the percent's reveal");
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line on the percent's reveal");
       assert.equal(Number(await attr(page, "fathom-running", "data-total")), 100 + percentWant, "the running total");
       assert.equal(await noHScroll(page), true);
       await next(page);
 
       // The year: a number pad, typed as four digits and never grouped.
       assert.equal(await attr(page, "fathom-question", "data-round"), "year");
-      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "year: the rule was said on the estimate");
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "year: no rule line");
       assert.equal(await field.getAttribute("inputmode"), "numeric");
       assert.ok((await page.getByTestId("fathom-unit").textContent()).trim().length > 0, "the unit shows beside the field");
       await field.focus();
@@ -467,10 +453,10 @@ describe("Fathom", { concurrency: true }, () => {
       assert.ok(Math.abs((await squidAt()) - yearOff(1994, YEAR.answer)) < 0.05, "the squid left, by the distance the points come from");
       assert.equal(await noHScroll(page), true);
 
-      // Two estimates more, without a rule (the estimate's was on the first).
+      // Two estimates more, without a rule line.
       for (const id of ["adult-bones", "piano-keys"]) {
         await next(page);
-        assert.equal(await page.getByTestId("fathom-rule").count(), 0, `${id}: no rule on a second estimate`);
+        assert.equal(await page.getByTestId("fathom-rule").count(), 0, `${id}: no rule line`);
         await lockIn(page, String(byId.get(id).answer));
       }
       await next(page);
@@ -486,9 +472,7 @@ describe("Fathom", { concurrency: true }, () => {
       assert.match(nums[1], /\b53%.*\b59%/);
       assert.match(nums[2], /\b1994\b.*\b1997\b/);
       assert.doesNotMatch(nums[2], /1,99/);
-      // Every round's rule again, once each.
-      // One rule for every round now (the owner: "closer the guess the more points"): the results say it once.
-      assert.deepEqual(await page.getByTestId("fathom-rule").evaluateAll((els) => els.map((el) => el.dataset.round)), ["estimate"]);
+      assert.equal(await page.getByTestId("fathom-rule").count(), 0, "no rule line on the results");
       assert.equal(await noHScroll(page), true);
       if (vp.name === "desktop") {
         await page.getByTestId("fathom-share").click();
@@ -818,8 +802,6 @@ describe("Fathom", { concurrency: true }, () => {
         }, visible);
         const id = await attr(page, "fathom-question", "data-question");
         assert.deepEqual({ ...seen, lockBottom: undefined }, { question: true, field: true, lock: true, lockBottom: undefined }, `${where}, ${id}: LOCK IN ends at ${seen.lockBottom}`);
-        // The first question's scoring rule is still there, under LOCK IN, out of their way.
-        if (i === 0) assert.equal(await page.getByTestId("fathom-ask").getByTestId("fathom-rule").count(), 1, `${where}: the rule under LOCK IN`);
         await page.getByTestId("fathom-lock").click();
         await page.getByTestId("fathom-reveal").waitFor();
         await next(page);

@@ -108,17 +108,6 @@
   }
 }
 
-/* The scoring rule under the first question (and on the results): one plain line, set apart from what the question
-   measures by a dashed rule. */
-.fathom-rule {
-  margin-top: 8px;
-  padding-top: 7px;
-  border-top: 1px dashed var(--hairline);
-  font-size: 18px;
-  line-height: 1.2;
-  letter-spacing: 0.04em;
-  color: var(--label);
-}
 
 /* ---- The ask card ---- */
 .fathom-ask {
@@ -644,10 +633,6 @@
   margin: 12px 0 6px;
 }
 /* The scoring rule again, under the five squares. */
-.fathom-rule-end {
-  font-size: 18px;
-  line-height: 1.25;
-}
 .band-sq {
   position: relative;
   flex: none;
@@ -750,11 +735,6 @@
 }
 .fathom[data-short] .prompt .caption {
   margin-top: 2px;
-}
-.fathom[data-short] .fathom-rule {
-  margin-top: 5px;
-  padding-top: 4px;
-  font-size: 16px;
 }
 .fathom[data-short] .fathom-ask {
   padding: 10px 12px 12px;
