@@ -12,7 +12,7 @@ const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { chromium, VIEWPORTS, TODAY, open, go, store, noHScroll } = require("./helpers.cjs");
+const { chromium, VIEWPORTS, TODAY, open, go, store, noHScroll, freeze } = require("./helpers.cjs");
 const { shortReach } = require("./fathom-lib.cjs");
 
 const FIXTURES = path.join(__dirname, "fixtures", "fathom");
@@ -124,6 +124,29 @@ test("endless Fathom's results rate their questions too, by id; nothing to rate 
   await key.click();
   await page.getByTestId("fathom-rate-panel").getByTestId("rate-up").click();
   assert.equal((await saved(page, id)).rating, 1);
+  await ctx.close();
+});
+
+// A full verify caught it: the Share key takes focus a beat (0.9 s) after the results show, and a rating opened in that
+// beat lost its focus to it, and its reasons closed. The player's focus now stays.
+test("a rating opened at once on the results keeps its focus and its reasons past Share's delayed focus", async () => {
+  const vp = VIEWPORTS.find((v) => v.name === "phone");
+  const { ctx, page } = await open(browser, vp, "#fathom", undefined, { setup, reducedMotion: "reduce" });
+  await page.getByTestId("fathom-next").waitFor();
+  await freeze(page);
+  await page.getByTestId("fathom-next").click();
+  await page.getByTestId("fathom-results").waitFor();
+  await page.getByTestId("fathom-rate").first().click();
+  await page.getByTestId("fathom-rate-panel").getByTestId("rate-down").click();
+  await page.getByTestId("rate-reasons").waitFor();
+  await page.clock.runFor(1500);
+  assert.equal(await page.getByTestId("rate-reasons").count(), 1, "the reasons still open");
+  assert.notEqual(await page.evaluate(() => document.activeElement?.dataset.testid), "fathom-share");
+  // With nothing touched, Share still takes focus after the beat.
+  await page.clock.resume();
+  await page.reload();
+  await page.getByTestId("fathom-results").waitFor();
+  await page.waitForFunction(() => document.activeElement?.dataset.testid === "fathom-share");
   await ctx.close();
 });
 

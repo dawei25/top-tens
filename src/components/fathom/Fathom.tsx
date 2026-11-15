@@ -1084,9 +1084,14 @@ function Results({
   // the rows' keys show it.
   const [rating, setRating] = useState<string | null>(null);
   const [, rated] = useState(0);
-  // COPY RESULT takes focus a beat after the end, never at once: an Enter still held from NEXT lands on nothing.
+  // COPY RESULT takes focus a beat after the end, never at once: an Enter still held from NEXT lands on nothing. Not
+  // when the player has moved on in that beat (a question's rating opened): their focus stays, and so do its reasons.
   useEffect(() => {
-    const t = setTimeout(() => copyKey.current?.focus({ preventScroll: true }), END_FOCUS_MS);
+    const t = setTimeout(() => {
+      const now = document.activeElement;
+      if (now && now !== document.body && now.isConnected) return;
+      copyKey.current?.focus({ preventScroll: true });
+    }, END_FOCUS_MS);
     return () => clearTimeout(t);
   }, []);
   useEffect(() => {
