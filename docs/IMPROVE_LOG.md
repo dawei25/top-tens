@@ -2,6 +2,15 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-15, weekly lineup (week of Nov 16), Sunday fallback
+
+- No answer from the owner by Sunday 18:00 HKT: scheduled as proposed. Mon metro-cities, Tue painters, Wed
+  coastline-countries, Thu concert-tours, Fri australia-cities, Sat happiest-countries, Sun winter-olympics-countries
+  (six new debut lists and one older list nobody had played), replacing the old free-play lists the scheduler had
+  put on Nov 16-21. Built this cycle and judged free play: grand-slam-titles, billionaire-cities, wine-countries.
+  Spare: life-expectancy-countries (fixed, approved; not the same week as happiest-countries). Every pick had an
+  answer-coverage audit (about 30 fair guesses fixed) and the matcher fixes it found (country names and title words).
+
 ## 2026-11-15, launch-week morning check (Sun)
 
 - Notes since yesterday's check: none. Ratings: landlocked-countries and world-heritage-countries, 1 up each.

@@ -170,31 +170,37 @@
  {
   "n": 29,
   "date": "2026-11-17",
-  "id": "capitals",
+  "id": "painters",
   "blitz": "instagram"
  },
  {
   "n": 30,
   "date": "2026-11-18",
-  "id": "car-makers",
+  "id": "coastline-countries",
   "blitz": "countries-area"
  },
  {
   "n": 31,
   "date": "2026-11-19",
-  "id": "animated-films",
+  "id": "concert-tours",
   "blitz": "us-cities"
  },
  {
   "n": 32,
   "date": "2026-11-20",
-  "id": "car-models",
+  "id": "australia-cities",
   "blitz": "tiktok-accounts"
  },
  {
   "n": 33,
   "date": "2026-11-21",
-  "id": "youtube-videos",
+  "id": "happiest-countries",
   "blitz": "asia-population"
+ },
+ {
+  "n": 34,
+  "date": "2026-11-22",
+  "id": "winter-olympics-countries",
+  "blitz": "wine-countries"
  }
 ]

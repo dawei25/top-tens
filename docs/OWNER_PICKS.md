@@ -57,3 +57,10 @@ measure of how well the picks match his taste.
 | Nov 9 | Fri 13 | retailers / mcdonalds-countries | kept | approved the week as proposed |
 | Nov 9 | Sat 14 | landlocked-countries / spotify-songs | kept | approved the week as proposed |
 | Nov 9 | Sun 15 | longest-running-tv / billionaire-countries | kept | approved the week as proposed |
+| Nov 16 | Mon 16 | metro-cities | no answer, scheduled as proposed | Sunday 18:00 HKT fallback (owner, Nov 5) |
+| Nov 16 | Tue 17 | painters | no answer, scheduled as proposed | |
+| Nov 16 | Wed 18 | coastline-countries | no answer, scheduled as proposed | |
+| Nov 16 | Thu 19 | concert-tours | no answer, scheduled as proposed | older list, never played by anyone |
+| Nov 16 | Fri 20 | australia-cities | no answer, scheduled as proposed | |
+| Nov 16 | Sat 21 | happiest-countries | no answer, scheduled as proposed | |
+| Nov 16 | Sun 22 | winter-olympics-countries | no answer, scheduled as proposed | |
