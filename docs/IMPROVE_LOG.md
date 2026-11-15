@@ -2,6 +2,18 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-15, launch-week morning check (Sun)
+
+- Notes since yesterday's check: none. Ratings: landlocked-countries and world-heritage-countries, 1 up each.
+  Plays all time: 167 across 85 lists (+11).
+- Missed guesses: 20 texts, each from one browser, on 4 lists. Re-judged with today's matcher: none is a fair answer
+  a list misses. Today's longest-running-tv drew 7: a famous cable cartoon (the list is broadcast networks only, as its
+  prompt says, so "isn't in this ranking" is right), short-run dramas, a news channel. retailers drew 7 words around
+  the #2 answer's first letters (the answer itself lands when typed). smallest-countries drew territories and a city.
+  One two-slip misspelling of a coffee country. No fix.
+- Fathom: Today's Fathom went live overnight (Fathom #1). No Fathom guesses yet on today's first question. The daily
+  totals and Fathom feedback migrations aren't run yet, so the players' curve is the simulated crowd only.
+
 ## 2026-11-14, launch-week morning check (Sat)
 
 - Notes and ratings since yesterday's check: none. Plays all time: 156 across 82 lists (+21).
