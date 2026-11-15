@@ -816,6 +816,104 @@
   text-align: right;
   color: var(--text);
 }
+/* The points, and under them the question's rating key; beside them from 640px, where the row has room, so no row
+   grows for it. */
+.recap-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+@media (min-width: 640px) {
+  .recap-side {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+}
+/*
+ * "Rate this question" (owner, Nov 14): a small quiet key, 44px to the finger, the list's rating keys' look. Unrated it
+ * holds both thumbs, small and in the label colour; rated, the one chosen, on cyan (up) or pink (down).
+ */
+.recap-rate-key {
+  position: relative;
+  width: 44px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  color: var(--label);
+  font-size: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 0 var(--key-shadow);
+}
+/* 40px to the eye, 48 to the finger: the key's reach runs past its edges, top and bottom. */
+.recap-rate-key::before {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+.recap-rate-key .thumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.recap-thumbs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.recap-thumbs .thumb {
+  width: 10px;
+  height: 10px;
+}
+.recap-rate-key:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 2px 0 var(--key-shadow);
+}
+@media (hover: hover) {
+  .recap-rate-key:hover:not(:disabled) {
+    color: var(--text);
+  }
+}
+.recap-rate-key[data-rating="1"] {
+  background: var(--cyan);
+  color: #04202a;
+  box-shadow: 0 4px 0 var(--cyan-edge);
+}
+.recap-rate-key[data-rating="-1"] {
+  background: var(--pink);
+  color: var(--pink-ink);
+  box-shadow: 0 4px 0 var(--pink-shadow);
+}
+.recap-rate-key[aria-expanded="true"] {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+/*
+ * "Good question?" right under the question it rates, in line with its words (the list's row, its reasons and its
+ * note), no line between them: part of that question's row. On a phone the words take their own line over the thumbs;
+ * from 640px all in one.
+ */
+.recap-rate {
+  grid-column: 2 / -1;
+  margin-top: -2px;
+}
+.recap-rate .rate {
+  flex-wrap: wrap;
+  row-gap: 6px;
+  min-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+@media (max-width: 639px) {
+  .recap-rate .rate-q {
+    flex-basis: 100%;
+  }
+}
 
 /* Narrow phones: the field's number a step smaller, so more of a long one shows beside the unit. */
 @media (max-width: 379px) {

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from
 import { submitFeedback } from "../../net";
 import { cleanNote, MAX_NOTE, noteLength } from "../../net/feedback";
 import type { RatingMode } from "../../net/ratings";
+import { RATE_WORDS, type RatedKind } from "./words";
 
 /** The counter shows from here: quiet until the note gets near the limit. */
 const COUNT_FROM = MAX_NOTE - 100;
@@ -19,8 +20,9 @@ const drafts = new Map<string, string>();
  * is now, and a dry line takes the key's place. Typing here is never a game shortcut: Enter adds a line, and Escape
  * closes the box instead of going Back.
  */
-export function AddNote({ listId, mode, rating }: { listId: string; mode: RatingMode; rating: -1 | 1 | null }) {
+export function AddNote({ listId, mode, kind = "list", rating }: { listId: string; mode: RatingMode; kind?: RatedKind; rating: -1 | 1 | null }) {
   const id = `${mode}:${listId}`;
+  const words = RATE_WORDS[kind];
   const [open, setOpen] = useState(() => drafts.has(id));
   const [text, setText] = useState(() => drafts.get(id) ?? "");
   const [done, setDone] = useState<"sent" | "queued" | null>(null);
@@ -108,9 +110,9 @@ export function AddNote({ listId, mode, rating }: { listId: string; mode: Rating
             ref={box}
             className="rate-add-text"
             data-testid="note-text"
-            aria-label="A note on this list"
-            aria-describedby={`note-hint-${mode}`}
-            placeholder="what would make this list better?"
+            aria-label={words.noteLabel}
+            aria-describedby={`note-hint-${mode}-${listId}`}
+            placeholder={words.placeholder}
             rows={4}
             maxLength={MAX_NOTE}
             value={text}
@@ -123,7 +125,7 @@ export function AddNote({ listId, mode, rating }: { listId: string; mode: Rating
             <button type="button" className="text-btn" data-testid="note-cancel" onClick={close}>
               cancel
             </button>
-            <span className="rate-add-count" id={`note-hint-${mode}`} data-testid="note-count" data-over={n > MAX_NOTE} hidden={n < COUNT_FROM}>
+            <span className="rate-add-count" id={`note-hint-${mode}-${listId}`} data-testid="note-count" data-over={n > MAX_NOTE} hidden={n < COUNT_FROM}>
               {n}/{MAX_NOTE}
             </span>
           </div>

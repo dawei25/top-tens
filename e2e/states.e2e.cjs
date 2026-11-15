@@ -247,6 +247,17 @@ const SCREENS = [
       await tick(page);
     },
   },
+  {
+    // A question's "Good question?" open under its row (owner, Nov 14: the lists' feedback for Fathom).
+    name: "Fathom, results, a question's rating open",
+    setup: async (page) => {
+      await page.getByTestId("fathom-rate").first().click();
+      await page.getByTestId("fathom-rate-panel").waitFor();
+      await tick(page);
+    },
+  },
+  // (Its reasons after a thumbs down are the list's own, RateList's, walked on "list game over, rating reasons open".
+  // Here a Tab out of them reaches the next row's key, which closes them, so the screen can't come back to that rest.)
 ];
 
 /**

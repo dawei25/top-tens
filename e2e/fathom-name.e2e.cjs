@@ -85,6 +85,9 @@ const text = async (page, testId) => (await page.getByTestId(testId).textContent
 const saved = (page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k)), KEY);
 /** Types a name that doesn't lock and presses LOCK IN (or Enter); what the line says, as { read, tone, text }. */
 async function say(page, name, how = "click") {
+  // A name read before the lexicon has loaded waits for it (up to 1.5 s, longer than a busy machine's first look at
+  // the line): read once it's there, so the line is said at once.
+  await page.locator('[data-testid="fathom-ask"][data-lexicon]').waitFor();
   const field = page.getByTestId("fathom-input");
   await field.fill(name);
   if (how === "enter") await field.press("Enter");

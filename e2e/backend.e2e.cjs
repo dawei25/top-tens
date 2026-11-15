@@ -373,6 +373,59 @@ test("Today's Fathom: the day's total is sent once, and its results count the da
   await ctx.close();
 });
 
+// Rating a Fathom question (owner, Nov 14: "add the same feedback system for fathom ... same mechanics and tables"):
+// rate_list and submit_feedback, mode fathom, the question's id for the list's. Before the owner runs its migration
+// both answer 404: the screen goes on as it was, the rating kept in the save.
+test("Fathom: a question's rating and note go to rate_list and submit_feedback, mode fathom, its id; a 404 changes nothing on screen (phone)", async () => {
+  const bank = path.join(__dirname, "fixtures", "fathom", "questions.json");
+  const fixture = JSON.parse(fs.readFileSync(bank, "utf8")).questions;
+  const ids = fixture.slice(0, 10).map((q) => q.id);
+  const done = { day: { date: TODAY, n: 2 }, ids, guesses: fixture.slice(0, 10).map((q) => q.answer), at: 10, startedAt: NOW.getTime() - 60_000 };
+  const { ctx, page, calls } = await open(phone, "#fathom", { ...FRESH, "tentacle:fathom-daily": done }, undefined, (c) =>
+    c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ path: bank, contentType: "application/json" })),
+  );
+  await page.getByTestId("fathom-results").waitFor();
+  const key = page.getByTestId("fathom-rate");
+  const panel = page.getByTestId("fathom-rate-panel");
+
+  // The first question: up, then down with "wrong answer", then a note.
+  await key.nth(0).click();
+  await panel.getByTestId("rate-up").click();
+  await until(() => calls.rate.length === 1);
+  const id = calls.rate[0].p_client_id;
+  assert.match(id, UUID);
+  assert.deepEqual(calls.rate[0], { p_list_id: ids[0], p_mode: "fathom", p_rating: 1, p_reason: null, p_client_id: id });
+  await panel.getByTestId("rate-down").click();
+  await page.locator('[data-testid="rate-reason"][data-reason="wrong-data"]').click();
+  await until(() => calls.rate.at(-1)?.p_reason === "wrong-data");
+  assert.deepEqual(calls.rate.at(-1), { p_list_id: ids[0], p_mode: "fathom", p_rating: -1, p_reason: "wrong-data", p_client_id: id });
+  await panel.getByTestId("note-open").click();
+  assert.equal(await panel.getByTestId("note-text").getAttribute("placeholder"), "what would make this question better?");
+  await panel.getByTestId("note-text").fill("the answer depends on the year");
+  await panel.getByTestId("note-send").click();
+  await panel.getByTestId("note-sent").waitFor();
+  await until(() => calls.feedback.length === 1);
+  assert.deepEqual(calls.feedback[0], { p_list_id: ids[0], p_mode: "fathom", p_rating: -1, p_text: "the answer depends on the year", p_client_id: id });
+
+  // The migration not run yet: rate_list and submit_feedback answer 404. The row keeps its rating, the note its thanks.
+  const missing = (route) => route.fulfill({ status: 404, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: '{"message":"not found"}' });
+  await page.route(`${SUPA}/rest/v1/rpc/rate_list`, missing);
+  await page.route(`${SUPA}/rest/v1/rpc/submit_feedback`, missing);
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await key.nth(3).click();
+  await panel.getByTestId("rate-up").click();
+  await panel.getByTestId("note-open").click();
+  await panel.getByTestId("note-text").fill("too easy for an opener");
+  await panel.getByTestId("note-send").click();
+  await panel.getByTestId("note-sent").waitFor();
+  await settle();
+  assert.equal(await key.nth(3).getAttribute("data-rating"), "1");
+  assert.equal(await page.getByTestId("fathom-results").isVisible(), true);
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
 // A name-it round sends the figure of the thing named, like any guess (the owner will score questions by how real
 // players do): an island on a land-borders round is a 0. It asks for no players' line.
 test("Fathom: a name-it round sends the figure of the thing named, 0 land borders included (desktop)", async () => {
