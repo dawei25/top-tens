@@ -1,5 +1,5 @@
 import { isDailyBlitzRun } from "./blitz";
-import type { DailyEntry } from "./daily";
+import { dailyGame, type DailyEntry } from "./daily";
 import type { GameState } from "./state";
 import type { Saved } from "./storage";
 
@@ -29,12 +29,13 @@ function mayBeDaily(id: string, saved: Saved, schedule: readonly Pick<DailyEntry
   return schedule.some((e) => e.id === id && e.date <= today && !saved.dailyGames?.[e.date]);
 }
 
-/** Today's list (the latest day up to today, as todayEntry reads it), which is never free play. */
-function todaysList(schedule: readonly Pick<DailyEntry, "date" | "id">[], today: string): string | undefined {
+/** Today's list's day (the latest day up to today, as todayEntry reads it): never free play, never asked about. */
+function todaysDay(schedule: readonly Pick<DailyEntry, "date" | "id">[], today: string): Pick<DailyEntry, "date" | "id"> | undefined {
   let best: Pick<DailyEntry, "date" | "id"> | undefined;
   for (const e of schedule) if (e.date <= today && (!best || e.date > best.date)) best = e;
-  return best?.id;
+  return best;
 }
+const todaysList = (schedule: readonly Pick<DailyEntry, "date" | "id">[], today: string) => todaysDay(schedule, today)?.id;
 
 /**
  * The free-play games this save has played, each once: finished list games that weren't a daily, list games under way
@@ -70,24 +71,39 @@ export function freeGamesPlayed(
   return seen.size;
 }
 
+/** What the sign-in rules read: the schedule and the player's date, whether they're signed in, the build, the marks. */
+export interface SignInOptions {
+  schedule: readonly Pick<DailyEntry, "date" | "id">[];
+  today: string;
+  signedIn: boolean;
+  accounts: boolean;
+  limit?: number;
+  /** The marks free play left on the list games it started (see freeGamesPlayed). */
+  freeStarts?: ReadonlySet<string>;
+}
+
 /**
  * Whether starting a new free-play game asks the player to sign in first: a build with accounts, signed out, and
- * `limit` free games played already. Signed in, free play never runs out; dailies are never asked about.
+ * `limit` free games played already. Signed in, free play never runs out; dailies are never asked about here.
  */
-export function signInToPlay(
-  saved: Saved,
-  o: {
-    schedule: readonly Pick<DailyEntry, "date" | "id">[];
-    today: string;
-    signedIn: boolean;
-    accounts: boolean;
-    limit?: number;
-    /** The marks free play left on the list games it started (see freeGamesPlayed). */
-    freeStarts?: ReadonlySet<string>;
-  },
-): boolean {
+export function signInToPlay(saved: Saved, o: SignInOptions): boolean {
   if (!o.accounts || o.signedIn) return false;
   return freeGamesPlayed(saved, o.schedule, o.today, o.freeStarts) >= (o.limit ?? FREE_GAMES_BEFORE_SIGN_IN);
+}
+
+/**
+ * Whether opening the archive's daily for `date` asks the player to sign in first (owner, Nov 16: "make sure they cant
+ * play the archives either until they sign in"): once the free games are used up (`signInToPlay`), an archive day that
+ * would start a new game. Archive days never count toward the free games themselves. Never asked: today's list (the
+ * day standing in for it when the schedule is late, too), a day under way (it resumes) or finished (its result shows),
+ * a future day or a date with no list (no game there).
+ */
+export function archiveNeedsSignIn(saved: Saved, date: string, o: SignInOptions): boolean {
+  const day = o.schedule.find((e) => e.date === date);
+  if (!day || date > o.today || date === todaysDay(o.schedule, o.today)?.date) return false;
+  const g = dailyGame(saved, day);
+  if (g && listGamePlayed(g)) return false;
+  return signInToPlay(saved, o);
 }
 
 /**
