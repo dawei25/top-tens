@@ -53,7 +53,7 @@ Puzzles are prebuilt from Wikipedia tables (`scripts/topics.ts`, `scripts/build.
 with every table row as an accepted answer, aliases from redirects, and a source link with an "as of" date.
 Modes: one daily, Today's list (from `public/puzzles/daily.json`), and free play (a random list or Blitz, optionally
 by category). Blitz is free play only: Today's Blitz was retired (owner, Nov 9), and an old `#dailyblitz-<date>` link
-opens that date's list as a free Blitz. **Dailies are one try each**, archive dailies included: a finished daily always reopens on
+opens that date's list as a free Blitz. **Dailies are one try each**, archive dailies included (signed out, past the free games, a new archive day needs an account, §4): a finished daily always reopens on
 its result. Free play is endless (with an account; two games without one, §4): Roll new list rolls a new random game, keeping the category if one was picked, and
 prefers lists the player hasn't played in that mode. Before play it sits in its own box right of the guess panel.
 
@@ -82,7 +82,9 @@ give-up; a Blitz round once its clock runs; opening one counts nothing. Starting
 screen: "Sign in to keep playing", "free play is unlimited with an account. today's list is always free.", the Google
 key, and a quiet key to today's list (Home once it's played). Closing leaves the player where they were; signing in
 starts the game asked for. Never asked: dailies, Fathom, Past runs and their results, Stats, How to play; a game
-under way always resumes. Inner screens have no
+under way always resumes. Once they're used up, a new archive day asks too, from its row (the wall over the Archive) or a past day's
+`#daily-<date>` link (the wall alone; closing goes to the Archive); archive days never count toward the two (owner,
+Nov 16). The wall's line: "free play and the archive are unlimited with an account. today's list is always free." Inner screens have no
 account key: their headers are full, and HOME is one press away (UX.md 19). **Settings** (`#settings`): the sound
 switch and reset all progress (Fathom's too). **Today's Fathom** (`#fathom`), the estimation game, a daily since Nov 15 (owner, Nov 14: "id like fathom to have a
 today's fathom"): ten questions a day, the same for everyone (an easy opener, estimates, two percents, two years, a

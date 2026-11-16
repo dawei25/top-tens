@@ -61,10 +61,12 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
     unrelated word into an answer ("pope").
 24. **Ask at the door, never mid-game, and say what stays free.** A sign-in the game asks for comes before a new game
     starts, over the screen the player is on, never during a game or over its results (a game under way always
-    resumes). Closing it leaves everything as it was. It says what an account gives and what stays free (today's
-    list), with a key there, and signing in carries on to what the player asked for. (Owner, Nov 14: "after a user
-    plays more than once in free play, they have to sign in with google to continue playing -> encourages user
-    signups!"; `e2e/free-wall.e2e.cjs`.)
+    resumes). Once the free games are used up, the door is every new game but today's, free play and the archive alike
+    (owner, Nov 16: "make sure they cant play the archives either until they sign in"); archive days never count toward
+    the free games. Closing it leaves everything as it was. It says what an account gives and what stays free ("free
+    play and the archive are unlimited with an account. today's list is always free."), with a key to today's list, and
+    signing in carries on to what the player asked for. (Owner, Nov 14: "after a user plays more than once in free
+    play, they have to sign in with google to continue playing -> encourages user signups!"; `e2e/free-wall.e2e.cjs`.)
 
 ## Look
 
