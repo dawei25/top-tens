@@ -2,8 +2,8 @@
 // now- keep access to it via a hidden url", then "add a timer per question (maybe like 20s) ... and change it to 10
 // questions"), on the fixture bank and a fixture schedule (e2e/fixtures/fathom/daily.json: Fathom #1 on the 28th of
 // October, #2 on the 29th, the e2e clock's today):
-// - Home's Today panel: Today's Fathom under Today's list, as wide, as tall as a free-play key, its state and no
-//   description (new, playing, then the total), nothing of Fathom left in Free play; the panel's countdown says
+// - Home's Today panel: Today's Fathom under Today's list, as wide, one line shorter than a free-play key, its state and
+//   no description (new, playing, then the total), nothing of Fathom left in Free play; the panel's countdown says
 //   "new in", for both. Hover and focus move nothing. The menu's Play group: a Today's Fathom tile with the same state.
 // - The day's ten: the schedule's, in its order, "Fathom #2" in the header. A day the schedule doesn't cover is seeded
 //   by its date (the same ten in any browser), numbered from day one; yesterday's unfinished game doesn't carry over.
@@ -104,7 +104,7 @@ async function playOut(page, ids, from = 0) {
 }
 
 for (const vp of VIEWPORTS) {
-  test(`Home: Today's Fathom under Today's list, as tall as a free-play key, its state; the menu's tile (${vp.name})`, async () => {
+  test(`Home: Today's Fathom under Today's list, one short line with its state; the menu's tile (${vp.name})`, async () => {
     const { ctx, page } = await open(browser, vp, "", undefined, { setup: setup(), reducedMotion: "reduce" });
     const key = page.getByTestId("today-fathom");
     await key.waitFor();
@@ -115,8 +115,8 @@ for (const vp of VIEWPORTS) {
     assert.ok(fathom.y >= list.y + list.height, "under Today's list");
     assert.equal(Math.round(fathom.x), Math.round(list.x));
     assert.equal(Math.round(fathom.width), Math.round(list.width));
-    // As tall as Random list (no description line, no strip); Today's list stays the big key.
-    assert.ok(Math.abs(fathom.height - random.height) <= 1, `as tall as a free-play key (${fathom.height} vs ${random.height})`);
+    // One line, shorter than Random list (no description line, no strip; owner, Nov 16); Today's list stays the big key.
+    assert.ok(fathom.height < random.height, `shorter than a free-play key (${fathom.height} vs ${random.height})`);
     assert.ok(list.height > fathom.height, "Today's list keeps its big key");
     // Its state, on one line: new before it's played.
     assert.equal((await page.getByTestId("today-fathom-status").textContent()).trim(), "new");

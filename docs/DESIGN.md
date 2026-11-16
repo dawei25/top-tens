@@ -98,7 +98,8 @@ totals in Stats (avg and best / 1000), and they sync with an account. Endless Fa
 `#fathom-endless` (owner: "remove the unlimited fathom play for now- keep access to it via a hidden url").
 
 1. **Home:** the Today panel (its countdown "new in" for both games): Today's list across the row, the big key, and
-   under it Today's Fathom, as tall as a free-play key, its state only, no description (owner, Nov 14); then directly
+   under it Today's Fathom, one line as wide as Today's list, a keycap's height, title left and state right, no
+   description (owner, Nov 14 and 16); then directly
    Free play (Random list, Random Blitz, each with a floating by-category picker that offers only categories with at
    least 3 lists a roll can land on);
    Your games (Archive, Past runs, Stats); your record (days in a row, most in a row). Home keys carry no mode tags; elsewhere tags name the mode (LIST, BLITZ). Home never names today's list: the

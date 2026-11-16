@@ -6,7 +6,8 @@
 // the thing named; Today's Fathom's total goes to submit_fathom_play once, and its results draw the day's real players
 // (fathom_day_stats) with the simulated crowd; Home's
 // account key in its header (signed out, signing in, signed in by name and never by address, the pink dot for sync
-// trouble, each in its icon, name and title; nothing between Today and Free play), the menu without an account
+// trouble, each in its icon, name and title; nothing between Today and Free play; Today's Fathom with Today's list's
+// edges, its title and state on one line), the menu without an account
 // section and its Feedback, the sign-in sheet in both modes and privacy page; and a signed-in session syncing its save
 // (merge both ways), with the account sheet, the comparison with players, and account deletion.
 // Notes ("add a note") have their own spec on the same build: note.e2e.cjs.
@@ -797,6 +798,69 @@ test("Home: the account is a key in the header, never a row; nothing comes betwe
         assert.deepEqual(here, await tops(other), `${tag}: Today's list and Free play where the plain build has them`);
         await other.close();
       }
+      await ctx.close();
+    }
+  }
+});
+
+test("Home: Today's Fathom has Today's list's edges, and its title and state share one short line (320 to 1440)", async () => {
+  // Owner, Nov 16, with a desktop screenshot: "todays fathom button is off center and ugly". It read as a tall empty
+  // box beside the panel's edges, its state at the top right and its title at the bottom left. Now, at every width and
+  // with the longest state there is (a perfect day, "1000/1000"): exactly Today's list's left and right edges and
+  // corners, shorter than a free-play key (Today's list stays the big key) and still a finger's height, the title left
+  // and the state right on one line, centred on the same row, each whole and apart.
+  const startedAt = Date.parse("2026-10-29T08:00:00-04:00");
+  const ids = Array.from({ length: 10 }, (_, i) => `q${i}`);
+  const perfect = { startedAt, finishedAt: startedAt + 120_000, ids, guesses: ids.map(() => 1), points: ids.map(() => 100), daily: { date: TODAY, n: 2 } };
+  const played = { "top-tens:v1": { ...FRESH["top-tens:v1"], fathom: { runs: [perfect], totals10: { [startedAt]: 1000 }, recent: [] } } };
+  for (const [state, seed] of [
+    ["new", FRESH],
+    ["1000/1000", played],
+  ]) {
+    for (const width of [320, 390, 640, 1024, 1440]) {
+      const small = width < 640;
+      const vp = { viewport: { width, height: small ? 844 : 900 }, isMobile: small, hasTouch: small, reducedMotion: "reduce" };
+      const { ctx, page } = await open(vp, "", seed);
+      await page.getByTestId("today-fathom").waitFor();
+      await page.evaluate(() => document.fonts.ready);
+      const tag = `${width} (${state})`;
+      const got = await page.evaluate(() => {
+        const el = (id) => document.querySelector(`[data-testid="${id}"]`);
+        const fathom = el("today-fathom");
+        const rect = (x) => {
+          const b = x.getBoundingClientRect();
+          return { left: b.left, right: b.right, top: b.top, bottom: b.bottom, height: b.height, mid: b.top + b.height / 2 };
+        };
+        const lines = (x) => {
+          const r = document.createRange();
+          r.selectNodeContents(x);
+          return new Set([...r.getClientRects()].filter((b) => b.width > 0).map((b) => Math.round(b.top))).size;
+        };
+        const label = fathom.querySelector(".key-label");
+        const status = el("today-fathom-status");
+        return {
+          list: rect(el("today-list")),
+          random: rect(el("random-list")),
+          fathom: rect(fathom),
+          label: { ...rect(label), lines: lines(label) },
+          status: { ...rect(status), lines: lines(status), text: status.textContent.trim() },
+          radius: ["today-list", "random-list", "today-fathom"].map((id) => getComputedStyle(el(id)).borderRadius),
+        };
+      });
+      const { list, random, fathom, label, status } = got;
+      assert.equal(status.text, state === "new" ? "new" : state, tag);
+      assert.ok(fathom.top >= list.bottom, `${tag}: under Today's list`);
+      assert.ok(Math.abs(fathom.left - list.left) < 0.5, `${tag}: Today's list's left edge (${fathom.left} vs ${list.left})`);
+      assert.ok(Math.abs(fathom.right - list.right) < 0.5, `${tag}: Today's list's right edge (${fathom.right} vs ${list.right})`);
+      assert.equal(new Set(got.radius).size, 1, `${tag}: the same corners as the other keys (${got.radius})`);
+      assert.ok(fathom.height < random.height && fathom.height < list.height, `${tag}: shorter than a free-play key (${fathom.height} vs ${random.height})`);
+      assert.ok(fathom.height >= 44, `${tag}: a finger's height (${fathom.height})`);
+      assert.ok(label.lines === 1 && status.lines === 1, `${tag}: the title and the state each on one line`);
+      assert.ok(Math.abs(label.mid - status.mid) <= 1, `${tag}: the title and the state centred on one row (${label.mid} vs ${status.mid})`);
+      assert.ok(Math.abs(label.mid - fathom.mid) <= 2, `${tag}: the row centred in the key (${label.mid} vs ${fathom.mid})`);
+      assert.ok(status.left - label.right >= 12, `${tag}: the state apart from the title (${status.left - label.right}px)`);
+      assert.ok(label.left - fathom.left >= 12 && fathom.right - status.right >= 12, `${tag}: both inside the key's padding`);
+      assert.ok(await noHScroll(page), tag);
       await ctx.close();
     }
   }

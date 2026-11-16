@@ -482,8 +482,8 @@ a {
  * Home system.
  * - Groups (Today, Free play, Your games, Your record) share one label style and one spacing scale:
  *   28px between groups, 12px inside a group.
- * - Every play key is a mode key: its status on top (right-aligned), the action below. No rules tags: the title
- *   names the mode and the color carries it.
+ * - Every play key is a mode key: its status on top (right-aligned), the action below; Today's Fathom has the same
+ *   two parts on one line (.one-line). No rules tags: the title names the mode and the color carries it.
  * - Mode identity: classic is pink, Blitz is gold, on the accent and the fill.
  * - Today's key is always filled with its mode's color; played, it dims a step and shows the result.
  *   Free-play keys are quiet; Your games (archive, past runs) are quieter still.
@@ -701,10 +701,39 @@ a {
 .free-key.blitz {
   --accent: var(--gold);
 }
-/* Today's Fathom (owner, Nov 14): under Today's list, a key as tall as free play's, quiet like them; its state in
-   cyan until it's played, then settled. */
+/* Today's Fathom (owner, Nov 14): under Today's list and as wide, quiet like free play's keys; its state in cyan until
+   it's played, then settled. One line (owner, Nov 16: "off center and ugly", a tall box with its title and state at
+   opposite corners): the title left, the state right, a keycap's height, so Today's list stays the big key. */
 .mode-key.fathom {
   --accent: var(--cyan);
+}
+/* A mode key on one line: the same two parts side by side (the status line first in the markup, so it goes right).
+   The status line takes the room between them, and the ENTER cap floats at its left end, beside the title, where a
+   wide key has room for it (a phone's key doesn't: under 640px it has no cap). */
+.mode-key.one-line {
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 18px;
+}
+.mode-key.one-line .mode-key-top {
+  flex: 1;
+}
+@media (max-width: 639px) {
+  .mode-key.one-line .enter-hint {
+    display: none;
+  }
+}
+/* Small phones: tighter letters, so the title and the longest state ("1000/1000") share the line with room to spare
+   (at 320 they overlapped by 21px, at 360 had 3px between them). */
+@media (max-width: 374px) {
+  .mode-key.one-line .key-label {
+    letter-spacing: 0.1em;
+  }
+  .mode-key.one-line .key-sub {
+    letter-spacing: 0.08em;
+  }
 }
 .today-stack .mode-key.fathom .key-sub {
   font-size: 17px;
