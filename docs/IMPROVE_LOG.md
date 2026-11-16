@@ -2,6 +2,16 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-16, launch-week morning check (Mon)
+
+- Notes and ratings since yesterday's check: none. Plays all time: still 167 across 85 lists (no finished list game
+  in 24 hours).
+- Missed guesses: 5, one browser, all on yesterday's longest-running-tv: cable and streaming dramas, a cooking show,
+  wrestling. The list is scripted broadcast-network series, as its prompt says; "isn't in this ranking" is right. No fix.
+- Fathom: no guesses stored for Fathom #1's questions. Checked the live client (every backend call blocked, nothing
+  written): Today's Fathom sends submit_fathom_guess and fathom_compare on lock-in, so nobody played it. The daily
+  totals and Fathom feedback migrations still aren't run (`fathom_day_stats` missing).
+
 ## 2026-11-15, weekly lineup (week of Nov 16), Sunday fallback
 
 - No answer from the owner by Sunday 18:00 HKT: scheduled as proposed. Mon metro-cities, Tue painters, Wed
