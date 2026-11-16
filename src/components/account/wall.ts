@@ -11,13 +11,15 @@ import { accountsOn, BACKEND } from "../../net/config";
 export const wallOn: boolean = accountsOn && !!BACKEND?.signIn.includes("google");
 
 /**
- * A free-play game the player asked for: a roll (Random list or Random Blitz, from Home, the menu or Roll new list, in a
- * category if one was picked, never landing on `leave`), or Play again on a past run. (A list's results offered its
+ * A game the wall holds back: a roll (Random list or Random Blitz, from Home, the menu or Roll new list, in a category
+ * if one was picked, never landing on `leave`), Play again on a past run, or an archive day. (A list's results offered its
  * Blitz, an "open" ask, until the owner kept the modes separate, Nov 14: one kept from then reads as no ask.)
  */
 export type FreeAsk =
   | { kind: "roll"; mode: "list" | "blitz"; category?: string; leave?: string }
-  | { kind: "replay"; mode: "list" | "blitz"; id: string };
+  | { kind: "replay"; mode: "list" | "blitz"; id: string }
+  /** An archive day's list (#daily-<date>), held back too once the free games are used up (owner, Nov 16). */
+  | { kind: "daily"; date: string };
 
 /**
  * sessionStorage: the game asked for, kept while a sign-in from the wall leaves the page (a blocked popup takes the tab
@@ -34,7 +36,9 @@ const optStr = (x: unknown) => x === undefined || typeof x === "string";
 export function readAsk(raw: unknown, now: number): FreeAsk | null {
   if (!raw || typeof raw !== "object") return null;
   const a = raw as Record<string, unknown>;
-  if (typeof a.at !== "number" || now - a.at > ASK_TTL || a.at > now + 60_000 || !MODES.has(a.mode as string)) return null;
+  if (typeof a.at !== "number" || now - a.at > ASK_TTL || a.at > now + 60_000) return null;
+  if (a.kind === "daily") return typeof a.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(a.date) ? { kind: "daily", date: a.date } : null;
+  if (!MODES.has(a.mode as string)) return null;
   const mode = a.mode as "list" | "blitz";
   if (a.kind === "roll" && optStr(a.category) && optStr(a.leave)) {
     return { kind: "roll", mode, ...(a.category ? { category: a.category as string } : {}), ...(a.leave ? { leave: a.leave as string } : {}) };

@@ -14,6 +14,12 @@ describe("the ask kept across a full-page sign-in", () => {
       leave: "airports",
     });
     expect(readAsk({ kind: "replay", mode: "list", id: "mountains", at: now }, now)).toEqual({ kind: "replay", mode: "list", id: "mountains" });
+    // An archive day (since Nov 16 the wall holds those back too, once the free games are used up).
+    expect(readAsk({ kind: "daily", date: "2026-11-08", at: now }, now)).toEqual({ kind: "daily", date: "2026-11-08" });
+  });
+  it("an archive day's ask names a date and nothing else", () => {
+    for (const date of [undefined, "", "2026-11-8", "#archive", "2026-11-08/x"]) expect(readAsk({ kind: "daily", date, at: now }, now)).toBeNull();
+    expect(readAsk({ kind: "daily", date: "2026-11-08", at: now - ASK_TTL - 1 }, now)).toBeNull();
   });
   it("reads an old Play Blitz ask (a list's results offered its Blitz until Nov 14) as no ask", () => {
     expect(readAsk({ kind: "open", mode: "blitz", id: "airports", at: now }, now)).toBeNull();

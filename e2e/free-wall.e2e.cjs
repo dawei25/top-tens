@@ -6,9 +6,13 @@
 // the menu and Roll new list, over the screen the player was on, which closing leaves as it was; Today's list still
 // opens, from Home and from the wall's quiet key; a game in progress resumes; a link to a free list counts, and one
 // past the free ones shows the wall alone, closing back where the player came from; an accidental open doesn't count;
-// Play again and a finished daily's Random list ask too (no list's results offer its Blitz since Nov 14); signing in starts the game asked for (by popup, and with the popup blocked, after a
-// trip to Google and back), and a signed-in player is never asked; the build without a backend has no wall; the
-// wall's keys never move anything at 390 and 1440.
+// Play again and a finished daily's Random list ask too (no list's results offer its Blitz since Nov 14); signing in
+// starts the game asked for (by popup, and with the popup blocked, after a trip to Google and back), and a signed-in
+// player is never asked; the build without a backend has no wall; the wall's keys never move anything at 390 and 1440.
+// Archive days (owner, Nov 16: "make sure they cant play the archives either until they sign in"): once the free games
+// are used up, an archive row asks over the archive and a past day's link gets the wall alone; a day under way resumes,
+// a finished one shows its result, and today's list still opens; before then an archive day plays freely and doesn't
+// count; signing in opens the day asked for.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { chromium, VIEWPORTS, NOW, TODAY, guess, noHScroll, open: openPlain, store } = require("./helpers.cjs");
@@ -41,6 +45,8 @@ const FREE_LISTS = ["africa-population", "asia-population", "us-states-area", "u
 const played = (n, more = {}) => ({
   "top-tens:v1": { ...FRESH["top-tens:v1"], listRuns: FREE_LISTS.slice(0, n).map((id, i) => freeRun(id, (i + 2) * 3_600_000)), ...more },
 });
+/** An archive day nobody in these specs has played: Oct 27, the airports list (today is Oct 29, NOW). */
+const PAST = "2026-10-27";
 const hashOf = (page) => page.evaluate(() => location.hash);
 const sheet = (page) => page.getByTestId("free-wall-sheet");
 /** The wall is open: its heading, its line, the Google key focused first (no keyboard on a phone). */
@@ -291,6 +297,112 @@ test("a signed-in player is never asked, from a key or a link (phone)", async ()
   await rollList(page);
   await settle();
   assert.equal(await sheet(page).count(), 0);
+  // An archive day too, from its row and from a link.
+  await page.evaluate(() => (location.hash = "#archive"));
+  await page.locator(`[data-testid="archive-row"][data-date="${PAST}"]`).click();
+  await page.waitForFunction((d) => location.hash === `#daily-${d}`, PAST);
+  await page.getByLabel("Your guess").waitFor();
+  await page.evaluate(() => (location.hash = "#daily-2026-10-28"));
+  await page.getByLabel("Your guess").waitFor();
+  await settle();
+  assert.equal(await sheet(page).count(), 0);
+  await ctx.close();
+});
+
+// Owner, Nov 16: "once a player gets notified they have to sign in to continue playing make sure they cant play the
+// archives either until they sign in either - rn they can still play that completely freely."
+test("after the free games, an archive row asks over the archive; a day under way resumes, a finished one shows, today's opens (phone)", async () => {
+  const done = { puzzleId: "islands", found: [1, 2], lives: 0, log: [], status: "lost", startedAt: T - 9_000_000, finishedAt: T - 8_900_000 };
+  const underway = { puzzleId: "spotify-artists", found: [], lives: 4, log: [], hints: [3], status: "playing", startedAt: T - 7_000_000 };
+  const seed = played(2, { dailyGames: { "2026-10-25": done }, games: { islands: done, "spotify-artists": underway } });
+  const { ctx, page } = await open(phone, "#archive", seed, undefined, withGoogle({}));
+  const row = (d) => page.locator(`[data-testid="archive-row"][data-date="${d}"]`);
+  await row(PAST).waitFor();
+
+  // A day never played: the wall, over the archive; nothing opened, nothing saved.
+  const before = await store(page);
+  await row(PAST).click();
+  await walled(page);
+  assert.equal(await hashOf(page), "#archive");
+  assert.deepEqual(await store(page), before, "the save is as it was");
+  assert.ok(await noHScroll(page));
+  await page.getByTestId("free-wall-close").click();
+  await gone(page);
+  assert.equal(await hashOf(page), "#archive");
+  await page.getByTestId("archive-table").waitFor();
+
+  // A day under way resumes; a finished one shows its result.
+  await row("2026-10-26").click();
+  await page.waitForFunction(() => location.hash === "#daily-2026-10-26");
+  await page.locator('[data-testid="lives"][data-lives="4"]').waitFor();
+  await page.getByLabel("Your guess").waitFor();
+  assert.equal(await sheet(page).count(), 0);
+  await page.getByTestId("nav-back").click();
+  await row("2026-10-25").click();
+  await page.getByTestId("results").waitFor();
+  assert.equal(await sheet(page).count(), 0);
+  await page.getByTestId("nav-back").click();
+
+  // Today's list opens from its row, never walled; and the wall's quiet key goes there too.
+  await row(TODAY).click();
+  await page.waitForFunction((d) => location.hash === `#daily-${d}`, TODAY);
+  await page.getByLabel("Your guess").waitFor();
+  assert.equal(await sheet(page).count(), 0);
+  await page.getByTestId("nav-back").click();
+  await row("2026-10-24").click();
+  await walled(page);
+  assert.equal(await page.getByTestId("free-wall-alt").getAttribute("data-go"), "today");
+  await page.getByTestId("free-wall-alt").click();
+  await gone(page);
+  await page.waitForFunction((d) => location.hash === `#daily-${d}`, TODAY);
+  await ctx.close();
+});
+
+test("a past day's link gets the wall alone, closing to the archive; signing in opens that day (desktop)", async () => {
+  const { ctx, page } = await open(desktop, `#daily-${PAST}`, played(2), undefined, withGoogle({}));
+  await walled(page);
+  await page.getByTestId("free-wall-screen").waitFor();
+  assert.equal(await page.getByTestId("title-card").count(), 0, "nothing of the day behind the wall");
+  await page.getByTestId("free-wall-close").click();
+  await gone(page);
+  await page.getByTestId("archive-table").waitFor();
+  assert.equal(await hashOf(page), "#archive");
+
+  await page.evaluate((d) => (location.hash = `#daily-${d}`), PAST);
+  await walled(page);
+  const popup = await pressForPopup(page);
+  await popup.waitForEvent("close");
+  await gone(page);
+  assert.equal(await hashOf(page), `#daily-${PAST}`);
+  await page.getByTestId("title-card").waitFor();
+  await page.getByLabel("Your guess").waitFor();
+  await ctx.close();
+});
+
+test("before the free games are used up, an archive day plays freely and doesn't count; signing in at its wall opens it (desktop)", async () => {
+  const { ctx, page } = await open(desktop, "#archive", played(1), undefined, withGoogle({}));
+  // One free game played: an archive day opens and plays.
+  await page.locator(`[data-testid="archive-row"][data-date="${PAST}"]`).click();
+  await page.waitForFunction((d) => location.hash === `#daily-${d}`, PAST);
+  await findTop(page, "airports");
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("give-up").click();
+  await page.getByTestId("results").waitFor();
+  // It didn't count: the second free game still starts.
+  await page.evaluate(() => (location.hash = ""));
+  await page.getByTestId("today-list").waitFor();
+  const id = await rollList(page);
+  await findTop(page, id);
+  // Now the free games are used up: the next archive day asks, and signing in opens it.
+  await page.evaluate(() => (location.hash = "#archive"));
+  await page.locator('[data-testid="archive-row"][data-date="2026-10-28"]').click();
+  await walled(page);
+  const popup = await pressForPopup(page);
+  await popup.waitForEvent("close");
+  await gone(page);
+  await page.waitForFunction(() => location.hash === "#daily-2026-10-28");
+  await page.getByLabel("Your guess").waitFor();
+  assert.equal(await page.evaluate(() => sessionStorage.getItem("top-tens:free-ask")), null);
   await ctx.close();
 });
 
@@ -325,6 +437,9 @@ test("the build without a backend has no wall: free play runs on (desktop)", asy
   await page.getByTestId("blitz-clock").waitFor();
   await page.evaluate(() => (location.hash = "#p-rivers"));
   await page.getByTestId("title-card").waitFor();
+  // The archive too.
+  await page.evaluate((d) => (location.hash = `#daily-${d}`), PAST);
+  await page.getByLabel("Your guess").waitFor();
   assert.equal(await sheet(page).count(), 0);
   assert.equal(await page.getByTestId("account-key").count(), 0);
   await ctx.close();

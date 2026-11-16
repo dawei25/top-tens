@@ -91,11 +91,12 @@ export function accountKeyLabel(a: Pick<AccountState, "status" | "user" | "sync"
 }
 
 /**
- * The free-play wall (./FreePlayWall), the sheet a signed-out player meets when a free-play game past the free ones would
- * start (src/game/free-games.ts): its heading and its one line.
+ * The free-play wall (./FreePlayWall), the sheet a signed-out player meets when a free-play game past the free ones, or
+ * a new archive game after them, would start (src/game/free-games.ts): its heading and its one line.
  */
 export const WALL_TITLE = "Sign in to keep playing";
-export const WALL_LINE = "free play is unlimited with an account. today's list is always free.";
+// Its last two words wrap as one (a non-breaking space), so "free." never sits alone on a phone's last line.
+export const WALL_LINE = `free play and the archive are unlimited with an account. today's list is always${String.fromCharCode(160)}free.`;
 
 /** The wall's quiet way out: today's list while it waits to be played, else Home. */
 export function wallAlt(todayPlayed: boolean): { go: "today" | "home"; label: string } {
