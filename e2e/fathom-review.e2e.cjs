@@ -5,7 +5,7 @@
 //   overkill ... id just remove it"): no question card, reveal or results says one, in any round; How to play still
 //   explains the score, and Blitz keeps its own line.
 // - SHARE as on lists and Blitz: the phone's share sheet, else a copy and "Copied".
-// - Home's Today's Fathom key at 320, 360 and 375 as tall as Random list, its state on one line (UX 8); Your record's
+// - Home's Today's Fathom key at 320, 360 and 375: one line, its title and state on one row, each whole; Your record's
 //   first label ("lists played") on one line, the row as tall as it was with "played".
 // The games here are endless Fathom's (#fathom-endless, their draw seeded in its save); Today's Fathom:
 // fathom-daily.e2e.cjs.
@@ -160,14 +160,16 @@ test("SHARE: the phone's share sheet with the squares and the link; on a desktop
   }
 });
 
-test("Home on narrow phones: Today's Fathom as tall as Random list, its state on one line; lists played on one line", async () => {
+test("Home on narrow phones: Today's Fathom on one line, its title and state whole; lists played on one line", async () => {
   for (const width of [320, 360, 375]) {
     const { ctx, page } = await open(browser, at(width), "", undefined, { reducedMotion: "reduce" });
     await page.getByTestId("today-fathom").waitFor();
     const [list, fathom] = [await page.getByTestId("random-list").boundingBox(), await page.getByTestId("today-fathom").boundingBox()];
-    assert.equal(Math.round(fathom.height), Math.round(list.height), `${width}px: as tall as a free-play key`);
-    const line = await textLines(page.getByTestId("today-fathom-status"));
-    assert.ok(line.lines === 1 && !line.cut, `${width}px: "${line.text}" on one line, whole`);
+    assert.ok(fathom.height < list.height, `${width}px: shorter than a free-play key (the longest state: backend.e2e.cjs)`);
+    for (const part of [page.getByTestId("today-fathom-status"), page.getByTestId("today-fathom").locator(".key-label")]) {
+      const line = await textLines(part);
+      assert.ok(line.lines === 1 && !line.cut, `${width}px: "${line.text}" on one line, whole`);
+    }
     // Your record: "lists played" on one line, and the row as tall as the next label's ("perfect", one word).
     const dts = page.locator('[data-testid="home-record"] dt');
     const first = await textLines(dts.first());

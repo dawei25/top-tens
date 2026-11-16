@@ -17,7 +17,8 @@ import { pickerCategories } from "./freeplay";
 
 /**
  * A home key: its status on top (right), the action below. Today's key carries its mode's accent while unplayed
- * and settles once played; free-play keys stay quiet. The mode shows in the color, not in a tag.
+ * and settles once played; free-play keys stay quiet. The mode shows in the color, not in a tag. `oneLine` lays the
+ * same parts out on one line, the action left and the status right, a keycap's height (Today's Fathom).
  */
 function ModeKey({
   mode,
@@ -25,6 +26,7 @@ function ModeKey({
   status,
   today = false,
   done = false,
+  oneLine = false,
   disabled = false,
   btnRef,
   testId,
@@ -35,6 +37,7 @@ function ModeKey({
   status: React.ReactNode;
   today?: boolean;
   done?: boolean;
+  oneLine?: boolean;
   disabled?: boolean;
   btnRef?: React.Ref<HTMLButtonElement>;
   testId: string;
@@ -43,7 +46,7 @@ function ModeKey({
   return (
     <button
       ref={btnRef}
-      className={`key mode-key ${mode} ${today ? "today" : ""} ${done ? "done" : ""}`}
+      className={`key mode-key ${mode} ${today ? "today" : ""} ${done ? "done" : ""} ${oneLine ? "one-line" : ""}`}
       onClick={onClick}
       disabled={disabled}
       data-testid={testId}
@@ -318,7 +321,7 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
           <Countdown label="new in" />
         </div>
         {/* Today's list across the whole card, the big key (UX 6: the main thing gets the most room); Today's Fathom
-            under it, a key as tall as free play's, its state and no description (owner, Nov 14). */}
+            under it, as wide, one short line: its title and its state, no description (owner, Nov 14 and 16). */}
         <div className="today-stack">
           <ModeKey
             mode="classic"
@@ -331,7 +334,7 @@ export function Home({ index, blitzLists, freeLists, entry, archiveCount, onDail
             disabled={!entry}
             onClick={onDaily}
           />
-          <ModeKey mode="fathom" testId="today-fathom" title={FATHOM_TODAY} status={fathom.status} done={fathom.done} onClick={onFathom} />
+          <ModeKey mode="fathom" oneLine testId="today-fathom" title={FATHOM_TODAY} status={fathom.status} done={fathom.done} onClick={onFathom} />
         </div>
       </section>
 
