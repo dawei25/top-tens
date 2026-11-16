@@ -11,6 +11,11 @@ interface Props {
   today: string;
   onBack: () => void;
   onHome: () => void;
+  /**
+   * A row was pressed (a link to its day): App may hold a new archive game back for a sign-in first
+   * (src/game/free-games.ts), opening the wall over the archive instead (it prevents the link's default).
+   */
+  onOpen?: (date: string, e: React.MouseEvent) => void;
 }
 
 /** A cell's status under its title. Unplayed cells show none: a new player would see "not played" on every row. */
@@ -37,7 +42,7 @@ function Status({ r }: { r?: { text: string; tone: string } }) {
  * opens its own one-try game; old ones played late don't count toward days in a row. (Blitz is free play only: past
  * Blitz rounds are in Past runs.)
  */
-export function Archive({ index, schedule, today, onBack, onHome }: Props) {
+export function Archive({ index, schedule, today, onBack, onHome, onOpen }: Props) {
   const saved = load();
   const list = archive(schedule, today);
   const title = (id: string) => index.find((p) => p.id === id)?.title ?? id;
@@ -80,6 +85,7 @@ export function Archive({ index, schedule, today, onBack, onHome }: Props) {
                   data-testid="archive-row"
                   data-date={e.date}
                   href={`#daily-${e.date}`}
+                  onClick={(ev) => onOpen?.(e.date, ev)}
                 >
                   <span className="sr-only">{day}: </span>
                   <span className="arch-name">

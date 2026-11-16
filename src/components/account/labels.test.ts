@@ -122,7 +122,11 @@ describe("syncLabel", () => {
 describe("the free-play wall's copy", () => {
   it("says it plainly, in the game's voice", () => {
     expect(WALL_TITLE).toBe("Sign in to keep playing");
-    expect(WALL_LINE).toBe("free play is unlimited with an account. today's list is always free.");
+    // Since Nov 16 the wall holds back new archive games too (owner: "make sure they cant play the archives either"):
+    // the line says so, to stay true.
+    expect(WALL_LINE.replace(/ /g, " ")).toBe("free play and the archive are unlimited with an account. today's list is always free.");
+    // Its last words wrap as one: "free." alone on the third line at 390 read as an afterthought.
+    expect(WALL_LINE.endsWith("always free.")).toBe(true);
     expect(wallAlt(false)).toEqual({ go: "today", label: "Play today's list" });
     expect(wallAlt(true)).toEqual({ go: "home", label: "Home" });
   });
@@ -131,7 +135,7 @@ describe("the free-play wall's copy", () => {
       expect(s).not.toMatch(/[—–\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u);
     }
     expect(WALL_LINE).not.toMatch(/\n/);
-    expect(WALL_LINE.length).toBeLessThanOrEqual(80);
+    expect(WALL_LINE.length).toBeLessThanOrEqual(90);
     // UPPERCASE in the sheet's heading: one line on a 320px phone.
     expect(WALL_TITLE.length).toBeLessThanOrEqual(24);
   });

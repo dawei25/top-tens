@@ -14,7 +14,7 @@ import type { Lexicon } from "./game/junk";
 import { loadIndex, loadLexicon, pickRandom, randomPuzzleId, type PuzzleMeta } from "./game/puzzles";
 import { blitzAvailable, freshBlitz } from "./game/blitz";
 import { freshList, lastPlayed } from "./game/history";
-import { opensPlayedGame, signInToPlay } from "./game/free-games";
+import { archiveNeedsSignIn, opensPlayedGame, signInToPlay } from "./game/free-games";
 import {
   blitzOfTheDay,
   rollHoldouts,
@@ -342,21 +342,28 @@ function Screens() {
   };
   const current = todayEntry(schedule, today);
 
-  // Free play without an account (src/game/free-games.ts): past the free games, a new one asks the player to sign in.
-  // Every way into a new free game comes through here (Home's keys and category chips, the menu's tiles, Roll new list,
-  // Play again); a link to one is checked as it arrives (linkWalled, below). Dailies never are.
-  const mustSignIn = (saved = load()) =>
-    wallOn && signInToPlay(saved, { schedule, today, signedIn: account.status === "in", accounts: true, freeStarts: freeStarts() });
+  // Free play without an account (src/game/free-games.ts): past the free games, a new one asks the player to sign in,
+  // and so does a new archive game after them (owner, Nov 16). Every way into a new free game comes through here (Home's
+  // keys and category chips, the menu's tiles, Roll new list, Play again), and the archive's rows too; a link to one is
+  // checked as it arrives (linkWalled, below). Today's list and Today's Fathom never are.
+  const signIn = (signedIn: boolean) => ({ schedule, today, signedIn, accounts: wallOn, freeStarts: freeStarts() });
+  const mustSignIn = (a: FreeAsk, saved = load()) =>
+    a.kind === "daily" ? archiveNeedsSignIn(saved, a.date, signIn(account.status === "in")) : signInToPlay(saved, signIn(account.status === "in"));
   /** Opens the wall over the screen instead of starting `a`, if it must: true when it did. */
   const askFirst = (a: FreeAsk): boolean => {
-    if (!mustSignIn()) return false;
+    if (!mustSignIn(a)) return false;
     setWall(a);
     return true;
   };
-  /** Starts a free game asked for (after signing in at the wall, too). */
+  /** Starts a game asked for (after signing in at the wall, too). */
   const start = (a: FreeAsk) => {
     if (a.kind === "roll") return a.mode === "list" ? roll(a.category, a.leave) : void blitzRoll(a.category, a.leave);
+    if (a.kind === "daily") return void (location.hash = `#daily-${a.date}`);
     return held(a.id) ? undefined : replayNow(a.mode, a.id);
+  };
+  /** An archive row (a link to its day): the wall instead, over the archive, when a new archive game must wait. */
+  const openDay = (date: string, e: React.MouseEvent) => {
+    if (askFirst({ kind: "daily", date })) e.preventDefault();
   };
   startAsk.current = start;
   const freeRoll = (category?: string, leave?: string) => {
@@ -379,12 +386,14 @@ function Screens() {
   };
 
   /**
-   * Whether this route is a link to a free game that would start a new one while the player must sign in first:
-   * `#p-<id>` (not today's list: that address opens today's own game) or a fresh round at `#blitz-<id>` (a past
-   * round's results never). A game under way resumes and a finished list game shows its result, as always.
+   * Whether this route is a link to a game that would start a new one while the player must sign in first:
+   * `#p-<id>` (not today's list: that address opens today's own game), a fresh round at `#blitz-<id>` (a past round's
+   * results never), or an archive day at `#daily-<date>` once the free games are used up. A game under way resumes and
+   * a finished one shows its result, as always.
    */
   const linkWalled = (r: Route, signedIn: boolean): boolean => {
     if (!wallOn || signedIn) return false;
+    if (r.screen === "daily") return archiveNeedsSignIn(load(), r.date, signIn(false));
     let mode: "list" | "blitz";
     if (r.screen === "game") mode = "list";
     else if (r.screen === "blitz" && r.run === undefined) mode = "blitz";
@@ -395,7 +404,7 @@ function Screens() {
     // A Blitz that's closed (it would spoil a daily) says so on its own screen: no game starts there.
     if (mode === "blitz" && !blitzAvailable({ id: meta.id, blitz: !!meta.blitz }, schedule, today, saved)) return false;
     if (opensPlayedGame(saved, mode, r.id)) return false;
-    return signInToPlay(saved, { schedule, today, signedIn: false, accounts: true, freeStarts: freeStarts() });
+    return signInToPlay(saved, signIn(false));
   };
   // Decided once per arrival (see linkGate); while a sign-in is still coming back, the screen waits to know.
   if (linkGate.current?.route !== route && account.status !== "loading") {
@@ -473,7 +482,7 @@ function Screens() {
     if (route.screen === "dailyblitz") return <Loading />;
 
     if (route.screen === "archive") {
-      return <Archive index={index} schedule={schedule} today={today} onBack={back} onHome={home} />;
+      return <Archive index={index} schedule={schedule} today={today} onBack={back} onHome={home} onOpen={openDay} />;
     }
 
     if (route.screen === "daily" || route.screen === "game") {

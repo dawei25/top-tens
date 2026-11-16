@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { BlitzRun, BlitzState } from "./blitz";
 import type { DailyEntry } from "./daily";
-import { FREE_GAMES_BEFORE_SIGN_IN, freeGamesPlayed, opensPlayedGame, signInToPlay } from "./free-games";
+import { archiveNeedsSignIn, FREE_GAMES_BEFORE_SIGN_IN, freeGamesPlayed, opensPlayedGame, signInToPlay } from "./free-games";
 import type { ListRun } from "./history";
 import type { GameState } from "./state";
 import type { Saved } from "./storage";
@@ -125,5 +125,55 @@ describe("a visit that shows a game already played", () => {
     expect(opensPlayedGame({ ...empty, blitzLive: { c: live("c", 500) } }, "blitz", "c")).toBe(true);
     // A finished round is in the history; the next visit is a new round.
     expect(opensPlayedGame({ ...empty, blitzRuns: { c: [round(500)] } }, "blitz", "c")).toBe(false);
+  });
+});
+
+// Owner, Nov 16: "once a player gets notified they have to sign in to continue playing make sure they cant play the
+// archives either until they sign in either - rn they can still play that completely freely." Archive days still
+// never count toward the free games; once those are used up, a new archive game waits for a sign-in too.
+describe("archive dailies once the free games are used up", () => {
+  /** "old" ran on the 10th and "older" on the 8th; today's list is "today"; "later" runs on the 20th. */
+  const days: DailyEntry[] = [{ n: 0, date: "2026-11-08", id: "older" }, ...schedule];
+  const o = (signedIn = false, accounts = true) => ({ schedule: days, today: TODAY, signedIn, accounts });
+  const two: Saved = { ...empty, listRuns: [run("a", 100), run("b", 200)] };
+
+  it("asks for an archive day only once the free games are used up", () => {
+    expect(archiveNeedsSignIn(empty, "2026-11-10", o())).toBe(false);
+    expect(archiveNeedsSignIn({ ...empty, listRuns: [run("a", 100)] }, "2026-11-10", o())).toBe(false);
+    expect(archiveNeedsSignIn(two, "2026-11-10", o())).toBe(true);
+    expect(archiveNeedsSignIn(two, "2026-11-08", o())).toBe(true);
+  });
+
+  it("archive days played before then never count toward the free games", () => {
+    const s: Saved = {
+      ...empty,
+      listRuns: [run("a", 100), run("older", 300, 9)],
+      dailyGames: { "2026-11-08": game("older", 300, { status: "lost", finishedAt: 360 }) },
+      games: { old: game("old", 400, { log: [guessed] }) },
+    };
+    expect(freeGamesPlayed(s, days, TODAY)).toBe(1);
+    expect(archiveNeedsSignIn(s, "2026-11-08", o())).toBe(false);
+  });
+
+  it("never asks for today's list (a late schedule's stand-in included), a future day or a day with no list", () => {
+    expect(archiveNeedsSignIn(two, TODAY, o())).toBe(false);
+    expect(archiveNeedsSignIn(two, "2026-11-20", o())).toBe(false);
+    expect(archiveNeedsSignIn(two, "2026-11-09", o())).toBe(false);
+    // The schedule stops on the 10th: that day stands in as today's list (Home's Today key opens it).
+    expect(archiveNeedsSignIn(two, "2026-11-10", { ...o(), schedule: days.slice(0, 2) })).toBe(false);
+    expect(archiveNeedsSignIn(two, "2026-11-08", { ...o(), schedule: days.slice(0, 2) })).toBe(true);
+  });
+
+  it("a day under way resumes and a finished one shows its result; one opened and left untouched is a new game", () => {
+    expect(archiveNeedsSignIn({ ...two, games: { old: game("old", 400, { log: [guessed] }) } }, "2026-11-10", o())).toBe(false);
+    expect(archiveNeedsSignIn({ ...two, games: { old: game("old", 400, { hints: [2], lives: 4 }) } }, "2026-11-10", o())).toBe(false);
+    const locked = { "2026-11-10": game("old", 400, { status: "won", finishedAt: 500 }) };
+    expect(archiveNeedsSignIn({ ...two, dailyGames: locked }, "2026-11-10", o())).toBe(false);
+    expect(archiveNeedsSignIn({ ...two, games: { old: game("old", 400) } }, "2026-11-10", o())).toBe(true);
+  });
+
+  it("never asks a signed-in player, or in a build without accounts", () => {
+    expect(archiveNeedsSignIn(two, "2026-11-10", o(true))).toBe(false);
+    expect(archiveNeedsSignIn(two, "2026-11-10", o(false, false))).toBe(false);
   });
 });
