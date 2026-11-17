@@ -297,6 +297,7 @@ stronger.
 | (Fathom bank, Nov 17) city name groups (New York / NYC) were checked on every name-it list, wrongly flagging state lists | the check didn't look at the list's kind | city groups checked only on city lists; scripts/fathom/check.test.ts |
 | (audit, Nov 17) game-franchises: sub-series counted inside their series (Paper Mario, Black Ops) were separate answers costing a life, and famous games read as not in the ranking | the page's series totals include sub-series; titles weren't aliases | sub-series and ~200 titles count as their series; aliases.test.ts (no answer is a sub-series of a top-10 series) |
 | (audit, Nov 17) car-models: two duplicate keys in scripts/intent.ts since Nov 8 left "bmw 3" finding nothing | a duplicate object key silently drops the first | merged; a test fails on any duplicate key in scripts/ or src/ |
+| (owner, Nov 17) Fathom questions a player could read two ways: a transfer fee (wages or the contract?), "an even chance" | the judge checked key words but not whole readings, and allowed idioms for numbers | FATHOM.md Judging check 6 ("Two readings, written out"), the fathom-judge brief; a sweep of all 297 fixed 9; verdicts.json records both readings |
 
 ## What good looks like
 

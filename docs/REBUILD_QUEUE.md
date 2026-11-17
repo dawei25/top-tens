@@ -10,6 +10,10 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Fathom: enforce the two-lines rule** (sweep, Nov 17): the browser suite only checks that LOCK IN stays in view at
+      375x400; two questions took three lines without failing. Add a check that every question and definition fit in two
+      lines at 375px. Also set `left-handed-share`'s verdict to keep (its drop was for an older question with that id).
+
 - [ ] **Matcher (coordinator), from the Nov 17 audit:** on car-models a make alone ("honda") offers two top-10 models
       (fine, a choice); on franchise lists a game title known elsewhere that starts with a top-10 series' name ("Mario
       Party DS") still says it isn't in this ranking: let a top-10 series' name at the start of a title count there.
