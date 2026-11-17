@@ -3727,7 +3727,7 @@
    "question": "How long did Usain Bolt take to run 200 m in his world record?",
    "unit": "seconds",
    "answer": 19.19,
-   "fact": "That's an average of 37.52 km/h, from a standing start and round a bend.",
+   "fact": "That's an average of 37.52 km/h over the whole race.",
    "source": {
     "title": "Usain Bolt",
     "url": "https://en.wikipedia.org/wiki/Usain_Bolt"
