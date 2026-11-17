@@ -14,7 +14,7 @@ export type { RatingReason } from "../game/storage";
 /** What can be rated, and have notes: a list game, a Blitz round, a Fathom question (rate_list, submit_feedback). */
 export const RATING_MODES = ["list", "blitz", "fathom"] as const;
 export type RatingMode = (typeof RATING_MODES)[number];
-/** A list's own modes, a list game and a Blitz round: what plays and missed guesses take (never Fathom). */
+/** A list's own modes, a list game and a Blitz round: what plays take (missed guesses take Fathom's too: ./misses). */
 export type ListMode = Exclude<RatingMode, "fathom">;
 
 export const isRatingMode = (x: unknown): x is RatingMode => (RATING_MODES as readonly unknown[]).includes(x);

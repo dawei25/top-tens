@@ -1,5 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { BlitzResult, BlitzState } from "../game/blitz";
+import type { NameRead } from "../game/fathom-name";
+import type { Lexicon } from "../game/junk";
 import type { GameState } from "../game/state";
 import { load, save } from "../game/storage";
 import type { GuessResult } from "../game/types";
@@ -7,7 +9,7 @@ import { accountsOn, backendOn } from "./config";
 import type { CrowdStats, ListAverages } from "./crowd";
 import { compareKey, FATHOM_GUESSES, FATHOM_PLAYS, fathomDayKey, type CompareRound, type FathomCrowd, type FathomGuess, type FathomPlay } from "./fathom";
 import { cleanNote, FEEDBACK, type Feedback } from "./feedback";
-import { cleanMiss, missKind, MISSES, type Miss } from "./misses";
+import { cleanMiss, missKind, MISSES, nameMissKind, type Miss, type MissKind, type MissMode } from "./misses";
 import { enqueue, localOutboxStore } from "./outbox";
 import { invalidRating, ratingKey, withRating, type ListMode, type Rating, type RatingMode, type RatingReason } from "./ratings";
 import type { SyncSave } from "./sync/merge";
@@ -252,7 +254,23 @@ export function reportFathomDaily(date: string, total: number): boolean {
  */
 export function reportGuess(listId: string, mode: ListMode, typed: string, result: GuessResult | BlitzResult): boolean {
   if (!backendOn) return false;
-  const kind = missKind(result);
+  return queueMiss(listId, mode, typed, missKind(result));
+}
+
+/**
+ * A name was just typed and locked in (or Entered) on a Fathom name-it round: pass the question's id, what was typed,
+ * how the round read it and the lexicon it read it with. A name the round didn't take (`nameMissKind`: not on its list,
+ * a thing of another kind, a city it has no figure for, junk) is kept as a list's miss is, under mode fathom with the
+ * question's id for the list's; a name it took or offered, the yardstick and a way of giving up are not. The number
+ * rounds never call this (their guesses go to submitFathomGuess). Until the fathom_misses migration has run the
+ * server refuses mode fathom and the miss is dropped, as any refused one. True when it was queued.
+ */
+export function reportNameMiss(questionId: string, typed: string, read: NameRead, lex?: Lexicon): boolean {
+  if (!backendOn) return false;
+  return queueMiss(questionId, "fathom", typed, nameMissKind(read, typed, lex));
+}
+
+function queueMiss(listId: string, mode: MissMode, typed: string, kind: MissKind | null): boolean {
   if (!kind) return false;
   const miss: Miss = { listId, mode, kind, text: cleanMiss(typed), at: Date.now() };
   try {
