@@ -10,7 +10,9 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
-- [ ] **Fathom: enforce the two-lines rule** (sweep, Nov 17): the browser suite only checks that LOCK IN stays in view at
+- [ ] **Fathom: enforce the two-lines rule** (sweep and timer, Nov 17): at 320x400 three questions put LOCK IN 11px under
+      the keyboard (hot-dog-eating-record, record-transfer-fee, old-faithful-interval): shorten their definitions, and add a
+      320x400 check beside the 375x400 one. the browser suite only checks that LOCK IN stays in view at
       375x400; two questions took three lines without failing. Add a check that every question and definition fit in two
       lines at 375px. Also set `left-handed-share`'s verdict to keep (its drop was for an older question with that id).
 

@@ -67,6 +67,10 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
     play and the archive are unlimited with an account. today's list is always free."), with a key to today's list, and
     signing in carries on to what the player asked for. (Owner, Nov 14: "after a user plays more than once in free
     play, they have to sign in with google to continue playing -> encourages user signups!"; `e2e/free-wall.e2e.cjs`.)
+25. **A rule that can cost the player shows itself before it matters.** Big, in the game's own look, and at full the
+    moment the round starts: Fathom's 17px "0:19" in a corner went unnoticed until time ran out (owner, Nov 17:
+    "didnt even realize it was there until it was too late"), so the clock became a diver's air tank across the card
+    with the seconds in big type. (`e2e/fathom-daily.e2e.cjs`.)
 
 ## Look
 

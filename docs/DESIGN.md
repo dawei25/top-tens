@@ -89,10 +89,13 @@ account key: their headers are full, and HOME is one press away (UX.md 19). **Se
 switch and reset all progress (Fathom's too). **Today's Fathom** (`#fathom`), the estimation game, a daily since Nov 15 (owner, Nov 14: "id like fathom to have a
 today's fathom"): ten questions a day, the same for everyone (an easy opener, estimates, two percents, two years, a
 name-it round; `public/fathom/daily.json`, written ahead by `scripts/fathom/daily.ts`, never repeating until the bank
-runs out), one try, 20 seconds a question (at 0 a typed guess that reads locks in, else "Time's up" and 0), scored by
-plain closeness out of 1000 with no scoring line on screen (How to play explains it, UX 21; docs/FATHOM.md). The
-question card's header holds the clock and ten cells filling with each round's points and the running total. Its
-results show the players' curve and "you did better than X% of players today". Its key sits under Today's list in
+runs out), one try, 25 seconds a question (owner, Nov 17; at 0 a typed guess that reads locks in, else "Time's up"
+and 0), scored by plain closeness out of 1000 with no scoring line on screen (How to play explains it, UX 21;
+docs/FATHOM.md). The question card's clock is a diver's air (owner, Nov 17: "make the timer for fathom more
+apparent"): the seconds left in big cyan type at the header's end, over a pixel tank as wide as the card, full when the
+question shows and draining, with bubbles at its edge, pink for the last five seconds (a soft tick for the last three
+with sound on). Under it, ten cells fill with each round's points, with the running total. Its results show the
+players' curve and "you did better than X% of players today", then Share and Home side by side (owner, Nov 17). Its key sits under Today's list in
 Home's Today panel, its tile in the menu's Play group; its games are in Past runs ("Fathom #12") and its ten-question
 totals in Stats (avg and best / 1000), and they sync with an account. Endless Fathom plays only at the hidden
 `#fathom-endless` (owner: "remove the unlimited fathom play for now- keep access to it via a hidden url").
