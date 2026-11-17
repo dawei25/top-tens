@@ -40,7 +40,7 @@ export interface NameList {
 }
 
 /** The country lists, which share one set of countries (by name) so a country means the same in every round. */
-export const COUNTRY_LISTS = ["countries-population", "countries-area", "land-borders"];
+export const COUNTRY_LISTS = ["countries-population", "countries-area", "land-borders", "countries-density"];
 /** The US state lists (Nov 17): the 50 states, the same set in both, typed the same way. */
 export const STATE_LISTS = ["us-states-population", "us-states-area"];
 /** What a US state list names: "Name a US state with about 5 million people". */
@@ -317,6 +317,27 @@ async function areaRows(title: string): Promise<Map<string, number>> {
   return out;
 }
 
+/**
+ * The density table's rows (Nov 17): each country's people per square kilometre of land, by the country its
+ * "Demographics of ..." link names ("Demographics of Republic of the Congo"), its rows for dependencies included.
+ */
+async function densityRows(title: string): Promise<{ country: string; density: number }[]> {
+  const $ = await fetchPage(title);
+  const { header, body } = splitHeader(tableGrid($, wikitables($)[0]));
+  const col = header.findIndex((h) => /density.*km/i.test(h));
+  if (col < 0) throw new Error(`no density column on ${title}: ${header.join(" | ")}`);
+  const rows: { country: string; density: number }[] = [];
+  for (const row of body) {
+    const text = row[0]?.text ?? "";
+    if (text === "World") continue;
+    const density = Number((row[col]?.text ?? "").replace(/,/g, ""));
+    if (!Number.isFinite(density) || density <= 0) throw new Error(`${text}: density "${row[col]?.text}"`);
+    const country = (row[0]?.link ?? text).replace(/^Demographics of (?:the )?/, "");
+    rows.push({ country, density });
+  }
+  return rows;
+}
+
 /** The list ids named on the command line (`lists.ts us-states-population`): only those are written; none, all. */
 const ONLY = process.argv.slice(2).filter((a) => !a.startsWith("-"));
 
@@ -415,6 +436,33 @@ async function main() {
     source: { title: bordersTitle, url: pageUrl(bordersTitle) },
     asOf: new Date().toISOString().slice(0, 10),
     entries: uniqueForms(countries.map((c) => country(c, borders.get(c.name)!))),
+  });
+
+  // People per square kilometre of land (Nov 17: "Name a country with about 100 people per square kilometre", worked
+  // out from a population and an area you know): the density table's own figures, its rows for dependencies left out.
+  const densityTitle = "List of countries and dependencies by population density";
+  const writtenForms = new Map(
+    (JSON.parse(readFileSync(join(LISTS_DIR, "countries-population.json"), "utf8")) as NameList).entries.map((e) => [e.name, e.aliases] as const),
+  );
+  const density = new Map<string, number>();
+  for (const row of await densityRows(densityTitle)) {
+    const plain = row.country.replace(/\s*\(.*\)$/, "");
+    const e = byForm.get(normalize(row.country)) ?? byForm.get(normalize(plain));
+    if (!e || !borders.has(e.name)) continue;
+    if (density.has(e.name)) throw new Error(`density: two rows for ${e.name}`);
+    density.set(e.name, row.density);
+  }
+  write({
+    id: "countries-density",
+    noun: "country",
+    nounPlural: "countries",
+    measure: "people per square kilometre",
+    scoring: "ratio",
+    source: { title: densityTitle, url: pageUrl(densityTitle) },
+    asOf: new Date().toISOString().slice(0, 10),
+    // Its forms are the population list's as written (just now, or as committed when only this list is built), so the
+    // country lists keep one set of forms even when the puzzles' redirects have moved on since.
+    entries: uniqueForms(countries.map((c) => ({ name: c.name, aliases: writtenForms.get(c.name) ?? forms.get(c.name)!, value: density.get(c.name) ?? missing("density")(c) }))),
   });
 
   // Every city the world cities list ranks (UN 2025 urban agglomerations); its other accepted answers have no figure.

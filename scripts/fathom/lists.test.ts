@@ -36,10 +36,11 @@ function sample(over: Partial<NameList> = {}): NameList {
 }
 
 describe("Fathom name-it lists (public/fathom/lists)", () => {
-  it("holds the lists the name-it round plays: four from Nov 8, the two US state lists from Nov 17", () => {
+  it("holds the lists the name-it round plays: four from Nov 8, density and the two US state lists from Nov 17", () => {
     expect([...byId.keys()].sort()).toEqual([
       "cities-population",
       "countries-area",
+      "countries-density",
       "countries-population",
       "land-borders",
       "us-states-area",
@@ -109,6 +110,14 @@ describe("Fathom name-it lists (public/fathom/lists)", () => {
     });
     // 38 in November 2026: Japan, Australia, Cuba, Madagascar, Fiji, Taiwan...
     expect([...borders.values()].filter((v) => v === 0).length).toBeGreaterThanOrEqual(35);
+  });
+
+  // Nov 17: "Name a country with about 100 people per square kilometre", worked out from a population and an area.
+  it("reads density as the table gives it: people per square kilometre of land, the countries only", () => {
+    const density = new Map(byId.get("countries-density")!.entries.map((e) => [e.name, e.value]));
+    expect(Object.fromEntries(["Bangladesh", "Netherlands", "United Kingdom", "France", "United States", "Russia", "Canada", "Mongolia"].map((n) => [n, density.get(n)]))).toEqual({
+      Bangladesh: 1333, Netherlands: 541, "United Kingdom": 287, France: 122, "United States": 37, Russia: 8.6, Canada: 4.5, Mongolia: 2.2,
+    });
   });
 
   // Nov 17: "Name a US state with about 5 million people", "... about the same area as the UK". The 50 states (no DC, no
