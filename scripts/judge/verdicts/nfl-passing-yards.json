@@ -5,7 +5,7 @@
   "alsoBlitz": true,
   "priority": 8,
   "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 4 },
-  "casual": { "found": 7, "livesLost": 4, "guesses": 14 },
+  "casual": { "found": 8, "livesLost": 4, "guesses": 14 },
   "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
   "blitzCasual": { "scored": 13, "named": 17 },
   "difficulty": 2,
@@ -20,5 +20,6 @@
   "fixes": [
     "Junk redirect aliases on top-10 entries: Brees 'Brittany Dudchenko', 'Brittany Brees', 'MVP of Super Bowl XLIV'; Peyton Manning 'Ashley Manning', 'Laser rocket arm'; Favre 'Irvin Favre', 'Favregate'; Rodgers 'Aaron Rodgers Day', 'Aaron Rodgers and COVID-19', 'Throw Rogan'; Stafford 'Kelly Stafford'; Rivers 'Stephen Rivers', 'Gunner Rivers'; Brady '199 Productions', 'Autograph'; Marino 'Dan Marino Football', \"Dan Marino's Touchdown Football\". Drop redirects naming relatives, events, companies and games.",
     "Active starters (Josh Allen, Lamar Jackson, Joe Burrow, Jalen Hurts) get 'not an answer for this list' and score nothing in Blitz. Extend the ranked pool past 50 (e.g. top 100) so they are recognized and carry a stat."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-10-30: casual 7, fan 10). Active season: refreshed to the Nov 17 page (Rodgers 68,288, Stafford 67,139, Cousins now #15); top 10 unchanged. Fixed \"johnny u\"; 40 QBs under the page's top 50 (Jalen Hurts, Michael Vick, Tua, CJ Stroud) now say they aren't in the ranking. Casual runs 9 and 6, so 8; fan 10. Refresh again the day before it runs. judgedAt predates the Nov 2 daily bar.", "casual": 8, "fan": 10, "decision": "keep daily-list"}
 }

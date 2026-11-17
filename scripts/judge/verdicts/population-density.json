@@ -19,5 +19,6 @@
   ],
   "fixes": [
     "Junk redirect aliases on top-10 entries: Monaco 'France–Monaco border', 'Monaco–France border', 'Fort-Hercule', 'Monegasque culture', 'Monegasque geography'; Singapore 'HUB in a Singapore context'; Gibraltar 'Gibraltar Health Authority', 'Gibraltar Group Practice Medical Scheme'; Vatican City 'Vatican City culture', 'Vatican City cuisine', 'Vatican citizenship', 'Roman Catholicism in Rome', \"St. Joseph's Fountain\"; Maldives 'Fushifarurah', 'Iru fushi', 'Irufushi' (single islands). Drop redirects naming borders, forts, institutions, culture/cuisine/geography subtopics and sub-islands."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-10-30: casual 7, fan 10). Refreshed: Bangladesh (#10) 1,333 to 1,362 a km², South Georgia added; top 10 unchanged. The rebuild brings \"aus\"/\"oz\"/\"lux\". Casual 7, fan 10. judgedAt predates the Nov 2 daily bar.", "casual": 7, "fan": 10, "decision": "keep daily-list"}
 }

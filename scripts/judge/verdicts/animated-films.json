@@ -5,8 +5,8 @@
   "alsoBlitz": true,
   "priority": 8,
   "scores": { "recognizability": 5, "curve": 3, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
-  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 5, "guesses": 14 },
   "blitzCasual": { "scored": 24, "named": 30 },
   "difficulty": 2,
   "tags": ["film", "animation", "box office"],
@@ -21,5 +21,6 @@
     "scripts/topics.ts (animated-films): `also: [{ tables: [1, 2, 3], name: \"Title\" }]` has no value, so all 89 unranked answers miss with no figure and score nothing in Blitz, though each table has a 'Worldwide gross' column in the list's unit (table 1: Cars 2 $559,853,036, Puss in Boots $554,987,477; table 2: Coraline $185,860,104; table 3: Aladdin $504,050,219, Beauty and the Beast $438,656,843, Spirited Away $395,802,070, Lilo & Stitch $273,144,151). Add `value: \"Worldwide gross\"`.",
     "Sequel number words: 'frozen two' offers Frozen (#7) to confirm, and says 'already found' once Frozen is in, so it never reaches Frozen II (#5). 'inside out two', 'incredibles two', 'moana two' and 'ne zha two' offer the first film (a life if confirmed), and 'toy story four' and 'toy story three' aren't recognized. Only 'Zootopia Two' and 'Toy story five' work, through redirects. Add number-word aliases for a trailing 2-9 or II-IX in the pipeline, or have the matcher read a trailing number word as its digit (src/game, coordinator's call).",
     "Add 'Minions 2' as an alias of Minions: The Rise of Gru (#22). Now it offers Minions (#9) to confirm."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-02: casual 8, fan 9). Page edited since the build: Toy Story 5's gross ($1,149,545,392) and Mario Galaxy's refreshed, top 10 unchanged. Fixed \"the lion king live action\" (2019 film) and \"ne zha 1\"; the rebuild dropped a category's \"Draft talk:Broked\" (now a validate.ts error). Casual 7, fan 10. Keep it away from us-box-office in the same week.", "casual": 7, "fan": 10, "decision": "keep daily-list"}
 }

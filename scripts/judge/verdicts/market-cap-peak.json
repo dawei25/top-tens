@@ -6,7 +6,7 @@
   "priority": 8,
   "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 0 },
   "casual": { "found": 7, "livesLost": 5, "guesses": 14 },
-  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 5, "guesses": 14 },
   "blitzCasual": null,
   "difficulty": 2,
   "tags": ["business", "companies", "stocks"],
@@ -22,5 +22,6 @@
     "Nvidia's GR00T aliases survived because junkAliases spells them with the letter O: drop 'Project GR00T', 'NVIDIA Project GR00T', 'NVIDIA GR00T' (zeros), 'Nvidia GROOT' and 'Generalist Robot 00 Technology'",
     "Amazon: drop 'Co-mingled inventory', 'Comingled inventory' and 'Amazon leadership principles' (only 'Commingled inventory' is in this topic's junkAliases)",
     "Merge the unranked 'Samsung Electronics' (from the revenue list) into Samsung #12; 'samsung electronics' now costs a life without showing the rank"
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-02: casual 7, fan 9). Stale peaks refreshed: Nvidia 5,724 to 5,777 (Oct 6), Apple 5,045 to 5,177 (Nov 11); top 10 unchanged. Fixed \"taiwan semi\"; Palantir, Standard Oil, the East India Company and private firms (Anthropic, ByteDance, xAI) now say they aren't in the ranking. Casual 7, fan 10.", "casual": 7, "fan": 10, "decision": "keep daily-list"}
 }
