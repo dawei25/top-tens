@@ -27,6 +27,10 @@ const live = (id: string, startedAt?: number): BlitzState => ({ puzzleId: id, hi
 
 const count = (s: Saved) => freeGamesPlayed(s, schedule, TODAY);
 const ask = (s: Saved, signedIn = false, accounts = true) => signInToPlay(s, { schedule, today: TODAY, signedIn, accounts });
+/** The limit, as the game has it: the tests follow it, so tuning it needs no test edits (only the pin below). */
+const LIMIT = FREE_GAMES_BEFORE_SIGN_IN;
+/** `n` finished free list games, on lists that never run as a daily. */
+const freeRuns = (n: number, from = 0): ListRun[] => Array.from({ length: n }, (_, i) => run(`free-${from + i}`, (from + i + 1) * 1000));
 
 describe("the free-play counter", () => {
   it("counts finished free list games and Blitz rounds, each once", () => {
@@ -81,19 +85,24 @@ describe("the free-play counter", () => {
     // The mark names one game: a later game on the list (an archive daily, say) isn't it.
     expect(freeGamesPlayed(s, schedule, TODAY, new Set(["old:99"]))).toBe(0);
     expect(freeGamesPlayed(s, schedule, TODAY, new Set(["old:100", "today:200"]))).toBe(1);
-    expect(signInToPlay({ ...s, listRuns: [run("a", 50)] }, { schedule, today: TODAY, signedIn: false, accounts: true, freeStarts: new Set(["old:100"]) })).toBe(true);
+    // The marked game is the one that reaches the limit.
+    const withRuns = { ...s, listRuns: freeRuns(LIMIT - 1) };
+    expect(ask(withRuns)).toBe(false);
+    expect(signInToPlay(withRuns, { schedule, today: TODAY, signedIn: false, accounts: true, freeStarts: new Set(["old:100"]) })).toBe(true);
   });
 });
 
 describe("signing in to play", () => {
-  const two: Saved = { ...empty, listRuns: [run("a", 100)], blitzLive: { c: live("c", 500) } };
+  /** The free games used up: list games and a Blitz round under way. */
+  const atLimit: Saved = { ...empty, listRuns: freeRuns(LIMIT - 1), blitzLive: { c: live("c", 500) } };
 
   it(`lets ${FREE_GAMES_BEFORE_SIGN_IN} free games start, then asks`, () => {
-    expect(FREE_GAMES_BEFORE_SIGN_IN).toBe(2);
+    // The owner's number (Nov 17: 5, from 2). The one line to change with it; everything else follows the constant.
+    expect(FREE_GAMES_BEFORE_SIGN_IN).toBe(5);
     expect(ask(empty)).toBe(false);
-    expect(ask({ ...empty, listRuns: [run("a", 100)] })).toBe(false);
-    expect(ask(two)).toBe(true);
-    expect(ask({ ...two, listRuns: [run("a", 100), run("b", 200), run("c", 300)] })).toBe(true);
+    expect(ask({ ...empty, listRuns: freeRuns(LIMIT - 1) })).toBe(false);
+    expect(ask(atLimit)).toBe(true);
+    expect(ask({ ...atLimit, listRuns: freeRuns(LIMIT + 1) })).toBe(true);
   });
 
   it("never asks a signed-in player, or in a build without accounts", () => {
@@ -103,13 +112,14 @@ describe("signing in to play", () => {
   });
 
   it("takes the limit as one number", () => {
-    expect(signInToPlay(two, { schedule, today: TODAY, signedIn: false, accounts: true, limit: 3 })).toBe(false);
-    expect(signInToPlay(two, { schedule, today: TODAY, signedIn: false, accounts: true, limit: 1 })).toBe(true);
+    expect(signInToPlay(atLimit, { schedule, today: TODAY, signedIn: false, accounts: true, limit: LIMIT + 1 })).toBe(false);
+    expect(signInToPlay(atLimit, { schedule, today: TODAY, signedIn: false, accounts: true, limit: 1 })).toBe(true);
   });
 
   it("dailies never count toward the limit", () => {
-    const dailies: Saved = { ...empty, listRuns: [run("today", 100, 5), run("old", 200, 1), run("x", 300, 3)] };
-    expect(ask(dailies)).toBe(false);
+    // As many dailies as the limit and more, with one free game short of it.
+    const dailies = Array.from({ length: LIMIT + 1 }, (_, i) => run(`day-${i}`, 100 + i, i + 1));
+    expect(ask({ ...empty, listRuns: [...dailies, ...freeRuns(LIMIT - 1)] })).toBe(false);
   });
 });
 
@@ -135,13 +145,13 @@ describe("archive dailies once the free games are used up", () => {
   /** "old" ran on the 10th and "older" on the 8th; today's list is "today"; "later" runs on the 20th. */
   const days: DailyEntry[] = [{ n: 0, date: "2026-11-08", id: "older" }, ...schedule];
   const o = (signedIn = false, accounts = true) => ({ schedule: days, today: TODAY, signedIn, accounts });
-  const two: Saved = { ...empty, listRuns: [run("a", 100), run("b", 200)] };
+  const atLimit: Saved = { ...empty, listRuns: freeRuns(LIMIT) };
 
   it("asks for an archive day only once the free games are used up", () => {
     expect(archiveNeedsSignIn(empty, "2026-11-10", o())).toBe(false);
-    expect(archiveNeedsSignIn({ ...empty, listRuns: [run("a", 100)] }, "2026-11-10", o())).toBe(false);
-    expect(archiveNeedsSignIn(two, "2026-11-10", o())).toBe(true);
-    expect(archiveNeedsSignIn(two, "2026-11-08", o())).toBe(true);
+    expect(archiveNeedsSignIn({ ...empty, listRuns: freeRuns(LIMIT - 1) }, "2026-11-10", o())).toBe(false);
+    expect(archiveNeedsSignIn(atLimit, "2026-11-10", o())).toBe(true);
+    expect(archiveNeedsSignIn(atLimit, "2026-11-08", o())).toBe(true);
   });
 
   it("archive days played before then never count toward the free games", () => {
@@ -156,24 +166,24 @@ describe("archive dailies once the free games are used up", () => {
   });
 
   it("never asks for today's list (a late schedule's stand-in included), a future day or a day with no list", () => {
-    expect(archiveNeedsSignIn(two, TODAY, o())).toBe(false);
-    expect(archiveNeedsSignIn(two, "2026-11-20", o())).toBe(false);
-    expect(archiveNeedsSignIn(two, "2026-11-09", o())).toBe(false);
+    expect(archiveNeedsSignIn(atLimit, TODAY, o())).toBe(false);
+    expect(archiveNeedsSignIn(atLimit, "2026-11-20", o())).toBe(false);
+    expect(archiveNeedsSignIn(atLimit, "2026-11-09", o())).toBe(false);
     // The schedule stops on the 10th: that day stands in as today's list (Home's Today key opens it).
-    expect(archiveNeedsSignIn(two, "2026-11-10", { ...o(), schedule: days.slice(0, 2) })).toBe(false);
-    expect(archiveNeedsSignIn(two, "2026-11-08", { ...o(), schedule: days.slice(0, 2) })).toBe(true);
+    expect(archiveNeedsSignIn(atLimit, "2026-11-10", { ...o(), schedule: days.slice(0, 2) })).toBe(false);
+    expect(archiveNeedsSignIn(atLimit, "2026-11-08", { ...o(), schedule: days.slice(0, 2) })).toBe(true);
   });
 
   it("a day under way resumes and a finished one shows its result; one opened and left untouched is a new game", () => {
-    expect(archiveNeedsSignIn({ ...two, games: { old: game("old", 400, { log: [guessed] }) } }, "2026-11-10", o())).toBe(false);
-    expect(archiveNeedsSignIn({ ...two, games: { old: game("old", 400, { hints: [2], lives: 4 }) } }, "2026-11-10", o())).toBe(false);
+    expect(archiveNeedsSignIn({ ...atLimit, games: { old: game("old", 400, { log: [guessed] }) } }, "2026-11-10", o())).toBe(false);
+    expect(archiveNeedsSignIn({ ...atLimit, games: { old: game("old", 400, { hints: [2], lives: 4 }) } }, "2026-11-10", o())).toBe(false);
     const locked = { "2026-11-10": game("old", 400, { status: "won", finishedAt: 500 }) };
-    expect(archiveNeedsSignIn({ ...two, dailyGames: locked }, "2026-11-10", o())).toBe(false);
-    expect(archiveNeedsSignIn({ ...two, games: { old: game("old", 400) } }, "2026-11-10", o())).toBe(true);
+    expect(archiveNeedsSignIn({ ...atLimit, dailyGames: locked }, "2026-11-10", o())).toBe(false);
+    expect(archiveNeedsSignIn({ ...atLimit, games: { old: game("old", 400) } }, "2026-11-10", o())).toBe(true);
   });
 
   it("never asks a signed-in player, or in a build without accounts", () => {
-    expect(archiveNeedsSignIn(two, "2026-11-10", o(true))).toBe(false);
-    expect(archiveNeedsSignIn(two, "2026-11-10", o(false, false))).toBe(false);
+    expect(archiveNeedsSignIn(atLimit, "2026-11-10", o(true))).toBe(false);
+    expect(archiveNeedsSignIn(atLimit, "2026-11-10", o(false, false))).toBe(false);
   });
 });
