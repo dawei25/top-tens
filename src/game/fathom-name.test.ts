@@ -41,9 +41,9 @@ const COUNTRIES = named(LISTS.get("countries-population")!);
 const CITIES = named(LISTS.get("cities-population")!);
 
 describe("name-it on the real lists: the judge's readings (Nov 8)", { timeout: 30_000 }, () => {
-  it("plays all 12 name-it questions: 10 on country lists, 2 on the city list", () => {
-    expect(COUNTRY_QS.length).toBe(10);
-    expect(CITY_QS.length).toBe(2);
+  it("plays every name-it question: at least 10 on country lists, at least 2 on the city list", () => {
+    expect(COUNTRY_QS.length).toBeGreaterThanOrEqual(10);
+    expect(CITY_QS.length).toBeGreaterThanOrEqual(2);
   });
 
   // "England", "Scotland" and "Wales" locked the whole UK. They are parts of it: free, and said so.

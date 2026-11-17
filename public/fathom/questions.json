@@ -184,7 +184,7 @@
    "question": "How long did the longest professional tennis match last?",
    "unit": "hours",
    "answer": 11,
-   "definition": "playing time, Wimbledon 2010",
+   "definition": "playing time, Isner v Mahut at Wimbledon",
    "fact": "John Isner beat Nicolas Mahut 70-68 in the fifth set, after 11 hours 5 minutes spread over three days.",
    "source": {
     "title": "Isner–Mahut match at the 2010 Wimbledon Championships",
@@ -304,7 +304,7 @@
    "unit": "hot dogs",
    "answer": 76,
    "definition": "with buns, Nathan's contest, 2021",
-   "fact": "In 2001 Takeru Kobayashi ate 50, nearly doubling the old record of 25.5.",
+   "fact": "Takeru Kobayashi once ate 50, nearly doubling the old record of 25.5.",
    "source": {
     "title": "Nathan's Hot Dog Eating Contest",
     "url": "https://en.wikipedia.org/wiki/Nathan%27s_Hot_Dog_Eating_Contest"
@@ -2023,6 +2023,1991 @@
    "list": "countries-population",
    "target": 5000000,
    "question": "Name a country with about 5 million people",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "channel-tunnel-length",
+   "kind": "landmarks",
+   "question": "How long is the Channel Tunnel between England and France?",
+   "unit": "kilometres",
+   "answer": 50.46,
+   "definition": "portal to portal",
+   "fact": "Its 37.9 km under the sea is the longest underwater stretch of any tunnel in the world.",
+   "source": {
+    "title": "Channel Tunnel",
+    "url": "https://en.wikipedia.org/wiki/Channel_Tunnel"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "panama-canal-length",
+   "kind": "landmarks",
+   "question": "How long is the Panama Canal?",
+   "unit": "kilometres",
+   "answer": 82,
+   "fact": "Locks lift ships some 27 m up to Gatun Lake, a man-made lake, to cross the isthmus.",
+   "source": {
+    "title": "Panama Canal",
+    "url": "https://en.wikipedia.org/wiki/Panama_Canal"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "danube-countries",
+   "kind": "places",
+   "question": "How many countries does the Danube flow through or along?",
+   "unit": "countries",
+   "answer": 10,
+   "fact": "On its way from Germany to the Black Sea it passes four capitals: Vienna, Bratislava, Budapest and Belgrade.",
+   "source": {
+    "title": "Danube",
+    "url": "https://en.wikipedia.org/wiki/Danube"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "world-cup-winning-countries",
+   "kind": "sports",
+   "question": "How many countries have won the men's football World Cup?",
+   "unit": "countries",
+   "answer": 8,
+   "fact": "Each winner wears a star on its badge for every title it has won.",
+   "source": {
+    "title": "FIFA World Cup",
+    "url": "https://en.wikipedia.org/wiki/FIFA_World_Cup"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "dog-teeth",
+   "kind": "animals",
+   "question": "How many teeth does a grown dog have?",
+   "unit": "teeth",
+   "answer": 42,
+   "fact": "They are built for meat: dogs use their carnassial teeth to cut it into bite-sized chunks.",
+   "source": {
+    "title": "Dog",
+    "url": "https://en.wikipedia.org/wiki/Dog"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "friends-episodes",
+   "kind": "culture",
+   "question": "How many episodes of Friends were made?",
+   "unit": "episodes",
+   "answer": 236,
+   "fact": "Its ten seasons averaged about two dozen episodes each.",
+   "source": {
+    "title": "Friends",
+    "url": "https://en.wikipedia.org/wiki/Friends"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "netherlands-bicycles",
+   "kind": "everyday",
+   "question": "How many bicycles are there in the Netherlands?",
+   "unit": "million bicycles",
+   "answer": 18,
+   "fact": "That's 1.3 for every Dutch person old enough to ride, on 35,000 km of cycle paths.",
+   "source": {
+    "title": "Cycling in the Netherlands",
+    "url": "https://en.wikipedia.org/wiki/Cycling_in_the_Netherlands"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "land-speed-record",
+   "kind": "science",
+   "question": "How fast has a car ever gone?",
+   "unit": "kilometres per hour",
+   "answer": 1228,
+   "definition": "the land speed record, a jet-powered car",
+   "fact": "ThrustSSC is the only car ever to have officially broken the sound barrier.",
+   "source": {
+    "title": "ThrustSSC",
+    "url": "https://en.wikipedia.org/wiki/ThrustSSC"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "train-speed-record",
+   "kind": "science",
+   "question": "How fast has a train ever gone?",
+   "unit": "kilometres per hour",
+   "answer": 603,
+   "definition": "the record, with people on board",
+   "fact": "Japan's L0 maglev runs on rubber wheels at low speed, then floats on its magnets.",
+   "source": {
+    "title": "SCMaglev",
+    "url": "https://en.wikipedia.org/wiki/SCMaglev"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "oldest-cat",
+   "kind": "animals",
+   "question": "How old was the oldest cat on record?",
+   "unit": "years",
+   "answer": 38,
+   "fact": "Her owner credited a diet including turkey bacon, broccoli, coffee with cream and an eyedropper of red wine.",
+   "source": {
+    "title": "Creme Puff (cat)",
+    "url": "https://en.wikipedia.org/wiki/Creme_Puff_(cat)"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "louis-xiv-reign",
+   "kind": "culture",
+   "question": "How long did Louis XIV, the longest-reigning monarch in history, reign?",
+   "unit": "years",
+   "answer": 72.3,
+   "fact": "He became king of France at four, when his father died, and reigned until his own death at 76.",
+   "source": {
+    "title": "Louis XIV",
+    "url": "https://en.wikipedia.org/wiki/Louis_XIV"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "walking-speed",
+   "kind": "body",
+   "question": "How fast does a person walk, on average?",
+   "unit": "kilometres per hour",
+   "answer": 5,
+   "fact": "That's 1.4 metres a second, the speed road design guides use for people crossing the street.",
+   "source": {
+    "title": "Preferred walking speed",
+    "url": "https://en.wikipedia.org/wiki/Preferred_walking_speed"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "grand-canyon-depth",
+   "kind": "nature",
+   "question": "How deep is the Grand Canyon?",
+   "unit": "metres",
+   "answer": 1857,
+   "definition": "at its deepest",
+   "fact": "The Colorado River carved it 446 km long and up to 29 km wide.",
+   "source": {
+    "title": "Grand Canyon",
+    "url": "https://en.wikipedia.org/wiki/Grand_Canyon"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "great-pyramid-blocks",
+   "kind": "landmarks",
+   "question": "How many blocks of stone went into the Great Pyramid of Giza?",
+   "unit": "million blocks",
+   "answer": 2.3,
+   "fact": "Together they weigh about 6 million tonnes.",
+   "source": {
+    "title": "Great Pyramid of Giza",
+    "url": "https://en.wikipedia.org/wiki/Great_Pyramid_of_Giza"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "fastest-sail-around-world",
+   "kind": "sports",
+   "question": "How long is the record for sailing around the world?",
+   "unit": "days",
+   "answer": 40.45,
+   "definition": "with a crew, the Jules Verne Trophy, 2026",
+   "fact": "The trophy for it is named after Jules Verne, whose hero went round the world in 80 days.",
+   "source": {
+    "title": "Jules Verne Trophy",
+    "url": "https://en.wikipedia.org/wiki/Jules_Verne_Trophy"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "manhattan-length",
+   "kind": "places",
+   "question": "How long is the island of Manhattan, end to end?",
+   "unit": "kilometres",
+   "answer": 21.6,
+   "fact": "At its widest, near 14th Street, it's only 3.7 km across.",
+   "source": {
+    "title": "Manhattan",
+    "url": "https://en.wikipedia.org/wiki/Manhattan"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "dutch-men-height",
+   "kind": "body",
+   "question": "How tall are young Dutch men, among the world's tallest, on average?",
+   "unit": "centimetres",
+   "answer": 183,
+   "definition": "2012",
+   "fact": "Before 1850, men in Leiden averaged only 167 cm.",
+   "source": {
+    "title": "Human height",
+    "url": "https://en.wikipedia.org/wiki/Human_height"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "eiffel-tower-steps",
+   "kind": "landmarks",
+   "question": "How many steps did the first visitors climb to the top of the Eiffel Tower?",
+   "unit": "steps",
+   "answer": 1710,
+   "fact": "Nearly 30,000 people made the climb before the lifts opened.",
+   "source": {
+    "title": "Eiffel Tower",
+    "url": "https://en.wikipedia.org/wiki/Eiffel_Tower"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "keyboard-keys",
+   "kind": "everyday",
+   "question": "How many keys does a full-size computer keyboard have?",
+   "unit": "keys",
+   "answer": 104,
+   "definition": "US layout, number pad included",
+   "fact": "Outside the US the norm is one key more.",
+   "source": {
+    "title": "Computer keyboard",
+    "url": "https://en.wikipedia.org/wiki/Computer_keyboard"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "venice-historic-population",
+   "kind": "places",
+   "question": "How many people live in Venice's historic island city?",
+   "unit": "people",
+   "answer": 50000,
+   "definition": "2026",
+   "fact": "Most of the city's 249,385 people live on the mainland instead.",
+   "source": {
+    "title": "Venice",
+    "url": "https://en.wikipedia.org/wiki/Venice"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "tornado-wind-record",
+   "kind": "nature",
+   "question": "How fast is the fastest wind ever measured in a tornado?",
+   "unit": "kilometres per hour",
+   "answer": 486,
+   "definition": "by Doppler radar",
+   "fact": "A tornado needs winds of only 64 km/h at the ground to count as one.",
+   "source": {
+    "title": "Tornado",
+    "url": "https://en.wikipedia.org/wiki/Tornado"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "chile-length",
+   "kind": "places",
+   "question": "How long is Chile from north to south?",
+   "unit": "kilometres",
+   "answer": 4300,
+   "fact": "Squeezed between the Andes and the Pacific, it is the southernmost country in the world.",
+   "source": {
+    "title": "Chile",
+    "url": "https://en.wikipedia.org/wiki/Chile"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "ocean-average-depth",
+   "kind": "nature",
+   "question": "How deep is the ocean on average?",
+   "unit": "metres",
+   "answer": 3688,
+   "fact": "Over 70.8% of Earth's surface, that adds up to 1.335 billion cubic kilometres of water.",
+   "source": {
+    "title": "Ocean",
+    "url": "https://en.wikipedia.org/wiki/Ocean"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "sumo-wrestler-weight",
+   "kind": "sports",
+   "question": "How heavy is the average top-division sumo wrestler?",
+   "unit": "kilograms",
+   "answer": 166,
+   "definition": "a record, January 2019",
+   "fact": "There are no weight classes, so a wrestler can face an opponent twice his weight.",
+   "source": {
+    "title": "Sumo",
+    "url": "https://en.wikipedia.org/wiki/Sumo"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "oktoberfest-beer",
+   "kind": "food",
+   "question": "How much beer is drunk at Oktoberfest?",
+   "unit": "million litres",
+   "answer": 7.4,
+   "definition": "2023, a record year",
+   "fact": "A record 7.2 million visitors came that year, about a litre of beer each.",
+   "source": {
+    "title": "Oktoberfest",
+    "url": "https://en.wikipedia.org/wiki/Oktoberfest"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "space-shuttle-missions",
+   "kind": "space",
+   "question": "How many missions did NASA's Space Shuttles fly?",
+   "unit": "missions",
+   "answer": 135,
+   "fact": "Five orbiters shared them over 30 years, launching the Hubble Space Telescope among much else.",
+   "source": {
+    "title": "Space Shuttle",
+    "url": "https://en.wikipedia.org/wiki/Space_Shuttle"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "apollo-11-duration",
+   "kind": "space",
+   "question": "How long did Apollo 11 take, from launch to splashdown?",
+   "unit": "days",
+   "answer": 8.14,
+   "fact": "Armstrong and Aldrin spent 2 hours 31 minutes walking outside on the Moon.",
+   "source": {
+    "title": "Apollo 11",
+    "url": "https://en.wikipedia.org/wiki/Apollo_11"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "lindbergh-flight-time",
+   "kind": "everyday",
+   "question": "How long did Lindbergh's New York to Paris flight take?",
+   "unit": "hours",
+   "answer": 33.5,
+   "definition": "the first solo flight across the Atlantic",
+   "fact": "He flew about 5,800 km alone, in a small single-engine plane.",
+   "source": {
+    "title": "Spirit of St. Louis",
+    "url": "https://en.wikipedia.org/wiki/Spirit_of_St._Louis"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "euro-countries",
+   "kind": "places",
+   "question": "How many countries in the EU use the euro?",
+   "unit": "countries",
+   "answer": 21,
+   "fact": "Six EU members still keep their own money, among them Sweden, Poland and Denmark.",
+   "source": {
+    "title": "Eurozone",
+    "url": "https://en.wikipedia.org/wiki/Eurozone"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "gibraltar-strait-width",
+   "kind": "places",
+   "question": "How wide is the Strait of Gibraltar at its narrowest?",
+   "unit": "kilometres",
+   "answer": 14.3,
+   "fact": "That is all that separates Europe from Africa, over water 900 m deep.",
+   "source": {
+    "title": "Strait of Gibraltar",
+    "url": "https://en.wikipedia.org/wiki/Strait_of_Gibraltar"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "hadrians-wall-length",
+   "kind": "landmarks",
+   "question": "How long is Hadrian's Wall, the Roman wall across northern England?",
+   "unit": "kilometres",
+   "answer": 117.5,
+   "fact": "It was 80 Roman miles long, built to separate the Romans from the barbarians.",
+   "source": {
+    "title": "Hadrian's Wall",
+    "url": "https://en.wikipedia.org/wiki/Hadrian%27s_Wall"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "louvre-visitors",
+   "kind": "culture",
+   "question": "How many people visit the Louvre, the world's most visited museum?",
+   "unit": "million people",
+   "answer": 9,
+   "definition": "2025",
+   "fact": "The Mona Lisa alone draws about 20,000 visitors a day.",
+   "source": {
+    "title": "Louvre",
+    "url": "https://en.wikipedia.org/wiki/Louvre"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "japan-mountainous",
+   "kind": "places",
+   "round": "percent",
+   "question": "How much of Japan is mountainous?",
+   "unit": "percent",
+   "answer": 73,
+   "fact": "A mountain range runs through each of its main islands.",
+   "source": {
+    "title": "Geography of Japan",
+    "url": "https://en.wikipedia.org/wiki/Geography_of_Japan"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "java-share-of-indonesians",
+   "kind": "places",
+   "round": "percent",
+   "question": "What share of Indonesians live on Java?",
+   "unit": "percent",
+   "answer": 56,
+   "fact": "Java is the world's most populous island, with only 7% of Indonesia's land.",
+   "source": {
+    "title": "Java",
+    "url": "https://en.wikipedia.org/wiki/Java"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "england-share-of-uk",
+   "kind": "places",
+   "round": "percent",
+   "question": "What share of the UK's people live in England?",
+   "unit": "percent",
+   "answer": 84,
+   "fact": "England's 56.3 million people make it by far the most populous of the UK's four nations.",
+   "source": {
+    "title": "England",
+    "url": "https://en.wikipedia.org/wiki/England"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "arabica-share",
+   "kind": "food",
+   "round": "percent",
+   "question": "What share of the world's coffee is arabica?",
+   "unit": "percent",
+   "answer": 60,
+   "fact": "Packs labelled 100% Arabica sell it as a mark of quality over the cheaper robusta.",
+   "source": {
+    "title": "Coffea arabica",
+    "url": "https://en.wikipedia.org/wiki/Coffea_arabica"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "finland-forest",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of Finland is forest?",
+   "unit": "percent",
+   "answer": 78,
+   "fact": "Another 10% is lakes, rivers and ponds.",
+   "source": {
+    "title": "Finland",
+    "url": "https://en.wikipedia.org/wiki/Finland"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "rodent-share-of-mammals",
+   "kind": "animals",
+   "round": "percent",
+   "question": "What share of mammal species are rodents?",
+   "unit": "percent",
+   "answer": 40,
+   "fact": "They live on every continent but Antarctica, and most kinds weigh less than 100 g.",
+   "source": {
+    "title": "Rodent",
+    "url": "https://en.wikipedia.org/wiki/Rodent"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "bone-share-of-weight",
+   "kind": "body",
+   "round": "percent",
+   "question": "How much of a person's weight is bone?",
+   "unit": "percent",
+   "answer": 14,
+   "fact": "That's about 10 to 11 kg for an average person, heaviest between the ages of 25 and 30.",
+   "source": {
+    "title": "Human skeleton",
+    "url": "https://en.wikipedia.org/wiki/Human_skeleton"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "japan-over-65",
+   "kind": "places",
+   "round": "percent",
+   "question": "What share of Japan's people are 65 or older?",
+   "unit": "percent",
+   "answer": 29.4,
+   "definition": "2025",
+   "fact": "That's the highest share among the 38 countries in Japan's own statistics report.",
+   "source": {
+    "title": "Aging of Japan",
+    "url": "https://en.wikipedia.org/wiki/Aging_of_Japan"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "california-forest",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of California is covered by forest?",
+   "unit": "percent",
+   "answer": 45,
+   "fact": "No other US state has as many kinds of pine.",
+   "source": {
+    "title": "California",
+    "url": "https://en.wikipedia.org/wiki/California"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "greece-island-share",
+   "kind": "places",
+   "round": "percent",
+   "question": "How much of Greece's land is on its islands?",
+   "unit": "percent",
+   "answer": 16.67,
+   "fact": "The other 83.33%, 110,496 square kilometres, is mainland.",
+   "source": {
+    "title": "Geography of Greece",
+    "url": "https://en.wikipedia.org/wiki/Geography_of_Greece"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "sahara-share-of-africa",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of Africa does the Sahara cover?",
+   "unit": "percent",
+   "answer": 31,
+   "fact": "At 9.2 million square kilometres it is the largest hot desert in the world.",
+   "source": {
+    "title": "Sahara",
+    "url": "https://en.wikipedia.org/wiki/Sahara"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "ivory-coast-cocoa",
+   "kind": "food",
+   "round": "percent",
+   "question": "How much of the world's cocoa does Ivory Coast grow?",
+   "unit": "percent",
+   "answer": 38,
+   "definition": "2024",
+   "fact": "With Ghana next door, the two grow about 58% of the world's cocoa.",
+   "source": {
+    "title": "Cocoa bean",
+    "url": "https://en.wikipedia.org/wiki/Cocoa_bean"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "french-speaking-canadians",
+   "kind": "places",
+   "round": "percent",
+   "question": "What share of Canadians speak French as their first language?",
+   "unit": "percent",
+   "answer": 19.6,
+   "definition": "2021 census",
+   "fact": "In Quebec, 85% of people are native French speakers.",
+   "source": {
+    "title": "French language in Canada",
+    "url": "https://en.wikipedia.org/wiki/French_language_in_Canada"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "swiss-german-speakers",
+   "kind": "places",
+   "round": "percent",
+   "question": "What share of the Swiss speak German as their main language?",
+   "unit": "percent",
+   "answer": 62,
+   "definition": "2021",
+   "fact": "French comes next with 22.7%, then Italian with 8.2% and Romansh with 0.5%.",
+   "source": {
+    "title": "Languages of Switzerland",
+    "url": "https://en.wikipedia.org/wiki/Languages_of_Switzerland"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "glacier-share-of-land",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of the world's land lies under glacier ice?",
+   "unit": "percent",
+   "answer": 10,
+   "fact": "Almost all of it is the ice sheets of the polar regions, which hold 99% of all glacier ice.",
+   "source": {
+    "title": "Glacier",
+    "url": "https://en.wikipedia.org/wiki/Glacier"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "amazon-deforested",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of the Amazon rainforest has been cut down?",
+   "unit": "percent",
+   "answer": 20,
+   "definition": "by 2022",
+   "fact": "Another 6% has been highly degraded.",
+   "source": {
+    "title": "Amazon rainforest",
+    "url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "dead-sea-salt",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of the Dead Sea's water is salt?",
+   "unit": "percent",
+   "answer": 34.2,
+   "definition": "by weight, 2011",
+   "fact": "That's 9.6 times as salty as the ocean, which makes swimming in it like floating.",
+   "source": {
+    "title": "Dead Sea",
+    "url": "https://en.wikipedia.org/wiki/Dead_Sea"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "body-oxygen-share",
+   "kind": "body",
+   "round": "percent",
+   "question": "What share of your body's mass is oxygen?",
+   "unit": "percent",
+   "answer": 65,
+   "definition": "as an element",
+   "fact": "Most of it is in water; carbon comes next with 18.5%.",
+   "source": {
+    "title": "Composition of the human body",
+    "url": "https://en.wikipedia.org/wiki/Composition_of_the_human_body"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "eighteen-carat-gold",
+   "kind": "everyday",
+   "round": "percent",
+   "question": "How much of 18-carat gold is pure gold?",
+   "unit": "percent",
+   "answer": 75,
+   "fact": "Carats count parts of gold in 24, so 24-carat gold is pure.",
+   "source": {
+    "title": "Fineness",
+    "url": "https://en.wikipedia.org/wiki/Fineness"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "sun-hydrogen",
+   "kind": "space",
+   "round": "percent",
+   "question": "What share of the Sun is hydrogen?",
+   "unit": "percent",
+   "answer": 73.46,
+   "definition": "its surface, by mass",
+   "fact": "Nearly all the rest is helium, 24.85%.",
+   "source": {
+    "title": "Sun",
+    "url": "https://en.wikipedia.org/wiki/Sun"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "asia-share-of-land",
+   "kind": "places",
+   "round": "percent",
+   "question": "How much of Earth's land is in Asia?",
+   "unit": "percent",
+   "answer": 30,
+   "fact": "Its 4.7 billion people are about 60% of the world's population.",
+   "source": {
+    "title": "Asia",
+    "url": "https://en.wikipedia.org/wiki/Asia"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "russia-share-of-europe",
+   "kind": "places",
+   "round": "percent",
+   "question": "How much of Europe's land is in Russia?",
+   "unit": "percent",
+   "answer": 40,
+   "fact": "Yet that European part is only about 23% of Russia's own territory.",
+   "source": {
+    "title": "European Russia",
+    "url": "https://en.wikipedia.org/wiki/European_Russia"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "great-lakes-fresh-water",
+   "kind": "nature",
+   "round": "percent",
+   "question": "What share of the world's surface fresh water is in the Great Lakes?",
+   "unit": "percent",
+   "answer": 21,
+   "fact": "Spread over North America, it would cover the whole continent 1.5 metres deep.",
+   "source": {
+    "title": "Great Lakes",
+    "url": "https://en.wikipedia.org/wiki/Great_Lakes"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "honey-water",
+   "kind": "food",
+   "round": "percent",
+   "question": "How much of honey is water?",
+   "unit": "percent",
+   "answer": 18,
+   "fact": "It starts as flower nectar that is 70 to 80% water.",
+   "source": {
+    "title": "Honey",
+    "url": "https://en.wikipedia.org/wiki/Honey"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "everest-air-pressure",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of sea-level air pressure is left at the top of Everest?",
+   "unit": "percent",
+   "answer": 33,
+   "fact": "Strong winds can lower it further, cutting the oxygen available by up to 14 percent.",
+   "source": {
+    "title": "Mount Everest",
+    "url": "https://en.wikipedia.org/wiki/Mount_Everest"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "sugarcane-share",
+   "kind": "food",
+   "round": "percent",
+   "question": "How much of the world's sugar comes from sugarcane?",
+   "unit": "percent",
+   "answer": 79,
+   "fact": "Most of the rest is made from sugar beets.",
+   "source": {
+    "title": "Sugarcane",
+    "url": "https://en.wikipedia.org/wiki/Sugarcane"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "desert-sand-share",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of the world's desert is sand?",
+   "unit": "percent",
+   "answer": 20,
+   "fact": "It ranges from 2% in North America to over 45% in Central Asia.",
+   "source": {
+    "title": "Desert",
+    "url": "https://en.wikipedia.org/wiki/Desert"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "australia-arid",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of Australia is arid or semi-arid?",
+   "unit": "percent",
+   "answer": 70,
+   "fact": "About 95% of Australians live within 100 km of the coast.",
+   "source": {
+    "title": "Australia",
+    "url": "https://en.wikipedia.org/wiki/Australia"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "berlin-wall-falls",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did the Berlin Wall fall?",
+   "unit": "year",
+   "answer": 1989,
+   "fact": "East Germany's government announced one evening that its citizens could visit the West.",
+   "source": {
+    "title": "Berlin Wall",
+    "url": "https://en.wikipedia.org/wiki/Berlin_Wall"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "google-founded",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When was Google founded?",
+   "unit": "year",
+   "answer": 1998,
+   "fact": "Larry Page and Sergey Brin set up the search engine in a friend's garage.",
+   "source": {
+    "title": "Google",
+    "url": "https://en.wikipedia.org/wiki/Google"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "wikipedia-launched",
+   "kind": "culture",
+   "round": "year",
+   "question": "When was Wikipedia launched?",
+   "unit": "year",
+   "answer": 2001,
+   "fact": "It began as a side project to feed Nupedia, an online encyclopedia written by experts.",
+   "source": {
+    "title": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Wikipedia"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "first-pokemon-games",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did the first Pokémon games come out?",
+   "unit": "year",
+   "answer": 1996,
+   "definition": "in Japan",
+   "fact": "They were Pocket Monsters Red and Green, for the Game Boy.",
+   "source": {
+    "title": "Pokémon Red, Blue, and Yellow",
+    "url": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Red,_Blue,_and_Yellow"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "first-playstation",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did Sony's first PlayStation go on sale?",
+   "unit": "year",
+   "answer": 1994,
+   "definition": "in Japan",
+   "fact": "Its games sold 962 million copies in all.",
+   "source": {
+    "title": "PlayStation (console)",
+    "url": "https://en.wikipedia.org/wiki/PlayStation_(console)"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "instagram-launched",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When did Instagram launch?",
+   "unit": "year",
+   "answer": 2010,
+   "fact": "Its name joins instant camera and telegram.",
+   "source": {
+    "title": "Instagram",
+    "url": "https://en.wikipedia.org/wiki/Instagram"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "gagarin-first-in-space",
+   "kind": "space",
+   "round": "year",
+   "question": "When did Yuri Gagarin become the first person in space?",
+   "unit": "year",
+   "answer": 1961,
+   "fact": "His flight took 108 minutes from launch to landing, once around the Earth.",
+   "source": {
+    "title": "Vostok 1",
+    "url": "https://en.wikipedia.org/wiki/Vostok_1"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "telephone-patent",
+   "kind": "science",
+   "round": "year",
+   "question": "When did Alexander Graham Bell patent the telephone?",
+   "unit": "year",
+   "answer": 1876,
+   "fact": "His research on hearing and speech led him to it.",
+   "source": {
+    "title": "Alexander Graham Bell",
+    "url": "https://en.wikipedia.org/wiki/Alexander_Graham_Bell"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "first-nobel-prizes",
+   "kind": "science",
+   "round": "year",
+   "question": "When were the first Nobel Prizes awarded?",
+   "unit": "year",
+   "answer": 1901,
+   "fact": "They marked the fifth anniversary of Alfred Nobel's death.",
+   "source": {
+    "title": "Nobel Prize",
+    "url": "https://en.wikipedia.org/wiki/Nobel_Prize"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "four-minute-mile",
+   "kind": "sports",
+   "round": "year",
+   "question": "When did someone first run a mile in under four minutes?",
+   "unit": "year",
+   "answer": 1954,
+   "fact": "Roger Bannister ran 3:59.4 at Oxford, aged 25, with two friends as pacemakers.",
+   "source": {
+    "title": "Four-minute mile",
+    "url": "https://en.wikipedia.org/wiki/Four-minute_mile"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "barbie-launched",
+   "kind": "culture",
+   "round": "year",
+   "question": "When was the first Barbie doll sold?",
+   "unit": "year",
+   "answer": 1959,
+   "fact": "She wore a black-and-white zebra-striped swimsuit and cost three dollars.",
+   "source": {
+    "title": "Barbie",
+    "url": "https://en.wikipedia.org/wiki/Barbie"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "golden-gate-opens",
+   "kind": "landmarks",
+   "round": "year",
+   "question": "When did the Golden Gate Bridge open?",
+   "unit": "year",
+   "answer": 1937,
+   "fact": "It was the longest and the tallest suspension bridge in the world when it opened.",
+   "source": {
+    "title": "Golden Gate Bridge",
+    "url": "https://en.wikipedia.org/wiki/Golden_Gate_Bridge"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "first-ivf-baby",
+   "kind": "body",
+   "round": "year",
+   "question": "When was the first baby conceived by IVF born?",
+   "unit": "year",
+   "answer": 1978,
+   "fact": "Louise Brown was born in Oldham, England, by planned caesarean.",
+   "source": {
+    "title": "Louise Brown",
+    "url": "https://en.wikipedia.org/wiki/Louise_Brown"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "south-pole-reached",
+   "kind": "nature",
+   "round": "year",
+   "question": "When did anyone first reach the South Pole?",
+   "unit": "year",
+   "answer": 1911,
+   "fact": "Roald Amundsen's party got there five weeks ahead of Robert Falcon Scott's.",
+   "source": {
+    "title": "Amundsen's South Pole expedition",
+    "url": "https://en.wikipedia.org/wiki/Amundsen%27s_South_Pole_expedition"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "x-rays-discovered",
+   "kind": "science",
+   "round": "year",
+   "question": "When were X-rays discovered?",
+   "unit": "year",
+   "answer": 1895,
+   "fact": "Wilhelm Röntgen called them X for unknown, and took an X-ray of his wife's hand within weeks.",
+   "source": {
+    "title": "X-ray",
+    "url": "https://en.wikipedia.org/wiki/X-ray"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "rosetta-stone-found",
+   "kind": "culture",
+   "round": "year",
+   "question": "When was the Rosetta Stone found?",
+   "unit": "year",
+   "answer": 1799,
+   "fact": "A French army officer found it during France's invasion of Egypt.",
+   "source": {
+    "title": "Rosetta Stone",
+    "url": "https://en.wikipedia.org/wiki/Rosetta_Stone"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "first-dinosaur-named",
+   "kind": "animals",
+   "round": "year",
+   "question": "When was the first dinosaur named?",
+   "unit": "year",
+   "answer": 1824,
+   "fact": "It was Megalosaurus, named by William Buckland.",
+   "source": {
+    "title": "Megalosaurus",
+    "url": "https://en.wikipedia.org/wiki/Megalosaurus"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "origin-of-species",
+   "kind": "science",
+   "round": "year",
+   "question": "When did Darwin publish On the Origin of Species?",
+   "unit": "year",
+   "answer": 1859,
+   "fact": "He had been working on the theory for about 20 years before he published it.",
+   "source": {
+    "title": "On the Origin of Species",
+    "url": "https://en.wikipedia.org/wiki/On_the_Origin_of_Species"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "television-first-shown",
+   "kind": "science",
+   "round": "year",
+   "question": "When was television first shown to the public?",
+   "unit": "year",
+   "answer": 1926,
+   "definition": "John Logie Baird's demonstration",
+   "fact": "Months earlier Baird had sent his first greyscale picture: the head of a ventriloquist's dummy.",
+   "source": {
+    "title": "John Logie Baird",
+    "url": "https://en.wikipedia.org/wiki/John_Logie_Baird"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "magellan-voyage-ends",
+   "kind": "places",
+   "round": "year",
+   "question": "When did the first voyage around the world end?",
+   "unit": "year",
+   "answer": 1522,
+   "definition": "Magellan's expedition, back in Spain",
+   "fact": "Magellan himself died on the way, in the Philippines; Juan Sebastián Elcano brought the crew home.",
+   "source": {
+    "title": "Magellan expedition",
+    "url": "https://en.wikipedia.org/wiki/Magellan_expedition"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "pisa-starts-leaning",
+   "kind": "landmarks",
+   "round": "year",
+   "question": "When did the Leaning Tower of Pisa start to lean?",
+   "unit": "year",
+   "answer": 1178,
+   "fact": "It began to sink once building had reached the second floor.",
+   "source": {
+    "title": "Leaning Tower of Pisa",
+    "url": "https://en.wikipedia.org/wiki/Leaning_Tower_of_Pisa"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "penny-black",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When was the first postage stamp, the Penny Black, issued?",
+   "unit": "year",
+   "answer": 1840,
+   "fact": "It showed Queen Victoria's head.",
+   "source": {
+    "title": "Penny Black",
+    "url": "https://en.wikipedia.org/wiki/Penny_Black"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "jeans-patented",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When were riveted denim jeans patented?",
+   "unit": "year",
+   "answer": 1873,
+   "fact": "Jacob Davis asked Levi Strauss to help him apply for the patent, and they shared it.",
+   "source": {
+    "title": "Levi Strauss",
+    "url": "https://en.wikipedia.org/wiki/Levi_Strauss"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "first-crossword",
+   "kind": "culture",
+   "round": "year",
+   "question": "When was the first crossword published?",
+   "unit": "year",
+   "answer": 1913,
+   "fact": "Arthur Wynne, a Liverpool-born journalist, printed his word-cross in the New York World.",
+   "source": {
+    "title": "Crossword",
+    "url": "https://en.wikipedia.org/wiki/Crossword"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "bikini-introduced",
+   "kind": "culture",
+   "round": "year",
+   "question": "When was the bikini introduced?",
+   "unit": "year",
+   "answer": 1946,
+   "fact": "Louis Réard named it after Bikini Atoll, where a nuclear bomb had been tested four days before.",
+   "source": {
+    "title": "Bikini",
+    "url": "https://en.wikipedia.org/wiki/Bikini"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "boeing-747-first-flight",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When did the Boeing 747 jumbo jet first fly?",
+   "unit": "year",
+   "answer": 1969,
+   "fact": "It was certified that December, ready to carry passengers for Pan Am.",
+   "source": {
+    "title": "Boeing 747",
+    "url": "https://en.wikipedia.org/wiki/Boeing_747"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "first-cds",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did the first CDs go on sale?",
+   "unit": "year",
+   "answer": 1982,
+   "definition": "in Japan",
+   "fact": "The CD was the second optical disc to reach the market, after the bigger LaserDisc.",
+   "source": {
+    "title": "Compact disc",
+    "url": "https://en.wikipedia.org/wiki/Compact_disc"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "concorde-retired",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When did Concorde make its last passenger flight?",
+   "unit": "year",
+   "answer": 2003,
+   "fact": "Rising costs and fewer passengers ended it, 27 years after it entered service.",
+   "source": {
+    "title": "Concorde",
+    "url": "https://en.wikipedia.org/wiki/Concorde"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "first-oscars",
+   "kind": "culture",
+   "round": "year",
+   "question": "When were the first Academy Awards held?",
+   "unit": "year",
+   "answer": 1929,
+   "fact": "The ceremony lasted 15 minutes, at a dinner for about 270 people.",
+   "source": {
+    "title": "Academy Awards",
+    "url": "https://en.wikipedia.org/wiki/Academy_Awards"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "chernobyl-disaster",
+   "kind": "science",
+   "round": "year",
+   "question": "When did the Chernobyl disaster happen?",
+   "unit": "year",
+   "answer": 1986,
+   "fact": "The fire in reactor 4 burned for about two weeks.",
+   "source": {
+    "title": "Chernobyl disaster",
+    "url": "https://en.wikipedia.org/wiki/Chernobyl_disaster"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "disneyland-opens",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did the first Disneyland open?",
+   "unit": "year",
+   "answer": 1955,
+   "fact": "It was the only park built under Walt Disney's own supervision.",
+   "source": {
+    "title": "Disneyland",
+    "url": "https://en.wikipedia.org/wiki/Disneyland"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "dominoes-set",
+   "kind": "culture",
+   "question": "How many tiles are in a standard set of dominoes?",
+   "unit": "tiles",
+   "answer": 28,
+   "definition": "a double-six set",
+   "fact": "There is one tile for each pair of ends from blank to six, up to the double six.",
+   "source": {
+    "title": "Dominoes",
+    "url": "https://en.wikipedia.org/wiki/Dominoes"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "jupiter-earths",
+   "kind": "space",
+   "question": "How many Earths would fit inside Jupiter?",
+   "unit": "earths",
+   "answer": 1321,
+   "definition": "by volume",
+   "fact": "It is the largest planet in the Solar System, 142,976 km across at its equator.",
+   "source": {
+    "title": "Jupiter",
+    "url": "https://en.wikipedia.org/wiki/Jupiter"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "un-official-languages",
+   "kind": "culture",
+   "question": "How many languages are official at the United Nations?",
+   "unit": "languages",
+   "answer": 6,
+   "fact": "They are Arabic, Chinese, English, French, Russian and Spanish, each equally authoritative.",
+   "source": {
+    "title": "Official languages of the United Nations",
+    "url": "https://en.wikipedia.org/wiki/Official_languages_of_the_United_Nations"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "central-america-countries",
+   "kind": "places",
+   "question": "How many countries are there in Central America?",
+   "unit": "countries",
+   "answer": 7,
+   "fact": "Between Mexico and Colombia: Belize, Guatemala, Honduras, El Salvador, Nicaragua, Costa Rica and Panama.",
+   "source": {
+    "title": "Central America",
+    "url": "https://en.wikipedia.org/wiki/Central_America"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "phone-typing-speed",
+   "kind": "everyday",
+   "question": "How fast do people type on a phone, on average?",
+   "unit": "words per minute",
+   "answer": 36.2,
+   "definition": "2019 study",
+   "fact": "Professional typists on a real keyboard manage 43 to 80 words a minute.",
+   "source": {
+    "title": "Words per minute",
+    "url": "https://en.wikipedia.org/wiki/Words_per_minute"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "shinjuku-station-passengers",
+   "kind": "places",
+   "question": "How many people use Shinjuku Station, the world's busiest, each day?",
+   "unit": "million people",
+   "answer": 3.59,
+   "definition": "2018",
+   "fact": "That makes it the world's busiest railway station by far, says Guinness World Records.",
+   "source": {
+    "title": "Shinjuku Station",
+    "url": "https://en.wikipedia.org/wiki/Shinjuku_Station"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "route-66-length",
+   "kind": "landmarks",
+   "question": "How long was Route 66, from Chicago to Los Angeles?",
+   "unit": "kilometres",
+   "answer": 3940,
+   "fact": "It crossed eight states on its way from Chicago to Santa Monica, on the Pacific.",
+   "source": {
+    "title": "U.S. Route 66",
+    "url": "https://en.wikipedia.org/wiki/U.S._Route_66"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "titanic-speed",
+   "kind": "culture",
+   "question": "How fast was the Titanic going when its lookouts saw the iceberg?",
+   "unit": "kilometres per hour",
+   "answer": 41,
+   "fact": "Seven ice warnings had come in, but full speed in icy waters was standard practice then.",
+   "source": {
+    "title": "Sinking of the Titanic",
+    "url": "https://en.wikipedia.org/wiki/Sinking_of_the_Titanic"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "world-life-expectancy",
+   "kind": "body",
+   "question": "How long does the average person in the world live?",
+   "unit": "years",
+   "answer": 73.3,
+   "definition": "life expectancy at birth, 2019",
+   "fact": "At the start of the 19th century, no country in the world had a life expectancy above 40.",
+   "source": {
+    "title": "Life expectancy",
+    "url": "https://en.wikipedia.org/wiki/Life_expectancy"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "bolt-200m-record",
+   "kind": "sports",
+   "question": "How long did Usain Bolt take to run 200 m in his world record?",
+   "unit": "seconds",
+   "answer": 19.19,
+   "fact": "That's an average of 37.52 km/h, from a standing start and round a bend.",
+   "source": {
+    "title": "Usain Bolt",
+    "url": "https://en.wikipedia.org/wiki/Usain_Bolt"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "chicken-egg-hatching",
+   "kind": "animals",
+   "question": "How long does a chicken's egg take to hatch?",
+   "unit": "days",
+   "answer": 21,
+   "fact": "The chick breaks out of the shell with a little egg tooth on its beak.",
+   "source": {
+    "title": "Chicken",
+    "url": "https://en.wikipedia.org/wiki/Chicken"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "femur-share-of-height",
+   "kind": "body",
+   "round": "percent",
+   "question": "How much of your height is your thigh bone?",
+   "unit": "percent",
+   "answer": 26.74,
+   "definition": "the femur, on average",
+   "fact": "The femur is the longest bone in the body, and the ratio holds for men and women alike.",
+   "source": {
+    "title": "Femur",
+    "url": "https://en.wikipedia.org/wiki/Femur"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "beatles-break-up",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did the Beatles break up?",
+   "unit": "year",
+   "answer": 1970,
+   "fact": "They had stopped touring four years before, after over 1,400 concerts, and ended as a studio band.",
+   "source": {
+    "title": "The Beatles",
+    "url": "https://en.wikipedia.org/wiki/The_Beatles"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "first-wimbledon",
+   "kind": "sports",
+   "round": "year",
+   "question": "When was the first Wimbledon tennis championship played?",
+   "unit": "year",
+   "answer": 1877,
+   "fact": "Only men's singles was played, by 22 men who each paid a guinea to enter.",
+   "source": {
+    "title": "The Championships, Wimbledon",
+    "url": "https://en.wikipedia.org/wiki/Wimbledon_Championships"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "first-eurovision",
+   "kind": "culture",
+   "round": "year",
+   "question": "When was the first Eurovision Song Contest?",
+   "unit": "year",
+   "answer": 1956,
+   "fact": "Seven countries took part, each with two songs, the only time more than one entry was allowed.",
+   "source": {
+    "title": "Eurovision Song Contest",
+    "url": "https://en.wikipedia.org/wiki/Eurovision_Song_Contest"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "pac-man-released",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did Pac-Man first come out?",
+   "unit": "year",
+   "answer": 1980,
+   "definition": "in Japan",
+   "fact": "It was first called Puck Man, and was tested in an arcade in Shibuya, Tokyo.",
+   "source": {
+    "title": "Pac-Man",
+    "url": "https://en.wikipedia.org/wiki/Pac-Man"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "first-paralympics",
+   "kind": "sports",
+   "round": "year",
+   "question": "When did the Paralympics begin?",
+   "unit": "year",
+   "answer": 1960,
+   "fact": "400 athletes from 23 nations competed in Rome, alongside the Olympics.",
+   "source": {
+    "title": "1960 Summer Paralympics",
+    "url": "https://en.wikipedia.org/wiki/1960_Summer_Paralympics"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "first-vaccine",
+   "kind": "body",
+   "round": "year",
+   "question": "When did Edward Jenner make the first vaccine?",
+   "unit": "year",
+   "answer": 1796,
+   "definition": "against smallpox",
+   "fact": "He showed that catching mild cowpox protected people from deadly smallpox.",
+   "source": {
+    "title": "Smallpox vaccine",
+    "url": "https://en.wikipedia.org/wiki/Smallpox_vaccine"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "wright-first-flight-length",
+   "kind": "science",
+   "question": "How long did the Wright brothers' first powered flight last?",
+   "unit": "seconds",
+   "answer": 12,
+   "fact": "Orville covered 37 m at only 10.9 km/h over the ground.",
+   "source": {
+    "title": "Wright brothers",
+    "url": "https://en.wikipedia.org/wiki/Wright_brothers"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "game-of-thrones-episodes",
+   "kind": "culture",
+   "question": "How many episodes of Game of Thrones were made?",
+   "unit": "episodes",
+   "answer": 73,
+   "fact": "The plan was for each novel to give a season's worth of episodes.",
+   "source": {
+    "title": "Game of Thrones",
+    "url": "https://en.wikipedia.org/wiki/Game_of_Thrones"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "london-eye-turn",
+   "kind": "landmarks",
+   "question": "How long does the London Eye take to go round once?",
+   "unit": "minutes",
+   "answer": 30,
+   "fact": "It moves at 26 cm a second, slow enough to step on and off without stopping.",
+   "source": {
+    "title": "London Eye",
+    "url": "https://en.wikipedia.org/wiki/London_Eye"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "nobel-laureates",
+   "kind": "culture",
+   "question": "How many people and organisations have won a Nobel Prize?",
+   "unit": "laureates",
+   "answer": 1018,
+   "definition": "to 2026",
+   "fact": "The prizes have been given 633 times, many of them shared.",
+   "source": {
+    "title": "Nobel Prize",
+    "url": "https://en.wikipedia.org/wiki/Nobel_Prize"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "le-mans-distance-record",
+   "kind": "sports",
+   "question": "How far has a car gone in the 24 Hours of Le Mans?",
+   "unit": "kilometres",
+   "answer": 5410,
+   "definition": "the distance record",
+   "fact": "That's about 18 times the length of a Formula One Grand Prix.",
+   "source": {
+    "title": "24 Hours of Le Mans",
+    "url": "https://en.wikipedia.org/wiki/24_Hours_of_Le_Mans"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "landlocked-countries",
+   "kind": "places",
+   "question": "How many countries have no coastline?",
+   "unit": "countries",
+   "answer": 44,
+   "fact": "Two, Liechtenstein and Uzbekistan, are doubly landlocked, surrounded only by landlocked countries.",
+   "source": {
+    "title": "Landlocked country",
+    "url": "https://en.wikipedia.org/wiki/Landlocked_country"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "voyager-round-the-world",
+   "kind": "everyday",
+   "question": "How long did the first flight round the world without refuelling take?",
+   "unit": "days",
+   "answer": 9,
+   "fact": "Dick Rutan stayed at the controls without relief for almost the first three days.",
+   "source": {
+    "title": "Rutan Voyager",
+    "url": "https://en.wikipedia.org/wiki/Rutan_Voyager"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "longest-solar-eclipse",
+   "kind": "space",
+   "question": "How long can a total eclipse of the Sun last, at most?",
+   "unit": "minutes",
+   "answer": 7.53,
+   "fact": "Observers aboard Concorde once stretched one to about 74 minutes by chasing the Moon's shadow.",
+   "source": {
+    "title": "Solar eclipse",
+    "url": "https://en.wikipedia.org/wiki/Solar_eclipse"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "espresso-caffeine",
+   "kind": "food",
+   "question": "How much caffeine is in a shot of espresso?",
+   "unit": "milligrams",
+   "answer": 65,
+   "definition": "a typical 30 ml shot",
+   "fact": "Espresso is stronger than filter coffee, but a big mug of filter has more caffeine in all.",
+   "source": {
+    "title": "Espresso",
+    "url": "https://en.wikipedia.org/wiki/Espresso"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "scrabble-board-squares",
+   "kind": "culture",
+   "question": "How many squares are there on a Scrabble board?",
+   "unit": "squares",
+   "answer": 225,
+   "fact": "The English set's 100 tiles include two blanks worth no points.",
+   "source": {
+    "title": "Scrabble",
+    "url": "https://en.wikipedia.org/wiki/Scrabble"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "eurostar-london-paris",
+   "kind": "everyday",
+   "question": "How long does the Eurostar take from London to Paris?",
+   "unit": "minutes",
+   "answer": 135,
+   "definition": "the fastest trains",
+   "fact": "When it began, from Waterloo, the trip took 2 hours 55 minutes.",
+   "source": {
+    "title": "Eurostar",
+    "url": "https://en.wikipedia.org/wiki/Eurostar"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "uk-homes",
+   "kind": "places",
+   "question": "How many homes are there in the UK?",
+   "unit": "million homes",
+   "answer": 27,
+   "fact": "About 23 million of them are in England.",
+   "source": {
+    "title": "Housing in the United Kingdom",
+    "url": "https://en.wikipedia.org/wiki/Housing_in_the_United_Kingdom"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "hong-kong-skyscrapers",
+   "kind": "lists",
+   "question": "How many skyscrapers does Hong Kong have?",
+   "unit": "skyscrapers",
+   "answer": 569,
+   "definition": "buildings over 150 m, 2026",
+   "fact": "That's the most of any city, ahead of Shenzhen and New York.",
+   "source": {
+    "title": "List of cities with the most skyscrapers",
+    "url": "https://en.wikipedia.org/wiki/List_of_cities_with_the_most_skyscrapers"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "berlin-wall-length",
+   "kind": "landmarks",
+   "question": "How long was the Berlin Wall around West Berlin?",
+   "unit": "kilometres",
+   "answer": 155,
+   "fact": "Its last version was built from 45,000 concrete sections, each 3.6 m high.",
+   "source": {
+    "title": "Berlin Wall",
+    "url": "https://en.wikipedia.org/wiki/Berlin_Wall"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "lhc-ring-length",
+   "kind": "science",
+   "question": "How long is the ring of the Large Hadron Collider?",
+   "unit": "kilometres",
+   "answer": 26.7,
+   "fact": "It runs up to 175 m beneath the border of France and Switzerland, near Geneva.",
+   "source": {
+    "title": "Large Hadron Collider",
+    "url": "https://en.wikipedia.org/wiki/Large_Hadron_Collider"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "old-faithful-interval",
+   "kind": "nature",
+   "question": "How often does Old Faithful, the Yellowstone geyser, erupt?",
+   "unit": "minutes",
+   "answer": 92,
+   "definition": "the average gap between eruptions",
+   "fact": "Each eruption lasts 1.5 to 5 minutes and throws up 14,000 to 32,000 litres of boiling water.",
+   "source": {
+    "title": "Old Faithful",
+    "url": "https://en.wikipedia.org/wiki/Old_Faithful"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "maldives-height",
+   "kind": "places",
+   "question": "How high above sea level is the Maldives, on average?",
+   "unit": "metres",
+   "answer": 1.5,
+   "definition": "its ground level",
+   "fact": "Its highest natural point is only 2.4 m, making it the world's lowest-lying country.",
+   "source": {
+    "title": "Maldives",
+    "url": "https://en.wikipedia.org/wiki/Maldives"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "buckingham-palace-rooms",
+   "kind": "landmarks",
+   "question": "How many rooms does Buckingham Palace have?",
+   "unit": "rooms",
+   "answer": 775,
+   "fact": "Its garden is the largest private garden in London.",
+   "source": {
+    "title": "Buckingham Palace",
+    "url": "https://en.wikipedia.org/wiki/Buckingham_Palace"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "titanic-lifeboats",
+   "kind": "culture",
+   "question": "How many lifeboats did the Titanic carry?",
+   "unit": "lifeboats",
+   "answer": 20,
+   "fact": "Together they could hold only a little over half of the 2,207 people on board.",
+   "source": {
+    "title": "Lifeboats of the Titanic",
+    "url": "https://en.wikipedia.org/wiki/Lifeboats_of_the_Titanic"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-as-big-as-india",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-area",
+   "target": 3287263,
+   "question": "Name a country with about the same area as India",
+   "except": [
+    "India"
+   ],
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-as-many-people-as-australia",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-population",
+   "target": 27921150,
+   "question": "Name a country with about as many people as Australia",
+   "except": [
+    "Australia"
+   ],
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-200m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-population",
+   "target": 200000000,
+   "question": "Name a country with about 200 million people",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-as-big-as-mexico",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-area",
+   "target": 1964375,
+   "question": "Name a country with about the same area as Mexico",
+   "fact": "Indonesia and Sudan are each within 5% of it.",
+   "except": [
+    "Mexico"
+   ],
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-as-big-as-japan",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-area",
+   "target": 377915,
+   "question": "Name a country with about the same area as Japan",
+   "fact": "Japan is bigger than Germany: Norway and Germany are both within 6% of it.",
+   "except": [
+    "Japan"
+   ],
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-8-borders",
+   "round": "name",
+   "kind": "places",
+   "list": "land-borders",
+   "target": 8,
+   "question": "Name a country with 8 land borders",
+   "definition": "France has 11, counting its overseas territories",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-7-borders",
+   "round": "name",
+   "kind": "places",
+   "list": "land-borders",
+   "target": 7,
+   "question": "Name a country with 7 land borders",
+   "definition": "France has 11, counting its overseas territories",
    "easy": false,
    "verified": true
   }

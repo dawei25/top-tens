@@ -1218,5 +1218,750 @@
     "verdict": "keep",
     "why": "Mid-list target, answers on both sides and only two within 2% (Mauritania, Kuwait); Norway, Ireland, New Zealand, Finland, Slovakia, Costa Rica 89 to 96; Eire, NZ, Norge, Suomi lock, Danmark confirms; Scotland, Hong Kong, Puerto Rico, Tasmania say what they are.",
     "judgedAt": "2026-11-14"
+  },
+  "channel-tunnel-length": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Dover to Calais is about 35 km across the sea, and the tunnel starts and ends a few km inland on each side); figure and fact checked on Channel Tunnel.",
+    "judgedAt": "2026-11-17"
+  },
+  "panama-canal-length": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Panama is the narrowest part of the Americas, a short drive from ocean to ocean: well under 100 km); figure and fact checked on Panama Canal.",
+    "judgedAt": "2026-11-17"
+  },
+  "danube-countries": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself on a mental map: Germany, Austria, Slovakia, Hungary, then down through the Balkans to the Black Sea); figure and fact checked on Danube.",
+    "judgedAt": "2026-11-17"
+  },
+  "world-cup-winning-countries": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: list the winners you remember, Brazil, Germany, Italy, Argentina, France, and count); figure and fact checked on FIFA World Cup.",
+    "judgedAt": "2026-11-17"
+  },
+  "dog-teeth": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Start from yourself: an adult has 32 teeth, and a dog's long snout has room for more); figure and fact checked on Dog.",
+    "judgedAt": "2026-11-17"
+  },
+  "friends-episodes": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Ten seasons, and an American TV season runs to about two dozen episodes); figure and fact checked on Friends.",
+    "judgedAt": "2026-11-17"
+  },
+  "netherlands-bicycles": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The Netherlands has about 18 million people, and nearly everyone rides; some own two bikes); figure and fact checked on Cycling in the Netherlands.",
+    "judgedAt": "2026-11-17"
+  },
+  "land-speed-record": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The record car broke the sound barrier, and sound travels at about 1,200 km/h); figure and fact checked on ThrustSSC.",
+    "judgedAt": "2026-11-17"
+  },
+  "train-speed-record": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Bullet trains in service cruise at about 300 km/h; a record run on a test track might double that); figure and fact checked on SCMaglev.",
+    "judgedAt": "2026-11-17"
+  },
+  "oldest-cat": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Pet cats usually live about 15 years; a record holder might manage twice that); figure and fact checked on Creme Puff (cat).",
+    "judgedAt": "2026-11-17"
+  },
+  "louis-xiv-reign": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Elizabeth II reigned for 70 years; the record is a little longer); figure and fact checked on Louis XIV.",
+    "judgedAt": "2026-11-17"
+  },
+  "walking-speed": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Reason from yourself: a 1 km walk to the shops takes you 10 to 15 minutes); figure and fact checked on Preferred walking speed.",
+    "judgedAt": "2026-11-17"
+  },
+  "grand-canyon-depth": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (From the rim the river looks like a thread: 'a mile deep' is the phrase, well over a kilometre); figure and fact checked on Grand Canyon.",
+    "judgedAt": "2026-11-17"
+  },
+  "great-pyramid-blocks": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (It's about 230 m along each side and nearly 150 m tall; picture blocks a metre or so across, stacked solid); figure and fact checked on Great Pyramid of Giza.",
+    "judgedAt": "2026-11-17"
+  },
+  "fastest-sail-around-world": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Jules Verne's Phileas Fogg took 80 days by steamer and train; a racing trimaran might halve that); figure and fact checked on Jules Verne Trophy.",
+    "judgedAt": "2026-11-17"
+  },
+  "manhattan-length": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Walking from the southern tip to the northern end takes about four or five hours); figure and fact checked on Manhattan.",
+    "judgedAt": "2026-11-17"
+  },
+  "dutch-men-height": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Reason from yourself: the average man in most of Europe is about 175 to 180 cm); figure and fact checked on Human height.",
+    "judgedAt": "2026-11-17"
+  },
+  "eiffel-tower-steps": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (It's about 300 m to the top platform, and one step rises about 18 cm); figure and fact checked on Eiffel Tower.",
+    "judgedAt": "2026-11-17"
+  },
+  "keyboard-keys": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: 26 letters, 10 digits, 12 function keys, a number pad of 17, then the rest); figure and fact checked on Computer keyboard.",
+    "judgedAt": "2026-11-17"
+  },
+  "venice-historic-population": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (It's a small town of canals you can cross on foot in an hour, and tourism has pushed many residents out); figure and fact checked on Venice.",
+    "judgedAt": "2026-11-17"
+  },
+  "tornado-wind-record": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The strongest hurricanes blow at about 250 to 300 km/h; the worst tornadoes are fiercer still); figure and fact checked on Tornado.",
+    "judgedAt": "2026-11-17"
+  },
+  "chile-length": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (It runs most of the length of South America, which is about 7,500 km from top to bottom); figure and fact checked on Chile.",
+    "judgedAt": "2026-11-17"
+  },
+  "ocean-average-depth": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The deepest trenches reach about 11 km; most of the sea floor is a plain a few km down); figure and fact checked on Ocean.",
+    "judgedAt": "2026-11-17"
+  },
+  "sumo-wrestler-weight": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Reason from yourself: a big man weighs about 100 kg, and these are much bigger); figure and fact checked on Sumo.",
+    "judgedAt": "2026-11-17"
+  },
+  "oktoberfest-beer": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (About 7 million visitors, and the beer comes in one-litre mugs); figure and fact checked on Oktoberfest.",
+    "judgedAt": "2026-11-17"
+  },
+  "space-shuttle-missions": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The shuttles flew for about 30 years, a few launches a year); figure and fact checked on Space Shuttle.",
+    "judgedAt": "2026-11-17"
+  },
+  "apollo-11-duration": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Three days to the Moon, three days back, and about a day there); figure and fact checked on Apollo 11.",
+    "judgedAt": "2026-11-17"
+  },
+  "lindbergh-flight-time": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (New York to Paris is about 5,800 km, and a 1920s plane flew at about 170 km/h); figure and fact checked on Spirit of St. Louis.",
+    "judgedAt": "2026-11-17"
+  },
+  "euro-countries": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: the EU has 27 members, and only a few keep their own currency); figure and fact checked on Eurozone.",
+    "judgedAt": "2026-11-17"
+  },
+  "gibraltar-strait-width": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (On a clear day you can see Morocco from the Spanish coast); figure and fact checked on Strait of Gibraltar.",
+    "judgedAt": "2026-11-17"
+  },
+  "hadrians-wall-length": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (It runs coast to coast across the narrowest part of northern England, from Newcastle to Carlisle); figure and fact checked on Hadrian's Wall.",
+    "judgedAt": "2026-11-17"
+  },
+  "louvre-visitors": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Picture 25,000 visitors a day, every day of the year); figure and fact checked on Louvre.",
+    "judgedAt": "2026-11-17"
+  },
+  "japan-mountainous": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Picture Japan's cities squeezed along the coast, with Mount Fuji and the Japanese Alps behind them); figure and fact checked on Geography of Japan.",
+    "judgedAt": "2026-11-17"
+  },
+  "java-share-of-indonesians": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Indonesia has thousands of islands, but Jakarta's island is by far the most crowded); figure and fact checked on Java.",
+    "judgedAt": "2026-11-17"
+  },
+  "england-share-of-uk": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi from two anchors: the UK has about 69 million people; Scotland about 5.5 million, Wales 3, Northern Ireland 2); figure and fact checked on England.",
+    "judgedAt": "2026-11-17"
+  },
+  "arabica-share": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Nearly all coffee is one of two kinds, arabica, the premium bean, or robusta; arabica is the bigger one); figure and fact checked on Coffea arabica.",
+    "judgedAt": "2026-11-17"
+  },
+  "finland-forest": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Finland is the land of forests and lakes: picture trees almost everywhere that isn't water); figure and fact checked on Finland.",
+    "judgedAt": "2026-11-17"
+  },
+  "rodent-share-of-mammals": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Mice, rats, squirrels, hamsters, beavers, guinea pigs: there are rodents of every kind on every continent); figure and fact checked on Rodent.",
+    "judgedAt": "2026-11-17"
+  },
+  "bone-share-of-weight": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Reason from yourself: a classroom skeleton looks light, a few kilos out of your 70 or so); figure and fact checked on Human skeleton.",
+    "judgedAt": "2026-11-17"
+  },
+  "japan-over-65": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Japan is famously the oldest society; in most rich countries about one in five is over 65); figure and fact checked on Aging of Japan.",
+    "judgedAt": "2026-11-17"
+  },
+  "california-forest": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Picture the redwoods and the Sierra Nevada as well as the deserts and the beaches); figure and fact checked on California.",
+    "judgedAt": "2026-11-17"
+  },
+  "greece-island-share": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Picture the thousands of islands, then the size of the mainland: most islands are small); figure and fact checked on Geography of Greece.",
+    "judgedAt": "2026-11-17"
+  },
+  "sahara-share-of-africa": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (On a map of Africa, the desert takes most of the top third); figure and fact checked on Sahara.",
+    "judgedAt": "2026-11-17"
+  },
+  "ivory-coast-cocoa": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Most cocoa comes from West Africa, and one country there leads by far); figure and fact checked on Cocoa bean.",
+    "judgedAt": "2026-11-17"
+  },
+  "french-speaking-canadians": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Quebec has about a fifth of Canada's people, and nearly all of them speak French); figure and fact checked on French language in Canada.",
+    "judgedAt": "2026-11-17"
+  },
+  "swiss-german-speakers": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Zurich, Bern and Basel speak German; Geneva and Lausanne, French, are a smaller corner); figure and fact checked on Languages of Switzerland.",
+    "judgedAt": "2026-11-17"
+  },
+  "glacier-share-of-land": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Antarctica alone is bigger than Europe, and Greenland is huge; together they're a good slice of the map); figure and fact checked on Glacier.",
+    "judgedAt": "2026-11-17"
+  },
+  "amazon-deforested": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (You hear about the forest being cleared every year, but most of it is still standing); figure and fact checked on Amazon rainforest.",
+    "judgedAt": "2026-11-17"
+  },
+  "dead-sea-salt": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Sea water is about 3.5% salt, and the Dead Sea is famously about ten times saltier); figure and fact checked on Dead Sea.",
+    "judgedAt": "2026-11-17"
+  },
+  "body-oxygen-share": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi from two anchors: you're about 60% water, and nearly all of water's weight is its oxygen); figure and fact checked on Composition of the human body.",
+    "judgedAt": "2026-11-17"
+  },
+  "eighteen-carat-gold": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: 24-carat is pure gold, so 18-carat is 18 parts in 24); figure and fact checked on Fineness.",
+    "judgedAt": "2026-11-17"
+  },
+  "sun-hydrogen": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Stars are mostly hydrogen, which they fuse into helium; some has already turned); figure and fact checked on Sun.",
+    "judgedAt": "2026-11-17"
+  },
+  "asia-share-of-land": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (On a world map Asia is by far the biggest continent, about half as big again as Africa); figure and fact checked on Asia.",
+    "judgedAt": "2026-11-17"
+  },
+  "russia-share-of-europe": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (On a map, Russia west of the Urals is wider than all of Western Europe put together); figure and fact checked on European Russia.",
+    "judgedAt": "2026-11-17"
+  },
+  "great-lakes-fresh-water": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (They're the biggest group of freshwater lakes, but Siberia's Baikal and Africa's great lakes hold plenty too); figure and fact checked on Great Lakes.",
+    "judgedAt": "2026-11-17"
+  },
+  "honey-water": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Honey is thick and sticky, nothing like juice: mostly sugar, with a little water left); figure and fact checked on Honey.",
+    "judgedAt": "2026-11-17"
+  },
+  "everest-air-pressure": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Climbers need bottled oxygen near the top: the air is far thinner, but far from gone); figure and fact checked on Mount Everest.",
+    "judgedAt": "2026-11-17"
+  },
+  "sugarcane-share": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (There are two sources: cane from the tropics, and beet from cooler places like Europe); figure and fact checked on Sugarcane.",
+    "judgedAt": "2026-11-17"
+  },
+  "desert-sand-share": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Picture the rocky deserts of Arizona and the Gobi's gravel as well as the dunes); figure and fact checked on Desert.",
+    "judgedAt": "2026-11-17"
+  },
+  "australia-arid": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The outback fills the middle of the map; the green is a fringe along the coasts); figure and fact checked on Australia.",
+    "judgedAt": "2026-11-17"
+  },
+  "berlin-wall-falls": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The Cold War ended just before the 1990s; your parents may remember it on TV); figure and fact checked on Berlin Wall.",
+    "judgedAt": "2026-11-17"
+  },
+  "google-founded": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (A few years after the web went public, before Facebook and YouTube); figure and fact checked on Google.",
+    "judgedAt": "2026-11-17"
+  },
+  "wikipedia-launched": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (A few years after Google, a few before Facebook); figure and fact checked on Wikipedia.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-pokemon-games": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The cards and the cartoon were a late-1990s craze in the West; the games came first, in Japan); figure and fact checked on Pokémon Red, Blue, and Yellow.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-playstation": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (It's the 1990s console before the PlayStation 2, which came out around the millennium); figure and fact checked on PlayStation (console).",
+    "judgedAt": "2026-11-17"
+  },
+  "instagram-launched": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (A few years after the first iPhone, once phone cameras got good); figure and fact checked on Instagram.",
+    "judgedAt": "2026-11-17"
+  },
+  "gagarin-first-in-space": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (A few years after Sputnik, the first satellite, and before the Moon landings); figure and fact checked on Vostok 1.",
+    "judgedAt": "2026-11-17"
+  },
+  "telephone-patent": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Victorian times: after the telegraph, before cars and electric light); figure and fact checked on Alexander Graham Bell.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-nobel-prizes": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (At the turn of the 20th century, with Röntgen's X-rays among the first prizes); figure and fact checked on Nobel Prize.",
+    "judgedAt": "2026-11-17"
+  },
+  "four-minute-mile": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (After the Second World War, in the age of black-and-white newsreels); figure and fact checked on Four-minute mile.",
+    "judgedAt": "2026-11-17"
+  },
+  "barbie-launched": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Post-war American toys, before the Beatles); figure and fact checked on Barbie.",
+    "judgedAt": "2026-11-17"
+  },
+  "golden-gate-opens": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Between the Wall Street Crash and the Second World War); figure and fact checked on Golden Gate Bridge.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-ivf-baby": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Medicine of the late 1970s, before the first personal computers); figure and fact checked on Louise Brown.",
+    "judgedAt": "2026-11-17"
+  },
+  "south-pole-reached": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The age of the polar explorers, just before the Titanic and the First World War); figure and fact checked on Amundsen's South Pole expedition.",
+    "judgedAt": "2026-11-17"
+  },
+  "x-rays-discovered": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Late Victorian science, just before 1900); figure and fact checked on X-ray.",
+    "judgedAt": "2026-11-17"
+  },
+  "rosetta-stone-found": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Napoleon's time, at the end of the 1700s); figure and fact checked on Rosetta Stone.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-dinosaur-named": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Early 19th century, a generation before Darwin's famous book); figure and fact checked on Megalosaurus.",
+    "judgedAt": "2026-11-17"
+  },
+  "origin-of-species": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Mid-Victorian times, before the American Civil War); figure and fact checked on On the Origin of Species.",
+    "judgedAt": "2026-11-17"
+  },
+  "television-first-shown": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Between the two world wars, when radio was still new); figure and fact checked on John Logie Baird.",
+    "judgedAt": "2026-11-17"
+  },
+  "magellan-voyage-ends": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (About 30 years after Columbus first crossed the Atlantic); figure and fact checked on Magellan expedition.",
+    "judgedAt": "2026-11-17"
+  },
+  "pisa-starts-leaning": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Medieval Italy, long before the Renaissance); figure and fact checked on Leaning Tower of Pisa.",
+    "judgedAt": "2026-11-17"
+  },
+  "penny-black": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Early in Queen Victoria's reign, when railways were new); figure and fact checked on Penny Black.",
+    "judgedAt": "2026-11-17"
+  },
+  "jeans-patented": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Gold Rush and cowboy times in America, after the Civil War); figure and fact checked on Levi Strauss.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-crossword": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Just before the First World War); figure and fact checked on Crossword.",
+    "judgedAt": "2026-11-17"
+  },
+  "bikini-introduced": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Just after the Second World War); figure and fact checked on Bikini.",
+    "judgedAt": "2026-11-17"
+  },
+  "boeing-747-first-flight": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The jet age of the late 1960s); figure and fact checked on Boeing 747.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-cds": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Early 1980s, alongside the first home computers); figure and fact checked on Compact disc.",
+    "judgedAt": "2026-11-17"
+  },
+  "concorde-retired": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (A few years after the millennium); figure and fact checked on Concorde.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-oscars": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The end of the silent film era); figure and fact checked on Academy Awards.",
+    "judgedAt": "2026-11-17"
+  },
+  "chernobyl-disaster": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The late Soviet Union, a few years before the Berlin Wall fell); figure and fact checked on Chernobyl disaster.",
+    "judgedAt": "2026-11-17"
+  },
+  "disneyland-opens": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (1950s America, after the war, in the early days of TV); figure and fact checked on Disneyland.",
+    "judgedAt": "2026-11-17"
+  },
+  "dominoes-set": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: pair blank with blank to six, one with one to six, and so on, then add them up); figure and fact checked on Dominoes.",
+    "judgedAt": "2026-11-17"
+  },
+  "jupiter-earths": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Jupiter is about 11 times as wide as Earth, and the space inside grows with the cube of the width); figure and fact checked on Jupiter.",
+    "judgedAt": "2026-11-17"
+  },
+  "un-official-languages": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: list the biggest world languages of the countries that founded and lead it); figure and fact checked on Official languages of the United Nations.",
+    "judgedAt": "2026-11-17"
+  },
+  "central-america-countries": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: walk down the map from Mexico to Colombia and count); figure and fact checked on Central America.",
+    "judgedAt": "2026-11-17"
+  },
+  "phone-typing-speed": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: time a text message, about one short word a second or two); figure and fact checked on Words per minute.",
+    "judgedAt": "2026-11-17"
+  },
+  "shinjuku-station-passengers": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Greater Tokyo has 37 million people and most commute by train; its biggest hub takes a good share); figure and fact checked on Shinjuku Station.",
+    "judgedAt": "2026-11-17"
+  },
+  "route-66-length": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Coast to coast the US is about 4,500 km wide, and Chicago is a good way in from the east); figure and fact checked on U.S. Route 66.",
+    "judgedAt": "2026-11-17"
+  },
+  "titanic-speed": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Big liners crossed the Atlantic in about five days, roughly the speed of a car in town); figure and fact checked on Sinking of the Titanic.",
+    "judgedAt": "2026-11-17"
+  },
+  "world-life-expectancy": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Reason from yourself: rich countries reach about 80, the poorest about 55 to 60); figure and fact checked on Life expectancy.",
+    "judgedAt": "2026-11-17"
+  },
+  "bolt-200m-record": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (His 100 m record is 9.58 s; twice that, less a little for the start you only make once); figure and fact checked on Usain Bolt.",
+    "judgedAt": "2026-11-17"
+  },
+  "chicken-egg-hatching": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Hens sit on their eggs for a few weeks in spring, not months); figure and fact checked on Chicken.",
+    "judgedAt": "2026-11-17"
+  },
+  "femur-share-of-height": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: hip to knee is roughly a quarter of you, a bit more than your shin); figure and fact checked on Femur.",
+    "judgedAt": "2026-11-17"
+  },
+  "beatles-break-up": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (The end of the 1960s, the decade they ruled); figure and fact checked on The Beatles.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-wimbledon": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Victorian lawn tennis, about 20 years before the first modern Olympics); figure and fact checked on The Championships, Wimbledon.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-eurovision": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (After the war, in the early days of television); figure and fact checked on Eurovision Song Contest.",
+    "judgedAt": "2026-11-17"
+  },
+  "pac-man-released": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Arcade games came before home consoles took over, around the start of the 1980s); figure and fact checked on Pac-Man.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-paralympics": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (After the Second World War, when the Olympics came to Rome); figure and fact checked on 1960 Summer Paralympics.",
+    "judgedAt": "2026-11-17"
+  },
+  "first-vaccine": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Late 18th century, around the time of the French Revolution); figure and fact checked on Smallpox vaccine.",
+    "judgedAt": "2026-11-17"
+  },
+  "wright-first-flight-length": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (It was a short hop over the sand dunes, over before you could count to 20); figure and fact checked on Wright brothers.",
+    "judgedAt": "2026-11-17"
+  },
+  "game-of-thrones-episodes": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Eight seasons of about ten episodes, the last two shorter); figure and fact checked on Game of Thrones.",
+    "judgedAt": "2026-11-17"
+  },
+  "london-eye-turn": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (A ride is one turn, long enough to take in the view: about half an hour); figure and fact checked on London Eye.",
+    "judgedAt": "2026-11-17"
+  },
+  "nobel-laureates": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi: six prizes a year for about 125 years, often shared by two or three); figure and fact checked on Nobel Prize.",
+    "judgedAt": "2026-11-17"
+  },
+  "le-mans-distance-record": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi: 24 hours at an average of well over 200 km/h); figure and fact checked on 24 Hours of Le Mans.",
+    "judgedAt": "2026-11-17"
+  },
+  "landlocked-countries": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: count the inland countries of Africa, Central Europe and Central Asia); figure and fact checked on Landlocked country.",
+    "judgedAt": "2026-11-17"
+  },
+  "voyager-round-the-world": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi: about 40,000 km round the world, in a light plane at under 200 km/h); figure and fact checked on Rutan Voyager.",
+    "judgedAt": "2026-11-17"
+  },
+  "longest-solar-eclipse": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (You've heard totality lasts only a few minutes, because the Moon's shadow races across the ground); figure and fact checked on Solar eclipse.",
+    "judgedAt": "2026-11-17"
+  },
+  "espresso-caffeine": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (A can of cola or an energy drink lists its caffeine: tens of milligrams; an espresso is in the same range); figure and fact checked on Espresso.",
+    "judgedAt": "2026-11-17"
+  },
+  "scrabble-board-squares": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: the board is a square grid about 15 squares a side); figure and fact checked on Scrabble.",
+    "judgedAt": "2026-11-17"
+  },
+  "eurostar-london-paris": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi: about 500 km, mostly at high-speed-train pace near 300 km/h); figure and fact checked on Eurostar.",
+    "judgedAt": "2026-11-17"
+  },
+  "uk-homes": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi from two anchors: about 69 million people, at two or three to a home); figure and fact checked on Housing in the United Kingdom.",
+    "judgedAt": "2026-11-17"
+  },
+  "hong-kong-skyscrapers": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (New York's famous skyline has a few hundred; Hong Kong's is denser still); figure and fact checked on List of cities with the most skyscrapers.",
+    "judgedAt": "2026-11-17"
+  },
+  "berlin-wall-length": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi: West Berlin was a city about 30 to 40 km across, and the wall ran all the way round it); figure and fact checked on Berlin Wall.",
+    "judgedAt": "2026-11-17"
+  },
+  "lhc-ring-length": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (It loops under the countryside round Geneva, a ring you could cycle in an hour or two); figure and fact checked on Large Hadron Collider.",
+    "judgedAt": "2026-11-17"
+  },
+  "old-faithful-interval": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (It's 'faithful' because it keeps time: visitors wait an hour or two at most for the next one); figure and fact checked on Old Faithful.",
+    "judgedAt": "2026-11-17"
+  },
+  "maldives-height": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Picture coral islands that barely rise above the waves); figure and fact checked on Maldives.",
+    "judgedAt": "2026-11-17"
+  },
+  "buckingham-palace-rooms": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (A palace of state rooms, offices and staff quarters: count floors and wings, and it runs to hundreds); figure and fact checked on Buckingham Palace.",
+    "judgedAt": "2026-11-17"
+  },
+  "titanic-lifeboats": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (A lifeboat of the time took about 60 people, and there were famously too few for everyone); figure and fact checked on Lifeboats of the Titanic.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-as-big-as-india": {
+    "verdict": "keep",
+    "why": "Held since Nov 14 only for the test's count of country name-it questions; target and answers rechecked on the list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-as-many-people-as-australia": {
+    "verdict": "keep",
+    "why": "Held since Nov 14 only for the test's count of country name-it questions; target and answers rechecked on the list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-200m-people": {
+    "verdict": "keep",
+    "why": "Held since Nov 14 only for the test's count of country name-it questions; target and answers rechecked on the list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-as-big-as-mexico": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the countries-area list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-as-big-as-japan": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the countries-area list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-8-borders": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the land-borders list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-7-borders": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the land-borders list.",
+    "judgedAt": "2026-11-17"
+  },
+  "hundred-years-war-length": {
+    "verdict": "drop",
+    "why": "the unit is in the name: 'Hundred Years' War' states years, and check.ts keeps a measure out of the question",
+    "judgedAt": "2026-11-17"
+  },
+  "facebook-launched": {
+    "verdict": "drop",
+    "why": "near-copy of instagram-launched (a social network's launch year), and 2004 is in penalties-scored-share's definition",
+    "judgedAt": "2026-11-17"
+  },
+  "hubble-launched": {
+    "verdict": "drop",
+    "why": "1990 is in web-goes-public's fact, a question already scheduled",
+    "judgedAt": "2026-11-17"
+  },
+  "first-winter-olympics": {
+    "verdict": "drop",
+    "why": "near-copy of first-modern-olympics: the start of the Games again, a year apart in kind",
+    "judgedAt": "2026-11-17"
+  },
+  "png-languages": {
+    "verdict": "drop",
+    "why": "no way in (Nov 14 bar): 840 languages is a great reveal, but nothing to reason from; guesses run 10x off",
+    "judgedAt": "2026-11-17"
+  },
+  "lego-bricks-per-year": {
+    "verdict": "drop",
+    "why": "no way in: 36 billion bricks a year has no anchor (the chicken-population class)",
+    "judgedAt": "2026-11-17"
+  },
+  "owl-head-turn": {
+    "verdict": "drop",
+    "why": "an angle in degrees: the game reads 'degrees' as a temperature, so 270 is read as Celsius",
+    "judgedAt": "2026-11-17"
+  },
+  "pisa-tilt-degrees": {
+    "verdict": "drop",
+    "why": "an angle in degrees: the game reads 'degrees' as a temperature",
+    "judgedAt": "2026-11-17"
+  },
+  "randy-gardner-awake": {
+    "verdict": "drop",
+    "why": "familiarity: an unknown name, and the record was later broken (18 days), so 'the record' reads two ways",
+    "judgedAt": "2026-11-17"
+  },
+  "birth-weight": {
+    "verdict": "drop",
+    "why": "the source's average is given by ancestry ('of European and African descent'): a definition to avoid",
+    "judgedAt": "2026-11-17"
+  },
+  "red-bull-caffeine": {
+    "verdict": "drop",
+    "why": "the source gives a range, 40 to 80 mg a can, not a point",
+    "judgedAt": "2026-11-17"
+  },
+  "great-pyramid-tallest": {
+    "verdict": "drop",
+    "why": "'more than 3,700 years' on the page against c. 2600 BC to 1221 AD in its infobox: no one figure",
+    "judgedAt": "2026-11-17"
+  },
+  "spanish-official-countries": {
+    "verdict": "drop",
+    "why": "a sixth 'how many countries' count in one batch; the language count is kept as un-official-languages",
+    "judgedAt": "2026-11-17"
+  },
+  "alps-countries": {
+    "verdict": "drop",
+    "why": "near-copy of danube-countries: how many countries a feature spans",
+    "judgedAt": "2026-11-17"
   }
 }
