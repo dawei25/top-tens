@@ -1963,5 +1963,75 @@
     "verdict": "drop",
     "why": "near-copy of danube-countries: how many countries a feature spans",
     "judgedAt": "2026-11-17"
+  },
+  "milk-teeth": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Start from yourself: an adult has 32, and a small child's jaw has room for fewer, with no wisdom teeth); figure and fact checked on Deciduous teeth.",
+    "judgedAt": "2026-11-17"
+  },
+  "hand-bones": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Check it yourself: three in each finger, two in the thumb, one more for each in the palm, and a cluster at the wrist); figure and fact checked on Hand.",
+    "judgedAt": "2026-11-17"
+  },
+  "london-population": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi from two anchors: the UK has about 69 million people, and about one in eight lives in its capital); figure and fact checked on London.",
+    "judgedAt": "2026-11-17"
+  },
+  "stonehenge-stones-height": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Reason from yourself: in photos of visitors beside them, the stones are about twice a person's height); figure and fact checked on Stonehenge.",
+    "judgedAt": "2026-11-17"
+  },
+  "glastonbury-capacity": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Wembley holds 90,000; Glastonbury is a temporary city of tents a few times that); figure and fact checked on Glastonbury Festival.",
+    "judgedAt": "2026-11-17"
+  },
+  "bangkok-visitors": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Thailand is one of the world's top tourist countries, and most of its visitors pass through Bangkok); figure and fact checked on List of cities by international visitors.",
+    "judgedAt": "2026-11-17"
+  },
+  "norway-winter-medals": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi: 24 Winter Games so far, and Norway, a winter-sport giant, often wins 20 to 40 at each); figure and fact checked on All-time Olympic Games medal table.",
+    "judgedAt": "2026-11-17"
+  },
+  "italy-world-heritage-sites": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Rome, Venice, Florence, Pompeii, Pisa, the Dolomites: count the famous places and the many old towns besides); figure and fact checked on Lists of World Heritage Sites.",
+    "judgedAt": "2026-11-17"
+  },
+  "sahara-width": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (On a map it spans almost the whole width of northern Africa, about as wide as the United States); figure and fact checked on Sahara.",
+    "judgedAt": "2026-11-17"
+  },
+  "giraffe-neck-bones": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Reason from yourself: your own neck has a few small bones; a long neck might be longer bones, not more of them); figure and fact checked on Cervical vertebrae.",
+    "judgedAt": "2026-11-17"
+  },
+  "iceland-vegetation": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Picture lava fields, glaciers and black sand, with green only in the lowlands and valleys); figure and fact checked on Iceland.",
+    "judgedAt": "2026-11-17"
+  },
+  "switzerland-share-of-alps": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (On a map the Alps arc from France through Switzerland and Italy to Austria and Slovenia: Switzerland is one piece of five); figure and fact checked on Alps.",
+    "judgedAt": "2026-11-17"
+  },
+  "brain-share-of-weight": {
+    "verdict": "keep",
+    "why": "Familiar subject with a way in (Fermi from two anchors: a brain weighs about as much as a bag of sugar, out of the 70 kg or so of you); figure and fact checked on Human brain.",
+    "judgedAt": "2026-11-17"
+  },
+  "premier-league-matches": {
+    "verdict": "keep",
+    "why": "An easy opener with a way in (Check it yourself: 20 clubs, and each plays every other club at home and away); figure and fact checked on Premier League.",
+    "judgedAt": "2026-11-17"
   }
 }

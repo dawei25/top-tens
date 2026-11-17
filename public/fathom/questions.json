@@ -1893,6 +1893,211 @@
    "easy": false
   },
   {
+   "id": "milk-teeth",
+   "kind": "body",
+   "question": "How many teeth does a child have before the adult ones come?",
+   "unit": "teeth",
+   "answer": 20,
+   "fact": "There are five in each quarter of the mouth, ten in each jaw.",
+   "source": {
+    "title": "Deciduous teeth",
+    "url": "https://en.wikipedia.org/wiki/Deciduous_teeth"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "hand-bones",
+   "kind": "body",
+   "question": "How many bones are in one human hand?",
+   "unit": "bones",
+   "answer": 27,
+   "fact": "14 are in the fingers and thumb, 5 in the palm and 8 in the wrist.",
+   "source": {
+    "title": "Hand",
+    "url": "https://en.wikipedia.org/wiki/Hand"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "london-population",
+   "kind": "places",
+   "question": "What is the population of London?",
+   "unit": "million people",
+   "answer": 9.8,
+   "definition": "Greater London, 2025",
+   "fact": "That's 13.1% of the UK's people, and its wider metropolitan area holds 15.4 million.",
+   "source": {
+    "title": "London",
+    "url": "https://en.wikipedia.org/wiki/London"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "stonehenge-stones-height",
+   "kind": "landmarks",
+   "question": "How tall are the big standing stones of Stonehenge?",
+   "unit": "metres",
+   "answer": 4,
+   "definition": "the outer ring of sarsens",
+   "fact": "Each weighs around 25 tons, with a lintel stone laid across the tops.",
+   "source": {
+    "title": "Stonehenge",
+    "url": "https://en.wikipedia.org/wiki/Stonehenge"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
+   "id": "glastonbury-capacity",
+   "kind": "culture",
+   "question": "How many people can Glastonbury Festival take?",
+   "unit": "people",
+   "answer": 210000,
+   "definition": "its capacity, 2022",
+   "fact": "The first festival at Worthy Farm drew 1,500 people.",
+   "source": {
+    "title": "Glastonbury Festival",
+    "url": "https://en.wikipedia.org/wiki/Glastonbury_Festival"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "bangkok-visitors",
+   "kind": "lists",
+   "question": "How many international visitors does Bangkok, the world's most visited city, get?",
+   "unit": "million people",
+   "answer": 30.3,
+   "definition": "2025",
+   "fact": "Hong Kong came next with 23.2 million.",
+   "source": {
+    "title": "List of cities by international visitors",
+    "url": "https://en.wikipedia.org/wiki/List_of_cities_by_international_visitors"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "norway-winter-medals",
+   "kind": "lists",
+   "question": "How many medals has Norway won at the Winter Olympics?",
+   "unit": "medals",
+   "answer": 447,
+   "definition": "all-time, to the 2026 Games",
+   "fact": "That's the most of any country, ahead of the United States with 363.",
+   "source": {
+    "title": "All-time Olympic Games medal table",
+    "url": "https://en.wikipedia.org/wiki/All-time_Olympic_Games_medal_table"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "italy-world-heritage-sites",
+   "kind": "lists",
+   "question": "How many sites does Italy have on UNESCO's World Heritage List?",
+   "unit": "sites",
+   "answer": 62,
+   "definition": "2026",
+   "fact": "That's the most of any country, with China one behind on 61.",
+   "source": {
+    "title": "Lists of World Heritage Sites",
+    "url": "https://en.wikipedia.org/wiki/Lists_of_World_Heritage_Sites"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "sahara-width",
+   "kind": "nature",
+   "question": "How far does the Sahara stretch from the Atlantic to the Red Sea?",
+   "unit": "kilometres",
+   "answer": 4800,
+   "fact": "From north to south it is 1,800 km.",
+   "source": {
+    "title": "Sahara",
+    "url": "https://en.wikipedia.org/wiki/Sahara"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "giraffe-neck-bones",
+   "kind": "animals",
+   "question": "How many bones are in a giraffe's neck?",
+   "unit": "bones",
+   "answer": 7,
+   "fact": "Like most mammals, including us, it has seven: a giraffe's are just much longer.",
+   "source": {
+    "title": "Cervical vertebrae",
+    "url": "https://en.wikipedia.org/wiki/Cervical_vertebrae"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "iceland-vegetation",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of Iceland is covered by plants?",
+   "unit": "percent",
+   "answer": 23,
+   "fact": "Lakes and glaciers cover another 14.3% of its surface.",
+   "source": {
+    "title": "Iceland",
+    "url": "https://en.wikipedia.org/wiki/Iceland"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "switzerland-share-of-alps",
+   "kind": "places",
+   "round": "percent",
+   "question": "How much of the Alps lies in Switzerland?",
+   "unit": "percent",
+   "answer": 13.2,
+   "fact": "Austria has the biggest share, 28.7%, then Italy with 27.2% and France with 21.4%.",
+   "source": {
+    "title": "Alps",
+    "url": "https://en.wikipedia.org/wiki/Alps"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "brain-share-of-weight",
+   "kind": "body",
+   "round": "percent",
+   "question": "How much of your body weight is your brain?",
+   "unit": "percent",
+   "answer": 2,
+   "fact": "Yet it receives 15% of the blood the heart pumps out.",
+   "source": {
+    "title": "Human brain",
+    "url": "https://en.wikipedia.org/wiki/Human_brain"
+   },
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "premier-league-matches",
+   "kind": "sports",
+   "question": "How many matches does each Premier League club play in a league season?",
+   "unit": "matches",
+   "answer": 38,
+   "fact": "Erling Haaland holds the record for goals in one of those seasons: 36.",
+   "source": {
+    "title": "Premier League",
+    "url": "https://en.wikipedia.org/wiki/Premier_League"
+   },
+   "easy": true,
+   "verified": true
+  },
+  {
    "id": "name-country-1m-people",
    "round": "name",
    "kind": "places",
@@ -2412,7 +2617,7 @@
     "title": "Apollo 11",
     "url": "https://en.wikipedia.org/wiki/Apollo_11"
    },
-   "easy": false,
+   "easy": true,
    "verified": true
   },
   {
@@ -2807,7 +3012,7 @@
     "title": "Asia",
     "url": "https://en.wikipedia.org/wiki/Asia"
    },
-   "easy": false,
+   "easy": true,
    "verified": true
   },
   {
@@ -3337,7 +3542,7 @@
     "title": "Concorde",
     "url": "https://en.wikipedia.org/wiki/Concorde"
    },
-   "easy": false,
+   "easy": true,
    "verified": true
   },
   {
