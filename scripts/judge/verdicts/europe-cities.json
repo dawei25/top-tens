@@ -6,7 +6,7 @@
   "priority": 7,
   "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
   "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
-  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 5, "guesses": 14 },
   "blitzCasual": { "scored": 24, "named": 26 },
   "difficulty": 2,
   "tags": ["geography", "europe", "cities"],
@@ -21,5 +21,6 @@
     "Non-EU European cities between 300k and 1M lack a population or are missing: Manchester, Edinburgh, Oslo and Zürich are accepted but score 0 in Blitz; Glasgow, Liverpool, Sheffield, Bristol, Cardiff, Belfast, Lviv, Dnipro, Zaporizhzhia and Saratov are not recognized at all. Add a source with their city-limits population (EU cities down to Augsburg, 301,105, already score).",
     "'leeds' is offered as Lee's Summit and 'almaty' as Albany (a life if confirmed in classic, auto-corrected to those names in Blitz). Adding Leeds and Almaty to the pool removes both; the matcher arguably should not make those offers at all (src/game/match.ts).",
     "Junk aliases, harmless in play: Berlin 'CityBerlin', 'Berlin.de', 'Silicon Allee'; Paris 'Paris.fr', 'Paris, Banks of the Seine'; London 'Londonise', 'Londonize'; Saint Petersburg 'Four bridges on three lines', 'Four bridges on three support', 'Cahkt-Netep6ypr'; Kyiv 'Kiyeff Kiev'; Rome 'Gente di roma', 'Rome, Republic and Empire'."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-02: casual 8, fan 9). Page edited since the build; the ranked table is unchanged, so no rebuild. Every top-10 spelling lands (Constantinople, Leningrad, Kiev, Roma, Moskow). Casual runs 9 and 7, so 8; fan 10. Brussels, Oslo, Zurich and Geneva still miss with no figure.", "casual": 8, "fan": 10, "decision": "keep daily-list"}
 }

@@ -20,5 +20,6 @@
   "fixes": [
     "Duplicate capitals: the capitals universe adds Ulan Bator, Luxembourg, Djibouti, City of Victoria and South Tarawa as separate unranked entries next to the table's Ulaanbaatar (#66, 1,466,125), Luxembourg City (#160), Djibouti City (#118), Victoria (#194) and Tarawa (#176). 'ulan bator' costs a life with no figure (a second life for a player who already tried 'ulaanbaatar') and scores nothing in Blitz, and 'luxembourg' or 'djibouti' asks the player to pick between two entries for one city. Merge each universe name into its table row as an alias.",
     "Optional, not blocking: let the New Delhi miss say it counts only the New Delhi council area, not greater Delhi (needs a per-entry note in the puzzle format, a coordinator change)."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-02: casual 8, fan 10). Fresh: the page is unchanged since the build. Fixed \"dakha\" (now Dhaka) and \"ho chi minh\" (now says it isn't in the ranking, like Saigon). Casual 8 (lives on Delhi #148, London #11, Manila, Bangkok, Tehran), fan 10/10 with every top-10 spelling (Peking, Dacca, Moskva, CDMX).", "casual": 8, "fan": 10, "decision": "keep daily-list"}
 }

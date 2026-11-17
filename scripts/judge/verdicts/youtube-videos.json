@@ -5,8 +5,8 @@
   "alsoBlitz": false,
   "priority": 7,
   "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 7, "livesLost": 4, "guesses": 15 },
-  "fan": { "found": 9, "livesLost": 5, "guesses": 15 },
+  "casual": { "found": 8, "livesLost": 4, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 5, "guesses": 15 },
   "blitzCasual": null,
   "difficulty": 3,
   "tags": ["internet", "youtube", "music"],
@@ -20,5 +20,6 @@
   "fixes": [
     "Add 'Cocomelon' and 'CoComelon' (intent.ts) as an alias shared by the four Cocomelon uploads: Wheels on the Bus (#2), Bath Song (#4), Baa Baa Black Sheep (#15) and Baby Shark (Cocomelon) (#22). Then 'cocomelon' should put Wheels on the Bus in the box, not the #22 video. Also add 'Pinkfong' to #1 Baby Shark Dance.",
     "universeCategories still add non-video articles as costly unranked answers ('trump' is corrected to Donald Trump). Skip at least 'Donald Trump', 'Viral video', 'Mrwhosetheboss', 'Good Mythical Morning', 'Nostalgia Critic', 'Red Letter Media', 'Primitive Technology', 'Joueur du Grenier', 'The Juice Media', 'Robert Greenwald', 'Geoffrey Baron' and 'Tom Brier', or filter person and channel articles."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-02: casual 7, fan 9). Page edited since the build; the ranked table is unchanged. Fixed \"temu ad\"; famous kids' songs and memes the page doesn't rank (Twinkle Twinkle, Finger Family, Rickroll) now say they aren't in the ranking. Casual runs 9 and 7, so 8; fan 10.", "casual": 8, "fan": 10, "decision": "keep daily-list"}
 }

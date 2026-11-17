@@ -5,7 +5,7 @@
   "alsoBlitz": true,
   "priority": 6,
   "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 12 },
   "fan": { "found": 10, "livesLost": 0, "guesses": 12 },
   "blitzCasual": { "scored": 29, "named": 30 },
   "difficulty": 2,
@@ -22,5 +22,6 @@
   "fixes": [
     "Coordinator, not a rebuild: 'hong kong' reads 'Hong kong isn't in this ranking. No life lost.' That's untrue (it is the table's #1), and it echoes the typed casing ('Hong kong'). A territory the list leaves out needs a line like 'Hong Kong isn't a country here.', and the line should use the name's own casing.",
     "Keep `debut`."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-13: casual 7, fan 10). The live page is newer than the build's copy, but the UN table and its Monaco and San Marino note are unchanged: no rebuild. Casual 8 (lives on Iceland, Norway, Sweden, Canada, France), fan 10; nothing fair missed. Run it at least a week after happiest-countries (Nov 21): Nov 28 or later.", "casual": 8, "fan": 10, "decision": "keep daily-list"}
 }

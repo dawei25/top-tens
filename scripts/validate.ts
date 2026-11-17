@@ -17,9 +17,9 @@ const SHARED_FORMS = [
   "Congo",
   "Congolese",
 ];
-import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledForms, placeholderName } from "./aliases";
+import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledForms, otherNamespace, placeholderName } from "./aliases";
 import { citysCountries, countryOf, DIVISIONS, isContinent, MAJOR_CITIES, UNIVERSES, whereIs, type Where } from "./gazetteer";
-import { NOT_PUZZLES } from "./lexicon";
+import { KNOWN_DIR, NOT_PUZZLES } from "./lexicon";
 import { TOPICS, type Topic } from "./topics";
 
 const DIR = join(import.meta.dirname, "..", "public", "puzzles");
@@ -368,6 +368,10 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   if (p.noun && !/(s|people)$/.test(p.noun)) warn(`noun "${p.noun}" doesn't look plural`);
   if (topicNoun(p.id) && p.noun !== topicNoun(p.id)) err(`noun "${p.noun}" differs from topics.ts`);
   if (!p.source?.url || !p.source?.asOf) err("missing source url or asOf");
+  // The lexicon reads every scripts/known file: one left from names a topic no longer lists keeps them real (Nov 17).
+  if (topic && !topic.knownOnly && !topic.knownNames && existsSync(join(KNOWN_DIR, `${p.id}.json`))) {
+    err(`scripts/known/${p.id}.json is left from known names topics.ts no longer gives; rebuild the list`);
+  }
   if (p.answers.length !== 10) err(`${p.answers.length} answers, expected 10`);
 
   p.answers.forEach((e, i) => {
@@ -422,6 +426,8 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
     if (why) (e.rank >= 1 && e.rank <= 10 ? err : warn)(`${where} "${e.name}": looks like junk (${why})`);
     // A title not announced yet is never an answer: "peaky blinders" cost a life as "Untitled Peaky Blinders sequel series".
     if (placeholderName(e.name)) err(`${where} "${e.name}": a placeholder, not a title`);
+    // "Draft talk:Broked" came in from a film category (Nov 17).
+    if (otherNamespace(e.name)) err(`${where} "${e.name}": a wiki page outside the articles, not a name`);
     if (invertedName(e.name)) err(`${where} "${e.name}": an inverted index name; \`rename\` it to the usual one`);
     const n = normalize(e.name);
     if (!n) err(`${where} "${e.name}": normalizes to nothing`);

@@ -2,7 +2,7 @@
 // Usage: npm run build:puzzles [-- topic-id ...]
 import type { CheerioAPI } from "cheerio";
 import type { AnyNode } from "domhandler";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Entry, Fact, Puzzle } from "../src/game/types";
 import { normalize } from "../src/game/match";
@@ -17,7 +17,10 @@ import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./int
 /** Postal codes that are everyday words: never aliases. */
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
 import { countryOf, UNIVERSES, US_STATE_CODES, whereIs, type Place, type Region, type Where } from "./gazetteer";
-import { bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, mangledForms, placeholderName } from "./aliases";
+import {
+  bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, mangledForms,
+  otherNamespace, placeholderName,
+} from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
 /** Fewest entries with a stat (`n`) for a list to be playable in Blitz. */
@@ -941,7 +944,7 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
     const cut = capWarning(topic.id, cat, titles, cap);
     if (cut) console.log(cut);
     for (const title of titles) {
-      if (CATEGORY_SKIP.test(title) || topic.categorySkip?.test(title) || topic.skip?.includes(title)) continue;
+      if (CATEGORY_SKIP.test(title) || otherNamespace(title) || topic.categorySkip?.test(title) || topic.skip?.includes(title)) continue;
       if (topic.categoryNames && !looksLikeName(baseTitle(title))) continue;
       const cleaned = cleanName(title);
       const name = topic.categoryRename?.[title] ?? cleaned;
@@ -1491,6 +1494,9 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       // 2023 rank, not 2018's).
       adoptDated(into, e);
       inRegionWins(into, e);
+      // A figure in the list's own stat for an answer that has none: Tesla's 2025 deliveries (`cited`) came after the
+      // category had named it, and were lost (Nov 17).
+      if (into.rank === 0 && into.value === undefined && e.n !== undefined && !DATED.has(e)) Object.assign(into, { value: e.value, n: e.n });
       continue;
     }
     // Add-ons of an entry already listed ("Skyrim – Dragonborn" next to Skyrim) only blur what its name means.
@@ -1568,6 +1574,8 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   }
   const dataAsOf = await dataDate(topic);
   if (topic.knownOnly || topic.knownNames) await writeKnown(topic, entries);
+  // Known names the topic no longer gives must leave the lexicon too (validate.ts checks).
+  else if (existsSync(join(KNOWN_DIR, `${topic.id}.json`))) rmSync(join(KNOWN_DIR, `${topic.id}.json`));
   // A place outside the region shows no figure and never scores: the list's stat is the region's.
   for (const e of entries) {
     if (!e.elsewhere) continue;

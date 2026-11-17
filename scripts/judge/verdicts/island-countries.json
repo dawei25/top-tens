@@ -5,7 +5,7 @@
   "alsoBlitz": true,
   "priority": 7,
   "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
-  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 12 },
   "fan": { "found": 10, "livesLost": 0, "guesses": 10 },
   "blitzCasual": { "scored": 26, "named": 26 },
   "difficulty": 3,
@@ -20,5 +20,6 @@
   "fixes": [
     "Drop junk aliases: 'Topstrasse Global' (Philippines), 'Bókatíðindi' and 'Bokatidindi' (Iceland), 'Fenno-' and 'Northern Finland' (Finland), 'Norwegian coastline' (Norway).",
     "'islands' autocorrects to Ireland (#40) through the foreign-name aliases 'Irland' and 'Irlanda' (2 edits each); drop those two or block the correction."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-02: casual 7, fan 10). Page unchanged. The rebuild brings the shared forms: \"aus\" and \"oz\" now find Australia (#9; they said it wasn't in the ranking). Casual 8 (lives on Greece, Maldives, UK, New Zealand, Fiji), fan 10.", "casual": 8, "fan": 10, "decision": "keep daily-list"}
 }

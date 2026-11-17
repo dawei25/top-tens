@@ -6,7 +6,7 @@
   "priority": 7,
   "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 0 },
   "casual": { "found": 8, "livesLost": 5, "guesses": 17 },
-  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 5, "guesses": 14 },
   "blitzCasual": null,
   "difficulty": 2,
   "tags": ["business", "cars", "companies"],
@@ -22,5 +22,6 @@
     "Merge duplicate unranked entries so one company can't cost two lives: 'Mercedes' and 'Mercedes-Benz' (add 'Benz'), 'Tata' and 'Tata Motors Passenger Vehicles' (add Jaguar, Land Rover); also map Mini and Rolls-Royce to BMW.",
     "Natural spellings not recognized: 'kia motors' (add 'Kia Motors' to Hyundai Motor Group); 'tesla motors' (add 'Tesla' and 'Tesla Motors' to Tesla, Inc., which plain 'tesla' only reaches through a did-you-mean).",
     "Leftover aliases that are not names of the group (harmless, all contain the brand): Honda 'The Power of Dreams', 'Honda Clio', 'Honda Primo', 'Honda Verno', 'Honda Outboard', 'Honda Marine Group'; Ford 'Built Ford Tough', 'Ford Research and Innovation Center', 'Ford Advanced Vehicles'; VW 'New Auto', 'Volkswagen Financial Services', 'Volkswagen Financial Services AG'; Toyota 'Toyota Financial Services', 'Toyota FTAC', 'Toyota Baltic'; BYD 'BYD Toyota EV Technology', 'GAC BYD', 'BYD TianShen', 'BYD Dual Mode'; Geely 'Geely GC2', 'Geely-Kandi Panda'; GM 'General Motors in motorsport'."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-02: casual 8, fan 9). Page unchanged (2025 sales). Title said no measure: now \"Car makers that sold the most vehicles (2025)\". Tesla, the first casual miss, now shows 1,636,129 (2025 deliveries, its article). Fixed \"merc\", \"beemer\", \"bimmer\", \"lynk\"; \"volkswagen\" stays the group after the rebuild split out the brand. Casual 8, fan 10.", "casual": 8, "fan": 10, "decision": "keep daily-list"}
 }
