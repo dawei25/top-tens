@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { normalize } from "../../src/game/match";
-import { checkCountryLists, checkList, COUNTRY_LISTS, FORMS, isPlace, keptForms, loadLists, NOT_A_NAME, type NameList } from "./lists";
+import { readList, readName } from "../../src/game/fathom-name";
+import {
+  checkCountryLists,
+  checkList,
+  checkStateLists,
+  COUNTRY_LISTS,
+  FORMS,
+  isPlace,
+  keptForms,
+  loadLists,
+  NOT_A_NAME,
+  ownKind,
+  STATE_LISTS,
+  WRONG_FORMS,
+  type NameList,
+} from "./lists";
 
 const lists = loadLists();
 const byId = new Map(lists.map(({ list }) => [list.id, list]));
@@ -21,8 +36,15 @@ function sample(over: Partial<NameList> = {}): NameList {
 }
 
 describe("Fathom name-it lists (public/fathom/lists)", () => {
-  it("holds the four lists the name-it round plays", () => {
-    expect([...byId.keys()].sort()).toEqual(["cities-population", "countries-area", "countries-population", "land-borders"]);
+  it("holds the lists the name-it round plays: four from Nov 8, the two US state lists from Nov 17", () => {
+    expect([...byId.keys()].sort()).toEqual([
+      "cities-population",
+      "countries-area",
+      "countries-population",
+      "land-borders",
+      "us-states-area",
+      "us-states-population",
+    ]);
   });
 
   it.each(lists.map(({ file, list }) => [file, list] as const))("%s is well formed, every name and alias one entry's", (file, list) => {
@@ -59,18 +81,22 @@ describe("Fathom name-it lists (public/fathom/lists)", () => {
   // Nov 8: "England", "Scotland" and "Wales" were aliases of the United Kingdom, so they locked the whole UK. A place of
   // its own (fathom-name.ts PLACES) is never an alias: the round says what it is ("Scotland is part of the UK.").
   it("carries no place of its own as an alias: England, Scotland, Wales, Northern Ireland, Tasmania...", () => {
-    const found = lists.flatMap(({ list }) => list.entries.flatMap((e) => e.aliases.filter(isPlace).map((a) => `${list.id}: ${a} (${e.name})`)));
+    // A place of the list's own kind is its own entry ("New York State" on a US state list), and locks as it.
+    const found = lists.flatMap(({ list }) =>
+      list.entries.flatMap((e) => e.aliases.filter((a) => isPlace(a) && !ownKind(a, list.noun)).map((a) => `${list.id}: ${a} (${e.name})`)),
+    );
     expect(found).toEqual([]);
     const uk = byId.get("countries-population")!.entries.find((e) => e.name === "United Kingdom")!;
     expect(uk.aliases.map(normalize)).not.toContain("england");
     expect(keptForms("United Kingdom", ["UK", "England", "Scotland", "Wales", "Northern Ireland", "Scottish", "Welsh", "British"])).toEqual(["UK", "British"]);
   });
 
-  it("carries the forms a judge found missing, and no redirect that isn't a name", () => {
+  it("carries the forms a judge found missing, and no redirect that isn't a name or names something else", () => {
     for (const { list } of lists)
       for (const e of list.entries) {
         for (const f of FORMS[e.name] ?? []) expect(e.aliases, `${list.id}: ${e.name}`).toContain(f);
         expect(e.aliases.filter((a) => NOT_A_NAME.test(a)), `${list.id}: ${e.name}`).toEqual([]);
+        for (const f of WRONG_FORMS[e.name] ?? []) expect(e.aliases.map(normalize), `${list.id}: ${e.name}`).not.toContain(normalize(f));
       }
     expect(keptForms("Zambia", ["Zamibia", "Zambian sports", "Traditional Zambian games"])).toEqual(["Zamibia"]);
   });
@@ -83,6 +109,32 @@ describe("Fathom name-it lists (public/fathom/lists)", () => {
     });
     // 38 in November 2026: Japan, Australia, Cuba, Madagascar, Fiji, Taiwan...
     expect([...borders.values()].filter((v) => v === 0).length).toBeGreaterThanOrEqual(35);
+  });
+
+  // Nov 17: "Name a US state with about 5 million people", "... about the same area as the UK". The 50 states (no DC, no
+  // territories), one set and one set of forms in both lists, typed as people type them.
+  it("the US state lists share the 50 states, typed by their everyday forms", () => {
+    const states = STATE_LISTS.map((id) => byId.get(id)!);
+    expect(checkStateLists(states)).toEqual([]);
+    for (const l of states) expect(l.entries.length).toBe(50);
+    const names = new Set(states[0].entries.map((e) => e.name));
+    for (const n of ["District of Columbia", "Washington, D.C.", "Puerto Rico", "Guam"]) expect(names).not.toContain(n);
+    const forms = (l: NameList) => JSON.stringify(l.entries.map((e) => [e.name, [...e.aliases].sort()]).sort());
+    expect(forms(states[1])).toBe(forms(states[0]));
+    const area = readList(byId.get("us-states-area"))!;
+    const typed: Record<string, string> = {
+      "New York State": "New York", NY: "New York", "Washington State": "Washington", Cali: "California", Calif: "California",
+      "Hawaiʻi": "Hawaii", "Hawai'i": "Hawaii", Pensylvania: "Pennsylvania", Georgia: "Georgia", LA: "Louisiana", Mass: "Massachusetts",
+    };
+    for (const [t, name] of Object.entries(typed)) {
+      const r = readName(t, area);
+      expect(r.kind === "answer" || r.kind === "confirm" ? r.entry.name : r.kind, t).toBe(name);
+    }
+    // Areas are total areas, water included (Michigan takes in its share of the Great Lakes), as the countries' are.
+    const value = (n: string) => area.entries.find((e) => e.name === n)!.value;
+    expect(Object.fromEntries(["Alaska", "Texas", "Michigan", "Rhode Island"].map((n) => [n, value(n)]))).toEqual({
+      Alaska: 1723337, Texas: 695662, Michigan: 250487, "Rhode Island": 4001,
+    });
   });
 
   it("ranks the cities by one measure, the source's UN 2025 estimates", () => {
@@ -147,5 +199,15 @@ describe("checkCountryLists", () => {
     const b = sample({ id: "b" });
     b.entries[0] = { ...b.entries[0], name: "Elsewhere" };
     expect(checkCountryLists([a, b])).toEqual(["b lacks 1 of a's countries: Land 1", "b has 1 countries a lacks: Elsewhere"]);
+    expect(checkStateLists([a])).toEqual(["a: noun must be US state"]);
+  });
+});
+
+describe("keptForms", () => {
+  it("keeps a place of the list's own kind, and only on a list of that kind", () => {
+    expect(keptForms("New York", ["NY", "New York State", "Brooklyn"], "US state")).toEqual(["NY", "New York State"]);
+    expect(keptForms("New York", ["NY", "New York State"], "country")).toEqual(["NY"]);
+    expect(keptForms("New York", ["NY", "New York State"])).toEqual(["NY"]);
+    expect(keptForms("Michigan", ["MI", "The land of ten-thousand lakes"], "US state")).toEqual(["MI"]);
   });
 });
