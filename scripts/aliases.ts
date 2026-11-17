@@ -543,6 +543,14 @@ export function mangledForms<E extends { name: string; aliases: string[] }>(entr
 }
 
 /**
+ * A wiki page outside the articles, talk pages included: categories list drafts and their talk pages ("Draft
+ * talk:Broked" joined animated-films as an answer, Nov 17). Never an answer.
+ */
+export function otherNamespace(title: string): boolean {
+  return /^(talk|user|wikipedia|file|image|mediawiki|template|help|category|portal|draft|module|timedtext)( talk)?:/i.test(title.trim());
+}
+
+/**
  * A table's stand-in for a title that doesn't exist yet: "Untitled Peaky Blinders sequel series", "Awaiting release",
  * "TBA". Never an answer (on netflix-seasons, "peaky blinders" cost a life as one). Works named "Untitled" stay:
  * "Untitled Goose Game", the album "Untitled".
