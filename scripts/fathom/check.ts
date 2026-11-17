@@ -204,7 +204,9 @@ function registersAs(typed: string, list: NameList, entry: string): boolean {
 
 /**
  * Names everyone uses for the same thing. On a list that has one of them as a name or an alias, every other must
- * register as that entry too: "UK" and "Britain" wherever the United Kingdom is, "Bombay" wherever Mumbai is.
+ * register as that entry too: "UK" and "Britain" wherever the United Kingdom is, "Bombay" wherever Mumbai is. A
+ * country's group is checked on country lists, a city's (CITY_GROUPS) on city lists: on a list of US states "New York"
+ * is the state, and "NYC" must not lock it.
  */
 export const SAME_THING: readonly (readonly string[])[] = [
   ["United States", "United States of America", "USA", "US", "America"],
@@ -235,6 +237,9 @@ export const SAME_THING: readonly (readonly string[])[] = [
   ["Bogotá", "Bogota"],
 ];
 
+/** The SAME_THING groups that name a city, by their first name; the others name a country. */
+const CITY_GROUPS = new Set(["New York City", "Mumbai", "Kolkata", "Chennai", "Ho Chi Minh City", "Saint Petersburg", "Kyiv", "São Paulo", "Bogotá"]);
+
 /**
  * What on a list doesn't register as it should (the owner: "brain didn't even register"): each entry's name and
  * aliases read back as that entry (or one of the choices, for a name 2 to 4 entries share), and the names in
@@ -245,7 +250,9 @@ export function listMisses(list: NameList): string[] {
   for (const e of list.entries)
     for (const form of [e.name, ...e.aliases])
       if (!registersAs(form, list, e.name)) out.push(`list ${list.id}: "${form}" doesn't register as ${e.name}`);
+  const kind = normalize(list.noun);
   for (const group of SAME_THING) {
+    if (kind !== (CITY_GROUPS.has(group[0]) ? "city" : "country")) continue;
     const forms = new Set(group.map(normalize));
     const entry = list.entries.find((e) => [e.name, ...e.aliases].some((f) => forms.has(normalize(f))));
     if (!entry) continue;
