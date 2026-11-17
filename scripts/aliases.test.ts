@@ -4,9 +4,23 @@ import { describe, expect, it } from "vitest";
 import type { Lexicon } from "../src/game/junk";
 import { judgeGuess } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
-import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledText } from "./aliases";
+import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledText, otherNamespace } from "./aliases";
 
 const junk = (raw: string, names: string[], forms: string[] = [], works = false) => junkRedirect(raw, { names, forms, works });
+
+describe("otherNamespace", () => {
+  // Nov 17: a film category listed "Draft talk:Broked", which joined animated-films as an answer.
+  it("finds pages outside the articles, talk pages included", () => {
+    for (const t of ["Draft talk:Broked", "Draft:Broked", "Talk:Frozen", "User:Example", "Wikipedia talk:Films", "Template:Pixar", "Category:Films", "Portal:Film"]) {
+      expect(otherNamespace(t), t).toBe(true);
+    }
+  });
+  it("leaves titles with a colon alone", () => {
+    for (const t of ["Star Wars: The Force Awakens", "Monster: The Jeffrey Dahmer Story", "Help!", "Mission: Impossible", "Talk Talk"]) {
+      expect(otherNamespace(t), t).toBe(false);
+    }
+  });
+});
 
 describe("junkRedirect", () => {
   it("drops redirects about an aspect of the thing", () => {
@@ -1205,5 +1219,68 @@ describe("aliases as built: what players type", () => {
     for (const junk of ["Brisbane sport", "Brisbane Architecture", "Pinjar Park Speedway", "Central Coast Taxis"]) {
       expect(aliases).not.toContain(junk);
     }
+  });
+
+  // Coverage audit of the Nov 23 - Dec 6 candidates (Nov 17): each guess below found nothing, read as "not one of
+  // the N here", or landed on the wrong entry before the fix noted with it.
+  it.each([
+    // "dakha" found nothing (shared CITY_FORMS).
+    ["capitals", "dakha", "Dhaka"],
+    // "the lion king live action" and "ne zha 1" found nothing.
+    ["animated-films", "the lion king live action", "The Lion King (2019)"],
+    ["animated-films", "live action lion king", "The Lion King (2019)"],
+    ["animated-films", "ne zha 1", "Ne Zha"],
+    // "merc", "beemer", "bimmer" and "lynk" found nothing; after the rebuild "volkswagen" offered the brand's own
+    // article (a life) beside the group (car-makers `skip`).
+    ["car-makers", "merc", "Mercedes-Benz"],
+    ["car-makers", "beemer", "BMW"],
+    ["car-makers", "bimmer", "BMW"],
+    ["car-makers", "lynk", "Geely"],
+    ["car-makers", "volkswagen", "Volkswagen Group"],
+    // "aus" and "oz" said Australia (#9) isn't in the ranking (shared COUNTRY_FORMS, applied at this build).
+    ["island-countries", "aus", "Australia"],
+    ["island-countries", "oz", "Australia"],
+    ["co2-emissions", "aus", "Australia"],
+    // Owners' names that found nothing.
+    ["dog-breeds", "dachsie", "Dachshund"],
+    ["dog-breeds", "rotty", "Rottweiler"],
+    ["dog-breeds", "teacup poodle", "Poodle"],
+    ["dog-breeds", "amstaff", "American Staffordshire Terrier"],
+    ["dog-breeds", "mini aussie", "Miniature American Shepherd"],
+    // Fans' shorthand.
+    ["netflix-seasons", "st4", "Stranger Things (Season 4)"],
+    ["netflix-seasons", "st5", "Stranger Things (Season 5)"],
+    ["youtube-videos", "temu ad", "Temu's Big Game Ad"],
+    ["nfl-passing-yards", "johnny u", "Johnny Unitas"],
+    ["market-cap-peak", "taiwan semi", "TSMC"],
+    // The rebuild split out a by-year table's "Animal House" without its full title (read as free).
+    ["us-box-office", "national lampoon's animal house", "Animal House"],
+  ])("coverage audit, Nov 17: %s, %s -> %s", (id, guess, name) => {
+    expect(lands(id, guess)).toBe(name);
+  });
+
+  it("coverage audit, Nov 17: well-known names the rankings leave out say so", () => {
+    const known: [string, string[]][] = [
+      ["capitals", ["ho chi minh", "ho chi minh city"]],
+      ["dog-breeds", ["pit bulls", "pitbull terrier", "shepsky"]],
+      ["youtube-videos", ["twinkle twinkle little star", "five little ducks", "finger family", "head shoulders knees and toes", "rickroll"]],
+      ["nfl-passing-yards", ["jalen hurts", "michael vick", "jameis winston", "tua tagovailoa", "cj stroud", "trevor lawrence"]],
+      ["market-cap-peak", ["palantir", "standard oil", "east india company", "anthropic", "bytedance"]],
+    ];
+    for (const [id, names] of known) {
+      const p: Puzzle = JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
+      for (const name of names) expect(judgeGuess(name, p, new Set(), lex), `${id}: ${name}`).toMatchObject({ kind: "unknown", known: true });
+    }
+  });
+
+  it("us-box-office: the franchise's name offers each of its films, The Fellowship of the Ring included (Nov 17)", () => {
+    const r = judgeGuess("lord of the rings", JSON.parse(readFileSync(join(dir, "us-box-office.json"), "utf8")) as Puzzle, new Set(), lex);
+    expect(r.kind === "typo" && r.suggestions).toContain("The Lord of the Rings: The Fellowship of the Ring");
+  });
+
+  it("car-makers: Tesla, the usual first miss, shows its 2025 deliveries; the title names the measure", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "car-makers.json"), "utf8"));
+    expect(p.extras.filter((e) => /tesla/i.test(e.name)).map((e) => [e.name, e.value])).toEqual([["Tesla, Inc.", "1,636,129"]]);
+    expect(p.title).toMatch(/sold the most vehicles/);
   });
 });

@@ -421,7 +421,8 @@ export const CITY_FORMS: string[][] = [
   ["Dnipro", "Dnipropetrovsk", "Dnepropetrovsk"],
   ["Zaporizhzhia", "Zaporozhye", "Zaporizhia"],
   ["Istanbul", "Constantinople"],
-  ["Dhaka", "Dacca"],
+  // "dakha", the usual slip, found nothing on capitals (coverage audit, Nov 17).
+  ["Dhaka", "Dacca", "Dakha"],
   ["Yangon", "Rangoon"],
   ["Mecca", "Makkah"],
   ["Macau", "Macao"],
@@ -1525,7 +1526,7 @@ export const INTENT: Record<string, Intent> = {
       Honda: ["Acura"],
       // China's brands by their group, as Volvo is Geely's (coverage audit, Nov 8: each found nothing). SAIC's count
       // includes SAIC-GM-Wuling (Wuling, Baojun).
-      Geely: ["Volvo", "Volvo Cars", "Polestar", "Lotus", "Zeekr", "Lynk & Co", "Lynk and Co"],
+      Geely: ["Volvo", "Volvo Cars", "Polestar", "Lotus", "Zeekr", "Lynk & Co", "Lynk and Co", "Lynk"],
       "SAIC Motor": ["MG", "SAIC", "Roewe", "Wuling", "Baojun", "SGMW", "SAIC-GM-Wuling"],
       "Great Wall": ["Great Wall Motor", "Great Wall Motors", "GWM", "Haval"],
       Chery: ["Omoda", "Jaecoo", "Jetour"],
@@ -1537,9 +1538,10 @@ export const INTENT: Record<string, Intent> = {
       Suzuki: ["Maruti Suzuki", "Maruti"],
       "BYD Auto": ["BYD"],
       // Unranked groups, each one entry with its brands.
-      "Mercedes-Benz": ["Mercedes", "Benz", "Mercedes-Benz Group"],
+      // What owners call them: "merc", "beemer" and "bimmer" found nothing (coverage audit, Nov 17).
+      "Mercedes-Benz": ["Mercedes", "Benz", "Mercedes-Benz Group", "Merc"],
       Tata: ["Tata Motors", "Tata Motors Passenger Vehicles", "Jaguar", "Jaguar Cars", "Land Rover", "Jaguar Land Rover", "JLR"],
-      BMW: ["BMW Group", "Mini", "Rolls-Royce", "Rolls-Royce Motor Cars"],
+      BMW: ["BMW Group", "Mini", "Rolls-Royce", "Rolls-Royce Motor Cars", "Beemer", "Bimmer"],
       "Tesla, Inc.": ["Tesla", "Tesla Motors"],
     },
   },
@@ -1583,12 +1585,15 @@ export const INTENT: Record<string, Intent> = {
       "Spider-Man: Brand New Day": ["Spider-Man 4"],
       "Furious 7": ["Fast & Furious 7", "Fast and Furious 7", "Fast 7"],
       "The Fate of the Furious": ["Fast & Furious 8", "Fast and Furious 8", "Fast 8", "F8", "Furious 8"],
+      // A by-year table names it short, and the Nov 17 rebuild lost the full title (free since).
+      "Animal House": ["National Lampoon's Animal House"],
     },
     groups: {
-      // The franchise's name: its films here (Furious 7 is ranked).
+      // The franchise's name: its films here (Furious 7 is ranked). The Fellowship of the Ring is an answer since the
+      // Nov 17 rebuild (no longer merged into another film).
       "Fast and Furious": ["Furious 7", "The Fate of the Furious"],
-      LOTR: ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers"],
-      "Lord of the Rings": ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers"],
+      LOTR: ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers", "The Lord of the Rings: The Fellowship of the Ring"],
+      "Lord of the Rings": ["The Lord of the Rings: The Return of the King", "The Lord of the Rings: The Two Towers", "The Lord of the Rings: The Fellowship of the Ring"],
       HP: ["Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Sorcerer's Stone", "Harry Potter and the Goblet of Fire"],
       "Harry Potter": ["Harry Potter and the Deathly Hallows – Part 2", "Harry Potter and the Sorcerer's Stone", "Harry Potter and the Goblet of Fire"],
     },
@@ -1792,6 +1797,10 @@ export const INTENT: Record<string, Intent> = {
       "Pembroke Welsh Corgi": ["Corgi", "Corgis", "Welsh Corgi"],
       "Doberman Pinscher": ["Doberman", "Dobie"],
       "Australian Shepherd": ["Aussie"],
+      // "amstaff" and "mini aussie" found nothing (coverage audit, Nov 17); the AKC renamed the Miniature Australian
+      // Shepherd in 2015.
+      "American Staffordshire Terrier": ["AmStaff", "Am Staff"],
+      "Miniature American Shepherd": ["Mini Aussie", "Miniature Australian Shepherd", "Mini Australian Shepherd"],
       "Shetland Sheepdog": ["Sheltie"],
       "Bernese Mountain Dog": ["Berner", "Bernese"],
       "Miniature Schnauzer": ["Mini Schnauzer"],

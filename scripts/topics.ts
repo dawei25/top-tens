@@ -979,6 +979,14 @@ export const TOPICS: Topic[] = [
     categorySkip: /^(killing|killing and dismemberment|murder|torture|firing) of\b|\bincident$/i,
     // Cocomelon's own upload of the song; "Baby Shark" means Pinkfong's #1 (intent.ts).
     rename: { "Baby Shark": "Baby Shark (Cocomelon)" },
+    // "temu ad" found nothing (coverage audit, Nov 17).
+    aliases: { "Temu's Big Game Ad": ["Temu ad", "Temu Super Bowl ad", "Temu commercial"] },
+    // Kids' songs and memes with billions of views that the page doesn't rank, free but real names: they read as
+    // "not one of the YouTube videos here" (coverage audit, Nov 17).
+    knownNames: [
+      "Twinkle Twinkle Little Star", "Five Little Ducks", "Finger Family", "Head Shoulders Knees and Toes", "ABC Song",
+      "Five Little Monkeys", "Old MacDonald", "Itsy Bitsy Spider", "Humpty Dumpty", "Rickroll",
+    ],
   },
   {
     id: "instagram",
@@ -1487,6 +1495,19 @@ export const TOPICS: Topic[] = [
       "Favregate", "Aaron Rodgers Day", "Aaron Rodgers and COVID-19", "Throw Rogan", "Kelly Stafford", "Stephen Rivers",
       "Gunner Rivers", "199 Productions", "Autograph", "Dan Marino Football", "Dan Marino's Touchdown Football",
     ],
+    // "johnny u" found nothing (coverage audit, Nov 17).
+    aliases: { "Johnny Unitas": ["Johnny U"] },
+    // Quarterbacks under the page's top 50 (32,344 yards): today's starters and famous names, free, but they read as
+    // "not one of the quarterbacks here" (coverage audit, Nov 17). A ranked one stays an answer (writeKnown drops it).
+    knownNames: [
+      "Jalen Hurts", "Michael Vick", "Jameis Winston", "Justin Herbert", "Trevor Lawrence", "Baker Mayfield",
+      "Tua Tagovailoa", "Kyler Murray", "Jayden Daniels", "Caleb Williams", "Bo Nix", "Drake Maye", "Brock Purdy",
+      "C. J. Stroud", "CJ Stroud", "Geno Smith", "Sam Darnold", "Tim Tebow", "Colin Kaepernick", "Johnny Manziel",
+      "Deshaun Watson", "Mark Brunell", "Steve McNair", "Randall Cunningham", "Jim Plunkett", "Brian Griese",
+      "Daniel Jones", "Mac Jones", "Justin Fields", "Bryce Young", "Jordan Love", "Mark Sanchez", "Robert Griffin III",
+      "Carson Wentz", "Joe Burrow", "Lamar Jackson", "Josh Allen", "Andrew Luck", "Shedeur Sanders", "Cam Ward",
+      "J. J. McCarthy", "Anthony Richardson",
+    ],
   },
   {
     id: "nfl-rushing-yards",
@@ -1774,7 +1795,13 @@ export const TOPICS: Topic[] = [
     ],
     // Not answers: a blank cell, a gross in euros, and the studios' films not out yet.
     skip: ["—N/a", "The Enchanted Sword", "Coco 2", "Incredibles 3", "Frozen 3", "Shrek 5", "KPop Demon Hunters 2"],
-    aliases: { "Minions: The Rise of Gru": ["Minions 2"], Zootopia: ["Zootropolis"] },
+    // "the lion king live action" and "ne zha 1" found nothing (coverage audit, Nov 17).
+    aliases: {
+      "Minions: The Rise of Gru": ["Minions 2"],
+      Zootopia: ["Zootropolis"],
+      "The Lion King (2019)": ["Lion King live action", "Live-action Lion King", "Lion King 2019"],
+      "Ne Zha": ["Ne Zha 1", "Nezha 1"],
+    },
     junkAliases: [
       "Inside Out 3", "Zootopia Three", "Frozen IIII", "Jikŋon 2", "Frozen fandom", "Frozen Reo Māori", "The Lion King 4",
       "The Super Mario Bros. Movie 3", "Pratt Mario",
@@ -2265,7 +2292,14 @@ export const TOPICS: Topic[] = [
     webNames: true,
     // Companies the page never ranked, free but real names ("asml" read as junk, coverage audit, Nov 8). The Dutch
     // East India Company, the usual trivia answer, has no market value on record.
-    knownNames: ["ASML", "ASML Holding", "Dutch East India Company", "VOC"],
+    knownNames: [
+      "ASML", "ASML Holding", "Dutch East India Company", "VOC",
+      // Coverage audit (Nov 17): these read as "not one of the companies here": a public company the page doesn't
+      // rank, the old trivia answers, and private companies (no market value).
+      "Palantir", "Palantir Technologies", "East India Company", "Standard Oil", "xAI", "Anthropic", "ByteDance",
+    ],
+    // "taiwan semi" found nothing (coverage audit, Nov 17).
+    aliases: { TSMC: ["Taiwan Semi"] },
   },
   {
     id: "banks",
@@ -2712,6 +2746,9 @@ export const TOPICS: Topic[] = [
       "Sangwon Middle School", "Five Grand Palaces of Joseon-Dynasty Seoul", "Five Grand Palaces", "Seoul castle",
       "South Seoul", "North Seoul", "Mexican Federal District Transit System", "Londonise", "Londonize", "Baku Oilfields",
     ],
+    // Vietnam's biggest city is no capital, free: "ho chi minh" read as "not one of the capital cities" (coverage
+    // audit, Nov 17), where Saigon already said it isn't in the ranking.
+    knownNames: ["Ho Chi Minh City", "Ho Chi Minh"],
   },
   {
     id: "brazil-cities",
@@ -2850,7 +2887,8 @@ export const TOPICS: Topic[] = [
   {
     id: "car-makers",
     category: "Business",
-    title: "Biggest car makers",
+    // "Biggest" named no measure (docs/UX.md 3): it is vehicles sold, not revenue or market value (Nov 17).
+    title: "Car makers that sold the most vehicles (2025)",
     noun: "car makers",
     prompt: "Name the 10 car makers (groups) that sold the most vehicles in 2025",
     page: "List of manufacturers by motor vehicle production",
@@ -2880,6 +2918,9 @@ export const TOPICS: Topic[] = [
       "Cupra Racing", "Bentley", "Lamborghini", "Lexus", "Daihatsu", "Acura", "Volvo Cars", "Polestar", "Lotus Cars",
       "MG Cars", "Lincoln Motor Company", "Infiniti", "Datsun", "Maruti Suzuki", "Mercedes", "Tata Motors Passenger Vehicles",
       "Jaguar Cars", "Land Rover", "Mini", "Mini (marque)", "Rolls-Royce Motor Cars",
+      // The brand's article no longer merges into the group's row (Nov 8 merging rules): "volkswagen" offered both,
+      // the brand a life (Nov 17 rebuild).
+      "Volkswagen",
     ],
     junkAliases: [
       "Toyota sewing machine", "Shigeru Hayakawa", "Controversies surrounding Toyota", "Toyota automobile collectibles",
@@ -2898,6 +2939,15 @@ export const TOPICS: Topic[] = [
     // Groups the page's tables leave out, free but real names: "gac motor" was corrected to General Motors (coverage
     // audit, Nov 8). They need a figure from their articles to be answers.
     knownNames: ["GAC Group", "GAC", "GAC Motor", "GAC Aion", "Aion", "Nio", "XPeng", "Li Auto", "Xiaomi Auto", "Leapmotor"],
+    // The casual player's first miss showed no figure; its article gives 2025's deliveries (coverage audit, Nov 17).
+    cited: {
+      "Tesla, Inc.": {
+        value: "1,636,129",
+        n: 1636129,
+        aliases: ["Tesla", "Tesla Motors"],
+        source: "Tesla, Inc.: \"full year 2025 deliveries were reported by both companies (2,256,714 vs 1,636,129 BEV sales)\"",
+      },
+    },
   },
   // Oddball: fun lists anyone can throw guesses at, with a surprise or two.
   {
@@ -3194,7 +3244,12 @@ export const TOPICS: Topic[] = [
     // The anthology's first season has a title of its own, which is how people know it.
     rename: { "Monster (Season 1)": "Monster: The Jeffrey Dahmer Story" },
     articles: { "Monster: The Jeffrey Dahmer Story": "Monster: The Jeffrey Dahmer Story" },
-    aliases: { "Monster: The Jeffrey Dahmer Story": ["Monster", "Dahmer", "Jeffrey Dahmer"] },
+    aliases: {
+      "Monster: The Jeffrey Dahmer Story": ["Monster", "Dahmer", "Jeffrey Dahmer"],
+      // Fans' shorthand, which found nothing (coverage audit, Nov 17).
+      "Stranger Things (Season 4)": ["ST4"],
+      "Stranger Things (Season 5)": ["ST5"],
+    },
     // Episodes, attractions, shops, characters and the novels among the redirects.
     junkAliases: [
       "One More Game", "Byeori binnaneun bame", "Stranger Things Experience", "Stranger Things Store",
@@ -3368,6 +3423,8 @@ export const TOPICS: Topic[] = [
       // most-typed breeds missing here (coverage audit, Nov 8): real names, never junk or a typo of a listed breed.
       "Pit Bull", "Pitbull", "Pit Bull Terrier", "American Pit Bull Terrier", "Pittie", "Pitty", "American Bully",
       "XL Bully",
+      // Coverage audit (Nov 17): these read as "not one of the dog breeds here".
+      "Pit Bulls", "Pitbulls", "Pitbull Terrier", "Shepsky",
     ],
     noFigures: "the AKC's ranks past 10 aren't on Wikipedia; breeds from its earlier top 10s show their last rank",
     // How owners say them.
@@ -3376,10 +3433,11 @@ export const TOPICS: Topic[] = [
       "Labrador Retriever": ["Lab", "Labs", "Labrador", "Labradors", "Labrador Retrievers", "Black Lab", "Black Labrador"],
       "Golden Retriever": ["Golden", "Goldens", "Golden Retrievers", "Goldie"],
       "German Shepherd": ["GSD", "German Shepherd Dog", "German Shepherds", "Alsatian"],
-      Dachshund: ["Doxie", "Wiener dog", "Weiner dog", "Sausage dog", "Dachshunds", "Daschund"],
-      Poodle: ["Poodles", "Standard Poodle", "Toy Poodle", "Miniature Poodle", "Mini Poodle", "French Poodle"],
+      // "dachsie", "rotty" and "teacup poodle" found nothing (coverage audit, Nov 17).
+      Dachshund: ["Doxie", "Wiener dog", "Weiner dog", "Sausage dog", "Dachshunds", "Daschund", "Dachsie"],
+      Poodle: ["Poodles", "Standard Poodle", "Toy Poodle", "Miniature Poodle", "Mini Poodle", "French Poodle", "Teacup Poodle"],
       Beagle: ["Beagles"],
-      Rottweiler: ["Rottie", "Rottweilers"],
+      Rottweiler: ["Rottie", "Rottweilers", "Rotty"],
       "German Shorthaired Pointer": ["GSP", "Shorthaired Pointer", "German Shorthair"],
       Bulldog: ["English Bulldog", "British Bulldog", "Bulldogs"],
     },
