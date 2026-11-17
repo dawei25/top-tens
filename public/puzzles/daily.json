@@ -202,5 +202,89 @@
   "date": "2026-11-22",
   "id": "winter-olympics-countries",
   "blitz": "wine-countries"
+ },
+ {
+  "n": 35,
+  "date": "2026-11-23",
+  "id": "capitals",
+  "blitz": "football-club-revenue"
+ },
+ {
+  "n": 36,
+  "date": "2026-11-24",
+  "id": "animated-films",
+  "blitz": "us-states-gdp"
+ },
+ {
+  "n": 37,
+  "date": "2026-11-25",
+  "id": "car-makers",
+  "blitz": "grand-slam-titles"
+ },
+ {
+  "n": 38,
+  "date": "2026-11-26",
+  "id": "island-countries",
+  "blitz": "lakes"
+ },
+ {
+  "n": 39,
+  "date": "2026-11-27",
+  "id": "dog-breeds",
+  "blitz": "video-games"
+ },
+ {
+  "n": 40,
+  "date": "2026-11-28",
+  "id": "athletes-earnings",
+  "blitz": "population-density"
+ },
+ {
+  "n": 41,
+  "date": "2026-11-29",
+  "id": "netflix-seasons",
+  "blitz": "nba-points"
+ },
+ {
+  "n": 42,
+  "date": "2026-11-30",
+  "id": "life-expectancy-countries",
+  "blitz": "co2-emissions"
+ },
+ {
+  "n": 43,
+  "date": "2026-12-01",
+  "id": "youtube-videos",
+  "blitz": "nfl-passing-yards"
+ },
+ {
+  "n": 44,
+  "date": "2026-12-02",
+  "id": "europe-cities",
+  "blitz": "spotify-artists"
+ },
+ {
+  "n": 45,
+  "date": "2026-12-03",
+  "id": "car-models",
+  "blitz": "countries-population"
+ },
+ {
+  "n": 46,
+  "date": "2026-12-04",
+  "id": "game-franchises",
+  "blitz": "beer-per-capita"
+ },
+ {
+  "n": 47,
+  "date": "2026-12-05",
+  "id": "market-cap-peak",
+  "blitz": "islands"
+ },
+ {
+  "n": 48,
+  "date": "2026-12-06",
+  "id": "us-box-office",
+  "blitz": "us-surnames"
  }
 ]

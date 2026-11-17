@@ -30,7 +30,7 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
           <li>Your games, streaks, bests and settings are kept in this browser's local storage.</li>
           {backendOn && <li>So is a random id for this browser, made up on the spot. It only stops one game being counted twice.</li>}
           <li>
-            No cookies, no ads, no tracking.
+            No cookies, no ads, no tracking of who you are.
             {accountsOn && " Signing in keeps its session in local storage too, not in a cookie."}
           </li>
         </ul>

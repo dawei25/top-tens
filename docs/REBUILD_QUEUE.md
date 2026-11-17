@@ -10,6 +10,9 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Before they run:** athletes-earnings (Nov 28), car-models (Dec 3, two duplicate keys in scripts/intent.ts since
+      Nov 8), game-franchises (Dec 4) need the same freshness and coverage audit the other picks had (Nov 17).
+
 - [ ] **Every gazetteer country in the lexicon's country set** (matcher agent, Nov 13): the guard that keeps a country's
       name off longer names that contain it only knows the 195 countries the lexicon has another form for. 65 others
       (Andorra, San Marino, Togo, Bermuda, Jersey...) still land on such names ("togo" is Chooks-to-Go, "bermuda" The
