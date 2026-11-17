@@ -1,8 +1,10 @@
 // Free play without an account (owner, Nov 14: "after a user plays more than once in free play, they have to sign in
 // with google to continue playing"): src/game/free-games.ts counts the free games played (FREE_GAMES_BEFORE_SIGN_IN,
-// 2), and the next one asks for Google sign-in in a sheet, the wall. On the launch build (GOOGLE_ENV: Google alone, a
-// client ID; Supabase mocked, Google faked as in backend-google.e2e.cjs). Checks: two free games play (a list game
-// counts from a guess, a Blitz round once its clock runs) and the third shows the wall, from Home's keys, a category,
+// read from that file below, so a new number needs no edit here: 5 since Nov 17), and the next one asks for Google
+// sign-in in a sheet, the wall. On the launch build (GOOGLE_ENV: Google alone, a client ID; Supabase mocked, Google
+// faked as in backend-google.e2e.cjs). Saves are seeded a game or two short of the limit and the last ones played by
+// hand. Checks: the free games play (a list game counts from a guess, a Blitz round once its clock runs) and the next
+// shows the wall, from Home's keys, a category,
 // the menu and Roll new list, over the screen the player was on, which closing leaves as it was; Today's list still
 // opens, from Home and from the wall's quiet key; a game in progress resumes; a link to a free list counts, and one
 // past the free ones shows the wall alone, closing back where the player came from; an accidental open doesn't count;
@@ -15,6 +17,8 @@
 // count; signing in opens the day asked for.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 const { chromium, VIEWPORTS, NOW, TODAY, guess, noHScroll, open: openPlain, store } = require("./helpers.cjs");
 const { GOOGLE_ENV } = require("./backend-env.cjs");
 const { serveBuild, opener, homeSignedIn, openMenu, FRESH, SESSION, until, settle, withGoogle, pressForPopup } = require("./backend-lib.cjs");
@@ -37,11 +41,30 @@ after(async () => {
   await plainBrowser?.close();
 });
 
+/** The free games a signed-out player gets, as the game has it (the one constant in src/game/free-games.ts). */
+const LIMIT = (() => {
+  const src = fs.readFileSync(path.join(__dirname, "../src/game/free-games.ts"), "utf8");
+  const m = src.match(/export const FREE_GAMES_BEFORE_SIGN_IN = (\d+);/);
+  assert.ok(m, "FREE_GAMES_BEFORE_SIGN_IN is a number in src/game/free-games.ts");
+  return Number(m[1]);
+})();
+
 const T = NOW.getTime();
 /** A finished free list game in the history (no daily number). */
 const freeRun = (id, ago) => ({ id, startedAt: T - ago, finishedAt: T - ago + 60_000, status: "lost", found: [1], lives: 0, hints: 0 });
+/**
+ * Lists for seeded free games: never a daily (any day), never a debut, and none the specs open themselves (rivers,
+ * lakes, tourism, countries-area), so a seeded game never stands in for one played here.
+ */
+const FREE_LISTS = (() => {
+  const dailies = new Set(require("../public/puzzles/daily.json").map((e) => e.id));
+  const own = new Set(["rivers", "lakes", "tourism", "countries-area"]);
+  return require("../public/puzzles/index.json")
+    .filter((m) => !dailies.has(m.id) && !m.debut && !own.has(m.id))
+    .map((m) => m.id);
+})();
+assert.ok(FREE_LISTS.length > LIMIT + 1, "enough lists to seed past the limit");
 /** A save with `n` free games played (finished list games on lists that never run as a daily). */
-const FREE_LISTS = ["africa-population", "asia-population", "us-states-area", "us-cities", "world-cities", "lakes"];
 const played = (n, more = {}) => ({
   "top-tens:v1": { ...FRESH["top-tens:v1"], listRuns: FREE_LISTS.slice(0, n).map((id, i) => freeRun(id, (i + 2) * 3_600_000)), ...more },
 });
@@ -75,14 +98,15 @@ async function findTop(page, id) {
 }
 const home = (page) => page.getByTestId("nav-home").click().then(() => page.getByTestId("today-list").waitFor());
 
-test("two free games play, the third shows the wall over Home; closing leaves Home as it was; Today's list still opens (phone)", async () => {
-  const { ctx, page } = await open(phone, "", FRESH, undefined, withGoogle({}));
+test("the free games play, the next shows the wall over Home; closing leaves Home as it was; Today's list still opens (phone)", async () => {
+  // All but the last two free games played already; the last two by hand.
+  const { ctx, page } = await open(phone, "", played(LIMIT - 2), undefined, withGoogle({}));
   await page.getByTestId("today-list").waitFor();
 
-  // Game 1: a random list, played from its first guess.
+  // The next to last: a random list, played from its first guess.
   const first = await rollList(page);
   await findTop(page, first);
-  // Game 2: a random Blitz, counted once its clock starts (the first keystroke).
+  // The last: a random Blitz, counted once its clock starts (the first keystroke).
   await home(page);
   await page.getByTestId("random-blitz").click();
   await page.getByTestId("blitz-clock").waitFor();
@@ -91,7 +115,7 @@ test("two free games play, the third shows the wall over Home; closing leaves Ho
   await page.locator('[data-testid="blitz-clock"][data-started="true"]').waitFor();
   await home(page);
 
-  // Game 3: the wall, over Home; nothing rolled, nothing saved.
+  // One more: the wall, over Home; nothing rolled, nothing saved.
   const before = await store(page);
   await page.getByTestId("random-list").click();
   await walled(page);
@@ -143,16 +167,16 @@ test("two free games play, the third shows the wall over Home; closing leaves Ho
 });
 
 test("a link to a free list counts, and one past the free ones gets the wall alone; an open alone doesn't count (desktop)", async () => {
-  // One free game played; a list opened and left untouched (it doesn't count); a daily played (never counts).
+  // All but one free game played; a list opened and left untouched (it doesn't count); a daily played (never counts).
   const untouched = { puzzleId: "rivers", found: [], lives: 5, log: [], status: "playing", startedAt: T - 600_000 };
   const daily = { ...freeRun("youtube-channels", 86_400_000), daily: 9 };
-  const seed = played(1, { games: { rivers: untouched } });
+  const seed = played(LIMIT - 1, { games: { rivers: untouched } });
   seed["top-tens:v1"].listRuns.push(daily);
   const { ctx, page } = await open(desktop, "", seed, undefined, withGoogle({}));
   await page.getByTestId("today-list").waitFor();
 
-  // A link to a free list (here typed in): game 2, played. The list ran as a daily (Oct 22) and that daily wasn't
-  // played: the game under way shares the list's save with it, and counts as free play by the mark it starts with.
+  // A link to a free list (here typed in): the last free game, played. The list ran as a daily (Oct 22) and that daily
+  // wasn't played: the game under way shares the list's save with it, and counts as free play by its mark.
   await page.evaluate(() => (location.hash = "#p-mountains"));
   await page.getByTestId("title-card").waitFor();
   await findTop(page, "mountains");
@@ -222,7 +246,7 @@ test("a link to a free list counts, and one past the free ones gets the wall alo
 test("Random list on today's finished list asks over its results, whose quiet key then goes Home (desktop)", async () => {
   const daily = require("../public/puzzles/daily.json").find((e) => e.date === TODAY);
   const done = { puzzleId: daily.id, found: [1, 2, 3], lives: 0, log: [], status: "lost", startedAt: T - 900_000, finishedAt: T - 600_000 };
-  const seed = played(2, { games: { [daily.id]: done }, dailyGames: { [TODAY]: done }, daily: { [TODAY]: daily.id } });
+  const seed = played(LIMIT, { games: { [daily.id]: done }, dailyGames: { [TODAY]: done }, daily: { [TODAY]: daily.id } });
   const { ctx, page } = await open(desktop, `#daily-${TODAY}`, seed, undefined, withGoogle({}));
   await page.getByTestId("results").waitFor();
   // No Play Blitz on a list's results (owner, Nov 14: the modes stay separate).
@@ -250,7 +274,7 @@ test("Random list on today's finished list asks over its results, whose quiet ke
 
 test("signing in at the wall starts the game asked for, the save goes along, and a signed-in player is never asked (desktop)", async () => {
   const fake = {};
-  const { ctx, page, calls } = await open(desktop, "", played(2), undefined, withGoogle(fake));
+  const { ctx, page, calls } = await open(desktop, "", played(LIMIT), undefined, withGoogle(fake));
   await page.getByTestId("today-list").waitFor();
   await page.getByTestId("random-blitz").click();
   await walled(page);
@@ -263,7 +287,7 @@ test("signing in at the wall starts the game asked for, the save goes along, and
   assert.equal(await page.evaluate(() => sessionStorage.getItem("top-tens:free-ask")), null, "nothing left to start later");
   // The device's games went to the account.
   await until(() => calls.saves.some((c) => c.method === "POST"));
-  assert.deepEqual(calls.saves.find((c) => c.method === "POST").body.data.listRuns.map((r) => r.id), FREE_LISTS.slice(0, 2));
+  assert.deepEqual(calls.saves.find((c) => c.method === "POST").body.data.listRuns.map((r) => r.id), FREE_LISTS.slice(0, LIMIT));
   // Signed in, free play never runs out.
   await homeSignedIn(page, "Dana Scully");
   for (let i = 0; i < 3; i++) {
@@ -277,7 +301,7 @@ test("signing in at the wall starts the game asked for, the save goes along, and
 });
 
 test("signing in at a link's wall opens that link's game (phone)", async () => {
-  const { ctx, page } = await open(phone, "#p-rivers", played(2), undefined, withGoogle({}));
+  const { ctx, page } = await open(phone, "#p-rivers", played(LIMIT), undefined, withGoogle({}));
   await walled(page);
   const popup = await pressForPopup(page);
   await popup.waitForEvent("close");
@@ -290,7 +314,7 @@ test("signing in at a link's wall opens that link's game (phone)", async () => {
 });
 
 test("a signed-in player is never asked, from a key or a link (phone)", async () => {
-  const seed = { ...played(6), "top-tens:auth": SESSION };
+  const seed = { ...played(LIMIT + 1), "top-tens:auth": SESSION };
   const { ctx, page } = await open(phone, "#blitz-lakes", seed, { save: { data: seed["top-tens:v1"], version: 1 } }, withGoogle({}));
   await page.getByTestId("blitz-clock").waitFor();
   await home(page);
@@ -314,7 +338,7 @@ test("a signed-in player is never asked, from a key or a link (phone)", async ()
 test("after the free games, an archive row asks over the archive; a day under way resumes, a finished one shows, today's opens (phone)", async () => {
   const done = { puzzleId: "islands", found: [1, 2], lives: 0, log: [], status: "lost", startedAt: T - 9_000_000, finishedAt: T - 8_900_000 };
   const underway = { puzzleId: "spotify-artists", found: [], lives: 4, log: [], hints: [3], status: "playing", startedAt: T - 7_000_000 };
-  const seed = played(2, { dailyGames: { "2026-10-25": done }, games: { islands: done, "spotify-artists": underway } });
+  const seed = played(LIMIT, { dailyGames: { "2026-10-25": done }, games: { islands: done, "spotify-artists": underway } });
   const { ctx, page } = await open(phone, "#archive", seed, undefined, withGoogle({}));
   const row = (d) => page.locator(`[data-testid="archive-row"][data-date="${d}"]`);
   await row(PAST).waitFor();
@@ -359,7 +383,7 @@ test("after the free games, an archive row asks over the archive; a day under wa
 });
 
 test("a past day's link gets the wall alone, closing to the archive; signing in opens that day (desktop)", async () => {
-  const { ctx, page } = await open(desktop, `#daily-${PAST}`, played(2), undefined, withGoogle({}));
+  const { ctx, page } = await open(desktop, `#daily-${PAST}`, played(LIMIT), undefined, withGoogle({}));
   await walled(page);
   await page.getByTestId("free-wall-screen").waitFor();
   assert.equal(await page.getByTestId("title-card").count(), 0, "nothing of the day behind the wall");
@@ -380,15 +404,15 @@ test("a past day's link gets the wall alone, closing to the archive; signing in 
 });
 
 test("before the free games are used up, an archive day plays freely and doesn't count; signing in at its wall opens it (desktop)", async () => {
-  const { ctx, page } = await open(desktop, "#archive", played(1), undefined, withGoogle({}));
-  // One free game played: an archive day opens and plays.
+  const { ctx, page } = await open(desktop, "#archive", played(LIMIT - 1), undefined, withGoogle({}));
+  // All but one free game played: an archive day opens and plays.
   await page.locator(`[data-testid="archive-row"][data-date="${PAST}"]`).click();
   await page.waitForFunction((d) => location.hash === `#daily-${d}`, PAST);
   await findTop(page, "airports");
   await page.getByTestId("give-up").click();
   await page.getByTestId("give-up").click();
   await page.getByTestId("results").waitFor();
-  // It didn't count: the second free game still starts.
+  // It didn't count: the last free game still starts.
   await page.evaluate(() => (location.hash = ""));
   await page.getByTestId("today-list").waitFor();
   const id = await rollList(page);
@@ -409,7 +433,7 @@ test("before the free games are used up, an archive day plays freely and doesn't
 test("with the popup blocked, the tab goes to Google and back, and the game asked for starts (desktop)", async () => {
   const blockPopups = (ctx) => ctx.addInitScript(() => (window.open = () => null));
   const finished = { puzzleId: "tourism", found: [1], lives: 0, log: [], status: "lost", startedAt: T - 900_000, finishedAt: T - 600_000 };
-  const seed = played(1, { games: { tourism: finished } });
+  const seed = played(LIMIT - 1, { games: { tourism: finished } });
   seed["top-tens:v1"].listRuns.unshift(freeRun("tourism", 900_000));
   const { ctx, page, calls } = await open(desktop, "#p-tourism", seed, undefined, withGoogle({}, blockPopups));
   await page.getByTestId("results").waitFor();
@@ -427,7 +451,7 @@ test("with the popup blocked, the tab goes to Google and back, and the game aske
 });
 
 test("the build without a backend has no wall: free play runs on (desktop)", async () => {
-  const { ctx, page } = await openPlain(plainBrowser, desktop, "", played(6)["top-tens:v1"]);
+  const { ctx, page } = await openPlain(plainBrowser, desktop, "", played(LIMIT + 1)["top-tens:v1"]);
   await page.getByTestId("today-list").waitFor();
   for (let i = 0; i < 2; i++) {
     await rollList(page);
@@ -447,7 +471,7 @@ test("the build without a backend has no wall: free play runs on (desktop)", asy
 
 test("the wall's keys never move anything on hover, press or focus (390 and 1440)", async () => {
   for (const vp of [phone, desktop]) {
-    const { ctx, page } = await open(vp, "", played(2), undefined, withGoogle({}));
+    const { ctx, page } = await open(vp, "", played(LIMIT), undefined, withGoogle({}));
     await page.getByTestId("random-list").click();
     await walled(page);
     await settle();

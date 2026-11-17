@@ -6,9 +6,11 @@ import type { Saved } from "./storage";
 /**
  * Free play without an account (owner, Nov 14: "after a user plays more than once in free play, they have to sign in
  * with google to continue playing"): how many free-play games (Random list, Random Blitz, a link or Play again to a
- * list) a player may start before the next one asks them to sign in. One number, so it can be tuned here.
+ * list) a player may start before the next one asks them to sign in. One number, so it can be tuned here: 5 since
+ * Nov 17 (owner; it was 2). The tests follow it (free-games.test.ts pins the number once; e2e/free-wall.e2e.cjs reads it
+ * from this file).
  */
-export const FREE_GAMES_BEFORE_SIGN_IN = 2;
+export const FREE_GAMES_BEFORE_SIGN_IN = 5;
 
 /**
  * A list game the player has played, not only opened: a guess the list took (an answer, or a life lost: a free miss
