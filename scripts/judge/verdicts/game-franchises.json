@@ -6,7 +6,7 @@
   "priority": 7,
   "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
   "casual": { "found": 8, "livesLost": 5, "guesses": 15 },
-  "fan": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 8, "livesLost": 5, "guesses": 15 },
   "blitzCasual": { "scored": 21, "named": 26 },
   "difficulty": 2,
   "tags": ["gaming", "video games", "franchises"],
@@ -22,5 +22,6 @@
     "Final Fantasy (#10): drop 'Compilation of Final Fantasy VII' from the unranked pool (it is part of the series) and add 'Final Fantasy VII' and 'FF7' as aliases; 'final fantasy 7' and 'final fantasy vii' currently cost a life. Drop the other sub-series entries too: 'Final Fantasy Crystal Chronicles', 'Fabula Nova Crystallis Final Fantasy'.",
     "Junk redirect aliases on the top 10. Mario: characters, enemies, places and the film ('Kamek the Magikoopa', 'Toadsworth', 'Koopa kid', 'Fire Bro', 'Toad Town', 'Professor E. Gadd', 'Lord Fawful', 'FawfuI', 'Cheep-Cheep', 'Bob-Omb', 'Dry Bones', 'Buzzy Beetle', 'Snifit', 'Lumalee', 'Bloober', 'Ignatius Koopa', 'Petey Piranha', 'Peach's Castle', 'Mushroom Kingdom', 'Super Mario Bros film', 'SMB Film', 'Mario Takes America' and the like). Pokémon: mechanics and characters ('Pokémon moves', 'Pokémon natures', 'Pokémon breeding', 'Pokémon evolution', 'Gym Leader', 'Gym Badges', 'Pokéball', 'Giovani', 'Professor Odamaki', 'Yukinari Ôkido-Hakase', 'Pokémon crime syndicates'). Resident Evil: every 'Biohazard ... Soundtrack' and '... Orchestra' redirect, 'Resident Evil list of books', 'The Umbrella Conspiracy', 'Arklay Forrest', 'Arklay Mountains', 'Raccoon City Outbreak', 'Operation Bacillus Terminate', 'Bio-Organic Weapon', 'Drain Demios'. Assassin's Creed: 'Abstergo Industries', 'Creed's Assassin'. Tetris: 'L-BIock'. GTA: 'Lists of Grand Theft Auto characters'. FIFA: 'FIFA leagues'.",
     "Minor, free misses on plain names of top-10 answers: 'grand theft auto v' (while 'gta v' works), 'gta 6' / 'gta vi', 'resident evil 4' / 're4', 'pokemon go'. Add as aliases where the numbered-title rule allows."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-02: casual 8, fan 8). Fresh: the page was edited Nov 11: GTA now 480 million (was 475) and Red Dead 118, the top 10 and its order unchanged; facts sourced. Fixed: sub-series the page counts in their series cost a life of their own (Paper Mario, Mario & Luigi, New Super Mario Bros., Pokemon Mystery Dungeon, Call of Duty: Black Ops, Tetris: The Grand Master, the FIFA World Cup games); famous games of a top-10 series said they \"aren't in this ranking\" (Pokemon Red, Super Mario Odyssey, AC Valhalla, Resident Evil Village, GTA Online, Minecraft Java) or went to a confirm (black ops, warzone, ffxiv, fc 25): about 200 titles now name their series; near misses by their games or fans' names (breath of the wild, lara croft, spiderman, nfs, metal gear solid); \"nintendo\" put Nintendo Mini Classics in the box. Still open, a matcher change: a known title led by a top-10 series' name (\"Mario Party DS\", \"Pokemon Black and White\") still says it isn't in the ranking. Casual 8, fan 8 (lives on Wii, The Sims, Lego, NBA 2K, Need for Speed: #11 to #15, within 54 million).", "casual": 8, "fan": 8, "decision": "keep daily-list"}
 }
