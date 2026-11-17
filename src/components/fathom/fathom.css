@@ -40,30 +40,186 @@
   --band-text: var(--label);
 }
 
-/* The question card: "Question 2 of 10" and the question's time on one line, then the score, the question and what it measures. */
+/* The question card: "Question 2 of 10" and the seconds left on one line, then the air, the score, the question and
+   what it measures. */
 .fathom-q .prompt-top {
   align-items: center;
 }
+/* The header's words and number drawn over the bubbles rising past them. */
+.fathom-q .prompt-top > * {
+  position: relative;
+  z-index: 1;
+}
 /*
- * The question's time (owner, Nov 14: "add a timer per question (maybe like 20s)"): "0:17" at the header's end, in
- * the label's size and its muted colour, pink for the last five seconds. Four tabular characters: never wider or
- * narrower. No transition: it changes as a number does.
+ * The air (owner, Nov 17: "make the timer for fathom more apparent- didnt even realize it was there until it was too
+ * late ... maybe can make the countdown more in theme too"; it was a quiet "0:19" at this header's end). Fathom is a
+ * depth, so the clock is a diver's air: the seconds left in big cyan type at the header's end, and under the header a
+ * tank as wide as the card, full the moment the question shows and draining as the seconds go, a few pixel bubbles
+ * rising from its edge; pink for the last five seconds, the number beating once a second. Two tabular digits, so it
+ * never changes width; the tank's rows are there on the reveal too (it holds what was left, dimmed, and the number's
+ * place is kept), so nothing moves. Only transforms move it (the drain, the bubbles, the beat): no layout ever.
  */
 .fathom-clock {
   flex: none;
-  min-width: 4ch;
-  font-size: 17px;
-  line-height: 1;
+  min-width: 2ch;
+  font-size: 36px;
+  /* The label's line, so the header is no taller for it (the digits stand out of it, into the card's padding). */
+  line-height: 19px;
   text-align: right;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
-  color: var(--muted);
+  /* None, so two digits are exactly 2ch: "5" keeps the box "25" had. */
+  letter-spacing: 0;
+  color: var(--cyan);
+  text-shadow: 0 0 10px rgba(77, 227, 255, 0.35);
+}
+@media (min-width: 560px) {
+  .fathom-clock {
+    font-size: 40px;
+  }
+}
+.clock-n {
+  display: inline-block;
 }
 .fathom-clock[data-warn] {
   color: var(--pink);
+  text-shadow: 0 0 10px var(--pink-glow);
 }
 .fathom-clock[data-idle] {
   visibility: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fathom-clock[data-warn] .clock-n {
+    animation: air-beat 0.45s steps(3, end) both;
+  }
+}
+@keyframes air-beat {
+  0% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: none;
+  }
+}
+/* The tank: a dark well with a cyan wall, the air in it a bright tube (a light top row, a deep bottom one). */
+.fathom-air {
+  --air-hi: #c4f6ff;
+  --air-mid: var(--cyan);
+  --air-lo: var(--cyan-edge);
+  --air-glow: rgba(77, 227, 255, 0.45);
+  --air-rim: rgba(77, 227, 255, 0.3);
+  /* The tank's wall, and the gap from it to the air. */
+  --air-wall: 2px;
+  --air-in: 3px;
+  --air-px: 2px;
+  position: relative;
+  height: 14px;
+  margin-top: 10px;
+}
+.fathom-air[data-warn] {
+  --air-hi: #ffc4d6;
+  --air-mid: var(--pink);
+  --air-lo: var(--pink-shadow);
+  --air-glow: var(--pink-glow);
+  --air-rim: rgba(255, 93, 143, 0.35);
+}
+/* The reveal: what was left, held and dimmed. */
+.fathom-air:not([data-runs]) {
+  --air-hi: #5d7096;
+  --air-mid: #3b4c6e;
+  --air-lo: #2c3a57;
+  --air-glow: transparent;
+  --air-rim: rgba(125, 147, 184, 0.3);
+}
+.air-tank {
+  position: absolute;
+  inset: 0;
+  background: #040b18;
+  box-shadow:
+    inset 0 0 0 var(--air-wall) var(--air-rim),
+    0 0 12px var(--air-glow);
+}
+.air-fill {
+  position: absolute;
+  inset: var(--air-in);
+  background: linear-gradient(
+    var(--air-hi) 0 var(--air-px),
+    var(--air-mid) var(--air-px) calc(100% - var(--air-px)),
+    var(--air-lo) calc(100% - var(--air-px))
+  );
+  transform-origin: left center;
+  /* A second at a time with reduced motion; smoothly otherwise (below). */
+  transform: scaleX(var(--air-step));
+}
+/* The bubbles ride the air's edge: a layer the tank's width, moved left as the air goes. Only with motion. */
+.air-edge {
+  display: none;
+  position: absolute;
+  inset: var(--air-in);
+  pointer-events: none;
+}
+.air-edge i {
+  position: absolute;
+  right: -2px;
+  bottom: 3px;
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  background: var(--air-hi);
+  -webkit-mask: var(--bubble) center / 100% 100% no-repeat;
+  mask: var(--bubble) center / 100% 100% no-repeat;
+}
+.air-edge i:nth-child(2) {
+  right: 3px;
+  width: 4px;
+  height: 4px;
+  -webkit-mask: none;
+  mask: none;
+}
+.air-edge i:nth-child(3) {
+  right: -6px;
+  width: 4px;
+  height: 4px;
+  -webkit-mask: none;
+  mask: none;
+}
+.fathom {
+  /* A pixel bubble: a 4 x 4 ring, corners off. */
+  --bubble: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 4' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h2v1H1zM0 1h1v2H0zM3 1h1v2H3zM1 3h2v1H1z'/%3E%3C/svg%3E");
+}
+@media (prefers-reduced-motion: no-preference) {
+  .air-fill {
+    transform: scaleX(var(--air));
+  }
+  .air-edge {
+    display: block;
+    transform: translateX(calc((var(--air) - 1) * 100%));
+  }
+  .fathom-air[data-runs] .air-fill,
+  .fathom-air[data-runs] .air-edge {
+    transition: transform 0.25s linear;
+  }
+  .air-edge i {
+    animation: air-rise 1.8s steps(6, end) infinite;
+  }
+  .air-edge i:nth-child(2) {
+    animation-delay: 0.6s;
+  }
+  .air-edge i:nth-child(3) {
+    animation-delay: 1.2s;
+  }
+}
+@keyframes air-rise {
+  0% {
+    opacity: 0;
+    transform: none;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(3px, -18px);
+  }
 }
 /*
  * The running score under the header (owner, Nov 14: "some kind of bar at the top ... sleek and minimalistic"): ten
@@ -929,21 +1085,39 @@
  * Return key, so the cards come down to size: the question, the field and LOCK IN all stay in view.
  */
 .fathom[data-short] {
-  gap: 10px;
+  gap: 8px;
   padding-top: 8px;
 }
 .fathom[data-short] .prompt {
-  padding: 8px 14px 10px;
+  padding: 6px 14px 8px;
 }
 .fathom[data-short] .prompt h1 {
-  font-size: 24px;
+  margin-top: 3px;
+  font-size: 22px;
+}
+/* The narrowest phones (320): a step smaller still, so a long question keeps to two lines over the keyboard. */
+@media (max-width: 359px) {
+  .fathom[data-short] .prompt h1 {
+    font-size: 20px;
+  }
 }
 .fathom[data-short] .prompt .caption {
   margin-top: 2px;
 }
 .fathom[data-short] .fathom-ask {
-  padding: 10px 12px 12px;
+  padding: 8px 12px 10px;
   gap: 8px;
+}
+/* The air stays, where it always is, a thinner tank: the player is typing against it. */
+.fathom[data-short] .fathom-clock {
+  font-size: 28px;
+}
+.fathom[data-short] .fathom-air {
+  --air-wall: 1px;
+  --air-in: 2px;
+  --air-px: 1px;
+  height: 8px;
+  margin-top: 6px;
 }
 .fathom[data-short] .fathom-keys {
   gap: 8px;
@@ -952,4 +1126,18 @@
 /* Today's Fathom's results: when the next one comes (one try a day, so no key for new questions). */
 .fathom-next-day {
   margin-top: 10px;
+}
+/*
+ * SHARE and HOME (owner, Nov 17: "add a return to home button next to the share"): one pair on one row, the same
+ * height, each half of it; after New questions or Today's Fathom on a wide card, under it on a phone. It wraps only
+ * when the two labels can't both fit whole (each key keeps its label's width at least).
+ */
+.results-pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: 2 1 332px;
+}
+.results-actions .results-pair .key {
+  flex: 1 1 0;
 }

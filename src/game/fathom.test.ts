@@ -45,6 +45,8 @@ import {
   scoreFor,
   QUESTION_SECONDS,
   QUESTIONS_PER_GAME,
+  TICK_SECONDS,
+  WARN_SECONDS,
   scoreGame,
   shareLines,
   shareText,
@@ -1133,9 +1135,13 @@ describe("a game", () => {
     // A game of five from before Nov 14 (Past runs) shares as it was: out of 500.
     expect(shareLines(244, ["near", "dead-on", "far", "lost", "close"])).toBe("Fathom 244/500\n🟪 🟨 🟥 ⬛ 🟦");
   });
-  // The owner, Nov 14: "add a timer per question (maybe like 20s)". At 0 with nothing to lock in, the round scores 0.
+  // The owner, Nov 14: "add a timer per question (maybe like 20s)"; Nov 17: "make it 25s instead of 20s". At 0 with
+  // nothing to lock in, the round scores 0.
   it("times a question out: 0 points, lost at sea, kept apart from a guess of 0", () => {
-    expect(QUESTION_SECONDS).toBe(20);
+    expect(QUESTION_SECONDS).toBe(25);
+    // Pink for the last five, a tick (with sound on) for the last three: both inside the question's time.
+    expect(WARN_SECONDS).toBe(5);
+    expect(TICK_SECONDS).toBeLessThan(WARN_SECONDS);
     const share = pct("share", "body", { answer: 2 });
     const bank = [share, ...BANK.slice(0, 9)];
     let g = newGame(bank.map((x) => x.id));
