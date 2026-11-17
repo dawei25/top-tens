@@ -5,8 +5,8 @@
   "alsoBlitz": false,
   "priority": 7,
   "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 3 },
-  "casual": { "found": 7, "livesLost": 3, "guesses": 15 },
-  "fan": { "found": 10, "livesLost": 3, "guesses": 18 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
   "blitzCasual": { "scored": 14, "named": 26 },
   "difficulty": 2,
   "tags": ["business", "cars"],
@@ -21,5 +21,6 @@
     "Bare makes should read as 'be more specific' (free) on this list instead of offering or correcting to an unranked model: 'toyota' offers Toyota Mirai / Toyota Prius, 'ford' offers Ford Model T / Ford Mustang, 'volkswagen' and 'volkswagon' are corrected to Volkswagen Type 2 (nameStrip hides those makes' top-10 models), and likewise 'chevrolet' to Chevrolet Impala, 'jeep' to Jeep Wrangler, 'nissan' offers Nissan Sunny / Nissan Z-car, 'mazda' offers three Mazdas.",
     "'cutlass' is corrected to Mercedes-Benz C-Class; add 'Cutlass' and 'Oldsmobile Cutlass' as aliases of Oldsmobile Cutlass Supreme.",
     "Pool aliases: drop the plain-word aliases 'Series' (Land Rover Series; 'series' costs a life) and 'Metropolitan' (Nash Metropolitan) left by rename; split the glued aliases 'Nissan Sunny/Sentra/Pulsar/Almera', 'Series/Defender', 'VAZ-2105/04/07' and 'Iso/BMW/VELAM/Romi Isetta' into names, so 'nissan sentra' reaches Nissan Sunny."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-02: casual 7, fan 10). Fresh: the page was edited Nov 7, its tables are unchanged (cache refreshed); facts sourced. Fixed the two duplicate keys in scripts/intent.ts (BMW 3 Series, Mercedes-Benz C-Class: \"bmw 3\" was lost and \"bmw 3 series\" only a correction), and fair names that found nothing: \"ford pickup\", \"ford truck\", \"super duty\", \"gti\", \"civic type r\", \"ae86\", \"chevy silverado\", \"honda crv\", \"ram truck\", \"vauxhall corsa\", \"deux chevaux\", \"zhiguli\", \"trabi\", \"mazda 323\", \"240z\", \"volvo 240\", \"vw van\", \"lancer evo\", \"e30\", \"m3\". 260 famous nameplates without a figure (Tacoma, Odyssey, Qashqai, Grand Cherokee, Range Rover, Model S) now say they aren't in the ranking. Still open, a matcher change: \"honda\" offers Accord and Civic (two top-10 answers share the make). Casual 7 in two runs (lives on Model T, Mustang, RAV4, Focus, Model 3), fan 10/10.", "casual": 7, "fan": 10, "decision": "keep daily-list"}
 }

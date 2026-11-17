@@ -5,8 +5,8 @@
   "alsoBlitz": false,
   "priority": 7,
   "scores": { "recognizability": 4, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 0 },
-  "casual": { "found": 6, "livesLost": 2, "guesses": 14 },
-  "fan": { "found": 6, "livesLost": 5, "guesses": 11 },
+  "casual": { "found": 7, "livesLost": 2, "guesses": 15 },
+  "fan": { "found": 10, "livesLost": 4, "guesses": 16 },
   "blitzCasual": null,
   "difficulty": 3,
   "tags": ["sports", "money", "athletes"],
@@ -20,5 +20,6 @@
   "fixes": [
     "\"john rahm\" and \"jhon rahm\" are not recognized: the game tells a player who knows #7 that he isn't an answer (\"rahm\" and \"jon ram\" work). Add \"John Rahm\" as an alias (scripts/intent.ts). The class is in the matcher (src/game/match.ts, coordinator): with the surname shared, \"john\" vs \"jon\" is compared alone at length 3, which gets no typo budget.",
     "Unranked answers match only their full name: \"fury\" and \"burrow\" say \"isn't an answer for this list\" while \"tyson fury\" and \"joe burrow\" cost a life with a figure. Give the extras the surname short forms the top 10 get (only Giannis has aliases now), so the reveal is true either way."
-  ]
+  ],
+  "recheck": {"at": "2026-11-17", "note": "Re-checked Nov 17 (judged 2026-11-03: casual 6, fan 6). Fresh: the page is unchanged since the build (Forbes' 2026 list); the top 10 matches it, the title and prompt name Forbes' 2026 list and the measure, and all ten facts are sourced. Every natural form of the top 10 lands (cr7, king james, chef curry, saul alvarez, kd, sir lewis hamilton, typos). Fixed the stars outside the ranking that read \"not one of the athletes here\": Mayweather, Verstappen, Scheffler, Vini Jr, De Bruyne, Mike Tyson, the other Ronaldo (R9), Lando Norris, Dhoni and 36 more now say they aren't in the ranking. Casual 7 in two runs (lives on Neymar and Mbappe or Giannis), fan 10/10 (lives on Prescott, Fury, Soto, Giannis).", "casual": 7, "fan": 10, "decision": "keep daily-list"}
 }

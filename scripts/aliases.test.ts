@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -1282,5 +1283,111 @@ describe("aliases as built: what players type", () => {
     const p: Puzzle = JSON.parse(readFileSync(join(dir, "car-makers.json"), "utf8"));
     expect(p.extras.filter((e) => /tesla/i.test(e.name)).map((e) => [e.name, e.value])).toEqual([["Tesla, Inc.", "1,636,129"]]);
     expect(p.title).toMatch(/sold the most vehicles/);
+  });
+
+  // Coverage audit of Today's lists for Nov 28, Dec 3 and Dec 4 (Nov 17): each guess below found nothing, said it
+  // "isn't in this ranking", cost a life as an answer of its own, or reached its entry only through a correction,
+  // before the fix noted with it.
+  it.each([
+    // A second "BMW 3 Series" key in scripts/intent.ts (Nov 8) replaced the first, so "bmw 3" was lost and "bmw 3
+    // series" (read as "bmw 3") was a correction. The 3 Series' generations and the M3 found nothing.
+    ["car-models", "bmw 3", "near BMW 3 Series"],
+    ["car-models", "bmw 3 series", "near BMW 3 Series"],
+    ["car-models", "e30", "near BMW 3 Series"],
+    ["car-models", "m3", "near BMW 3 Series"],
+    // Owners' and fans' names for the top 10.
+    ["car-models", "ford pickup", "correct Ford F-Series"],
+    ["car-models", "ford truck", "correct Ford F-Series"],
+    ["car-models", "super duty", "correct Ford F-Series"],
+    ["car-models", "gti", "correct Volkswagen Golf"],
+    ["car-models", "civic type r", "correct Honda Civic"],
+    ["car-models", "ae86", "correct Toyota Corolla"],
+    // And for the pool's nameplates ("vauxhall corsa": the row is "Opel/Vauxhall").
+    ["car-models", "chevy silverado", "near Chevrolet Silverado"],
+    ["car-models", "honda crv", "near Honda CR-V"],
+    ["car-models", "ram truck", "near Ram Pickup"],
+    ["car-models", "vauxhall corsa", "near Opel Corsa"],
+    ["car-models", "deux chevaux", "near Citroën 2CV"],
+    ["car-models", "zhiguli", "near Lada Riva"],
+    ["car-models", "trabi", "near Trabant 601"],
+    ["car-models", "mazda 323", "near Mazda Familia"],
+    ["car-models", "240z", "near Nissan Z-car"],
+    ["car-models", "volvo 240", "near Volvo 200 Series"],
+    ["car-models", "vw van", "near Volkswagen Type 2"],
+    ["car-models", "lancer evo", "near Mitsubishi Lancer"],
+    // A famous game typed for its series: a title that is a known name elsewhere said it isn't in the ranking (the
+    // series at #1 to #10 included), others went to a confirm; sub-series the page counts in a series cost a life of
+    // their own (topics.ts `skip`).
+    ["game-franchises", "pokemon red", "correct Pokémon"],
+    ["game-franchises", "pokemon scarlet", "correct Pokémon"],
+    ["game-franchises", "pokemon mystery dungeon", "correct Pokémon"],
+    ["game-franchises", "super mario odyssey", "correct Mario"],
+    ["game-franchises", "paper mario", "correct Mario"],
+    ["game-franchises", "new super mario bros", "correct Mario"],
+    ["game-franchises", "luigi's mansion", "correct Mario"],
+    ["game-franchises", "mario kart wii", "correct Mario"],
+    ["game-franchises", "black ops", "correct Call of Duty"],
+    ["game-franchises", "black ops 6", "correct Call of Duty"],
+    ["game-franchises", "call of duty black ops", "correct Call of Duty"],
+    ["game-franchises", "warzone", "correct Call of Duty"],
+    ["game-franchises", "mw2", "correct Call of Duty"],
+    ["game-franchises", "gta online", "correct Grand Theft Auto"],
+    ["game-franchises", "gta san andreas", "correct Grand Theft Auto"],
+    ["game-franchises", "minecraft java", "correct Minecraft"],
+    ["game-franchises", "fc 25", "correct FIFA"],
+    ["game-franchises", "fifa world cup", "correct FIFA"],
+    ["game-franchises", "ac valhalla", "correct Assassin's Creed"],
+    ["game-franchises", "assassins creed odyssey", "correct Assassin's Creed"],
+    ["game-franchises", "resident evil village", "correct Resident Evil"],
+    ["game-franchises", "ffxiv", "correct Final Fantasy"],
+    ["game-franchises", "ff7 remake", "correct Final Fantasy"],
+    ["game-franchises", "tetris the grand master", "correct Tetris"],
+    // Near misses by their games and their fans' names.
+    ["game-franchises", "breath of the wild", "near The Legend of Zelda"],
+    ["game-franchises", "lara croft", "near Tomb Raider"],
+    ["game-franchises", "spiderman", "near Marvel's Spider-Man"],
+    ["game-franchises", "nfs", "near Need for Speed"],
+    ["game-franchises", "metal gear solid", "near Metal Gear"],
+  ])("coverage audit, Nov 17 (Nov 28 to Dec 4): %s, %s -> %s", (id, guess, want) => {
+    const r = judgeGuess(guess, JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8")) as Puzzle, new Set(), lex);
+    expect("entry" in r ? `${r.kind}${"corrected" in r && r.corrected ? "?" : ""} ${r.entry.name}` : r.kind).toBe(want);
+  });
+
+  it("coverage audit, Nov 17 (Nov 28 to Dec 4): well-known names outside the rankings say so", () => {
+    const known: [string, string[]][] = [
+      // They read "not one of the athletes here"; the other Ronaldo is no Cristiano.
+      ["athletes-earnings", ["mayweather", "verstappen", "scheffler", "vini jr", "de bruyne", "mike tyson", "ronaldo nazario", "lando norris", "dhoni"]],
+      ["car-models", ["toyota tacoma", "honda odyssey", "nissan qashqai", "qashqai", "jeep grand cherokee", "range rover", "tesla model s", "new beetle"]],
+      // "nintendo" put Nintendo Mini Classics (keychain LCD games) in the box.
+      ["game-franchises", ["flappy bird", "undertale", "subway surfers", "nintendo"]],
+    ];
+    for (const [id, names] of known) {
+      const p: Puzzle = JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
+      for (const name of names) expect(judgeGuess(name, p, new Set(), lex), `${id}: ${name}`).toMatchObject({ kind: "unknown", known: true });
+    }
+  });
+
+  it("game-franchises: no answer is named for a top-10 series, so a sub-series never costs a life of its own (Nov 17)", () => {
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, "game-franchises.json"), "utf8"));
+    const fold = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+    const series = p.answers.map((a) => fold(a.name));
+    // FIFA Manager is EA's management series, not FIFA's: its own.
+    const own = new Set(["FIFA Manager"]);
+    const named = p.extras.filter((e) => !own.has(e.name) && series.some((s) => fold(e.name).startsWith(`${s} `) || fold(e.name).startsWith(`${s}:`)));
+    expect(named.map((e) => e.name)).toEqual([]);
+  });
+});
+
+describe("the pipeline's hand-written tables", () => {
+  // Nov 17: car-models in scripts/intent.ts gave "BMW 3 Series" and "Mercedes-Benz C-Class" twice from Nov 8. The second
+  // key replaced the first without a word, so "bmw 3" was lost; oxlint's default only warns.
+  it("give no key twice", () => {
+    const root = join(import.meta.dirname, "..");
+    const r = spawnSync(join(root, "node_modules", ".bin", "oxlint"), ["-A", "all", "-D", "no-dupe-keys", "scripts", "src"], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    expect(`${r.stdout}${r.stderr}`).not.toMatch(/no-dupe-keys/);
+    expect(r.status).toBe(0);
   });
 });
