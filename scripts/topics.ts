@@ -1862,9 +1862,20 @@ export const TOPICS: Topic[] = [
       ...[1971, ...range(1978, 2019), 2022, 2023].map((y) => `Video game franchises introduced in ${y}`),
     ],
     // A spin-off article, and sub-series counted in Mario and Final Fantasy (intent.ts gives the series their names).
+    // Coverage audit, Nov 17: the year categories add more sub-series of the top 10, each an unranked answer that cost
+    // a life ("paper mario", "call of duty black ops", "pokemon mystery dungeon"); the page counts them in their
+    // series. Nintendo Mini Classics (keychain LCD games) put "nintendo" in the box.
     skip: [
       "Educational games in the Sonic the Hedgehog series", "Mario Party", "Mario Kart", "Compilation of Final Fantasy VII",
-      "Final Fantasy Crystal Chronicles", "Fabula Nova Crystallis Final Fantasy",
+      "Final Fantasy Crystal Chronicles", "Fabula Nova Crystallis Final Fantasy", "Paper Mario", "Mario & Luigi",
+      "New Super Mario Bros.", "Mario Artist", "Pokémon Mystery Dungeon", "Tetris: The Grand Master", "Call of Duty: Black Ops",
+      "FIFA World Cup video games", "Nintendo Mini Classics",
+    ],
+    // Famous games that aren't franchises the page or the categories have: they say they aren't in the ranking
+    // ("flappy bird" and "undertale" were "not one of the video game franchises here").
+    knownNames: [
+      "Flappy Bird", "Fruit Ninja", "Subway Surfers", "Undertale", "Team Fortress", "Team Fortress 2", "Cyberpunk",
+      "Wordle", "Baldur's Gate", "Hogwarts Legacy", "Palworld", "Helldivers", "Black Myth: Wukong",
     ],
     // Famous franchises the category misses ("uncharted" was corrected to Uncharted Waters, "pacman" to Rayman).
     // Free-to-play series sell no copies, so no category or table here has them (coverage audit): answers, unranked.
@@ -1902,6 +1913,9 @@ export const TOPICS: Topic[] = [
       "Arklay Forrest", "Arklay Mountains", "Raccoon City Outbreak", "Operation Bacillus Terminate", "Bio-Organic Weapon",
       "Drain Demios", "Abstergo Industries", "Creed's Assassin", "L-BIock", "Lists of Grand Theft Auto characters",
       "FIFA leagues",
+      // Characters and a list article left on Mario and Resident Evil (coverage audit, Nov 17).
+      "The Hammer Brothers", "Ignace Koopa", "Lawrence Koopa", "Laurence Koopa", "King Bob-Omb", "Resident Evil list of games",
+      "Resident Evil Comic",
     ],
   },
   {
@@ -3157,6 +3171,15 @@ export const TOPICS: Topic[] = [
       "Luka Dončić", "Jayson Tatum", "Caitlin Clark", "Simone Biles", "Usain Bolt", "Kylian Mbappe", "Vinícius Júnior",
       "Jude Bellingham", "Aaron Judge", "Josh Allen", "Joe Burrow", "Travis Kelce", "Novak Djokovic", "Rafael Nadal",
       "Tom Brady", "Michael Jordan", "Kobe Bryant", "Tiger Woods", "Roger Federer", "Floyd Mayweather",
+      // Coverage audit, Nov 17: stars and surnames that read "not one of the athletes here" ("mayweather", "verstappen",
+      // "vini jr", "mike tyson"). Surnames only where they aren't words; the other Ronaldo is no Cristiano.
+      "Mayweather", "Mayweather Jr", "Verstappen", "Scheffler", "Mickelson", "Pacquiao", "Kelce", "Vini Jr", "Vinicius Jr",
+      "Vinícius Jr.", "Kevin De Bruyne", "De Bruyne", "Antoine Griezmann", "Griezmann", "Ronaldo Nazário", "R9",
+      "Mike Tyson", "Terence Crawford", "Gervonta Davis", "Tank Davis", "Deontay Wilder", "Ryan Garcia", "Naoya Inoue",
+      "Jon Jones", "Israel Adesanya", "Lando Norris", "Charles Leclerc", "Leclerc", "Fernando Alonso", "Sergio Pérez",
+      "Checo Pérez", "Bryson DeChambeau", "DeChambeau", "Brooks Koepka", "Koepka", "Cameron Smith", "Gerrit Cole",
+      "Yoshinobu Yamamoto", "Justin Jefferson", "MS Dhoni", "M. S. Dhoni", "Dhoni", "Rohit Sharma", "Michael Phelps",
+      "Phelps",
     ],
     // Fights, relatives, staff, companies, pets and jokes among the redirects: CELEBRITY_JUNK, shared with the
     // career lists, where these stars rank too.
@@ -3198,6 +3221,50 @@ export const TOPICS: Topic[] = [
       "Volkswagen Jetta": ["VW Jetta", "Jetta"], "Suzuki Swift": [], "Jeep Cherokee": ["Cherokee"],
       "Chevrolet Corvette": ["Corvette"], "Chevrolet Camaro": ["Camaro"], "Nissan Altima": ["Altima"], "Mini": ["Mini Cooper"],
     },
+    // Coverage audit, Nov 17: famous nameplates the page has no figure for read "not one of the car models here"
+    // ("toyota tacoma", "honda odyssey", "nissan qashqai"). They say they aren't in the ranking, free. The model alone
+    // only where it is no ordinary word ("qashqai", not "escape" or "pilot").
+    knownNames: [
+      "Toyota Tacoma", "Toyota Tundra", "Toyota Highlander", "Toyota 4Runner", "4Runner", "Toyota Sienna", "Toyota Supra",
+      "Toyota Celica", "Celica", "Toyota Crown", "Toyota Corona", "Toyota Avalon", 
+      "Honda Pilot", "Honda Odyssey", "Honda Fit", "Honda Jazz", "Honda HR-V", "HR-V", "Honda Prelude", "Honda Integra",
+      "Honda NSX", "Honda City", "Nissan Rogue", "Nissan Qashqai", "Qashqai", "Nissan Leaf", "Nissan Skyline",
+      "Nissan GT-R", "GT-R", "Nissan Patrol", "Nissan Micra", "Nissan Navara", "Nissan Pathfinder", "Datsun 510",
+      "Hyundai Sonata", "Hyundai Tucson", "Hyundai Santa Fe", "Hyundai Accent", "Hyundai i10", "Hyundai i20", "Kia Sportage",
+      "Sportage", "Kia Rio", "Kia Sorento", "Kia Soul", "Kia Picanto", "Kia Telluride", "Jeep Grand Cherokee",
+      "Grand Cherokee", "Jeep Compass", "Jeep Renegade", "Chevrolet Malibu", "Chevy Malibu", "Chevrolet Cruze",
+      "Chevy Cruze", "Cruze", "Chevrolet Cavalier", "Chevy Cavalier", "Chevrolet Suburban", "Chevy Suburban",
+      "Chevrolet Tahoe", "Chevy Tahoe", "Chevrolet Bel Air", "Chevy Bel Air", "Chevrolet Nova", "Chevy Nova",
+      "Chevrolet Equinox", "Chevrolet Chevelle", "Chevelle", "Chevrolet Blazer", "Chevrolet Bolt", "Ford Escape",
+      "Ford Taurus", "Ford Ka", "Ford Mondeo", "Mondeo", "Ford Sierra", "Ford Cortina", "Ford Capri", "Ford Bronco",
+      "Ford Maverick", "Ford Expedition", "Ford Crown Victoria", "Crown Victoria", "Crown Vic", "Ford Thunderbird",
+      "Ford Pinto", "Ford Model A", "Ford Granada", "Ford Anglia", "Ford Fusion", "Ford Kuga", "Ford Puma", "Ford GT",
+      "Dodge Charger", "Dodge Challenger", "Dodge Viper", "Dodge Caravan", "Dodge Grand Caravan", "Dodge Durango",
+      "Volkswagen Tiguan", "VW Tiguan", "Tiguan", "Volkswagen Touareg", "Volkswagen Scirocco", "Volkswagen Up",
+      "Volkswagen ID.4", "Volkswagen Atlas", "Volkswagen New Beetle", "New Beetle", "Volkswagen Amarok", "Fiat Panda",
+      "Fiat Punto", "Fiat 126", "Fiat 600", "Fiat 124", "Fiat 127", "Renault 4", "Renault 5", "Renault Megane", "Megane",
+      "Renault Twingo", "Renault Captur", "Renault Kangoo", "Renault Scenic", "Renault Espace", "Renault Zoe",
+      "Peugeot 205", "Peugeot 208", "Peugeot 306", "Peugeot 307", "Peugeot 308", "Peugeot 405", "Peugeot 504",
+      "Peugeot 3008", "Citroën DS", "Citroen DS", "Dacia Duster", "Dacia Logan", "Škoda Fabia", "Skoda Fabia",
+      "Škoda Superb", "Skoda Superb", "SEAT León", "Seat Leon", "Opel Kadett", "Opel Vectra", "Opel Insignia",
+      "Vauxhall Cavalier", "BMW 5 Series", "BMW 7 Series", "BMW 1 Series", "BMW X5", "BMW X3", "BMW M5", "Mercedes-Benz E-Class",
+      "Mercedes E-Class", "E-Class", "Mercedes-Benz S-Class", "Mercedes S-Class", "S-Class", "Mercedes-Benz G-Class",
+      "G-Class", "G-Wagon", "Mercedes G-Wagon", "Mercedes-Benz A-Class", "Mercedes-Benz Sprinter", "Mercedes-Benz W123",
+      "Audi A3", "Audi A6", "Audi Q5", "Audi Q7", "Audi TT", "Audi R8", "Audi Quattro", "Porsche Cayenne", 
+      "Porsche Macan", "Porsche Boxster", "Porsche Taycan", "Lexus RX", "Lexus ES", "Tesla Model S", "Model S",
+      "Tesla Model X", "Model X", "Tesla Cybertruck", "Cybertruck", "Tesla Roadster", "Subaru Impreza", "Impreza",
+      "Subaru Outback", "Subaru Forester", "Subaru WRX", "Mitsubishi Pajero", "Pajero", "Mitsubishi Outlander",
+      "Mitsubishi Eclipse", "Mazda3", "Mazda 3", "Mazda6", "Mazda 6",
+      "Mazda CX-5", "CX-5", "Mazda RX-8", "RX-8", "Mazda 626", "Suzuki Alto", "Maruti Alto", "Maruti 800", "Maruti Suzuki 800",
+      "Suzuki Wagon R", "Wagon R", "Suzuki Jimny", "Jimny", "Suzuki Vitara", "Range Rover", "Land Rover Discovery",
+      "Range Rover Evoque", "Jaguar E-Type", "E-Type", "Jaguar F-Type", "Ferrari Testarossa", "Testarossa", "Ferrari F40",
+      "Ferrari Enzo", "LaFerrari", "Lamborghini Countach", "Countach", "Lamborghini Aventador", "Aventador",
+      "Lamborghini Huracán", "Lamborghini Diablo", "DeLorean", "DMC DeLorean", "Hummer H1", "Hummer H2", "Cadillac Escalade",
+      "Lincoln Navigator", "Chrysler 300", "Chrysler PT Cruiser", "PT Cruiser", "Pontiac Firebird", "Pontiac Trans Am",
+      "Pontiac GTO", "Plymouth Barracuda", "AMC Gremlin", "Morris Minor", "Austin Allegro", "Reliant Robin", "Tata Nano",
+      "Lada Niva", "Wuling Hongguang", "Wuling Hongguang Mini EV", "Hongguang Mini EV", "BYD Seagull", "BYD Qin",
+      "BYD Atto 3", "Volga", "GAZ Volga", "Moskvitch", "Wartburg", "Ford Fairmont",
+    ],
     // Platforms, concepts, a lawsuit, maintenance and plain words ("Bug", "Rabbit": "vw bug" still works) among the
     // redirects.
     junkAliases: [
