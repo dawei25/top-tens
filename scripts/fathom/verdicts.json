@@ -1964,6 +1964,61 @@
     "why": "near-copy of danube-countries: how many countries a feature spans",
     "judgedAt": "2026-11-17"
   },
+  "name-us-state-1m-people": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the us-states-population list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-us-state-5m-people": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the us-states-population list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-us-state-10m-people": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the us-states-population list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-us-state-as-big-as-wales": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the us-states-area list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-us-state-as-big-as-england": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the us-states-area list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-us-state-as-big-as-uk": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the us-states-area list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-us-state-as-big-as-germany": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the us-states-area list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-10-per-km2": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the countries-density list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-30-per-km2": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the countries-density list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-100-per-km2": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the countries-density list.",
+    "judgedAt": "2026-11-17"
+  },
+  "name-country-300-per-km2": {
+    "verdict": "keep",
+    "why": "Target mid-list with answers on both sides and at least 3 within Close; typed answers checked against the countries-density list.",
+    "judgedAt": "2026-11-17"
+  },
   "milk-teeth": {
     "verdict": "keep",
     "why": "Familiar subject with a way in (Start from yourself: an adult has 32, and a small child's jaw has room for fewer, with no wisdom teeth); figure and fact checked on Deciduous teeth.",

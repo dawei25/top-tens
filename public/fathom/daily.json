@@ -196,15 +196,15 @@
   "date": "2026-11-27",
   "ids": [
    "london-eye-turn",
-   "first-paralympics",
    "french-speaking-canadians",
-   "hong-kong-skyscrapers",
-   "name-country-8-borders",
    "glacier-share-of-land",
    "world-life-expectancy",
    "cars-in-the-world",
-   "rosetta-stone-found",
-   "longest-solar-eclipse"
+   "hong-kong-skyscrapers",
+   "name-country-10-per-km2",
+   "longest-solar-eclipse",
+   "first-paralympics",
+   "rosetta-stone-found"
   ]
  },
  {
@@ -212,15 +212,15 @@
   "date": "2026-11-28",
   "ids": [
    "new-york-city-population",
-   "first-crossword",
+   "old-faithful-interval",
    "four-minute-mile",
-   "great-pyramid-blocks",
+   "train-speed-record",
+   "name-us-state-5m-people",
    "eighteen-carat-gold",
    "giraffe-neck-bones",
-   "train-speed-record",
-   "sugarcane-share",
-   "name-country-as-big-as-mexico",
-   "old-faithful-interval"
+   "great-pyramid-blocks",
+   "first-crossword",
+   "sugarcane-share"
   ]
  },
  {
@@ -228,15 +228,15 @@
   "date": "2026-11-29",
   "ids": [
    "game-of-thrones-episodes",
-   "concorde-retired",
    "premier-league-matches",
-   "honey-water",
+   "milk-teeth",
    "chernobyl-disaster",
-   "japan-mountainous",
    "name-country-as-big-as-india",
    "buckingham-palace-rooms",
-   "milk-teeth",
-   "space-shuttle-missions"
+   "japan-mountainous",
+   "space-shuttle-missions",
+   "concorde-retired",
+   "honey-water"
   ]
  },
  {
@@ -244,15 +244,15 @@
   "date": "2026-11-30",
   "ids": [
    "wright-first-flight-length",
+   "grand-canyon-depth",
+   "name-us-state-as-big-as-england",
+   "hadrians-wall-length",
+   "japan-over-65",
    "friends-episodes",
-   "ivory-coast-cocoa",
+   "first-dinosaur-named",
    "first-traffic-lights",
    "bangkok-visitors",
-   "name-country-200m-people",
-   "first-dinosaur-named",
-   "grand-canyon-depth",
-   "hadrians-wall-length",
-   "japan-over-65"
+   "ivory-coast-cocoa"
   ]
  },
  {
@@ -260,15 +260,15 @@
   "date": "2026-12-01",
   "ids": [
    "first-playstation",
-   "arabica-share",
    "panama-canal-length",
-   "football-panels",
-   "land-speed-record",
    "australia-arid",
-   "name-country-7-borders",
-   "billion-dollars-a-second",
+   "arabica-share",
+   "land-speed-record",
+   "first-vaccine",
    "oldest-cat",
-   "first-vaccine"
+   "billion-dollars-a-second",
+   "football-panels",
+   "name-country-300-per-km2"
   ]
  },
  {
@@ -277,14 +277,14 @@
   "ids": [
    "sahara-share-of-africa",
    "netherlands-bicycles",
-   "dog-teeth",
-   "route-66-length",
-   "first-ivf-baby",
+   "name-us-state-1m-people",
    "norway-winter-medals",
    "first-pokemon-games",
+   "route-66-length",
    "apollo-11-duration",
    "greece-island-share",
-   "name-country-as-many-people-as-australia"
+   "dog-teeth",
+   "first-ivf-baby"
   ]
  },
  {
@@ -292,15 +292,175 @@
   "date": "2026-12-03",
   "ids": [
    "world-cup-winning-countries",
-   "body-oxygen-share",
-   "california-forest",
    "jupiter-earths",
    "telephone-patent",
-   "stonehenge-stones-height",
-   "first-oscars",
-   "name-country-as-big-as-japan",
+   "name-us-state-as-big-as-uk",
+   "california-forest",
    "voyager-round-the-world",
-   "espresso-caffeine"
+   "stonehenge-stones-height",
+   "espresso-caffeine",
+   "first-oscars",
+   "body-oxygen-share"
+  ]
+ },
+ {
+  "n": 20,
+  "date": "2026-12-04",
+  "ids": [
+   "eurostar-london-paris",
+   "oktoberfest-beer",
+   "channel-tunnel-length",
+   "everest-air-pressure",
+   "berlin-wall-falls",
+   "name-country-as-big-as-japan",
+   "television-first-shown",
+   "italy-world-heritage-sites",
+   "sun-hydrogen",
+   "le-mans-distance-record"
+  ]
+ },
+ {
+  "n": 21,
+  "date": "2026-12-05",
+  "ids": [
+   "louis-xiv-reign",
+   "phone-typing-speed",
+   "golden-gate-opens",
+   "java-share-of-indonesians",
+   "hand-bones",
+   "name-us-state-as-big-as-wales",
+   "amazon-deforested",
+   "sumo-wrestler-weight",
+   "chicken-egg-hatching",
+   "x-rays-discovered"
+  ]
+ },
+ {
+  "n": 22,
+  "date": "2026-12-06",
+  "ids": [
+   "euro-countries",
+   "ocean-average-depth",
+   "finland-forest",
+   "brain-share-of-weight",
+   "lindbergh-flight-time",
+   "eiffel-tower-steps",
+   "fastest-sail-around-world",
+   "origin-of-species",
+   "first-cds",
+   "name-us-state-as-big-as-germany"
+  ]
+ },
+ {
+  "n": 23,
+  "date": "2026-12-07",
+  "ids": [
+   "bolt-200m-record",
+   "magellan-voyage-ends",
+   "berlin-wall-length",
+   "walking-speed",
+   "keyboard-keys",
+   "name-country-100-per-km2",
+   "lhc-ring-length",
+   "bone-share-of-weight",
+   "iceland-vegetation",
+   "beatles-break-up"
+  ]
+ },
+ {
+  "n": 24,
+  "date": "2026-12-08",
+  "ids": [
+   "london-population",
+   "name-us-state-10m-people",
+   "scrabble-board-squares",
+   "rodent-share-of-mammals",
+   "first-mobile-phone-weight",
+   "dead-sea-salt",
+   "bikini-introduced",
+   "longest-tennis-match",
+   "pisa-starts-leaning",
+   "dutch-men-height"
+  ]
+ },
+ {
+  "n": 25,
+  "date": "2026-12-09",
+  "ids": [
+   "google-founded",
+   "sahara-width",
+   "uk-homes",
+   "titanic-speed",
+   "desert-sand-share",
+   "a4-sheets-per-square-metre",
+   "switzerland-share-of-alps",
+   "first-wimbledon",
+   "name-country-7-borders",
+   "un-official-languages"
+  ]
+ },
+ {
+  "n": 26,
+  "date": "2026-12-10",
+  "ids": [
+   "wikipedia-launched",
+   "antarctica-winter-population",
+   "shinjuku-station-passengers",
+   "us-penny-cost",
+   "penny-black",
+   "red-green-colour-blind-men",
+   "tornado-wind-record",
+   "great-lakes-fresh-water",
+   "name-country-8-borders",
+   "titanic-lifeboats"
+  ]
+ },
+ {
+  "n": 27,
+  "date": "2026-12-11",
+  "ids": [
+   "asia-share-of-land",
+   "nobel-laureates",
+   "glastonbury-capacity",
+   "femur-share-of-height",
+   "louvre-visitors",
+   "chile-length",
+   "first-nobel-prizes",
+   "gagarin-first-in-space",
+   "name-country-as-big-as-mexico",
+   "central-america-countries"
+  ]
+ },
+ {
+  "n": 28,
+  "date": "2026-12-12",
+  "ids": [
+   "instagram-launched",
+   "dominoes-set",
+   "greenland-ice-share",
+   "landlocked-countries",
+   "vatican-population",
+   "manhattan-length",
+   "russia-share-of-europe",
+   "gibraltar-strait-width",
+   "pac-man-released",
+   "name-country-200m-people"
+  ]
+ },
+ {
+  "n": 29,
+  "date": "2026-12-13",
+  "ids": [
+   "england-share-of-uk",
+   "boeing-747-first-flight",
+   "name-country-30-per-km2",
+   "swiss-german-speakers",
+   "maldives-height",
+   "russia-time-zones",
+   "people-ever-born",
+   "danube-countries",
+   "disneyland-opens",
+   "countries-in-africa"
   ]
  }
 ]

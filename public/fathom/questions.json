@@ -4215,6 +4215,128 @@
    "definition": "France has 11, counting its overseas territories",
    "easy": false,
    "verified": true
+  },
+  {
+   "id": "name-us-state-1m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "us-states-population",
+   "target": 1000000,
+   "question": "Name a US state with about 1 million people",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-us-state-5m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "us-states-population",
+   "target": 5000000,
+   "question": "Name a US state with about 5 million people",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-us-state-10m-people",
+   "round": "name",
+   "kind": "places",
+   "list": "us-states-population",
+   "target": 10000000,
+   "question": "Name a US state with about 10 million people",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-us-state-as-big-as-wales",
+   "round": "name",
+   "kind": "places",
+   "list": "us-states-area",
+   "target": 21218,
+   "question": "Name a US state with about the same area as Wales",
+   "definition": "total area, lakes and coastal water included",
+   "fact": "New Jersey is within 7% of the size of Wales.",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-us-state-as-big-as-england",
+   "round": "name",
+   "kind": "places",
+   "list": "us-states-area",
+   "target": 132932,
+   "question": "Name a US state with about the same area as England",
+   "definition": "total area, lakes and coastal water included",
+   "fact": "Alabama, Louisiana and Arkansas are each within 4% of England's area.",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-us-state-as-big-as-uk",
+   "round": "name",
+   "kind": "places",
+   "list": "us-states-area",
+   "target": 244376,
+   "question": "Name a US state with about the same area as the UK",
+   "definition": "total area, lakes and coastal water included",
+   "fact": "Michigan, Wyoming and Oregon are each within 5% of the UK's area.",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-us-state-as-big-as-germany",
+   "round": "name",
+   "kind": "places",
+   "list": "us-states-area",
+   "target": 357581,
+   "question": "Name a US state with about the same area as Germany",
+   "definition": "total area, lakes and coastal water included",
+   "fact": "Montana, the fourth-biggest state, is 6.5% bigger than Germany.",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-10-per-km2",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-density",
+   "target": 10,
+   "question": "Name a country with about 10 people per square kilometre",
+   "definition": "its population over its land area",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-30-per-km2",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-density",
+   "target": 30,
+   "question": "Name a country with about 30 people per square kilometre",
+   "definition": "its population over its land area",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-100-per-km2",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-density",
+   "target": 100,
+   "question": "Name a country with about 100 people per square kilometre",
+   "definition": "its population over its land area",
+   "easy": false,
+   "verified": true
+  },
+  {
+   "id": "name-country-300-per-km2",
+   "round": "name",
+   "kind": "places",
+   "list": "countries-density",
+   "target": 300,
+   "question": "Name a country with about 300 people per square kilometre",
+   "definition": "its population over its land area",
+   "easy": false,
+   "verified": true
   }
  ]
 }
