@@ -2,6 +2,14 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-17, launch-week morning check (Tue, the last scheduled one)
+
+- Notes since yesterday's check: none. Ratings: metro-cities (yesterday's daily) and island-countries, 1 up each.
+  Plays all time: 173 across 86 lists (+6). Today's Fathom: 4 players answered Fathom #2's first question, the first
+  real Fathom data (guesses only: the daily totals and Fathom feedback migrations still aren't run).
+- Missed guesses: 4, one browser, all on metro-cities: three country names on a city list (the wrong-kind theme again;
+  "isn't in this ranking" is true) and keyboard mash. No fix; the wrong-kind line is still the owner's call.
+
 ## 2026-11-16, launch-week morning check (Mon)
 
 - Notes and ratings since yesterday's check: none. Plays all time: still 167 across 85 lists (no finished list game
