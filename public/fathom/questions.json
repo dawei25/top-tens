@@ -607,10 +607,10 @@
    "id": "record-transfer-fee",
    "round": "estimate",
    "kind": "sports",
-   "question": "How much was the most expensive football transfer ever?",
+   "question": "How much did PSG pay Barcelona for Neymar?",
    "unit": "million euros",
    "answer": 222,
-   "definition": "Neymar to Paris Saint-Germain, 2017",
+   "definition": "the record transfer fee, not wages",
    "fact": "It more than doubled the previous record, Paul Pogba's move to Manchester United a year earlier.",
    "source": {
     "title": "List of most expensive association football transfers",
@@ -1029,7 +1029,7 @@
   {
    "id": "birthday-pairs",
    "kind": "science",
-   "question": "How many people does a group need for an even chance two share a birthday?",
+   "question": "How many people give a 50% chance two share a birthday?",
    "unit": "people",
    "answer": 23,
    "fact": "With 23 people there are 253 pairs, and each pair is a fresh chance of a match.",
@@ -1151,6 +1151,7 @@
    "question": "What share of Earth's water is fresh water?",
    "unit": "percent",
    "answer": 2.5,
+   "definition": "ice and groundwater included",
    "fact": "About 69% of that is frozen as ice and snow, and only 0.3% is liquid water at the surface.",
    "source": {
     "title": "Water distribution on Earth",
@@ -1838,6 +1839,7 @@
    "question": "When did Elizabeth II become queen?",
    "unit": "year",
    "answer": 1952,
+   "definition": "on her father's death",
    "fact": "She was 25, and reigned for 70 years and 214 days, the longest of any British monarch.",
    "source": {
     "title": "Elizabeth II",
@@ -1912,6 +1914,7 @@
    "question": "How many bones are in one human hand?",
    "unit": "bones",
    "answer": 27,
+   "definition": "wrist included",
    "fact": "14 are in the fingers and thumb, 5 in the palm and 8 in the wrist.",
    "source": {
     "title": "Hand",
@@ -2568,7 +2571,7 @@
    "question": "How heavy is the average top-division sumo wrestler?",
    "unit": "kilograms",
    "answer": 166,
-   "definition": "a record, January 2019",
+   "definition": "January 2019, the highest average yet",
    "fact": "There are no weight classes, so a wrestler can face an opponent twice his weight.",
    "source": {
     "title": "Sumo",
@@ -2913,6 +2916,7 @@
    "question": "How much of the world's land lies under glacier ice?",
    "unit": "percent",
    "answer": 10,
+   "definition": "Antarctica and Greenland included",
    "fact": "Almost all of it is the ice sheets of the polar regions, which hold 99% of all glacier ice.",
    "source": {
     "title": "Glacier",
@@ -3399,7 +3403,7 @@
    "question": "When was television first shown to the public?",
    "unit": "year",
    "answer": 1926,
-   "definition": "John Logie Baird's demonstration",
+   "definition": "John Logie Baird's real pictures, not silhouettes",
    "fact": "Months earlier Baird had sent his first greyscale picture: the head of a ventriloquist's dummy.",
    "source": {
     "title": "John Logie Baird",
@@ -3830,9 +3834,10 @@
    "id": "first-paralympics",
    "kind": "sports",
    "round": "year",
-   "question": "When did the Paralympics begin?",
+   "question": "When were the first Paralympic Games held?",
    "unit": "year",
    "answer": 1960,
+   "definition": "not the Stoke Mandeville Games",
    "fact": "400 athletes from 23 nations competed in Rome, alongside the Olympics.",
    "source": {
     "title": "1960 Summer Paralympics",

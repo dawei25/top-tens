@@ -615,9 +615,9 @@
     "judgedAt": "2026-11-06"
   },
   "record-transfer-fee": {
-    "verdict": "keep",
-    "why": "Neymar, EUR 222 million, 2017, as stated, and the page confirms it more than doubled Pogba's EUR 105 million; football fans have an anchor.",
-    "judgedAt": "2026-11-06"
+    "verdict": "fix",
+    "why": "check 6 (owner, Nov 17: 'yearly salary or the full contract?'): 'how much was the transfer' read as the fee, his wages or his contract; now what PSG paid Barcelona, the record transfer fee, not wages (the page: PSG matched the EUR 222m buyout fee). Way in kept: big transfers run to about 100 million, the record about twice that.",
+    "judgedAt": "2026-11-17"
   },
   "wimbledon-tennis-balls": {
     "verdict": "drop",
@@ -706,8 +706,8 @@
   },
   "fresh-water-share": {
     "verdict": "fix",
-    "why": "2.5% as stated; 'out of reach' was the writer's: fact now the page's, about 69% frozen as ice and snow and only 0.3% liquid at the surface.",
-    "judgedAt": "2026-11-06"
+    "why": "check 6: 'fresh water' read as all of it or as lakes and rivers (under 1%); the page's 2.5% counts ice, snow and groundwater, so the definition says so.",
+    "judgedAt": "2026-11-17"
   },
   "forest-cover-share": {
     "verdict": "fix",
@@ -1070,9 +1070,9 @@
     "judgedAt": "2026-11-14"
   },
   "birthday-pairs": {
-    "verdict": "keep",
-    "why": "Reason from yourself: most school classes of 25 to 30 had two with the same birthday; 23 and its 253 pairs confirmed, the classic surprise against the 183 of first instinct.",
-    "judgedAt": "2026-11-14"
+    "verdict": "fix",
+    "why": "check 6 (owner, Nov 17: 'does even chance mean a 50/50 chance?'): an idiom stood in for the number; now 'a 50% chance', in two lines at 375px (the old wording took three). The page: 23 is the smallest group over 50% (50.7%). Way in kept: count pairs, 23 people make 253.",
+    "judgedAt": "2026-11-17"
   },
   "coca-cola-can-sugar": {
     "verdict": "keep",
@@ -1190,9 +1190,9 @@
     "judgedAt": "2026-11-14"
   },
   "elizabeth-ii-becomes-queen": {
-    "verdict": "keep",
-    "why": "Arithmetic from the 70-year reign that ended in 2022; queen from 6 February 1952, aged 25, confirmed (the 1953 coronation is a year off and still scores 98). An easy opener.",
-    "judgedAt": "2026-11-14"
+    "verdict": "fix",
+    "why": "check 6: 'become queen' read as her accession (1952) or her coronation (June 1953); the page: she became queen when her father died in February 1952. Scheduled Nov 18: wording only, answer unchanged.",
+    "judgedAt": "2026-11-17"
   },
   "web-goes-public": {
     "verdict": "fix",
@@ -1335,8 +1335,8 @@
     "judgedAt": "2026-11-17"
   },
   "sumo-wrestler-weight": {
-    "verdict": "keep",
-    "why": "Familiar subject with a way in (Reason from yourself: a big man weighs about 100 kg, and these are much bigger); figure and fact checked on Sumo.",
+    "verdict": "fix",
+    "why": "check 6: 'a record, January 2019' read as the heaviest wrestler's record or the average's; the page: the top-division average reached a record 166 kg as of January 2019, now said plainly.",
     "judgedAt": "2026-11-17"
   },
   "oktoberfest-beer": {
@@ -1450,8 +1450,8 @@
     "judgedAt": "2026-11-17"
   },
   "glacier-share-of-land": {
-    "verdict": "keep",
-    "why": "Familiar subject with a way in (Antarctica alone is bigger than Europe, and Greenland is huge; together they're a good slice of the map); figure and fact checked on Glacier.",
+    "verdict": "fix",
+    "why": "check 6: 'glacier ice' read as mountain glaciers (about 1%) or with the polar ice sheets; the page's 10% is mostly the ice sheets of Antarctica and Greenland (99% of glacier ice), so the definition says so.",
     "judgedAt": "2026-11-17"
   },
   "amazon-deforested": {
@@ -1610,8 +1610,8 @@
     "judgedAt": "2026-11-17"
   },
   "television-first-shown": {
-    "verdict": "keep",
-    "why": "Familiar subject with a way in (Between the two world wars, when radio was still new); figure and fact checked on John Logie Baird.",
+    "verdict": "fix",
+    "why": "check 6: the page has two first public showings, moving silhouettes at Selfridges (March 1925) and true television images (January 1926); the definition now names the real pictures, not the silhouettes.",
     "judgedAt": "2026-11-17"
   },
   "magellan-voyage-ends": {
@@ -1755,8 +1755,8 @@
     "judgedAt": "2026-11-17"
   },
   "first-paralympics": {
-    "verdict": "keep",
-    "why": "Familiar subject with a way in (After the Second World War, when the Olympics came to Rome); figure and fact checked on 1960 Summer Paralympics.",
+    "verdict": "fix",
+    "why": "check 6: 'when did the Paralympics begin' read as Rome 1960 or the Stoke Mandeville Games of 1948; the page: Rome 1960 were the first international Paralympic Games, following on from Stoke Mandeville, so the question asks for the first Games and the definition rules out their forerunner.",
     "judgedAt": "2026-11-17"
   },
   "first-vaccine": {
@@ -2025,8 +2025,8 @@
     "judgedAt": "2026-11-17"
   },
   "hand-bones": {
-    "verdict": "keep",
-    "why": "Familiar subject with a way in (Check it yourself: three in each finger, two in the thumb, one more for each in the palm, and a cluster at the wrist); figure and fact checked on Hand.",
+    "verdict": "fix",
+    "why": "check 6: a hand counted as fingers and palm (19) or with the wrist (27); the page's 27 includes the 8 wrist bones, so the definition says so.",
     "judgedAt": "2026-11-17"
   },
   "london-population": {
