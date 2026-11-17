@@ -22,6 +22,9 @@ automated. Judges read this file before scoring a candidate (docs/JUDGE.md).
 | 2026-11-14 | Fathom: share of the body's energy the brain uses | cut | "kinda ambigious ... what exactly is energy?": a key word a player can read two ways |
 | 2026-11-14 | Fathom scoring | gentler far end: 10x off scores about 30, not 0 | "we were within one magnitude should get more like 25-40 points" |
 | 2026-11-14 | Fathom feedback | the same "Good question?" thumbs and notes as lists, same tables | wanted to leave notes on single questions |
+| 2026-11-17 | Fathom: record transfer fee | reword | "need to clarify if you mean yearly salary or the full contract": money says whose and what for |
+| 2026-11-17 | Fathom: birthday pairs | reword | "does even chance mean a 50/50 chance?": no idioms for numbers |
+| 2026-11-17 | Fathom: name a country with about 1 million people; when the world reached 4 billion | liked (thumbs up) | |
 | 2026-11-04 | national-parks | liked (rated well) | wanted each park's state in its fact |
 | 2026-11-05 | lakes | vetoed as a daily | not a great list; it had already been in free play; third Geography daily in a row |
 | 2026-11-05 | x-accounts | dropped | same problem as Facebook (follower counts) |
