@@ -208,6 +208,20 @@ describe("Fathom's sounds", () => {
     }
   });
 
+  // Owner, Nov 17: the clock "more apparent". With sound on, the last three seconds tick: a bubble's blip, soft and
+  // short (no louder than LOCK IN's click), a step higher each second.
+  it("ticks softly in a question's last seconds, higher as the air runs out", () => {
+    const ticks = [3, 2, 1].map((left) => fathomVoices({ kind: "tick", left }));
+    for (const vs of ticks) {
+      expect(vs).toHaveLength(1);
+      expect(end(vs)).toBeLessThan(0.1);
+      expect(peak(vs)).toBeLessThanOrEqual(0.06);
+    }
+    const freqs = ticks.map((vs) => tones(vs)[0].freq);
+    expect(freqs).toEqual([...freqs].sort((a, b) => a - b));
+    expect(new Set(freqs).size).toBe(3);
+  });
+
   it("plays a results fanfare that grows with the total", () => {
     expect([0, 99, 100, 250, 499, 500].map(fanfareLevel)).toEqual([0, 0, 1, 2, 4, 5]);
     let last = 0;

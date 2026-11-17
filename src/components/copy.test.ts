@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { entryPoints } from "../game/blitz";
+import { QUESTION_SECONDS } from "../game/fathom";
 import { shownValue } from "../game/state";
 import type { Entry, Puzzle } from "../game/types";
 import {
@@ -245,6 +246,14 @@ describe("Fathom's keys and Home's record", () => {
   // A Fathom-only player saw "played --" on Home: Your record counts list games.
   it("says Your record's games are list games", () => {
     expect(RECORD_PLAYED).toBe("lists played");
+  });
+  // Owner, Nov 17: "make it 25s instead of 20s". How to play's Fathom rule names the clock; the constant stays out of
+  // the main chunk (game/fathom.ts is Fathom's), so its words are held to it here.
+  it("How to play gives Fathom's clock as the game has it", () => {
+    const rules = readFileSync(join(import.meta.dirname, "HowToPlay.tsx"), "utf8").replace(/\s+/g, " ");
+    const fathom = rules.slice(rules.indexOf("Today's Fathom:"));
+    expect(fathom).toContain(`${QUESTION_SECONDS} seconds each`);
+    expect(fathom.match(/\b\d+ seconds\b/g)).toEqual([`${QUESTION_SECONDS} seconds`]);
   });
 });
 

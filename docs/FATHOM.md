@@ -1,7 +1,7 @@
 # Fathom
 
 The estimation game, a full game mode since Nov 9 (the owner: "ship it now") and a daily since Nov 14: **Today's
-Fathom** (`#fathom`), ten questions a day, the same for everyone, one try, 20 seconds a question. The player types a
+Fathom** (`#fathom`), ten questions a day, the same for everyone, one try, 25 seconds a question. The player types a
 number (or, in the name-it round, a name), and the score is plain closeness, by one rule for each round (`scoreFor`,
 `src/game/fathom.ts`), out of 1000. Ten since Nov 14 (owner: "change it to 10 questions to keep in line with the 10
 theme"), five before: those games keep their own total out of 500. Endless Fathom (NEW QUESTIONS draws another game)
@@ -17,7 +17,7 @@ name-it round's lists in `public/fathom/lists/<id>.json` (built by `scripts/fath
   The panel's countdown ("new in 06:29:10") is for both. Nothing of Fathom in Free play.
 - **The menu**: a Today's Fathom tile in Play (a sonar's rings) with the same state, marked while it's on show; no
   endless tile.
-- **How to play**: rule 7, Today's Fathom in the game's own words (ten a day, 20 seconds each) and its scoring rule
+- **How to play**: rule 7, Today's Fathom in the game's own words (ten a day, 25 seconds each) and its scoring rule
   (the only place it's written).
 - **Stats**: a Fathom card under the lists' sections: games, avg / 1000, best / 1000 over every finished game of ten;
   "0", "--", "--" and a key to play before the first. The games of five from before Nov 14 stay out (a total out of
@@ -26,8 +26,11 @@ name-it round's lists in `public/fathom/lists/<id>.json` (built by `scripts/fath
 - **Past runs**: each finished game under its day, a square a question for a title (ten, smaller, or the old five)
   and its total out of its own maximum, tagged FATHOM #12 (a day's game, by its number, as Today's list's rows are) or
   FATHOM (endless); the row opens that game's results (`#fathom/run-<startedAt>`: the total, the squares, when it was
-  played, the recap of the questions still in the bank, SHARE, and a TODAY'S FATHOM key to the day's game, where it
-  is).
+  played, the recap of the questions still in the bank, a TODAY'S FATHOM key to the day's game, where it is, then
+  SHARE and HOME).
+- **HOME beside SHARE** (owner, Nov 17: "add a return to home button next to the share"): every Fathom results screen
+  (Today's, a past game's, endless) ends its keys with SHARE and HOME on one row, the same height (at 320 too): SHARE
+  the pink lead on Today's results, HOME the dark keycap; HOME goes where the header's does.
 - **The share text** (SHARE, as on lists and Blitz: the phone's share sheet, else a copy and "Copied"): "Fathom #12
   712/1000" ("Fathom 712/1000" for an endless game; "/500" for a game of five), a square a question in the results'
   colours (🟨 dead on, 🟦 close, 🟪 near, 🟥 far, ⬛ lost at sea or time's up), and the link to `#fathom`, each line but
@@ -56,15 +59,23 @@ name-it round's lists in `public/fathom/lists/<id>.json` (built by `scripts/fath
   before the switch starts over as the day's ten). Once finished, the run is in the save tagged with its day
   (`daily: { date, n }`), so the day reopens on its results on every device: no key for new questions, "next Fathom
   in 06:29:10" instead. The day's game never sits behind a sign-in.
-- **The clock** (owner, Nov 14: "add a timer per question (maybe like 20s)"): `QUESTION_SECONDS`, 20, from when the
-  question shows and the field takes typing. "0:17" at the end of the card's header, quiet (the muted label colour),
-  pink for the last five seconds (`WARN_SECONDS`); four tabular characters, no animation, its box kept (hidden) on the
-  reveal, so nothing moves. Paused while the tab is hidden; the time a question has used is kept in this browser
-  (`tentacle:fathom-clock`), so a reload doesn't give it back. At 0 a guess that reads locks in, as LOCK IN would (a
+- **The clock** (owner, Nov 14: "add a timer per question (maybe like 20s)"; Nov 17: "make the timer for fathom more
+  apparent- didnt even realize it was there until it was too late- also make it 25s instead of 20s. maybe can make
+  the countdown more in theme too"): `QUESTION_SECONDS`, 25, from when the question shows and the field takes typing.
+  It is a diver's air: under the card's header a pixel tank as wide as the card, full the moment the question shows
+  (so a first-time player sees there is a clock before typing, with no words about it), draining as the seconds go, a
+  few bubbles rising from its edge; the seconds alone ("25") in big cyan type at the header's end, over the tank's
+  end. Pink, the air and the number, for the last five seconds (`WARN_SECONDS`), the number beating once a second;
+  with sound on, a soft bubble tick in each of the last three (`TICK_SECONDS`). With reduced motion the tank drains a
+  second at a time, with no bubbles and no beat. On the reveal the tank holds what was left, dimmed, and the number's
+  place is kept (hidden): the rows are the same on a question and its reveal, and two tabular digits are one width,
+  so nothing moves; only transforms move the air. With the keyboard up the tank stays, thinner (8px), and the cards
+  tighten to pay for it. Paused while the tab is hidden; the time a question has used is kept in this browser
+  (`tentacle:fathom-clock`, also when it is locked in or the screen closes), so a reload doesn't give it back. At 0 a guess that reads locks in, as LOCK IN would (a
   name-it round: a name the list has, or a misspelling of one thing it would have asked to confirm); anything else
   scores 0, and the reveal says "Time's up" with the answer, the fact and the source (a name-it round's best answers
   too), no guess and no sonar. The round's id goes in the game's and the run's `timeouts`; its square is lost at sea's,
-  and the recap reads "time's up · answer 126 litres". The name-it round keeps the same 20 seconds for now (not yet
+  and the recap reads "time's up · answer 126 litres". The name-it round keeps the same 25 seconds for now (not yet
   play-tested by a person against the clock; the browser suite's name-it rounds lock well inside it).
 - **The running score** (owner, Nov 14: "add points to a visible counter ... some kind of bar at the top ... sleek and
   minimalistic"): under the question card's header, the total out of 1000 and ten pixel cells, one a question and its
@@ -213,7 +224,7 @@ register". **A fair answer must always register**, and one answer locks per roun
 Ten rounds (`GAME_ROUNDS`): five estimates, two percents, two years, and a name-it round (an estimate when the bank
 has none whose list loaded); five before Nov 14 (two estimates, a percent, a year, a name-it round). One name-it
 round, not two: the bank's 12 would last six days at two a day, and a name against the clock is the slowest round.
-20 seconds a question (The clock, above). The first question is an easy one, and a number to type (never the name-it
+25 seconds a question (The clock, above). The first question is an easy one, and a number to type (never the name-it
 round); the other nine come in a random order. Within that: none from the last 3 games while the bank has others
 (then the oldest come back first), kinds as spread as the bank allows (a kind not in the game yet, then the least
 used), and at most three how tall / how heavy questions. A round the bank has none of is played as an estimate, so a

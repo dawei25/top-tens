@@ -1,8 +1,9 @@
 /**
  * Fathom's sounds (the estimation game): a soft click on LOCK IN, a sonar ping as the answer shows, then the band's
  * own sound (Dead on a bright rising chord with a sparkle, Close a warm two-note chime, Near one soft note, Far a low
- * thud, Lost at sea a sinking bubble), and a short fanfare on the results that grows with the total. Quiet and short,
- * on the game's chip voices, and only with sound on (the speaker key).
+ * thud, Lost at sea a sinking bubble), a short fanfare on the results that grows with the total, and a bubble's tick
+ * in each of a question's last three seconds. Quiet and short, on the game's chip voices, and only with sound on (the
+ * speaker key).
  *
  * `fathomVoices` is pure (what to play), so it can be tested; `playFathom` plays it. Fathom calls these from the press
  * itself (LOCK IN, NEXT), where the sound layer has its audio ready (./index.ts).
@@ -18,7 +19,9 @@ export type FathomCue =
   /** The answer shows: the ping, then the band's sound. */
   | { kind: "reveal"; band: Band }
   /** The results, with the total (0 to 500). */
-  | { kind: "results"; total: number };
+  | { kind: "results"; total: number }
+  /** The question's last seconds (3, 2, 1): a soft tick, one a second. */
+  | { kind: "tick"; left: number };
 
 export type Voice = { tone: Tone } | { noise: Noise };
 
@@ -103,6 +106,12 @@ export function fathomVoices(cue: FathomCue): Voice[] {
     }
     case "results":
       return fanfareVoices(cue.total);
+    case "tick": {
+      // A bubble's blip, a step higher each second as the air runs out (3, 2, 1): as soft as LOCK IN's click and as
+      // short, so it reads as the clock and never as a verdict.
+      const up = 220 * (3 - Math.max(1, Math.min(3, cue.left)));
+      return [t({ freq: 880 + up, slideTo: 1320 + up, dur: 0.03, gain: 0.05, wave: "triangle", release: 0.05 })];
+    }
   }
 }
 

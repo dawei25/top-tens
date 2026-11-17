@@ -29,6 +29,7 @@ import {
   shareLines,
   shareText,
   startGame,
+  TICK_SECONDS,
   timeUp,
   totalOf,
   unitShown,
@@ -92,8 +93,9 @@ import "./fathom.css";
  * people"), percents, years, and a name-it round ("Name a country with about 50 million people", read with the game's
  * matcher over its list). Type a guess, lock it in, see how close it was on a sonar, and NEXT; ten of those and the
  * results. Each question has QUESTION_SECONDS (owner, Nov 14: "add a timer per question (maybe like 20s)"): at 0 what's
- * typed locks in if it reads, else the round scores 0 ("Time's up"). No lives, no scoring line (How to play explains
- * it); the time and the running score in the question card's header.
+ * typed locks in if it reads, else the round scores 0 ("Time's up"); the owner, Nov 17: 25 seconds, and a clock you
+ * can't miss, so it is a diver's air (QuestionTop). No lives, no scoring line (How to play explains it); the time,
+ * the air and the running score at the top of the question card.
  *
  * Two ways to play (owner, Nov 14: "id like fathom to have a today's fathom- remove the unlimited fathom play for now-
  * keep access to it via a hidden url"):
@@ -241,7 +243,7 @@ const focusGuess = () => document.querySelector<HTMLInputElement>('[data-testid=
 
 /** A question's time in ms. */
 const QUESTION_MS = QUESTION_SECONDS * 1000;
-/** The time a question on screen has used, in this browser, so a reload doesn't hand it a fresh 20 seconds. */
+/** The time a question on screen has used, in this browser, so a reload doesn't hand it its whole time again. */
 const CLOCK_KEY = "tentacle:fathom-clock";
 function readUsed(key: string): number {
   try {
@@ -260,16 +262,24 @@ function writeUsed(key: string, used: number): void {
 }
 
 /**
- * A question's clock: the ms it has left, counting while the page is on show (paused while the tab is hidden), from
- * what it had used before a reload; `onEnd` once at 0. `key` names the question in its game.
+ * A question's clock: the ms it has left, counting while it `runs` and the page is on show (paused while the tab is
+ * hidden), from what it had used before a reload; `onEnd` once at 0. Stopped (the reveal), it holds what was left.
+ * `key` names the question in its game: a new key is a new question, with its whole time.
  */
-function useQuestionClock(key: string, onEnd: () => void): number {
-  const [left, setLeft] = useState(() => QUESTION_MS - readUsed(key));
+function useQuestionClock(key: string, runs: boolean, onEnd: () => void): number {
+  const [now, setNow] = useState(() => ({ key, left: QUESTION_MS - readUsed(key) }));
+  // A new question: its own time, from the render that shows it (React's "information from previous renders").
+  let left = now.left;
+  if (now.key !== key) {
+    left = QUESTION_MS - readUsed(key);
+    setNow({ key, left });
+  }
   const end = useRef(onEnd);
   useEffect(() => {
     end.current = onEnd;
   });
   useEffect(() => {
+    if (!runs) return;
     let used = readUsed(key);
     let last = Date.now();
     let kept = Math.floor(used / 1000);
@@ -279,7 +289,7 @@ function useQuestionClock(key: string, onEnd: () => void): number {
       if (!document.hidden) used += Math.max(0, now - last);
       last = now;
       const l = Math.max(0, QUESTION_MS - used);
-      setLeft(l);
+      setNow({ key, left: l });
       // Kept each second, so a reload takes up where it was.
       if (Math.floor(used / 1000) !== kept || l === 0) {
         kept = Math.floor(used / 1000);
@@ -302,52 +312,77 @@ function useQuestionClock(key: string, onEnd: () => void): number {
     return () => {
       clearTimeout(t);
       document.removeEventListener("visibilitychange", shown);
+      // Stopped (locked in): kept as the reveal shows it, so a reload there shows the same air left.
+      writeUsed(key, used);
     };
-  }, [key]);
+  }, [key, runs]);
   return left;
 }
 
 /**
- * The question's time in the card's header, "0:17": the seconds left, quiet (the header's muted label colour), toward
- * pink in the last WARN_SECONDS. Its width never changes (four tabular characters). No animation: it changes as a
- * number does.
+ * The question card's header and its air (owner, Nov 17: "make the timer for fathom more apparent- didnt even realize
+ * it was there until it was too late ... maybe can make the countdown more in theme too"). Fathom is a depth, so the
+ * clock is a diver's air: the seconds left in big type at the header's end, and under the header a tank as wide as
+ * the card, full the moment the question shows, draining as the seconds go, a few bubbles rising from its edge, pink
+ * for the last WARN_SECONDS (the number beating once a second then), and with sound on a soft tick for the last
+ * TICK_SECONDS. On the reveal the tank holds what was left, dimmed, and the number's place is kept (hidden): the same
+ * rows on the question and its reveal, so nothing moves. With reduced motion the tank drains a second at a time, with
+ * no bubbles and no beat.
  */
-function Clock({ left }: { left: number }) {
+function QuestionTop({ at, count, clockKey, runs, onEnd }: { at: number; count: number; clockKey: string; runs: boolean; onEnd: () => void }) {
+  const left = useQuestionClock(clockKey, runs, onEnd);
   const secs = Math.ceil(left / 1000);
+  const warn = runs && secs <= WARN_SECONDS;
+  // The last seconds tick (with sound on): each one as it comes, never on a reload or a question's first render.
+  const heard = useRef(secs);
+  useEffect(() => {
+    if (runs && secs < heard.current && secs >= 1 && secs <= TICK_SECONDS) playFathom({ kind: "tick", left: secs });
+    heard.current = secs;
+  }, [secs, runs]);
   return (
-    <span
-      className="fathom-clock"
-      data-testid="fathom-clock"
-      data-left={secs}
-      data-warn={secs <= WARN_SECONDS || undefined}
-      role="timer"
-      aria-label={`${secs} ${secs === 1 ? "second" : "seconds"} left`}
-    >
-      0:{String(secs).padStart(2, "0")}
-    </span>
-  );
-}
-
-/** The question card's header: which question, and its time (counting only while the question is on screen). */
-function QuestionTop({ at, count, clockKey, onEnd }: { at: number; count: number; clockKey?: string; onEnd: () => void }) {
-  return (
-    <div className="prompt-top">
-      <span className="label cyan">
-        Question {at + 1} of {count}
-      </span>
-      {/* On the reveal, no time: the clock's place kept (hidden), so nothing moves. */}
-      {clockKey ? (
-        <Ticking clockKey={clockKey} onEnd={onEnd} />
-      ) : (
-        <span className="fathom-clock" data-testid="fathom-clock" data-idle="" aria-hidden="true">
-          0:00
+    <>
+      <div className="prompt-top">
+        <span className="label cyan">
+          Question {at + 1} of {count}
         </span>
-      )}
-    </div>
+        <span
+          className="fathom-clock"
+          data-testid="fathom-clock"
+          data-left={secs}
+          data-warn={warn || undefined}
+          data-idle={runs ? undefined : ""}
+          role={runs ? "timer" : undefined}
+          aria-hidden={runs ? undefined : true}
+          aria-label={runs ? `${secs} ${secs === 1 ? "second" : "seconds"} left` : undefined}
+        >
+          {/* Keyed by the second in the last ones, so each beats once. */}
+          <span key={warn ? secs : "n"} className="clock-n">
+            {secs}
+          </span>
+        </span>
+      </div>
+      <div
+        className="fathom-air"
+        data-testid="fathom-air"
+        data-left={secs}
+        data-runs={runs || undefined}
+        data-warn={warn || undefined}
+        aria-hidden="true"
+        style={{ "--air": left / QUESTION_MS, "--air-step": secs / QUESTION_SECONDS } as React.CSSProperties}
+      >
+        <span className="air-tank">
+          <span className="air-fill" data-testid="fathom-air-fill" />
+        </span>
+        {runs && (
+          <span className="air-edge">
+            <i />
+            <i />
+            <i />
+          </span>
+        )}
+      </div>
+    </>
   );
-}
-function Ticking({ clockKey, onEnd }: { clockKey: string; onEnd: () => void }) {
-  return <Clock left={useQuestionClock(clockKey, onEnd)} />;
 }
 
 /** The screen height (CSS px) at or under which a phone gets the compact layout: a small phone, or its keyboard up. */
@@ -466,8 +501,8 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
       </main>
     );
   }
-  if (data && run !== undefined) return <PastGame head={head} run={run} bank={data.bank} />;
-  if (data && playedRun) return <PastGame head={head} run={playedRun.startedAt} bank={data.bank} today />;
+  if (data && run !== undefined) return <PastGame head={head} run={run} bank={data.bank} onHome={onHome} />;
+  if (data && playedRun) return <PastGame head={head} run={playedRun.startedAt} bank={data.bank} onHome={onHome} today />;
   if (!data || !game) return <Loading />;
   const { bank, lists } = data;
 
@@ -537,8 +572,8 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
   const list = question?.nameIt ? lists.get(question.nameIt.list) : undefined;
   // No scoring line on the card (the owner, Nov 14: "self intuitive already enough"; How to play explains it).
   const round = question && roundOf(question);
-  // A question's clock, by its game and place: a reload goes on with the time it had left.
-  const clockKey = question && phase === "question" ? `${game.startedAt ?? 0}:${game.at}:${question.id}` : undefined;
+  // A question's clock, by its game and place: a reload goes on with the time it had left (and its reveal shows it).
+  const clockKey = question ? `${game.startedAt ?? 0}:${game.at}:${question.id}` : "";
   return (
     <main className="screen fathom" data-testid="fathom" data-phase={phase} data-short={short || undefined}>
       {head}
@@ -549,6 +584,7 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
         <Results
           scored={scored}
           max={game.ids.length * POINTS_PER_QUESTION}
+          onHome={onHome}
           onAgain={day ? undefined : again}
           n={day?.n}
           crowd={day ? { date: day.date, questions } : undefined}
@@ -556,7 +592,7 @@ export default function Fathom({ onBack, onHome, run, mode = "daily", today = lo
       ) : (
         <>
           <section className="panel prompt fathom-q" data-glass data-testid="fathom-question" data-question={question.id} data-round={round}>
-            <QuestionTop at={game.at} count={game.ids.length} clockKey={clockKey} onEnd={outOfTime} />
+            <QuestionTop at={game.at} count={game.ids.length} clockKey={clockKey} runs={phase === "question"} onEnd={outOfTime} />
             <ScoreBar scored={scored} at={game.at} count={game.ids.length} />
             <h1>{question.question}</h1>
             {question.definition && <p className="caption">{question.definition}</p>}
@@ -986,7 +1022,19 @@ function playedAt(ms: number): string {
  * recap of the questions still in the bank, and from Past runs the way to Today's Fathom. A game no longer kept here
  * (another device's, pruned) says so.
  */
-function PastGame({ head, run: at, bank, today = false }: { head: ReactNode; run: number; bank: FathomQuestion[]; today?: boolean }) {
+function PastGame({
+  head,
+  run: at,
+  bank,
+  onHome,
+  today = false,
+}: {
+  head: ReactNode;
+  run: number;
+  bank: FathomQuestion[];
+  onHome: () => void;
+  today?: boolean;
+}) {
   const run = findRun(load().fathom, at);
   const toToday = () => (location.hash = "#fathom");
   if (!run) {
@@ -1034,6 +1082,7 @@ function PastGame({ head, run: at, bank, today = false }: { head: ReactNode; run
         bands={bands}
         share={share}
         crowd={today && run.daily ? { date: run.daily.date, questions: run.ids.flatMap((id) => byId.get(id) ?? []) } : undefined}
+        onHome={onHome}
         onAgain={today ? undefined : toToday}
         againLabel={FATHOM_TODAY}
         when={today ? undefined : playedAt(run.finishedAt)}
@@ -1045,11 +1094,14 @@ function PastGame({ head, run: at, bank, today = false }: { head: ReactNode; run
 
 /**
  * The end: the total and the five bands in a row; NEW QUESTIONS (endless) or the time to the next Fathom (Today's:
- * one try), and SHARE; then each question with guess and answer. A past game passes its own total, bands and share
- * text (a question gone from the bank has no row), when it was played, and its key's label.
+ * one try), then SHARE and HOME side by side (owner, Nov 17: "add a return to home button next to the share"): SHARE
+ * the lead where it is the only way on (Today's, pink), HOME the quieter dark key; then each question with guess and
+ * answer. A past game passes its own total, bands and share text (a question gone from the bank has no row), when it
+ * was played, and its key's label.
  */
 function Results({
   scored,
+  onHome,
   onAgain,
   n,
   crowd,
@@ -1062,6 +1114,8 @@ function Results({
   count = true,
 }: {
   scored: Scored[];
+  /** HOME, as the header's. */
+  onHome: () => void;
   /** No key for new questions on Today's Fathom: one try a day. */
   onAgain?: () => void;
   /** Today's Fathom's number, for the share text. */
@@ -1137,9 +1191,15 @@ function Results({
               {againLabel}
             </button>
           )}
-          <button ref={copyKey} type="button" className="key" data-testid="fathom-share" onClick={shareIt}>
-            <SwapLabel off="Share" on="Copied" active={copied} />
-          </button>
+          {/* One pair, never split while both labels fit whole side by side (UX 7). */}
+          <div className="results-pair">
+            <button ref={copyKey} type="button" className={onAgain ? "key" : "key key-pink"} data-testid="fathom-share" onClick={shareIt}>
+              <SwapLabel off="Share" on="Copied" active={copied} />
+            </button>
+            <button type="button" className="key" data-testid="fathom-home" onClick={onHome}>
+              Home
+            </button>
+          </div>
         </div>
       </section>
       <section className="panel fathom-recap" data-glass aria-label="Your answers">

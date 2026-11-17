@@ -111,13 +111,15 @@ export const POINTS_PER_QUESTION = 100;
 export const MAX_TOTAL = QUESTIONS_PER_GAME * POINTS_PER_QUESTION;
 
 /**
- * Seconds a question gives (owner, Nov 14: "add a timer per question (maybe like 20s)"): counted from when it shows
- * and the field takes typing, paused while the tab is hidden. At 0 what's typed locks in if it reads; otherwise the
- * round scores 0 ("Time's up.").
+ * Seconds a question gives (owner, Nov 14: "add a timer per question (maybe like 20s)"; Nov 17: "make it 25s instead
+ * of 20s"): counted from when it shows and the field takes typing, paused while the tab is hidden. At 0 what's typed
+ * locks in if it reads; otherwise the round scores 0 ("Time's up.").
  */
-export const QUESTION_SECONDS = 20;
-/** The last seconds, when the clock tints toward pink. */
+export const QUESTION_SECONDS = 25;
+/** The last seconds, when the air turns pink. */
 export const WARN_SECONDS = 5;
+/** The last seconds that tick, with sound on. */
+export const TICK_SECONDS = 3;
 
 /* ---------- Scoring ---------- */
 

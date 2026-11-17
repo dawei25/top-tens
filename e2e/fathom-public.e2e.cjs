@@ -56,6 +56,9 @@ test("How to play has a Fathom rule that says how it scores", async () => {
   const section = page.getByTestId("howto-fathom");
   await section.waitFor();
   assert.match(await section.textContent(), /the closer your guess, the more points/i);
+  // The clock as the game has it (QUESTION_SECONDS, owner Nov 17: "make it 25s instead of 20s").
+  assert.match(await section.textContent(), /\b25 seconds\b/);
+  assert.doesNotMatch(await section.textContent(), /\b20 seconds\b/);
   await noBeta(page, "How to play");
   // Whole on a phone: no sideways scroll in the rules.
   assert.ok(await page.getByTestId("howto").evaluate((el) => el.scrollWidth <= el.clientWidth + 1));

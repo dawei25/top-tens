@@ -309,8 +309,8 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
     await without.ctx.close();
   });
 
-  // The owner, Nov 14: "add a timer per question (maybe like 20s)". A name-it round has the same 20 seconds: at 0, a
-  // name the list has locks in as LOCK IN would take it; anything that wouldn't lock is Time's up.
+  // The owner, Nov 14: "add a timer per question (maybe like 20s)" (25 since Nov 17). A name-it round has the same 25
+  // seconds: at 0, a name the list has locks in as LOCK IN would take it; anything that wouldn't lock is Time's up.
   test("at 0 seconds a name the list has locks in; one it doesn't take is Time's up (phone)", async () => {
     const vp = VIEWPORTS.find((v) => v.name === "phone");
     const ids = ["eiffel-tower-height", "name-country-50m-people", "adult-bones", "octopus-hearts", "piano-keys"];
@@ -322,7 +322,7 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
       await page.getByTestId("fathom-input").waitFor();
       await freeze(page);
       await page.getByTestId("fathom-input").fill(typed);
-      await page.clock.runFor(21_000);
+      await page.clock.runFor(26_000);
       await page.getByTestId("fathom-reveal").waitFor();
       if (locks) {
         assert.equal(await attr(page, "fathom-guess", "data-pick"), typed);

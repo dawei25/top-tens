@@ -14,9 +14,17 @@
 // - The running score in the question card (owner, Nov 14): the total out of 1000 and ten pixel cells, one a question,
 //   filled in the bands' colours, counting up on each reveal (not with reduced motion); it never moves or resizes
 //   anything (320, 390, 1440).
-// - The clock: 0:20 a question, pink for the last five seconds, paused while the tab is hidden, kept through a reload;
-//   at 0 a guess that reads locks in, nothing typed scores 0 and the reveal says Time's up with the answer and the
-//   fact; the reveal has no clock, and nothing moves as it ticks.
+// - The clock: 25 seconds a question (owner, Nov 17: "make it 25s instead of 20s"), pink for the last five seconds,
+//   paused while the tab is hidden, kept through a reload; at 0 a guess that reads locks in, nothing typed scores 0
+//   and the reveal says Time's up with the answer and the fact; the reveal has no number, and nothing moves as it
+//   ticks.
+// - The air (owner, Nov 17: "make the timer for fathom more apparent- didnt even realize it was there until it was too
+//   late"): on question 1 a full tank as wide as the card, plainly in view, the seconds in big type over its end; it
+//   drains, turns pink for the last five seconds, and holds what was left on the reveal; nothing moves between a
+//   question and its reveal or the next question (320, 390, 1440). Bubbles and a beat with motion, none without; a
+//   soft tick for each of the last three seconds with sound on.
+// - The results: SHARE and HOME side by side, the same height (320, 390, 1440); HOME opens Home (owner, Nov 17: "add a
+//   return to home button next to the share").
 // - The day's results: where the total stands among the day's players, the players' curve over 0 to 1000 (the
 //   player's marker at their total), "you did better than X% of players today", never "estimated"; no crowd on
 //   endless Fathom's results or on a past game.
@@ -402,16 +410,17 @@ test("endless Fathom at its hidden address: New questions, no number, no crowd",
   await ctx.close();
 });
 
-// The owner, Nov 14: "add a timer per question (maybe like 20s)".
-test("the clock: 20 seconds a question, pink at the end, paused while hidden, kept through a reload; at 0 a typed guess locks in, nothing typed is Time's up", async () => {
+// The owner, Nov 14: "add a timer per question (maybe like 20s)"; Nov 17: "make it 25s instead of 20s".
+test("the clock: 25 seconds a question, pink at the end, paused while hidden, kept through a reload; at 0 a typed guess locks in, nothing typed is Time's up", async () => {
   const { ctx, page } = await open(browser, phone, "#fathom", undefined, { setup: setup(), reducedMotion: "reduce" });
   const clock = page.getByTestId("fathom-clock");
   await page.getByTestId("fathom-input").waitFor();
   await freeze(page);
   const left = async () => Number(await clock.getAttribute("data-left"));
   const start = await left();
-  assert.ok(start >= 18 && start <= 20, `starts at 20: ${start}`);
-  assert.match(await clock.textContent(), /^0:\d\d$/);
+  assert.ok(start >= 23 && start <= 25, `starts at 25: ${start}`);
+  // The seconds alone, in big type.
+  assert.equal((await clock.textContent()).trim(), String(start));
   // Quiet until the last five seconds, then pink.
   assert.equal(await clock.getAttribute("data-warn"), null);
   const quiet = await clock.evaluate((el) => getComputedStyle(el).color);
@@ -444,15 +453,15 @@ test("the clock: 20 seconds a question, pink at the end, paused while hidden, ke
   await page.getByTestId("fathom-reveal").waitFor();
   assert.equal(await page.getByTestId("fathom-reveal").getAttribute("data-timeout"), null);
   assert.equal(Number(await page.getByTestId("fathom-guess").getAttribute("data-value")), first.answer);
-  // The reveal has no clock (its place kept).
-  assert.equal(await clock.isVisible(), false);
-  // The next question starts at 20 again; nothing that reads at 0 is Time's up: 0 points, the answer and the fact.
+  // The reveal has no number (its place kept; reduced motion still eases for 1ms).
+  await clock.waitFor({ state: "hidden" });
+  // The next question starts at 25 again; nothing that reads at 0 is Time's up: 0 points, the answer and the fact.
   await page.getByTestId("fathom-next").click();
   await page.getByTestId("fathom-input").waitFor();
-  assert.equal(await left(), 20);
+  assert.equal(await left(), 25);
   const second = BANK.get(await questionId(page));
   await page.getByTestId("fathom-input").fill("abc");
-  await page.clock.runFor(21_000);
+  await page.clock.runFor(26_000);
   const reveal = page.getByTestId("fathom-reveal");
   await reveal.waitFor();
   assert.equal(await reveal.getAttribute("data-timeout"), "true");
@@ -462,6 +471,8 @@ test("the clock: 20 seconds a question, pink at the end, paused while hidden, ke
   if (second.fact) await page.getByTestId("fathom-fact").waitFor();
   assert.equal(await page.getByTestId("fathom-guess").count(), 0, "no guess to show");
   assert.equal(await page.getByTestId("fathom-cell").nth(1).getAttribute("data-band"), "lost");
+  // Out of air: the tank shows none left.
+  assert.equal(await page.getByTestId("fathom-air").getAttribute("data-left"), "0");
   // Kept with the game: a reload shows it again.
   const local = JSON.parse(await page.evaluate((k) => localStorage.getItem(k), DAILY_KEY));
   assert.deepEqual(local.timeouts, [second.id]);
@@ -470,3 +481,266 @@ test("the clock: 20 seconds a question, pink at the end, paused while hidden, ke
   await page.locator('[data-testid="fathom-reveal"][data-timeout="true"]').waitFor();
   await ctx.close();
 });
+
+/**
+ * Today's first question with its whole 25 seconds and the page's clock stopped: the time it has used set to none
+ * (once the screen is closed: closing it keeps what it used) and the screen opened again, so nothing of how long the
+ * page took to load shows in it.
+ */
+async function wholeQuestion(page) {
+  await page.getByTestId("fathom-input").waitFor();
+  await freeze(page);
+  const local = JSON.parse(await page.evaluate((k) => localStorage.getItem(k), DAILY_KEY));
+  await go(page, "#");
+  await page.getByTestId("today-list").waitFor();
+  await page.evaluate((key) => localStorage.setItem("tentacle:fathom-clock", JSON.stringify({ key, used: 0 })), `${local.startedAt}:${local.at}:${local.ids[local.at]}`);
+  await go(page, "#fathom");
+  for (let i = 0; i < 40 && !(await page.getByTestId("fathom-input").count()); i++) await page.clock.runFor(50);
+  await page.getByTestId("fathom-input").waitFor();
+}
+
+/** How much air the tank shows: the air's drawn width over the tank's inside (the drain is a transform). */
+const airShown = (page) => page.getByTestId("fathom-air-fill").evaluate((el) => el.getBoundingClientRect().width / el.offsetWidth);
+/** Asserts the tank shows `share` of its air, once the frame has drawn it (reduced motion still eases for 1ms). */
+async function airIs(page, share, what) {
+  await page
+    .waitForFunction(
+      (s) => {
+        const el = document.querySelector('[data-testid="fathom-air-fill"]');
+        return Math.abs(el.getBoundingClientRect().width / el.offsetWidth - s) < 0.01;
+      },
+      share,
+      { timeout: 2000 },
+    )
+    .catch(() => {});
+  const shown = await airShown(page);
+  assert.ok(Math.abs(shown - share) < 0.01, `${what}: ${shown} shown, ${share} expected`);
+}
+
+/** Where the question card's parts and the field sit on the page (untransformed, so the drain and the beat don't count). */
+const cardParts = (page) =>
+  page.evaluate(() => {
+    const at = (sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      let x = 0;
+      let y = 0;
+      for (let e = el; e; e = e.offsetParent) {
+        x += e.offsetLeft;
+        y += e.offsetTop;
+      }
+      return { x, y, width: el.offsetWidth, height: el.offsetHeight };
+    };
+    return {
+      card: at('[data-testid="fathom-question"]'),
+      top: at(".fathom-q .prompt-top"),
+      clock: at('[data-testid="fathom-clock"]'),
+      air: at('[data-testid="fathom-air"]'),
+      score: at('[data-testid="fathom-score"]'),
+      title: at('[data-testid="fathom-question"] h1'),
+    };
+  });
+/** The field's box (its input shares it with the question's unit, so its own width follows the unit) and LOCK IN. */
+const fieldParts = (page) =>
+  page.evaluate(() =>
+    Object.fromEntries(
+      [".fathom-field", '[data-testid="fathom-lock"]'].map((sel) => [sel, (({ x, y, width, height }) => ({ x, y, width, height }))(document.querySelector(sel).getBoundingClientRect())]),
+    ),
+  );
+
+// The owner, Nov 17: "make the timer for fathom more apparent- didnt even realize it was there until it was too late-
+// also make it 25s instead of 20s. maybe can make the countdown more in theme too". It was a quiet "0:19" at the end
+// of the card's header. Now it is a diver's air: a tank as wide as the card, full the moment the question shows.
+for (const width of [320, 390, 1440]) {
+  test(`the air: a full tank as wide as the card on question 1, draining, pink for the last five seconds; nothing moves (${width})`, async () => {
+    const { ctx, page } = await open(browser, at(width), "#fathom", undefined, { setup: setup(), reducedMotion: "reduce" });
+    await wholeQuestion(page);
+    const [air, clock, fill] = [page.getByTestId("fathom-air"), page.getByTestId("fathom-clock"), page.getByTestId("fathom-air-fill")];
+    // Question 1, before a key is pressed: the whole 25 seconds, the tank full and in view, as wide as the card's inside.
+    assert.equal(await page.getByTestId("fathom-cell").nth(0).getAttribute("data-now"), "true");
+    assert.equal(await air.getAttribute("data-left"), "25");
+    assert.equal((await clock.textContent()).trim(), "25");
+    await airIs(page, 1, "full");
+    const seen = await page.evaluate(() => {
+      const card = document.querySelector('[data-testid="fathom-question"]');
+      const pad = parseFloat(getComputedStyle(card).paddingLeft) + parseFloat(getComputedStyle(card).paddingRight);
+      const r = (el) => el.getBoundingClientRect();
+      const tank = r(document.querySelector('[data-testid="fathom-air"]'));
+      const num = r(document.querySelector('[data-testid="fathom-clock"]'));
+      const label = r(document.querySelector(".fathom-q .prompt-top .label"));
+      return {
+        inside: r(card).width - 2 - pad,
+        tank: { w: tank.width, h: tank.height, top: tank.top, bottom: tank.bottom, right: tank.right },
+        num: { right: num.right, bottom: num.bottom, size: parseFloat(getComputedStyle(document.querySelector('[data-testid="fathom-clock"]')).fontSize) },
+        labelSize: parseFloat(getComputedStyle(document.querySelector(".fathom-q .prompt-top .label")).fontSize),
+        labelBottom: label.bottom,
+        fill: getComputedStyle(document.querySelector('[data-testid="fathom-air-fill"]')).backgroundImage,
+        h: innerHeight,
+      };
+    });
+    assert.ok(Math.abs(seen.tank.w - seen.inside) <= 1, `as wide as the card's inside: ${seen.tank.w} of ${seen.inside}`);
+    assert.ok(seen.tank.h >= 12, `a tank, not a hairline: ${seen.tank.h}px`);
+    assert.ok(seen.tank.top >= 0 && seen.tank.bottom <= seen.h, "in view");
+    assert.ok(seen.fill.includes("rgb(77, 227, 255)"), `cyan: ${seen.fill}`);
+    // The seconds over the tank's end, bigger than the header's words (and than the old 17px clock).
+    assert.ok(Math.abs(seen.num.right - seen.tank.right) <= 1, "the seconds over the tank's end");
+    assert.ok(seen.num.bottom <= seen.tank.top && seen.tank.top - seen.num.bottom < 24, "the seconds just over the tank");
+    assert.ok(seen.num.size >= 1.75 * seen.labelSize && seen.num.size > 17, `big: ${seen.num.size}px`);
+    assert.ok(seen.tank.top >= seen.labelBottom, "under the header");
+    // With reduced motion: no bubbles, no beat, and the air goes a second at a time.
+    assert.equal(await page.locator(".air-edge").evaluate((el) => getComputedStyle(el).display), "none");
+    assert.doesNotMatch(await fill.evaluate((el) => getComputedStyle(el).transition), /0\.25s/);
+    const rest = await cardParts(page);
+    const field = await fieldParts(page);
+
+    // It drains, a second at a time, and nothing moves as it does.
+    await page.clock.runFor(10_000);
+    assert.equal(await air.getAttribute("data-left"), "15");
+    await airIs(page, 15 / 25, "15 of 25 left");
+    assert.equal(await air.getAttribute("data-warn"), null);
+    assert.deepEqual(await cardParts(page), rest, "the air moved something");
+    assert.deepEqual(await fieldParts(page), field, "the air moved the field or LOCK IN");
+    // The last five seconds: pink, the number and the air.
+    await page.clock.runFor(5000);
+    assert.equal(await air.getAttribute("data-warn"), null);
+    await page.clock.runFor(5000);
+    assert.equal(await air.getAttribute("data-left"), "5");
+    assert.equal(await air.getAttribute("data-warn"), "true");
+    assert.equal(await clock.getAttribute("data-warn"), "true");
+    const pink = () =>
+      page.evaluate(() => {
+        const css = (id) => getComputedStyle(document.querySelector(`[data-testid="${id}"]`));
+        return css("fathom-air-fill").backgroundImage.includes("rgb(255, 93, 143)") && css("fathom-clock").color === "rgb(255, 93, 143)";
+      });
+    await page.waitForFunction(() => {
+      const css = (id) => getComputedStyle(document.querySelector(`[data-testid="${id}"]`));
+      return css("fathom-air-fill").backgroundImage.includes("rgb(255, 93, 143)") && css("fathom-clock").color === "rgb(255, 93, 143)";
+    }, undefined, { timeout: 2000 }).catch(() => {});
+    assert.ok(await pink(), "the air and the seconds turn pink");
+    assert.equal(await clock.locator(".clock-n").evaluate((el) => getComputedStyle(el).animationName), "none", "no beat with reduced motion");
+    assert.deepEqual(await cardParts(page), rest, "the last seconds moved something");
+
+    // Locked in: the reveal keeps the card's rows where they were, the tank holding what was left; the number's place kept.
+    const q = BANK.get(await questionId(page));
+    await page.getByTestId("fathom-input").fill(String(q.answer));
+    await page.getByTestId("fathom-lock").click();
+    await page.getByTestId("fathom-reveal").waitFor();
+    assert.deepEqual(await cardParts(page), rest, "the reveal moved something");
+    assert.equal(await air.getAttribute("data-runs"), null);
+    assert.equal(await air.getAttribute("data-left"), "5");
+    await airIs(page, 5 / 25, "what was left, held");
+    await clock.waitFor({ state: "hidden" });
+    await page.clock.runFor(3000);
+    assert.equal(await air.getAttribute("data-left"), "5", "held: the reveal has no clock");
+    // The next question: a full tank again, and the field and LOCK IN where they were.
+    await page.getByTestId("fathom-next").click();
+    await page.getByTestId("fathom-input").waitFor();
+    assert.equal(await air.getAttribute("data-left"), "25");
+    await airIs(page, 1, "full again");
+    assert.deepEqual(await cardParts(page), rest, "the next question moved something");
+    assert.deepEqual(await fieldParts(page), field, "the next question moved the field or LOCK IN");
+    assert.ok(await noHScroll(page));
+    await ctx.close();
+  });
+}
+
+test("the air with motion: bubbles rise from its edge, it drains smoothly, the last seconds beat", async () => {
+  const { ctx, page } = await open(browser, phone, "#fathom", undefined, { setup: setup() });
+  await wholeQuestion(page);
+  const edge = page.locator(".air-edge");
+  assert.notEqual(await edge.evaluate((el) => getComputedStyle(el).display), "none");
+  assert.deepEqual(await edge.locator("i").evaluateAll((els) => els.map((el) => getComputedStyle(el).animationName)), ["air-rise", "air-rise", "air-rise"]);
+  // The bubbles ride the air's end: at the tank's right end while it's full.
+  const [tank, rim] = [await page.getByTestId("fathom-air").boundingBox(), await edge.boundingBox()];
+  assert.ok(Math.abs(rim.x + rim.width - (tank.x + tank.width)) <= 4);
+  assert.match(await page.getByTestId("fathom-air-fill").evaluate((el) => getComputedStyle(el).transition), /transform 0\.25s linear/);
+  await page.clock.runFor(20_500);
+  assert.equal(await page.getByTestId("fathom-clock").getAttribute("data-warn"), "true");
+  assert.equal(await page.getByTestId("fathom-clock").locator(".clock-n").evaluate((el) => getComputedStyle(el).animationName), "air-beat");
+  // A fifth of the air left, and the bubbles with its edge (once the drain's short glide has caught up).
+  await page.waitForFunction(
+    () => {
+      const [tank, edge] = [document.querySelector('[data-testid="fathom-air"]'), document.querySelector(".air-edge")].map((el) => el.getBoundingClientRect());
+      return edge.right < tank.left + tank.width * 0.3;
+    },
+    undefined,
+    { timeout: 3000 },
+  );
+  await ctx.close();
+});
+
+test("with sound on, the last three seconds tick, once each; with it off, nothing", async () => {
+  for (const on of [true, false]) {
+    const { ctx, page } = await open(browser, phone, "#fathom", undefined, {
+      setup: async (c) => {
+        await setup()(c);
+        // Counts the notes started.
+        await c.addInitScript(() => {
+          window.__notes = 0;
+          const C = window.AudioContext;
+          if (!C) return;
+          const create = C.prototype.createOscillator;
+          C.prototype.createOscillator = function () {
+            window.__notes += 1;
+            return create.call(this);
+          };
+        });
+      },
+      reducedMotion: "reduce",
+    });
+    await wholeQuestion(page);
+    // The speaker key, pressed on the question (its press is what starts the audio); pressed twice, off again.
+    await page.getByTestId("sound-toggle").click();
+    if (!on) await page.getByTestId("sound-toggle").click();
+    // A second at a time, each shown before the next (a player's seconds come one by one).
+    const second = async (left) => {
+      await page.clock.runFor(1000);
+      await page.locator(`[data-testid="fathom-clock"][data-left="${left}"]`).waitFor();
+    };
+    await page.clock.runFor(19_500);
+    await page.locator('[data-testid="fathom-clock"][data-left="6"]').waitFor();
+    await second(5);
+    const before = await page.evaluate(() => window.__notes);
+    await second(4);
+    assert.equal(await page.evaluate(() => window.__notes), before, "4 seconds left: no tick yet");
+    for (const left of [3, 2, 1]) await second(left);
+    if (on) await page.waitForFunction((n) => window.__notes >= n, before + 3, { timeout: 3000 });
+    else await page.waitForTimeout(300);
+    assert.equal(await page.evaluate(() => window.__notes) - before, on ? 3 : 0, on ? "3, 2, 1: a tick each" : "sound off: silent");
+    await ctx.close();
+  }
+});
+
+// The owner, Nov 17: "add a return to home button next to the share".
+for (const vp of [at(320), phone, desktop]) {
+  const name = vp.name ?? `${vp.viewport.width}`;
+  test(`the results: SHARE and HOME side by side, HOME opens Home (${name})`, async () => {
+    const game = { day: { date: TODAY, n: DAY.n }, ids: DAY.ids, guesses: DAY.ids.map((id) => BANK.get(id).answer * 1.5), at: 9, startedAt: Date.parse("2026-10-29T09:00:00-04:00") };
+    const { ctx, page } = await open(browser, vp, "#fathom", undefined, { setup: setup({ [DAILY_KEY]: game }), reducedMotion: "reduce" });
+    await page.getByTestId("fathom-next").click();
+    await page.getByTestId("fathom-results").waitFor();
+    const pair = async () => {
+      // Both in one frame (the page may still be settling its scroll).
+      const [share, home] = await page.evaluate(() => ["fathom-share", "fathom-home"].map((id) => document.querySelector(`[data-testid="${id}"]`).getBoundingClientRect().toJSON()));
+      assert.equal(Math.round(share.y), Math.round(home.y), "one row");
+      assert.equal(Math.round(share.height), Math.round(home.height), "the same height");
+      assert.ok(share.x + share.width <= home.x, "SHARE, then HOME beside it");
+      // Each label whole, not squeezed (UX 7).
+      for (const id of ["fathom-share", "fathom-home"]) assert.ok(await page.getByTestId(id).evaluate((el) => el.scrollWidth <= el.clientWidth), `${id} whole`);
+    };
+    await pair();
+    // SHARE leads (the main key); HOME is the quieter dark key.
+    assert.match(await page.getByTestId("fathom-share").getAttribute("class"), /key-pink/);
+    assert.doesNotMatch(await page.getByTestId("fathom-home").getAttribute("class"), /key-pink/);
+    // A past game's results (Past runs): Today's Fathom, and the same pair.
+    const run = (await store(page)).fathom.runs[0];
+    await go(page, `#fathom/run-${run.startedAt}`);
+    await page.locator('[data-testid="fathom"][data-phase="past"]').waitFor();
+    await pair();
+    await page.getByTestId("fathom-home").click();
+    await page.getByTestId("today-list").waitFor();
+    assert.ok(["", "#"].includes(await hash(page)), "Home");
+    assert.ok(await noHScroll(page));
+    await ctx.close();
+  });
+}

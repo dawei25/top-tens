@@ -224,12 +224,13 @@ describe("visual baselines", { concurrency: true }, () => {
         },
       });
       await page.getByTestId("fathom-input").waitFor();
-      // The question's clock from a known time: stopped, its time used set to a second, and the screen opened again, so
-      // it reads 0:19 every run (how long the page took to load would show in it otherwise).
+      // The question's clock from a known time: stopped, its time used set to a second (once the screen is closed:
+      // closing it keeps what it used), and the screen opened again, so it reads 24 (and its air shows 24 of 25
+      // seconds) every run (how long the page took to load would show in it otherwise).
       await freeze(page);
-      await page.evaluate((key) => localStorage.setItem("tentacle:fathom-clock", JSON.stringify({ key, used: 1000 })), `${NOW.getTime()}:0:${draw[0]}`);
       await go(page, "#");
       await page.getByTestId("today-list").waitFor();
+      await page.evaluate((key) => localStorage.setItem("tentacle:fathom-clock", JSON.stringify({ key, used: 1000 })), `${NOW.getTime()}:0:${draw[0]}`);
       await go(page, "#fathom");
       for (let i = 0; i < 40 && !(await page.getByTestId("fathom-input").count()); i++) await page.clock.runFor(100);
       await page.getByTestId("fathom-input").waitFor();
