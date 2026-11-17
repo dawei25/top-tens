@@ -1,6 +1,26 @@
 import { describe, expect, it } from "vitest";
-import type { DailyEntry } from "../src/game/daily";
-import { addDays, assignBlitz, BLITZ_RERUN_DAYS, nextEntries, waitingDebuts, type ListInfo, type Verdict } from "./schedule";
+import { localDate, type DailyEntry } from "../src/game/daily";
+import { addDays, assignBlitz, BLITZ_RERUN_DAYS, nextEntries, readSchedule, waitingDebuts, type ListInfo, type Verdict } from "./schedule";
+
+/** Days the committed schedule must reach past today. */
+const RUNWAY_DAYS = 7;
+
+// Past its last day the site shows that day's list again every day (todayEntry, src/game/daily.ts). This runs in
+// `npm run verify` (and `npm test`), never in `verify:deploy` (`vitest run src`): a short week never blocks a deploy.
+describe("the committed schedule's runway (public/puzzles/daily.json)", () => {
+  it(`has Today's list for each of the next ${RUNWAY_DAYS} days`, () => {
+    const today = localDate();
+    const dates = new Set(readSchedule().map((e) => e.date));
+    let days = 0;
+    while (dates.has(addDays(today, days + 1))) days++;
+    const left = days ? `${days} day${days === 1 ? "" : "s"} left after today (${today}), through ${addDays(today, days)}` : `no days left after today (${today})`;
+    expect(
+      days,
+      `Today's list has ${left}; it needs ${RUNWAY_DAYS}. Past the last day the site repeats it every day. Set the next ` +
+        `lineup (docs/IMPROVE.md, Weekly lineup), then run: NODE_NO_WARNINGS=1 npx tsx scripts/schedule.ts ${RUNWAY_DAYS} --write`,
+    ).toBeGreaterThanOrEqual(RUNWAY_DAYS);
+  });
+});
 
 /** A real judge's verdict: `list` approves it for Today's list, `blitz` for Today's Blitz. */
 const verdict = (id: string, { list = false, blitz = false, priority = 5, depth = 20 } = {}): Verdict => ({

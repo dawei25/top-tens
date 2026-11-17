@@ -1,4 +1,5 @@
 import { accountsOn, BACKEND, backendOn, PRIVACY_CONTACT } from "../../net/config";
+import { analyticsOn } from "../analytics";
 import { ScreenHead } from "../pixel";
 import { privacySignInLine } from "./labels";
 import "./account.css";
@@ -120,6 +121,12 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
               ? " Like any server, both see your IP address and keep it in short-lived logs. The game itself never stores it."
               : " Like any server, it sees your IP address and keeps it in short-lived logs."}
           </li>
+          {analyticsOn() && (
+            <li data-testid="privacy-analytics">
+              Vercel also counts visits (Vercel Web Analytics), without cookies: we only see totals, like visits a day and
+              the sites that sent them.
+            </li>
+          )}
           {BACKEND?.signIn.includes("google") && (
             <li data-testid="privacy-google">
               Continue with Google takes you to Google's sign-in page, which sees that visit like any server. Nothing
