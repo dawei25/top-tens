@@ -2174,7 +2174,7 @@
    "list": "cities-population",
    "target": 10000000,
    "question": "Name a city with about 10 million people",
-   "definition": "its whole built-up area, UN figures for 2025",
+   "definition": "its whole built-up area, estimates for 2026",
    "easy": false,
    "verified": true
   },
@@ -2185,7 +2185,7 @@
    "list": "cities-population",
    "target": 20000000,
    "question": "Name a city with about 20 million people",
-   "definition": "its whole built-up area, UN figures for 2025",
+   "definition": "its whole built-up area, estimates for 2026",
    "easy": false,
    "verified": true
   },

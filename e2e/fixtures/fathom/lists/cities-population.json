@@ -42,5 +42,9 @@
     {"name":"Singapore","aliases":[],"value":5792000},
     {"name":"Saint Petersburg","aliases":["St. Petersburg","Leningrad"],"value":5383000},
     {"name":"Washington, D.C.","aliases":["Washington"],"value":5207000}
+  ],
+  "unmeasured": [
+    {"name":"Florence","aliases":["Firenze"]},
+    {"name":"Yokohama","aliases":[],"partOf":"Tokyo"}
   ]
 }

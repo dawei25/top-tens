@@ -29,6 +29,19 @@ export interface NameEntry {
   value: number;
 }
 
+/**
+ * A thing of the list's kind the round knows by name but has no figure for on the list's measure (Nov 17: the city list
+ * takes its figures from one source of urban areas of 1 million or more, and knows every city TENtacle's city lists
+ * have): Florence, or Shenzhen, which the source counts in Guangzhou's urban area (`partOf`). Never an answer: it says
+ * so, and costs nothing.
+ */
+export interface KnownName {
+  name: string;
+  aliases: string[];
+  /** The entry whose figure counts it ("Guangzhou", for Shenzhen). */
+  partOf?: string;
+}
+
 /** A name-it round's list, as the data agent writes it (public/fathom/lists/<id>.json). Complete: every country. */
 export interface NameList {
   id: string;
@@ -43,6 +56,8 @@ export interface NameList {
   /** When the figures are from, as the list says it ("2024", "2026-11-07"). */
   asOf?: string;
   entries: NameEntry[];
+  /** Names of its kind it knows without a figure (KnownName): "Florence isn't measured here." */
+  unmeasured?: KnownName[];
 }
 
 /** A list id, as it names its file: kebab-case. */
@@ -59,6 +74,15 @@ function readEntry(x: unknown): NameEntry | null {
   return { name: o.name, aliases, value: o.value };
 }
 
+/** A name known without a figure, if well formed; `partOf` only when it names one of the list's `entries`. */
+function readKnown(x: unknown, entries: ReadonlySet<string>): KnownName | null {
+  if (!x || typeof x !== "object") return null;
+  const o = x as Record<string, unknown>;
+  if (!isText(o.name)) return null;
+  const aliases = Array.isArray(o.aliases) ? o.aliases.filter(isText) : [];
+  return { name: o.name, aliases, ...(isText(o.partOf) && entries.has(o.partOf) && { partOf: o.partOf }) };
+}
+
 /** A list file, if it is one (well-formed entries only; anything else left out). Null when it isn't. */
 export function readList(json: unknown): NameList | null {
   if (!json || typeof json !== "object") return null;
@@ -69,6 +93,8 @@ export function readList(json: unknown): NameList | null {
   if (!src || !isText(src.title) || !isText(src.url) || !Array.isArray(o.entries)) return null;
   const entries = o.entries.map(readEntry).filter((e): e is NameEntry => !!e);
   if (!entries.length) return null;
+  const names = new Set(entries.map((e) => e.name));
+  const unmeasured = Array.isArray(o.unmeasured) ? o.unmeasured.map((x) => readKnown(x, names)).filter((k): k is KnownName => !!k) : [];
   return {
     id: o.id,
     noun: o.noun,
@@ -78,6 +104,7 @@ export function readList(json: unknown): NameList | null {
     source: { title: src.title, url: src.url },
     ...(isText(o.asOf) && { asOf: o.asOf }),
     entries,
+    ...(unmeasured.length && { unmeasured }),
   };
 }
 
@@ -199,6 +226,8 @@ export function readFullBank(json: unknown, lists: ReadonlyMap<string, NameList>
  * - `vague`: a word a crowd of names share: type more.
  * - `except`: the one the question names as its yardstick ("France" on "about as big as France").
  * - `other`: a thing of another kind ("Paris" on a country question: a city).
+ * - `unmeasured`: a thing of this kind the list knows but has no figure for ("Florence"; "Shenzhen", which the source
+ *   counts in Guangzhou's urban area: `partOf`).
  * - `offList`: a thing of the same kind that isn't on this list.
  * - `unknown`: none of those.
  * Only `answer` locks; nothing else costs anything.
@@ -215,6 +244,7 @@ export type NameRead =
    * `plural`: a name that takes "are" ("The Canary Islands").
    */
   | { kind: "other"; name: string; noun: string; partOf?: string; plural?: boolean }
+  | { kind: "unmeasured"; name: string; partOf?: string }
   | { kind: "offList"; name: string }
   | { kind: "unknown" };
 
@@ -361,6 +391,8 @@ interface Read {
   of: Map<Entry, NameEntry>;
   /** Normalized names and aliases, and the entries that carry each. */
   forms: Map<string, NameEntry[]>;
+  /** The names known without a figure, by each normalized name and alias no entry carries (the first's, if shared). */
+  known: Map<string, KnownName>;
 }
 
 const reads = new WeakMap<NameList, Read>();
@@ -392,6 +424,9 @@ function readOf(list: NameList): Read {
       forms.set(f, at);
     }
   }
+  const known = new Map<string, KnownName>();
+  for (const k of list.unmeasured ?? [])
+    for (const f of [k.name, ...k.aliases].map(normalize)) if (f && !forms.has(f) && !known.has(f)) known.set(f, k);
   const puzzle: Puzzle = {
     id: `fathom:${list.id}:${readsMade}`,
     title: list.nounPlural,
@@ -401,10 +436,14 @@ function readOf(list: NameList): Read {
     answers: [],
     extras,
   };
-  r = { puzzle, of, forms };
+  r = { puzzle, of, forms, known };
   reads.set(list, r);
   return r;
 }
+
+/** The thing of its kind `list` knows without a figure that `text` names exactly, if any ("firenze": Florence). */
+export const unmeasuredNamed = (text: string, list: NameList): KnownName | undefined =>
+  list.unmeasured?.length ? readOf(list).known.get(normalize(text)) : undefined;
 
 type Judged = { kind: "exact" | "confirm"; entry: NameEntry } | { kind: "choose"; names: string[] } | { kind: "vague" } | { kind: "none" };
 
@@ -462,7 +501,8 @@ function rewritten(text: string, list: NameList): NameEntry | undefined {
  * that before anything on this list is read into it ("Tasmania" is not Tanzania, "Africa" on a city question not South
  * Africa). `lex`, the game's lexicon: a name of its own isn't read as a misspelling of something on the list, unless the
  * game stores it as a misspelling of that thing ("Irak", for Iraq: the confirm or the tap that a misspelling needs
- * keeps that fair); any other real name the list doesn't have says so ("Berlin isn't one of our 85 cities.", and
+ * keeps that fair); a thing of this kind the list knows without a figure says so ("Florence isn't measured here.",
+ * `unmeasured`); any other real name the list doesn't have says so ("Atlantis isn't one of our 652 cities.", and
  * "Abkhazia" is not Afghanistan). `offered`: the names the last read offered, so typing or tapping one picks it.
  * `except`: names that don't count.
  */
@@ -490,6 +530,15 @@ export function readName(
   if (exactElsewhere) return { kind: "other", name: exactElsewhere.j.entry.name, noun: exactElsewhere.o.noun };
   const place = placeNamed(text);
   if (place) return { kind: "other", name: place.name, noun: place.noun, ...(place.partOf && { partOf: place.partOf }), ...(place.plural && { plural: true }) };
+  // A thing of this kind the list knows but has no figure for ("Florence"; "Shenzhen", in Guangzhou's urban area): it
+  // says so, and like a thing of another kind it is never read as a misspelling of something on the list. One another
+  // list knows that way is a thing of that list's kind ("Florence is a city, not a country.").
+  const known = unmeasuredNamed(text, list);
+  if (known) return { kind: "unmeasured", name: known.name, ...(known.partOf && { partOf: known.partOf }) };
+  for (const o of others) {
+    const k = o.id !== list.id && !sameNoun(o, list) ? unmeasuredNamed(text, o) : undefined;
+    if (k) return { kind: "other", name: k.name, noun: o.noun };
+  }
 
   const kept = (m: Judged): NameRead | undefined => {
     if (m.kind === "confirm") return out(m.entry) ? { kind: "except", name: m.entry.name } : { kind: "confirm", entry: m.entry };
@@ -593,6 +642,13 @@ function lineFor(read: NameRead, list: Pick<NameList, "noun" | "nounPlural" | "e
         return `${name} ${read.plural ? "are" : "is"} part of ${read.partOf}, ${not}. Try again.`;
       }
       return `${name} ${read.plural ? "are" : "is"} ${withArticle(read.noun)}, ${not}. Try again.`;
+    }
+    case "unmeasured": {
+      // No figure to score it by: "Florence isn't measured here.", "Shenzhen is counted as part of Guangzhou." A long
+      // one leaves its own name out, then the other's.
+      const name = bare ? "That" : named(read.name, "That");
+      if (read.partOf) return `${name} is counted as part of ${short ? `another ${list.noun}` : read.partOf}. Try again.`;
+      return `${name} isn't measured here. Try again.`;
     }
     case "offList":
       return `${named(read.name, "That", 14)} isn't one of our ${list.entries.length} ${list.nounPlural}. Try again.`;
