@@ -472,14 +472,21 @@ The judge checks, in this order, and stops at the first fail:
    the large tiles or the individual ones; it requires too many assumptions and background knowledge and isn't
    satisfying."
 5. **Stable and dated.** It won't change from month to month; a yearly figure says its year.
-6. **Fair, short wording.** Plain, dry English, about 12 words or fewer (two lines on a phone), no trick or gotcha
+6. **Two readings, written out.** Before judging the wording, write the two most likely ways a casual player could
+   read the question, its definition and its unit. If a second reading is plausible, fix the wording so it names the
+   exact measure in plain words, or drop it. Money says whose money and what for ("the fee one club paid another",
+   not "how much was the transfer": the owner, Nov 17: "need to clarify if you mean yearly salary or the full
+   contract"). No idioms or terms of art standing in for a number: "a 50% chance", never "an even chance" or "the
+   odds" (the owner, Nov 17: "does even chance mean a 50/50 chance? was kinda confused"). Earlier cases: "energy"
+   (the brain's share), "about as big as" (area).
+7. **Fair, short wording.** Plain, dry English, about 12 words or fewer (two lines on a phone), no trick or gotcha
    definitions. Question and definition together stay within 100 characters, so LOCK IN stays above a phone keyboard
    (`check.ts` enforces it).
-7. **Safe and fresh.** Nothing gory, political or about a private person, and not a near-copy of another question in
+8. **Safe and fresh.** Nothing gory, political or about a private person, and not a near-copy of another question in
    the bank (same subject and measure).
-8. **The how tall / how heavy share.** Count them (`check.ts` prints the share). While the bank is over one in five,
+9. **The how tall / how heavy share.** Count them (`check.ts` prints the share). While the bank is over one in five,
    a how tall / how heavy question has to beat the others on all three tests to stay: the plainer ones go first.
-9. **A name-it question: type every obvious answer to the question; each must register.** Play it at #fathom with
+10. **A name-it question: type every obvious answer to the question; each must register.** Play it at #fathom with
    its list there. Write down the answers a curious player would try (the well-known countries near the target, their
    short forms and old names: "UK", "USA", "Holland", "Burma", "Bombay"), type each, and check it locks as the right
    thing, or goes in the box or offers a choice that includes it. One that says "Not one we know." is a missing alias
