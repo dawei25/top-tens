@@ -294,6 +294,7 @@ stronger.
 | (coverage audit, Nov 17) a stale known-name file kept old names in the lexicon | a topic dropped its known names but the file stayed | the build removes it; validate.ts errors |
 | (coverage audit, Nov 17) short forms and spellings found nothing on next weeks' lists ("merc", "beemer", "st4", "dakha") and famous names outside the ranking read as "not one of the N here" | missing aliases and known names | aliases and known names; aliases.test.ts "coverage audit, Nov 17" |
 | (scheduling, Nov 17) three lists picked for Today's list had run as Today's Blitz in October | the run-once rule counts a day's Blitz | real.test.ts "runs Today's list once" caught it; swapped for spares that never ran |
+| (Fathom bank, Nov 17) city name groups (New York / NYC) were checked on every name-it list, wrongly flagging state lists | the check didn't look at the list's kind | city groups checked only on city lists; scripts/fathom/check.test.ts |
 
 ## What good looks like
 

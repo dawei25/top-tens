@@ -496,3 +496,17 @@ The judge records each verdict in `scripts/fathom/verdicts.json`:
 test that failed, for a drop ("no way in: know it or don't"). A fix changes only wording, unit, round, definition or
 fact, always from the source; it never invents an answer. A dropped question is removed from
 `public/fathom/questions.json` and kept in the verdicts file, so it isn't written again.
+
+## Notes from the Nov 17 bank expansion
+
+- The 100-character limit isn't enough alone: a question must also stay within two lines at 375x400 so LOCK IN stays
+  above the keyboard (the browser suite checks it).
+- Angles can't be asked yet: the game reads "degrees" as Celsius.
+- Easy openers run out first near the end of a cycle, because they also fill ordinary rounds: keep about two per
+  scheduled day.
+- The land-borders page changed (India and Afghanistan now 6, not 7); rebuild that list on purpose, not as a side
+  effect: `scripts/fathom/lists.ts` takes list ids.
+- Running `scripts/fathom/daily.ts` with the real date re-chooses every day after tomorrow; pass `--today` to extend
+  only past the last scheduled day.
+- Name-it lists: US states by population and by area, countries by people per square kilometre (Nov 17). A list's
+  noun may hold an acronym ("US state"); a place of the list's own kind is kept as an alias ("New York State").
