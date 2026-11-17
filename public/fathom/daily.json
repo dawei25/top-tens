@@ -190,5 +190,117 @@
    "canada-near-border-share",
    "name-country-5m-people"
   ]
+ },
+ {
+  "n": 13,
+  "date": "2026-11-27",
+  "ids": [
+   "berlin-wall-falls",
+   "dog-teeth",
+   "chernobyl-disaster",
+   "hong-kong-skyscrapers",
+   "oktoberfest-beer",
+   "le-mans-distance-record",
+   "england-share-of-uk",
+   "name-country-200m-people",
+   "lindbergh-flight-time",
+   "desert-sand-share"
+  ]
+ },
+ {
+  "n": 14,
+  "date": "2026-11-28",
+  "ids": [
+   "bolt-200m-record",
+   "x-rays-discovered",
+   "oldest-cat",
+   "ocean-average-depth",
+   "espresso-caffeine",
+   "bone-share-of-weight",
+   "name-country-as-big-as-mexico",
+   "sun-hydrogen",
+   "first-cds",
+   "first-mobile-phone-weight"
+  ]
+ },
+ {
+  "n": 15,
+  "date": "2026-11-29",
+  "ids": [
+   "world-life-expectancy",
+   "great-pyramid-blocks",
+   "french-speaking-canadians",
+   "concorde-retired",
+   "longest-solar-eclipse",
+   "world-cup-winning-countries",
+   "pac-man-released",
+   "dead-sea-salt",
+   "lhc-ring-length",
+   "name-country-as-big-as-india"
+  ]
+ },
+ {
+  "n": 16,
+  "date": "2026-11-30",
+  "ids": [
+   "euro-countries",
+   "longest-tennis-match",
+   "route-66-length",
+   "first-pokemon-games",
+   "land-speed-record",
+   "space-shuttle-missions",
+   "name-country-as-big-as-japan",
+   "google-founded",
+   "amazon-deforested",
+   "sugarcane-share"
+  ]
+ },
+ {
+  "n": 17,
+  "date": "2026-12-01",
+  "ids": [
+   "wright-first-flight-length",
+   "arabica-share",
+   "us-penny-cost",
+   "name-country-8-borders",
+   "channel-tunnel-length",
+   "swiss-german-speakers",
+   "football-panels",
+   "tornado-wind-record",
+   "first-dinosaur-named",
+   "first-vaccine"
+  ]
+ },
+ {
+  "n": 18,
+  "date": "2026-12-02",
+  "ids": [
+   "wikipedia-launched",
+   "australia-arid",
+   "buckingham-palace-rooms",
+   "apollo-11-duration",
+   "walking-speed",
+   "telephone-patent",
+   "name-country-7-borders",
+   "fastest-sail-around-world",
+   "phone-typing-speed",
+   "asia-share-of-land"
+  ]
+ },
+ {
+  "n": 19,
+  "date": "2026-12-03",
+  "ids": [
+   "first-playstation",
+   "train-speed-record",
+   "keyboard-keys",
+   "jupiter-earths",
+   "glacier-share-of-land",
+   "chicken-egg-hatching",
+   "four-minute-mile",
+   "femur-share-of-height",
+   "name-country-as-many-people-as-australia",
+   "panama-canal-length"
+  ]
  }
 ]
