@@ -10,7 +10,11 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
-- [ ] **Before they run:** athletes-earnings (Nov 28), car-models (Dec 3, two duplicate keys in scripts/intent.ts since
+- [ ] **Matcher (coordinator), from the Nov 17 audit:** on car-models a make alone ("honda") offers two top-10 models
+      (fine, a choice); on franchise lists a game title known elsewhere that starts with a top-10 series' name ("Mario
+      Party DS") still says it isn't in this ranking: let a top-10 series' name at the start of a title count there.
+
+- [x] **Before they run** (done Nov 17): athletes-earnings (Nov 28), car-models (Dec 3, two duplicate keys in scripts/intent.ts since
       Nov 8), game-franchises (Dec 4) need the same freshness and coverage audit the other picks had (Nov 17).
 
 - [ ] **Every gazetteer country in the lexicon's country set** (matcher agent, Nov 13): the guard that keeps a country's

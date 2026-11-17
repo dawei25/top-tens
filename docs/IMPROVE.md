@@ -295,6 +295,8 @@ stronger.
 | (coverage audit, Nov 17) short forms and spellings found nothing on next weeks' lists ("merc", "beemer", "st4", "dakha") and famous names outside the ranking read as "not one of the N here" | missing aliases and known names | aliases and known names; aliases.test.ts "coverage audit, Nov 17" |
 | (scheduling, Nov 17) three lists picked for Today's list had run as Today's Blitz in October | the run-once rule counts a day's Blitz | real.test.ts "runs Today's list once" caught it; swapped for spares that never ran |
 | (Fathom bank, Nov 17) city name groups (New York / NYC) were checked on every name-it list, wrongly flagging state lists | the check didn't look at the list's kind | city groups checked only on city lists; scripts/fathom/check.test.ts |
+| (audit, Nov 17) game-franchises: sub-series counted inside their series (Paper Mario, Black Ops) were separate answers costing a life, and famous games read as not in the ranking | the page's series totals include sub-series; titles weren't aliases | sub-series and ~200 titles count as their series; aliases.test.ts (no answer is a sub-series of a top-10 series) |
+| (audit, Nov 17) car-models: two duplicate keys in scripts/intent.ts since Nov 8 left "bmw 3" finding nothing | a duplicate object key silently drops the first | merged; a test fails on any duplicate key in scripts/ or src/ |
 
 ## What good looks like
 
