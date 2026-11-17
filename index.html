@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="theme-color" content="#050a14" />
     <meta name="color-scheme" content="dark" />
-    <meta name="description" content="Name the top 10. Five lives. Typos are free." />
+    <meta name="description" content="A free daily trivia game: name the top 10 of a list with five lives (typos are free), plus Today's Fathom, a daily estimation game." />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href="https://toptentacle.io/" />
     <!-- The link preview (Reddit, iMessage, Slack, Discord, X). og.png and the icons: e2e/share-image.cjs. -->
@@ -29,10 +29,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
-    <title>TENtacle</title>
+    <title>TENtacle: name the top 10, a daily list game</title>
   </head>
   <body>
     <div id="root"></div>
+    <!-- For crawlers and browsers without JavaScript; players never see it. -->
+    <noscript>
+      <h1>TENtacle</h1>
+      <p>A free daily trivia game: name the top 10 of a list, like the most populous countries or the highest-grossing films, with five lives. Typos are free. Plus Today's Fathom, a daily game of ten estimation questions.</p>
+      <p>TENtacle needs JavaScript to play.</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
