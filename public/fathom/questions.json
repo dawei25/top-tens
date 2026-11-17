@@ -1968,10 +1968,10 @@
   {
    "id": "bangkok-visitors",
    "kind": "lists",
-   "question": "How many international visitors does Bangkok, the world's most visited city, get?",
+   "question": "How many international visitors did Bangkok get?",
    "unit": "million people",
    "answer": 30.3,
-   "definition": "2025",
+   "definition": "2025, more than any other city",
    "fact": "Hong Kong came next with 23.2 million.",
    "source": {
     "title": "List of cities by international visitors",
