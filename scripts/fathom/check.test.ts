@@ -463,6 +463,17 @@ describe("name-it questions", () => {
     expect(listMisses(list([andes("Colombia", 5), andes("Peru", 4), andes("Chile", 3), andes("Ecuador", 2), andes("Bolivia", 1)]))).toEqual([
       'list countries-population: "Andes" doesn\'t register as Bolivia',
     ]);
+    // Nov 17: a city's names are a city list's to register. On a list of US states "New York" is the state, and "NYC"
+    // must not lock it; on a city list it must lock the city.
+    const places = (noun: string, name: string): NameList => ({
+      ...fixtures("countries-population")!,
+      id: "places",
+      noun,
+      nounPlural: `${noun}s`,
+      entries: [{ name, aliases: ["New York"], value: 2 }, { name: "Texas", aliases: [], value: 1 }],
+    });
+    expect(listMisses(places("US state", "New York State"))).toEqual([]);
+    expect(listMisses(places("city", "New York City"))).toEqual(['list places: "NYC" doesn\'t register as New York City']);
   });
 
   // When the real lists are there (once the data agent's branch is merged), the real bank is checked against them.

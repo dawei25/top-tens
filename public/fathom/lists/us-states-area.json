@@ -1,0 +1,744 @@
+{
+  "id": "us-states-area",
+  "noun": "US state",
+  "nounPlural": "US states",
+  "measure": "square kilometres",
+  "scoring": "ratio",
+  "source": {
+    "title": "List of U.S. states and territories by area",
+    "url": "https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_area"
+  },
+  "asOf": "2026-11-02",
+  "entries": [
+    {
+      "name": "California",
+      "aliases": [
+        "California, USA",
+        "State of California, United States",
+        "State of California",
+        "Calif.",
+        "California's",
+        "California, United States",
+        "California, United States of America",
+        "Califronia",
+        "Califnornia",
+        "US-CA",
+        "Calfornia",
+        "Californny",
+        "CA state",
+        "31st State",
+        "Kalifornija",
+        "Californiay",
+        "Kalifornía",
+        "California, United States America",
+        "Taxifornia",
+        "California, US",
+        "Thirty-First State",
+        "CA, USA",
+        "Calefornia",
+        "Calafornia",
+        "Ahééháshį́į́h Hahoodzo",
+        "Carlifonia",
+        "Califonria",
+        "Californai",
+        "CA",
+        "Cali"
+      ],
+      "value": 423967
+    },
+    {
+      "name": "Texas",
+      "aliases": [
+        "Texas, United States",
+        "The Lone Star State",
+        "State of Texas",
+        "US-TX",
+        "28th State",
+        "Texass",
+        "Texos",
+        "Texas, USA",
+        "Twenty-Eighth State",
+        "Texan",
+        "Twxas",
+        "Texas, United States of America",
+        "Bluebonnet State",
+        "TX"
+      ],
+      "value": 695662
+    },
+    {
+      "name": "Florida",
+      "aliases": [
+        "Fla.",
+        "Florida, United States",
+        "State of Florida",
+        "Sunshine State",
+        "Flordia",
+        "US-FL",
+        "Floreda",
+        "27th State",
+        "Flordida",
+        "Florida, USA",
+        "Florida's",
+        "Flawda",
+        "Twenty-Seventh State",
+        "Flarida",
+        "Florda",
+        "Floryda",
+        "Floirda",
+        "Floridah",
+        "Free State of Florida",
+        "Florida, United States of America",
+        "Floorida",
+        "FL"
+      ],
+      "value": 170312
+    },
+    {
+      "name": "New York",
+      "aliases": [
+        "State of New York",
+        "State New York",
+        "US-NY",
+        "11th State",
+        "New Yourk State",
+        "Estado de Nueva York",
+        "Estado Nueva York",
+        "Nueva York",
+        "Eleventh State",
+        "NewYork",
+        "NYS",
+        "NY",
+        "New York State",
+        "NY State"
+      ],
+      "value": 141297
+    },
+    {
+      "name": "Pennsylvania",
+      "aliases": [
+        "Pennsilvania",
+        "Pensylvania",
+        "Commonwealth of Pennsylvania",
+        "Pennyslvania, United States",
+        "Pennylvania",
+        "Pencilvania",
+        "State of pennsylvania",
+        "Keystone State",
+        "US-PA",
+        "Pennslyvania",
+        "Pennsylvana",
+        "Pennsylvania, United States",
+        "Pennsylvannia",
+        "The Quaker State",
+        "The Coal State",
+        "The Oil State",
+        "Penna.",
+        "2nd State",
+        "Pensylvaina",
+        "Second State",
+        "Pennsylvania, United States of America",
+        "PA state",
+        "Pennsilfaani",
+        "Penn.",
+        "Penn's Woods",
+        "Pennsylvania, PA",
+        "Pennyslvania",
+        "Pennsylania",
+        "Pennsylvanie",
+        "Pennyslavia",
+        "Pennsylvaina",
+        "Pennslvania",
+        "Pennsylvainia",
+        "Pennsylvania, USA",
+        "PA"
+      ],
+      "value": 119280
+    },
+    {
+      "name": "Illinois",
+      "aliases": [
+        "Illinois, United States",
+        "State of Illinois",
+        "Land of Lincoln",
+        "Illinios",
+        "Illionis",
+        "The Prairie State",
+        "21st State",
+        "Ill.",
+        "US-IL",
+        "Illinoisan",
+        "Illinoy",
+        "Sucker State",
+        "Ilinois",
+        "IIIinois",
+        "Illinoid",
+        "Twenty-first State",
+        "Illinois, USA",
+        "Illonois",
+        "Illinoisian",
+        "Illinoisans",
+        "The Inland Empire State",
+        "Illinois, United States of America",
+        "Illinoi",
+        "IL"
+      ],
+      "value": 149995
+    },
+    {
+      "name": "Ohio",
+      "aliases": [
+        "Buckeye State",
+        "State of Ohio",
+        "Ohio, United States",
+        "Mother of Modern Presidents",
+        "Ohioan",
+        "Ohioian",
+        "Ohio, USA",
+        "Oiho",
+        "Ohoi",
+        "17th State",
+        "US-OH",
+        "Buckeye",
+        "Seventeenth State",
+        "O hio",
+        "Ohiyo",
+        "Ohioans",
+        "Ohion",
+        "Ohyo",
+        "Ohio, United States of America",
+        "0hio"
+      ],
+      "value": 116098
+    },
+    {
+      "name": "Georgia",
+      "aliases": [
+        "U.S. Georgia",
+        "Georgia, United States",
+        "US-GA",
+        "The Peach State",
+        "The Empire State of the South",
+        "State of Georgia",
+        "Georgia-USA",
+        "U.S. state of Georgia",
+        "USA Georgia",
+        "American Georgia",
+        "Georgia US state",
+        "Georgia, United States of America",
+        "Georgia America",
+        "GA"
+      ],
+      "value": 153910
+    },
+    {
+      "name": "North Carolina",
+      "aliases": [
+        "The Old North State",
+        "North Carolina, United States",
+        "State of North Carolina",
+        "North Cackalacky",
+        "US-NC",
+        "From Manteo to Murphy",
+        "From Murphy to Manteo",
+        "Manteo to Murphy",
+        "Murphy to Manteo",
+        "North Cackalack",
+        "Tarheel State",
+        "12th State",
+        "North Carolinian",
+        "Land of the pines",
+        "Twelfth State",
+        "N. Carolina",
+        "Rip Van Winkle State",
+        "North Calorina",
+        "Upper Carolina",
+        "North Carollina",
+        "North Carrolina",
+        "North Carolina, USA",
+        "North Carolina, United States of America",
+        "NC"
+      ],
+      "value": 139391
+    },
+    {
+      "name": "Michigan",
+      "aliases": [
+        "Michigan, United States",
+        "Mitchigan",
+        "State of Michigan",
+        "Mich.",
+        "Wolverine State",
+        "The Great Lakes State",
+        "Water-Winter Wonderland",
+        "26th State",
+        "US-MI",
+        "Micigan",
+        "Twenty-Sixth State",
+        "The Great Lake State",
+        "Mixigen",
+        "Mixiegen",
+        "Michgan",
+        "Michigun",
+        "Mighican",
+        "Michigan, USA",
+        "Michigan, United States of America",
+        "Mishigan",
+        "MI"
+      ],
+      "value": 250487
+    },
+    {
+      "name": "New Jersey",
+      "aliases": [
+        "NJ"
+      ],
+      "value": 22591
+    },
+    {
+      "name": "Virginia",
+      "aliases": [
+        "VA",
+        "Virgina"
+      ],
+      "value": 110787
+    },
+    {
+      "name": "Washington",
+      "aliases": [
+        "State Washington",
+        "State of Washington",
+        "The 42nd state",
+        "US-WA",
+        "Estado de Washington",
+        "Emerald state",
+        "Huashengdun",
+        "Washignton",
+        "Forty-Second State",
+        "U.S. state of Washington",
+        "Washington, United States of America",
+        "WA",
+        "Washington State"
+      ],
+      "value": 184661
+    },
+    {
+      "name": "Arizona",
+      "aliases": [
+        "Arizona, United States",
+        "Grand Canyon State",
+        "State of arizona",
+        "Arisona",
+        "US-AZ",
+        "Arizona, USA",
+        "The Copper State",
+        "48th State",
+        "Arizonian",
+        "Ariz.",
+        "Arizone",
+        "Forty-Eighth State",
+        "Arazona",
+        "Airzona",
+        "Hoozdo Hahoodzo",
+        "The Valentine State",
+        "Arizona, United States of America",
+        "AZ"
+      ],
+      "value": 295234
+    },
+    {
+      "name": "Tennessee",
+      "aliases": [
+        "TN"
+      ],
+      "value": 109153
+    },
+    {
+      "name": "Massachusetts",
+      "aliases": [
+        "MA",
+        "Mass"
+      ],
+      "value": 27336
+    },
+    {
+      "name": "Indiana",
+      "aliases": [],
+      "value": 94326
+    },
+    {
+      "name": "Missouri",
+      "aliases": [
+        "MO"
+      ],
+      "value": 180540
+    },
+    {
+      "name": "Maryland",
+      "aliases": [
+        "MD"
+      ],
+      "value": 32131
+    },
+    {
+      "name": "Colorado",
+      "aliases": [
+        "Kolorado",
+        "Colorado, United States",
+        "Colarado",
+        "State of Colorado",
+        "US-CO",
+        "Centennial State",
+        "Coloradan",
+        "Coloradans",
+        "Colorful Colorado",
+        "38th State",
+        "Colo.",
+        "Buffalo Plains State",
+        "Columbine State",
+        "Rocky Mountain Empire",
+        "Colorada",
+        "Thirty-Eighth State",
+        "Calorado",
+        "Collorado",
+        "Colourado",
+        "Colorado, USA",
+        "Colorado, United States of America",
+        "Colorodo",
+        "Corolado",
+        "CO"
+      ],
+      "value": 269601
+    },
+    {
+      "name": "Wisconsin",
+      "aliases": [
+        "WI"
+      ],
+      "value": 169635
+    },
+    {
+      "name": "Minnesota",
+      "aliases": [
+        "MN"
+      ],
+      "value": 225163
+    },
+    {
+      "name": "South Carolina",
+      "aliases": [
+        "SC"
+      ],
+      "value": 82933
+    },
+    {
+      "name": "Alabama",
+      "aliases": [
+        "AL"
+      ],
+      "value": 135767
+    },
+    {
+      "name": "Louisiana",
+      "aliases": [
+        "LA"
+      ],
+      "value": 135659
+    },
+    {
+      "name": "Kentucky",
+      "aliases": [
+        "KY"
+      ],
+      "value": 104656
+    },
+    {
+      "name": "Oregon",
+      "aliases": [
+        "Oregon's",
+        "Oregon, USA",
+        "Oregon, United States",
+        "State of Oregon",
+        "The Beaver State",
+        "33rd State",
+        "US-OR",
+        "Ore.",
+        "Thirty-Third State",
+        "Orgeon",
+        "Oregon, United States of America"
+      ],
+      "value": 254799
+    },
+    {
+      "name": "Oklahoma",
+      "aliases": [],
+      "value": 181037
+    },
+    {
+      "name": "Connecticut",
+      "aliases": [
+        "CT"
+      ],
+      "value": 14357
+    },
+    {
+      "name": "Utah",
+      "aliases": [
+        "UT"
+      ],
+      "value": 219882
+    },
+    {
+      "name": "Nevada",
+      "aliases": [
+        "Nevada, United States",
+        "Silver state",
+        "State of Nevada",
+        "US-NV",
+        "The Sagebrush State",
+        "36th State",
+        "Nevadan",
+        "Nevadian",
+        "Nevada, USA",
+        "Nev.",
+        "Thirty-Sixth State",
+        "Nevada, United States of America",
+        "NV"
+      ],
+      "value": 286380
+    },
+    {
+      "name": "Iowa",
+      "aliases": [
+        "IA"
+      ],
+      "value": 145746
+    },
+    {
+      "name": "Arkansas",
+      "aliases": [
+        "AR"
+      ],
+      "value": 137732
+    },
+    {
+      "name": "Kansas",
+      "aliases": [
+        "KS"
+      ],
+      "value": 213100
+    },
+    {
+      "name": "Mississippi",
+      "aliases": [
+        "Misisipi",
+        "Mississippi, United States",
+        "Misissippi",
+        "Mississipi",
+        "Missisipi",
+        "Misisippi",
+        "Misssissippi",
+        "State of Mississippi",
+        "Missisippi",
+        "The Magnolia State",
+        "The Hospitality State",
+        "20th State",
+        "Miss.",
+        "US-MS",
+        "Misissipi",
+        "U.S. state of Mississippi",
+        "Twentieth State",
+        "Miſsiſsippi",
+        "Missippi",
+        "Mississippi, USA",
+        "Mississippi, United States of America",
+        "Mississiippi",
+        "MS"
+      ],
+      "value": 125438
+    },
+    {
+      "name": "New Mexico",
+      "aliases": [
+        "Nuevo Mejico",
+        "New Mexico, United States",
+        "Nueva mexico",
+        "State of New Mexico",
+        "US-NM",
+        "Estado de Nuevo México",
+        "The Land of Enchantment",
+        "47th State",
+        "State of NM",
+        "NewMexico",
+        "New Mexcio",
+        "Forty-Seventh State",
+        "Yootó Hahoodzo",
+        "New Mex",
+        "New Mexico, USA",
+        "New Mexico, United States of America",
+        "NM"
+      ],
+      "value": 314917
+    },
+    {
+      "name": "Idaho",
+      "aliases": [
+        "Idaho, United States",
+        "Idahoan",
+        "State of Idaho",
+        "The Gem State",
+        "The Spud State",
+        "43rd State",
+        "US-ID",
+        "Forty-Third State",
+        "Ida.",
+        "Idahoe",
+        "Idaho, USA",
+        "Idaho, United States of America",
+        "ID"
+      ],
+      "value": 216443
+    },
+    {
+      "name": "Nebraska",
+      "aliases": [
+        "NE"
+      ],
+      "value": 200330
+    },
+    {
+      "name": "West Virginia",
+      "aliases": [
+        "WV"
+      ],
+      "value": 62756
+    },
+    {
+      "name": "Hawaii",
+      "aliases": [
+        "Hawaiʻi"
+      ],
+      "value": 28313
+    },
+    {
+      "name": "New Hampshire",
+      "aliases": [
+        "NH"
+      ],
+      "value": 24214
+    },
+    {
+      "name": "Maine",
+      "aliases": [],
+      "value": 91633
+    },
+    {
+      "name": "Montana",
+      "aliases": [
+        "Montana, United States",
+        "Montanans",
+        "State of Montana",
+        "Big Sky Country",
+        "US-MT",
+        "The Treasure State",
+        "41st State",
+        "Montucky",
+        "Forty-First State",
+        "Montana, USA",
+        "Montana, United States of America",
+        "MT"
+      ],
+      "value": 380831
+    },
+    {
+      "name": "Rhode Island",
+      "aliases": [
+        "Rhode",
+        "RI"
+      ],
+      "value": 4001
+    },
+    {
+      "name": "Delaware",
+      "aliases": [
+        "DE"
+      ],
+      "value": 6446
+    },
+    {
+      "name": "South Dakota",
+      "aliases": [
+        "SD"
+      ],
+      "value": 199729
+    },
+    {
+      "name": "North Dakota",
+      "aliases": [
+        "ND"
+      ],
+      "value": 183108
+    },
+    {
+      "name": "Alaska",
+      "aliases": [
+        "Alaskan",
+        "Alaskans",
+        "Alaska, United States",
+        "State of Alaska",
+        "US-AK",
+        "Alyaska",
+        "Alaksa",
+        "Arasuka",
+        "49th State",
+        "Elaska",
+        "Ulaska",
+        "Alasca",
+        "Alaska, USA",
+        "Forty-Ninth State",
+        "Alaasikaq",
+        "Alas'kaaq",
+        "Anáaski",
+        "Alaska state",
+        "Alaskas",
+        "Alaskaq",
+        "Alax̂sxax̂",
+        "Alaska, United States of America",
+        "AK"
+      ],
+      "value": 1723337
+    },
+    {
+      "name": "Vermont",
+      "aliases": [
+        "VT"
+      ],
+      "value": 24906
+    },
+    {
+      "name": "Wyoming",
+      "aliases": [
+        "Wyoming, United States",
+        "State of Wyoming",
+        "US-WY",
+        "The Equality State",
+        "The Cowboy State",
+        "Wioming",
+        "Big Wonderful Wyoming",
+        "44th State",
+        "Wyo.",
+        "Wyomingites",
+        "Forty-Fourth State",
+        "Whyoming",
+        "Yoming",
+        "Wyoming state",
+        "Wyomng",
+        "Wyomming",
+        "Wyoming, USA",
+        "Wyoming, United States of America",
+        "WY"
+      ],
+      "value": 253335
+    }
+  ]
+}

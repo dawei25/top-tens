@@ -1,0 +1,533 @@
+{
+  "id": "countries-density",
+  "noun": "country",
+  "nounPlural": "countries",
+  "measure": "people per square kilometre",
+  "scoring": "ratio",
+  "source": {
+    "title": "List of countries and dependencies by population density",
+    "url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population_density"
+  },
+  "asOf": "2026-11-17",
+  "entries": [
+    {
+      "name": "India",
+      "aliases": [],
+      "value": 441
+    },
+    {
+      "name": "China",
+      "aliases": [
+        "People's Republic of China",
+        "PRC"
+      ],
+      "value": 151
+    },
+    {
+      "name": "United States",
+      "aliases": [
+        "United States of America",
+        "USA",
+        "US",
+        "U.S.",
+        "America"
+      ],
+      "value": 37
+    },
+    {
+      "name": "Indonesia",
+      "aliases": [],
+      "value": 150
+    },
+    {
+      "name": "Pakistan",
+      "aliases": [],
+      "value": 289
+    },
+    {
+      "name": "Nigeria",
+      "aliases": [],
+      "value": 255
+    },
+    {
+      "name": "Brazil",
+      "aliases": [],
+      "value": 25
+    },
+    {
+      "name": "Bangladesh",
+      "aliases": [],
+      "value": 1333
+    },
+    {
+      "name": "Russia",
+      "aliases": [
+        "Russian Federation"
+      ],
+      "value": 8.6
+    },
+    {
+      "name": "Ethiopia",
+      "aliases": [],
+      "value": 117
+    },
+    {
+      "name": "Mexico",
+      "aliases": [],
+      "value": 67
+    },
+    {
+      "name": "Japan",
+      "aliases": [],
+      "value": 340
+    },
+    {
+      "name": "Philippines",
+      "aliases": [],
+      "value": 389
+    },
+    {
+      "name": "Egypt",
+      "aliases": [],
+      "value": 117
+    },
+    {
+      "name": "Democratic Republic of the Congo",
+      "aliases": [
+        "DR Congo",
+        "DRC",
+        "Congo-Kinshasa"
+      ],
+      "value": 48
+    },
+    {
+      "name": "Vietnam",
+      "aliases": [
+        "Viet Nam"
+      ],
+      "value": 309
+    },
+    {
+      "name": "Iran",
+      "aliases": [],
+      "value": 56
+    },
+    {
+      "name": "Turkey",
+      "aliases": [
+        "Türkiye"
+      ],
+      "value": 114
+    },
+    {
+      "name": "Germany",
+      "aliases": [],
+      "value": 242
+    },
+    {
+      "name": "Thailand",
+      "aliases": [],
+      "value": 140
+    },
+    {
+      "name": "Tanzania",
+      "aliases": [],
+      "value": 77
+    },
+    {
+      "name": "United Kingdom",
+      "aliases": [
+        "UK",
+        "U.K.",
+        "Britain",
+        "Great Britain"
+      ],
+      "value": 287
+    },
+    {
+      "name": "France",
+      "aliases": [],
+      "value": 122
+    },
+    {
+      "name": "South Africa",
+      "aliases": [],
+      "value": 53
+    },
+    {
+      "name": "Italy",
+      "aliases": [],
+      "value": 201
+    },
+    {
+      "name": "Kenya",
+      "aliases": [],
+      "value": 99
+    },
+    {
+      "name": "Myanmar",
+      "aliases": [
+        "Burma"
+      ],
+      "value": 84
+    },
+    {
+      "name": "Colombia",
+      "aliases": [],
+      "value": 48
+    },
+    {
+      "name": "South Korea",
+      "aliases": [
+        "Republic of Korea",
+        "Korea, South"
+      ],
+      "value": 530
+    },
+    {
+      "name": "Sudan",
+      "aliases": [],
+      "value": 27
+    },
+    {
+      "name": "Uganda",
+      "aliases": [],
+      "value": 249
+    },
+    {
+      "name": "Spain",
+      "aliases": [],
+      "value": 98
+    },
+    {
+      "name": "Iraq",
+      "aliases": [],
+      "value": 106
+    },
+    {
+      "name": "Algeria",
+      "aliases": [],
+      "value": 20
+    },
+    {
+      "name": "Argentina",
+      "aliases": [],
+      "value": 17
+    },
+    {
+      "name": "Canada",
+      "aliases": [],
+      "value": 4.5
+    },
+    {
+      "name": "Poland",
+      "aliases": [],
+      "value": 126
+    },
+    {
+      "name": "Ukraine",
+      "aliases": [],
+      "value": 65
+    },
+    {
+      "name": "Morocco",
+      "aliases": [],
+      "value": 53
+    },
+    {
+      "name": "Saudi Arabia",
+      "aliases": [],
+      "value": 16
+    },
+    {
+      "name": "Ivory Coast",
+      "aliases": [
+        "Côte d'Ivoire",
+        "Cote d'Ivoire"
+      ],
+      "value": 100
+    },
+    {
+      "name": "Niger",
+      "aliases": [],
+      "value": 21
+    },
+    {
+      "name": "Australia",
+      "aliases": [],
+      "value": 3.5
+    },
+    {
+      "name": "North Korea",
+      "aliases": [
+        "DPRK",
+        "Korea, North"
+      ],
+      "value": 220
+    },
+    {
+      "name": "Netherlands",
+      "aliases": [
+        "Holland",
+        "The Netherlands"
+      ],
+      "value": 541
+    },
+    {
+      "name": "Guinea",
+      "aliases": [],
+      "value": 60
+    },
+    {
+      "name": "Czech Republic",
+      "aliases": [
+        "Czechia"
+      ],
+      "value": 139
+    },
+    {
+      "name": "Sweden",
+      "aliases": [],
+      "value": 26
+    },
+    {
+      "name": "Papua New Guinea",
+      "aliases": [],
+      "value": 23
+    },
+    {
+      "name": "Portugal",
+      "aliases": [],
+      "value": 114
+    },
+    {
+      "name": "Greece",
+      "aliases": [],
+      "value": 78
+    },
+    {
+      "name": "Hungary",
+      "aliases": [],
+      "value": 106
+    },
+    {
+      "name": "United Arab Emirates",
+      "aliases": [
+        "UAE"
+      ],
+      "value": 155
+    },
+    {
+      "name": "Austria",
+      "aliases": [],
+      "value": 111
+    },
+    {
+      "name": "Laos",
+      "aliases": [],
+      "value": 34
+    },
+    {
+      "name": "Republic of the Congo",
+      "aliases": [
+        "Congo-Brazzaville",
+        "Congo Republic"
+      ],
+      "value": 19
+    },
+    {
+      "name": "Singapore",
+      "aliases": [],
+      "value": 8290
+    },
+    {
+      "name": "Ireland",
+      "aliases": [],
+      "value": 76
+    },
+    {
+      "name": "New Zealand",
+      "aliases": [],
+      "value": 20
+    },
+    {
+      "name": "Guinea-Bissau",
+      "aliases": [],
+      "value": 78
+    },
+    {
+      "name": "Equatorial Guinea",
+      "aliases": [],
+      "value": 67
+    },
+    {
+      "name": "Bahrain",
+      "aliases": [],
+      "value": 2034
+    },
+    {
+      "name": "Timor-Leste",
+      "aliases": [
+        "East Timor"
+      ],
+      "value": 94
+    },
+    {
+      "name": "Estonia",
+      "aliases": [],
+      "value": 32
+    },
+    {
+      "name": "Cyprus",
+      "aliases": [],
+      "value": 147
+    },
+    {
+      "name": "Mauritius",
+      "aliases": [],
+      "value": 637
+    },
+    {
+      "name": "Eswatini",
+      "aliases": [
+        "Swaziland"
+      ],
+      "value": 72
+    },
+    {
+      "name": "Djibouti",
+      "aliases": [],
+      "value": 50
+    },
+    {
+      "name": "Fiji",
+      "aliases": [],
+      "value": 51
+    },
+    {
+      "name": "Bhutan",
+      "aliases": [],
+      "value": 21
+    },
+    {
+      "name": "Iceland",
+      "aliases": [],
+      "value": 3.9
+    },
+    {
+      "name": "Monaco",
+      "aliases": [],
+      "value": 19428
+    },
+    {
+      "name": "Vatican City",
+      "aliases": [
+        "Holy See",
+        "Vatican"
+      ],
+      "value": 2205
+    },
+    {
+      "name": "Kazakhstan",
+      "aliases": [
+        "Kazakhistan",
+        "Kazhakstan",
+        "Qazaqstan",
+        "Republic of Kazakhstan",
+        "Kazachstan",
+        "Kazahstan",
+        "Khazakstan",
+        "Khazakastan",
+        "Khazakhstan",
+        "Kazastan",
+        "Kazakistan",
+        "Kazahkstan",
+        "Kazahastan",
+        "Kazajastan",
+        "Kazakhia",
+        "KA3AKCTAH",
+        "KA3AXCTAH",
+        "Kazakh Yeli",
+        "Kazakh Eli",
+        "Qazaqstan Respublïkası",
+        "Respublika Kazakhstan",
+        "Kazakh Republic",
+        "Qazaqstan Respwblïkası",
+        "Kazacstan",
+        "Qazaqhstan",
+        "Qazakhstan",
+        "Kazaqstan",
+        "Kazaqhstan",
+        "Qazakstan",
+        "Kazaxstan",
+        "Qaziqistan",
+        "Kasakhstan",
+        "Ka3akcmah",
+        "Cazakstan",
+        "Cazakhstan",
+        "Kazakstan",
+        "Kazakh",
+        "Kazakhstani"
+      ],
+      "value": 7.6
+    },
+    {
+      "name": "Bolivia",
+      "aliases": [
+        "Boliva",
+        "Republic of Bolivia",
+        "Bolivian Republic",
+        "República de Bolivia",
+        "The Plurinational State of Bolivia",
+        "Plan de Todos",
+        "Estado Plurinacional de Bolivia",
+        "Volívia",
+        "Buliwya Mamallaqta",
+        "Wuliwya Suyu",
+        "Bolibia",
+        "Bolivia Plurinational States of",
+        "Bollivia",
+        "Bolivian"
+      ],
+      "value": 11
+    },
+    {
+      "name": "Central African Republic",
+      "aliases": [
+        "CAR",
+        "Central African Rep"
+      ],
+      "value": 8.6
+    },
+    {
+      "name": "Mongolia",
+      "aliases": [
+        "Republic of Mongolia",
+        "Republic Mongolia",
+        "Mongol Uls",
+        "Mongolian Republic",
+        "Mongol Nation",
+        "Mongolia Proper",
+        "Mongol Proper",
+        "Hmongolia",
+        "Menggu",
+        "Mongol Ulus",
+        "Outer Mongolia",
+        "Mongol country",
+        "Minegolia",
+        "Mohron ync",
+        "Western Mongolia",
+        "State of Mongolia",
+        "Mongollia",
+        "Monogolia",
+        "Mongolian"
+      ],
+      "value": 2.2
+    },
+    {
+      "name": "Gabon",
+      "aliases": [],
+      "value": 9.9
+    }
+  ]
+}

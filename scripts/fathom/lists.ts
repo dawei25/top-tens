@@ -40,7 +40,11 @@ export interface NameList {
 }
 
 /** The country lists, which share one set of countries (by name) so a country means the same in every round. */
-export const COUNTRY_LISTS = ["countries-population", "countries-area", "land-borders"];
+export const COUNTRY_LISTS = ["countries-population", "countries-area", "land-borders", "countries-density"];
+/** The US state lists (Nov 17): the 50 states, the same set in both, typed the same way. */
+export const STATE_LISTS = ["us-states-population", "us-states-area"];
+/** What a US state list names: "Name a US state with about 5 million people". */
+export const STATE_NOUN = { noun: "US state", nounPlural: "US states" } as const;
 
 const KEYS = ["id", "noun", "nounPlural", "measure", "scoring", "source", "asOf", "entries"];
 
@@ -55,7 +59,8 @@ export function checkList(list: NameList, file?: string): string[] {
   if (file && list.id !== file.replace(/\.json$/, "")) err(`id doesn't match its file name ${file}`);
   for (const k of ["noun", "nounPlural", "measure"] as const)
     if (typeof list[k] !== "string" || !list[k].trim()) err(`${k} is missing`);
-    else if (list[k] !== list[k].toLowerCase()) err(`${k} "${list[k]}" must be lower case`);
+    // Lower case, an acronym aside ("US state", as the round says "Texas is a US state").
+    else if (list[k].split(" ").some((w) => w !== w.toLowerCase() && !/^[A-Z]{2,3}$/.test(w))) err(`${k} "${list[k]}" must be lower case`);
   if (list.scoring !== "ratio" && list.scoring !== "steps") err(`scoring must be "ratio" or "steps"`);
   if (!list.source || typeof list.source.title !== "string" || !list.source.title) err("source.title is missing");
   if (!list.source || typeof list.source.url !== "string" || !list.source.url.startsWith("https://"))
@@ -102,6 +107,16 @@ export function checkList(list: NameList, file?: string): string[] {
 
 /** The country lists must name the same countries, so every round has the same set to pick from. */
 export function checkCountryLists(lists: NameList[]): string[] {
+  return checkOneSet(lists, "country", "countries");
+}
+
+/** The US state lists likewise: the same 50 states in each. */
+export function checkStateLists(lists: NameList[]): string[] {
+  return checkOneSet(lists, STATE_NOUN.noun, STATE_NOUN.nounPlural);
+}
+
+/** Lists of one kind of thing name the same things, so a name means the same in every round of that kind. */
+function checkOneSet(lists: NameList[], noun: string, nounPlural: string): string[] {
   const errors: string[] = [];
   const [first, ...rest] = lists;
   const names = (l: NameList) => new Set(l.entries.map((e) => e.name));
@@ -110,10 +125,10 @@ export function checkCountryLists(lists: NameList[]): string[] {
     const other = names(l);
     const missing = [...base].filter((n) => !other.has(n));
     const extra = [...other].filter((n) => !base.has(n));
-    if (missing.length) errors.push(`${l.id} lacks ${missing.length} of ${first.id}'s countries: ${missing.slice(0, 8).join(", ")}`);
-    if (extra.length) errors.push(`${l.id} has ${extra.length} countries ${first.id} lacks: ${extra.slice(0, 8).join(", ")}`);
+    if (missing.length) errors.push(`${l.id} lacks ${missing.length} of ${first.id}'s ${nounPlural}: ${missing.slice(0, 8).join(", ")}`);
+    if (extra.length) errors.push(`${l.id} has ${extra.length} ${nounPlural} ${first.id} lacks: ${extra.slice(0, 8).join(", ")}`);
   }
-  for (const l of lists) if (l.noun !== "country" || l.nounPlural !== "countries") errors.push(`${l.id}: noun must be country`);
+  for (const l of lists) if (l.noun !== noun || l.nounPlural !== nounPlural) errors.push(`${l.id}: noun must be ${noun}`);
   return errors;
 }
 
@@ -175,6 +190,12 @@ export const FORMS: Record<string, string[]> = {
   Dhaka: ["Dakha"],
   London: ["Greater London"],
   "Mexico City": ["Mex City"],
+  Hawaii: ["Hawaiʻi"],
+};
+
+/** Forms a puzzle gives an entry that name something else: "The land of ten-thousand lakes" is Minnesota, not Michigan. */
+export const WRONG_FORMS: Record<string, string[]> = {
+  Michigan: ["The land of ten-thousand lakes"],
 };
 
 /**
@@ -193,17 +214,30 @@ export const isPlace = (form: string): boolean => !!placeNamed(form) || PART_WOR
 /** The people of a part of a country, never the country: "Scottish" and "Welsh" locked the UK as "Scotland" did. */
 const PART_WORDS = new Set(["English", "Scottish", "Scots", "Welsh", "Northern Irish"].map(normalize));
 
-/** The forms a list keeps for an entry: its own and FORMS, less places of their own and redirects that aren't names. */
-export function keptForms(name: string, aliases: string[]): string[] {
-  return [...aliases, ...(FORMS[name] ?? [])].filter((a) => !isPlace(a) && !NOT_A_NAME.test(a));
+/**
+ * Whether a place of its own is one of the list's own things: on a list of US states, "New York State" (a US state in
+ * PLACES) is New York, the entry, and must lock as it. On any other list it is a place of its own, never an alias.
+ */
+export const ownKind = (form: string, noun: string | undefined): boolean =>
+  !!noun && normalize(placeNamed(form)?.noun ?? "") === normalize(noun);
+
+/**
+ * The forms a list keeps for an entry: its own and FORMS, less places of their own (but a place of the list's own kind,
+ * `noun`) and redirects that aren't names.
+ */
+export function keptForms(name: string, aliases: string[], noun?: string): string[] {
+  const wrong = new Set((WRONG_FORMS[name] ?? []).map(normalize));
+  return [...aliases, ...(FORMS[name] ?? [])].filter(
+    (a) => (!isPlace(a) || ownKind(a, noun)) && !NOT_A_NAME.test(a) && !wrong.has(normalize(a)),
+  );
 }
 
 /**
  * An entry's aliases with every form another entry also has dropped (an alias two countries share would make a
  * typed answer ambiguous; neither gets it), and the forms that only repeat its own name.
  */
-function uniqueForms(given: { name: string; aliases: string[]; value: number }[]): NameEntry[] {
-  const entries = given.map((e) => ({ ...e, aliases: keptForms(e.name, e.aliases) }));
+function uniqueForms(given: { name: string; aliases: string[]; value: number }[], noun?: string): NameEntry[] {
+  const entries = given.map((e) => ({ ...e, aliases: keptForms(e.name, e.aliases, noun) }));
   const count = new Map<string, number>();
   for (const e of entries)
     for (const f of new Set([e.name, ...e.aliases].map(normalize).filter(Boolean))) count.set(f, (count.get(f) ?? 0) + 1);
@@ -283,7 +317,32 @@ async function areaRows(title: string): Promise<Map<string, number>> {
   return out;
 }
 
+/**
+ * The density table's rows (Nov 17): each country's people per square kilometre of land, by the country its
+ * "Demographics of ..." link names ("Demographics of Republic of the Congo"), its rows for dependencies included.
+ */
+async function densityRows(title: string): Promise<{ country: string; density: number }[]> {
+  const $ = await fetchPage(title);
+  const { header, body } = splitHeader(tableGrid($, wikitables($)[0]));
+  const col = header.findIndex((h) => /density.*km/i.test(h));
+  if (col < 0) throw new Error(`no density column on ${title}: ${header.join(" | ")}`);
+  const rows: { country: string; density: number }[] = [];
+  for (const row of body) {
+    const text = row[0]?.text ?? "";
+    if (text === "World") continue;
+    const density = Number((row[col]?.text ?? "").replace(/,/g, ""));
+    if (!Number.isFinite(density) || density <= 0) throw new Error(`${text}: density "${row[col]?.text}"`);
+    const country = (row[0]?.link ?? text).replace(/^Demographics of (?:the )?/, "");
+    rows.push({ country, density });
+  }
+  return rows;
+}
+
+/** The list ids named on the command line (`lists.ts us-states-population`): only those are written; none, all. */
+const ONLY = process.argv.slice(2).filter((a) => !a.startsWith("-"));
+
 function write(list: NameList) {
+  if (ONLY.length && !ONLY.includes(list.id)) return;
   mkdirSync(LISTS_DIR, { recursive: true });
   const errors = checkList(list);
   if (errors.length) throw new Error(errors.join("\n"));
@@ -379,6 +438,33 @@ async function main() {
     entries: uniqueForms(countries.map((c) => country(c, borders.get(c.name)!))),
   });
 
+  // People per square kilometre of land (Nov 17: "Name a country with about 100 people per square kilometre", worked
+  // out from a population and an area you know): the density table's own figures, its rows for dependencies left out.
+  const densityTitle = "List of countries and dependencies by population density";
+  const writtenForms = new Map(
+    (JSON.parse(readFileSync(join(LISTS_DIR, "countries-population.json"), "utf8")) as NameList).entries.map((e) => [e.name, e.aliases] as const),
+  );
+  const density = new Map<string, number>();
+  for (const row of await densityRows(densityTitle)) {
+    const plain = row.country.replace(/\s*\(.*\)$/, "");
+    const e = byForm.get(normalize(row.country)) ?? byForm.get(normalize(plain));
+    if (!e || !borders.has(e.name)) continue;
+    if (density.has(e.name)) throw new Error(`density: two rows for ${e.name}`);
+    density.set(e.name, row.density);
+  }
+  write({
+    id: "countries-density",
+    noun: "country",
+    nounPlural: "countries",
+    measure: "people per square kilometre",
+    scoring: "ratio",
+    source: { title: densityTitle, url: pageUrl(densityTitle) },
+    asOf: new Date().toISOString().slice(0, 10),
+    // Its forms are the population list's as written (just now, or as committed when only this list is built), so the
+    // country lists keep one set of forms even when the puzzles' redirects have moved on since.
+    entries: uniqueForms(countries.map((c) => ({ name: c.name, aliases: writtenForms.get(c.name) ?? forms.get(c.name)!, value: density.get(c.name) ?? missing("density")(c) }))),
+  });
+
   // Every city the world cities list ranks (UN 2025 urban agglomerations); its other accepted answers have no figure.
   write({
     id: "cities-population",
@@ -398,8 +484,36 @@ async function main() {
     ),
   });
 
-  const lists = COUNTRY_LISTS.map((id) => JSON.parse(readFileSync(join(LISTS_DIR, `${id}.json`), "utf8")) as NameList);
-  const errors = checkCountryLists(lists);
+  // The 50 US states (Nov 17), from the two state puzzles: one set of states and one set of forms in both lists, the
+  // puzzles' own (postal codes, "Calif.", "New York State"), less what isn't a name.
+  const statePop = puzzle("us-states-population");
+  const stateArea = puzzle("us-states-area");
+  const areaByState = new Map(all(stateArea).map((e) => [e.name, e]));
+  const states = all(statePop).filter((e) => e.n !== undefined);
+  if (states.length !== 50) throw new Error(`expected the 50 US states, got ${states.length}`);
+  const stateForms = (e: Entry) => [...new Set([...e.aliases, ...(areaByState.get(e.name)?.aliases ?? [])])];
+  const areaOfState = (e: Entry) => areaByState.get(e.name)?.n ?? missing("US state area")(e);
+  write({
+    id: "us-states-population",
+    ...STATE_NOUN,
+    measure: "people",
+    scoring: "ratio",
+    source: { title: pageTitle(statePop), url: statePop.source.url },
+    asOf: statePop.source.dataAsOf ?? statePop.source.asOf,
+    entries: uniqueForms(states.map((e) => ({ name: e.name, aliases: stateForms(e), value: e.n! })), STATE_NOUN.noun),
+  });
+  write({
+    id: "us-states-area",
+    ...STATE_NOUN,
+    measure: "square kilometres",
+    scoring: "ratio",
+    source: { title: pageTitle(stateArea), url: stateArea.source.url },
+    asOf: stateArea.source.dataAsOf ?? stateArea.source.asOf,
+    entries: uniqueForms(states.map((e) => ({ name: e.name, aliases: stateForms(e), value: areaOfState(e) })), STATE_NOUN.noun),
+  });
+
+  const read = (id: string) => JSON.parse(readFileSync(join(LISTS_DIR, `${id}.json`), "utf8")) as NameList;
+  const errors = [...checkCountryLists(COUNTRY_LISTS.map(read)), ...checkStateLists(STATE_LISTS.map(read))];
   if (errors.length) throw new Error(errors.join("\n"));
 }
 

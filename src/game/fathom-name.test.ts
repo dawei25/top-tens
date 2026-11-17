@@ -4,11 +4,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { nameLine, readList, readName, type NameList, type NameRead } from "./fathom-name";
+import { nameLine, nameListIds, readList, readName, type NameList, type NameRead } from "./fathom-name";
 import type { Lexicon } from "./junk";
 
 const PUBLIC = join(import.meta.dirname, "..", "..", "public");
-const LIST_IDS = ["countries-population", "countries-area", "land-borders", "cities-population"];
+const BANK = JSON.parse(readFileSync(join(PUBLIC, "fathom", "questions.json"), "utf8"));
+/** Every list the bank's name-it questions use, as the game fetches them (and reads each name against the others). */
+const LIST_IDS = nameListIds(BANK);
 const LISTS = new Map(LIST_IDS.map((id) => [id, readList(JSON.parse(readFileSync(join(PUBLIC, "fathom", "lists", `${id}.json`), "utf8")))!]));
 const LEX = JSON.parse(readFileSync(join(PUBLIC, "puzzles", "lexicon.json"), "utf8")) as Lexicon;
 interface NameQ {
@@ -17,9 +19,10 @@ interface NameQ {
   list: string;
   except?: string[];
 }
-const QUESTIONS = (JSON.parse(readFileSync(join(PUBLIC, "fathom", "questions.json"), "utf8")).questions as NameQ[]).filter((q) => q.round === "name");
-const COUNTRY_QS = QUESTIONS.filter((q) => q.list !== "cities-population");
-const CITY_QS = QUESTIONS.filter((q) => q.list === "cities-population");
+const QUESTIONS = (BANK.questions as NameQ[]).filter((q) => q.round === "name");
+// By what their list names: the country lists' questions, the city list's (a US state list's are lists.test.ts's).
+const COUNTRY_QS = QUESTIONS.filter((q) => LISTS.get(q.list)!.noun === "country");
+const CITY_QS = QUESTIONS.filter((q) => LISTS.get(q.list)!.noun === "city");
 /**
  * One question for each list (a reading only depends on the list and the yardstick), and every one with a yardstick:
  * the matcher over four lists is slow enough that all 12 questions for every answer would take seconds.
@@ -41,9 +44,9 @@ const COUNTRIES = named(LISTS.get("countries-population")!);
 const CITIES = named(LISTS.get("cities-population")!);
 
 describe("name-it on the real lists: the judge's readings (Nov 8)", { timeout: 30_000 }, () => {
-  it("plays all 12 name-it questions: 10 on country lists, 2 on the city list", () => {
-    expect(COUNTRY_QS.length).toBe(10);
-    expect(CITY_QS.length).toBe(2);
+  it("plays every name-it question: at least 10 on country lists, at least 2 on the city list", () => {
+    expect(COUNTRY_QS.length).toBeGreaterThanOrEqual(10);
+    expect(CITY_QS.length).toBeGreaterThanOrEqual(2);
   });
 
   // "England", "Scotland" and "Wales" locked the whole UK. They are parts of it: free, and said so.
