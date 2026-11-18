@@ -6,13 +6,13 @@
  *   state as is; the only rule outside hides the decorative extras (burst, float).
  * - Infinite blinks are named motion-blink-*: src/components/motion pins them to the wall-clock second, so they
  *   blink together.
- * - The squid, ink-sac lives and ink dim live in components/squid (squid.css); the deep-sea backdrop,
- *   the roaming squid and its ink cloud in components/ocean.
- * - Already in index.css and not doubled here: found-row flash and type-in, life flash and lives shake,
- *   guess-row shake, the Blitz clock's low-time blink.
+ * - The squid and its ink dim live in components/squid (squid.css); the deep-sea backdrop, the roaming squid
+ *   and its ink cloud in components/ocean. A lost life's heart breaking is here (the hearts themselves: index.css).
+ * - Already in index.css and not doubled here: found-row flash and type-in, lives shake, guess-row shake, the
+ *   Blitz clock's low-time blink.
  */
 
-/* Decorative extras only exist with motion on. (The squid, ink lives and their effects: components/squid.) */
+/* Decorative extras only exist with motion on. (The squid and its effects: components/squid.) */
 .motion-float {
   display: none;
 }
@@ -101,6 +101,18 @@
   .results.enter [data-motion="banner"] {
     animation: motion-banner 1.2s steps(1, end) calc(var(--d, 0ms) + 0.35s) both;
   }
+
+  /* ---- A life lost: the heart flashes white in a pink glow, cracks, dims and is spent (0.36 s, four frames).
+     Colour, opacity and a glow only: the heart keeps its place and size. (The squid's ink is components/squid.) ---- */
+  .life.lost {
+    animation: motion-life-glow 0.36s steps(1, end) both;
+  }
+  .life.lost .heart {
+    animation: motion-life-fill 0.36s steps(1, end) both;
+  }
+  .life.lost .crack {
+    animation: motion-life-crack 0.36s steps(1, end) both;
+  }
 }
 
 @keyframes motion-crt-on {
@@ -178,6 +190,46 @@
 @keyframes motion-count {
   from {
     --motion-n: 0;
+  }
+}
+@keyframes motion-life-glow {
+  0% {
+    filter: drop-shadow(0 0 5px var(--pink));
+  }
+  25% {
+    filter: drop-shadow(0 0 3px var(--pink-glow));
+  }
+  75%,
+  100% {
+    filter: none;
+  }
+}
+@keyframes motion-life-fill {
+  0% {
+    fill: #fff;
+  }
+  25% {
+    fill: var(--pink);
+  }
+  55% {
+    fill: var(--pink-shadow);
+  }
+  80%,
+  100% {
+    fill: var(--life-off);
+  }
+}
+@keyframes motion-life-crack {
+  0% {
+    opacity: 0;
+  }
+  25%,
+  55% {
+    opacity: 1;
+  }
+  80%,
+  100% {
+    opacity: 0;
   }
 }
 @keyframes motion-banner {

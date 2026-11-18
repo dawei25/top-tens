@@ -64,7 +64,7 @@ for (const vp of VIEWPORTS) {
     assert.equal(await squid.getAttribute("data-lit"), "3");
     assert.deepEqual(await litOf(squid), [1, 4, 7]);
 
-    // A costly miss empties an ink sac; the lives element reads the same as ever.
+    // A costly miss empties a heart; the lives element reads the same as ever.
     await guess(page, p.extras.find((e) => e.rank > 10).name);
     assert.equal(await page.getByTestId("lives").getAttribute("data-lives"), "4");
     assert.equal(await squid.getAttribute("data-lit"), "3");

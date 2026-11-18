@@ -20,7 +20,7 @@ import { emitPlay } from "../game/events";
 import type { Lexicon } from "../game/junk";
 import type { GuessResult, Puzzle } from "../game/types";
 import { Countdown } from "./Countdown";
-import { ClueIcon, END_FOCUS_MS, formatAsOf, InkSac, ordinal, PHONE, reducedMotion, RollBox, rollState, ScreenHead, sourceSite, SwapLabel, TypeIn, useMedia } from "./pixel";
+import { ClueIcon, END_FOCUS_MS, formatAsOf, LifeHeart, ordinal, PHONE, reducedMotion, RollBox, rollState, ScreenHead, sourceSite, SwapLabel, TypeIn, useMedia } from "./pixel";
 import {
   alreadyGuessed,
   CLUE_ASK,
@@ -358,10 +358,10 @@ export function Game({ id, meta, daily, today, lexicon, onBack, onHome, onRoll, 
           data-testid="lives"
           data-lives={game.lives}
           role="img"
-          aria-label={`${game.lives} ${game.lives === 1 ? "life" : "lives"} left`}
+          aria-label={`${game.lives} of ${MAX_LIVES} lives left`}
         >
           {Array.from({ length: MAX_LIVES }, (_, i) => (
-            <InkSac key={i} className={`life ${i < game.lives ? "on" : "off"} ${lostLife?.i === i ? "lost" : ""}`} />
+            <LifeHeart key={i} on={i < game.lives} lost={lostLife?.i === i} />
           ))}
         </div>
       </ScreenHead>

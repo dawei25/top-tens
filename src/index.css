@@ -1188,7 +1188,7 @@ a {
   }
 }
 
-/* The header is a glass card, like the panels: the menu key and BACK, the screen's label (and the ink-sac lives),
+/* The header is a glass card, like the panels: the menu key and BACK, the screen's label (and the heart lives),
    sound and HOME. */
 .game-head {
   display: grid;
@@ -1243,8 +1243,8 @@ a {
     line-height: 1.15;
   }
 }
-/* Narrow phones (360px): four keys and the five ink-sac lives share the header, so the keys slim down a little; the
-   smallest phones (320px) also get smaller sacs (2px art pixels). The 390px phone keeps the full sizes. */
+/* Narrow phones (360px): four keys and the five heart lives share the header, so the keys slim down a little; the
+   smallest phones (320px) also get smaller hearts (2px art pixels). The 390px phone keeps the full sizes. */
 @media (max-width: 380px) {
   .game-head {
     gap: 6px;
@@ -1268,9 +1268,10 @@ a {
   .game-head .sound-toggle {
     width: 32px;
   }
-  .game-head .lives .ink-sac {
-    width: 16px;
-    height: 18px;
+  .game-head .lives .life {
+    width: 18px;
+    height: 16px;
+    margin: 1px -1px;
   }
 }
 .mode {
@@ -1282,23 +1283,43 @@ a {
   width: 46px;
 }
 
+/*
+ * Lives: five of the logo's pixel hearts (pixel.tsx LifeHeart, the favicon's 9 x 8 art with its pixel of room), solid
+ * pink while left, the same heart dark once spent. Whole pixels per art pixel: 3 on phones, 4 from 640px, 2 on the
+ * smallest phones, so the edges stay crisp at 1x and 2x. Each heart keeps the slot the ink drops had (24 x 27,
+ * 32 x 36, 16 x 18, with the same gaps): the margins fold the svg's empty edge into the gap, so the row's box and
+ * everything around it in the header stay where they were. The one just lost flashes and cracks (motion.css).
+ */
 .lives {
+  --life-off: #1f2d4b;
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 .life {
-  width: 24px;
-  height: auto;
   display: block;
-  color: var(--pink);
-  filter: drop-shadow(0 2px 0 var(--pink-shadow));
+  width: 27px;
+  height: 24px;
+  margin: 2px -2px 1px -1px;
 }
-.life.off {
-  color: #1c2a45;
-  filter: none;
+.life .heart {
+  fill: var(--pink);
 }
-.life.lost {
-  animation: heart-lost 0.7s steps(2, end) both;
+.life.off .heart {
+  fill: var(--life-off);
+}
+.life .crack {
+  fill: var(--page);
+  opacity: 0;
+}
+@media (min-width: 640px) {
+  .lives {
+    gap: 6px;
+  }
+  .life {
+    width: 36px;
+    height: 32px;
+    margin: 3px -2px 1px;
+  }
 }
 .lives-hit {
   animation: shake 0.3s linear;
@@ -2600,22 +2621,6 @@ a {
   100% {
     border-color: var(--cyan-edge);
     box-shadow: 0 0 0 3px var(--cyan-glow);
-  }
-}
-@keyframes heart-lost {
-  0%,
-  50% {
-    color: #fff;
-    transform: scale(1.3);
-  }
-  25%,
-  75% {
-    color: var(--pink);
-    transform: scale(1.15);
-  }
-  100% {
-    color: #1c2a45;
-    transform: none;
   }
 }
 @keyframes blink {

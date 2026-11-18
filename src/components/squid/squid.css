@@ -1,7 +1,8 @@
 /*
- * TENtacle's glow squid (animations agent): the sprite, its moods, the ink-sac lives, and the one-off effects layer.
+ * TENtacle's glow squid (animations agent): the sprite, its moods and the one-off effects layer. (The lives are the
+ * logo's pixel hearts: index.css .life, their break in motion.css.)
  * The playing squid roams the ocean behind the app (components/ocean); the hero squid sits on the results panels.
- * Persistent states (lit limbs, moods, momentum glow, empty sacs) are plain styles and show with reduced motion too;
+ * Persistent states (lit limbs, moods, momentum glow) are plain styles and show with reduced motion too;
  * every move sits under prefers-reduced-motion: no-preference or is skipped in JS.
  */
 
@@ -185,39 +186,6 @@
   box-shadow: 0 0 4px var(--gold);
 }
 
-/* ---------- Ink-sac lives (replace the hearts; the lives element itself is unchanged) ---------- */
-/* An indigo ink drop with a pink rim and gloss; spent, it is a hollow dim outline. 8 x 9 art pixels. */
-.lives:has(.ink-sac) {
-  gap: 4px;
-}
-/* With the squid out in the ocean, the sacs carry the header's middle: 3 px art pixels, 4 px on wider screens. */
-.lives .ink-sac {
-  width: 24px;
-  height: 27px;
-  display: block;
-  filter: none;
-}
-@media (min-width: 640px) {
-  .lives:has(.ink-sac) {
-    gap: 6px;
-  }
-  .lives .ink-sac {
-    width: 32px;
-    height: 36px;
-  }
-}
-.ink-sac.on {
-  filter: drop-shadow(0 0 3px rgba(255, 93, 143, 0.45));
-}
-.ink-sac.on .rim { fill: var(--pink); }
-.ink-sac.on .ink { fill: #241650; }
-.ink-sac.on .deep { fill: #140b2e; }
-.ink-sac.on .glint { fill: #ffa8c6; }
-.ink-sac.off .rim { fill: #2b3c60; }
-.ink-sac.off .ink,
-.ink-sac.off .deep,
-.ink-sac.off .glint { fill: transparent; }
-
 /* ---------- Blitz score bump: grows mostly from its right edge, where the digits are anchored, so it stays clear
    of the +N float on its left ---------- */
 .blitz-meter [data-motion="score"] {
@@ -331,11 +299,6 @@
   .squid-sparks.best i:nth-child(odd) {
     background: #fff;
   }
-
-  /* A sac emptying: squeezed flat, then spent. */
-  .lives .ink-sac.lost {
-    animation: ink-sac-lost 0.5s steps(5, end) both;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -377,23 +340,6 @@
 }
 .ink.big .ink-dim {
   background: radial-gradient(circle at var(--ox) var(--oy), rgba(12, 6, 30, 0.95), rgba(4, 2, 12, 0.8) 50%, rgba(3, 2, 8, 0.7));
-}
-.ink-drop {
-  position: absolute;
-  left: -4px;
-  top: -4px;
-  width: 8px;
-  height: 8px;
-  background: #2a1650;
-}
-.ink-drop::before {
-  content: "";
-  position: absolute;
-  left: 2px;
-  top: 2px;
-  width: 2px;
-  height: 2px;
-  background: var(--pink);
 }
 
 @keyframes squid-bob {
@@ -476,19 +422,5 @@
   100% {
     opacity: 0;
     transform: translate(calc(var(--dx) * var(--px)), calc(var(--dy) * var(--px)));
-  }
-}
-@keyframes ink-sac-lost {
-  0% {
-    transform: scale(1.3, 0.7);
-    filter: brightness(2.5);
-  }
-  40% {
-    transform: scale(0.8, 1.2);
-    filter: brightness(1.5);
-  }
-  100% {
-    transform: none;
-    filter: none;
   }
 }
