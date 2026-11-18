@@ -75,7 +75,8 @@ enforces it (a test, `lint:css`, the judge brief); then sweep the other screens 
 ## Look
 
 17. **Keep the brand look unless asked.** Don't retune the palette or type (the pink and yellow were faded once,
-    unasked). The visual baselines are the reference.
+    unasked). The visual baselines are the reference. One heart everywhere: the lives are the logo's heart (owner, Nov 18: "change
+    ink hearts back into regular hearts as shown in our logo").
 18. **Third-party pieces come in our own language.** A widget drawn by someone else (Google's sign-in button, in its
     own font and fill) looks out of place: build our own key and keep only what trust needs (Google's G, unaltered).
 

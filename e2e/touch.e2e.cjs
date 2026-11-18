@@ -426,6 +426,8 @@ test("a phone on its side: Home's play keys keep their titles on one line", asyn
   ]) {
     const { ctx, page } = await open(browser, phone(width, height));
     await page.getByTestId("today-list").waitFor();
+    // Measure in the real font: under load the fallback font can still be showing, and it is wider.
+    await page.evaluate(() => document.fonts.ready);
     const lines = await page.locator(".mode-key .key-label").evaluateAll((els) =>
       els.map((el) => ({ title: el.textContent, lines: Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight)) })),
     );

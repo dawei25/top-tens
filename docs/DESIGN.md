@@ -159,7 +159,7 @@ metaphor is a **retro arcade high-score table**, which a top 10 already is.
 **Ours:**
 - The 10 slots are a high-score table: big pixel rank numerals (1ST, 2ND ...), names typed in like initials when found,
   #1 in gold. Missed slots revealed muted at the end.
-- Lives as 5 pixel hearts or credit squares in the header; losing one flashes pink.
+- Lives as 5 pixel hearts, the logo's heart (the favicon): solid pink while left, the same heart dark once spent; losing one flashes white in a pink glow and cracks (0.36 s).
 - Results: score in huge pixel type, the full table with values, share text with one square per rank and a link.
 - Respect `prefers-reduced-motion`. Visible focus rings.
 
@@ -194,7 +194,7 @@ arms, two long tentacles), and a top 10 has ten slots.** Every answer found is o
   1. The squid fills in: one limb lights per answer found; ten lit is a full glowing squid.
   2. The find flash (replaced the tentacle grab in November 2026): the lit limb flashes white-hot, a shimmer runs
      root to tip and the squid hops head-first; #1 and #2 hop and glow bigger. About half a second, no delay to state.
-  3. Ink lives: five ink sacs; a life lost squirts ink that dims the screen for a beat; running out ends in a cloud.
+  3. Lost lives: the lives are the logo's hearts (owner, Nov 18: back from ink sacs, to match the logo). A life lost makes the squid ink, which dims the screen for a beat; running out ends in a cloud.
   5. Sound (optional, off by default): each rank is a note (#1 highest); a perfect game ends on a chord.
   6. Blitz glow: fast hits make the squid glow brighter (momentum, no scoring change); the score bumps with each
      gain, harder for bigger ones; passing your best flares.
