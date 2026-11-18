@@ -120,6 +120,11 @@ use redirects already in the cache.
   as aliases.
 - Every top-10 answer needs a fun fact (`scripts/facts/<id>.json`, with a source), and misses should show a number:
   when the ranked table stops early, unranked answers take dated figures from the page's other tables.
+- Famous names count (owner, Nov 18: Frida Kahlo was not an answer on painters). A short people or works list takes
+  famous names from other articles: ranked by a figure Wikipedia states (quoted, checked at build), or free and said
+  plainly when there is none. A figure shown as someone's best ("priciest painting sold") must be their record per
+  Wikipedia; a record we know was beaten counts as none, and the name stays free. validate.ts warns on a people or
+  works pool under 60 unless the topic sets `fullPool`.
 - Every bug a player reports gets a guard (a validate.ts check, a test or a judge-brief line), recorded in
   `docs/IMPROVE.md`, so the class can't come back.
 - `NODE_NO_WARNINGS=1 npx tsx scripts/validate.ts` checks every built puzzle; run it after a rebuild.

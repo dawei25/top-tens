@@ -10,6 +10,15 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Famous names count on concert-tours and tiktok-accounts** (painters agent, Nov 18), once their days pass
+      (concert-tours is Nov 19's daily, tiktok-accounts Nov 20's legacy Blitz): Born This Way Ball, Reputation, Justice,
+      Purpose, Sweetener, Formation, On the Run II and Future Nostalgia read "Not one of the 67 concert tours here";
+      Taylor Swift, Ronaldo, Kim Kardashian, Ariana Grande and Bieber are free on tiktok-accounts. Same treatment as
+      painters (CLAUDE.md data rules). Also seen: richest-people (Sam Altman, Tim Cook, Jamie Dimon, Aliko Dangote, Safra
+      Catz), instagram (Jungkook, Jisoo, Gigi Hadid, Emma Watson, Tom Holland), broadway (Mean Girls, Into the Woods,
+      Sweeney Todd, Company) read "not one of the ... here". athletes-earnings (Nov 28) keeps Federer, Jordan and others
+      free by a cycle 4 judge call; validate.ts warns on it, netflix-seasons and tiktok-accounts.
+
 - [ ] **Fathom: enforce the two-lines rule** (sweep and timer, Nov 17): at 320x400 three questions put LOCK IN 11px under
       the keyboard (hot-dog-eating-record, record-transfer-fee, old-faithful-interval): shorten their definitions, and add a
       320x400 check beside the 375x400 one. the browser suite only checks that LOCK IN stays in view at
