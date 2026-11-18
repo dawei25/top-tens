@@ -1160,7 +1160,12 @@ export const TOPICS: Topic[] = [
     knownNames: [
       "The Bible", "Bible", "Quran", "Koran", "Quotations from Chairman Mao Tse-tung", "Little Red Book",
       "The Lord of the Rings", "LOTR", "Narnia", "Harry Potter series",
+      // Famous books no table here has a figure for (owner, Nov 18: famous names count): said plainly, not "not one of
+      // the books here". Don Quixote's "500 million" is a claim the page leaves out.
+      "Don Quixote", "Moby-Dick", "Moby Dick", "Think and Grow Rich", "Percy Jackson", "Percy Jackson and the Olympians",
     ],
+    // "the diary of a young girl", its English title, was "not one of the books here".
+    aliases: { "The Diary of Anne Frank": ["The Diary of a Young Girl", "Diary of a Young Girl", "Anne Frank's diary"] },
     works: true,
     junkAliases: [
       "The Da Vinci Code paintings", "Lord of the Rings Prequel", "Vengeance", "Roger Cly", "Mrs. Cruncher",
@@ -1725,6 +1730,21 @@ export const TOPICS: Topic[] = [
       { page: "List of Spotify streaming records", tables: [21], name: "Album" },
     ],
     junkAliases: ["For Crying Out Loud"],
+    // Famous albums below the tables' 20 million (owner, Nov 18, on painters: famous names count), with the worldwide
+    // sales their articles give. Unranked: the page lists no album under 20 million, so the ones between are unknown.
+    cited: {
+      Graceland: { value: "16", n: 16, aliases: [], source: "Graceland (album): \"estimated sales of more than 16 million copies worldwide\"" },
+      "OK Computer": { value: "7.8", n: 7.8, aliases: [], source: "OK Computer: \"sold at least 7.8 million copies worldwide\"" },
+    },
+    // Famous albums with no worldwide figure on Wikipedia: free, said plainly ("Revolver isn't in this ranking"), not
+    // "not one of the albums here".
+    knownNames: [
+      "The White Album", "Revolver", "Kind of Blue", "Born to Run", "÷", "Divide", "No Strings Attached",
+      "A Night at the Opera", "Physical Graffiti", "Pet Sounds", "Highway 61 Revisited", "Blonde on Blonde",
+      "What's Going On", "Exile on Main St.", "Blue", "London Calling", "Ready to Die", "Illmatic",
+      "To Pimp a Butterfly", "The Miseducation of Lauryn Hill", "Blonde", "Lover", "Folklore", "Midnights", "Sour",
+      "Renaissance", "Un Verano Sin Ti", "Scorpion", "Starboy", "After Hours",
+    ],
   },
   {
     id: "music-artists",

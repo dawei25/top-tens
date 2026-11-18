@@ -1065,6 +1065,9 @@ describe("aliases as built: what players type", () => {
       ["youtube-videos", "rickroll", "Never Gonna Give You Up"],
       ["youtube-videos", "havana", "Havana"],
       ["youtube-videos", "justin bieber baby", "Baby"],
+      ["albums", "graceland", "Graceland"],
+      ["albums", "ok computer", "OK Computer"],
+      ["books", "the diary of a young girl", "The Diary of Anne Frank"],
     ])("%s: %s is %s, at once", (id, guess, name) => {
       expect(answer(id, guess)).toMatchObject({ kind: "near", corrected: false, name });
     });
@@ -1076,6 +1079,12 @@ describe("aliases as built: what players type", () => {
       for (const name of ["george orwell", "haruki murakami", "john steinbeck", "toni morrison", "margaret atwood", "lee child"]) {
         expect(judgeGuess(name, puzzle("fiction-authors"), new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
       }
+    });
+    it.each([
+      ["albums", ["revolver", "the white album", "kind of blue", "divide", "physical graffiti"]],
+      ["books", ["don quixote", "moby dick", "think and grow rich"]],
+    ])("%s: famous ones with no figure are known names", (id, names) => {
+      for (const name of names) expect(judgeGuess(name, puzzle(id), new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
     });
   });
 
