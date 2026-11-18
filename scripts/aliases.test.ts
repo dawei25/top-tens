@@ -1371,7 +1371,8 @@ describe("aliases as built: what players type", () => {
     const known: [string, string[]][] = [
       ["capitals", ["ho chi minh", "ho chi minh city"]],
       ["dog-breeds", ["pit bulls", "pitbull terrier", "shepsky"]],
-      ["youtube-videos", ["twinkle twinkle little star", "five little ducks", "finger family", "head shoulders knees and toes", "rickroll"]],
+      // "rickroll" is Never Gonna Give You Up since it ranks by its views (owner, Nov 18: famous names count).
+      ["youtube-videos", ["twinkle twinkle little star", "five little ducks", "finger family", "head shoulders knees and toes"]],
       ["nfl-passing-yards", ["jalen hurts", "michael vick", "jameis winston", "tua tagovailoa", "cj stroud", "trevor lawrence"]],
       ["market-cap-peak", ["palantir", "standard oil", "east india company", "anthropic", "bytedance"]],
     ];
