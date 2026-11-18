@@ -86,6 +86,8 @@ interface Row {
   plain?: string;
   /** The countries the row is in (`countryCol`), as the country lists name them. */
   country?: string[];
+  /** When the figure is from, shown in brackets after it: a `textRows` year, "$54.7 million (2025)". */
+  note?: string;
 }
 
 /** An entry as built: the puzzle format, plus the countries a place is in where the topic reads them. */
@@ -361,13 +363,41 @@ export function rankRows<R extends Pick<Row, "value" | "tiebreak">>(topic: Pick<
  * A ranked row the table leaves out, from the page's own text (`textRows`): the UN's note gives "Monaco (LE 86.37
  * years". Fails when the text no longer says it, so a changed page never ships a figure it dropped.
  */
-export function textRow(pageText: string, t: TextRow): Row {
+const SCALE_WORDS: Record<number, string> = { 1e3: "thousand", 1e6: "million", 1e9: "billion" };
+
+export function textRow(pageText: string, t: TextRow, unit = "", recordText = pageText): Row {
   const said = (s: string) => s.replace(/\s+/g, " ");
   if (!said(t.says).includes(t.value)) throw new Error(`textRows "${t.name}": "${t.says}" doesn't give ${t.value}`);
   if (!said(pageText).includes(said(t.says))) throw new Error(`textRows "${t.name}": the page no longer says "${t.says}"`);
-  const v = parseValue(t.value);
+  // The figure is the record, not just a sale: a page that stops saying so fails the build (painters, Nov 18).
+  if (t.record && !said(recordText).includes(said(t.record))) {
+    throw new Error(`textRows "${t.name}": the page no longer says it's the record ("${t.record}")`);
+  }
+  // As the text writes money: "£30.3m" is £30.3 million, "24,571,250 GBP" £24,571,250, "15.3 million U.S. dollars"
+  // $15.3 million.
+  const written = t.value
+    .replace(/(\d)m$/i, "$1 million")
+    .replace(/^(\d[\d.,]*(?: million)?) GBP$/, "£$1")
+    .replace(/^(\d[\d.,]*(?: million| billion)?) U\.?S\.? dollars$/, "$$$1");
+  const v = parseValue(written);
   if (!v) throw new Error(`textRows "${t.name}": ${t.value} is no figure`);
-  return { name: t.name, value: v.value, valueText: v.display, aliasSeeds: [t.name], redirectTarget: t.name, link: t.name };
+  let valueText = v.display;
+  if (t.scale) {
+    // In the ranked rows' unit, as the text writes it: "$54.7 million" in a table of millions is "$54.7" (the unit
+    // follows), "1.11 billion" in one of billions "1.11"; "$44,405,000" is "$44.4".
+    const sign = v.display.match(/^[$€£]/)?.[0] ?? "";
+    const word = SCALE_WORDS[t.scale] ?? unit.trim();
+    valueText = word && v.display.endsWith(` ${word}`) ? v.display.slice(0, -word.length - 1) : sign + scaledFigure(v.value, t.scale);
+  }
+  return {
+    name: t.name,
+    value: t.n ?? (t.scale ? statNumber(v.value / t.scale) : v.value),
+    valueText,
+    aliasSeeds: [t.name],
+    redirectTarget: t.name,
+    link: t.name,
+    ...(t.year ? { note: t.year } : {}),
+  };
 }
 
 /** An entry's figure with a topic's note (`notes`): in brackets after it, or in its place when there is none. */
@@ -474,13 +504,23 @@ export async function readRows(topic: Topic): Promise<Row[]> {
       }
     }
   }
-  if (topic.textRows?.length) {
-    const $ = await fetchPage(topic.page);
-    $("style, script").remove();
-    for (const t of topic.textRows) {
-      rows.push(textRow($("body").text(), t));
-      console.log(`     ${topic.id}: ${t.name} ${t.value} from the page's text ("${t.says}")`);
+  // A row's text is the topic's page, or the article it names (`page`, `recordPage`): read once each.
+  const texts = new Map<string, string>();
+  const textOf = async (page: string) => {
+    if (!texts.has(page)) {
+      const $ = await fetchPage(page);
+      $("style, script").remove();
+      texts.set(page, $("body").text());
     }
+    return texts.get(page)!;
+  };
+  for (const t of topic.textRows ?? []) {
+    const page = t.page ?? topic.page;
+    const row = textRow(await textOf(page), t, topic.unit, await textOf(t.recordPage ?? page));
+    // A title that is also a word ("Hello", "Baby") names its own article in `articles`: its redirects, not the word's.
+    const article = topic.articles?.[t.name];
+    rows.push(article ? { ...row, redirectTarget: article, link: article, aliasSeeds: [...row.aliasSeeds, cleanName(article)] } : row);
+    console.log(`     ${topic.id}: ${t.name} ${t.value}${t.year ? ` (${t.year})` : ""} from ${t.page ? `"${t.page}"` : "the page's text"} ("${t.says}")`);
   }
   for (const name of Object.keys(topic.overrides ?? {})) {
     if (!rows.some((r) => r.name === (topic.rename?.[name] ?? name))) console.log(`warn ${topic.id}: override for "${name}", which is not a row`);
@@ -1388,7 +1428,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       rank: tied ? entries[i - 1].rank : i + 1,
       name: row.name,
       aliases: [...aliases],
-      value: (topic.prefix ?? "") + row.valueText + (topic.unit ?? ""),
+      value: (topic.prefix ?? "") + row.valueText + (topic.unit ?? "") + (row.note ? ` (${row.note})` : ""),
       ...(Number.isFinite(row.value) ? { n: statNumber(row.value) } : {}),
       ...(i < 10 ? { article: row.redirectTarget } : {}),
     };

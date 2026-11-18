@@ -15,7 +15,7 @@
   "casual": {
     "found": 6,
     "livesLost": 5,
-    "guesses": 15
+    "guesses": 13
   },
   "fan": {
     "found": 10,
@@ -37,7 +37,8 @@
   "reasons": [
     "Casual replay: da Vinci, Picasso, Warhol, Rembrandt, Pollock and Klimt found, out of lives on Van Gogh, Monet, Basquiat, Matisse and Munch (each shows its price). A less art-minded casual stops at 5 with Renoir as a trap. A fan gets 10 with 2 lives lost. Leans hard, but the traps are the fun: everyone learns Van Gogh is #18.",
     "Clean and current: the prompt names the measure, Klimt's 2025 record is in, every fact names the painting, every miss shows a figure. Category words alone (painter, art, artist, painting, auction, impressionism, pop art, renaissance, christie's) and painting titles (mona lisa, starry night, the scream, salvator mundi) are free and give nothing away. Michelangelo, Dali, Kahlo, Banksy, Vermeer, Bob Ross are free.",
-    "A new kind of list for the bank (no other art list; museums is a different universe). Blitz pool is deep (43) but a casual only recalls about 13 scorers in 90 s, under the Blitz bar."
+    "A new kind of list for the bank (no other art list; museums is a different universe). Blitz pool is deep (43) but a casual only recalls about 13 scorers in 90 s, under the Blitz bar.",
+    "Builder replay (Nov 18), after famous painters joined the pool with their records (owner: \"allow ppl to guess frida, sorolla\"; each figure is the painter's record, coordinator): da Vinci, Picasso, Warhol, Rembrandt, Pollock and Klimt found, out of lives on Van Gogh, Monet, Frida Kahlo (#43), Basquiat and Matisse; Michelangelo and Dalí free. Casual stays at 6."
   ],
   "fixes": [
     "Junk alias on Paul Gauguin: \"Eugčne Henri Paul Gauguin\" (mojibake of Eugène); add it to junkAliases. Optional: \"Gogan\" and \"Gogin\" (phonetic spellings) are not recognized.",

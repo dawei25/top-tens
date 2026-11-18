@@ -111,7 +111,7 @@
   "id": "youtube-videos",
   "title": "Most-viewed YouTube videos",
   "category": "Entertainment",
-  "blitz": false
+  "blitz": true
  },
  {
   "id": "instagram",

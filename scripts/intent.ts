@@ -1618,7 +1618,13 @@ export const INTENT: Record<string, Intent> = {
       "Ariana Grande": ["Ariana"],
       "Taylor Swift": ["Taylor", "T-Swift"],
       "Bad Bunny": ["Benito"],
+      // "tupac" asked to confirm Tupac Shakur (owner, Nov 18: famous names count).
+      "Tupac Shakur": ["Tupac", "2Pac"],
     },
+  },
+  "grand-slam-titles": {
+    // "del potro" asked to confirm Juan Martín del Potro: his surname is "del Potro", not "Potro".
+    same: { "Juan Martín del Potro": ["Del Potro", "Delpo"] },
   },
   "car-makers": {
     same: {
@@ -1991,6 +1997,6 @@ export const INTENT: Record<string, Intent> = {
   "music-artists": {
     // Not built yet: music-artists is protected until after Nov 10 16:00 HKT (docs/REBUILD_QUEUE.md). His legal
     // name since 2021.
-    same: { "Kanye West": ["Ye"] },
+    same: { "Kanye West": ["Ye"], "Tupac Shakur": ["Tupac", "2Pac"] },
   },
 };

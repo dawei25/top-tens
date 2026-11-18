@@ -58,6 +58,24 @@ export function countryFieldIssues(e: Entry & { country?: unknown }): string[] {
 /** Below this many accepted answers, wrong-but-real guesses are likely to be free. */
 const MIN_ACCEPTED = 30;
 /**
+ * A list of people or works with fewer answers than this leaves out famous names players know, which then read
+ * "isn't in this ranking" (owner, Nov 18, on painters: "ppl dont even know that many artists so its even frustrating
+ * when 2 out of 5 they know cant even be guessed").
+ */
+export const MIN_FAMOUS_POOL = 60;
+
+/** A people or works list whose pool is a short elite table: why its famous names may not count, and the fix. */
+export function shortPool(p: Pick<Puzzle, "answers" | "extras">, topic?: Pick<Topic, "people" | "works" | "noun" | "fullPool">): string | undefined {
+  if (!topic || !(topic.people || topic.works) || topic.fullPool) return undefined;
+  const n = p.answers.length + p.extras.length;
+  if (n >= MIN_FAMOUS_POOL) return undefined;
+  return (
+    `only ${n} ${topic.noun} accepted (want ${MIN_FAMOUS_POOL}+): famous ones players name likely read "isn't in this ` +
+    "ranking\". Add them with a figure (`textRows` from their articles, `cited`, `also` with `dated`), or say why every " +
+    "one is in (`fullPool`)"
+  );
+}
+/**
  * Lists built (source.asOf) on or after this day must have a fact on every top-10 answer; older builds only warn.
  * A rebuild brings a list under the rule.
  */
@@ -406,6 +424,8 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   const all: Entry[] = [...p.answers, ...p.extras];
   // A list whose other real names are free on purpose (`knownOnly`: no figure to show) is small by design.
   if (all.length < MIN_ACCEPTED && !topic?.knownOnly) warn(`only ${all.length} accepted answers (want ${MIN_ACCEPTED}+)`);
+  const short = shortPool(p, topic);
+  if (short) warn(short);
 
   // Ranks 11+ follow their place in the ranking; a tie shares the first one's rank (#20, #20, #22).
   let place = 10;

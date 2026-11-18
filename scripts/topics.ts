@@ -163,6 +163,12 @@ export interface Topic {
   fallback?: { from: string | number; factor: number };
   /** Creative works (books, shows, films, albums, games): redirects sharing no word with the title are songs or characters. */
   works?: boolean;
+  /**
+   * Why a short list of people or works already has every one there is ("every Pixar feature film"): scripts/
+   * validate.ts warns on such a list under 60 answers otherwise, since famous names left out read "isn't in this
+   * ranking" (owner, Nov 18).
+   */
+  fullPool?: string;
   /** The table writes every word capitalized ("Shape Of You"): small words go lower case ("Shape of You"). */
   titleCase?: boolean;
   /** Web addresses are names here ("x.com", "Amazon.com"); elsewhere a redirect like "Dallascowboys.com" is dropped. */
@@ -330,6 +336,29 @@ export interface TextRow {
   name: string;
   value: string;
   says: string;
+  /**
+   * The article whose text says it, when that isn't the topic's page: a famous painter's record sale, which the
+   * ranking's table leaves out (it starts at $85 million in today's money), told in the painting's own article.
+   */
+  page?: string;
+  /** Divides the figure into the ranked rows' unit: 1e6 for a table in millions, so "$54.7 million" ranks as 54.7. */
+  scale?: number;
+  /**
+   * The figure in the ranked rows' unit and currency, when the text gives it in another one: "£30.3m" (2014) ranks
+   * as 49.9 (million US dollars, at that year's average rate) and is shown as the text writes it.
+   */
+  n?: number;
+  /** When the figure is from, shown after it: "$54.7 million (2025)". */
+  year?: string;
+  /**
+   * Words showing the figure is the most there is, not just a sale: "a record for the artist", or the record it beats
+   * ("This surpassed the 2019 record for a Caillebotte work"). On a list ranked by a record (painters: their priciest
+   * painting sold) every row needs one (scripts/aliases.test.ts). Checked like `says`, on `recordPage` (default: the
+   * row's page): the build fails once the page no longer says it. A record Wikipedia names that we know was beaten
+   * later counts as no record (Kandinsky's 2016 one, beaten in 2017 and 2023): the row goes, and the name is free.
+   */
+  record?: string;
+  recordPage?: string;
 }
 
 /** Redirects to US states that are jokes, documents, agencies or teams, found by the list judges. */
@@ -552,6 +581,8 @@ const SPOTIFY_MORE: Record<string, string[]> = {
   "Frank Ocean": [], "Playboi Carti": ["Carti"], "Rosé": ["Rose"], Radiohead: [], "Marshmello": [], Kygo: [],
   "Cardi B": [], "Charlie Puth": [], "Camila Cabello": [], Hozier: [], OneRepublic: [],
   "Tate McRae": [], "Teddy Swims": [], "Sabrina Carpenter": [], "Avicii": [], "The Chainsmokers": ["Chainsmokers"],
+  // Famous names that read "not one of the artists here" or "isn't in this ranking" (owner, Nov 18: famous names count).
+  "Rosalía": ["Rosalia"], "Dolly Parton": [], Lorde: [], "Zach Bryan": [], "Snoop Dogg": ["Snoop"], "50 Cent": ["Fifty Cent"],
 };
 
 export const TOPICS: Topic[] = [
@@ -979,8 +1010,41 @@ export const TOPICS: Topic[] = [
     categorySkip: /^(killing|killing and dismemberment|murder|torture|firing) of\b|\bincident$/i,
     // Cocomelon's own upload of the song; "Baby Shark" means Pinkfong's #1 (intent.ts).
     rename: { "Baby Shark": "Baby Shark (Cocomelon)" },
-    // "temu ad" found nothing (coverage audit, Nov 17).
-    aliases: { "Temu's Big Game Ad": ["Temu ad", "Temu Super Bowl ad", "Temu commercial"] },
+    // Famous videos below the table's line (owner, Nov 18, on painters: famous names count): ranked by the views their
+    // song's article gives, with when. Videos with no count on Wikipedia stay known names (free, said plainly).
+    textRows: [
+      { name: "Thinking Out Loud", page: "Thinking Out Loud", value: "3.9 billion", says: "As of September 2025, it has 3.9 billion views,", scale: 1e9, year: "2025" },
+      { name: "Lean On", page: "Lean On", value: "3.8 billion", says: "has over 3.8 billion views on YouTube as of September 2025", scale: 1e9, year: "2025" },
+      { name: "Bailando", page: "Bailando (Enrique Iglesias song)", value: "3.7 billion", says: "the Spanish version of the video has been viewed over 3.7 billion times", scale: 1e9, year: "2025" },
+      { name: "Mi Gente", page: "Mi Gente", value: "3.6 billion", says: "As of February 2026, the music video has over 3.6 billion views on YouTube.", scale: 1e9, year: "2026" },
+      { name: "Baby", page: "Baby (Justin Bieber song)", value: "3.5 billion", says: "As of January 2026, the video has received over 3.5 billion views", scale: 1e9, year: "2026" },
+      { name: "Hello", page: "Hello (Adele song)", value: "2.8 billion", says: "having earned over 2.8 billion views", scale: 1e9, year: "2020" },
+      { name: "Thunder", page: "Thunder (Imagine Dragons song)", value: "2.4 billion", says: "As of October 2026, the video has over 2.4 billion views on YouTube", scale: 1e9, year: "2026" },
+      { name: "Señorita", page: "Señorita (Shawn Mendes and Camila Cabello song)", value: "2 billion", says: "As of August 2026, it has received over 2 billion views on YouTube.", scale: 1e9, year: "2026" },
+      { name: "Cheap Thrills", page: "Cheap Thrills (song)", value: "1.9 billion", says: "has been viewed more than 1.9 billion times as of February 2026", scale: 1e9, year: "2026" },
+      { name: "Never Gonna Give You Up", page: "Never Gonna Give You Up", value: "1.7 billion", says: "the video has received over 1.7 billion views and 18 million likes", scale: 1e9 },
+      { name: "Love Yourself", page: "Love Yourself", value: "1.7 billion", says: "As of June 2025, the music video has received over 1.7 billion views on YouTube.", scale: 1e9, year: "2025" },
+      { name: "Gentleman", page: "Gentleman (Psy song)", value: "1.6 billion", says: "As of August 2025, it has received over 1.6 billion views.", scale: 1e9, year: "2025" },
+      { name: "Havana", page: "Havana (Camila Cabello song)", value: "1.11 billion", says: "As of January 2025, the video has received more than 1.11 billion views on YouTube", scale: 1e9, year: "2025" },
+    ],
+    // Their own articles, not the word's ("Hello" the greeting, "Baby" the infant).
+    articles: {
+      "Thinking Out Loud": "Thinking Out Loud", "Lean On": "Lean On", Bailando: "Bailando (Enrique Iglesias song)",
+      "Mi Gente": "Mi Gente", Baby: "Baby (Justin Bieber song)", Hello: "Hello (Adele song)",
+      Thunder: "Thunder (Imagine Dragons song)", "Señorita": "Señorita (Shawn Mendes and Camila Cabello song)",
+      "Cheap Thrills": "Cheap Thrills (song)", "Never Gonna Give You Up": "Never Gonna Give You Up",
+      "Love Yourself": "Love Yourself", Gentleman: "Gentleman (Psy song)", Havana: "Havana (Camila Cabello song)",
+    },
+    aliases: {
+      // "temu ad" found nothing (coverage audit, Nov 17).
+      "Temu's Big Game Ad": ["Temu ad", "Temu Super Bowl ad", "Temu commercial"],
+      Baby: ["Justin Bieber Baby", "Justin Bieber"],
+      "Never Gonna Give You Up": ["Rick Astley", "Rickroll"],
+      Hello: ["Adele Hello", "Adele"],
+      "Lean On": ["Major Lazer"],
+      "Mi Gente": ["J Balvin"],
+      Bailando: ["Enrique Iglesias"],
+    },
     // Kids' songs and memes with billions of views that the page doesn't rank, free but real names: they read as
     // "not one of the YouTube videos here" (coverage audit, Nov 17).
     knownNames: [
@@ -1105,7 +1169,12 @@ export const TOPICS: Topic[] = [
     knownNames: [
       "The Bible", "Bible", "Quran", "Koran", "Quotations from Chairman Mao Tse-tung", "Little Red Book",
       "The Lord of the Rings", "LOTR", "Narnia", "Harry Potter series",
+      // Famous books no table here has a figure for (owner, Nov 18: famous names count): said plainly, not "not one of
+      // the books here". Don Quixote's "500 million" is a claim the page leaves out.
+      "Don Quixote", "Moby-Dick", "Moby Dick", "Think and Grow Rich", "Percy Jackson", "Percy Jackson and the Olympians",
     ],
+    // "the diary of a young girl", its English title, was "not one of the books here".
+    aliases: { "The Diary of Anne Frank": ["The Diary of a Young Girl", "Diary of a Young Girl", "Anne Frank's diary"] },
     works: true,
     junkAliases: [
       "The Da Vinci Code paintings", "Lord of the Rings Prequel", "Vengeance", "Roger Cly", "Mrs. Cruncher",
@@ -1154,6 +1223,25 @@ export const TOPICS: Topic[] = [
       "Harry Potter encyclopaedia", "Harry Potter encyclopedia", "J k rowling books", "The Elephant House",
       "Volant Charitable Trust", "Very Good Lives", "Accidental Heroes", "Dirty Snow", "Trixie Koontz", "Relentless",
       "Buried Alive", "Voice of Thunder", "Little lost hen", "The Little lose hen", "The Three Golliwogs",
+    ],
+    // Famous authors the table leaves out (owner, Nov 18, on painters: famous names count): ranked by the sales their
+    // own article gives. The rest have no figure on Wikipedia and are known names: free, and said plainly ("George
+    // Orwell isn't in this ranking"), not "not one of the authors here".
+    textRows: [
+      { name: "Jeff Kinney", page: "Jeff Kinney", value: "300 million", says: "Over 300 million copies of the Diary of a Wimpy Kid books have sold globally as of late 2025", year: "2025" },
+      { name: "Eric Carle", page: "Eric Carle", value: "170 million", says: "His books have sold more than 170 million copies around the world." },
+      { name: "Sarah J. Maas", page: "Sarah J. Maas", value: "75 million", says: "As of 2024, she has sold more than 75 million copies of her books", year: "2024" },
+      { name: "Harper Lee", page: "Harper Lee", value: "40 million", says: "It remains a bestseller, with more than 40 million copies in print." },
+      { name: "Colleen Hoover", page: "Colleen Hoover", value: "20 million", says: "As of October 2022, Hoover had sold approximately 20 million books.", year: "2022" },
+    ],
+    knownNames: [
+      "George Orwell", "Orwell", "Haruki Murakami", "Murakami", "Hans Christian Andersen", "Judy Blume", "Lee Child",
+      "Brandon Sanderson", "Sanderson", "Dav Pilkey", "Gabriel García Márquez", "García Márquez", "Toni Morrison",
+      "Margaret Atwood", "Atwood", "Ray Bradbury", "Bradbury", "Kurt Vonnegut", "Vonnegut", "John Steinbeck",
+      "Steinbeck", "F. Scott Fitzgerald", "Virginia Woolf", "James Joyce", "Homer", "Dante Alighieri", "Dante",
+      "Franz Kafka", "Kafka", "Oscar Wilde", "Charlotte Brontë", "Emily Brontë", "Mary Shelley", "Bram Stoker",
+      "H. P. Lovecraft", "Lovecraft", "Philip K. Dick", "Arthur C. Clarke", "Frank Herbert", "Douglas Adams",
+      "Cormac McCarthy", "Salman Rushdie", "Kazuo Ishiguro", "Chinua Achebe", "Vladimir Nabokov", "Nabokov",
     ],
   },
   {
@@ -1651,6 +1739,21 @@ export const TOPICS: Topic[] = [
       { page: "List of Spotify streaming records", tables: [21], name: "Album" },
     ],
     junkAliases: ["For Crying Out Loud"],
+    // Famous albums below the tables' 20 million (owner, Nov 18, on painters: famous names count), with the worldwide
+    // sales their articles give. Unranked: the page lists no album under 20 million, so the ones between are unknown.
+    cited: {
+      Graceland: { value: "16", n: 16, aliases: [], source: "Graceland (album): \"estimated sales of more than 16 million copies worldwide\"" },
+      "OK Computer": { value: "7.8", n: 7.8, aliases: [], source: "OK Computer: \"sold at least 7.8 million copies worldwide\"" },
+    },
+    // Famous albums with no worldwide figure on Wikipedia: free, said plainly ("Revolver isn't in this ranking"), not
+    // "not one of the albums here".
+    knownNames: [
+      "The White Album", "Revolver", "Kind of Blue", "Born to Run", "÷", "Divide", "No Strings Attached",
+      "A Night at the Opera", "Physical Graffiti", "Pet Sounds", "Highway 61 Revisited", "Blonde on Blonde",
+      "What's Going On", "Exile on Main St.", "Blue", "London Calling", "Ready to Die", "Illmatic",
+      "To Pimp a Butterfly", "The Miseducation of Lauryn Hill", "Blonde", "Lover", "Folklore", "Midnights", "Sour",
+      "Renaissance", "Un Verano Sin Ti", "Scorpion", "Starboy", "After Hours",
+    ],
   },
   {
     id: "music-artists",
@@ -3523,6 +3626,7 @@ export const TOPICS: Topic[] = [
     value: "Worldwide",
     metric: "Worldwide box office (US$)",
     works: true,
+    fullPool: "every released Pixar feature is in the box office table",
     // Lifetime grosses, as the table gives Toy Story's (re-releases included): the table stops at these two films'
     // first runs, before their 2012 3D re-releases (judge, cycle 7). Monsters, Inc.'s text says $577.4 million; the
     // infobox's $579.7 million is the later Box Office Mojo figure.
@@ -4163,6 +4267,34 @@ export const TOPICS: Topic[] = [
       "Hans Holbein": ["Holbein", "Hans Holbein the Younger"],
       "Henri Matisse": ["Matisse"],
       "Peter Paul Rubens": ["Rubens"],
+      // "manet" asked to confirm Édouard Manet (owner's list, Nov 18): one letter from Monet, it lost its surname alias.
+      "Édouard Manet": ["Manet", "Edouard Manet"],
+      "Fernand Léger": ["Léger"],
+      // The famous painters below the table's line (`textRows`), as people type them.
+      "Frida Kahlo": ["Frida", "Kahlo", "Khalo", "Frida Khalo"],
+      "Johannes Vermeer": ["Vermeer", "Jan Vermeer"],
+      "Georgia O'Keeffe": ["O'Keeffe", "O'Keefe", "Georgia O'Keefe"],
+      // "turner" and "constable" are English words: no surname alias of their own.
+      "J. M. W. Turner": ["Turner", "William Turner", "JMW Turner", "Joseph Mallord William Turner"],
+      "John Constable": ["Constable"],
+      "Diego Velázquez": ["Velázquez", "Velasquez", "Diego Velasquez"],
+      "Henri de Toulouse-Lautrec": ["Toulouse-Lautrec", "Lautrec", "Henri Toulouse-Lautrec"],
+      "Marc Chagall": ["Chagall"],
+      "Joan Miró": ["Miró"],
+      "Gerhard Richter": ["Richter"],
+      "Yayoi Kusama": ["Kusama"],
+      "Diego Rivera": ["Rivera"],
+      "Camille Pissarro": ["Pissarro"],
+      "Norman Rockwell": ["Rockwell"],
+      "Piet Mondrian": ["Mondrian", "Mondriaan"],
+      "John Singer Sargent": ["Sargent", "John Sargent"],
+      "Winslow Homer": ["Homer"],
+      "Gustave Courbet": ["Courbet"],
+      "Gustave Caillebotte": ["Caillebotte"],
+      "Yoshitomo Nara": ["Nara"],
+      "Berthe Morisot": ["Morisot"],
+      "Francisco Goya": ["Goya", "Francisco de Goya"],
+      "Mary Cassatt": ["Cassatt"],
     },
     // Paintings, a book, a medal, notebooks, relatives, last words and a journal among the redirects ("number 1"
     // was Pollock).
@@ -4171,22 +4303,60 @@ export const TOPICS: Topic[] = [
       "Drink to me.", "María Picasso y López", "Leonardo da Vinci Notebooks", "Paul Picasso", "Paul Warhola",
       "Leonard of Vinci",
     ],
-    // The record holders before them (Raphael, Vermeer) and famous painters with no sale this big are free, and
-    // still real names: "dali" or "kahlo" is never read as an answer.
+    // Famous painters the table leaves out (owner, Nov 18: "you should allow ppl to guess frida, sorolla, etc"): each
+    // ranks by their priciest painting sold, the highest price Wikipedia gives them, and `record` quotes the words that
+    // make it their record, not just a sale (coordinator, Nov 18). The table takes in every sale over its line in
+    // today's money, so these all rank below #10. A price the text gives in pounds or euros is shown as written and
+    // ranks by its dollar value at that year's average rate (`n`: GBP 1.6476 in 2014, 1.2889 in 2017; EUR 1.2848 in
+    // 2012). Free, as known names said plainly: painters with no price on Wikipedia (Sorolla, Degas, El Greco, Hokusai's
+    // prints, Bob Ross), or only an undisclosed one (Michelangelo's and Caravaggio's disputed panels), or only a sale
+    // Wikipedia doesn't call their record: Dalí (£8.31 million in 2020; his 2011 record isn't there), Raphael (the
+    // National Gallery's £34.88 million in 2004), Schiele ($40.1 million in 2011), Zhang Daqian (US$15.2 million in
+    // 2016), Keith Haring ($3.86 million in 2019). Or only a record we know was beaten: Kandinsky ($23.3 million in
+    // 2016 on Wikipedia; Murnau mit Kirche II sold for £37.2 million in March 2023, CNN and the Guardian).
+    textRows: [
+      { name: "Frida Kahlo", page: "The Dream (The Bed)", value: "$54.7 million", says: "In November 2025, the painting was sold for $54.7 million at Sotheby", scale: 1e6, year: "2025", record: "The price set a new auction record for a work by a woman artist" },
+      { name: "Gustave Caillebotte", page: "Boating Party", value: "$53 million", says: "J. Paul Getty Museum in Los Angeles for $53 million", scale: 1e6, year: "2021", record: "This surpassed the 2019 record for a Caillebotte work of $22 million", recordPage: "Young Man at His Window" },
+      { name: "Piet Mondrian", value: "$51 million", page: "Piet Mondrian", says: "The most expensive painting by Mondrian was sold for $51 million in 2022.", scale: 1e6, year: "2022", record: "which beat a previous record of US $50.6 million for his work" },
+      { name: "Norman Rockwell", page: "Norman Rockwell", value: "$46 million", says: "The 2013 sale of Saying Grace for $46 million", scale: 1e6, year: "2013", record: "established a new record price for Rockwell" },
+      { name: "Gerhard Richter", page: "Gerhard Richter", value: "$44.52 million", says: "his 1986 painting Abstraktes Bild (599) sold for $44.52 million", scale: 1e6, year: "2015", record: "This was exceeded in May 2013 when his 1968 piece Cathedral Square, Milan was sold for $37.1 million" },
+      { name: "Georgia O'Keeffe", page: "Georgia O'Keeffe", value: "$44,405,000", says: "1932 painting Jimson Weed/White Flower No. 1 sold for $44,405,000", scale: 1e6, year: "2014", record: "by far the largest price paid for any painting by a female artist" },
+      { name: "Johannes Vermeer", page: "Steve Wynn", value: "$30 million", says: "auction for $30 million. With the purchase, he became the first art collector to purchase a Vermeer painting", scale: 1e6, year: "2004", record: "he became the first art collector to purchase a Vermeer painting in over 80 years" },
+      { name: "Winslow Homer", page: "John Spoor Broome", value: "$30 million", says: "Microsoft Chairman Bill Gates purchased it for a record price, over $30 million.", scale: 1e6, year: "1998", record: "purchased it for a record price" },
+      { name: "Marc Chagall", page: "Marc Chagall", value: "$28.5 million", says: "sold for $28.5 million (with fees) at Sotheby", scale: 1e6, year: "2017", record: "27-year-old $14.85 million auction record" },
+      { name: "Banksy", page: "Love Is in the Bin", value: "US$25,327,452", says: "(then equivalent to US$25,327,452 or €21.62M), a record for the artist", scale: 1e6, year: "2021", record: "a record for the artist" },
+      { name: "Yoshitomo Nara", page: "Yoshitomo Nara", value: "US$25m", says: "in Hong Kong for HK$195.7m (US$25m), nearly five times its record", scale: 1e6, year: "2019", record: "The new record is also a milestone for Nara" },
+      { name: "John Singer Sargent", page: "John Singer Sargent", value: "US$23.5 million", says: "In December 2004, Group with Parasols (A Siesta) (1905) sold for US$23.5 million", scale: 1e6, year: "2004", record: "The previous highest price for a Sargent painting was US$11 million." },
+      { name: "Henri de Toulouse-Lautrec", page: "La Blanchisseuse (Toulouse-Lautrec)", value: "US$22.4 million", says: "In November 2005, it was sold for US$22.4 million at auction", scale: 1e6, year: "2005", record: "setting a new record for the artist for a price at auction", recordPage: "Henri de Toulouse-Lautrec" },
+      { name: "Gustave Courbet", page: "Femme nue couchée", value: "15.3 million U.S. dollars", says: "for 15.3 million U.S. dollars, four times the previous auction record for a Courbet painting", scale: 1e6, year: "2015", record: "four times the previous auction record for a Courbet painting" },
+      // The Rivals was his record; sold again in 2022, for more.
+      { name: "Diego Rivera", page: "The Rivals (painting)", value: "$14.1 million", says: "subsequently sold for $14.1 million US (with fees) at the auction of his art collection in November 2022", scale: 1e6, year: "2022", record: "Rivera held the record for highest price at auction for a work by a Latin American artist until November 2021, with his 1931 painting The Rivals.", recordPage: "Diego Rivera" },
+      { name: "Berthe Morisot", page: "Berthe Morisot", value: "US$10.9 million", says: "sold for US$10.9 million at a Christie", scale: 1e6, year: "2013", record: "Morisot became the highest priced female artist" },
+      { name: "Francisco Goya", page: "Bullfight (Goya)", value: "$7.9 million", says: "Bullfight, Suerte de Varas, Price: $7.9 million", scale: 1e6, year: "1992", record: "When the museum bought the painting at auction in 1992, it shattered the artist" },
+      { name: "Yayoi Kusama", page: "Yayoi Kusama", value: "US$7.1 million", says: "from her Infinity Nets series sold for US$7.1 million at Christie", scale: 1e6, year: "2014", record: "making Kusama then the most expensive living female artist at auction" },
+      { name: "Diego Velázquez", page: "Art auction", value: "$5.5 million", says: "Portrait of Juan de Pareja sold for $5.5 million", scale: 1e6, year: "1970", record: "The sale tripled the previous world record" },
+      { name: "Mary Cassatt", page: "Mary Cassatt", value: "$4,072,500", says: "the record price of $4,072,500 being set in 1996", scale: 1e6, year: "1996", record: "the record price of $4,072,500" },
+      // In pounds or euros, ranked by their dollar value then.
+      { name: "J. M. W. Turner", page: "Harry Primrose, 8th Earl of Rosebery", value: "£30.3m", says: "the painting Rome, From Mount Aventine by J. M. W. Turner for £30.3m", scale: 1e6, n: 49.9, year: "2014", record: "this was later beaten by Rome, From Mount Aventine in December 2014, which sold for £30.3m", recordPage: "Modern Rome – Campo Vaccino" },
+      // Above the 2012 record the page names (Peinture (Etoile Bleue), "a record price for the artist at auction").
+      { name: "Joan Miró", page: "Joan Miró", value: "24,571,250 GBP", says: "London for 24,571,250 GBP", scale: 1e6, n: 31.7, year: "2017", record: "a record price for the artist at auction" },
+      { name: "John Constable", page: "Thyssen-Bornemisza Museum", value: "€25.8 million", says: "was sold in London the following year for €25.8 million", scale: 1e6, n: 33.1, year: "2012", record: "The Lock sells for a record £22.4million" },
+      { name: "Camille Pissarro", page: "Camille Pissarro", value: "£19.9M", says: "in London for £19.9M, nearly five times the previous record", scale: 1e6, n: 32.8, year: "2014", record: "nearly five times the previous record" },
+    ],
+    // The record holders before them (table 1: Correggio, Murillo, van Dyck) and famous painters with no price on
+    // Wikipedia are free, and still real names: "michelangelo" or "sorolla" is never read as an answer.
     knownOnly: [{ tables: [1], name: "Artist" }],
     knownNames: [
-      "Michelangelo", "Salvador Dalí", "Dalí", "Frida Kahlo", "Kahlo", "Banksy", "Caravaggio", "Raphael", "Vermeer",
-      "Johannes Vermeer", "Hokusai", "J. M. W. Turner", "Turner", "Diego Rivera", "Bob Ross", "Keith Haring",
-      "Edgar Degas", "Degas", "Wassily Kandinsky", "Kandinsky", "Joan Miró", "Miró", "Marc Chagall", "Chagall",
-      "Georgia O'Keeffe", "O'Keeffe", "Yayoi Kusama", "Kusama", "Jeff Koons", "Damien Hirst", "Fernando Botero",
-      "El Greco", "Francisco Goya", "Goya", "Diego Velázquez", "Velázquez", "Paul Klee", "Egon Schiele",
-      "Henri de Toulouse-Lautrec", "Toulouse-Lautrec", "Norman Rockwell", "Gerhard Richter", "Leonardo DiCaprio",
-      "Sigmund Freud", "Donatello", "Auguste Rodin", "Rodin", "Gustave Courbet", "Camille Pissarro", "Jan van Eyck",
-      "Hieronymus Bosch", "Pieter Bruegel", "Albrecht Dürer", "Artemisia Gentileschi",
+      "Michelangelo", "Caravaggio", "Hokusai", "Katsushika Hokusai", "Bob Ross", "Edgar Degas", "Degas", "El Greco",
+      // No sale Wikipedia calls their record, or only one we know was beaten (coordinator, Nov 18).
+      "Salvador Dalí", "Dalí", "Raphael", "Egon Schiele", "Schiele", "Keith Haring", "Haring", "Zhang Daqian",
+      "Chang Dai-chien", "Wassily Kandinsky", "Kandinsky", "Vasily Kandinsky",
+      "Joaquín Sorolla", "Sorolla", "Jeff Koons", "Damien Hirst", "Fernando Botero", "Paul Klee", "Andrew Wyeth",
+      "Wyeth", "Henri Rousseau", "Leonardo DiCaprio", "Sigmund Freud", "Donatello", "Auguste Rodin", "Rodin",
+      "Jan van Eyck", "Hieronymus Bosch", "Pieter Bruegel", "Albrecht Dürer", "Artemisia Gentileschi",
       // Coverage audit (Nov 13): these read as "not one of the painters" (surnames alone, and painters left out).
-      "Piet Mondrian", "Mondrian", "James McNeill Whistler", "Whistler", "Bruegel", "Brueghel", "Dürer", "Van Eyck",
-      "Schiele", "Klee", "Pissarro", "Courbet", "Haring", "Rockwell", "Botero", "Gentileschi", "Lautrec", "Koons",
-      "Frida", "Yoshitomo Nara", "Zhang Daqian", "Ai Weiwei",
+      "James McNeill Whistler", "Whistler", "Bruegel", "Brueghel", "Dürer", "Van Eyck", "Klee", "Botero",
+      "Gentileschi", "Koons", "Ai Weiwei",
     ],
   },
   {
