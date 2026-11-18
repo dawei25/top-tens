@@ -566,6 +566,8 @@ const SPOTIFY_MORE: Record<string, string[]> = {
   "Frank Ocean": [], "Playboi Carti": ["Carti"], "Rosé": ["Rose"], Radiohead: [], "Marshmello": [], Kygo: [],
   "Cardi B": [], "Charlie Puth": [], "Camila Cabello": [], Hozier: [], OneRepublic: [],
   "Tate McRae": [], "Teddy Swims": [], "Sabrina Carpenter": [], "Avicii": [], "The Chainsmokers": ["Chainsmokers"],
+  // Famous names that read "not one of the artists here" or "isn't in this ranking" (owner, Nov 18: famous names count).
+  "Rosalía": ["Rosalia"], "Dolly Parton": [], Lorde: [], "Zach Bryan": [], "Snoop Dogg": ["Snoop"], "50 Cent": ["Fifty Cent"],
 };
 
 export const TOPICS: Topic[] = [
@@ -1168,6 +1170,25 @@ export const TOPICS: Topic[] = [
       "Harry Potter encyclopaedia", "Harry Potter encyclopedia", "J k rowling books", "The Elephant House",
       "Volant Charitable Trust", "Very Good Lives", "Accidental Heroes", "Dirty Snow", "Trixie Koontz", "Relentless",
       "Buried Alive", "Voice of Thunder", "Little lost hen", "The Little lose hen", "The Three Golliwogs",
+    ],
+    // Famous authors the table leaves out (owner, Nov 18, on painters: famous names count): ranked by the sales their
+    // own article gives. The rest have no figure on Wikipedia and are known names: free, and said plainly ("George
+    // Orwell isn't in this ranking"), not "not one of the authors here".
+    textRows: [
+      { name: "Jeff Kinney", page: "Jeff Kinney", value: "300 million", says: "Over 300 million copies of the Diary of a Wimpy Kid books have sold globally as of late 2025", year: "2025" },
+      { name: "Eric Carle", page: "Eric Carle", value: "170 million", says: "His books have sold more than 170 million copies around the world." },
+      { name: "Sarah J. Maas", page: "Sarah J. Maas", value: "75 million", says: "As of 2024, she has sold more than 75 million copies of her books", year: "2024" },
+      { name: "Harper Lee", page: "Harper Lee", value: "40 million", says: "It remains a bestseller, with more than 40 million copies in print." },
+      { name: "Colleen Hoover", page: "Colleen Hoover", value: "20 million", says: "As of October 2022, Hoover had sold approximately 20 million books.", year: "2022" },
+    ],
+    knownNames: [
+      "George Orwell", "Orwell", "Haruki Murakami", "Murakami", "Hans Christian Andersen", "Judy Blume", "Lee Child",
+      "Brandon Sanderson", "Sanderson", "Dav Pilkey", "Gabriel García Márquez", "García Márquez", "Toni Morrison",
+      "Margaret Atwood", "Atwood", "Ray Bradbury", "Bradbury", "Kurt Vonnegut", "Vonnegut", "John Steinbeck",
+      "Steinbeck", "F. Scott Fitzgerald", "Virginia Woolf", "James Joyce", "Homer", "Dante Alighieri", "Dante",
+      "Franz Kafka", "Kafka", "Oscar Wilde", "Charlotte Brontë", "Emily Brontë", "Mary Shelley", "Bram Stoker",
+      "H. P. Lovecraft", "Lovecraft", "Philip K. Dick", "Arthur C. Clarke", "Frank Herbert", "Douglas Adams",
+      "Cormac McCarthy", "Salman Rushdie", "Kazuo Ishiguro", "Chinua Achebe", "Vladimir Nabokov", "Nabokov",
     ],
   },
   {
