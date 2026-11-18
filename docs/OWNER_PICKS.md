@@ -26,6 +26,7 @@ automated. Judges read this file before scoring a candidate (docs/JUDGE.md).
 | 2026-11-17 | Fathom: birthday pairs | reword | "does even chance mean a 50/50 chance?": no idioms for numbers |
 | 2026-11-17 | Fathom: name a country with about 1 million people; when the world reached 4 billion | liked (thumbs up) | |
 | 2026-11-17 | Free games before sign-in | 5 (was 2) | for the launch (first post Wed Nov 18, 21:00 HKT) |
+| 2026-11-18 | concert-tours | vetoed as a daily (Nov 19), free play only | "i dont like that one- do a geography one instead" |
 | 2026-11-04 | national-parks | liked (rated well) | wanted each park's state in its fact |
 | 2026-11-05 | lakes | vetoed as a daily | not a great list; it had already been in free play; third Geography daily in a row |
 | 2026-11-05 | x-accounts | dropped | same problem as Facebook (follower counts) |
@@ -64,9 +65,9 @@ measure of how well the picks match his taste.
 | Nov 16 | Mon 16 | metro-cities | no answer, scheduled as proposed | Sunday 18:00 HKT fallback (owner, Nov 5) |
 | Nov 16 | Tue 17 | painters | no answer, scheduled as proposed | |
 | Nov 16 | Wed 18 | coastline-countries | no answer, scheduled as proposed | |
-| Nov 16 | Thu 19 | concert-tours | no answer, scheduled as proposed | older list, never played by anyone |
-| Nov 16 | Fri 20 | australia-cities | no answer, scheduled as proposed | |
-| Nov 16 | Sat 21 | happiest-countries | no answer, scheduled as proposed | |
+| Nov 16 | Thu 19 | concert-tours | swapped (Nov 18) for capitals, pulled from Mon 23 | "i dont like that one- do a geography one instead"; vetoed as a daily, free play only. No approved geography list was spare, so capitals came forward and every later day moved up one (Dec 6 opened) |
+| Nov 16 | Fri 20 | australia-cities | moved to Sat 21; happiest-countries came to Fri 20 | coastline (Wed 18), capitals (Thu 19) and Australia's cities on Fri 20 would be three Geography days running |
+| Nov 16 | Sat 21 | happiest-countries | moved to Fri 20 | see Fri 20 |
 | Nov 16 | Sun 22 | winter-olympics-countries | no answer, scheduled as proposed | |
 
 Players' signals (not the owner's): painters (Nov 17 daily) drew one note and one down, too hard: "obscure for the

@@ -2,6 +2,7 @@
   "id": "concert-tours",
   "judgedAt": "2026-11-03",
   "decision": "daily-list",
+  "ownerVeto": "owner, Nov 18: \"i dont like that one\" (pulled from Nov 19; free play only)",
   "alsoBlitz": true,
   "priority": 9,
   "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 4, "blitzDepth": 5 },
