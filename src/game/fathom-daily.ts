@@ -5,7 +5,8 @@
  * its date, by the same rules, so every player still gets the same ten.
  *
  * The rules of a day's pick: a game's round mix and draw rules (`drawQuestions`: an easy number first, five estimates,
- * two percents, two years and a name-it round, kinds spread), and no question again until the bank has run out of them.
+ * two percents, two years and a name-it round, kinds spread), no question again until the bank has run out of them,
+ * and no name-it round from the list of one in the last two days while another list has some left.
  * The script stops there and says so (`freshDay` is null); a seeded day in the game starts the bank over instead,
  * holding back the last few days, so a player always gets a game. Pure functions only; the script and the game share
  * them, so a scheduled day and a seeded one are the same pick for the same bank.
@@ -71,6 +72,24 @@ export function fullGame(qs: readonly FathomQuestion[]): boolean {
   return rounds(qs.map(roundOf)) === rounds(GAME_ROUNDS);
 }
 
+/**
+ * How many days apart two name-it rounds from the same list must be: "Name a country with about 50 million people" one
+ * day and "about 1 million" the next reads as the same question again (owner, Nov 18: "make sure you arent reusing same
+ * questions across diff dailies"). 3: at least two days between.
+ */
+export const NAME_LIST_GAP = 3;
+
+/** The name-it lists of the last NAME_LIST_GAP - 1 days (the days before, oldest first). */
+function recentNameLists(bank: readonly FathomQuestion[], before: readonly (readonly string[])[]): Set<string> {
+  const byId = new Map(bank.map((q) => [q.id, q]));
+  const lists = new Set<string>();
+  for (const ids of before.slice(-(NAME_LIST_GAP - 1))) for (const id of ids) {
+    const list = byId.get(id)?.nameIt?.list;
+    if (list) lists.add(list);
+  }
+  return lists;
+}
+
 /** The questions asked since the bank last started over, from the days before (oldest first). */
 function askedThisCycle(before: readonly (readonly string[])[]): Set<string> {
   let asked = new Set<string>();
@@ -88,11 +107,16 @@ function askedThisCycle(before: readonly (readonly string[])[]): Set<string> {
  */
 export function freshDay(bank: readonly FathomQuestion[], before: readonly (readonly string[])[], date: string): string[] | null {
   const asked = askedThisCycle(before);
-  const fresh = drawQuestions(
-    bank.filter((q) => !asked.has(q.id)),
+  const left = bank.filter((q) => !asked.has(q.id));
+  // A name-it round from a list the last days didn't ask, while one is left.
+  const recent = recentNameLists(bank, before);
+  const spaced = drawQuestions(
+    left.filter((q) => !q.nameIt || !recent.has(q.nameIt.list)),
     [],
     seeded(date),
   );
+  if (fullGame(spaced)) return spaced.map((q) => q.id);
+  const fresh = drawQuestions(left, [], seeded(date));
   return fullGame(fresh) ? fresh.map((q) => q.id) : null;
 }
 

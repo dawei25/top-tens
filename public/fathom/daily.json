@@ -104,7 +104,7 @@
    "first-modern-olympics",
    "van-gogh-oil-paintings",
    "elephant-pregnancy",
-   "name-country-as-big-as-france",
+   "name-country-10-per-km2",
    "sputnik-launch",
    "coca-cola-can-sugar",
    "internet-users-share",
@@ -120,7 +120,7 @@
    "hummingbird-heart-rate",
    "amazon-in-brazil",
    "first-text-message",
-   "name-country-9-borders",
+   "name-us-state-as-big-as-england",
    "north-pole-to-equator",
    "hot-dog-eating-record",
    "iss-orbit-time",
@@ -136,7 +136,7 @@
    "blinks-per-minute",
    "italian-pasta-per-year",
    "last-moonwalk",
-   "name-country-100m-people",
+   "name-country-as-big-as-france",
    "earth-spin-speed",
    "record-painting-price",
    "wild-mammals-share",
@@ -151,7 +151,7 @@
    "perseverance-trip",
    "world-cup-2026-matches",
    "titanic-sinking",
-   "name-country-as-big-as-uk",
+   "name-country-100m-people",
    "ring-of-fire-earthquakes",
    "new-zealand-sheep",
    "first-email",
@@ -167,7 +167,7 @@
    "brazil-coffee-share",
    "piano-keys",
    "forest-cover-share",
-   "name-country-10m-people",
+   "name-us-state-5m-people",
    "pluto-demoted",
    "skydiver-fall-speed",
    "smartphones-shipped",
@@ -188,7 +188,7 @@
    "heart-pumps-a-day",
    "olympic-pool-volume",
    "canada-near-border-share",
-   "name-country-5m-people"
+   "name-country-as-big-as-uk"
   ]
  },
  {
@@ -201,7 +201,7 @@
    "world-life-expectancy",
    "cars-in-the-world",
    "hong-kong-skyscrapers",
-   "name-country-10-per-km2",
+   "name-country-9-borders",
    "longest-solar-eclipse",
    "first-paralympics",
    "rosetta-stone-found"
@@ -215,7 +215,7 @@
    "old-faithful-interval",
    "four-minute-mile",
    "train-speed-record",
-   "name-us-state-5m-people",
+   "name-country-300-per-km2",
    "eighteen-carat-gold",
    "giraffe-neck-bones",
    "great-pyramid-blocks",
@@ -231,7 +231,7 @@
    "premier-league-matches",
    "milk-teeth",
    "chernobyl-disaster",
-   "name-country-as-big-as-india",
+   "name-us-state-as-big-as-uk",
    "buckingham-palace-rooms",
    "japan-mountainous",
    "space-shuttle-missions",
@@ -245,7 +245,7 @@
   "ids": [
    "wright-first-flight-length",
    "grand-canyon-depth",
-   "name-us-state-as-big-as-england",
+   "name-country-10m-people",
    "hadrians-wall-length",
    "japan-over-65",
    "friends-episodes",
@@ -268,7 +268,7 @@
    "oldest-cat",
    "billion-dollars-a-second",
    "football-panels",
-   "name-country-300-per-km2"
+   "name-country-as-big-as-india"
   ]
  },
  {
@@ -294,7 +294,7 @@
    "world-cup-winning-countries",
    "jupiter-earths",
    "telephone-patent",
-   "name-us-state-as-big-as-uk",
+   "name-country-7-borders",
    "california-forest",
    "voyager-round-the-world",
    "stonehenge-stones-height",
@@ -312,7 +312,7 @@
    "channel-tunnel-length",
    "everest-air-pressure",
    "berlin-wall-falls",
-   "name-country-as-big-as-japan",
+   "name-country-100-per-km2",
    "television-first-shown",
    "italy-world-heritage-sites",
    "sun-hydrogen",
@@ -348,7 +348,7 @@
    "fastest-sail-around-world",
    "origin-of-species",
    "first-cds",
-   "name-us-state-as-big-as-germany"
+   "name-country-5m-people"
   ]
  },
  {
@@ -360,7 +360,7 @@
    "berlin-wall-length",
    "walking-speed",
    "keyboard-keys",
-   "name-country-100-per-km2",
+   "name-country-as-big-as-japan",
    "lhc-ring-length",
    "bone-share-of-weight",
    "iceland-vegetation",
@@ -395,7 +395,7 @@
    "a4-sheets-per-square-metre",
    "switzerland-share-of-alps",
    "first-wimbledon",
-   "name-country-7-borders",
+   "name-country-8-borders",
    "un-official-languages"
   ]
  },
@@ -411,7 +411,7 @@
    "red-green-colour-blind-men",
    "tornado-wind-record",
    "great-lakes-fresh-water",
-   "name-country-8-borders",
+   "name-country-30-per-km2",
    "titanic-lifeboats"
   ]
  },
@@ -427,7 +427,7 @@
    "chile-length",
    "first-nobel-prizes",
    "gagarin-first-in-space",
-   "name-country-as-big-as-mexico",
+   "name-us-state-as-big-as-germany",
    "central-america-countries"
   ]
  },
@@ -453,7 +453,7 @@
   "ids": [
    "england-share-of-uk",
    "boeing-747-first-flight",
-   "name-country-30-per-km2",
+   "name-country-as-big-as-mexico",
    "swiss-german-speakers",
    "maldives-height",
    "russia-time-zones",

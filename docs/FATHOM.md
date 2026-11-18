@@ -49,6 +49,12 @@ name-it round's lists in `public/fathom/lists/<id>.json` (built by `scripts/fath
   (put it back, or rewrite that day by hand); a past day's is only a warning. `scripts/fathom/daily.test.ts` holds the
   committed file to all of it, every scheduled id from today on in the bank included: a question renamed or dropped
   fails `npm test` until the script is re-run; a file short of a week ahead fails it while the bank has another day.
+- **Name-it rounds spaced out** (owner, Nov 18: "make sure you arent reusing same questions across diff dailies"): no
+  id comes back, but one name-it list twice within a few days reads as the same question with a new number ("Name a
+  country with about 50 million people", then 1 million the next day, as on Nov 16 and 17). Two rounds from the same
+  list are at least `NAME_LIST_GAP` (3) days apart, while the bank has another list left (`freshDay`); the committed
+  file is held to it from Nov 20 on. Four of the seven lists are about countries, so "Name a country..." still comes
+  most days: new kinds of name-it list (not countries) are what would make the round feel fresher.
 - **A day the file doesn't cover** (it ran out, or didn't load): the game seeds that day by its date from the bank, by
   the same rules, continuing from the file's last day (`dayFor`, `src/game/fathom-daily.ts`: the same code the script
   uses), so everyone still gets the same ten; it is numbered by days since Fathom #1. Unlike the script, it never

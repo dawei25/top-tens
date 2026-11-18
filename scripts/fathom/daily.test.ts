@@ -3,7 +3,7 @@
 // no question again, today and tomorrow never changed once written, and a loud failure when a fixed day asks a question
 // the bank no longer has or the bank runs out before the days asked for (it says how many days it covers).
 import { describe, expect, it } from "vitest";
-import { addDays, dayFor, freshDay, fullGame, pickDay, readSchedule, type FathomDailyEntry } from "../../src/game/fathom-daily";
+import { addDays, dayFor, freshDay, fullGame, NAME_LIST_GAP, pickDay, readSchedule, type FathomDailyEntry } from "../../src/game/fathom-daily";
 import { QUESTIONS_PER_GAME, type FathomQuestion } from "../../src/game/fathom";
 import { BankRanOut, daysCovered, loadBank, loadSchedule, planSchedule } from "./daily";
 
@@ -13,6 +13,22 @@ const schedule = loadSchedule();
 const pad = (n: number) => String(n).padStart(2, "0");
 const now = new Date();
 const TODAY = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+/** Days from `from` on whose name-it round's list was asked fewer than NAME_LIST_GAP days before. */
+function nameListClashes(days: readonly FathomDailyEntry[], from: string): string[] {
+  const lastDay = new Map<string, number>();
+  const out: string[] = [];
+  days.forEach((e, i) => {
+    for (const id of e.ids) {
+      const list = byId.get(id)?.nameIt?.list;
+      if (!list) continue;
+      const before = lastDay.get(list);
+      if (e.date >= from && before !== undefined && i - before < NAME_LIST_GAP) out.push(`#${e.n} ${e.date}: ${list} again after ${i - before} day(s)`);
+      lastDay.set(list, i);
+    }
+  });
+  return out;
+}
 
 describe("the committed schedule (public/fathom/daily.json)", () => {
   it("runs day by day from Fathom #1, a week ahead or as far as the bank's fresh questions go", () => {
@@ -50,6 +66,13 @@ describe("the committed schedule (public/fathom/daily.json)", () => {
       }
       e.ids.forEach((id) => seen.add(id));
     }
+  });
+
+  // Owner, Nov 18: "make sure you arent reusing same questions across diff dailies". No id repeats (above), but the
+  // same name-it list on days close together reads as the same question with another number ("Name a country with
+  // about 50 million people", then 1 million the next day). Nov 16 and 17 were already played that way.
+  it("spaces out name-it rounds from one list: NAME_LIST_GAP days apart, from Nov 20 on", () => {
+    expect(nameListClashes(schedule.filter((e) => e.date >= "2026-11-14"), "2026-11-20")).toEqual([]);
   });
 
   it("is what the game works out for a scheduled day, and the next day past its end is the script's next pick", () => {
@@ -103,6 +126,13 @@ describe("planSchedule", () => {
     for (const e of repeated) expect(fullGame(e.ids.map((id) => byId.get(id)!)), `#${e.n}`).toBe(true);
     // Counted from today, the fixed days still ahead included.
     expect(planSchedule(full.schedule.slice(0, 3), bank, { today: addDays(today, 1), days: covers - 2 }).covers).toBe(covers - 1);
+  });
+
+  it("spaces out name-it rounds from one list while the bank has other lists left", () => {
+    const covers = daysCovered(bank, [], today);
+    // Near the bank's end the name-it questions left may all be from one or two lists: only the first two thirds.
+    const plan = planSchedule([], bank, { today, days: Math.floor((covers * 2) / 3) }).schedule;
+    expect(nameListClashes(plan, today)).toEqual([]);
   });
 
   it("reads only well-formed days", () => {
