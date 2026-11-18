@@ -215,6 +215,9 @@ test("a link to a free list counts, and one past the free ones gets the wall alo
   await page.getByTestId("results").waitFor();
   await page.getByTestId("play-again").click();
   await walled(page);
+  // The game just ended: SHARE's focus beat (END_FOCUS_MS after the reveal) must never pull focus out of the wall.
+  await page.waitForTimeout(1600);
+  assert.equal(await page.evaluate(() => document.activeElement?.dataset.testid), "sign-in-google", "focus stays in the wall");
   // Today's list waits: the quiet key says so even here.
   assert.equal(await page.getByTestId("free-wall-alt").getAttribute("data-go"), "today");
   await page.getByTestId("free-wall-close").click();

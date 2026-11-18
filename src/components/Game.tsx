@@ -196,6 +196,8 @@ export function Game({ id, meta, daily, today, lexicon, onBack, onHome, onRoll, 
   useEffect(() => {
     if (!over || !endedHere) return;
     const t = setTimeout(() => {
+      // Never out of an open sheet (the free-play wall can open in that beat): focus stays where the player is.
+      if (document.querySelector('[aria-modal="true"]')) return;
       shareRef.current?.focus({ preventScroll: true });
       resultsRef.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "nearest" });
     }, Math.max(resultsDelay, END_FOCUS_MS));
