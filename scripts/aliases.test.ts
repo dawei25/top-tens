@@ -1059,8 +1059,18 @@ describe("aliases as built: what players type", () => {
       ["music-artists", "dolly parton", "Dolly Parton"],
       ["music-artists", "2pac", "Tupac Shakur"],
       ["grand-slam-titles", "del potro", "Juan Martín del Potro"],
+      ["youtube-videos", "thinking out loud", "Thinking Out Loud"],
+      ["youtube-videos", "hello", "Hello"],
+      ["youtube-videos", "never gonna give you up", "Never Gonna Give You Up"],
+      ["youtube-videos", "rickroll", "Never Gonna Give You Up"],
+      ["youtube-videos", "havana", "Havana"],
+      ["youtube-videos", "justin bieber baby", "Baby"],
     ])("%s: %s is %s, at once", (id, guess, name) => {
       expect(answer(id, guess)).toMatchObject({ kind: "near", corrected: false, name });
+    });
+    it("youtube-videos: a famous video below the top 30 ranks with its dated count", () => {
+      expect(answer("youtube-videos", "thinking out loud")).toMatchObject({ rank: 30, value: "3.9 (2025)" });
+      expect(answer("youtube-videos", "havana")).toMatchObject({ value: "1.11 (2025)" });
     });
     it("fiction-authors: famous authors with no figure anywhere are known names, not \"not one of the authors\"", () => {
       for (const name of ["george orwell", "haruki murakami", "john steinbeck", "toni morrison", "margaret atwood", "lee child"]) {

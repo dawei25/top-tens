@@ -1001,8 +1001,41 @@ export const TOPICS: Topic[] = [
     categorySkip: /^(killing|killing and dismemberment|murder|torture|firing) of\b|\bincident$/i,
     // Cocomelon's own upload of the song; "Baby Shark" means Pinkfong's #1 (intent.ts).
     rename: { "Baby Shark": "Baby Shark (Cocomelon)" },
-    // "temu ad" found nothing (coverage audit, Nov 17).
-    aliases: { "Temu's Big Game Ad": ["Temu ad", "Temu Super Bowl ad", "Temu commercial"] },
+    // Famous videos below the table's line (owner, Nov 18, on painters: famous names count): ranked by the views their
+    // song's article gives, with when. Videos with no count on Wikipedia stay known names (free, said plainly).
+    textRows: [
+      { name: "Thinking Out Loud", page: "Thinking Out Loud", value: "3.9 billion", says: "As of September 2025, it has 3.9 billion views,", scale: 1e9, year: "2025" },
+      { name: "Lean On", page: "Lean On", value: "3.8 billion", says: "has over 3.8 billion views on YouTube as of September 2025", scale: 1e9, year: "2025" },
+      { name: "Bailando", page: "Bailando (Enrique Iglesias song)", value: "3.7 billion", says: "the Spanish version of the video has been viewed over 3.7 billion times", scale: 1e9, year: "2025" },
+      { name: "Mi Gente", page: "Mi Gente", value: "3.6 billion", says: "As of February 2026, the music video has over 3.6 billion views on YouTube.", scale: 1e9, year: "2026" },
+      { name: "Baby", page: "Baby (Justin Bieber song)", value: "3.5 billion", says: "As of January 2026, the video has received over 3.5 billion views", scale: 1e9, year: "2026" },
+      { name: "Hello", page: "Hello (Adele song)", value: "2.8 billion", says: "having earned over 2.8 billion views", scale: 1e9, year: "2020" },
+      { name: "Thunder", page: "Thunder (Imagine Dragons song)", value: "2.4 billion", says: "As of October 2026, the video has over 2.4 billion views on YouTube", scale: 1e9, year: "2026" },
+      { name: "Señorita", page: "Señorita (Shawn Mendes and Camila Cabello song)", value: "2 billion", says: "As of August 2026, it has received over 2 billion views on YouTube.", scale: 1e9, year: "2026" },
+      { name: "Cheap Thrills", page: "Cheap Thrills (song)", value: "1.9 billion", says: "has been viewed more than 1.9 billion times as of February 2026", scale: 1e9, year: "2026" },
+      { name: "Never Gonna Give You Up", page: "Never Gonna Give You Up", value: "1.7 billion", says: "the video has received over 1.7 billion views and 18 million likes", scale: 1e9 },
+      { name: "Love Yourself", page: "Love Yourself", value: "1.7 billion", says: "As of June 2025, the music video has received over 1.7 billion views on YouTube.", scale: 1e9, year: "2025" },
+      { name: "Gentleman", page: "Gentleman (Psy song)", value: "1.6 billion", says: "As of August 2025, it has received over 1.6 billion views.", scale: 1e9, year: "2025" },
+      { name: "Havana", page: "Havana (Camila Cabello song)", value: "1.11 billion", says: "As of January 2025, the video has received more than 1.11 billion views on YouTube", scale: 1e9, year: "2025" },
+    ],
+    // Their own articles, not the word's ("Hello" the greeting, "Baby" the infant).
+    articles: {
+      "Thinking Out Loud": "Thinking Out Loud", "Lean On": "Lean On", Bailando: "Bailando (Enrique Iglesias song)",
+      "Mi Gente": "Mi Gente", Baby: "Baby (Justin Bieber song)", Hello: "Hello (Adele song)",
+      Thunder: "Thunder (Imagine Dragons song)", "Señorita": "Señorita (Shawn Mendes and Camila Cabello song)",
+      "Cheap Thrills": "Cheap Thrills (song)", "Never Gonna Give You Up": "Never Gonna Give You Up",
+      "Love Yourself": "Love Yourself", Gentleman: "Gentleman (Psy song)", Havana: "Havana (Camila Cabello song)",
+    },
+    aliases: {
+      // "temu ad" found nothing (coverage audit, Nov 17).
+      "Temu's Big Game Ad": ["Temu ad", "Temu Super Bowl ad", "Temu commercial"],
+      Baby: ["Justin Bieber Baby", "Justin Bieber"],
+      "Never Gonna Give You Up": ["Rick Astley", "Rickroll"],
+      Hello: ["Adele Hello", "Adele"],
+      "Lean On": ["Major Lazer"],
+      "Mi Gente": ["J Balvin"],
+      Bailando: ["Enrique Iglesias"],
+    },
     // Kids' songs and memes with billions of views that the page doesn't rank, free but real names: they read as
     // "not one of the YouTube videos here" (coverage audit, Nov 17).
     knownNames: [

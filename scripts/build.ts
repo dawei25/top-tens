@@ -363,6 +363,8 @@ export function rankRows<R extends Pick<Row, "value" | "tiebreak">>(topic: Pick<
  * A ranked row the table leaves out, from the page's own text (`textRows`): the UN's note gives "Monaco (LE 86.37
  * years". Fails when the text no longer says it, so a changed page never ships a figure it dropped.
  */
+const SCALE_WORDS: Record<number, string> = { 1e3: "thousand", 1e6: "million", 1e9: "billion" };
+
 export function textRow(pageText: string, t: TextRow, unit = ""): Row {
   const said = (s: string) => s.replace(/\s+/g, " ");
   if (!said(t.says).includes(t.value)) throw new Error(`textRows "${t.name}": "${t.says}" doesn't give ${t.value}`);
@@ -373,9 +375,10 @@ export function textRow(pageText: string, t: TextRow, unit = ""): Row {
   if (!v) throw new Error(`textRows "${t.name}": ${t.value} is no figure`);
   let valueText = v.display;
   if (t.scale) {
-    // In the ranked rows' unit: "$54.7 million" in a table of millions is "$54.7" (the unit follows), "$44,405,000" "$44.4".
+    // In the ranked rows' unit, as the text writes it: "$54.7 million" in a table of millions is "$54.7" (the unit
+    // follows), "1.11 billion" in one of billions "1.11"; "$44,405,000" is "$44.4".
     const sign = v.display.match(/^[$€£]/)?.[0] ?? "";
-    const word = unit.trim();
+    const word = SCALE_WORDS[t.scale] ?? unit.trim();
     valueText = word && v.display.endsWith(` ${word}`) ? v.display.slice(0, -word.length - 1) : sign + scaledFigure(v.value, t.scale);
   }
   return {
@@ -502,7 +505,10 @@ export async function readRows(topic: Topic): Promise<Row[]> {
       $("style, script").remove();
       texts.set(page, $("body").text());
     }
-    rows.push(textRow(texts.get(page)!, t, topic.unit));
+    const row = textRow(texts.get(page)!, t, topic.unit);
+    // A title that is also a word ("Hello", "Baby") names its own article in `articles`: its redirects, not the word's.
+    const article = topic.articles?.[t.name];
+    rows.push(article ? { ...row, redirectTarget: article, link: article, aliasSeeds: [...row.aliasSeeds, cleanName(article)] } : row);
     console.log(`     ${topic.id}: ${t.name} ${t.value}${t.year ? ` (${t.year})` : ""} from ${t.page ? `"${t.page}"` : "the page's text"} ("${t.says}")`);
   }
   for (const name of Object.keys(topic.overrides ?? {})) {
