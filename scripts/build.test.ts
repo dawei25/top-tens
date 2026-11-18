@@ -520,6 +520,26 @@ describe("textRow (figures from the page's text)", () => {
     expect(() => textRow(note, { name: "Monaco", value: "86.50", says: "Monaco (LE 86.50 years" })).toThrow(/no longer says/);
     expect(() => textRow(note, { name: "Monaco", value: "86.37", says: "Monaco (LE" })).toThrow(/doesn't give/);
   });
+  // Painters (owner, Nov 18): a famous painter's record sale, from another article, in the table's millions of dollars.
+  it("reads a figure in the ranked rows' unit, with its year, from another article's words", () => {
+    const dream = "In November 2025, the painting was sold for $54.7 million at Sotheby's in New York City as the star lot.";
+    expect(
+      textRow(dream, { name: "Frida Kahlo", value: "$54.7 million", says: "the painting was sold for $54.7 million", scale: 1e6, year: "2025" }, " million"),
+    ).toMatchObject({ name: "Frida Kahlo", value: 54.7, valueText: "$54.7", note: "2025" });
+    const okeeffe = "In 2014, O'Keeffe's 1932 painting Jimson Weed/White Flower No. 1 sold for $44,405,000—at the time";
+    expect(textRow(okeeffe, { name: "Georgia O'Keeffe", value: "$44,405,000", says: "sold for $44,405,000", scale: 1e6 }, " million")).toMatchObject({
+      value: 44.405,
+      valueText: "$44.4",
+    });
+    // Another currency is shown as written and ranks by its dollar figure (`n`).
+    const turner = "In 2014, the Primrose family sold the painting Rome, From Mount Aventine by J. M. W. Turner for £30.3m to fund";
+    expect(
+      textRow(turner, { name: "J. M. W. Turner", value: "£30.3m", says: "Turner for £30.3m", scale: 1e6, n: 49.9, year: "2014" }, " million"),
+    ).toMatchObject({ value: 49.9, valueText: "£30.3" });
+    const courbet = "The painting was sold at auction on 9 November 2015 for 15.3 million U.S. dollars, four times";
+    const dollars = { name: "Gustave Courbet", value: "15.3 million U.S. dollars", says: "for 15.3 million U.S. dollars", scale: 1e6 };
+    expect(textRow(courbet, dollars, " million")).toMatchObject({ value: 15.3, valueText: "$15.3" });
+  });
 });
 
 describe("noted (a word on a figure)", () => {

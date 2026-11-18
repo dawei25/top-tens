@@ -330,6 +330,20 @@ export interface TextRow {
   name: string;
   value: string;
   says: string;
+  /**
+   * The article whose text says it, when that isn't the topic's page: a famous painter's record sale, which the
+   * ranking's table leaves out (it starts at $85 million in today's money), told in the painting's own article.
+   */
+  page?: string;
+  /** Divides the figure into the ranked rows' unit: 1e6 for a table in millions, so "$54.7 million" ranks as 54.7. */
+  scale?: number;
+  /**
+   * The figure in the ranked rows' unit and currency, when the text gives it in another one: "£30.3m" (2014) ranks
+   * as 49.9 (million US dollars, at that year's average rate) and is shown as the text writes it.
+   */
+  n?: number;
+  /** When the figure is from, shown after it: "$54.7 million (2025)". */
+  year?: string;
 }
 
 /** Redirects to US states that are jokes, documents, agencies or teams, found by the list judges. */
@@ -4163,6 +4177,40 @@ export const TOPICS: Topic[] = [
       "Hans Holbein": ["Holbein", "Hans Holbein the Younger"],
       "Henri Matisse": ["Matisse"],
       "Peter Paul Rubens": ["Rubens"],
+      // "manet" asked to confirm Édouard Manet (owner's list, Nov 18): one letter from Monet, it lost its surname alias.
+      "Édouard Manet": ["Manet", "Edouard Manet"],
+      "Fernand Léger": ["Léger"],
+      // The famous painters below the table's line (`textRows`), as people type them.
+      "Frida Kahlo": ["Frida", "Kahlo", "Khalo", "Frida Khalo"],
+      "Johannes Vermeer": ["Vermeer", "Jan Vermeer"],
+      "Wassily Kandinsky": ["Kandinsky", "Vasily Kandinsky"],
+      "Georgia O'Keeffe": ["O'Keeffe", "O'Keefe", "Georgia O'Keefe"],
+      // "turner" and "constable" are English words: no surname alias of their own.
+      "J. M. W. Turner": ["Turner", "William Turner", "JMW Turner", "Joseph Mallord William Turner"],
+      "John Constable": ["Constable"],
+      Raphael: ["Raffaello", "Raffaello Sanzio", "Raphael Sanzio"],
+      "Diego Velázquez": ["Velázquez", "Velasquez", "Diego Velasquez"],
+      "Henri de Toulouse-Lautrec": ["Toulouse-Lautrec", "Lautrec", "Henri Toulouse-Lautrec"],
+      "Marc Chagall": ["Chagall"],
+      "Joan Miró": ["Miró"],
+      "Keith Haring": ["Haring"],
+      "Gerhard Richter": ["Richter"],
+      "Yayoi Kusama": ["Kusama"],
+      "Diego Rivera": ["Rivera"],
+      "Camille Pissarro": ["Pissarro"],
+      "Norman Rockwell": ["Rockwell"],
+      "Piet Mondrian": ["Mondrian", "Mondriaan"],
+      "Egon Schiele": ["Schiele"],
+      "John Singer Sargent": ["Sargent", "John Sargent"],
+      "Winslow Homer": ["Homer"],
+      "Gustave Courbet": ["Courbet"],
+      "Gustave Caillebotte": ["Caillebotte"],
+      "Yoshitomo Nara": ["Nara"],
+      "Zhang Daqian": ["Chang Dai-chien", "Zhang Dai-chien"],
+      "Salvador Dalí": ["Dalí"],
+      "Berthe Morisot": ["Morisot"],
+      "Francisco Goya": ["Goya", "Francisco de Goya"],
+      "Mary Cassatt": ["Cassatt"],
     },
     // Paintings, a book, a medal, notebooks, relatives, last words and a journal among the redirects ("number 1"
     // was Pollock).
@@ -4171,22 +4219,57 @@ export const TOPICS: Topic[] = [
       "Drink to me.", "María Picasso y López", "Leonardo da Vinci Notebooks", "Paul Picasso", "Paul Warhola",
       "Leonard of Vinci",
     ],
-    // The record holders before them (Raphael, Vermeer) and famous painters with no sale this big are free, and
-    // still real names: "dali" or "kahlo" is never read as an answer.
+    // Famous painters the table leaves out (owner, Nov 18: "you should allow ppl to guess frida, sorolla, etc"): each
+    // ranks by their priciest sale an article gives, in dollars. The table takes in every sale over its line in today's
+    // money, so these all rank below #10. A price the text gives in pounds or euros is shown as written and ranks by
+    // its dollar value at that year's average rate (`n`: GBP 1.8326 in 2004, 1.5852 in 2012, 1.6476 in 2014, 1.2837 in
+    // 2020; EUR 1.2848 in 2012). Where Wikipedia gives no price (Sorolla, Degas, El Greco, Hokusai's prints, Bob Ross)
+    // or only an undisclosed one (Michelangelo's and Caravaggio's disputed panels), the painter stays a known name:
+    // free, and said plainly. Dalí's figure is the best one Wikipedia gives (his 2011 record isn't there).
+    textRows: [
+      { name: "Frida Kahlo", page: "The Dream (The Bed)", value: "$54.7 million", says: "In November 2025, the painting was sold for $54.7 million at Sotheby", scale: 1e6, year: "2025" },
+      { name: "Gustave Caillebotte", page: "Boating Party", value: "$53 million", says: "J. Paul Getty Museum in Los Angeles for $53 million", scale: 1e6, year: "2021" },
+      { name: "Piet Mondrian", value: "$51 million", page: "Piet Mondrian", says: "The most expensive painting by Mondrian was sold for $51 million in 2022.", scale: 1e6, year: "2022" },
+      { name: "Norman Rockwell", page: "Norman Rockwell", value: "$46 million", says: "The 2013 sale of Saying Grace for $46 million", scale: 1e6, year: "2013" },
+      { name: "Gerhard Richter", page: "Gerhard Richter", value: "$44.52 million", says: "his 1986 painting Abstraktes Bild (599) sold for $44.52 million", scale: 1e6, year: "2015" },
+      { name: "Georgia O'Keeffe", page: "Georgia O'Keeffe", value: "$44,405,000", says: "1932 painting Jimson Weed/White Flower No. 1 sold for $44,405,000", scale: 1e6, year: "2014" },
+      { name: "Egon Schiele", page: "Egon Schiele", value: "$40.1 million", says: "Houses With Colorful Laundry (Suburb II), for $40.1 million", scale: 1e6, year: "2011" },
+      { name: "Johannes Vermeer", page: "Steve Wynn", value: "$30 million", says: "auction for $30 million. With the purchase, he became the first art collector to purchase a Vermeer painting", scale: 1e6, year: "2004" },
+      { name: "Winslow Homer", page: "John Spoor Broome", value: "$30 million", says: "Microsoft Chairman Bill Gates purchased it for a record price, over $30 million.", scale: 1e6, year: "1998" },
+      { name: "Marc Chagall", page: "Marc Chagall", value: "$28.5 million", says: "sold for $28.5 million (with fees) at Sotheby", scale: 1e6, year: "2017" },
+      { name: "Banksy", page: "Love Is in the Bin", value: "US$25,327,452", says: "(then equivalent to US$25,327,452 or €21.62M), a record for the artist", scale: 1e6, year: "2021" },
+      { name: "Yoshitomo Nara", page: "Yoshitomo Nara", value: "US$25m", says: "in Hong Kong for HK$195.7m (US$25m), nearly five times its record", scale: 1e6, year: "2019" },
+      { name: "John Singer Sargent", page: "John Singer Sargent", value: "US$23.5 million", says: "In December 2004, Group with Parasols (A Siesta) (1905) sold for US$23.5 million", scale: 1e6, year: "2004" },
+      { name: "Wassily Kandinsky", page: "Wassily Kandinsky", value: "$23.3 million", says: "a large 1935 abstract painting, for $23.3 million, a new record for Kandinsky", scale: 1e6, year: "2016" },
+      { name: "Henri de Toulouse-Lautrec", page: "La Blanchisseuse (Toulouse-Lautrec)", value: "US$22.4 million", says: "In November 2005, it was sold for US$22.4 million at auction", scale: 1e6, year: "2005" },
+      { name: "Gustave Courbet", page: "Femme nue couchée", value: "15.3 million U.S. dollars", says: "for 15.3 million U.S. dollars, four times the previous auction record for a Courbet painting", scale: 1e6, year: "2015" },
+      { name: "Zhang Daqian", page: "China Guardian", value: "US$15.2 million", says: "A Landscape of Mountains was sold for US$15.2 million in November 2016", scale: 1e6, year: "2016" },
+      { name: "Diego Rivera", page: "The Rivals (painting)", value: "$14.1 million", says: "subsequently sold for $14.1 million US (with fees) at the auction of his art collection in November 2022", scale: 1e6, year: "2022" },
+      { name: "Berthe Morisot", page: "Berthe Morisot", value: "US$10.9 million", says: "sold for US$10.9 million at a Christie", scale: 1e6, year: "2013" },
+      { name: "Francisco Goya", page: "Bullfight (Goya)", value: "$7.9 million", says: "Bullfight, Suerte de Varas, Price: $7.9 million", scale: 1e6, year: "1992" },
+      { name: "Yayoi Kusama", page: "Yayoi Kusama", value: "US$7.1 million", says: "from her Infinity Nets series sold for US$7.1 million at Christie", scale: 1e6, year: "2014" },
+      { name: "Diego Velázquez", page: "Art auction", value: "$5.5 million", says: "Portrait of Juan de Pareja sold for $5.5 million", scale: 1e6, year: "1970" },
+      { name: "Mary Cassatt", page: "Mary Cassatt", value: "$4,072,500", says: "the record price of $4,072,500 being set in 1996", scale: 1e6, year: "1996" },
+      { name: "Keith Haring", page: "Keith Haring", value: "$3.86 million", says: "sold at auction in 2019 to an anonymous private collector for $3.86 million", scale: 1e6, year: "2019" },
+      // In pounds or euros, ranked by their dollar value then.
+      { name: "Raphael", page: "Madonna of the Pinks", value: "£34.88 million", says: "was bought in 2004 by the National Gallery from the Duke of Northumberland for £34.88 million", scale: 1e6, n: 63.9, year: "2004" },
+      { name: "J. M. W. Turner", page: "Harry Primrose, 8th Earl of Rosebery", value: "£30.3m", says: "the painting Rome, From Mount Aventine by J. M. W. Turner for £30.3m", scale: 1e6, n: 49.9, year: "2014" },
+      { name: "Joan Miró", page: "Painting (Blue Star)", value: "£23.5 million", says: "In June 2012, it sold at auction for £23.5 million", scale: 1e6, n: 37.3, year: "2012" },
+      { name: "John Constable", page: "Thyssen-Bornemisza Museum", value: "€25.8 million", says: "was sold in London the following year for €25.8 million", scale: 1e6, n: 33.1, year: "2012" },
+      { name: "Camille Pissarro", page: "Camille Pissarro", value: "£19.9M", says: "in London for £19.9M, nearly five times the previous record", scale: 1e6, n: 32.8, year: "2014" },
+      { name: "Salvador Dalí", page: "Couple with Their Heads Full of Clouds", value: "£8.31 million", says: "This work was sold for £8.31 million at auction", scale: 1e6, n: 10.7, year: "2020" },
+    ],
+    // The record holders before them (table 1: Correggio, Murillo, van Dyck) and famous painters with no price on
+    // Wikipedia are free, and still real names: "michelangelo" or "sorolla" is never read as an answer.
     knownOnly: [{ tables: [1], name: "Artist" }],
     knownNames: [
-      "Michelangelo", "Salvador Dalí", "Dalí", "Frida Kahlo", "Kahlo", "Banksy", "Caravaggio", "Raphael", "Vermeer",
-      "Johannes Vermeer", "Hokusai", "J. M. W. Turner", "Turner", "Diego Rivera", "Bob Ross", "Keith Haring",
-      "Edgar Degas", "Degas", "Wassily Kandinsky", "Kandinsky", "Joan Miró", "Miró", "Marc Chagall", "Chagall",
-      "Georgia O'Keeffe", "O'Keeffe", "Yayoi Kusama", "Kusama", "Jeff Koons", "Damien Hirst", "Fernando Botero",
-      "El Greco", "Francisco Goya", "Goya", "Diego Velázquez", "Velázquez", "Paul Klee", "Egon Schiele",
-      "Henri de Toulouse-Lautrec", "Toulouse-Lautrec", "Norman Rockwell", "Gerhard Richter", "Leonardo DiCaprio",
-      "Sigmund Freud", "Donatello", "Auguste Rodin", "Rodin", "Gustave Courbet", "Camille Pissarro", "Jan van Eyck",
-      "Hieronymus Bosch", "Pieter Bruegel", "Albrecht Dürer", "Artemisia Gentileschi",
+      "Michelangelo", "Caravaggio", "Hokusai", "Katsushika Hokusai", "Bob Ross", "Edgar Degas", "Degas", "El Greco",
+      "Joaquín Sorolla", "Sorolla", "Jeff Koons", "Damien Hirst", "Fernando Botero", "Paul Klee", "Andrew Wyeth",
+      "Wyeth", "Henri Rousseau", "Leonardo DiCaprio", "Sigmund Freud", "Donatello", "Auguste Rodin", "Rodin",
+      "Jan van Eyck", "Hieronymus Bosch", "Pieter Bruegel", "Albrecht Dürer", "Artemisia Gentileschi",
       // Coverage audit (Nov 13): these read as "not one of the painters" (surnames alone, and painters left out).
-      "Piet Mondrian", "Mondrian", "James McNeill Whistler", "Whistler", "Bruegel", "Brueghel", "Dürer", "Van Eyck",
-      "Schiele", "Klee", "Pissarro", "Courbet", "Haring", "Rockwell", "Botero", "Gentileschi", "Lautrec", "Koons",
-      "Frida", "Yoshitomo Nara", "Zhang Daqian", "Ai Weiwei",
+      "James McNeill Whistler", "Whistler", "Bruegel", "Brueghel", "Dürer", "Van Eyck", "Klee", "Botero",
+      "Gentileschi", "Koons", "Ai Weiwei",
     ],
   },
   {
