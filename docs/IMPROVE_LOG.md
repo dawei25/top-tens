@@ -2,6 +2,19 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-18, morning check (Wed, launch day: first post 21:00 HKT)
+
+- Owner's notes: the two Fathom notes from Nov 17 (a transfer fee readable as wages or the contract; "an even chance")
+  were acted on yesterday: both reworded, the judge's check 6 "two readings" added, and a sweep of all 297 questions
+  fixed 9. Owner's thumbs up: two Fathom questions (a country of about 1 million people; the world reaching 4 billion).
+- A player's note on painters (Nov 17's daily) with a thumbs down, too hard: the list is too obscure for the typical
+  player, fine for free play but not as a daily. One player, a taste call, so no change (it already ran and isn't
+  scheduled again); passed to the lineup judges as a caution: art lists need a lower obscurity bar (painters was the
+  week's lowest-priority pick, casual 6).
+- Missed guesses: 15, one browser each, all correctly refused: tech companies and marketplaces on retailers, painters
+  outside the auction ranking (a famous self-portraitist, a Dutch master, a Spanish Impressionist). No fix.
+- Plays all time: 174 across 87 lists (+1). Today's Fathom: 1 player yesterday (649), 1 so far today.
+
 ## 2026-11-17, launch-week morning check (Tue, the last scheduled one)
 
 - Notes since yesterday's check: none. Ratings: metro-cities (yesterday's daily) and island-countries, 1 up each.

@@ -68,3 +68,6 @@ measure of how well the picks match his taste.
 | Nov 16 | Fri 20 | australia-cities | no answer, scheduled as proposed | |
 | Nov 16 | Sat 21 | happiest-countries | no answer, scheduled as proposed | |
 | Nov 16 | Sun 22 | winter-olympics-countries | no answer, scheduled as proposed | |
+
+Players' signals (not the owner's): painters (Nov 17 daily) drew one note and one down, too hard: "obscure for the
+average player; free play, not a daily". One player, so logged, not acted on; judges should weigh it for art lists.
