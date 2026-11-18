@@ -133,12 +133,12 @@ for (const vp of VIEWPORTS) {
       assert.equal(at.href, `${LIVE}${link.path}`, "the address is untouched when the script goes in");
       assert.ok(at.loaded && at.gameOnScreen, `after the page has loaded, with the game on screen: ${JSON.stringify(at)}`);
       assert.ok(at.async && at.inHead, "an async script in the head: nothing waits for it");
-      // The pageview it sends: the page and its ref, not the screen.
+      // The pageview it sends: the ref as its own path (/ref/<channel>), not the screen.
       const sent = await page.evaluate(() => {
         const [, beforeSend] = window.vaq.find(([k]) => k === "beforeSend");
         return beforeSend({ type: "pageview", url: location.href }).url;
       });
-      assert.equal(sent, `${LIVE}?ref=e2e`, link.path);
+      assert.equal(sent, `${LIVE}ref/e2e`, link.path);
 
       // The 404: no error from the game, and nothing on the page moves.
       await page.evaluate(() => document.fonts.ready);

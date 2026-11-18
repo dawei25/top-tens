@@ -18,17 +18,18 @@ describe("where analytics loads", () => {
 });
 
 describe("what a pageview reports", () => {
-  it("the page and its ?ref=, without the screen", () => {
-    expect(reportedUrl("https://toptentacle.io/?ref=reddit")).toBe("https://toptentacle.io/?ref=reddit");
-    expect(reportedUrl("https://toptentacle.io/?ref=reddit#daily-2026-11-17")).toBe("https://toptentacle.io/?ref=reddit");
+  it("a ?ref= as its own path, so the dashboard shows one row per post; never the screen", () => {
+    expect(reportedUrl("https://toptentacle.io/?ref=reddit")).toBe("https://toptentacle.io/ref/reddit");
+    expect(reportedUrl("https://toptentacle.io/?ref=rWebGames#daily-2026-11-17")).toBe("https://toptentacle.io/ref/rwebgames");
     expect(reportedUrl("https://toptentacle.io/#fathom")).toBe("https://toptentacle.io/");
     expect(reportedUrl("https://toptentacle.io/")).toBe("https://toptentacle.io/");
   });
-  it("keeps utm_ tags too, and nothing else of the query (a sign-in's code, an error)", () => {
-    expect(reportedUrl("https://toptentacle.io/?utm_source=x&ref=tiktok&utm_campaign=launch")).toBe(
-      "https://toptentacle.io/?utm_source=x&ref=tiktok&utm_campaign=launch",
-    );
+  it("drops everything else in the query (utm tags, a sign-in's code, an error) and odd characters in the ref", () => {
+    expect(reportedUrl("https://toptentacle.io/?utm_source=x&ref=tiktok&utm_campaign=launch")).toBe("https://toptentacle.io/ref/tiktok");
+    expect(reportedUrl("https://toptentacle.io/?utm_source=x")).toBe("https://toptentacle.io/");
     expect(reportedUrl("https://toptentacle.io/?code=abc123&sb_flow_id=f1")).toBe("https://toptentacle.io/");
-    expect(reportedUrl("https://toptentacle.io/?ref=x&error_description=bad#error=1&access_token=t")).toBe("https://toptentacle.io/?ref=x");
+    expect(reportedUrl("https://toptentacle.io/?ref=x&error_description=bad#error=1&access_token=t")).toBe("https://toptentacle.io/ref/x");
+    expect(reportedUrl("https://toptentacle.io/?ref=<script>")).toBe("https://toptentacle.io/ref/script");
+    expect(reportedUrl("https://toptentacle.io/?ref=%20%20")).toBe("https://toptentacle.io/");
   });
 });

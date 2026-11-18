@@ -18,18 +18,20 @@ export function analyticsOn(): boolean {
   return import.meta.env.PROD && typeof location !== "undefined" && analyticsHost(location.hostname);
 }
 
-/** Query parameters a pageview keeps: where the visit came from. */
-const KEPT = (name: string) => name === "ref" || name.startsWith("utm_");
+/** A ref as the dashboard shows it: lowercase letters, digits, - and _, at most 40 of them. */
+function cleanRef(ref: string | null): string {
+  return (ref ?? "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
+}
 
 /**
- * The address a pageview reports: the page with its ?ref= (and utm_ tags), never the screen (#hash) or anything else
- * in the query (a sign-in's code or error on its way back).
+ * The address a pageview reports. Vercel's Hobby dashboard groups pages by path and drops the query (marketing, Nov
+ * 18), so a post's ?ref=<channel> is reported as its own path, /ref/<channel>: one row per post. Without a ref, the
+ * page alone. Never the screen (#hash) or anything else in the query (a sign-in's code or error on its way back).
  */
 export function reportedUrl(href: string): string {
   const url = new URL(href);
-  const kept = new URLSearchParams([...url.searchParams].filter(([name]) => KEPT(name)));
-  const query = kept.toString();
-  return `${url.origin}${url.pathname}${query ? `?${query}` : ""}`;
+  const ref = cleanRef(url.searchParams.get("ref"));
+  return ref ? `${url.origin}/ref/${ref}` : `${url.origin}${url.pathname}`;
 }
 
 export const beforeSend = (event: BeforeSendEvent): BeforeSendEvent => ({ ...event, url: reportedUrl(event.url) });
