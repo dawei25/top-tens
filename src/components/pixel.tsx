@@ -111,42 +111,33 @@ export function pixels(rows: string[]): string {
   return d;
 }
 
-const HEART = pixels([".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."]);
 const ARROW = pixels(["...#....", "..##....", ".#######", "########", ".#######", "..##....", "...#...."]);
 
-export function Heart({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 7 6" shapeRendering="crispEdges" aria-hidden="true">
-      <path d={HEART} fill="currentColor" />
-    </svg>
-  );
-}
+/**
+ * The logo's heart, path for path: the favicon in index.html (viewBox 0 0 9 8, a 7 x 6 pixel heart with a pixel of
+ * room around it). e2e/lives.e2e.cjs checks the lives draw the favicon's own path.
+ */
+export const LOGO_HEART = "M2 1h2v1H2zM5 1h2v1H5zM1 2h7v2H1zM2 4h5v1H2zM3 5h3v1H3zM4 6h1v1H4z";
+/** A crack down the middle, shown for a beat while a life breaks (motion.css). */
+const CRACK = "M4 2h1v1H4zM3 3h1v1H3zM4 4h1v2H4z";
 
 /**
- * A life: one of the squid's ink sacs, an 8 x 9 droplet with a rim, ink inside (deeper at the bottom) and a gloss.
- * Colours come from CSS (.ink-sac .rim / .ink / .deep / .glint), so a spent sac can go hollow.
+ * A life: the logo's pixel heart. Full while the life is left (`on`, solid pink), the same heart dark once spent
+ * (`off`), so the five keep their places. `lost` marks the one that just went: it flashes and cracks (motion.css).
+ * Sizes are whole multiples of 9 x 8 (index.css .life), so every art pixel lands on whole pixels.
  */
-const SAC = [
-  "...rr...",
-  "..riir..",
-  ".rigiir.",
-  "rigiiiir",
-  "rgiiiiir",
-  "riiiiiir",
-  "riidddir",
-  ".rdddir.",
-  "..rrrr..",
-];
-const sac = (c: string) => pixels(SAC.map((row) => row.replace(new RegExp(`[^${c}]`, "g"), ".").replace(new RegExp(c, "g"), "#")));
-const SAC_PATHS = { rim: sac("r"), ink: sac("i"), deep: sac("d"), glint: sac("g") };
-
-export function InkSac({ className }: { className?: string }) {
+export function LifeHeart({ on, lost }: { on: boolean; lost?: boolean }) {
   return (
-    <svg className={`ink-sac ${className ?? ""}`} viewBox="0 0 8 9" shapeRendering="crispEdges" aria-hidden="true">
-      <path className="ink" d={SAC_PATHS.ink} />
-      <path className="deep" d={SAC_PATHS.deep} />
-      <path className="glint" d={SAC_PATHS.glint} />
-      <path className="rim" d={SAC_PATHS.rim} />
+    <svg
+      className={`life ${on ? "on" : "off"}${lost ? " lost" : ""}`}
+      data-testid="life"
+      data-full={on}
+      viewBox="0 0 9 8"
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+    >
+      <path className="heart" d={LOGO_HEART} />
+      {lost && <path className="crack" d={CRACK} />}
     </svg>
   );
 }
