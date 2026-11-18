@@ -19,6 +19,7 @@ import {
   PLACES_NOUN,
   REGION_REQUIRED_FROM,
   regionGaps,
+  shortPool,
   undeclaredRegion,
 } from "./validate";
 
@@ -100,6 +101,32 @@ describe("validate: facts", () => {
     const p = puzzle();
     p.prompt = "Name the 10 things — all of them";
     expect(errors(p)).toContain("prompt has an em dash");
+  });
+});
+
+// Owner, Nov 18 (painters): famous painters read "isn't in this ranking", because the pool was the 43 on one table.
+describe("validate: people and works lists with a short pool", () => {
+  const pool = (n: number) => ({ answers: [], extras: Array.from({ length: n }, (_, i) => ({ rank: i + 1, name: `P${i}`, aliases: [] })) });
+  it("warns on a list of people or works under 60 answers", () => {
+    expect(shortPool(pool(43), { people: true, noun: "painters" })).toMatch(/only 43 painters accepted/);
+    expect(shortPool(pool(12), { works: true, noun: "Netflix series" })).toMatch(/textRows/);
+  });
+  it("leaves big pools, other lists and complete short ones alone", () => {
+    expect(shortPool(pool(73), { people: true, noun: "painters" })).toBeUndefined();
+    expect(shortPool(pool(30), { noun: "MLB teams" })).toBeUndefined();
+    expect(shortPool(pool(31), { works: true, noun: "Pixar films", fullPool: "every Pixar feature" })).toBeUndefined();
+  });
+  it("passes every people or works list built now, or names it", () => {
+    const short = TOPICS.filter((t) => {
+      try {
+        return shortPool(JSON.parse(readFileSync(join(import.meta.dirname, "..", "public", "puzzles", `${t.id}.json`), "utf8")), t);
+      } catch {
+        return false;
+      }
+    }).map((t) => t.id);
+    // Reported (Nov 18), not yet fixed: athletes-earnings keeps past stars free on purpose (judge, cycle 4); Netflix's
+    // views exist only for its top 10; tiktok-accounts was Nov 20's Blitz, too close to rebuild.
+    expect(short.sort()).toEqual(["athletes-earnings", "netflix-seasons", "tiktok-accounts"]);
   });
 });
 

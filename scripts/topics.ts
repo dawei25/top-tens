@@ -163,6 +163,12 @@ export interface Topic {
   fallback?: { from: string | number; factor: number };
   /** Creative works (books, shows, films, albums, games): redirects sharing no word with the title are songs or characters. */
   works?: boolean;
+  /**
+   * Why a short list of people or works already has every one there is ("every Pixar feature film"): scripts/
+   * validate.ts warns on such a list under 60 answers otherwise, since famous names left out read "isn't in this
+   * ranking" (owner, Nov 18).
+   */
+  fullPool?: string;
   /** The table writes every word capitalized ("Shape Of You"): small words go lower case ("Shape of You"). */
   titleCase?: boolean;
   /** Web addresses are names here ("x.com", "Amazon.com"); elsewhere a redirect like "Dallascowboys.com" is dropped. */
@@ -3558,6 +3564,7 @@ export const TOPICS: Topic[] = [
     value: "Worldwide",
     metric: "Worldwide box office (US$)",
     works: true,
+    fullPool: "every released Pixar feature is in the box office table",
     // Lifetime grosses, as the table gives Toy Story's (re-releases included): the table stops at these two films'
     // first runs, before their 2012 3D re-releases (judge, cycle 7). Monsters, Inc.'s text says $577.4 million; the
     // infobox's $579.7 million is the later Box Office Mojo figure.

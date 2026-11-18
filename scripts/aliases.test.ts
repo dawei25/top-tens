@@ -976,9 +976,97 @@ describe("aliases as built: what players type", () => {
   it("painters: the usual slip on da Vinci, and famous painters the ranking leaves out say so (coverage audit, Nov 13)", () => {
     expect(lands("painters", "di vinci")).toBe("Leonardo da Vinci");
     const p: Puzzle = JSON.parse(readFileSync(join(dir, "painters.json"), "utf8"));
-    for (const name of ["mondrian", "whistler", "bruegel", "durer", "van eyck", "schiele", "koons", "klee", "money"]) {
+    // Mondrian and Schiele joined the pool with their record sales (owner, Nov 18, below).
+    for (const name of ["whistler", "bruegel", "durer", "van eyck", "koons", "klee", "money"]) {
       expect(judgeGuess(name, p, new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
     }
+  });
+
+  describe("owner, Nov 18: famous names count", () => {
+    // "you should allow ppl to guess frida, sorolla, etc- ppl dont even know that many artists so its even
+    // frustrating when 2 out of 5 they know cant even be guessed": Kahlo, Sorolla, Vermeer and Michelangelo read
+    // "isn't in this ranking". A famous name is an answer with its figure (it costs a life below #10); one with no
+    // figure anywhere is free and said plainly.
+    const puzzle = (id: string): Puzzle => JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
+    const answer = (id: string, guess: string) => {
+      const r = judgeGuess(guess, puzzle(id), new Set(), lex);
+      return r.kind === "near" || r.kind === "correct" ? { kind: r.kind, corrected: r.corrected, name: r.entry.name, rank: r.entry.rank, value: r.entry.value } : r;
+    };
+    it.each([
+      ["frida kahlo", "Frida Kahlo", "$54.7 million (2025)"],
+      ["frida", "Frida Kahlo", "$54.7 million (2025)"],
+      ["vermeer", "Johannes Vermeer", "$30 million (2004)"],
+      ["dali", "Salvador Dalí", "£8.31 million (2020)"],
+      ["kandinsky", "Wassily Kandinsky", "$23.3 million (2016)"],
+      ["okeeffe", "Georgia O'Keeffe", "$44.4 million (2014)"],
+      ["turner", "J. M. W. Turner", "£30.3 million (2014)"],
+      ["constable", "John Constable", "€25.8 million (2012)"],
+      ["raphael", "Raphael", "£34.88 million (2004)"],
+      ["goya", "Francisco Goya", "$7.9 million (1992)"],
+      ["velazquez", "Diego Velázquez", "$5.5 million (1970)"],
+      ["toulouse lautrec", "Henri de Toulouse-Lautrec", "$22.4 million (2005)"],
+      ["chagall", "Marc Chagall", "$28.5 million (2017)"],
+      ["miro", "Joan Miró", "£23.5 million (2012)"],
+      ["banksy", "Banksy", "$25.3 million (2021)"],
+      ["haring", "Keith Haring", "$3.86 million (2019)"],
+      ["richter", "Gerhard Richter", "$44.52 million (2015)"],
+      ["kusama", "Yayoi Kusama", "$7.1 million (2014)"],
+      ["mondrian", "Piet Mondrian", "$51 million (2022)"],
+      ["rockwell", "Norman Rockwell", "$46 million (2013)"],
+      ["diego rivera", "Diego Rivera", "$14.1 million (2022)"],
+      ["manet", "Édouard Manet", "$65.1 million"],
+      ["matisse", "Henri Matisse", "$80.8 million"],
+      ["hopper", "Edward Hopper", "$91.9 million"],
+      ["botticelli", "Sandro Botticelli", "$92.2 million"],
+      ["titian", "Titian", "$71.7 million"],
+      ["renoir", "Pierre-Auguste Renoir", "$78.1 million"],
+      ["magritte", "René Magritte", "$121.2 million"],
+      ["hockney", "David Hockney", "$90.3 million"],
+      ["basquiat", "Jean-Michel Basquiat", "$110.5 million"],
+      ["lichtenstein", "Roy Lichtenstein", "$165.0 million"],
+      ["bacon", "Francis Bacon", "$142.4 million"],
+      ["freud", "Lucian Freud", "$86.3 million"],
+    ])("painters: %s is %s, ranked, with %s", (guess, name, value) => {
+      expect(answer("painters", guess)).toMatchObject({ kind: "near", corrected: false, name, value });
+      expect((answer("painters", guess) as { rank: number }).rank).toBeGreaterThan(10);
+    });
+    it("painters: every painter in the pool lands as itself, with a figure", () => {
+      const p = puzzle("painters");
+      expect(p.answers.length + p.extras.length).toBeGreaterThanOrEqual(70);
+      for (const e of [...p.answers, ...p.extras]) {
+        expect(e.rank, e.name).toBeGreaterThan(0);
+        expect(e.value, e.name).toBeTruthy();
+        expect(answer("painters", e.name), e.name).toMatchObject({ name: e.name, corrected: false });
+      }
+    });
+    it("painters: no sale on record reads plainly and costs nothing", () => {
+      for (const name of ["michelangelo", "caravaggio", "joaquin sorolla", "sorolla", "degas", "el greco", "hokusai", "bob ross"]) {
+        expect(judgeGuess(name, puzzle("painters"), new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
+      }
+    });
+    it.each([
+      ["fiction-authors", "jeff kinney", "Jeff Kinney"],
+      ["fiction-authors", "eric carle", "Eric Carle"],
+      ["fiction-authors", "sarah j maas", "Sarah J. Maas"],
+      ["fiction-authors", "harper lee", "Harper Lee"],
+      ["fiction-authors", "colleen hoover", "Colleen Hoover"],
+      ["spotify-artists", "rosalia", "Rosalía"],
+      ["spotify-artists", "dolly parton", "Dolly Parton"],
+      ["spotify-artists", "lorde", "Lorde"],
+      ["spotify-artists", "snoop dogg", "Snoop Dogg"],
+      ["spotify-artists", "50 cent", "50 Cent"],
+      ["spotify-artists", "tupac", "Tupac Shakur"],
+      ["music-artists", "dolly parton", "Dolly Parton"],
+      ["music-artists", "2pac", "Tupac Shakur"],
+      ["grand-slam-titles", "del potro", "Juan Martín del Potro"],
+    ])("%s: %s is %s, at once", (id, guess, name) => {
+      expect(answer(id, guess)).toMatchObject({ kind: "near", corrected: false, name });
+    });
+    it("fiction-authors: famous authors with no figure anywhere are known names, not \"not one of the authors\"", () => {
+      for (const name of ["george orwell", "haruki murakami", "john steinbeck", "toni morrison", "margaret atwood", "lee child"]) {
+        expect(judgeGuess(name, puzzle("fiction-authors"), new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
+      }
+    });
   });
 
   it.each([
