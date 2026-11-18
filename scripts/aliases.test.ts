@@ -997,7 +997,6 @@ describe("aliases as built: what players type", () => {
       ["frida kahlo", "Frida Kahlo", "$54.7 million (2025)"],
       ["frida", "Frida Kahlo", "$54.7 million (2025)"],
       ["vermeer", "Johannes Vermeer", "$30 million (2004)"],
-      ["kandinsky", "Wassily Kandinsky", "$23.3 million (2016)"],
       ["okeeffe", "Georgia O'Keeffe", "$44.4 million (2014)"],
       ["turner", "J. M. W. Turner", "£30.3 million (2014)"],
       ["constable", "John Constable", "€25.8 million (2012)"],
@@ -1046,13 +1045,14 @@ describe("aliases as built: what players type", () => {
     // Coordinator, Nov 18: "Kandinsky is #62 with $23.3 million" tells the player that's his top price, so a figure
     // below the table's line must be the painter's record, not just a sale. One Wikipedia doesn't call their record
     // (Dalí's £8.31 million in 2020, Raphael's, Schiele's, Zhang Daqian's, Haring's) shows nothing: the painter is free.
+    // So does a record we know was beaten later: Kandinsky's $23.3 million (2016), beaten in 2017 and 2023.
     it("painters: every figure from an article is the painter's record, with the words saying so", () => {
       const rows = TOPICS.find((t) => t.id === "painters")!.textRows ?? [];
       expect(rows.length).toBeGreaterThan(20);
       for (const r of rows) expect(r.record, r.name).toBeTruthy();
     });
     it("painters: a sale that isn't the painter's record is no figure: they're free", () => {
-      for (const name of ["dali", "salvador dali", "raphael", "schiele", "egon schiele", "haring", "keith haring", "zhang daqian"]) {
+      for (const name of ["dali", "salvador dali", "raphael", "schiele", "egon schiele", "haring", "keith haring", "zhang daqian", "kandinsky", "wassily kandinsky"]) {
         expect(judgeGuess(name, puzzle("painters"), new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
       }
     });

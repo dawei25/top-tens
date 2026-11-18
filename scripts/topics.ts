@@ -354,7 +354,8 @@ export interface TextRow {
    * Words showing the figure is the most there is, not just a sale: "a record for the artist", or the record it beats
    * ("This surpassed the 2019 record for a Caillebotte work"). On a list ranked by a record (painters: their priciest
    * painting sold) every row needs one (scripts/aliases.test.ts). Checked like `says`, on `recordPage` (default: the
-   * row's page): the build fails once the page no longer says it.
+   * row's page): the build fails once the page no longer says it. A record Wikipedia names that we know was beaten
+   * later counts as no record (Kandinsky's 2016 one, beaten in 2017 and 2023): the row goes, and the name is free.
    */
   record?: string;
   recordPage?: string;
@@ -4272,7 +4273,6 @@ export const TOPICS: Topic[] = [
       // The famous painters below the table's line (`textRows`), as people type them.
       "Frida Kahlo": ["Frida", "Kahlo", "Khalo", "Frida Khalo"],
       "Johannes Vermeer": ["Vermeer", "Jan Vermeer"],
-      "Wassily Kandinsky": ["Kandinsky", "Vasily Kandinsky"],
       "Georgia O'Keeffe": ["O'Keeffe", "O'Keefe", "Georgia O'Keefe"],
       // "turner" and "constable" are English words: no surname alias of their own.
       "J. M. W. Turner": ["Turner", "William Turner", "JMW Turner", "Joseph Mallord William Turner"],
@@ -4312,8 +4312,8 @@ export const TOPICS: Topic[] = [
     // prints, Bob Ross), or only an undisclosed one (Michelangelo's and Caravaggio's disputed panels), or only a sale
     // Wikipedia doesn't call their record: Dalí (£8.31 million in 2020; his 2011 record isn't there), Raphael (the
     // National Gallery's £34.88 million in 2004), Schiele ($40.1 million in 2011), Zhang Daqian (US$15.2 million in
-    // 2016), Keith Haring ($3.86 million in 2019). Kandinsky's is the last record Wikipedia names (2016): his later
-    // sales aren't on it.
+    // 2016), Keith Haring ($3.86 million in 2019). Or only a record we know was beaten: Kandinsky ($23.3 million in
+    // 2016 on Wikipedia; Murnau mit Kirche II sold for £37.2 million in March 2023, CNN and the Guardian).
     textRows: [
       { name: "Frida Kahlo", page: "The Dream (The Bed)", value: "$54.7 million", says: "In November 2025, the painting was sold for $54.7 million at Sotheby", scale: 1e6, year: "2025", record: "The price set a new auction record for a work by a woman artist" },
       { name: "Gustave Caillebotte", page: "Boating Party", value: "$53 million", says: "J. Paul Getty Museum in Los Angeles for $53 million", scale: 1e6, year: "2021", record: "This surpassed the 2019 record for a Caillebotte work of $22 million", recordPage: "Young Man at His Window" },
@@ -4327,7 +4327,6 @@ export const TOPICS: Topic[] = [
       { name: "Banksy", page: "Love Is in the Bin", value: "US$25,327,452", says: "(then equivalent to US$25,327,452 or €21.62M), a record for the artist", scale: 1e6, year: "2021", record: "a record for the artist" },
       { name: "Yoshitomo Nara", page: "Yoshitomo Nara", value: "US$25m", says: "in Hong Kong for HK$195.7m (US$25m), nearly five times its record", scale: 1e6, year: "2019", record: "The new record is also a milestone for Nara" },
       { name: "John Singer Sargent", page: "John Singer Sargent", value: "US$23.5 million", says: "In December 2004, Group with Parasols (A Siesta) (1905) sold for US$23.5 million", scale: 1e6, year: "2004", record: "The previous highest price for a Sargent painting was US$11 million." },
-      { name: "Wassily Kandinsky", page: "Wassily Kandinsky", value: "$23.3 million", says: "a large 1935 abstract painting, for $23.3 million, a new record for Kandinsky", scale: 1e6, year: "2016", record: "a new record for Kandinsky" },
       { name: "Henri de Toulouse-Lautrec", page: "La Blanchisseuse (Toulouse-Lautrec)", value: "US$22.4 million", says: "In November 2005, it was sold for US$22.4 million at auction", scale: 1e6, year: "2005", record: "setting a new record for the artist for a price at auction", recordPage: "Henri de Toulouse-Lautrec" },
       { name: "Gustave Courbet", page: "Femme nue couchée", value: "15.3 million U.S. dollars", says: "for 15.3 million U.S. dollars, four times the previous auction record for a Courbet painting", scale: 1e6, year: "2015", record: "four times the previous auction record for a Courbet painting" },
       // The Rivals was his record; sold again in 2022, for more.
@@ -4349,9 +4348,9 @@ export const TOPICS: Topic[] = [
     knownOnly: [{ tables: [1], name: "Artist" }],
     knownNames: [
       "Michelangelo", "Caravaggio", "Hokusai", "Katsushika Hokusai", "Bob Ross", "Edgar Degas", "Degas", "El Greco",
-      // No sale Wikipedia calls their record (coordinator, Nov 18).
+      // No sale Wikipedia calls their record, or only one we know was beaten (coordinator, Nov 18).
       "Salvador Dalí", "Dalí", "Raphael", "Egon Schiele", "Schiele", "Keith Haring", "Haring", "Zhang Daqian",
-      "Chang Dai-chien",
+      "Chang Dai-chien", "Wassily Kandinsky", "Kandinsky", "Vasily Kandinsky",
       "Joaquín Sorolla", "Sorolla", "Jeff Koons", "Damien Hirst", "Fernando Botero", "Paul Klee", "Andrew Wyeth",
       "Wyeth", "Henri Rousseau", "Leonardo DiCaprio", "Sigmund Freud", "Donatello", "Auguste Rodin", "Rodin",
       "Jan van Eyck", "Hieronymus Bosch", "Pieter Bruegel", "Albrecht Dürer", "Artemisia Gentileschi",
