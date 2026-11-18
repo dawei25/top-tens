@@ -866,6 +866,96 @@ test("Home: Today's Fathom has Today's list's edges, and its title and state sha
   }
 });
 
+test("Home after a game, by the Home key and by Back: Today's Fathom keeps Today's list's edges, Home its layout (390, 1440)", async () => {
+  // Owner, Nov 18, with a desktop screenshot: "every now and then there's a bug affecting the width of fathom button- it
+  // appears after i return home from playing a game but then refreshing it fixes it". Today's Fathom took 672px of the
+  // panel's 880 at 1440, left-aligned: the Fathom screen's stylesheet comes with its own chunk, loaded the first time
+  // the screen opens, and its `.fathom` (the screen, 640px wide) also matched Home's key and Past runs' rows, which
+  // carry `fathom` as their mode class. The check above loads Home fresh, before that chunk, so it never saw it. Here
+  // Home is measured fresh, then after each kind of game (Today's list under way, Today's Fathom, a random list, a
+  // random Blitz) and each way back: every card and play key keeps its left and right edges, and Today's Fathom has
+  // Today's list's. Then Past runs: its Fathom row as wide as its list.
+  const startedAt = Date.parse("2026-10-29T08:00:00-04:00");
+  const ids = Array.from({ length: 10 }, (_, i) => `q${i}`);
+  // The owner's day: 766/1000.
+  const run = { startedAt, finishedAt: startedAt + 120_000, ids, guesses: ids.map(() => 1), points: ids.map((_, i) => (i < 6 ? 77 : 76)), daily: { date: TODAY, n: 2 } };
+  const played = { "top-tens:v1": { ...FRESH["top-tens:v1"], fathom: { runs: [run], totals10: { [startedAt]: 766 }, recent: [] } } };
+  const KEYS = ["today-group", "today-list", "today-fathom", "free-play", "random-list", "random-blitz", "home-record"];
+  /**
+   * Home's cards and play keys, left and right, once the fonts are in and layout has settled: their layout boxes
+   * (offsets), not their drawn ones, since after Back the pointer still rests where Today's list was pressed and that
+   * key lifts and grows under the mouse (a transform: nothing moves).
+   */
+  const edges = async (page) => {
+    await page.getByTestId("today-fathom").waitFor();
+    await page.evaluate(() => document.fonts.ready.then(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))));
+    return page.evaluate(
+      (keys) =>
+        Object.fromEntries(
+          keys.map((id) => {
+            const el = document.querySelector(`[data-testid="${id}"]`);
+            let left = 0;
+            for (let e = el; e; e = e.offsetParent) left += e.offsetLeft;
+            return [id, [left, left + el.offsetWidth]];
+          }),
+        ),
+      KEYS,
+    );
+  };
+  const into = {
+    // Under way, as in the owner's screenshot (PLAYING).
+    "Today's list": async (page) => {
+      await page.getByTestId("today-list").click();
+      await guess(page, "zzzz");
+    },
+    "Today's Fathom": async (page) => {
+      await page.getByTestId("today-fathom").click();
+      await page.getByTestId("fathom").waitFor();
+    },
+    "a random list": async (page) => {
+      await page.getByTestId("random-list").click();
+      await guess(page, "zzzz");
+    },
+    "a random Blitz": async (page) => {
+      await page.getByTestId("random-blitz").click();
+      await page.getByTestId("blitz-screen").waitFor();
+    },
+  };
+  for (const [state, seed] of [
+    ["Fathom new", FRESH],
+    ["Fathom played", played],
+  ]) {
+    for (const width of [390, 1440]) {
+      const small = width < 640;
+      const vp = { viewport: { width, height: small ? 844 : 900 }, isMobile: small, hasTouch: small, reducedMotion: "reduce" };
+      const { ctx, page } = await open(vp, "", seed);
+      const fresh = await edges(page);
+      for (const [game, enter] of Object.entries(into)) {
+        for (const way of ["the Home key", "Back"]) {
+          const tag = `${width} (${state}), after ${game}, by ${way}`;
+          await enter(page);
+          if (way === "Back") await page.goBack();
+          else await page.getByTestId("nav-home").click();
+          const now = await edges(page);
+          const [fathom, list] = [now["today-fathom"], now["today-list"]];
+          assert.ok(Math.abs(fathom[0] - list[0]) < 0.5 && Math.abs(fathom[1] - list[1]) < 0.5, `${tag}: Today's Fathom on Today's list's edges (${fathom} vs ${list})`);
+          assert.deepEqual(now, fresh, `${tag}: Home laid out as on a fresh load`);
+        }
+      }
+      assert.equal((await page.getByTestId("today-list-status").textContent()).trim(), "playing", `${width} (${state})`);
+      if (state === "Fathom played") {
+        assert.equal((await page.getByTestId("today-fathom-status").textContent()).trim(), "766/1000", `${width} (${state})`);
+        await page.getByTestId("history-key").click();
+        const row = page.locator('[data-testid="history-row"][data-kind="fathom"]');
+        await row.waitFor();
+        const [r, rows] = await row.evaluate((el) => [el.getBoundingClientRect(), el.closest("ol").getBoundingClientRect()].map((b) => [b.left, b.right]));
+        assert.ok(Math.abs(r[0] - rows[0]) < 0.5 && Math.abs(r[1] - rows[1]) < 0.5, `${width}: Past runs' Fathom row as wide as its list (${r} vs ${rows})`);
+      }
+      await ctx.close();
+    }
+  }
+});
+
 test("Home's key shows sync trouble: offline and failed light a pink dot and say so; the sheet says what (desktop)", async () => {
   const seed = { ...FRESH, "top-tens:auth": SESSION };
   const save = { data: { games: {}, daily: {}, seenHelp: true }, version: 1 };

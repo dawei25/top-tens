@@ -6,12 +6,17 @@
  *
  * Bands have one colour each, from the game's palette: dead on gold, close cyan, near periwinkle (the squid's limb
  * ramp), far pink, lost at sea a deep slate. --band fills and lights, --band-text is the band as text on glass.
+ *
+ * The screen is .screen.fathom, never a bare .fathom: "fathom" is also a mode class (Home's Today's Fathom key, Past
+ * runs' rows), and this file stays in the page once the screen has opened. Its bare .fathom capped Home's key at the
+ * screen's 672px, left-aligned, after a visit to Fathom, until a reload (owner, Nov 18; e2e/backend.e2e.cjs, "Home
+ * after a game"). The .fathom[data-short] rules are the screen's alone: only it sets data-short.
  */
-.fathom {
+.screen.fathom {
   max-width: calc(640px + 2 * var(--gutter));
 }
 /* "FATHOM" in the header, on one line, the size every screen's label has (it was tightened for "FATHOM · BETA"). */
-.fathom .game-head-mid > .mode:only-child {
+.screen.fathom .game-head-mid > .mode:only-child {
   white-space: nowrap;
 }
 /* A past game's line under its rules: when it was played. */
@@ -19,23 +24,23 @@
   margin-top: 4px;
   color: var(--muted);
 }
-.fathom [data-band="dead-on"] {
+.screen.fathom [data-band="dead-on"] {
   --band: var(--gold);
   --band-text: var(--gold);
 }
-.fathom [data-band="close"] {
+.screen.fathom [data-band="close"] {
   --band: var(--cyan);
   --band-text: var(--cyan);
 }
-.fathom [data-band="near"] {
+.screen.fathom [data-band="near"] {
   --band: #8a9cff;
   --band-text: #8a9cff;
 }
-.fathom [data-band="far"] {
+.screen.fathom [data-band="far"] {
   --band: var(--pink);
   --band-text: var(--pink);
 }
-.fathom [data-band="lost"] {
+.screen.fathom [data-band="lost"] {
   --band: #3b4c6e;
   --band-text: var(--label);
 }
@@ -182,7 +187,7 @@
   -webkit-mask: none;
   mask: none;
 }
-.fathom {
+.screen.fathom {
   /* A pixel bubble: a 4 x 4 ring, corners off. */
   --bubble: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 4' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h2v1H1zM0 1h1v2H0zM3 1h1v2H3zM1 3h2v1H1z'/%3E%3C/svg%3E");
 }
@@ -345,7 +350,7 @@
   -webkit-mask: var(--cross) center / 100% 100% no-repeat;
   mask: var(--cross) center / 100% 100% no-repeat;
 }
-.fathom {
+.screen.fathom {
   --cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1H0zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM4 4h1v1H4zM4 0h1v1H4zM3 1h1v1H3zM1 3h1v1H1zM0 4h1v1H0z'/%3E%3C/svg%3E");
 }
 .fathom-q .prompt-top .label {
