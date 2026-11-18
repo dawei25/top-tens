@@ -6,6 +6,7 @@ import type { Lexicon } from "../src/game/junk";
 import { judgeGuess } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledText, otherNamespace } from "./aliases";
+import { TOPICS } from "./topics";
 
 const junk = (raw: string, names: string[], forms: string[] = [], works = false) => junkRedirect(raw, { names, forms, works });
 
@@ -996,19 +997,17 @@ describe("aliases as built: what players type", () => {
       ["frida kahlo", "Frida Kahlo", "$54.7 million (2025)"],
       ["frida", "Frida Kahlo", "$54.7 million (2025)"],
       ["vermeer", "Johannes Vermeer", "$30 million (2004)"],
-      ["dali", "Salvador Dalí", "£8.31 million (2020)"],
       ["kandinsky", "Wassily Kandinsky", "$23.3 million (2016)"],
       ["okeeffe", "Georgia O'Keeffe", "$44.4 million (2014)"],
       ["turner", "J. M. W. Turner", "£30.3 million (2014)"],
       ["constable", "John Constable", "€25.8 million (2012)"],
-      ["raphael", "Raphael", "£34.88 million (2004)"],
       ["goya", "Francisco Goya", "$7.9 million (1992)"],
       ["velazquez", "Diego Velázquez", "$5.5 million (1970)"],
       ["toulouse lautrec", "Henri de Toulouse-Lautrec", "$22.4 million (2005)"],
       ["chagall", "Marc Chagall", "$28.5 million (2017)"],
-      ["miro", "Joan Miró", "£23.5 million (2012)"],
+      // His highest price on Wikipedia (2017), above the 2012 record the page names (coordinator, Nov 18).
+      ["miro", "Joan Miró", "£24.6 million (2017)"],
       ["banksy", "Banksy", "$25.3 million (2021)"],
-      ["haring", "Keith Haring", "$3.86 million (2019)"],
       ["richter", "Gerhard Richter", "$44.52 million (2015)"],
       ["kusama", "Yayoi Kusama", "$7.1 million (2014)"],
       ["mondrian", "Piet Mondrian", "$51 million (2022)"],
@@ -1032,7 +1031,7 @@ describe("aliases as built: what players type", () => {
     });
     it("painters: every painter in the pool lands as itself, with a figure", () => {
       const p = puzzle("painters");
-      expect(p.answers.length + p.extras.length).toBeGreaterThanOrEqual(70);
+      expect(p.answers.length + p.extras.length).toBeGreaterThanOrEqual(65);
       for (const e of [...p.answers, ...p.extras]) {
         expect(e.rank, e.name).toBeGreaterThan(0);
         expect(e.value, e.name).toBeTruthy();
@@ -1041,6 +1040,19 @@ describe("aliases as built: what players type", () => {
     });
     it("painters: no sale on record reads plainly and costs nothing", () => {
       for (const name of ["michelangelo", "caravaggio", "joaquin sorolla", "sorolla", "degas", "el greco", "hokusai", "bob ross"]) {
+        expect(judgeGuess(name, puzzle("painters"), new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
+      }
+    });
+    // Coordinator, Nov 18: "Kandinsky is #62 with $23.3 million" tells the player that's his top price, so a figure
+    // below the table's line must be the painter's record, not just a sale. One Wikipedia doesn't call their record
+    // (Dalí's £8.31 million in 2020, Raphael's, Schiele's, Zhang Daqian's, Haring's) shows nothing: the painter is free.
+    it("painters: every figure from an article is the painter's record, with the words saying so", () => {
+      const rows = TOPICS.find((t) => t.id === "painters")!.textRows ?? [];
+      expect(rows.length).toBeGreaterThan(20);
+      for (const r of rows) expect(r.record, r.name).toBeTruthy();
+    });
+    it("painters: a sale that isn't the painter's record is no figure: they're free", () => {
+      for (const name of ["dali", "salvador dali", "raphael", "schiele", "egon schiele", "haring", "keith haring", "zhang daqian"]) {
         expect(judgeGuess(name, puzzle("painters"), new Set(), lex), name).toMatchObject({ kind: "unknown", known: true });
       }
     });

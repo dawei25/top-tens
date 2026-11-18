@@ -539,6 +539,20 @@ describe("textRow (figures from the page's text)", () => {
     const courbet = "The painting was sold at auction on 9 November 2015 for 15.3 million U.S. dollars, four times";
     const dollars = { name: "Gustave Courbet", value: "15.3 million U.S. dollars", says: "for 15.3 million U.S. dollars", scale: 1e6 };
     expect(textRow(courbet, dollars, " million")).toMatchObject({ value: 15.3, valueText: "$15.3" });
+    const miro = "On 21 June 2017, the work Femme et Oiseaux (1940), one of his Constellations, sold at Sotheby's London for 24,571,250 GBP.";
+    expect(textRow(miro, { name: "Joan Miró", value: "24,571,250 GBP", says: "for 24,571,250 GBP", scale: 1e6, n: 31.7 }, " million")).toMatchObject({
+      value: 31.7,
+      valueText: "£24.6",
+    });
+  });
+  // Coordinator, Nov 18: a painter's figure must be their record, not just a sale.
+  it("checks the words saying the figure is the record, on its own page if it names one", () => {
+    const banksy = "In October 2021, it sold at auction for £18,582,000 (then equivalent to US$25,327,452 or €21.62M), a record for the artist.";
+    const row = { name: "Banksy", value: "US$25,327,452", says: "US$25,327,452", scale: 1e6, record: "a record for the artist" };
+    expect(textRow(banksy, row, " million").value).toBeCloseTo(25.33, 2);
+    expect(() => textRow(banksy, { ...row, record: "the highest price ever" }, " million")).toThrow(/no longer says it's the record/);
+    // The record named on another page (`recordPage`): the build passes that page's text.
+    expect(() => textRow(banksy, { ...row, record: "the Getty's record" }, " million", "This surpassed the Getty's record.")).not.toThrow();
   });
 });
 

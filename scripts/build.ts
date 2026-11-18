@@ -365,12 +365,20 @@ export function rankRows<R extends Pick<Row, "value" | "tiebreak">>(topic: Pick<
  */
 const SCALE_WORDS: Record<number, string> = { 1e3: "thousand", 1e6: "million", 1e9: "billion" };
 
-export function textRow(pageText: string, t: TextRow, unit = ""): Row {
+export function textRow(pageText: string, t: TextRow, unit = "", recordText = pageText): Row {
   const said = (s: string) => s.replace(/\s+/g, " ");
   if (!said(t.says).includes(t.value)) throw new Error(`textRows "${t.name}": "${t.says}" doesn't give ${t.value}`);
   if (!said(pageText).includes(said(t.says))) throw new Error(`textRows "${t.name}": the page no longer says "${t.says}"`);
-  // As the text writes money: "£30.3m" is £30.3 million, "15.3 million U.S. dollars" $15.3 million.
-  const written = t.value.replace(/(\d)m$/i, "$1 million").replace(/^(\d[\d.,]*(?: million| billion)?) U\.?S\.? dollars$/, "$$$1");
+  // The figure is the record, not just a sale: a page that stops saying so fails the build (painters, Nov 18).
+  if (t.record && !said(recordText).includes(said(t.record))) {
+    throw new Error(`textRows "${t.name}": the page no longer says it's the record ("${t.record}")`);
+  }
+  // As the text writes money: "£30.3m" is £30.3 million, "24,571,250 GBP" £24,571,250, "15.3 million U.S. dollars"
+  // $15.3 million.
+  const written = t.value
+    .replace(/(\d)m$/i, "$1 million")
+    .replace(/^(\d[\d.,]*(?: million)?) GBP$/, "£$1")
+    .replace(/^(\d[\d.,]*(?: million| billion)?) U\.?S\.? dollars$/, "$$$1");
   const v = parseValue(written);
   if (!v) throw new Error(`textRows "${t.name}": ${t.value} is no figure`);
   let valueText = v.display;
@@ -496,16 +504,19 @@ export async function readRows(topic: Topic): Promise<Row[]> {
       }
     }
   }
-  // A row's text is the topic's page, or the article it names (`page`): read once each.
+  // A row's text is the topic's page, or the article it names (`page`, `recordPage`): read once each.
   const texts = new Map<string, string>();
-  for (const t of topic.textRows ?? []) {
-    const page = t.page ?? topic.page;
+  const textOf = async (page: string) => {
     if (!texts.has(page)) {
       const $ = await fetchPage(page);
       $("style, script").remove();
       texts.set(page, $("body").text());
     }
-    const row = textRow(texts.get(page)!, t, topic.unit);
+    return texts.get(page)!;
+  };
+  for (const t of topic.textRows ?? []) {
+    const page = t.page ?? topic.page;
+    const row = textRow(await textOf(page), t, topic.unit, await textOf(t.recordPage ?? page));
     // A title that is also a word ("Hello", "Baby") names its own article in `articles`: its redirects, not the word's.
     const article = topic.articles?.[t.name];
     rows.push(article ? { ...row, redirectTarget: article, link: article, aliasSeeds: [...row.aliasSeeds, cleanName(article)] } : row);
