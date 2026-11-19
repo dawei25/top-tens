@@ -2,6 +2,18 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-19, launch-week morning check (Thu, the morning after the first post)
+
+- Notes and ratings since yesterday's check: none. Plays all time: 184 across 88 lists (+10). Today's Fathom: 3
+  players finished Fathom #4 yesterday (570, 650, 760; average 663), none yet on #5.
+- Missed guesses: 14, one browser each, on 5 lists, typed between 13:22 and 23:03 HKT. Re-judged with today's
+  matcher. Fair answers refused, sent to a data agent with guards: four people-words on empires (English, Arab,
+  Chinese, Japanese) for the British Empire (#1), the caliphates (#7, #8), the Chinese dynasties (#4, #9) and the
+  Empire of Japan; the Natural History Museum (#8 on museums) typed as "museum of ... of London"; Xbox One with the
+  digit glued on; Kilimanjaro's Italian name on mountains. Correctly refused: a console maker's name alone (several
+  fit), a Roman amphitheatre and a Roman museum outside the ranking, Greenland and Antarctica on coastline-countries
+  (not countries; the wrong-kind line is still the owner's call).
+
 ## 2026-11-18, morning check (Wed, launch day: first post 21:00 HKT)
 
 - Owner's notes: the two Fathom notes from Nov 17 (a transfer fee readable as wages or the contract; "an even chance")
