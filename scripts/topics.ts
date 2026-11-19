@@ -58,6 +58,12 @@ export interface Topic {
    * country can offer its islands to choose from (owner, on islands: "typing japan should offer Honshu, Okinawa").
    */
   countryCol?: string | number;
+  /**
+   * The country rows are of, by hand, where the table names none: `{ China: ["Qing dynasty", ...] }` gives those
+   * entries `country`, as `countryCol` does, so the country or its people ("chinese") offer them to choose from, the
+   * most prominent few first (missed guesses, Nov 18: "chinese" on empires found nothing). Names must be entries.
+   */
+  countries?: Record<string, string[]>;
   /** Take names from cell text instead of the first link's text. */
   nameFromText?: boolean;
   /** Take names from the first link's article title ("Nokia 1100" for a cell showing "1100"). */
@@ -2325,6 +2331,19 @@ export const TOPICS: Topic[] = [
     ],
     more: { "Nazi Germany": ["Third Reich", "Greater German Reich"] },
     junkAliases: ["Empire", "British occupation", "British Asia"],
+    // Missed guesses, Nov 18: "chinese" found nothing. The dynasties and states of China's history (conquest dynasties
+    // included, as "Dynasties of China" counts them; not the steppe states or the Northern Yuan in Mongolia), so
+    // "chinese" or "china" offers the most prominent few: Qing, Yuan, Ming and Eastern Han, then the next.
+    countries: {
+      China: [
+        "Qing dynasty", "Yuan dynasty", "Eastern Han dynasty", "Ming dynasty", "Western Han dynasty", "Tang dynasty",
+        "Xin dynasty", "Northern Song dynasty", "Western Jin dynasty", "Sui dynasty", "Eastern Jin dynasty",
+        "Liao dynasty", "Later Zhao", "Jin dynasty", "Qin dynasty", "Southern Song dynasty", "Cao Wei", "Former Qin",
+        "Former Zhao", "Liu Song dynasty", "Northern Wei", "Eastern Wu", "Northern Qi", "Northern Zhou",
+        "Liang dynasty", "Shang dynasty", "Shu Han", "Western Xia", "Chu", "Zhou dynasty", "Xia dynasty",
+        "Eastern Zhou",
+      ],
+    },
   },
   {
     id: "moons",

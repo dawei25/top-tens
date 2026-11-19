@@ -616,6 +616,8 @@ export const INTENT: Record<string, Intent> = {
       "Annapurna I": ["Annapurna"],
       "Gasherbrum I": ["Hidden Peak"],
       Denali: ["Mount McKinley", "McKinley", "Mt McKinley"],
+      // Missed guesses, Nov 18: its Italian name ("Le nevi del Kilimangiaro") found nothing.
+      "Mount Kilimanjaro": ["Kilimangiaro"],
     },
   },
   rivers: {
@@ -762,8 +764,13 @@ export const INTENT: Record<string, Intent> = {
   },
   consoles: {
     same: {
-      "Nintendo 3DS": ["3DS", "New Nintendo 3DS", "New 3DS"],
-      "Xbox Series X/S": ["Xbox Series X", "Xbox Series S", "Xbox Series X and Series S", "Series X"],
+      "Nintendo 3DS": ["3DS", "New Nintendo 3DS", "New 3DS", "3DS XL", "Nintendo 2DS", "2DS"],
+      "Xbox Series X/S": ["Xbox Series X", "Xbox Series S", "Xbox Series X and Series S", "Series X", "Series S", "XSX"],
+      // Missed guesses, Nov 18: "xbox1" found nothing (the page's redirects aren't read below #10, and normalize()
+      // only spells a number word as a digit when it stands alone). The short forms fans write, and its models.
+      "Xbox One": ["Xbox1", "XB1", "Xbone", "X Box One", "Xbox One S", "Xbox One X"],
+      "Nintendo Switch 2": ["Switch 2"],
+      "Quest 2": ["Meta Quest 2", "Oculus Quest 2"],
       "Sega Mark III/Master System": ["Master System", "Sega Master System"],
       PlayStation: ["PS1", "PSX", "PS One", "PlayStation 1"],
       "PlayStation 2": ["PS2"],
@@ -811,7 +818,8 @@ export const INTENT: Record<string, Intent> = {
       "Wu Chinese": ["Shanghainese"],
       "Standard German": ["German", "Deutsch"],
       "Mandarin Chinese": ["Mandarin", "Chinese", "Putonghua"],
-      "Modern Standard Arabic": ["Arabic"],
+      // "arab" found nothing (launch week, Nov 12). Not built yet: at the list's next rebuild (docs/REBUILD_QUEUE.md).
+      "Modern Standard Arabic": ["Arabic", "Arab"],
       Bengali: ["Bangla"],
       // Not built yet: languages is protected until after Nov 10 16:00 HKT (docs/REBUILD_QUEUE.md). "bahasa" was
       // corrected to Bengali (coverage audit, Nov 8); "deutsch" and "yue" found nothing.
@@ -1332,8 +1340,10 @@ export const INTENT: Record<string, Intent> = {
     same: {
       "Xiongnu Empire": ["Xiongnu"],
       "Achaemenid Empire": ["Persian Empire", "Persia", "Persian", "First Persian Empire"],
-      "Empire of Japan": ["Japanese Empire", "Imperial Japan"],
-      "British Empire": ["British", "Britain", "UK", "United Kingdom", "England", "English Empire"],
+      // Missed guesses, Nov 18: a people's name is how players name their empire ("english", "japanese" found
+      // nothing). The Chinese dynasties come by "chinese" through topics.ts `countries`.
+      "Empire of Japan": ["Japanese Empire", "Imperial Japan", "Japanese"],
+      "British Empire": ["British", "Britain", "UK", "United Kingdom", "England", "English Empire", "English"],
       // Coverage audit: the usual English spellings and names ("sassanids" was corrected to the Umayyads, #8, and
       // "mogul empire" to the Mongols, #2).
       "Roman Empire": ["Rome", "Ancient Rome"],
@@ -1352,6 +1362,13 @@ export const INTENT: Record<string, Intent> = {
       "Umayyad Caliphate": ["Umayyads"],
       "Yuan dynasty": ["Yuan"],
       "United States": ["USA", "US", "America", "American Empire"],
+    },
+    groups: {
+      // Missed guesses, Nov 18: "arab" found nothing. The Arab caliphates, offered to choose from.
+      Arab: ["Rashidun Caliphate", "Umayyad Caliphate", "Abbasid Caliphate", "Fatimid Caliphate"],
+      Arabs: ["Rashidun Caliphate", "Umayyad Caliphate", "Abbasid Caliphate", "Fatimid Caliphate"],
+      "Arab Empire": ["Rashidun Caliphate", "Umayyad Caliphate", "Abbasid Caliphate", "Fatimid Caliphate"],
+      "Arab Caliphate": ["Rashidun Caliphate", "Umayyad Caliphate", "Abbasid Caliphate", "Fatimid Caliphate"],
     },
   },
   moons: {
@@ -1373,8 +1390,12 @@ export const INTENT: Record<string, Intent> = {
       "Galleria degli Uffizi": ["Uffizi Gallery", "Uffizi Galleries", "The Uffizi"],
       "Prado Museum": ["Museo del Prado", "Museo Nacional del Prado", "The Prado"],
       "Musée d'Orsay": ["Orsay", "Orsay Museum", "Musee d Orsay"],
+      // Missed guesses, Nov 18: "museum of natural history of london" found nothing. Its other word orders too; the
+      // plain "museum of natural history" stays a choice with New York's and the Smithsonian's (#11, #17).
       "Natural History Museum, South Kensington": [
         "Natural History Museum London", "Natural History Museum, London", "London Natural History Museum", "NHM London",
+        "Museum of Natural History of London", "Museum of Natural History, London", "London Museum of Natural History",
+        "Natural History Museum of London",
       ],
     },
     groups: {

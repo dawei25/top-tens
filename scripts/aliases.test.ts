@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Lexicon } from "../src/game/junk";
-import { judgeGuess } from "../src/game/match";
+import { judgeGuess, normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledText, otherNamespace } from "./aliases";
 import { TOPICS } from "./topics";
@@ -1495,6 +1495,69 @@ describe("aliases as built: what players type", () => {
     const own = new Set(["FIFA Manager"]);
     const named = p.extras.filter((e) => !own.has(e.name) && series.some((s) => fold(e.name).startsWith(`${s} `) || fold(e.name).startsWith(`${s}:`)));
     expect(named.map((e) => e.name)).toEqual([]);
+  });
+
+  describe("missed guesses, Nov 18", () => {
+    // Launch night's wrong guesses the game didn't take (the live database): fair answers it refused on four free-play
+    // lists, each read the natural way now. "?" is a correction put in the box to confirm; "choose" lists the choices.
+    const read = (id: string, guess: string, found: number[] = []) => {
+      const r = judgeGuess(guess, JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8")) as Puzzle, new Set(found), lex);
+      if ("entry" in r) return `${r.kind}${"corrected" in r && r.corrected ? "?" : ""} ${r.entry.name}`;
+      return r.kind === "typo" ? `choose ${r.suggestions.join(" | ")}` : r.kind;
+    };
+    it.each([
+      // A people's name is their empire (intent.ts).
+      ["empires", "english", "correct British Empire"],
+      ["empires", "japanese", "near Empire of Japan"],
+      // A people with several empires: the most prominent few to choose from, as "avengers" offers its films. "arab" is
+      // one alias on the four Arab caliphates (2-4 owners: kept on all); the Chinese dynasties are too many for one
+      // alias, so they say they're China's (topics.ts `countries`) and the matcher offers a country's entries.
+      ["empires", "arab", "choose Abbasid Caliphate | Fatimid Caliphate | Rashidun Caliphate | Umayyad Caliphate"],
+      ["empires", "arabs", "choose Abbasid Caliphate | Fatimid Caliphate | Rashidun Caliphate | Umayyad Caliphate"],
+      ["empires", "arab caliphate", "choose Abbasid Caliphate | Fatimid Caliphate | Rashidun Caliphate | Umayyad Caliphate"],
+      ["empires", "chinese", "choose Eastern Han dynasty | Ming dynasty | Qing dynasty | Yuan dynasty"],
+      ["empires", "china", "choose Eastern Han dynasty | Ming dynasty | Qing dynasty | Yuan dynasty"],
+      // "natural history museum london" already landed; the same museum in other words.
+      ["museums", "museum of natural history of london", "correct Natural History Museum, South Kensington"],
+      ["museums", "museum of natural history london", "correct Natural History Museum, South Kensington"],
+      ["museums", "london museum of natural history", "correct Natural History Museum, South Kensington"],
+      ["museums", "natural history museum of london", "correct Natural History Museum, South Kensington"],
+      // Without a city it could be New York's (#11) or the Smithsonian's (#17): still a choice.
+      ["museums", "museum of natural history", "choose American Museum of Natural History | National Museum of Natural History"],
+      // A number glued to the name ("xbox 1" already landed), fans' short forms, the models; the PlayStations did.
+      ["consoles", "xbox1", "near Xbox One"],
+      ["consoles", "xbox 1", "near Xbox One"],
+      ["consoles", "xb1", "near Xbox One"],
+      ["consoles", "xbone", "near Xbox One"],
+      ["consoles", "xbox one x", "near Xbox One"],
+      ["consoles", "ps1", "correct PlayStation"],
+      ["consoles", "ps2", "correct PlayStation 2"],
+      ["consoles", "ps3", "correct PlayStation 3"],
+      ["consoles", "ps4", "correct PlayStation 4"],
+      ["consoles", "ps5", "correct PlayStation 5"],
+      ["consoles", "psp", "near PlayStation Portable"],
+      ["consoles", "xbox360", "correct Xbox 360"],
+      ["consoles", "switch 2", "near Nintendo Switch 2"],
+      ["consoles", "switch2", "near Nintendo Switch 2"],
+      ["consoles", "series s", "near Xbox Series X/S"],
+      ["consoles", "xsx", "near Xbox Series X/S"],
+      ["consoles", "2ds", "near Nintendo 3DS"],
+      ["consoles", "meta quest 2", "near Quest 2"],
+      // Kilimanjaro's Italian name.
+      ["mountains", "kilimangiaro", "near Mount Kilimanjaro"],
+    ])("%s: %s -> %s", (id, guess, want) => {
+      expect(read(id, guess)).toBe(want);
+    });
+    it("empires: once the top 10's are found, a people's name offers the next ones", () => {
+      expect(read("empires", "chinese", [4, 9])).toBe("choose Eastern Han dynasty | Ming dynasty | Tang dynasty | Western Han dynasty");
+      expect(read("empires", "arab", [7, 8])).toBe("choose Fatimid Caliphate | Rashidun Caliphate");
+    });
+    it("empires: no people's name is one alias on more than four empires", () => {
+      const p: Puzzle = JSON.parse(readFileSync(join(dir, "empires.json"), "utf8"));
+      const owners = (alias: string) => [...p.answers, ...p.extras].filter((e) => e.aliases.some((a) => normalize(a) === alias)).length;
+      expect(owners("chinese")).toBe(0);
+      expect(owners("arab")).toBe(4);
+    });
   });
 });
 
