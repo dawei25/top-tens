@@ -553,9 +553,10 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
   const regionRequired = (p.source?.asOf ?? "") >= REGION_REQUIRED_FROM;
   for (const m of regionGaps(p, topic)) (regionRequired ? err : warn)(m);
   // Only the puzzle format's fields ship: a build-only field (a capital's `country`) is noise in every download.
-  // `country` ships only where the topic reads it (`countryCol`): a capital's build-only one is noise.
+  // `country` ships only where the topic reads it (`countryCol`) or gives it (`countries`): a capital's build-only one
+  // is noise.
   for (const e of all) {
-    const extra = Object.keys(e).filter((k) => !ENTRY_FIELDS.has(k) || (k === "country" && !topic?.countryCol));
+    const extra = Object.keys(e).filter((k) => !ENTRY_FIELDS.has(k) || (k === "country" && !topic?.countryCol && !topic?.countries));
     if (extra.length) err(`"${e.name}": fields outside the puzzle format: ${extra.join(", ")}`);
     else for (const m of countryFieldIssues(e)) err(m);
   }

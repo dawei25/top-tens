@@ -1598,6 +1598,14 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   }
   pruneAliases(entries, namesakes, lower);
   applyIntent(topic, entries);
+  // The country of rows whose table names none (topics.ts `countries`): "chinese" offers the Chinese dynasties.
+  for (const [country, names] of Object.entries(topic.countries ?? {})) {
+    for (const name of names) {
+      const e = entries.find((x) => x.name === name);
+      if (!e) throw new Error(`${topic.id}: \`countries\` puts "${name}" in ${country}, but it is no entry`);
+      e.country = country;
+    }
+  }
   addSpellings(entries, topic.people);
   // Whatever the source (redirect, cell, universe), a slur never ships.
   for (const e of entries) e.aliases = e.aliases.filter((a) => !blockedAlias(a, [e.name]));
