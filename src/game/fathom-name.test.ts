@@ -118,6 +118,10 @@ describe("name-it on the real lists: the judge's readings (Nov 8)", { timeout: 3
       for (const city of ["Florence", "Venice", "Edinburgh", "Oxford", "Geneva", "Honolulu", "Kyoto"])
         expect(reads(city, q), `${q.id}: ${city}`).toMatch(new RegExp(`^${city} (isn't measured here|is counted as part of \\w+)\\. Try again\\.$`));
       expect(reads("Firenze", q)).toBe("Florence isn't measured here. Try again.");
+      // The source's Guangzhou is the whole Pearl River Delta (73.6 million): shown with what it counts, and the places
+      // in it name it bare, so their line stays short.
+      expect(reads("Guangzhou", q)).toBe("answer Guangzhou (Pearl River Delta)");
+      expect(reads("Canton", q)).toBe("answer Guangzhou (Pearl River Delta)");
       expect(reads("Shenzhen", q)).toBe("Shenzhen is counted as part of Guangzhou. Try again.");
       expect(reads("Yokohama", q)).toBe("Yokohama is counted as part of Tokyo. Try again.");
       expect(reads("Köln", q)).toBe("Cologne is counted as part of Rhine-Ruhr. Try again.");

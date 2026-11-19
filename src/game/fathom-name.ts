@@ -647,7 +647,10 @@ function lineFor(read: NameRead, list: Pick<NameList, "noun" | "nounPlural" | "e
       // No figure to score it by: "Florence isn't measured here.", "Shenzhen is counted as part of Guangzhou." A long
       // one leaves its own name out, then the other's.
       const name = bare ? "That" : named(read.name, "That");
-      if (read.partOf) return `${name} is counted as part of ${short ? `another ${list.noun}` : read.partOf}. Try again.`;
+      // The host by its bare name: "Guangzhou (Pearl River Delta)" is shown with what it counts, but Shenzhen is part
+      // of Guangzhou, and the longer name would push the line past LINE_MAX.
+      const host = read.partOf?.replace(/ \([^)]*\)$/, "");
+      if (host) return `${name} is counted as part of ${short ? `another ${list.noun}` : host}. Try again.`;
       return `${name} isn't measured here. Try again.`;
     }
     case "offList":

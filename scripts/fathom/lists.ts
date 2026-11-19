@@ -548,6 +548,14 @@ const ENGLISH_NAMES: Record<string, string> = {
   "Frankfurt am Main": "Frankfurt",
 };
 
+/**
+ * Entries whose figure takes in far more than the city its name says, shown with what they count, the bare name kept
+ * as an alias: the page's Guangzhou is the whole Pearl River Delta (Shenzhen, Dongguan and Foshan in it) at 73.6
+ * million, which read as a mistake beside Shanghai's 42 million (Nov 19). The places in it say "counted as part of"
+ * the shown name.
+ */
+export const SHOWN_AS: Record<string, string> = { Guangzhou: "Guangzhou (Pearl River Delta)" };
+
 /** A romanization's marks ("Kermānshāh", "Zhōukŏu"): a name shown as its article writes it ("Kermanshah"), if it has one. */
 const ROMANIZED = /[āēīōūǎěǐǒǔăĕĭŏŭṣḥṭẓḍṇṛṃ]/i;
 
@@ -732,8 +740,8 @@ export function cityList({ rows, asOf }: { rows: AgglomerationRow[]; asOf: strin
     scoring: "ratio",
     source: AGGLOMERATIONS,
     asOf,
-    entries: measured,
-    unmeasured,
+    entries: measured.map((e) => (SHOWN_AS[e.name] ? { ...e, name: SHOWN_AS[e.name], aliases: [e.name, ...e.aliases] } : e)),
+    unmeasured: unmeasured.map((k) => (k.partOf && SHOWN_AS[k.partOf] ? { ...k, partOf: SHOWN_AS[k.partOf] } : k)),
   };
 }
 

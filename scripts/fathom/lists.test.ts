@@ -197,7 +197,7 @@ describe("Fathom name-it lists (public/fathom/lists)", () => {
       return r.kind === "answer" ? `answer ${r.entry.name}` : r.kind === "unmeasured" ? `unmeasured ${r.name}${r.partOf ? ` in ${r.partOf}` : ""}` : r.kind;
     };
     expect(["Rome", "Roma", "Firenze", "Shenzhen", "Köln", "Howrah", "Chhatrapati Sambhajinagar"].map(said)).toEqual([
-      "answer Rome", "answer Rome", "unmeasured Florence", "unmeasured Shenzhen in Guangzhou", "unmeasured Cologne in Rhine-Ruhr",
+      "answer Rome", "answer Rome", "unmeasured Florence", "unmeasured Shenzhen in Guangzhou (Pearl River Delta)", "unmeasured Cologne in Rhine-Ruhr",
       "unmeasured Howrah in Kolkata", "answer Aurangabad",
     ]);
   });
@@ -210,7 +210,7 @@ describe("Fathom name-it lists (public/fathom/lists)", () => {
     // The page's "incl." lists: the well-known places it counts in another city's figure.
     const partOf = new Map(cities.unmeasured!.filter((k) => k.partOf).map((k) => [k.name, k.partOf]));
     expect(Object.fromEntries(["Shenzhen", "Yokohama", "Kyoto", "Newark", "Fort Worth", "Giza", "Incheon", "Suzhou", "Cologne"].map((n) => [n, partOf.get(n)]))).toEqual({
-      Shenzhen: "Guangzhou", Yokohama: "Tokyo", Kyoto: "Osaka", Newark: "New York City", "Fort Worth": "Dallas", Giza: "Cairo", Incheon: "Seoul", Suzhou: "Shanghai", Cologne: "Rhine-Ruhr",
+      Shenzhen: "Guangzhou (Pearl River Delta)", Yokohama: "Tokyo", Kyoto: "Osaka", Newark: "New York City", "Fort Worth": "Dallas", Giza: "Cairo", Incheon: "Seoul", Suzhou: "Shanghai", Cologne: "Rhine-Ruhr",
     });
     // A name shared with places elsewhere is never said to be counted in one (which Springfield?).
     for (const n of ["Springfield", "Concord", "Hamilton", "Windsor", "Victoria"]) expect(partOf.get(n), n).toBeUndefined();

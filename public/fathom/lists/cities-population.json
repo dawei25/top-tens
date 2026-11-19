@@ -11,8 +11,9 @@
   "asOf": "2026-01-01",
   "entries": [
     {
-      "name": "Guangzhou",
+      "name": "Guangzhou (Pearl River Delta)",
       "aliases": [
+        "Guangzhou",
         "Canton, China",
         "Kwangchow",
         "Kuang-chou",
@@ -5662,7 +5663,7 @@
         "Shen-ch'uen",
         "Shenzhen, Guangdong province"
       ],
-      "partOf": "Guangzhou"
+      "partOf": "Guangzhou (Pearl River Delta)"
     },
     {
       "name": "Suzhou",
@@ -5685,12 +5686,12 @@
         "Tung Koon",
         "Tung-kun District"
       ],
-      "partOf": "Guangzhou"
+      "partOf": "Guangzhou (Pearl River Delta)"
     },
     {
       "name": "Foshan",
       "aliases": [],
-      "partOf": "Guangzhou"
+      "partOf": "Guangzhou (Pearl River Delta)"
     },
     {
       "name": "Fort Worth",
@@ -9174,7 +9175,7 @@
     {
       "name": "Zhongshan",
       "aliases": [],
-      "partOf": "Guangzhou"
+      "partOf": "Guangzhou (Pearl River Delta)"
     },
     {
       "name": "Changzhou",
@@ -9184,7 +9185,7 @@
     {
       "name": "Huizhou",
       "aliases": [],
-      "partOf": "Guangzhou"
+      "partOf": "Guangzhou (Pearl River Delta)"
     },
     {
       "name": "Shaoxing",
@@ -9194,7 +9195,7 @@
     {
       "name": "Jiangmen",
       "aliases": [],
-      "partOf": "Guangzhou"
+      "partOf": "Guangzhou (Pearl River Delta)"
     },
     {
       "name": "Kunshan",
