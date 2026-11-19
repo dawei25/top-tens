@@ -456,6 +456,97 @@ test("Fathom: a name-it round sends the figure of the thing named, 0 land border
   await ctx.close();
 });
 
+// The owner, Nov 17: "are wrong guesses tracked for fathom? i guessed rome for a city based question but it wasnt
+// accepted". A name the name-it round doesn't take goes to submit_miss like a list's miss, under mode fathom with the
+// question's id for the list's; the number rounds never send one (their guesses go to submit_fathom_guess). Until the
+// fathom_misses migration runs the server refuses mode fathom, and the game drops the miss quietly.
+test("Fathom: a name the name-it round doesn't take goes to submit_miss as mode fathom; a number round never (desktop)", async () => {
+  const KEY = BACKEND_ENV.VITE_SUPABASE_ANON_KEY;
+  const fixtures = path.join(__dirname, "fixtures", "fathom");
+  const questionsIn = (file) => JSON.parse(fs.readFileSync(path.join(fixtures, file), "utf8")).questions;
+  const questions = [...questionsIn("questions.json"), ...questionsIn("name-questions.json")];
+  const ids = ["eiffel-tower-height", "name-city-10m-people", "adult-bones", "octopus-hearts", "piano-keys"];
+  const seed = { ...FRESH, "top-tens:auth": SESSION, "tentacle:fathom": { recent: [], game: { ids, guesses: [], at: 0 } } };
+  const { ctx, page, calls } = await open(desktop, "#fathom-endless", seed, { save: { data: { games: {}, daily: {}, seenHelp: true }, version: 1 } }, async (c) => {
+    await c.route(/\/fathom\/questions\.json(\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ version: 1, questions }) }));
+    await c.route(/\/fathom\/lists\/[a-z0-9-]+\.json(\?.*)?$/, (route) => {
+      const file = path.join(fixtures, "lists", path.basename(new URL(route.request().url()).pathname));
+      return fs.existsSync(file) ? route.fulfill({ path: file, contentType: "application/json" }) : route.fulfill({ status: 404, body: "" });
+    });
+  });
+  const input = page.getByTestId("fathom-input");
+  const lockIn = async (text) => {
+    await input.fill(text);
+    await page.getByTestId("fathom-lock").click();
+  };
+  // The number round: text that isn't a number, then a number off the answer. Neither is a miss.
+  await input.waitFor();
+  await lockIn("pizza");
+  await page.locator('[data-testid="fathom-echo"][data-tone="error"]').waitFor();
+  await lockIn("300");
+  await page.getByTestId("fathom-reveal").waitFor();
+  await until(() => calls.fathom.length === 1);
+  await page.getByTestId("fathom-next").click();
+
+  // The name-it round: a name no list has, junk, a thing of another kind and a city it knows without a figure go; a way
+  // of giving up and the same text again don't. An answer locks and sends nothing.
+  await page.locator('[data-testid="fathom-ask"][data-round="name"][data-lexicon]').waitFor();
+  const said = async (text, read) => {
+    await lockIn(text);
+    await page.locator(`[data-testid="fathom-echo"]${read ? `[data-read="${read}"]` : "[data-read]"}`).waitFor();
+  };
+  await said("  Atlantis ", "offList");
+  await until(() => calls.miss.length === 1);
+  const [first] = calls.miss;
+  assert.deepEqual(first.args, { p_list_id: "name-city-10m-people", p_mode: "fathom", p_kind: "unknown", p_text: "atlantis", p_client_id: first.args.p_client_id });
+  assert.match(first.args.p_client_id, UUID);
+  // Like a list's: the public key alone, never the signed-in player's session, and the misses' own random id.
+  assert.equal(first.headers.authorization, `Bearer ${KEY}`);
+  assert.notEqual(first.args.p_client_id, calls.fathom[0].p_client_id);
+  await said("xqzzvkw", "unknown");
+  await said("pass");
+  await said("France", "other");
+  await said("Firenze", "unmeasured");
+  await said("ATLANTIS", "offList");
+  await until(() => calls.miss.length === 4);
+  await settle();
+  assert.deepEqual(
+    calls.miss.map((m) => [m.args.p_list_id, m.args.p_mode, m.args.p_kind, m.args.p_text]),
+    [
+      ["name-city-10m-people", "fathom", "unknown", "atlantis"],
+      ["name-city-10m-people", "fathom", "junk", "xqzzvkw"],
+      ["name-city-10m-people", "fathom", "unknown", "france"],
+      ["name-city-10m-people", "fathom", "unknown", "firenze"],
+    ],
+  );
+
+  // Before the migration: submit_miss refuses mode fathom (400). The miss is dropped, never retried, and the round goes on.
+  await page.route(`${SUPA}/rest/v1/rpc/submit_miss`, (route) =>
+    route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ code: "22023", message: "submit_miss: mode must be list or blitz" }) }),
+  );
+  const refused = page.waitForResponse((r) => r.url().endsWith("/rpc/submit_miss") && r.status() === 400);
+  await said("Gotham");
+  await refused;
+  await settle();
+  const outbox = await page.evaluate(() => JSON.parse(localStorage.getItem("top-tens:miss-outbox")));
+  assert.deepEqual(outbox.pending, []);
+  assert.ok(outbox.sent.includes("fathom:name-city-10m-people:gotham"), "a refused miss counts as sent");
+  await page.unroute(`${SUPA}/rest/v1/rpc/submit_miss`);
+  await lockIn("Bombay");
+  await page.getByTestId("fathom-reveal").waitFor();
+  assert.equal(await page.getByTestId("fathom-guess").getAttribute("data-pick"), "Mumbai");
+
+  // The next number round sends nothing either, and nothing else went.
+  await page.getByTestId("fathom-next").click();
+  await page.locator('[data-testid="fathom-ask"]:not([data-round="name"])').waitFor();
+  await lockIn("206");
+  await page.getByTestId("fathom-reveal").waitFor();
+  await until(() => calls.fathom.length === 3);
+  await settle();
+  assert.equal(calls.miss.length, 4);
+  await ctx.close();
+});
+
 test("Home's account key signed out, the menu's Feedback, the sign-in sheet and privacy page (desktop)", async () => {
   const { ctx, page, calls } = await open(desktop, "", FRESH);
   await page.getByTestId("today-list").waitFor();

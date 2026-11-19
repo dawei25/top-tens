@@ -56,8 +56,8 @@ export default function Privacy({ onBack, onHome }: { onBack: () => void; onHome
               random id. Why: to show how other players guessed.
             </li>
             <li data-testid="privacy-misses">
-              When the game doesn't take a guess, it keeps what you typed (in lowercase), the list, list or Blitz, and a
-              second random id, never your account. Why: to fix answers it should take.
+              When the game doesn't take a guess, it keeps what you typed (in lowercase), the list or Fathom question,
+              which game it was, and a second random id, never your account. Why: to fix answers it should take.
             </li>
             <li>
               These scores don't say who you are, so they can't be picked out and deleted later. They stay in the

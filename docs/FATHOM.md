@@ -203,8 +203,10 @@ register". **A fair answer must always register**, and one answer locks per roun
   Australia, not a country.": it was offered as Tanzania), a city's boroughs ("Brooklyn is part of New York City, not a
   city."), regions of several ("Scandinavia is a region, not a country."), countries that no longer are ("Yugoslavia
   is no longer a country."). Nothing disputed: a breakaway region or a claimed territory is left to the lexicon. A real
-  name the list lacks, by the game's lexicon ("Berlin isn't one of our 85 cities.", "Dubai" on a city question, not
-  Mumbai); a name the lexicon knows is offered as a misspelling only one slip from what it reads as ("Chili", "Perm"), or
+  name the list lacks, by the game's lexicon ("Atlantis isn't one of our 652 cities.", "Dubai" on a city question, not
+  Mumbai); a city TENtacle's city lists know but this one has no figure for, said plainly ("Florence isn't measured
+  here."), or the agglomeration that counts it ("Shenzhen is counted as part of Guangzhou."; Guangzhou is shown as
+  "Guangzhou (Pearl River Delta)", since its 73.6 million takes in Shenzhen, Dongguan and Foshan); a name the lexicon knows is offered as a misspelling only one slip from what it reads as ("Chili", "Perm"), or
   when the game stores it as one ("Irak", Iraq's): "Abkhazia" is not Afghanistan. A name read before the lexicon has
   loaded waits for it (a moment at most). A list's inverted and short forms read exactly ("Korea, North", "Gambia,
   The", "Dominican Rep."). The question's own yardstick (`except`: "Any country but United Kingdom."); anything else,
@@ -418,8 +420,9 @@ second date that gives it away. The year must not appear in any other question's
   is another figure for it: "mainland France, without its overseas regions").
 - **Several good answers, not one**: at least 3 things on the list score 70 or more against the target (Close:
   within about 1.45x on a ratio list, one step on a steps list), so a fair answer is never a lucky one. Targets in the
-  middle of a list's range: the cities list holds only cities of 5 million and more (UN 2025), so no city target under
-  about 8 million or over about 30 million; a country list holds the 197 countries (193 UN members and Vatican City,
+  middle of a list's range: the cities list holds every urban agglomeration of 1 million or more (652, Thomas
+  Brinkhoff's Major Agglomerations of the World, citypopulation.de, 2026), one measure for all (a city question's
+  target still needs its three good answers: scripts/fathom/check.ts); a country list holds the 197 countries (193 UN members and Vatican City,
   Palestine, Taiwan, Kosovo; no dependencies).
 - **`definition`** when the figure needs it: a city's population means three things (the city, its urban area, its
   metro), so a city question says which the list uses ("its whole urban area, UN figures for 2025").

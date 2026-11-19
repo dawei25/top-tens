@@ -726,7 +726,7 @@ function suite(exposeNewTables: boolean) {
         await live.exec(standins(exposeNewTables));
         const sql = (f: string) => readFileSync(join(dir, f), "utf8");
         const files = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
-        const later = ["20261114120000_fathom_plays.sql", "20261114130000_fathom_feedback.sql"];
+        const later = ["20261114120000_fathom_plays.sql", "20261114130000_fathom_feedback.sql", "20261117120000_fathom_misses.sql"];
         for (const f of files.filter((f) => !later.includes(f))) await live.exec(sql(f));
         // What players have sent so far.
         await live.exec(`
@@ -1397,6 +1397,143 @@ function suite(exposeNewTables: boolean) {
       await db.query("delete from auth.users where id = $1", [M]);
       expect((await db.query<{ n: number }>("select count(*)::int as n from public.missed_guesses")).rows[0].n).toBe(before + 1);
     });
+  });
+
+  // The owner, Nov 17: "are wrong guesses tracked for fathom? i guessed rome for a city based question but it wasnt
+  // accepted". A name a Fathom name-it round doesn't take is a missed guess like a list's: mode 'fathom', the question's
+  // id as list_id (20261117120000_fathom_misses.sql).
+  describe("Fathom misses", () => {
+    const Q = "name-city-10m-people";
+    const KEY = "a-long-random-reader-key-for-fathom-misses-01";
+    type Row = { list_id: string; mode: string; kind: string; text: string; client_id: string };
+    const rows = (list: string) =>
+      db.query<Row>("select list_id, mode, kind, text, client_id from public.missed_guesses where list_id = $1 order by id", [list]);
+    type Read = { list_id: string; mode: string; kind: string; text: string; browsers: number; last_seen: Date };
+    const read = (reader: string | null) => as("anon", null, () => db.query<Read>("select * from public.list_misses($1)", [reader]));
+    const fnSig = (pg: PGlite) =>
+      pg.query<{ name: string; args: string; result: string }>(
+        `select p.proname as name, pg_get_function_identity_arguments(p.oid) as args, pg_get_function_result(p.oid) as result
+         from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('submit_miss', 'list_misses') order by 1`,
+      );
+    const listMissesDef = async (pg: PGlite) =>
+      (await pg.query<{ def: string }>("select pg_get_functiondef('public.list_misses(text, timestamptz)'::regprocedure) as def")).rows[0].def;
+    const sql = (f: string) => readFileSync(join(dir, f), "utf8");
+
+    beforeAll(async () => {
+      await db.query("select public.set_feedback_reader($1)", [KEY]);
+    });
+
+    it("keeps a name the round didn't take under mode fathom, the question's id as the list, a browser once per text", async () => {
+      await as("anon", null, async () => {
+        expect((await miss({ list: Q, mode: "fathom", text: "  ROME ", client: client(5000) })).rows[0].ok).toBe(true);
+        // Again from the same browser (a later game, junk this time): once.
+        expect((await miss({ list: Q, mode: "fathom", text: "rome", client: client(5000) })).rows[0].ok).toBe(false);
+        expect((await miss({ list: Q, mode: "fathom", kind: "junk", text: "Rome", client: client(5000) })).rows[0].ok).toBe(false);
+        // A list of the same id is its own; another browser is its own; junk goes too.
+        expect((await miss({ list: Q, mode: "list", text: "rome", client: client(5000) })).rows[0].ok).toBe(true);
+        expect((await miss({ list: Q, mode: "fathom", text: "rome", client: client(5001) })).rows[0].ok).toBe(true);
+        expect((await miss({ list: Q, mode: "fathom", kind: "junk", text: "xqzzvkw", client: client(5001) })).rows[0].ok).toBe(true);
+      });
+      // Signed in: still linked to nobody.
+      await as("authenticated", A, () => miss({ list: Q, mode: "fathom", text: "atlantis", client: client(5002) }));
+      expect((await rows(Q)).rows).toEqual([
+        { list_id: Q, mode: "fathom", kind: "unknown", text: "rome", client_id: client(5000) },
+        { list_id: Q, mode: "list", kind: "unknown", text: "rome", client_id: client(5000) },
+        { list_id: Q, mode: "fathom", kind: "unknown", text: "rome", client_id: client(5001) },
+        { list_id: Q, mode: "fathom", kind: "junk", text: "xqzzvkw", client_id: client(5001) },
+        { list_id: Q, mode: "fathom", kind: "unknown", text: "atlantis", client_id: client(5002) },
+      ]);
+    });
+
+    it("refuses what a list's miss refuses, and any other mode (invalid_parameter_value, a 400 from the API)", async () => {
+      await as("anon", null, async () => {
+        for (const args of [{ mode: "Fathom" }, { mode: "fathoms" }, { mode: "estimate" }, { mode: "name" }, { mode: "" }, { kind: "near" }, { text: "x".repeat(41) }, { text: "dana@example.com" }, { list: "Bad Id" }]) {
+          expect(await code(miss({ list: "fm-bad", mode: "fathom", client: client(5010), ...args })), JSON.stringify(args)).toBe("22023");
+        }
+      });
+      expect((await rows("fm-bad")).rows).toEqual([]);
+    });
+
+    it("shares the hourly limit with lists and Blitz", async () => {
+      await as("anon", null, async () => {
+        for (let i = 0; i < 60; i++) await miss({ list: "fm-spam", mode: i % 2 ? "list" : "blitz", text: `spam ${i}`, client: client(5020) });
+        expect((await miss({ list: "fm-spam", mode: "fathom", text: "one more", client: client(5020) })).rows[0].ok).toBe(false);
+      });
+    });
+
+    it("comes out of list_misses under mode fathom, only with the reader key", async () => {
+      for (const wrong of [null, "", "anything", KEY.toUpperCase()]) expect(await code(read(wrong)), String(wrong)).toBe("42501");
+      const got = (await read(KEY)).rows.filter((r) => r.list_id === Q);
+      expect(got.map(({ last_seen, ...r }) => (expect(last_seen).toBeInstanceOf(Date), r))).toEqual([
+        { list_id: Q, mode: "fathom", kind: "unknown", text: "rome", browsers: 2 },
+        { list_id: Q, mode: "fathom", kind: "unknown", text: "atlantis", browsers: 1 },
+        { list_id: Q, mode: "fathom", kind: "junk", text: "xqzzvkw", browsers: 1 },
+        { list_id: Q, mode: "list", kind: "unknown", text: "rome", browsers: 1 },
+      ]);
+    });
+
+    it("holds the table to list, blitz and fathom with one mode check, and players still can't touch it", async () => {
+      expect(await code(db.query("insert into public.missed_guesses (list_id, mode, kind, text, client_id) values ('fm-direct', 'fathom', 'unknown', 'hi', $1)", [client(5030)]))).toBeUndefined();
+      expect(await code(db.query("insert into public.missed_guesses (list_id, mode, kind, text, client_id) values ('fm-direct', 'quiz', 'unknown', 'hi', $1)", [client(5031)]))).toBe("23514");
+      const checks = await db.query<{ name: string; def: string }>(
+        `select con.conname as name, pg_get_constraintdef(con.oid) as def
+         from pg_constraint con join pg_class rel on rel.oid = con.conrelid
+         join pg_attribute att on att.attrelid = rel.oid and con.conkey = array[att.attnum]
+         where rel.relnamespace = 'public'::regnamespace and rel.relname = 'missed_guesses' and con.contype = 'c' and att.attname = 'mode'`,
+      );
+      expect(checks.rows.map((r) => r.name)).toEqual(["missed_guesses_mode_check"]);
+      expect(checks.rows[0].def).toMatch(/'list'.*'blitz'.*'fathom'/);
+      for (const [role, user] of [["anon", null], ["authenticated", A]] as const) {
+        await as(role, user, async () => {
+          expect(await code(db.query("select * from public.missed_guesses"))).toBe("42501");
+          expect(await code(db.query("insert into public.missed_guesses (list_id, mode, kind, text, client_id) values ('x', 'fathom', 'unknown', 'hi', $1)", [client(5032)]))).toBe("42501");
+        });
+      }
+    });
+
+    it("keeps the functions' signatures, and is safe to run again", async () => {
+      const before = (await fnSig(db)).rows;
+      expect(before.map((r) => [r.name, r.args])).toEqual([
+        ["list_misses", "p_reader text, p_since timestamp with time zone"],
+        ["submit_miss", "p_list_id text, p_mode text, p_kind text, p_text text, p_client_id uuid"],
+      ]);
+      const kept = (await rows(Q)).rows;
+      await db.exec(sql("20261117120000_fathom_misses.sql"));
+      expect((await fnSig(db)).rows).toEqual(before);
+      expect((await rows(Q)).rows).toEqual(kept);
+      expect((await as("anon", null, () => miss({ list: "fm-again", mode: "fathom", client: client(5040) }))).rows[0].ok).toBe(true);
+      expect(await code(as("anon", null, () => miss({ list: "fm-again", mode: "quiz", client: client(5040) })))).toBe("22023");
+    });
+
+    it("runs on the live project as it is (1 to 8, fathom_guesses, fathom_plays, fathom_feedback), keeping its misses and list_misses", async () => {
+      const live = new PGlite();
+      try {
+        await live.exec(standins(exposeNewTables));
+        const files = readdirSync(dir).filter((f) => f.endsWith(".sql") && f !== "20261117120000_fathom_misses.sql").sort();
+        for (const f of files) await live.exec(sql(f));
+        // What players have sent so far.
+        await live.exec(`
+          select public.submit_miss('mountains', 'list', 'unknown', 'pizza', '${client(5050)}');
+          select public.submit_miss('airports', 'blitz', 'junk', 'asdfgh', '${client(5050)}');
+        `);
+        const snapshot = async () => (await live.query("select list_id, mode, kind, text, client_id, created_at from public.missed_guesses order by id")).rows;
+        const before = await snapshot();
+        expect(before).toHaveLength(2);
+        const reader = await listMissesDef(live);
+        // Before it: a Fathom miss is refused (the game drops it quietly).
+        expect(await code(live.query("select public.submit_miss($1, 'fathom', 'unknown', 'rome', $2)", [Q, client(5051)]))).toBe("22023");
+        await live.exec(sql("20261117120000_fathom_misses.sql"));
+        expect(await snapshot()).toEqual(before);
+        // list_misses as it was, word for word.
+        expect(await listMissesDef(live)).toBe(reader);
+        expect((await live.query<{ ok: boolean }>("select public.submit_miss($1, 'fathom', 'unknown', 'rome', $2) as ok", [Q, client(5051)])).rows[0].ok).toBe(true);
+        // Twice is fine.
+        await live.exec(sql("20261117120000_fathom_misses.sql"));
+        expect((await live.query<{ n: number }>("select count(*)::int as n from public.missed_guesses where mode = 'fathom'")).rows[0].n).toBe(1);
+      } finally {
+        await live.close();
+      }
+    }, 60_000);
   });
 
   describe("saves", () => {

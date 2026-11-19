@@ -3,10 +3,27 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { blitzGuess, newBlitz, type BlitzResult } from "../game/blitz";
 import type { Lexicon } from "../game/junk";
+import { nameListIds, readList, readName } from "../game/fathom-name";
 import { judgeGuess } from "../game/match";
 import type { GuessResult, Puzzle } from "../game/types";
 import { enqueue, Outbox, type OutboxData, type SendResult } from "./outbox";
-import { cleanMiss, EMAIL, invalidMiss, LINK, looksPersonal, MAX_MISS, missArgs, missClientId, missKind, MISSES, PHONE, SPACES, type Miss } from "./misses";
+import {
+  cleanMiss,
+  EMAIL,
+  invalidMiss,
+  LINK,
+  looksPersonal,
+  MAX_MISS,
+  missArgs,
+  missClientId,
+  missKind,
+  MISS_MODES,
+  MISSES,
+  nameMissKind,
+  PHONE,
+  SPACES,
+  type Miss,
+} from "./misses";
 
 const T = Date.UTC(2026, 10, 8, 12);
 const miss = (over: Partial<Miss> = {}): Miss => ({ listId: "mountains", mode: "list", kind: "unknown", text: "mount fuji", at: T, ...over });
@@ -32,8 +49,9 @@ describe("a missed guess", () => {
     expect(invalidMiss(miss({ text: "é".repeat(MAX_MISS) }))).toBeNull();
     expect(invalidMiss(miss({ listId: "Bad Id" }))).toBe("list id");
     expect(invalidMiss(miss({ mode: "classic" as "list" }))).toBe("mode");
-    // Fathom's ratings and notes go where a list's do, but nothing from Fathom is a miss (missed_guesses takes list or blitz).
-    expect(invalidMiss(miss({ mode: "fathom" as "list" }))).toBe("mode");
+    // A Fathom name-it round's miss: mode fathom, the question's id as the list's (20261117120000_fathom_misses.sql).
+    expect(invalidMiss(miss({ mode: "fathom", listId: "name-city-10m-people" }))).toBeNull();
+    for (const mode of ["estimate", "name", "Fathom"]) expect(invalidMiss(miss({ mode: mode as "list" })), mode).toBe("mode");
     expect(invalidMiss(miss({ kind: "near" as "unknown" }))).toBe("kind");
     expect(invalidMiss(miss({ text: "" }))).toBe("length");
     expect(invalidMiss(miss({ text: "x".repeat(MAX_MISS + 1) }))).toBe("length");
@@ -62,6 +80,8 @@ describe("a missed guess", () => {
       p_text: "asdfgh",
       p_client_id: "m-1",
     });
+    // A Fathom name-it round's: the question's id where a list's id goes.
+    expect(missArgs(miss({ mode: "fathom", listId: "name-city-10m-people", text: "rome" }), "m-1")).toMatchObject({ p_list_id: "name-city-10m-people", p_mode: "fathom", p_text: "rome" });
     const store = new Map<string, string>();
     const storage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v) };
     const id = missClientId(storage);
@@ -76,6 +96,13 @@ describe("a missed guess", () => {
     expect(sql).toContain(`char_length(body) > ${MAX_MISS}`);
     expect(sql).toContain("check (kind in ('unknown', 'junk'))");
     for (const pattern of [SPACES, EMAIL, PHONE, LINK]) expect(sql).toContain(`'${pattern}'`);
+    // The Fathom migration replaces submit_miss: the same limits and patterns, and the game's modes.
+    const fathom = readFileSync(new URL("../../supabase/migrations/20261117120000_fathom_misses.sql", import.meta.url), "utf8");
+    expect(fathom).toContain(`char_length(body) > ${MAX_MISS}`);
+    for (const pattern of [SPACES, EMAIL, PHONE, LINK]) expect(fathom).toContain(`'${pattern}'`);
+    const modes = `(${MISS_MODES.map((m) => `'${m}'`).join(", ")})`;
+    expect(fathom).toContain(`check (mode in ${modes})`);
+    expect(fathom).toContain(`p_mode not in ${modes}`);
   });
 });
 
@@ -141,9 +168,51 @@ describe("which guesses are misses", () => {
     expect(missKind(round("xqzzvkw"))).toBe("junk");
   });
 
-  it("never come from Fathom: nothing there reports a guess", () => {
+  // The owner, Nov 17: "are wrong guesses tracked for fathom? i guessed rome for a city based question but it wasnt
+  // accepted". A name the name-it round doesn't take is a miss like a list's; a number round's guess never is.
+  it("from Fathom, only a name its name-it round didn't take; never a number round's guess", () => {
     const dir = join(import.meta.dirname, "../components/fathom");
     for (const f of readdirSync(dir)) expect(readFileSync(join(dir, f), "utf8"), f).not.toMatch(/reportGuess|submit_miss|missOutbox/);
+    const src = readFileSync(join(dir, "Fathom.tsx"), "utf8");
+    const calls = [...src.matchAll(/reportNameMiss\(/g)].map((m) => m.index!);
+    // Called once, inside the name-it field (AskName), after its read; never in Ask (the numbers).
+    expect(calls).toHaveLength(1);
+    const askName = src.indexOf("function AskName(");
+    const end = src.indexOf("\n}\n", askName);
+    expect(calls[0] > askName && calls[0] < end, "the call is in AskName").toBe(true);
+    const ask = src.slice(src.indexOf("function Ask("), src.indexOf("\n}\n", src.indexOf("function Ask(")));
+    expect(ask).not.toMatch(/reportNameMiss|reportGuess/);
+  });
+});
+
+describe("which names on a Fathom name-it round are misses", { timeout: 30_000 }, () => {
+  const fathom = join(import.meta.dirname, "../../public/fathom");
+  const bank = JSON.parse(readFileSync(join(fathom, "questions.json"), "utf8"));
+  const lists = new Map(nameListIds(bank).map((id) => [id, readList(JSON.parse(readFileSync(join(fathom, "lists", `${id}.json`), "utf8")))!]));
+  const all = [...lists.values()];
+  const on = (listId: string, text: string, except?: string[]) => {
+    const read = readName(text, lists.get(listId)!, all, { lex, except });
+    return { read: read.kind, miss: nameMissKind(read, text, lex) };
+  };
+
+  it("a name the round doesn't take: unknown (not on its list, another kind, no figure, several), or junk", () => {
+    expect(on("cities-population", "Atlantis")).toEqual({ read: "offList", miss: "unknown" });
+    expect(on("countries-population", "Paris")).toEqual({ read: "other", miss: "unknown" });
+    expect(on("countries-population", "Scotland")).toEqual({ read: "other", miss: "unknown" });
+    expect(on("cities-population", "Florence")).toEqual({ read: "unmeasured", miss: "unknown" });
+    expect(on("countries-population", "xqzzvkw")).toEqual({ read: "unknown", miss: "junk" });
+    expect(nameMissKind({ kind: "vague" }, "new", lex)).toBe("unknown");
+    expect(nameMissKind({ kind: "unknown" }, "pizza", lex)).toBe("unknown");
+  });
+
+  it("never a name it took or offered, the yardstick, an empty field or a way of giving up", () => {
+    expect(on("countries-population", "Colombia")).toEqual({ read: "answer", miss: null });
+    expect(on("cities-population", "Rome")).toEqual({ read: "answer", miss: null });
+    expect(on("countries-population", "Frnace")).toEqual({ read: "confirm", miss: null });
+    expect(on("countries-population", "Congo")).toEqual({ read: "choose", miss: null });
+    expect(on("countries-area", "UK", ["United Kingdom"])).toEqual({ read: "except", miss: null });
+    expect(on("countries-population", "")).toEqual({ read: "empty", miss: null });
+    for (const t of ["pass", "idk", "no idea", "?"]) expect(on("countries-population", t).miss, t).toBeNull();
   });
 });
 
@@ -162,6 +231,9 @@ describe("the misses outbox", () => {
     expect(enqueue(store, MISSES, miss({ mode: "blitz" }), T)).toBe(true);
     expect(enqueue(store, MISSES, miss({ listId: "islands" }), T)).toBe(true);
     expect(enqueue(store, MISSES, miss({ text: "fuji" }), T)).toBe(true);
+    // A Fathom name-it round's: once per question and text.
+    expect(enqueue(store, MISSES, miss({ mode: "fathom", listId: "name-city-10m-people", text: "atlantis" }), T)).toBe(true);
+    expect(enqueue(store, MISSES, miss({ mode: "fathom", listId: "name-city-10m-people", text: "atlantis", at: T + 1 }), T)).toBe(false);
     // Malformed or personal: never queued.
     expect(enqueue(store, MISSES, miss({ text: "Mount Fuji" }), T)).toBe(false);
     expect(enqueue(store, MISSES, miss({ text: "555-1234" }), T)).toBe(false);
@@ -170,6 +242,7 @@ describe("the misses outbox", () => {
       "blitz:mountains:mount fuji",
       "list:islands:mount fuji",
       "list:mountains:fuji",
+      "fathom:name-city-10m-people:atlantis",
     ]);
   });
 

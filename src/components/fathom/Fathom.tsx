@@ -73,7 +73,7 @@ import {
 } from "../../game/fathom-name";
 import type { Lexicon } from "../../game/junk";
 import { loadLexicon } from "../../game/puzzles";
-import { compareRound, reportFathom, reportFathomDaily, submitFathomGuess, useFathomCrowd, useFathomDay } from "../../net";
+import { compareRound, reportFathom, reportFathomDaily, reportNameMiss, submitFathomGuess, useFathomCrowd, useFathomDay } from "../../net";
 import { dayCounts, dayStanding, expectedTotal, FATHOM_BIN, simulatedCounts } from "../../game/fathom-crowd";
 import { blendAverage } from "../../net/crowd";
 import { CrowdCurve } from "../CrowdCurve";
@@ -783,6 +783,8 @@ function AskName({
     const known = lex ?? (lexicon && (await Promise.race([lexicon, new Promise<undefined>((r) => setTimeout(r, LEXICON_WAIT_MS))])));
     const r = readName(text, list, others, { lex: known, offered: offered.current, except: question.nameIt?.except });
     if (r.kind === "answer") return onLock(r.entry.value, r.entry.name);
+    // A name the round didn't take goes where a list's missed guesses go (with a backend), under the question's id.
+    reportNameMiss(question.id, text, r, known);
     if (r.kind === "confirm") setText(r.entry.name);
     if (r.kind === "choose") offered.current = r.names;
     setRead(r);

@@ -4,7 +4,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { nameLine, nameListIds, readList, readName, type NameList, type NameRead } from "./fathom-name";
+import { LINE_MAX, nameLine, nameListIds, readList, readName, type NameList, type NameRead } from "./fathom-name";
 import type { Lexicon } from "./junk";
 
 const PUBLIC = join(import.meta.dirname, "..", "..", "public");
@@ -74,7 +74,6 @@ describe("name-it on the real lists: the judge's readings (Nov 8)", { timeout: 3
       ["Sicily", "Italy"],
       ["Crete", "Greece"],
       ["Hokkaido", "Japan"],
-      ["Zanzibar", "Tanzania"],
       ["Phuket", "Thailand"],
       ["Bavaria", "Germany"],
       ["Siberia", "Russia"],
@@ -83,6 +82,9 @@ describe("name-it on the real lists: the judge's readings (Nov 8)", { timeout: 3
     ];
     for (const q of COUNTRY_EACH) {
       for (const [place, country] of parts) expect(reads(place, q), `${q.id}: ${place}`).toBe(`${place} is part of ${country}, not a country. Try again.`);
+      // Zanzibar is on the city list since Nov 17 (its urban area has 1 million people): a city, as Hong Kong is, and
+      // still never Tanzania.
+      expect(reads("Zanzibar", q)).toBe("Zanzibar is a city, not a country. Try again.");
       expect(reads("Hawaii", q)).toBe("Hawaii is a US state, not a country. Try again.");
       expect(reads("Greenland", q)).toBe("Greenland is a territory, not a country. Try again.");
       expect(reads("Borneo", q)).toBe("Borneo is an island, not a country. Try again.");
@@ -95,17 +97,36 @@ describe("name-it on the real lists: the judge's readings (Nov 8)", { timeout: 3
   it("never offers a known name as a misspelling of another, unless the game stores it as one (Irak)", () => {
     for (const q of COUNTRY_EACH) {
       expect(reads("Abkhazia", q), q.id).toBe(`Abkhazia isn't one of our ${COUNTRIES} countries. Try again.`);
-      expect(reads("Dubai", q), q.id).toBe(`Dubai isn't one of our ${COUNTRIES} countries. Try again.`);
+      expect(reads("Atlantis", q), q.id).toBe(`Atlantis isn't one of our ${COUNTRIES} countries. Try again.`);
+      // A city, measured or not, is a city (never Mumbai's misspelling, never Florida's).
+      expect(reads("Dubai", q), q.id).toBe("Dubai is a city, not a country. Try again.");
+      expect(reads("Florence", q), q.id).toBe("Florence is a city, not a country. Try again.");
       // "Irak" is an alias of Iraq on the real lists, and a stored slip of it in the lexicon: still read as Iraq.
       expect(reads("Irak", q), q.id).toMatch(/^(answer Iraq|choose Iran \/ Iraq)$/);
     }
   });
 
-  // "Dubai" and "Boston" were offered as Mumbai and Houston; "Africa" was South Africa, a country.
-  it("on a city question: a city not on the list says so, and a continent is a continent", () => {
+  // "Dubai" and "Boston" were offered as Mumbai and Houston; "Africa" was South Africa, a country. Then (the owner, Nov
+  // 17) "i guessed rome for a city based question but it wasnt accepted": the list held only the 85 largest.
+  it("on a city question: a well-known city scores, one without a figure says so, and a continent is a continent", () => {
     for (const q of CITY_EACH) {
-      for (const city of ["Dubai", "Boston", "Berlin", "Rome", "Sydney", "Vienna", "Las Vegas", "Algiers"])
-        expect(reads(city, q), `${q.id}: ${city}`).toBe(`${city} isn't one of our ${CITIES} cities. Try again.`);
+      for (const city of ["Rome", "Madrid", "Berlin", "Toronto", "Sydney", "Melbourne", "Chicago", "Barcelona", "Milan", "Dubai", "Boston", "Vienna", "Las Vegas", "Algiers"])
+        expect(reads(city, q), `${q.id}: ${city}`).toBe(`answer ${city}`);
+      for (const [typed, city] of [["Roma", "Rome"], ["Milano", "Milan"], ["Wien", "Vienna"], ["Kiev", "Kyiv"], ["Bombay", "Mumbai"], ["Frankfurt am Main", "Frankfurt"]])
+        expect(reads(typed, q), `${q.id}: ${typed}`).toBe(`answer ${city}`);
+      // Every city on TENtacle's city lists is a name the round knows: one with no figure on the list's measure says so.
+      for (const city of ["Florence", "Venice", "Edinburgh", "Oxford", "Geneva", "Honolulu", "Kyoto"])
+        expect(reads(city, q), `${q.id}: ${city}`).toMatch(new RegExp(`^${city} (isn't measured here|is counted as part of \\w+)\\. Try again\\.$`));
+      expect(reads("Firenze", q)).toBe("Florence isn't measured here. Try again.");
+      // The source's Guangzhou is the whole Pearl River Delta (73.6 million): shown with what it counts, and the places
+      // in it name it bare, so their line stays short.
+      expect(reads("Guangzhou", q)).toBe("answer Guangzhou (Pearl River Delta)");
+      expect(reads("Canton", q)).toBe("answer Guangzhou (Pearl River Delta)");
+      expect(reads("Shenzhen", q)).toBe("Shenzhen is counted as part of Guangzhou. Try again.");
+      expect(reads("Yokohama", q)).toBe("Yokohama is counted as part of Tokyo. Try again.");
+      expect(reads("Köln", q)).toBe("Cologne is counted as part of Rhine-Ruhr. Try again.");
+      // A name the game knows that no city list has.
+      expect(reads("Atlantis", q)).toBe(`Atlantis isn't one of our ${CITIES} cities. Try again.`);
       for (const c of ["Africa", "South America", "Europe", "Asia"]) expect(reads(c, q), `${q.id}: ${c}`).toBe(`${c} is a continent, not a city. Try again.`);
       expect(reads("England", q)).toBe("England is part of the UK, not a city. Try again.");
       expect(reads("Dakha", q)).toMatch(/^(answer|confirm) Dhaka$/);
@@ -113,10 +134,22 @@ describe("name-it on the real lists: the judge's readings (Nov 8)", { timeout: 3
     }
   });
 
+  // Every line keeps to two lines at 320px (LINE_MAX): the longest names leave their own name out, then the other's.
+  it("says every city known without a figure in a line that fits", () => {
+    const cities = LISTS.get("cities-population")!;
+    const long = (cities.unmeasured ?? []).flatMap((k) => {
+      const line = nameLine({ kind: "unmeasured", name: k.name, ...(k.partOf && { partOf: k.partOf }) }, cities);
+      return line.length > LINE_MAX || !line.endsWith(" Try again.") ? [line] : [];
+    });
+    expect(long).toEqual([]);
+    expect(nameLine({ kind: "unmeasured", name: "Mönchengladbach", partOf: "Rhine-Ruhr" }, cities)).toBe("That is counted as part of Rhine-Ruhr. Try again.");
+    expect(nameLine({ kind: "unmeasured", name: "Santa Cruz de Tenerife" }, cities)).toBe("That isn't measured here. Try again.");
+  });
+
   // Without the lexicon (it hadn't loaded) a city is never misread either: it may only be a name we don't know.
   it("never misreads a known place without the lexicon", () => {
     for (const q of [...COUNTRY_EACH, ...CITY_EACH])
-      for (const place of ["Dubai", "Boston", "Tasmania", "Bali", "Africa", "South America", "Scotland", "Abkhazia", "Vienna", "Algiers"]) {
+      for (const place of ["Tasmania", "Bali", "Africa", "South America", "Scotland", "Abkhazia", "Florence", "Venice", "Shenzhen", ...(q.list === "cities-population" ? [] : ["Dubai", "Boston", "Vienna", "Algiers"])]) {
         const r = reads(place, q, undefined);
         expect(r, `${q.id}: ${place}`).not.toMatch(/^(answer|confirm|choose) /);
       }

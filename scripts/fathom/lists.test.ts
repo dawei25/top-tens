@@ -1,15 +1,23 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { normalize } from "../../src/game/match";
 import { readList, readName } from "../../src/game/fathom-name";
+import type { Puzzle } from "../../src/game/types";
+import { blockedAlias, CITY_JUNK } from "../aliases";
 import {
+  AGGLOMERATIONS,
+  agglomerationRows,
   checkCountryLists,
   checkList,
   checkStateLists,
+  CITY_POOLS,
   COUNTRY_LISTS,
   FORMS,
   isPlace,
   keptForms,
   loadLists,
+  METRO_SYSTEM,
   NOT_A_NAME,
   ownKind,
   STATE_LISTS,
@@ -146,11 +154,98 @@ describe("Fathom name-it lists (public/fathom/lists)", () => {
     });
   });
 
-  it("ranks the cities by one measure, the source's UN 2025 estimates", () => {
+  // The owner, Nov 17: "i guessed rome for a city based question but it wasnt accepted". The list held the 85 largest
+  // (5 million and up); now every urban agglomeration of 1 million or more, by one source and one measure.
+  it("measures the cities by one measure, every urban area of 1 million or more, well-known ones included", () => {
     const cities = byId.get("cities-population")!;
-    expect(cities.entries.length).toBeGreaterThanOrEqual(80);
-    const top = [...cities.entries].sort((a, b) => b.value - a.value)[0];
-    expect(top.value).toBeGreaterThan(30e6);
+    expect(cities.source).toEqual(AGGLOMERATIONS);
+    expect(cities.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(cities.entries.length).toBeGreaterThanOrEqual(600);
+    expect(Math.min(...cities.entries.map((e) => e.value))).toBeGreaterThanOrEqual(1e6);
+    const value = (n: string) => cities.entries.find((e) => e.name === n)?.value;
+    for (const n of ["Rome", "Madrid", "Berlin", "Toronto", "Sydney", "Melbourne", "Chicago", "Barcelona", "Milan", "Tokyo", "New York City", "London", "Paris"])
+      expect(value(n), n).toBeGreaterThan(2e6);
+    expect(value("Rome")).toBe(3450000);
+    // Two of a name: the better known keeps it, the other says where it is (Valencia, Venezuela).
+    for (const n of ["Valencia, Venezuela", "Hyderabad, Pakistan", "Melbourne, Florida", "Taizhou, Zhejiang", "Taizhou, Jiangsu", "Suzhou, Anhui"]) expect(value(n), n).toBeGreaterThan(1e6);
+  });
+
+  // The coordinator, Nov 17: every city name and alias on TENtacle's city lists is a name the city round knows, so a
+  // real city never reads "isn't one of our cities"; one with no figure on the list's measure says so instead.
+  it("knows every city on TENtacle's city lists by its name, and its aliases but those no one types", () => {
+    const cities = byId.get("cities-population")!;
+    const known = new Map([...cities.entries, ...(cities.unmeasured ?? [])].flatMap((e) => [e.name, ...e.aliases].map((f) => [normalize(f), e.name] as const)));
+    const others = new Set(lists.filter(({ list }) => list.noun !== "city").flatMap(({ list }) => list.entries.flatMap((e) => [e.name, ...e.aliases].map(normalize))));
+    const junk = new Set(CITY_JUNK.map(normalize));
+    // A name two cities of the lists share (Taizhou is two cities, both measured) is no one city's.
+    const owners = new Map<string, Set<string>>();
+    const pools = CITY_POOLS.flatMap((id) => {
+      const p = JSON.parse(readFileSync(join(import.meta.dirname, "..", "..", "public", "puzzles", `${id}.json`), "utf8")) as Puzzle;
+      return [...p.answers, ...p.extras];
+    });
+    for (const e of pools) for (const a of e.aliases) owners.set(normalize(a), (owners.get(normalize(a)) ?? new Set()).add(e.name));
+    const dropped = (form: string, name: string) =>
+      isPlace(form) || isPlace(name) || NOT_A_NAME.test(form) || METRO_SYSTEM.test(form) || junk.has(normalize(form)) || blockedAlias(form, [name]) || (owners.get(normalize(form))?.size ?? 0) > 1;
+    const unknownNames = pools.filter((e) => !known.has(normalize(e.name)) && !isPlace(e.name) && normalize(e.name) !== "taizhou").map((e) => e.name);
+    expect([...new Set(unknownNames)]).toEqual([]);
+    const unknownAliases = pools.flatMap((e) => e.aliases.filter((a) => !known.has(normalize(a)) && !others.has(normalize(a)) && !dropped(a, e.name)).map((a) => `${a} (${e.name})`));
+    expect([...new Set(unknownAliases)]).toEqual([]);
+    // What that reads as, on a city question.
+    const list = readList(cities)!;
+    const said = (t: string) => {
+      const r = readName(t, list);
+      return r.kind === "answer" ? `answer ${r.entry.name}` : r.kind === "unmeasured" ? `unmeasured ${r.name}${r.partOf ? ` in ${r.partOf}` : ""}` : r.kind;
+    };
+    expect(["Rome", "Roma", "Firenze", "Shenzhen", "Köln", "Howrah", "Chhatrapati Sambhajinagar"].map(said)).toEqual([
+      "answer Rome", "answer Rome", "unmeasured Florence", "unmeasured Shenzhen in Guangzhou (Pearl River Delta)", "unmeasured Cologne in Rhine-Ruhr",
+      "unmeasured Howrah in Kolkata", "answer Aurangabad",
+    ]);
+  });
+
+  it("names no place two ways and keeps every unmeasured name off the entries", () => {
+    const cities = byId.get("cities-population")!;
+    expect(cities.unmeasured!.length).toBeGreaterThan(1500);
+    const entries = new Set(cities.entries.map((e) => e.name));
+    for (const k of cities.unmeasured!) if (k.partOf) expect(entries.has(k.partOf), `${k.name} in ${k.partOf}`).toBe(true);
+    // The page's "incl." lists: the well-known places it counts in another city's figure.
+    const partOf = new Map(cities.unmeasured!.filter((k) => k.partOf).map((k) => [k.name, k.partOf]));
+    expect(Object.fromEntries(["Shenzhen", "Yokohama", "Kyoto", "Newark", "Fort Worth", "Giza", "Incheon", "Suzhou", "Cologne"].map((n) => [n, partOf.get(n)]))).toEqual({
+      Shenzhen: "Guangzhou (Pearl River Delta)", Yokohama: "Tokyo", Kyoto: "Osaka", Newark: "New York City", "Fort Worth": "Dallas", Giza: "Cairo", Incheon: "Seoul", Suzhou: "Shanghai", Cologne: "Rhine-Ruhr",
+    });
+    // A name shared with places elsewhere is never said to be counted in one (which Springfield?).
+    for (const n of ["Springfield", "Concord", "Hamilton", "Windsor", "Victoria"]) expect(partOf.get(n), n).toBeUndefined();
+  });
+});
+
+describe("the agglomerations page (scripts/fathom/lists.ts)", () => {
+  const page = (rows: string) =>
+    `<html><body><p>Contents: all urban agglomerations (reference date: 2026-01-01).</p><table class="data"><tr><th>Rank</th><th>Name</th><th>English Name</th><th>Country</th><th>Population</th><th>Status</th><th>Remark</th></tr>${rows}</table></body></html>`;
+  const row = (cells: string[], wiki?: string) =>
+    `<tr><td>1</td><td${wiki ? ` data-wiki="${wiki}"` : ""}><a>${cells[0]}</a></td>${cells.slice(1).map((c) => `<td>${c}</td>`).join("")}</tr>`;
+
+  it("reads each row: names, country, figure, and the places it counts in, with their own country", () => {
+    const { rows, asOf } = agglomerationRows(
+      page(
+        row(["Al-Qāhirah", "Cairo", "Egypt", "23,200,000", "Aggl", "incl. Al-Jīzah [Giza], Shubrā al-Khaymah"], "Cairo") +
+          row(["Detroit", "Detroit", "Canada", "5,850,000", "CUA", "incl. Toledo, Windsor (Canada)"]) +
+          row(["Newcastle[upon Tyne", "Newcastle[upon Tyne", "Great Britain", "1,540,000", "CUA", ""]),
+      ),
+    );
+    expect(asOf).toBe("2026-01-01");
+    expect(rows).toEqual([
+      {
+        local: "Al-Qāhirah", english: "Cairo", wiki: "Cairo", country: "Egypt", population: 23200000,
+        includes: [{ names: ["Al-Jīzah", "Giza"] }, { names: ["Shubrā al-Khaymah", "Shubra el-Kheima"] }],
+      },
+      { local: "Detroit", english: "Detroit", country: "Canada", population: 5850000, includes: [{ names: ["Toledo"] }, { names: ["Windsor"], country: "Canada" }] },
+      { local: "Newcastle upon Tyne", english: "Newcastle upon Tyne", country: "Great Britain", population: 1540000, includes: [] },
+    ]);
+  });
+
+  it("fails loudly on a new layout, a missing date or a figure under 1 million", () => {
+    expect(() => agglomerationRows(page("").replace("Remark", "Notes"))).toThrow(/new table layout/);
+    expect(() => agglomerationRows(page("").replace("reference date", "as of"))).toThrow(/reference date/);
+    expect(() => agglomerationRows(page(row(["X", "X", "Chad", "900,000", "", ""])))).toThrow(/X has 900,000/);
   });
 });
 
@@ -189,6 +284,27 @@ describe("checkList", () => {
     const nan = sample();
     nan.entries[0].value = Number.NaN;
     expect(checkList(nan)).toEqual(["sample: Land 1: value must be a finite number"]);
+  });
+
+  it("takes names known without a figure, each form one owner's, never a place of its own, `partOf` an entry", () => {
+    expect(checkList(sample({ unmeasured: [{ name: "Hamlet", aliases: ["Hamletia"] }, { name: "Suburb", aliases: [], partOf: "Land 1" }] }))).toEqual([]);
+    expect(
+      checkList(
+        sample({
+          unmeasured: [
+            { name: "Land 2", aliases: [] },
+            { name: "Hamlet", aliases: ["Landia 3"] },
+            { name: "Suburb", aliases: [], partOf: "Nowhere" },
+            { name: "Scotland", aliases: [] },
+          ],
+        }),
+      ),
+    ).toEqual([
+      '"Land 2" is a form of both Land 2 and unmeasured Land 2',
+      '"Landia 3" is a form of both Land 3 and unmeasured Hamlet',
+      "unmeasured Suburb: partOf Nowhere is no entry",
+      "unmeasured Scotland is a place of its own (fathom-name.ts PLACES)",
+    ].map((e) => `sample: ${e}`));
   });
 
   it("wants the shape the round reads", () => {

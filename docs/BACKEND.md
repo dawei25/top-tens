@@ -57,12 +57,14 @@ nothing, stores nothing beyond the browser, and never downloads the backend code
   From 20 players on a question (`MIN_PLAYERS`, `src/game/fathom.ts`) it says "Players' typical guess: 4 litres · you
   were closer than 72%"; below that, nothing; a name-it reveal never asks. Never in the save, never synced. See Switch
   it on (2.7).
-- **Missed guesses** (owner, Nov 8: "real data instead of agents guessing what people type"). Where a list or Blitz
-  guess is judged (`Game.tsx`, `Blitz.tsx`), the facade's `reportGuess` gets what was typed and the result
+- **Missed guesses** (owner, Nov 8: "real data instead of agents guessing what people type"; Nov 17, for Fathom: "are
+  wrong guesses tracked for fathom?"). Where a list or Blitz guess is judged (`Game.tsx`, `Blitz.tsx`), or a name on a
+  Fathom name-it round (`Fathom.tsx`: mode `fathom`, the question's id as the list id), the facade's `reportGuess` gets what was typed and the result
   (`src/net/misses.ts`). A guess the game didn't take goes into its own outbox (`top-tens:miss-outbox`): `unknown` (not
   an answer here, a vague one included) or `junk` ("That doesn't look like an answer", kept so false junk calls can be
   found). Never an accepted answer, a near miss (a real answer outside the top 10, or outside a regional list's
-  region), a "did you mean" choice, an answer Blitz can't score, or anything from Fathom. The text is normalized
+  region), a "did you mean" choice, an answer Blitz can't score, or a guess on a Fathom number round (those are in
+  `fathom_guesses`). The text is normalized
   (`cleanMiss`: lowercase, NFC, every run of blanks one space, trimmed), 1 to 40 characters, and text that looks like an
   email address, a phone number or a link is never queued (`EMAIL`, `PHONE`, `LINK`: the database checks the same
   strings). Once per list, mode and text per browser. It goes to `submit_miss` with plain `fetch` and the public key
@@ -194,7 +196,15 @@ regulars can't lift every average.
       player); `list_ratings` and `list_feedback` already total by mode. Check it took: rate a question on Fathom's
       results; `select * from list_ratings(now() - interval '1 hour');` has a `fathom` row.
 
-   The live project has 1 to 8 (missed_guesses Nov 9, fathom_guesses Nov 14), so 9 and 10 are what's left.
+   11. `supabase/migrations/20261117120000_fathom_misses.sql` (after 3, the missed guesses; run once, safe to run
+      twice): Fathom's name-it misses. Lets `mode` be `fathom` in `missed_guesses` and in `submit_miss` (same
+      signature, checks, limits and grants); `list_misses` is unchanged and totals them under mode `fathom`. Until it
+      runs, `submit_miss` refuses mode `fathom` and the game drops those misses quietly. Check it took: on a name-it
+      round type "Atlantis" and LOCK IN; `rpc/submit_miss` answers `true`, and
+      `select * from list_misses('<your reader key>') where mode = 'fathom';` has that row.
+
+   The live project has 1 to 10 (missed_guesses Nov 9, fathom_guesses Nov 14, fathom_plays and fathom_feedback Nov
+   17), so 11 is what's left.
 
    Or with the CLI: `npx supabase link --project-ref <ref>`, `npx supabase db push` (the one-time steps above still go
    in the SQL Editor). Stats alone only need the first.

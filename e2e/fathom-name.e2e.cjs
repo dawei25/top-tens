@@ -263,9 +263,13 @@ describe("Fathom: the name-it round", { concurrency: true }, () => {
     assert.equal(await page.getByTestId("fathom-input").getAttribute("placeholder"), "your city");
     assert.deepEqual(await say(page, "France"), { read: "other", tone: "error", text: "France is a country, not a city. Try again." });
     assert.deepEqual(await say(page, "Greenland"), { read: "other", tone: "error", text: "Greenland is a territory, not a city. Try again." });
-    // A real city under the list's 5 million: the game's lexicon knows it, the list doesn't, and the line says so.
+    // A real name the fixture list doesn't have: the game's lexicon knows it, and the line says so.
     await page.locator('[data-testid="fathom-ask"][data-lexicon]').waitFor();
     assert.deepEqual(await say(page, "berlin"), { read: "offList", tone: "error", text: `Berlin isn't one of our ${list("cities-population").entries.length} cities. Try again.` });
+    // A city the list knows without a figure (the real list: every city on TENtacle's city lists, Nov 17), by any of its
+    // names, and one its source counts in another's urban area: free, and said so.
+    assert.deepEqual(await say(page, "Firenze"), { read: "unmeasured", tone: "error", text: "Florence isn't measured here. Try again." });
+    assert.deepEqual(await say(page, "yokohama"), { read: "unmeasured", tone: "error", text: "Yokohama is counted as part of Tokyo. Try again." });
     // An alias locks as its city.
     await lockName(page, "Bombay");
     assert.equal(await attr(page, "fathom-guess", "data-pick"), "Mumbai");
