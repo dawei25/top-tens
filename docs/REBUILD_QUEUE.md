@@ -10,6 +10,14 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Lexicon retrain held back (Nov 19), until happiest-countries' day (Nov 20) has passed.** The Nov 19 build of
+      empires, museums, consoles and mountains wrote a new lexicon.json; it was not committed. Retrained, it changed
+      how the dailies read off-list guesses: about 280 of the new aliases' forms ("xbox1", "arab empire", "2ds") would
+      read as known names on every list, 25 strings of mash flip junk or not (the letter model), and "arabs" on
+      happiest-countries would no longer be corrected to the United Arab Emirates. The answers themselves read the
+      same with or without it (aliases.test.ts passes on both). Any build writes it; after Nov 20, rebuild any list or
+      run `npx tsx scripts/lexicon.ts` and commit it, checking the dailies of those days the same way.
+
 - [ ] **Famous names count on concert-tours and tiktok-accounts** (painters agent, Nov 18), once their days pass
       (concert-tours is Nov 19's daily, tiktok-accounts Nov 20's legacy Blitz): Born This Way Ball, Reputation, Justice,
       Purpose, Sweetener, Formation, On the Run II and Future Nostalgia read "Not one of the 67 concert tours here";
@@ -178,7 +186,7 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
   through topics.ts `countries`); museums: the London natural history museum's other word orders; consoles: Xbox One
   short forms and models, "switch 2", "series s", "xsx", 2DS (its unranked entry merged into the 3DS, whose figure
   counts it), Quest 2's full names; mountains: "Kilimangiaro", and the ß keyboard spellings (FOLDS) on 57 Alpine peaks.
-  The lexicon was retrained; capitals, happiest-countries, us-cities and tiktok-accounts read as before.
+  lexicon.json is kept as it was (see Pending), so capitals and happiest-countries read exactly as before.
 
 - **Cycle 3** (2026-11-02): richest-people near misses take the newest figure from the US, India and France
   rankings (world ranks 11+ don't exist on Wikipedia); x-accounts, facebook-pages and tiktok-accounts rebuilt with
