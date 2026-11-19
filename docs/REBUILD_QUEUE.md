@@ -51,8 +51,9 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       unambiguous, as the judge did for some. Wingstop typed again (see below).
 
 - [ ] **Launch-week missed guesses (Nov 12), data hints** (one browser each; build when the list is next rebuilt):
-      languages: "arab" should reach Modern Standard Arabic (intent.ts short form; guard in aliases.test.ts).
-      fast-food-chains: Wingstop (about 2,500 locations) isn't in the source table; check whether the page's
+      languages: "arab" should reach Modern Standard Arabic: the intent.ts short form is in (Nov 19), not built
+      (languages wasn't in the Nov 19 batch); add its guard to aliases.test.ts when it is. On empires "arab" offers the
+      Arab caliphates, built Nov 19 (aliases.test.ts "missed guesses, Nov 18"). fast-food-chains: Wingstop (about 2,500 locations) isn't in the source table; check whether the page's
       other tables have it before adding it by hand. sports-leagues: "indian cricket league" finds nothing, though
       the Indian Premier League (#12) is there; consider "indian cricket league" as an intent alias.
 
@@ -171,6 +172,13 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       Zeenny to Jacques Saadé Jr.'s article, so they merge into one entry on richest-people.
 
 ## Done
+
+- **Missed guesses, Nov 18** (2026-11-19): empires, museums, consoles and mountains rebuilt (0 requests), top 10s
+  unchanged. Empires: "english", "japanese", "arab" (the four Arab caliphates) and "chinese"/"china" (the dynasties
+  through topics.ts `countries`); museums: the London natural history museum's other word orders; consoles: Xbox One
+  short forms and models, "switch 2", "series s", "xsx", 2DS (its unranked entry merged into the 3DS, whose figure
+  counts it), Quest 2's full names; mountains: "Kilimangiaro", and the ß keyboard spellings (FOLDS) on 57 Alpine peaks.
+  The lexicon was retrained; capitals, happiest-countries, us-cities and tiktok-accounts read as before.
 
 - **Cycle 3** (2026-11-02): richest-people near misses take the newest figure from the US, India and France
   rankings (world ranks 11+ don't exist on Wikipedia); x-accounts, facebook-pages and tiktok-accounts rebuilt with
