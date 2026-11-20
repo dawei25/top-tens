@@ -1,41 +1,45 @@
 {
   "id": "high-capitals",
-  "by": "builder",
   "judgedAt": "2026-11-20",
   "decision": "daily-list",
   "alsoBlitz": false,
-  "priority": 7,
+  "priority": 6,
   "scores": {
     "recognizability": 4,
     "curve": 4,
-    "fairness": 4,
+    "fairness": 3,
     "data": 4,
     "fun": 4,
-    "blitzDepth": 0
+    "blitzDepth": 5
   },
   "casual": {
-    "found": 7,
+    "found": 6,
     "livesLost": 5,
     "guesses": 14
   },
   "fan": {
     "found": 10,
-    "livesLost": 1,
-    "guesses": 11
+    "livesLost": 4,
+    "guesses": 14
   },
-  "blitzCasual": null,
+  "blitzCasual": {
+    "scored": 36,
+    "named": 38
+  },
   "difficulty": 3,
-  "tags": [
-    "geography",
-    "capitals",
-    "mountains"
-  ],
-  "audience": "anyone",
-  "summary": "La Paz, Quito, Bogotá and Mexico City come fast, Addis Ababa and Nairobi with thought; Bolivia's second capital Sucre at #3 is the surprise, Kabul (#11, 5 m short of Nairobi) the near miss, Kathmandu and Tehran (#18) the traps.",
+  "tags": ["geography", "cities", "capitals", "mountains"],
+  "audience": "geography fans",
+  "summary": "A good, slightly hard daily. La Paz, Quito, Bogotá and Mexico City come fast, and Addis Ababa and Nairobi take some thought. Kathmandu at #18 is the surprise that costs nearly everyone a life. Sucre, Thimphu, Asmara and Sanaa are the stretches.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 7 (6 without Sucre) and lost its lives on Kathmandu, Lima, Kabul, Tehran and Caracas; Denver and Lhasa were free.",
-    "The capitals of the UN's 193 members and its observers, a row per capital (197): Bolivia's La Paz and Sucre both rank. Capitals at sea level (Singapore, Tunis, 0 m) and below it (Amsterdam, Baku) rank too. Taipei, Pristina and territories' capitals are free, as are non-capital cities.",
-    "Countries are free ('bolivia' is no capital), as on capitals. Mexico City is the one overlap with capitals (by population). Blitz not simulated."
+    "Predicted first: players read it as mountain capitals and start with La Paz, then Quito, Bogotá, Kathmandu, Lhasa and Denver. The build matches that: Lhasa, Denver, Cusco and El Alto are free, Kathmandu costs a life and shows 1,400 m.",
+    "Casual found 6 (La Paz, Quito, Bogotá, Mexico City, Addis Ababa, Nairobi) and lost all five lives on Kathmandu, Lima, Kabul, Santiago and Tehran, each with its figure. Without Addis Ababa the same player finds 5, so this sits at the hard edge of the 5 to 6 target. The fan got 10/10 at guess 14 but lost 4 lives (Kathmandu, Kabul, Tehran, Maseru).",
+    "Fairness is 3: the Himalaya and Andes reasoning players use (Kathmandu, Lima, Santiago, Caracas) burns lives quickly. Each miss teaches something, though, and Kabul at #11, 5 m below Nairobi, is a near miss players will remember.",
+    "Next to capitals (Nov 19): it uses the same answer pool but tests something different. Only Mexico City is in both top 10s. It plays as physical geography, not megacities. 17 to 24 days later is far enough apart (the owner's rule of thumb is about one week), but put it in the second half of Dec 6-13 and not beside another cities or capitals day.",
+    "The data is clean. The source has one row per capital and two for Bolivia, so Sucre at #3 is fair and its fact explains why. All ten facts are quoted from their articles and name the country. 'mexico' asks 'did you mean Mexico City?' the same way capitals does, and other country names are free.",
+    "No Blitz: every capital scores, so the elevation ranking plays no part and the round is the capitals Blitz with a smaller pool (36 of 38 scored)."
   ],
-  "fixes": []
+  "fixes": [
+    "'ulan bator' is not recognized (free, no figure), but 'ulaanbaatar' costs a life at #20 (1,350 m). Add Ulan Bator as an alias of Ulaanbaatar, as on capitals.",
+    "Optional, not blocking: drop redirects on ranks 11+ that are not names of the city: 'Liberation from the Alberoni Occupation' (San Marino), 'Immigration to Madrid', 'Brasília, Taguatinga', 'Antrim, Ontario', 'NCBL' and 'Technically Beautiful' (Ottawa), 'Roman Catholicism in Rome', 'St. Joseph's Fountain', 'Vatican citizenship' and 'Catholic City' (Vatican City), 'Cecchignola' (Rome), '6-resurrection' (Manila), 'Baku Oilfields' and 'Baku Today'. Single words from them match nothing, so this is cleanup only."
+  ]
 }
