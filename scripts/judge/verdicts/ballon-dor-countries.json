@@ -1,24 +1,26 @@
 {
   "id": "ballon-dor-countries",
-  "judgedAt": "2026-10-30",
-  "decision": "daily-list",
+  "judgedAt": "2026-11-20",
+  "decision": "free-play",
   "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 0 },
+  "priority": 2,
+  "scores": { "recognizability": 5, "curve": 2, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 0 },
   "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
-  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
   "blitzCasual": null,
-  "difficulty": 2,
+  "difficulty": 1,
   "tags": ["sports", "soccer", "awards"],
-  "audience": "soccer fans and casual sports followers",
-  "summary": "Nine of the ten are the big football nations anyone can name, and the Soviet Union at #10 is a nice reveal. It plays easy, and a few famous football countries with no winner cost lives.",
+  "audience": "football fans",
+  "summary": "Correct and current, but the top nine are the football powers anyone names, so a casual player gets 9 of 10 and only the Soviet Union takes thought. Fine for free play, too easy for Today's list.",
   "reasons": [
-    "Casual player found 9/10 but used all 5 lives: Croatia (#12) is a fair near miss, while Belgium, Uruguay, Poland and Russia have no winner and cost a life with no rank to learn from.",
-    "Curve leans easy: Argentina, Portugal, France, Brazil, Germany, Spain and Italy are gimmes, England and the Netherlands need a moment's thought, and the Soviet Union is the one stretch.",
-    "Data matches the Wikipedia 'Wins by country' table; 'ussr' and 'holland' match, but 'west germany' is not recognized."
+    "Casual player found 9/10: the eight football powers by reflex, then the Netherlands after Croatia and Belgium. A soccer-light player who opens with USA and Mexico also gets 9. That is past the 6-8 bar.",
+    "Curve is nearly all gimmes: the list plays as 'name the big football nations' and knowing the Ballon d'Or barely matters. The Soviet Union (#10) is the one stretch; the fan found all 10 for 2 lives.",
+    "Data matches Wikipedia's wins-by-country table, current through Harry Kane's 2026 win (England 6). West Germany, Holland, USSR, UK and the demonyms all land; Russia is free; Croatia and Ukraine are fair #11 near misses showing 1 win.",
+    "It has been in random free play since Oct 29, and the owner wants dailies fresh."
   ],
   "fixes": [
-    "Add 'West Germany' as an alias of Germany (#3): six of its seven wins were West German players, and a fan types it.",
-    "Consider making 'Russia' free (not a costly unranked answer) on this list, since Yashin's wins count for the Soviet Union (#10) and a player guessing Russia is half right."
+    "Misses on countries with no winner (Belgium, Uruguay, Poland, USA) read \"Belgium is outside the top 11. Lost a life.\": all ten extras tie at #11, so this hides the real point, that no Belgian has ever won. Make the miss say the country has no Ballon d'Or winner (a 0 value for unranked countries on this list, or a miss line driven by `noFigures`, which today only reaches validate.ts).",
+    "The ten facts are generic country trivia (the French Revolution, Portus Cale, the Soviet Union's area), not Ballon d'Or stories. Rewrite them from the Ballon d'Or page and check each: Messi won all 8 of Argentina's; Platini won three in a row (1983-85); Cruyff and van Basten won three each; Lev Yashin is the only goalkeeper to win; Kane (2026) is England's first winner since Owen (2001); Spain's 4 include Argentine-born Di Stefano and Italy's 5 include Argentine-born Sivori.",
+    "Junk redirect aliases that aren't names of the country, from the shared country lexicon: \"Languages of cornwall\" (England, only this puzzle), \"Argentina.gob.ar\" (Argentina, 21 puzzles), \"German federal state\" (Germany, 25 puzzles; a German federal state is a Land such as Bavaria)."
   ]
 }
