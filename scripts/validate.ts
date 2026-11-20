@@ -17,7 +17,7 @@ const SHARED_FORMS = [
   "Congo",
   "Congolese",
 ];
-import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledForms, otherNamespace, placeholderName } from "./aliases";
+import { bareWord, blockedAlias, companySuffix, gluedAlias, junkRedirect, mangledForms, otherNamespace, placeholderName } from "./aliases";
 import { citysCountries, countryOf, DIVISIONS, isContinent, MAJOR_CITIES, UNIVERSES, whereIs, type Where } from "./gazetteer";
 import { KNOWN_DIR, NOT_PUZZLES } from "./lexicon";
 import { TOPICS, type Topic } from "./topics";
@@ -457,7 +457,13 @@ export function checkPuzzle(p: Puzzle, file: string, topic: Topic | undefined = 
     for (const a of e.aliases) {
       const na = normalize(a);
       if (na.replace(/[^a-z0-9]/g, "").length < 2) err(`${where} "${e.name}": alias "${a}" shorter than 2 letters`);
+      // " Inc." on Apple made "inc" score #1 on brands (list judge, Nov 20), as it had on market-cap-peak.
+      if (companySuffix(a)) err(`${where} "${e.name}": alias "${a}" is only a company suffix`);
     }
+  }
+  // A topic's aliases for a name that is no entry never ship: a renamed or dropped row, or a typo in topics.ts.
+  for (const name of Object.keys(topic?.aliases ?? {})) {
+    if (!byName.has(normalize(name))) warn(`topics.ts gives aliases for "${name}", which is no entry`);
   }
 
   // Shared aliases are groups ("Did you mean A or B?"); a big group means the alias is too generic.

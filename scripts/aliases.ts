@@ -141,6 +141,22 @@ export function blockedAlias(alias: string, names: string[]): boolean {
 }
 const BLOCKED = new Set(BLOCKED_ALIASES.map(normalize));
 
+/** Company suffixes written as such: "Inc.", "Corp.", "Ltd", "LLC", "plc", "GmbH", "& Co.". */
+const COMPANY_SUFFIX = /^[\s,]*(?:inc|incorporated|corp|corporation|ltd|limited|llc|l\.l\.c|plc|gmbh|(?:&|and)\s*co)\.?[\s.]*$/i;
+/** "Co." and "Co", but not "CO" (Colorado's postal code). */
+const CO_SUFFIX = /^[\s,]*(?:Co\.?|co\.)\s*$/;
+
+/**
+ * An alias that is only a company suffix (" Inc.", "Corp.", "Ltd.", "LLC", "Co."): no name of anything, yet typing
+ * "inc" scored #1 Apple on brands (list judge, Nov 20; market-cap-peak had it before). A cell's line break or a logo
+ * leaves one behind, on any list: Apple's redirect is " Inc." after its logo character, which normalize() drops too.
+ * Symbols and codes written otherwise stay: "CO" (Colorado), "Ag" (silver).
+ */
+export function companySuffix(alias: string): boolean {
+  const text = alias.replace(/[^\p{L}\p{N}\s.,&]/gu, "");
+  return COMPANY_SUFFIX.test(text) || CO_SUFFIX.test(text);
+}
+
 /** A web address: "Dallascowboys.com", "Www.britishmuseum.org", ".bnpparibas". Names on most lists, not on websites. */
 export const WEB_ADDRESS = /^(www\.|\.)|\.(com|org|net|gov|edu|co\.uk|io|tv|sucks|info)$/i;
 
@@ -407,6 +423,10 @@ export const COUNTRY_JUNK = [
   "Denmark.dk", "Second Costa Rican Republic", "East Luxembourg",
   // San Marino ranked on life-expectancy-countries (Nov 13): an event of 1739-40.
   "Liberation from the Alberoni Occupation",
+  // coldest-countries' judge (Nov 20): a storm, a boxing team, a region, a misspelling; Kyrgyzstan's village councils
+  // ("aiyl" alone gave Kyrgyzstan); an old name for a region of Iran on Tajikistan.
+  "Mongolian cyclone", "Mongolia national amateur boxing athletes", "Western Mongolia", "Mohron ync", "Aiyl okmotu",
+  "Ayıl ökmötü", "Ayil ökmötü", "Okmotu", "Aiyl", "North Persia",
 ];
 
 let english: Set<string> | undefined;
