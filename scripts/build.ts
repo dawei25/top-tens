@@ -96,16 +96,22 @@ type BuiltEntry = Entry & { country?: string | string[] };
 /**
  * The countries a cell names, one per line, as the countries universe names them: "Republic of Ireland" is Ireland,
  * "Danish Realm" Denmark, "Timor-Leste" East Timor. Asides ("(Kingdom of Denmark)") and unknown names are left out;
- * the unknown ones are listed for gazetteer.ts or COUNTRY_FORMS.
+ * the unknown ones are listed for gazetteer.ts or COUNTRY_FORMS. A line that is no country's name may list several,
+ * as the population table writes Borneo's: "Indonesia (Kalimantan), Brunei, Malaysia", "Indonesia and East Timor".
  */
 export function cellCountries(cell: Pick<Cell, "lines" | "text"> | undefined, unknown?: Set<string>): string[] {
   const out: string[] = [];
   for (const line of cell?.lines.length ? cell.lines : [cell?.text ?? ""]) {
     const name = cleanName(line);
     if (!name) continue;
-    const c = countryOf(name)?.name;
-    if (!c) unknown?.add(name);
-    else if (!out.includes(c)) out.push(c);
+    // Commas first, then "and" inside a part that is no country ("Trinidad and Tobago" stays whole).
+    const split = (s: string, by: RegExp) => (countryOf(s) ? [s] : s.split(by).filter(Boolean));
+    const parts = split(name, /\s*,\s*/).flatMap((p) => split(p, /\s+and\s+/));
+    for (const part of parts) {
+      const c = countryOf(part)?.name;
+      if (!c) unknown?.add(part);
+      else if (!out.includes(c)) out.push(c);
+    }
   }
   return out;
 }
@@ -463,8 +469,9 @@ export async function readRows(topic: Topic): Promise<Row[]> {
             v = alt;
           }
         }
-        // A count of nothing (a team with no titles) ranks nothing; the universe still accepts the name.
-        if (!v || (v.value === 0 && !topic.lowerIsBetter)) {
+        // A count of nothing (a team with no titles) ranks nothing; the universe still accepts the name. On a scale
+        // that goes below zero (`signed`) a zero is a reading like any other: Singapore's 0 m ranks above Baku's −28.
+        if (!v || (v.value === 0 && !topic.lowerIsBetter && !topic.signed)) {
           if (!v) unranked();
           // The Padres' "0": a guess shows it (judge, cycle 6), but a count of nothing never scores in Blitz. A "0.00"
           // is a figure too small to print (the Faroe Islands' CO2), not a zero: no figure beats a wrong one.
