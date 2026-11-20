@@ -27,6 +27,19 @@ after(async () => {
 
 const focused = (page) => page.evaluate(() => document.activeElement?.dataset.testid ?? document.activeElement?.tagName);
 const outbox = async (page) => (await page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? "null"), OUTBOX))?.pending ?? [];
+/**
+ * The outbox once a sent note has left it, waiting up to 5 s: the send is recorded before the client clears its copy,
+ * and a fixed pause missed that under a full verify's load (Nov 20). Still fails when the note never leaves.
+ */
+const outboxAfterSend = async (page) => {
+  const end = Date.now() + 5000;
+  let pending = await outbox(page);
+  while (pending.length && Date.now() < end) {
+    await new Promise((r) => setTimeout(r, 50));
+    pending = await outbox(page);
+  }
+  return pending;
+};
 /** Whether the element is wholly on screen. */
 const inView = (locator) =>
   locator.evaluate((el) => {
@@ -153,8 +166,7 @@ test("a note on a list's results: open, type, Enter is a new line, Escape closes
   assert.deepEqual(Object.keys(calls.feedback[0]).sort(), ["p_client_id", "p_list_id", "p_mode", "p_rating", "p_text"]);
   // The thanks takes the key's place; nothing is left waiting, and the note is in no save.
   assert.equal(await key.count(), 0);
-  await settle();
-  assert.deepEqual(await outbox(page), []);
+  assert.deepEqual(await outboxAfterSend(page), []);
   const saved = await page.evaluate(() => localStorage.getItem("top-tens:v1"));
   assert.ok(!saved.includes("national park"), "the note isn't kept in the save");
   await ctx.close();
@@ -262,8 +274,7 @@ test("offline, a note waits in its outbox, says so, and goes when the connection
   await ctx.setOffline(false);
   await until(() => calls.feedback.length === 1);
   assert.deepEqual(calls.feedback[0], { p_list_id: "mountains", p_mode: "list", p_rating: null, p_text: "sent from a tunnel", p_client_id: id });
-  await settle();
-  assert.deepEqual(await outbox(page), []);
+  assert.deepEqual(await outboxAfterSend(page), []);
 
   // The request never answered (the browser thinks it's online): the note waits through a reload and goes after it.
   await page.route(RPC, (route) => route.abort("internetdisconnected"));

@@ -4852,7 +4852,6 @@ export const TOPICS: Topic[] = [
   },
   {
     id: "forest-countries",
-    debut: true,
     category: "Geography",
     title: "Countries with the most forest",
     noun: "countries",
@@ -4907,7 +4906,6 @@ export const TOPICS: Topic[] = [
   },
   {
     id: "world-cup-wins",
-    debut: true,
     category: "Sports",
     // Matches won, not titles: Brazil's five titles tie with nothing, its 79 wins lead.
     title: "National teams with the most World Cup match wins",
@@ -4942,7 +4940,6 @@ export const TOPICS: Topic[] = [
   },
   {
     id: "car-countries",
-    debut: true,
     category: "Business",
     title: "Countries that build the most vehicles (2025)",
     noun: "countries",

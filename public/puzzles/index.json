@@ -734,8 +734,7 @@
   "id": "forest-countries",
   "title": "Countries with the most forest",
   "category": "Geography",
-  "blitz": true,
-  "debut": true
+  "blitz": true
  },
  {
   "id": "elements-crust",
@@ -748,15 +747,13 @@
   "id": "world-cup-wins",
   "title": "National teams with the most World Cup match wins",
   "category": "Sports",
-  "blitz": true,
-  "debut": true
+  "blitz": true
  },
  {
   "id": "car-countries",
   "title": "Countries that build the most vehicles (2025)",
   "category": "Business",
-  "blitz": true,
-  "debut": true
+  "blitz": true
  },
  {
   "id": "gold-reserves",

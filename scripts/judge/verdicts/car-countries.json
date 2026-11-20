@@ -1,43 +1,34 @@
 {
   "id": "car-countries",
-  "by": "builder",
   "judgedAt": "2026-11-20",
   "decision": "free-play",
-  "alsoBlitz": false,
-  "priority": 5,
+  "alsoBlitz": true,
+  "priority": 3,
   "scores": {
     "recognizability": 5,
     "curve": 2,
     "fairness": 4,
-    "data": 5,
+    "data": 4,
     "fun": 3,
-    "blitzDepth": 0
+    "blitzDepth": 5
   },
-  "casual": {
-    "found": 10,
-    "livesLost": 4,
-    "guesses": 14
-  },
-  "fan": {
-    "found": 10,
-    "livesLost": 1,
-    "guesses": 11
-  },
-  "blitzCasual": null,
-  "difficulty": 2,
-  "tags": [
-    "business",
-    "cars",
-    "industry"
-  ],
+  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 12 },
+  "blitzCasual": { "scored": 21, "named": 23 },
+  "difficulty": 1,
+  "tags": ["business", "cars", "geography"],
   "audience": "anyone",
-  "summary": "OICA's 2025 vehicle production: China builds over three times the US, but the rest are the car countries players expect, so a casual player gets most of them.",
+  "summary": "Too easy for Today's list: the top 10 is nearly the ten countries everyone names, so a casual player finds 9 or 10. A great Blitz, and the misses (Italy #26, UK #19) are the fun part.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). Two casual orders found 10; the UK (#19), Italy (#26), Canada (#14) and Sweden (#31) are the misses.",
-    "Close at the bottom: France 1,463,991 (#10), Thailand 1,455,569 (#11). Countries without a 2025 figure show their 2024 or 2020 one.",
-    "Likely too easy for Today's list; car-makers and car-models are already in the bank."
+    "Casual found 9 (out of lives on Italy, UK, Canada, Sweden, Russia); a brand-led casual order found all 10 with a life left. The crowd average lands about 6.4 to 6.7, over the 5 to 6 target.",
+    "Curve is flat: China, US, Japan, Germany and South Korea are gimmes, India, Mexico, France and Brazil come next, and Spain is the only stretch. No answer surprises once revealed.",
+    "Too close in kind to car-makers (Nov 24) and car-models (Dec 2) for the week of Dec 7-13: a third car list in under three weeks, and car-makers' top 10 (Toyota, VW, Hyundai, GM, BYD) is a map of this one.",
+    "Data matches Wikipedia's 2025 column exactly. #10 to #12 are close (France 1,463,991, Thailand 1,455,569, Czech Republic 1,452,776) but not tied. Every top-10 fact is sourced, and every casual miss shows its rank and figure.",
+    "Blitz: 21 of 23 quick names scored. Only Australia and Vietnam missed, having no 2025 figure."
   ],
   "fixes": [
-    "If a judge agrees on free play, drop its `debut` flag in topics.ts, or it waits out of random play for good."
+    "Sent to free play: drop `debut: true` from car-countries in scripts/topics.ts, or it waits out of random play for good.",
+    "\"car\" (and \"c.a.r.\") matches Central African Republic through its \"C.A.R.\" alias and costs a life, with no figure, on a car list. Drop that alias on this topic, or make the subject word free.",
+    "Dissolved states cost a life with no figure on a 2025 ranking: Soviet Union (\"ussr\"), East Germany, Czechoslovakia, Yugoslavia. Make them free, as West Germany already is."
   ]
 }

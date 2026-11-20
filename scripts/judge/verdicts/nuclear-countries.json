@@ -1,40 +1,27 @@
 {
   "id": "nuclear-countries",
-  "by": "builder",
   "judgedAt": "2026-11-20",
   "decision": "daily-list",
-  "alsoBlitz": false,
+  "alsoBlitz": true,
   "priority": 7,
-  "scores": {
-    "recognizability": 4,
-    "curve": 4,
-    "fairness": 3,
-    "data": 5,
-    "fun": 4,
-    "blitzDepth": 0
-  },
-  "casual": {
-    "found": 7,
-    "livesLost": 5,
-    "guesses": 13
-  },
-  "fan": {
-    "found": 10,
-    "livesLost": 2,
-    "guesses": 12
-  },
-  "blitzCasual": null,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 4 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
+  "blitzCasual": { "scored": 17, "named": 22 },
   "difficulty": 3,
-  "tags": [
-    "science",
-    "energy",
-    "nuclear"
-  ],
+  "tags": ["science", "energy", "nuclear"],
   "audience": "news followers",
-  "summary": "The US, France, Russia, China and Japan are easy; players who think of weapons (Iran, North Korea, Israel, Pakistan) lose lives, and Germany shows it shut its last reactor in 2023.",
+  "summary": "Ten household countries with a real curve: the US, China, France, Russia and Japan come fast, Canada and South Korea are the stretch. Weapons guesses and Germany burn lives quickly, so a casual player stops around 8.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). Casual orders found 7 (thinking of nuclear weapons) and 10 (thinking of power plants).",
-    "Reactors in use, 2026: Japan's 15 leave out its 18 suspended since Fukushima. Japan and Ukraine tie on 15 at #8 and #9; #10 the UK (9), #11 Spain (7). Countries that shut theirs show when (Germany, Italy, Taiwan, Lithuania, Kazakhstan)."
+    "A casual found 8 in 13 guesses (all but Canada and South Korea) and ran out of lives on Germany, Iran, North Korea, Israel and Pakistan. A fan found all 10 in 11 guesses, one life on Sweden (#12). Crowd average about 5.9, on target.",
+    "The prompt steers to power (\"nuclear power reactors in use\") but the title only says \"nuclear reactors\", and weapons guesses still cost lives. Iran (#28, 1) and Pakistan (#12, 6) teach something, and Germany's \"none since its phase-out in 2023\" is a good reveal. North Korea and Israel only say \"outside the top 28\", which sounds like a near miss for countries with no power reactors at all.",
+    "Figures match the source table and #10 UK (9) vs #11 Spain (7) is clean. Japan's 15 leave out 18 suspended reactors, but Ukraine's 15 include Zaporizhzhia's six, shut down since Russia seized it. That reorders #8 to #10 but changes no member. Distinct from oil-production and co2-emissions (France #3, Ukraine, South Korea)."
   ],
-  "fixes": []
+  "fixes": [
+    "Add notes for the famous countries with no power reactors that players will type: North Korea, Israel, Australia, Saudi Arabia get \"none\". Today each reads \"North Korea is outside the top 28. Lost a life.\" with no figure.",
+    "Title: \"Countries with the most nuclear power reactors\" (46 characters). The h1 is read first, and the steer away from weapons only sits in the caption today.",
+    "Ukraine's fact: say its 15 include Zaporizhzhia's six, Europe's largest plant, shut down since Russian forces seized it in March 2022 (Nuclear power in Ukraine: \"occupied and claimed by Russia and shutdown\"). Japan's idle reactors don't count, and an informed player will ask.",
+    "Japan's fact says only 13 ran again by late 2024, next to a shown 15: use the source table's 15 in use and 18 suspended.",
+    "The topic renames Türkiye to Turkey, but the build still shows \"Türkiye\" (the universe's name, matched from the table's \"Turkey\"): the rename doesn't take."
+  ]
 }

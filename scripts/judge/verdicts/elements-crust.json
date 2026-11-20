@@ -1,41 +1,45 @@
 {
   "id": "elements-crust",
-  "by": "builder",
   "judgedAt": "2026-11-20",
   "decision": "daily-list",
-  "alsoBlitz": false,
-  "priority": 6,
+  "alsoBlitz": true,
+  "priority": 7,
   "scores": {
-    "recognizability": 4,
+    "recognizability": 5,
     "curve": 4,
-    "fairness": 4,
+    "fairness": 3,
     "data": 4,
     "fun": 4,
-    "blitzDepth": 0
+    "blitzDepth": 5
   },
   "casual": {
-    "found": 7,
-    "livesLost": 5,
-    "guesses": 13
-  },
-  "fan": {
     "found": 9,
-    "livesLost": 3,
+    "livesLost": 5,
     "guesses": 14
   },
-  "blitzCasual": null,
+  "fan": {
+    "found": 10,
+    "livesLost": 0,
+    "guesses": 10
+  },
+  "blitzCasual": {
+    "scored": 20,
+    "named": 20
+  },
   "difficulty": 3,
-  "tags": [
-    "science",
-    "chemistry",
-    "earth"
-  ],
-  "audience": "curious minds",
-  "summary": "Oxygen, iron, silicon and aluminium are gettable, but carbon (#17), nitrogen (#34) and gold (#75) are the classic wrong guesses, each showing its ppm.",
+  "tags": ["science", "chemistry", "geology"],
+  "audience": "curious players",
+  "summary": "Ten elements everyone has heard of, plus a good trap: carbon, nitrogen and gold feel right and cost lives, each with a figure that teaches. Players who think \"rocks\" do well.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 7.",
-    "CRC figures for the continental crust, 94 elements. The ten trace elements whose figures are powers of ten (xenon, radium, polonium...) and plutonium and neptunium are answers that read \"a trace, under 0.0001 ppm\"; the table's text loses their exponents. Lab-made elements are free.",
-    "Figures show as ppm (461,000 ppm for oxygen); the share in percent would read easier but isn't a column of its own."
+    "Casual (written before reading the key) found 9 but lost all 5 lives, on carbon, nitrogen, copper, gold and nickel. The same player typing silver after gold stops at 6, so 9 is the top of the range, not a sign the list is easy. Crowd average about 5 to 6.3.",
+    "Fan gets 10/10 in 10: the textbook eight (O, Si, Al, Fe, Ca, Na, Mg, K), then titanium and hydrogen, which are fair stretches.",
+    "Fairness is 3: every lost life is a famous element (life, air, jewelry, mining). Each miss shows its figure (carbon #17 at 200 ppm, gold #75 at 0.004 ppm), so you learn something, but lives go fast.",
+    "Data matches the page (CRC continental crust, 94 elements). Aluminum and aluminium, two-letter symbols, misspellings and compound names (\"silicon dioxide\") all work. Category words (metal, rock, salt, air), lab-made and fictional elements are free.",
+    "Blitz: a casual names 20 elements in 90 s and all 20 score."
   ],
-  "fixes": []
+  "fixes": [
+    "Not blocking. Show percent, not ppm: the page's Abundance cell already has it (\"461,000 (46.1%)\"). \"Oxygen 46.1%\" and \"Carbon 0.02%\" read at a glance, while \"461,000 ppm\" doesn't. Keep ppm only where the percent needs an exponent (gold 0.004 ppm).",
+    "Not blocking. Junk alias \"Nitrium\" on Sodium: typing \"nitrium\" gives #6 Sodium as typed, with no correction step. Add it to junkAliases. Also drop the redirect phrases that aren't names: \"Aluminium poisoning\", \"Aluminium free\", \"Aluminum-free\", \"Al-free\", \"Properties of alminum\", \"Oxygen partial pressure\", \"ATC code V03AN01\", \"ATCvet code QV03AN01\", \"Hydrogen position in periodic table\", \"Potassium in nutrition and human health\", \"Applications of titanium and titanium alloys\", \"Titanium bolts\", \"Titanium jewelry\", \"Calcium cyclopentadienylide\", \"Calcium cyclopentadienyl\". In replay, none of their single words (free, jewelry, pressure, poisoning) gave an answer.",
+    "Optional. The page ranks the trace elements #83 (xenon) to #94 (neptunium) in its Most to Least column. \"Radon is #88, a trace\" reads better than \"outside the ranking\" for radon and plutonium, which people do guess."
+  ]
 }

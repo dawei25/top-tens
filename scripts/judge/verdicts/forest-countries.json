@@ -1,40 +1,44 @@
 {
   "id": "forest-countries",
-  "by": "builder",
   "judgedAt": "2026-11-20",
-  "decision": "daily-list",
-  "alsoBlitz": false,
-  "priority": 6,
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 3,
   "scores": {
-    "recognizability": 4,
+    "recognizability": 5,
     "curve": 3,
     "fairness": 4,
-    "data": 5,
+    "data": 4,
     "fun": 3,
-    "blitzDepth": 0
+    "blitzDepth": 5
   },
   "casual": {
-    "found": 8,
-    "livesLost": 5,
-    "guesses": 14
+    "found": 9,
+    "livesLost": 3,
+    "guesses": 13
   },
   "fan": {
     "found": 10,
-    "livesLost": 2,
-    "guesses": 13
+    "livesLost": 0,
+    "guesses": 10
   },
-  "blitzCasual": null,
+  "blitzCasual": {
+    "scored": 24,
+    "named": 24
+  },
   "difficulty": 2,
-  "tags": [
-    "geography",
-    "nature",
-    "forests"
-  ],
+  "tags": ["geography", "countries", "nature"],
   "audience": "anyone",
-  "summary": "The big countries come first (Russia, Brazil, Canada, the US, China, Australia); the Nordic guesses cost lives, and DR Congo, India and Peru are the finds.",
+  "summary": "Clean data and ten famous countries, but too easy for Today's list: the biggest countries plus the rainforest ones solve it, and the casual player found 9. Good free play and Blitz.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). Casual orders found 8 and 9; Sweden (#21), Finland (#26) and Norway (#50) are the natural misses.",
-    "FAO 2022, every country and territory with its forest area; ranked by area, not by share of land (the prompt says so: Suriname and Guyana lead by share)."
+    "Casual found 9 of 10 in 13 guesses and lost 3 lives (Sweden #21, Finland #26, Colombia #13), with 2 lives left and \"congo\" still offering both Congos, so 10 was likely. The fan found all 10 in 10 guesses for no lives. The bar is 6 to 8; at 9 the crowd estimate averages about 6.3, above the 5 to 6 target.",
+    "Why it is easy: 7 of the 10 are also the largest countries by area (Russia, Canada, China, the US, Brazil, Australia, India), and the prompt's \"by area\" points players right at them. DR Congo, Indonesia and Peru are the rainforest countries a player tries next. A player who leads with Sweden, Finland and Norway still found 6.",
+    "Against the closest list, countries-area: the same seven names, but not weaker. Rainforests replace Kazakhstan, Algeria and Argentina, and Sweden at only #21 is a real surprise, so not a reject.",
+    "Data: FAO 2022 for every country; #10 Peru (719,847 km²) is clear of #11 Angola (654,973). All ten facts are on topic and sourced, and every country miss shows its km². Subject words (forest, rainforest, amazon, siberia, scandinavia, borneo) are free.",
+    "Blitz: all 24 casual names scored."
   ],
-  "fixes": []
+  "fixes": [
+    "Name the FAO row \"Congo\" as \"Republic of the Congo\", as countries-area does. Now \"the congo\" goes straight to it and costs a life (#28), and \"congo\" offers \"Congo / Democratic Republic of the Congo\" with the Republic first, while a player thinking of the Congo rainforest means #7. Guard: on forest-countries, \"congo\" and \"the congo\" offer DR Congo first and never cost a life (aliases.test.ts). The same bare \"Congo\" sends \"congo\" straight to the Republic on co2-emissions, countries-gdp, happiest-countries and world-heritage-countries.",
+    "Debut list sent to free play: remove `debut: true` from forest-countries in scripts/topics.ts (and its built flag), or it waits out of random play for good."
+  ]
 }

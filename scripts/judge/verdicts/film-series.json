@@ -1,40 +1,29 @@
 {
   "id": "film-series",
-  "by": "builder",
   "judgedAt": "2026-11-20",
   "decision": "daily-list",
-  "alsoBlitz": false,
-  "priority": 7,
-  "scores": {
-    "recognizability": 5,
-    "curve": 4,
-    "fairness": 3,
-    "data": 4,
-    "fun": 4,
-    "blitzDepth": 0
-  },
-  "casual": {
-    "found": 8,
-    "livesLost": 5,
-    "guesses": 13
-  },
-  "fan": {
-    "found": 10,
-    "livesLost": 2,
-    "guesses": 13
-  },
-  "blitzCasual": null,
+  "alsoBlitz": true,
+  "priority": 6,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": { "scored": 19, "named": 20 },
   "difficulty": 2,
-  "tags": [
-    "entertainment",
-    "film"
-  ],
+  "tags": ["entertainment", "movies", "box office", "franchises"],
   "audience": "anyone",
-  "summary": "Marvel, Star Wars, Harry Potter and Bond come fast; Jurassic Park (#11), Avatar (#12) and Lord of the Rings (#14) are the painful misses.",
+  "summary": "Marvel, Star Wars, Harry Potter, Bond and Fast & Furious come fast, then Jurassic Park (#11), Avatar (#12) and Lord of the Rings (#14) eat lives. A casual player finds 7. Run it Dec 12 or 13, a week after us-box-office, not earlier.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 8.",
-    "The page's own franchise ranking, 20 deep, overlaps by design: the Avengers (#5) are inside the MCU (#1), the X-Men total takes in Deadpool, Batman's the Joker films. Sub-series reach their parent (harry potter: Wizarding World, deadpool: X-Men).",
-    "Famous series below #20 show a figure: animated ones from the animated films page's franchise table, live-action ones from their own box office tables (cited). Men in Black, Ghostbusters, Die Hard and Godzilla have no total and are free."
+    "Casual found 7 and ran out of lives at guess 12 on Jurassic Park #11, Avatar #12, Middle-earth #14, Transformers #15 and Pirates #17; Avengers, X-Men and DC never came to mind. The fan found all 10 with 3 lives lost (Jurassic World, Avatar, Lord of the Rings). Crowd average about 5.5.",
+    "Six of the ten are superhero series, and the source counts a series inside a bigger one on its own (Avengers in the MCU, Deadpool in X-Men, Joker in Batman). The MCU fact explains it, and Avengers at #5 with four films is a good reveal, but every famous non-superhero franchise costs a life. Each miss shows its rank and figure.",
+    "The ranking matches the page's top 20 exactly, and the order holds through Dec 13: Batman leads Jurassic Park by $226M, and nothing in these series opens before Avengers: Doomsday on Dec 18.",
+    "Close in kind to us-box-office (Dec 5): the same blockbusters counted by series instead of by film, with Spider-Man, Star Wars and the Avengers in both top 10s. Two to five days later (Dec 7-10) is too close; Dec 12 or 13 is fine. animated-films (Nov 23) is far enough and shares no top-10 answer.",
+    "\"dc\" offers Batman or the DCEU (an intent.ts group), like a car make on car-models: accepted. Blitz: a casual names 20 in 90 s and 19 score."
   ],
-  "fixes": []
+  "fixes": [
+    "James Bond (#6): \"007\" reads \"isn't an answer for this list\". topics.ts lists it, but usableAlias (scripts/build.ts:181) drops aliases made only of digits. Add it as a film-series alias in scripts/intent.ts (intent aliases skip that rule; \"007\" works on media-franchises), with an aliases.test.ts check that \"007\" reaches James Bond.",
+    "topics.ts `aliases` only reach ranked rows (scripts/build.ts:1415), so the animated `also` rows' declared aliases never ship: \"ne zha\", \"nezha\", \"super mario bros\", \"finding dory\", \"zootropolis\", \"httyd\" and \"case closed\" read as not answers (free, so minor). Move them to intent.ts, or apply topic aliases to unranked rows too, with a validate.ts warning when a declared alias names no entry.",
+    "Spider-Man (#2): add \"Venom\". The page's Spider-Man total includes Sony's Spider-Man Universe (the three Venom films, Morbius, Madame Web, Kraven), just as \"deadpool\" reaches X-Men; \"venom\" now reads as not an answer.",
+    "Facts: the X-Men fact (Dougray Scott) doesn't name Deadpool or Wolverine, and the Batman fact (1943 serial) doesn't name the Joker films, though players reach those entries by typing those names. Use facts that name them, e.g. Deadpool & Wolverine ($1.34B) as X-Men's top film, and Joker (2019, $1.07B) counted in Batman.",
+    "The Hunger Games' cited $3,325,946,050 goes stale once Sunrise on the Reaping (out Nov 20) earns, and it will likely pass Twilight ($3.37B) into the page's top 20: refresh it in the next rebuild. Rebuild before any rerun after Avengers: Doomsday (Dec 18)."
+  ]
 }

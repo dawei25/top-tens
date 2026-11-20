@@ -1,40 +1,31 @@
 {
   "id": "brands",
-  "by": "builder",
   "judgedAt": "2026-11-20",
   "decision": "daily-list",
-  "alsoBlitz": false,
+  "alsoBlitz": true,
   "priority": 7,
-  "scores": {
-    "recognizability": 5,
-    "curve": 4,
-    "fairness": 3,
-    "data": 4,
-    "fun": 4,
-    "blitzDepth": 0
-  },
-  "casual": {
-    "found": 7,
-    "livesLost": 5,
-    "guesses": 12
-  },
-  "fan": {
-    "found": 10,
-    "livesLost": 2,
-    "guesses": 14
-  },
-  "blitzCasual": null,
+  "scores": { "recognizability": 5, "curve": 4, "fairness": 3, "data": 4, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 8, "livesLost": 5, "guesses": 13 },
+  "fan": { "found": 10, "livesLost": 4, "guesses": 14 },
+  "blitzCasual": { "scored": 22, "named": 26 },
   "difficulty": 2,
-  "tags": [
-    "business",
-    "brands"
-  ],
+  "tags": ["business", "brands", "companies"],
   "audience": "anyone",
-  "summary": "Apple, Google, Amazon, Microsoft and Coca-Cola come fast; Instagram at #8 and Mercedes-Benz at #10 surprise, while Nike, Facebook, Tesla and Disney cost lives.",
+  "summary": "Every answer is a household name. Big tech, Coke and McDonald's come fast, and Instagram at #8 and Mercedes at #10 decide the score. Nike, Tesla, Disney and Facebook all miss the top 10 and use up lives, which is the fun of it.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). Two casual orders found 7 and 8.",
-    "Interbrand's Best Global Brands 2025 (100 brands). Brands it leaves out show their 2026 Kantar BrandZ or Brand Finance rank (Walmart #13 in Kantar); Ford, Rolex and Red Bull are in none and read as not in this ranking.",
-    "Meta and Alphabet are free (parent companies, not the ranked brands)."
+    "Casual found 8 (Apple, Google, Amazon, Microsoft, Coca-Cola, McDonald's, Samsung, Toyota) before Nike #23, Tesla #25, Facebook #18, Disney #17 and Netflix #28 used up the lives. The same guesses with the misses earlier found 6. Estimated crowd average about 5 to 6, on target",
+    "Fan found 10, with Mercedes as #9 and Instagram last, after BMW #14, Nike, Disney and Louis Vuitton #12",
+    "Fairness is a 3: every famous brand outside the top 10 costs a life, and #17 to #28 don't feel like near misses. But each miss shows its rank and value, and Nike or Tesla out of the top 10 is a real surprise",
+    "The top 10 matches Wikipedia's Interbrand 2025 table (the page was fetched today and has no newer Interbrand table). Interbrand is a better choice than Kantar or Brand Finance, whose top 10s include Tencent, Oracle and State Grid",
+    "Subject and category words give nothing away, and spellings, nicknames and typos all resolve (coke, maccas, insta, ig, mercedes, benz). Meta, Alphabet, Ford, Rolex, Red Bull and product names (iphone, windows, aws, lexus) are free",
+    "Shares Apple, Microsoft, Amazon and Google with market-cap-peak (Dec 4) and Toyota and Mercedes with car-models (Dec 2): run it late in the week of Dec 7-13, not on Monday",
+    "Blitz: 22 of 26 fast casual names score. Walmart, TikTok and Starbucks only show a Kantar rank, so they don't score"
   ],
-  "fixes": []
+  "fixes": [
+    "Apple has the alias ' Inc.' (leading space), so typing 'inc' scores #1 Apple. This topic's junkAliases misses it, the same bug market-cap-peak had. Drop it in the pipeline for every topic: any alias that is only a company suffix (Inc., Corp., Ltd., LLC, Co.), with a validate.ts check",
+    "Display names from the Kantar and Brand Finance tables: rename 'XBOX' to 'Xbox' and 'VMWare' to 'VMware', and Interbrand's 'eBay' (built as 'EBay') back to 'eBay'",
+    "Rename Brand Finance's 'Allianz Group' to 'Allianz' so it merges with Interbrand's Allianz #27. It is a second, unranked entry now",
+    "'sprite' is offered as Stripe (the game asks first). Add Sprite to knownNames so it's free, like Fanta and Diet Coke",
+    "Minor: ranks 11+ come from the rounded value, so source ties break differently: Facebook shows #18 (Interbrand #19), YouTube #12 (#13), Nintendo and Ferrari #52 (#53, #54). Use the table's Rank column if the pipeline allows it"
+  ]
 }

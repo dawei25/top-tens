@@ -1,17 +1,16 @@
 {
   "id": "world-cup-wins",
-  "by": "builder",
   "judgedAt": "2026-11-20",
-  "decision": "free-play",
-  "alsoBlitz": false,
-  "priority": 5,
+  "decision": "daily-blitz",
+  "alsoBlitz": true,
+  "priority": 4,
   "scores": {
     "recognizability": 5,
     "curve": 2,
     "fairness": 4,
     "data": 5,
     "fun": 3,
-    "blitzDepth": 0
+    "blitzDepth": 5
   },
   "casual": {
     "found": 10,
@@ -20,24 +19,27 @@
   },
   "fan": {
     "found": 10,
-    "livesLost": 1,
-    "guesses": 11
+    "livesLost": 0,
+    "guesses": 10
   },
-  "blitzCasual": null,
+  "blitzCasual": {
+    "scored": 26,
+    "named": 28
+  },
   "difficulty": 1,
   "tags": [
     "sports",
-    "football",
+    "soccer",
     "world cup"
   ],
-  "audience": "football fans",
-  "summary": "Fresh after the 2026 World Cup, but the top 10 is the football powers almost everyone names, so a casual player finds all 10.",
+  "audience": "anyone who has watched a World Cup",
+  "summary": "Too easy for Today's list: eight of the top 10 are the football powers anyone names, so a casual player finds all 10 and a fan sweeps it. Clean, current data and a deep pool of countries make it a great Blitz.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). Two casual orders found 10; the USA (#21), Mexico (#11) and Portugal (#13) are the misses.",
-    "Matches won, through 2026 (FIFA credits Germany with West Germany's record, Russia with the Soviet Union's). England, Scotland, Wales and Northern Ireland are teams of their own; \"uk\" offers them. Countries that never played say so.",
-    "Likely too easy for Today's list; a judge may still like it, or as a Blitz."
+    "Casual found 10/10 in 14 guesses but lost 4 lives on Portugal (#13), USA (#21), Mexico (#11) and Croatia (#18), each showing its win count. A US player who barely follows soccer still found 7. The fan swept it in 10 guesses without losing a life, so there is no stretch answer and the curve is flat.",
+    "The data matches Wikipedia's all-time table through 2026, the year Spain won. West Germany, USSR and Yugoslavia go to their successors, 'czechoslovakia' offers both successors, the home nations are separate ('uk' asks about England) and countries that never played say so. Clubs, players and 'soccer' are all free.",
+    "Blitz: 26 of 28 quick names score, down to Wales and Canada. Only teams with no wins (Qatar, China) score nothing."
   ],
   "fixes": [
-    "If a judge agrees on free play, drop its `debut` flag in topics.ts, or it waits out of random play for good."
+    "Drop `debut: true` from world-cup-wins in scripts/topics.ts: judged too easy for Today's list, it would otherwise wait out of random play for good."
   ]
 }

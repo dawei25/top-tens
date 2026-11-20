@@ -1,40 +1,31 @@
 {
   "id": "gold-reserves",
-  "by": "builder",
   "judgedAt": "2026-11-20",
   "decision": "daily-list",
-  "alsoBlitz": false,
-  "priority": 6,
+  "alsoBlitz": true,
+  "priority": 7,
   "scores": {
-    "recognizability": 4,
-    "curve": 3,
-    "fairness": 4,
+    "recognizability": 5,
+    "curve": 4,
+    "fairness": 3,
     "data": 5,
     "fun": 4,
-    "blitzDepth": 0
+    "blitzDepth": 5
   },
-  "casual": {
-    "found": 9,
-    "livesLost": 4,
-    "guesses": 14
-  },
-  "fan": {
-    "found": 10,
-    "livesLost": 2,
-    "guesses": 12
-  },
-  "blitzCasual": null,
+  "casual": { "found": 8, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 10, "livesLost": 2, "guesses": 14 },
+  "blitzCasual": { "scored": 21, "named": 25 },
   "difficulty": 2,
-  "tags": [
-    "business",
-    "money",
-    "gold"
-  ],
+  "tags": ["business", "economics", "gold"],
   "audience": "news followers",
-  "summary": "The US, China, Russia and Switzerland come first; Italy, France and Poland are the surprises, and the UK, Saudi Arabia and South Africa cost lives.",
+  "summary": "The US, Germany, China, Russia and Switzerland come easily. Italy at #3, France above China and Poland at #10 are the surprises, and the UK, Saudi Arabia and the gold-mining countries cost lives.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 9, so it may be on the easy side.",
-    "World Gold Council figures as of Q3 2026 (top 50 countries); the IMF, the ECB and the BIS are no country and not answers. Canada, which holds no gold, costs a life with no figure."
+    "A casual player found 8 (the crowd average lands near 6, the top of the target). They lost all five lives on famous non-holders: the UK (#18), Saudi Arabia (#17), South Africa (#32), Canada and Australia (#42). Every miss teaches something.",
+    "Canada costing a life is fair: it holds next to no gold, and the game says \"Canada is outside the top 50\", which is true. The page has no figure for it, so nothing is being withheld.",
+    "The data matches the page's World Gold Council table for Q3 2026 exactly. The IMF, ECB, BIS and euro area are free, the aliases are the clean shared country set, and every top-10 fact is sourced and about the gold.",
+    "Not a weaker countries-gdp: the names overlap, but the order (Italy #3, Switzerland #7, Poland #10) and who misses out (the UK, Canada) are the game. Space it from other country-economy lists that week."
   ],
-  "fixes": []
+  "fixes": [
+    "Optional, not blocking: once the miss-note field exists (the tourism item in docs/REBUILD_QUEUE.md), give Canada a note from a Wikipedia source saying it sold off its gold reserves. It is the most common costly miss here that shows no figure."
+  ]
 }
