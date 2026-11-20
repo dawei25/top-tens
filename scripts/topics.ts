@@ -162,6 +162,11 @@ export interface Topic {
    */
   lowerIsBetter?: boolean;
   /**
+   * The figures can be below zero (temperatures in °C): a minus sign right before a cell's number counts, so Canada's
+   * "−4.03 °C" is −4.03, not 4.03. Elsewhere a dash there is no sign (scripts/build.ts `parseValue`).
+   */
+  signed?: boolean;
+  /**
    * Another column that says the same in another unit: a `value` cell that disagrees with it × `factor` by more
    * than 2% is replaced by the converted number (shown rounded). The US states' km² column has misread cells
    * ("382.936" for Nevada); their square miles × 2.589988 are right.
@@ -269,6 +274,11 @@ export interface Also {
   aliasCols?: (string | number)[];
   /** Only keep rows whose `col` cell matches, as on a topic. */
   where?: { col: string | number; match: RegExp };
+  /**
+   * Skip rows whose first column is not a rank, as on a topic: the animated franchises' table puts each franchise's
+   * sub-series (" | Minions series") and its films under it, unranked or ranked within it ("1 | Minions (2015)").
+   */
+  rankedOnly?: boolean;
   /** Names for these tables' rows, by the name the table gives: "Mercedes" is the pool's "Mercedes-Benz". */
   rename?: Record<string, string>;
   /**
@@ -457,6 +467,31 @@ const SLAM_NAMES: Record<string, string> = {
   "Margaret Smith Court": "Margaret Court",
   "Billie Jean Moffitt King": "Billie Jean King",
 };
+
+/**
+ * Elements in the crust only in traces, by the abundance table: xenon and the radioactive ones, whose figures the table
+ * writes as powers of ten (3×10⁻⁵ ppm and less), and plutonium and neptunium, with none.
+ */
+const CRUST_TRACES = [
+  "Xenon", "Protactinium", "Radium", "Actinium", "Polonium", "Radon", "Technetium", "Promethium", "Francium", "Astatine",
+  "Plutonium", "Neptunium",
+];
+
+/**
+ * The 84 men's teams that have played at a World Cup through 2026 (the records table's rows), by their names on
+ * world-cup-wins. Every other country shows that it never played there, instead of no figure.
+ */
+const WORLD_CUP_TEAMS = [
+  "Brazil", "Germany", "Argentina", "Italy", "France", "England", "Spain", "Netherlands", "Uruguay", "Belgium", "Mexico",
+  "Sweden", "Russia", "Portugal", "Serbia", "Switzerland", "Poland", "Croatia", "Hungary", "Austria", "United States",
+  "Slovakia", "Czech Republic", "Colombia", "Chile", "Denmark", "Paraguay", "South Korea", "Morocco", "Japan", "Romania",
+  "Costa Rica", "Ghana", "Norway", "Senegal", "Ecuador", "Nigeria", "Turkey", "Cameroon", "Scotland", "Australia", "Peru",
+  "Ivory Coast", "Algeria", "Saudi Arabia", "Bulgaria", "Iran", "South Africa", "Northern Ireland", "Tunisia",
+  "Republic of Ireland", "East Germany", "Greece", "Ukraine", "Bosnia and Herzegovina", "Canada", "Egypt", "Wales",
+  "Slovenia", "Cuba", "DR Congo", "North Korea", "Jamaica", "United Arab Emirates", "Angola", "Bolivia", "China",
+  "Cabo Verde", "Curacao", "Honduras", "Haiti", "Indonesia", "Israel", "Iraq", "Iceland", "Jordan", "Kuwait",
+  "New Zealand", "Panama", "Qatar", "El Salvador", "Togo", "Trinidad and Tobago", "Uzbekistan",
+];
 
 /** Famous accounts on the big social platforms, shared by the follower-count lists. */
 const CELEBRITIES: Also[] = [
@@ -4750,6 +4785,368 @@ export const TOPICS: Topic[] = [
       "Caloundra", "Maroochydore", "Mooloolaba", "Mandurah", "Penrith", "Ipswich", "Frankston", "Dandenong", "Wyong",
       "Mount Barker",
     ],
+  },
+  // Nov 20: candidates for Today's list on Sun Dec 6 and the week of Dec 7-13. Dropped before building: F1 drivers by
+  // wins (Clark and Lauda tie at #10 on 25), theme parks (the owner, Nov 8), airlines by passengers (the page ranks
+  // ten airline groups and stops), oil-producing countries (oil-production has it) and footballers' career goals
+  // (Irish League players #8 and #10, and the counts are disputed).
+  {
+    id: "brands",
+    debut: true,
+    category: "Business",
+    title: "Most valuable brands (Interbrand 2025)",
+    noun: "brands",
+    prompt: "Name the 10 most valuable brands in Interbrand's Best Global Brands 2025",
+    page: "List of most valuable brands",
+    // Interbrand's 2025 ranking (published October 2025), 100 brands. The page's other rankings (Kantar BrandZ, Brand
+    // Finance, both 2026) put Nvidia, Facebook, Tencent and State Grid in their top 10; Interbrand's is the one with
+    // the household names (Coca-Cola, Toyota, McDonald's, Mercedes-Benz) and the longest record.
+    tables: [2],
+    name: "Brand",
+    value: "Brand value",
+    metric: "Brand value (Interbrand, 2025)",
+    prefix: "$",
+    unit: " billion",
+    dataAsOf: "2025",
+    rename: {
+      "Apple Inc.": "Apple",
+      "Amazon.com": "Amazon",
+      NVIDIA: "Nvidia",
+      UNIQLO: "Uniqlo",
+      LEGO: "Lego",
+      adidas: "Adidas",
+      MasterCard: "Mastercard",
+      Monster: "Monster Energy",
+    },
+    // A brand Interbrand leaves out shows its rank in the 2026 Kantar or Brand Finance ranking: Walmart, TikTok,
+    // Starbucks, Alibaba.
+    also: [
+      { tables: [0], name: "Brand", rename: { "Apple Inc.": "Apple", "Visa Inc.": "Visa" }, dated: { rank: "Rank", label: "2026", source: "Kantar BrandZ" } },
+      { tables: [1], name: "Brand", rename: { "Amazon.com": "Amazon", "TikTok/Douyin": "TikTok" }, dated: { rank: "Rank", label: "2026", source: "Brand Finance" } },
+    ],
+    aliases: { "Mercedes-Benz": ["Mercedes", "Benz"], "Louis Vuitton": ["LV"], "L'Oréal Paris": ["L'Oréal", "Loreal"] },
+    // Redirects that are no name for the brand: people, products, slogans, ad campaigns, offices, a Nike award, and
+    // words a player types for something else ("sonic" was Amazon, "the keyword" Google).
+    junkAliases: [
+      "Sonic", "The Keyword", "Just Do It Award", "Katherine L. Adams", "Boycott Apple", "Directly Responsible Individual",
+      "Wearables, Home and Accessories", "Apple Wearables, Home and Accessories", "Spruce Technologies", "Raycer",
+      "Apple Fellow", "Apple Energy", "Apple Energy, LLC", "Apple Newsroom", "Blibbet", "GIANT Company Software",
+      "GIANT Company Software, Inc", "Microsoft Way", "Lift London", "WebsiteSpark", "Extended Security Updates",
+      "Services Provider License Agreement", "Microsoft Services Provider License Agreement", "Microsoft SPLA",
+      "Microcomputer and Software", "Microsoft Logo", "Microsoft logos", "Microsoft Designer", "Microsoft 4Afrika",
+      "Microsoft Virtual Labs", "Microsoft Security Response Center", "Microsoft Tech Community", "Indigo Starfish",
+      "Brilliance Audio", "Brilliance Publishing", "Junglee", "Soundunwound", "Sound unwound", "ACI Gift Cards",
+      "Commingled inventory", "Co-mingled inventory", "Comingled inventory", "Amazon leadership principles",
+      "Amazon Software Download", "Googlenym", "Planet Google", "The Google Guys", "Google check", "Google community",
+      "GGEA", "GGQ1", "Google CodeF", "Samtron", "Samtron Displays Inc", "Samtron Corporation", "ES70", "Samsung Wave M",
+      "SAMSUNG WB750", "Samsung Wave 725", "Samsung Architecture Multimedia Interactions", "Samsung Republic",
+      "Republic of Samsung", "Democratic People's Republic of Samsung", "Samsung Digital City", "Zeronise",
+      "Shigeru Hayakawa", "Toyota sewing machine", "Toyota Financial Savings Bank", "Holidays are coming",
+      "It's the real thing", "Coke and capitalism", "Drinking the Coke", "Drink Coca-Cola", "Coca cola christmas advert",
+      "Coca-Cola advertising", "Coca-Cola marketing", "Coca-cola AI ads", "Coca-Cola logo", "Contour bottle",
+      "Minute Maid Light Lemonade", "Diet Coke with Zesty Blood Orange", "Passover Coca-Cola", "Great Plains Coca Cola",
+      "Effects of Instagram on mental health", "Instagram impact on people", "Instagram Kids", "Instagram blogger",
+      "Speedee", "Speedee Service", "QSC&V", "QSCV", "McHappy Day", "McBoat", "McRig", "Mckinley mac", "Big Yellow M",
+      "Franchise Realty Interstate Corp", "McValue", "McDrive", "Mercedes-Benz CLT-Class",
+    ],
+  },
+  {
+    id: "forest-countries",
+    debut: true,
+    category: "Geography",
+    title: "Countries with the most forest",
+    noun: "countries",
+    prompt: "Name the 10 countries with the most forest by area (not by share of their land)",
+    page: "List of countries by forest area",
+    // FAO's 2022 figures for every country and territory. The table is sorted by the share of land that is forest
+    // (Suriname, Guyana, Gabon first); this list ranks by the forest's area.
+    tables: [1],
+    name: "Location",
+    value: "Forest / km",
+    metric: "Forest area (FAO, 2022)",
+    unit: " km²",
+    dataAsOf: "2022",
+    skip: ["World"],
+    universe: "countries",
+  },
+  {
+    id: "elements-crust",
+    debut: true,
+    category: "Science",
+    title: "Most abundant elements in Earth's crust",
+    noun: "elements",
+    prompt: "Name the 10 chemical elements that make up the most of Earth's crust (by mass)",
+    page: "Abundance of elements in Earth's crust",
+    // The continental crust by mass, every element found there in nature (94).
+    tables: [1],
+    name: "Element",
+    value: "Abundance",
+    // The trace elements' figures are powers of ten ("3×10−5"), and the table's text loses the exponent: radium read
+    // as 9 ppm (#40). Such a cell gives no figure (build.ts `parseValue`), so only rows with a plain one rank (down to
+    // krypton's 0.0001 ppm); those ten, and plutonium and neptunium (none), are answers below them that say so.
+    metric: "Share of the crust by mass (parts per million)",
+    unit: " ppm",
+    // Chemical symbols: "fe" is iron, "si" silicon (one-letter ones like O and H are too short to be aliases).
+    aliasCols: [3],
+    more: Object.fromEntries(CRUST_TRACES.map((n) => [n, []])),
+    notes: Object.fromEntries(CRUST_TRACES.map((n) => [n, "a trace, under 0.0001 ppm"])),
+    // The usual other spellings ("sulphur", "cesium" found nothing; ranks 11+ only get cached redirects).
+    aliases: { Sulfur: ["Sulphur"], Caesium: ["Cesium"], Phosphorus: ["Phosphorous"], Aluminium: ["Aluminum"] },
+    // Symbols that are English words ("in", "as", "be"), Saturn's moon, and redirects that are no name for the element.
+    junkAliases: [
+      "In", "As", "At", "Be", "He", "Ho", "Re", "Pa", "Bi", "La", "Co", "Titan", "D lines", "Elements heavier than iron",
+      "Heavier than iron", "Steel and iron manufacturing", "Silicon Age", "Zillifone", "Alumen projection", "Sodium mirror",
+      "Monosodium", "Disodium", "Tetrasodium", "Dipotassium", "Aluminized",
+    ],
+    // Elements made only in laboratories: real names, free (none is in the crust).
+    knownNames: [
+      "Americium", "Curium", "Berkelium", "Californium", "Einsteinium", "Fermium", "Mendelevium", "Nobelium", "Lawrencium",
+      "Rutherfordium", "Dubnium", "Seaborgium", "Bohrium", "Hassium", "Meitnerium", "Darmstadtium", "Roentgenium",
+      "Copernicium", "Nihonium", "Flerovium", "Moscovium", "Livermorium", "Tennessine", "Oganesson",
+    ],
+  },
+  {
+    id: "world-cup-wins",
+    debut: true,
+    category: "Sports",
+    // Matches won, not titles: Brazil's five titles tie with nothing, its 79 wins lead.
+    title: "National teams with the most World Cup match wins",
+    noun: "national teams",
+    prompt: "Name the 10 men's national football teams that have won the most World Cup matches (all time, through 2026)",
+    page: "FIFA World Cup records and statistics",
+    // Every team that has played at a men's World Cup, through the 2026 tournament. FIFA credits each team with its
+    // predecessor's record: Germany with West Germany's, Russia with the Soviet Union's, Serbia with Yugoslavia's.
+    tables: [1],
+    name: "Team",
+    value: 4,
+    metric: "World Cup matches won (men's, through 2026)",
+    dataAsOf: "2026",
+    universe: "countries",
+    // The United Kingdom has no team: its names offer the home nations (intent.ts), each a team of its own. Places
+    // that are no sovereign state are free (Antarctica, Bermuda), except Curaçao, which played in 2026.
+    skip: ["United Kingdom", ...DEPENDENCIES.filter((d) => d !== "Curacao" && d !== "Curaçao")],
+    junkAliases: ["England's football team"],
+    // A country that never played (Finland, India) shows so: the table lists every team that has.
+    notes: Object.fromEntries(
+      UNIVERSES.countries()
+        .map((c) => c.name)
+        // The universe's names for teams the table names otherwise merge into them.
+        .filter(
+          (n) =>
+            !WORLD_CUP_TEAMS.includes(n) &&
+            !DEPENDENCIES.includes(n) &&
+            !["United Kingdom", "Democratic Republic of the Congo", "Ireland", "Czechia", "Türkiye"].includes(n),
+        )
+        .map((n) => [n, "never played at a World Cup"]),
+    ),
+  },
+  {
+    id: "car-countries",
+    debut: true,
+    category: "Business",
+    title: "Countries that build the most vehicles (2025)",
+    noun: "countries",
+    prompt: "Name the 10 countries that built the most motor vehicles in 2025 (cars, vans, trucks and buses)",
+    page: "List of countries by motor vehicle production",
+    // OICA's 2025 production by country.
+    tables: [0],
+    name: "Country",
+    value: "2025",
+    metric: "Motor vehicles built (2025)",
+    unit: " vehicles",
+    dataAsOf: "2025",
+    skip: ["World"],
+    universe: "countries",
+    // A country with no 2025 figure shows its latest year's.
+    also: [
+      { tables: [0], name: "Country", value: "2024", dated: { label: "2024", unit: " vehicles" } },
+      { tables: [1], name: "Country", value: "2020", dated: { label: "2020", unit: " vehicles" } },
+    ],
+  },
+  {
+    id: "gold-reserves",
+    debut: true,
+    category: "Business",
+    title: "Countries with the most gold reserves",
+    noun: "countries",
+    prompt: "Name the 10 countries whose central banks hold the most gold (in tonnes, October 2026)",
+    page: "Gold reserve",
+    // The World Gold Council's figures as of Q3 2026, the top 50 countries. The IMF, the ECB, the Bank for
+    // International Settlements and the euro area's total have no rank: no country, not an answer.
+    tables: [0],
+    name: "Country/Organization",
+    value: "Gold holdings",
+    metric: "Gold held by the central bank (Q3 2026)",
+    unit: " tonnes",
+    dataAsOf: "2026",
+    rankedOnly: true,
+    universe: "countries",
+  },
+  {
+    id: "coldest-countries",
+    debut: true,
+    category: "Geography",
+    title: "Coldest countries (average yearly temperature)",
+    noun: "countries",
+    prompt: "Name the 10 sovereign countries with the coldest average temperature over the year",
+    page: "List of countries by average yearly temperature",
+    // The World Bank's averages for 1991-2020 (the mean of each day's high and low), every country and territory.
+    tables: [0],
+    name: "Country or region",
+    value: "Temperature",
+    metric: "Average yearly temperature (1991-2020)",
+    unit: " °C",
+    signed: true,
+    lowerIsBetter: true,
+    dataAsOf: "1991–2020",
+    universe: "countries",
+    // Sovereign states only: Greenland (−18.68 °C) and Svalbard would be #1 and #2 as parts of Denmark and Norway;
+    // they and the other territories are free (the table's name for one of them, too).
+    skip: [...DEPENDENCIES, "French Southern and Antarctic Lands"],
+  },
+  {
+    id: "film-series",
+    debut: true,
+    category: "Entertainment",
+    title: "Highest-grossing film series",
+    noun: "film series",
+    prompt: "Name the 10 film series and franchises that have grossed the most at the box office worldwide (all their films together)",
+    page: "List of highest-grossing films",
+    // The page's top 20 franchises and film series, one small table each, with each one's parts and films under it.
+    // A ranked row has a rank and no year: its films ("1 | Endgame (2019)") and parts (" | The Infinity Saga") don't.
+    // The page counts a series inside a bigger one on its own too: the Avengers films are in the MCU's total.
+    tables: range(5, 88),
+    rankedOnly: true,
+    where: { col: 1, match: /^[^(]*$/ },
+    name: 1,
+    value: 2,
+    metric: "Worldwide box office, all films",
+    works: true,
+    // The parts the page counts in each one's total, as players name them ("harry potter" is the Wizarding World).
+    aliases: {
+      "Marvel Cinematic Universe": ["MCU", "Marvel", "Marvel movies", "Marvel films", "The Infinity Saga", "The Multiverse Saga"],
+      "Spider-Man": ["Spiderman", "Spider Man", "Spider-Man films", "Spider-Verse", "Spiderverse"],
+      "Star Wars": ["Skywalker Saga", "Star Wars films"],
+      "Wizarding World": ["Harry Potter", "Harry Potter films", "Harry Potter series", "Fantastic Beasts", "Potter"],
+      Avengers: ["The Avengers", "Avengers films"],
+      "James Bond": ["Bond", "007", "Bond films", "James Bond films"],
+      // The page's X-Men total takes in the Deadpool and Wolverine films.
+      "X-Men": ["X Men", "Xmen", "Deadpool", "Wolverine"],
+      "Fast & Furious": ["Fast and Furious", "The Fast and the Furious", "Fast Saga", "The Fast Saga"],
+      "DC Extended Universe": ["DCEU", "DC Universe", "DC movies"],
+      // The page's Batman total takes in the Dark Knight trilogy and the Joker films.
+      Batman: ["Batman films", "Dark Knight", "The Dark Knight", "The Dark Knight trilogy", "Joker"],
+      "Jurassic Park": ["Jurassic World"],
+      "Despicable Me": ["Minions"],
+      "Middle-earth": ["Lord of the Rings", "The Lord of the Rings", "LOTR", "The Hobbit", "Hobbit"],
+      "Mission: Impossible": ["Mission Impossible"],
+      "Pirates of the Caribbean": ["POTC"],
+      Shrek: ["Puss in Boots"],
+      "The Twilight Saga": ["Twilight"],
+      // The animated franchises' usual names (ranks 11+ only get cached redirects).
+      "Fengshen Cinematic Universe": ["Ne Zha", "Nezha"],
+      "Super Mario": ["Mario", "Super Mario Bros", "Mario movies"],
+      "Detective Conan": ["Case Closed"],
+      Zootopia: ["Zootropolis"],
+      "The Incredibles": ["Incredibles"],
+      "Finding Nemo": ["Finding Dory", "Nemo"],
+      "How to Train Your Dragon": ["HTTYD"],
+      "The Lion King": ["Lion King"],
+    },
+    // Redirects about the character, not the films (Spider-Man's suit and senses, comic-book eras of Batman), a film of
+    // the series, games, music, and a plain word ("fast" was Fast & Furious).
+    junkAliases: [
+      "Captain Marvel", "A Mini Marvel", "Marvel Studios' Infinity Saga Concert Experience", "The Story of Marvel Studios",
+      "Spider-sense", "Spidey-sense", "Spider-Suit", "Radioactive spider", "Spider-tracer", "Spider-tracers", "Spider-Mobile",
+      "Scarlet Spider", "Spidey senses", "Spider senses", "Features of Spider-Man media", "Spider-Man in comics",
+      "My spidey sense is tingling", "Spider-Man suit", "Black suited spider man", "Fast", "Fast & Furious Music",
+      "The Fast and the Furious DRIFT", "The Fast and the Furious Superbikes", "Fast Forever", "Untitled Fast X sequel",
+      "Golden Age Batman", "Silver Age Batman", "Batman emblem", "New Look Batman", "I'm Batman", "James Bond formula",
+      "Unofficial James Bond film", "DC Cinematic Universe tie-in comics", "DC Extended Universe tie-in comics",
+      "Fox's shared Marvel universe films",
+    ],
+    // The animated franchises below #20, from the same kind of table on the animated films page: Frozen, The Lion King.
+    also: [
+      {
+        page: "List of highest-grossing animated films",
+        tables: range(9, 47),
+        rankedOnly: true,
+        where: { col: 1, match: /^[^(]*$/ },
+        name: 1,
+        value: 2,
+      },
+    ],
+    // Famous live-action series below #20, by the worldwide total in their own article's box office table.
+    cited: Object.fromEntries(
+      (
+        [
+          ["The Hunger Games", 3325946050, ["Hunger Games"], "The Hunger Games (film series)"],
+          ["The Conjuring Universe", 2780130592, ["The Conjuring", "Conjuring", "Annabelle"], "The Conjuring Universe"],
+          ["Monsterverse", 2527195129, ["MonsterVerse", "Godzilla vs. Kong"], "Monsterverse"],
+          ["Planet of the Apes", 2524506124, [], "Planet of the Apes"],
+          ["Indiana Jones", 2371822047, ["Indy"], "Indiana Jones"],
+          ["Star Trek", 2264775888, ["Star Trek films"], "Star Trek (film franchise)"],
+          ["Jumanji", 2124934090, [], "Jumanji"],
+          ["Terminator", 2102805994, ["The Terminator"], "Terminator (franchise)"],
+          ["Rocky", 1932913202, ["Creed", "Rocky films"], "Rocky (franchise)"],
+          ["The Matrix", 1793712515, ["Matrix"], "The Matrix (franchise)"],
+          ["Alien", 1689128470, ["Aliens", "Alien films"], "Alien (franchise)"],
+          ["Bourne", 1665926127, ["Jason Bourne", "The Bourne films"], "Bourne (franchise)"],
+          ["Ocean's", 1422492765, ["Ocean's Eleven", "Ocean's 11"], "Ocean's (film series)"],
+          ["Hotel Transylvania", 1380239377, [], "Hotel Transylvania (franchise)"],
+          ["Night at the Museum", 1350792034, [], "Night at the Museum (film series)"],
+          ["John Wick", 1176300851, [], "John Wick (franchise)"],
+          ["Scream", 1126161309, [], "Scream (franchise)"],
+          ["Dune", 1120462358, [], "Dune (franchise)"],
+          ["Saw", 1100000000, [], "Saw (franchise)"],
+          ["Final Destination", 985838704, [], "Final Destination"],
+          ["Back to the Future", 972550749, ["BTTF"], "Back to the Future (franchise)"],
+          ["Kingsman", 951151686, [], "Kingsman (franchise)"],
+          ["Home Alone", 914762040, [], "Home Alone (franchise)"],
+          ["Halloween", 885966037, ["Michael Myers"], "Halloween (franchise)"],
+          ["Jaws", 845919074, [], "Jaws (franchise)"],
+          ["The Godfather", 476157225, ["Godfather"], "The Godfather (film series)"],
+        ] as [string, number, string[], string][]
+      ).map(([name, n, aliases, article]) => [
+        name,
+        {
+          value: name === "Saw" ? "$1.1 billion" : name === "The Godfather" ? "$476,157,225–517,294,647" : `$${n.toLocaleString("en-US")}`,
+          n,
+          aliases,
+          source: `${article}: the box office table's Total row, worldwide`,
+        },
+      ]),
+    ),
+    // Famous series whose article gives no worldwide total (or none in dollars alone): free, said plainly.
+    knownNames: ["Men in Black", "Ghostbusters", "Die Hard", "The Mummy", "Godzilla", "Mad Max", "Rambo", "Lethal Weapon", "Austin Powers", "The Karate Kid"],
+  },
+  {
+    id: "nuclear-countries",
+    debut: true,
+    category: "Science",
+    title: "Countries with the most nuclear reactors",
+    noun: "countries",
+    prompt: "Name the 10 countries with the most nuclear power reactors in use (2026)",
+    page: "Nuclear power by country",
+    // The 31 countries running nuclear power plants, and the three building their first, as of 2026. Japan's 18
+    // suspended reactors (shut after Fukushima, not yet restarted) don't count.
+    tables: [0],
+    name: "Country",
+    value: "Reactors / In use",
+    metric: "Power reactors in use (2026)",
+    dataAsOf: "2026",
+    skip: ["World"],
+    universe: "countries",
+    // The names the other country lists use.
+    rename: { Czechia: "Czech Republic", Türkiye: "Turkey" },
+    // Countries that shut their last reactor, as the page says: a guess shows why it's no answer here.
+    notes: {
+      Germany: "none since its phase-out in 2023",
+      Italy: "none since 1990",
+      Taiwan: "none since its phase-out in 2025",
+      Lithuania: "none since 2009",
+      Kazakhstan: "none since 1999",
+    },
   },
 ];
 

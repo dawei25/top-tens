@@ -1,0 +1,52 @@
+{
+  "China": {
+    "text": "Its first car was bought from Hong Kong in 1902 as a gift for Empress Dowager Cixi.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_China",
+    "evidence": "The first automobile in China was purchased from Hong Kong in 1902 by Yuan Shikai and gifted to Empress Dowager Cixi."
+  },
+  "United States": {
+    "text": "Ford's Model T sold over 15 million by 1927, and its price fell from $850 to $290.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_the_United_States",
+    "evidence": "in 1908, Ford introduced the Ford Model T, which would prove to be one of the world's most popular cars, more than 15 million unites being sold by the end of its production run in 1927. ... The first models were priced at $850, but by 1924 had dropped to $290."
+  },
+  "Japan": {
+    "text": "In 1936 Kurogane built the world's first mass-produced four-wheel-drive car, for the army.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_Japan",
+    "evidence": "During World War II, Toyota, Nissan, Isuzu and Kurogane built trucks and motorcycles for the Imperial Japanese Army, with Kurogane introducing the world's first mass-produced four-wheel-drive car, called the Kurogane Type 95 in 1936."
+  },
+  "India": {
+    "text": "In a 2021 survey only 8% of its households owned a car, while 54% owned a motorbike or scooter.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_India",
+    "evidence": "According to a 2021 National Family Health Survey, only 8% of Indian households own a car, while 54% own motorcycles or scooters."
+  },
+  "Germany": {
+    "text": "The Volkswagen Beetle and the Porsche 911 came 4th and 5th in the Car of the Century award.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_Germany",
+    "evidence": "The Volkswagen Beetle and Porsche 911 took 4th and 5th places in the Car of the Century award."
+  },
+  "South Korea": {
+    "text": "Hyundai sold 126,000 cars in its first US year, 1986, a record for any brand.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_South_Korea",
+    "evidence": "Hyundai entered the United States market in 1986 with the Excel (as the Pony was known there), and set a record for selling the most automobiles in its first year of business in the United States compared with any other car brand – 126,000 vehicles."
+  },
+  "Mexico": {
+    "text": "When cars reached Mexico City in 1903, its first highway code held them to 10 km/h on busy streets.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_Mexico",
+    "evidence": "In 1903, motorcars first arrived in Mexico City, totaling 136 cars in that year and rising to 800 by 1906. This encouraged then president Porfirio Díaz, to create both the first Mexican highway code (which would allow cars to move at a maximum speed of 10 km/h or 6 mph on crowded or small streets and 40 km/h or 25 mph elsewhere)"
+  },
+  "Brazil": {
+    "text": "The first car trip from Rio de Janeiro to São Paulo, in 1908, covered 700 km in 33 days.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_Brazil",
+    "evidence": "1908–1909: The first car trip from Rio de Janeiro to São Paulo occurred on 7 March, conducted by the Count of Lesdain, Jacques Bouly de Lesdain, his wife and two drivers; they travelled 700 km (430 miles) in 33 days, aboard a Brasier."
+  },
+  "Spain": {
+    "text": "Its 1953 Biscuter microcar, nicknamed the Zapatilla (little shoe), drove only its right front wheel.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_Spain",
+    "evidence": "The first Biscuter car was launched in Spain in 1953 and was called the Series 100 or the Zapatilla (little shoe). It was powered by a one-cylinder, 197 cc, two-stroke 9 hp (7 kW) engine which supplied power only to the right front wheel."
+  },
+  "France": {
+    "text": "In 1903 it built nearly half the world's cars: 30,124, against 11,235 in the US.",
+    "source": "https://en.wikipedia.org/wiki/Automotive_industry_in_France",
+    "evidence": "1903 – France remains the world's leading automaker, producing 30,124 cars (nearly 49% of the world total) as against 11,235 cars produced in the USA."
+  }
+}

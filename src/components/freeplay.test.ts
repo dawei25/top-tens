@@ -34,14 +34,19 @@ describe("by-category pickers on the real lists", () => {
 
   it("leaves a one-list category out of both pickers and keeps the big ones", () => {
     const today = schedule.at(-1)!.date;
-    const lists = rollableLists(schedule, index, FRESH, today);
-    const blitz = openBlitzLists(schedule, index, FRESH, today);
-    const small = [...new Set(index.map((m) => m.category))].filter((c) => inCategory(index, c) < MIN_CATEGORY_LISTS);
-    expect(small.length, "the bank has a category this small (Science, at the launch)").toBeGreaterThan(0);
-    const offered = [...pickerCategories(index, index, lists), ...pickerCategories(index, blitz)].map(([c]) => c);
+    // A category this small: Science was one at the launch, and grew to four lists on Nov 20. A made-up one-list
+    // category beside the real bank keeps the rule checked whatever the bank holds.
+    const open = index.find((m) => m.category === "Geography" && m.blitz && !m.debut)!;
+    const bank = [...index, { ...open, id: "lone-list", title: "Lone list", category: "Lonely" } as PuzzleMeta];
+    const lists = rollableLists(schedule, bank, FRESH, today);
+    const blitz = openBlitzLists(schedule, bank, FRESH, today);
+    expect(lists.map((l) => l.id), "the made-up list is one a roll can reach").toContain("lone-list");
+    const small = [...new Set(bank.map((m) => m.category))].filter((c) => inCategory(bank, c) < MIN_CATEGORY_LISTS);
+    expect(small).toContain("Lonely");
+    const offered = [...pickerCategories(bank, bank, lists), ...pickerCategories(bank, blitz)].map(([c]) => c);
     for (const c of small) expect(offered).not.toContain(c);
-    expect(pickerCategories(index, index, lists).map(([c]) => c)).toContain("Geography");
-    expect(pickerCategories(index, blitz).map(([c]) => c)).toContain("Geography");
+    expect(pickerCategories(bank, bank, lists).map(([c]) => c)).toContain("Geography");
+    expect(pickerCategories(bank, blitz).map(([c]) => c)).toContain("Geography");
   });
 
   it("counts each category's lists in the given set, in the index's order", () => {

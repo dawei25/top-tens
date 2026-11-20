@@ -1,0 +1,52 @@
+{
+  "Marvel Cinematic Universe": {
+    "text": "Marvel built it on the Avengers: it had licensed Spider-Man and the X-Men to Sony and Fox, but kept the Avengers.",
+    "source": "https://en.wikipedia.org/wiki/Marvel_Cinematic_Universe",
+    "evidence": "Kevin Feige, Arad's second-in-command, realized that unlike Spider-Man, Blade, and the X-Men which were respectively licensed to Sony, New Line, and Fox, Marvel owned the rights to the Avengers team."
+  },
+  "Spider-Man": {
+    "text": "Sony got Spider-Man's film rights from Marvel for $7 million in 1999.",
+    "source": "https://en.wikipedia.org/wiki/Spider-Man_in_film",
+    "evidence": "After protracted litigation over the Spider-Man copyrights, Sony Pictures and its subsidiary Columbia obtained the film rights for $7 million from Marvel in 1999."
+  },
+  "Star Wars": {
+    "text": "George Lucas started it in 1971, after he failed to get the rights to film Flash Gordon.",
+    "source": "https://en.wikipedia.org/wiki/Star_Wars",
+    "evidence": "In 1971, George Lucas wanted to film an adaptation of the Flash Gordon serial, but could not obtain the rights, so he began developing his own space opera."
+  },
+  "Wizarding World": {
+    "text": "Filming of Chamber of Secrets began just three days after the first Harry Potter film came out in 2001.",
+    "source": "https://en.wikipedia.org/wiki/Wizarding_World",
+    "evidence": "Columbus and Kloves returned as director, and screenwriter for the film adaptation of Chamber of Secrets. Just three days after the wide release of the first film, production began on 19 November 2001 in Surrey, England"
+  },
+  "Avengers": {
+    "text": "Endgame became the highest-grossing film ever in July 2019, until an Avatar re-release in China won it back in 2021.",
+    "source": "https://en.wikipedia.org/wiki/Avengers_(film_series)",
+    "evidence": "Endgame became the highest-grossing film of all time in July 2019, surpassing Avatar (2009), however, Avatar was re-released in China in March 2021, reclaiming its top spot."
+  },
+  "James Bond": {
+    "text": "Ian Fleming took the name from a bird book's author: he wanted the dullest name he could find.",
+    "source": "https://en.wikipedia.org/wiki/James_Bond",
+    "evidence": "Fleming, a keen birdwatcher himself, had a copy of Bond's guide and he later explained to the ornithologist's wife that \"It struck me that this brief, unromantic, Anglo-Saxon and yet very masculine name was just what I needed\" ... \"I wanted the simplest, dullest, plainest-sounding name I could find\""
+  },
+  "X-Men": {
+    "text": "Hugh Jackman wasn't the first Wolverine: Dougray Scott was cast until Mission: Impossible 2 ran late.",
+    "source": "https://en.wikipedia.org/wiki/X-Men_(film_series)",
+    "evidence": "The then-little known Jackman was not Fox's initial casting choice for Wolverine; the studio contracted Dougray Scott in that role until an unforeseen scheduling conflict pertaining to delays in the production of Mission: Impossible 2 (2000) forced the actor"
+  },
+  "Fast & Furious": {
+    "text": "The first film, in 2001, grew out of \"Racer X\", a 1998 Vibe magazine article about street racing.",
+    "source": "https://en.wikipedia.org/wiki/Fast_%26_Furious",
+    "evidence": "The first film, based on the 1998 Vibe magazine article \"Racer X\" by Ken Li and written by Gary Scott Thompson, Erik Bergquist, and David Ayer, was released in 2001. The first four films focused on illegal street racing"
+  },
+  "DC Extended Universe": {
+    "text": "When it was announced, fans and the media called it the DC Cinematic Universe, after Marvel's MCU.",
+    "source": "https://en.wikipedia.org/wiki/DC_Extended_Universe",
+    "evidence": "Upon announcement of the film series, the universe was commonly called the \"DC Cinematic Universe\" (DCCU) by fans and the media, in keeping with the naming convention of the already established Marvel Cinematic Universe (MCU)."
+  },
+  "Batman": {
+    "text": "He first reached cinemas in Columbia Pictures' Batman of 1943, followed by Batman and Robin in 1949.",
+    "source": "https://en.wikipedia.org/wiki/Batman_in_film",
+    "evidence": "Columbia Pictures supervised the first film adaptations with Batman (1943) and Batman and Robin (1949), which deviated significantly from the source material."
+  }
+}

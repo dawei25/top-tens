@@ -1,0 +1,52 @@
+{
+  "Apple": {
+    "text": "To pay for the first Apple computers, Jobs sold his VW bus and Wozniak his HP-65 calculator.",
+    "source": "https://en.wikipedia.org/wiki/Apple_Inc.",
+    "evidence": "The company's first product was the Apple I, designed by Wozniak and hand-built. ... To finance production, Jobs sold his Volkswagen Bus and Wozniak sold his HP-65 calculator."
+  },
+  "Microsoft": {
+    "text": "Paul Allen came up with the name Micro-Soft, short for micro-computer software.",
+    "source": "https://en.wikipedia.org/wiki/Microsoft",
+    "evidence": "Gates and Allen established Microsoft on April 4, 1975, with Gates as CEO, and Allen suggested the name \"Micro-Soft\", short for micro-computer software."
+  },
+  "Amazon": {
+    "text": "Jeff Bezos founded it in 1994 as an online bookstore called Cadabra, and renamed it Amazon that November.",
+    "source": "https://en.wikipedia.org/wiki/Amazon_(company)",
+    "evidence": "On July 5, 1994, Amazon was founded as \"Cadabra\" by Jeff Bezos, after he relocated from New York City to Bellevue, Washington, to operate an online bookstore. In November 1994, Bezos renamed the company Amazon to reflect his ambitions for his company."
+  },
+  "Google": {
+    "text": "Its name is a misspelling of googol, the number 1 followed by 100 zeros.",
+    "source": "https://en.wikipedia.org/wiki/Google",
+    "evidence": "Eventually, they changed the name to Google; the name of the search engine was a misspelling of the word googol, a very large number written 10100 (1 followed by 100 zeros), picked to signify that the search engine was intended to search a large number of webs"
+  },
+  "Samsung": {
+    "text": "Its name means three stars in Korean; it began in 1938 as a trading company.",
+    "source": "https://en.wikipedia.org/wiki/Samsung",
+    "evidence": "Founded in 1938 by Lee Byung-chul as a trading company ... According to Samsung's founder, the meaning of the Korean hanja Samsung (三星) is three stars."
+  },
+  "Toyota": {
+    "text": "It grew out of a loom maker: selling an automatic loom patent to a British firm in 1929 paid for its first cars.",
+    "source": "https://en.wikipedia.org/wiki/Toyota",
+    "evidence": "The company was founded as a spinoff of Toyota Industries, a machine maker started by Sakichi Toyoda, Kiichiro's father. ... In 1929, the patent for the automatic loom was sold to the British company Platt Brothers, generating the starting capital for automobile development."
+  },
+  "Coca-Cola": {
+    "text": "First sold for five cents a glass at an Atlanta pharmacy in 1886; its name comes from coca leaves and kola nuts.",
+    "source": "https://en.wikipedia.org/wiki/Coca-Cola",
+    "evidence": "The name refers to two of its original ingredients: coca leaves and kola nuts (a source of caffeine). ... The first sales were at Jacob's Pharmacy in Atlanta, Georgia, on May 8, 1886, where it initially sold for five cents a glass."
+  },
+  "Instagram": {
+    "text": "It began as Burbn, a check-in app; its new name joined instant camera and telegram.",
+    "source": "https://en.wikipedia.org/wiki/Instagram",
+    "evidence": "Instagram began development in San Francisco as Burbn, a mobile check-in app created by Kevin Systrom and Mike Krieger. ... They renamed it Instagram, a portmanteau of instant camera and telegram."
+  },
+  "McDonald's": {
+    "text": "Its first mascot was Speedee, a chef with a hamburger for a head, until the Golden Arches took over in 1962.",
+    "source": "https://en.wikipedia.org/wiki/McDonald%27s",
+    "evidence": "The original mascot of McDonald's was a hamburger-headed chef who was referred to as \"Speedee\". In 1962, the Golden Arches replaced Speedee as the universal mascot."
+  },
+  "Mercedes-Benz": {
+    "text": "Mercedes was a girl: Emil Jellinek named a 1901 car after his daughter, Mercédès Jellinek.",
+    "source": "https://en.wikipedia.org/wiki/Mercedes-Benz",
+    "evidence": "Emil Jellinek, an Austrian automobile entrepreneur who worked with DMG, registered the trademark in 1902, naming the 1901 Mercedes 35 hp after his daughter Mercédès Jellinek."
+  }
+}

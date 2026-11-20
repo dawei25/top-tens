@@ -2020,4 +2020,35 @@ export const INTENT: Record<string, Intent> = {
     // name since 2021.
     same: { "Kanye West": ["Ye"], "Tupac Shakur": ["Tupac", "2Pac"] },
   },
+  // Nov 20 candidates.
+  "world-cup-wins": {
+    same: {
+      // The home nations play as themselves, so the United Kingdom's forms skip this list (as on ballon-dor-countries).
+      England: ["English", "Three Lions"],
+      Scotland: ["Scottish"],
+      Wales: ["Welsh"],
+      // FIFA credits each team with its predecessor's record (the table's own breakdown): West Germany's wins are
+      // Germany's, the Soviet Union's Russia's, Yugoslavia's Serbia's.
+      Germany: ["West Germany"],
+      Russia: ["Soviet Union", "USSR", "Soviets"],
+      Serbia: ["Yugoslavia", "Serbia and Montenegro"],
+      Netherlands: ["Holland", "Dutch"],
+      "United States": ["USMNT"],
+    },
+    groups: {
+      // No United Kingdom team: its names offer the four home nations (the game asks which).
+      "United Kingdom": ["England", "Scotland", "Northern Ireland", "Wales"],
+      UK: ["England", "Scotland", "Northern Ireland", "Wales"],
+      Britain: ["England", "Scotland", "Northern Ireland", "Wales"],
+      "Great Britain": ["England", "Scotland", "Northern Ireland", "Wales"],
+      GB: ["England", "Scotland", "Northern Ireland", "Wales"],
+      British: ["England", "Scotland", "Northern Ireland", "Wales"],
+      // Both successors carry Czechoslovakia's record.
+      Czechoslovakia: ["Czech Republic", "Slovakia"],
+    },
+  },
+  "film-series": {
+    // DC's two series in the top 10 ("dc" found nothing): the game asks which.
+    groups: { DC: ["DC Extended Universe", "Batman"], "DC Comics": ["DC Extended Universe", "Batman"] },
+  },
 };

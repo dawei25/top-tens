@@ -1559,6 +1559,68 @@ describe("aliases as built: what players type", () => {
       expect(owners("arab")).toBe(4);
     });
   });
+
+  describe("Nov 20 candidates", () => {
+    // What the builder found on the new lists for Dec 6-13: redirects that turned other words into answers, and the
+    // forms players use for a series' parts, a team's past names and a country with no team.
+    const read = (id: string, guess: string) => {
+      const r = judgeGuess(guess, JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8")) as Puzzle, new Set(), lex);
+      if ("entry" in r) return `${r.kind}${"corrected" in r && r.corrected ? "?" : ""} ${r.entry.name}`;
+      return r.kind === "typo" ? `choose ${r.suggestions.join(" | ")}` : r.kind;
+    };
+    it.each([
+      // Redirects to the brand's article that are other things: "sonic" was Amazon, "the keyword" Google.
+      ["brands", "sonic", "unknown"],
+      ["brands", "the keyword", "unknown"],
+      ["brands", "just do it", "unknown"],
+      ["brands", "coke", "correct Coca-Cola"],
+      ["brands", "mercedes", "correct Mercedes-Benz"],
+      // Parent companies are not the ranked brands.
+      ["brands", "meta", "unknown"],
+      // Saturn's moon is no titanium; a symbol that is an English word is no element.
+      ["elements-crust", "titan", "unknown"],
+      ["elements-crust", "in", "unknown"],
+      ["elements-crust", "fe", "correct Iron"],
+      ["elements-crust", "aluminum", "correct Aluminium"],
+      ["elements-crust", "sulphur", "near Sulfur"],
+      // A film of the series is not the series; its parts are.
+      ["film-series", "captain marvel", "unknown"],
+      ["film-series", "harry potter", "correct Wizarding World"],
+      ["film-series", "deadpool", "correct X-Men"],
+      ["film-series", "lord of the rings", "near Middle-earth"],
+      ["film-series", "dc", "choose Batman | DC Extended Universe"],
+      // A team's past names; the United Kingdom has no team (its names offer the home nations, England first).
+      ["world-cup-wins", "west germany", "correct Germany"],
+      ["world-cup-wins", "ussr", "near Russia"],
+      ["world-cup-wins", "czechoslovakia", "choose Czech Republic | Slovakia"],
+      ["world-cup-wins", "uk", "correct? England"],
+      ["world-cup-wins", "antarctica", "unknown"],
+      // Parts of Denmark and Norway, colder than any country, are free on the sovereign list.
+      ["coldest-countries", "greenland", "unknown"],
+      ["coldest-countries", "svalbard", "unknown"],
+    ])("%s: %s -> %s", (id, guess, want) => {
+      expect(read(id, guess)).toBe(want);
+    });
+    const entry = (id: string, name: string) => {
+      const p: Puzzle = JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
+      return [...p.answers, ...p.extras].find((e) => e.name === name);
+    };
+    it("elements-crust: a trace element's power of ten is no figure (radium read as 9 ppm, #40)", () => {
+      for (const name of ["Radium", "Xenon", "Astatine", "Plutonium"]) {
+        expect(entry("elements-crust", name)?.rank, name).toBe(0);
+        expect(entry("elements-crust", name)?.value, name).toBe("a trace, under 0.0001 ppm");
+      }
+      expect(entry("elements-crust", "Krypton")?.value).toBe("0.0001 ppm");
+    });
+    it("coldest-countries: figures below zero rank first (Canada's −4.03 °C read as 4.03)", () => {
+      expect(entry("coldest-countries", "Canada")).toMatchObject({ rank: 1, value: "−4.03 °C" });
+      expect(entry("coldest-countries", "Russia")).toMatchObject({ rank: 2, value: "−3.79 °C" });
+    });
+    it("world-cup-wins and nuclear-countries: a country with none says why", () => {
+      expect(entry("world-cup-wins", "Finland")?.value).toBe("never played at a World Cup");
+      expect(entry("nuclear-countries", "Germany")?.value).toBe("none since its phase-out in 2023");
+    });
+  });
 });
 
 describe("the pipeline's hand-written tables", () => {

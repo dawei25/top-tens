@@ -1,0 +1,52 @@
+{
+  "Oxygen": {
+    "text": "No one person discovered it: Scheele found it in 1773 or earlier, Priestley in 1774.",
+    "source": "https://en.wikipedia.org/wiki/Oxygen",
+    "evidence": "Oxygen was isolated by Michael Sendivogius before 1604, but it is commonly believed that the element was discovered independently by Carl Wilhelm Scheele, in Uppsala, in 1773 or earlier, and Joseph Priestley in Wiltshire, in 1774. ... No one person discovered oxygen."
+  },
+  "Silicon": {
+    "text": "Humphry Davy named it silicium, from silex (flint); Thomas Thomson renamed it silicon in 1817.",
+    "source": "https://en.wikipedia.org/wiki/Silicon",
+    "evidence": "After an attempt to isolate silicon in 1808, Sir Humphry Davy proposed the name \"silicium\" for silicon, from the Latin silex, silicis for flint ... Silicon was given its present name in 1817 by Scottish chemist Thomas Thomson."
+  },
+  "Aluminium": {
+    "text": "It once cost more than gold, and in 1885 it was chosen to cap the Washington Monument.",
+    "source": "https://en.wikipedia.org/wiki/Aluminium",
+    "evidence": "As Wöhler's method could not yield great quantities of aluminium, the metal remained rare; its cost exceeded that of gold. ... Because of its electricity-conducting capacity, aluminium was used as the cap of the Washington Monument, completed in 1885"
+  },
+  "Iron": {
+    "text": "Only fourth in the crust, it is the most common element in the whole Earth by mass, forming much of its core.",
+    "source": "https://en.wikipedia.org/wiki/Iron",
+    "evidence": "It is, by mass, the most common element on Earth, forming much of Earth's outer and inner core. It is the fourth most abundant element in the Earth's crust."
+  },
+  "Calcium": {
+    "text": "Its name comes from calx, Latin for lime; it is the most abundant metal in the human body.",
+    "source": "https://en.wikipedia.org/wiki/Calcium",
+    "evidence": "The name comes from the Latin word calx (meaning \"lime\"), which was obtained from heating limestone. ... Calcium is the most abundant metal and the fifth-most abundant element in the human body."
+  },
+  "Sodium": {
+    "text": "Its name may come from the Arabic suda, headache: soda was an old headache cure.",
+    "source": "https://en.wikipedia.org/wiki/Sodium",
+    "evidence": "The name sodium is thought to originate from the Arabic suda, meaning headache, as the headache-alleviating properties of sodium carbonate or soda were well known in early times."
+  },
+  "Magnesium": {
+    "text": "Epsom salts are named after a well in Epsom, England, whose bitter water a farmer's cows refused in 1618.",
+    "source": "https://en.wikipedia.org/wiki/Magnesium",
+    "evidence": "In 1618, a farmer at Epsom in England attempted to give his cows water from a local well. The cows refused to drink because of the water's bitter taste ... The substance obtained by evaporating the water became known as Epsom salts and its fame spread."
+  },
+  "Potassium": {
+    "text": "It is named after potash, plant ash soaked in a pot; its symbol K comes from its other name, kalium.",
+    "source": "https://en.wikipedia.org/wiki/Potassium",
+    "evidence": "The English name for the element potassium comes from the word potash, which refers to an early method of extracting various potassium salts: placing in a pot the ash of burnt wood or tree leaves, adding water, heating, and evaporating the solution. ... In 1814, the Swedish chemist Berzelius advocated the name kalium for potassium, with the chemical symbol K."
+  },
+  "Titanium": {
+    "text": "Found in Cornwall in 1791, it is named after the Titans of Greek mythology.",
+    "source": "https://en.wikipedia.org/wiki/Titanium",
+    "evidence": "Titanium was discovered in Cornwall, Great Britain, by William Gregor in 1791 and was named by Martin Heinrich Klaproth after the Titans of Greek mythology."
+  },
+  "Hydrogen": {
+    "text": "Its name means water-former; it makes up about 75% of all normal matter in the universe.",
+    "source": "https://en.wikipedia.org/wiki/Hydrogen",
+    "evidence": "It is the lightest and most abundant chemical element in the universe, constituting about 75% of all normal matter. ... this is the origin of hydrogen's name, which means 'water-former'"
+  }
+}

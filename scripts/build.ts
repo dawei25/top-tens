@@ -139,18 +139,26 @@ function familyName(name: string, cellText: string): string {
   return m && name === m[1] && !name.includes(" ") ? `${m[1]} ${m[2]}` : name;
 }
 
-/** First number in a cell. A range ("2–4 billion") ranks by its low end and displays in full. */
-export function parseValue(text: string): { value: number; display: string } | null {
+/**
+ * First number in a cell. A range ("2–4 billion") ranks by its low end and displays in full. With `signed` (a topic
+ * whose figures can be below zero, `signed` in topics.ts), a minus right before the first number makes it negative
+ * ("−4.03 °C"); elsewhere a dash there is no sign (a goal difference column, a dash between two figures).
+ */
+export function parseValue(text: string, signed = false): { value: number; display: string } | null {
   const m = text.match(
-    /([$€£]?)\s*(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)(?:\s*[–-]\s*[$€£]?(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?))?\s*(million|billion|trillion)?/i,
+    /([$€£]?)\s*([−-]?)(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)(?:\s*[–-]\s*[$€£]?(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?))?\s*(million|billion|trillion)?/i,
   );
   if (!m) return null;
-  const mult = { million: 1e6, billion: 1e9, trillion: 1e12 }[m[4]?.toLowerCase() ?? ""] ?? 1;
-  const digits = m[2].replace(/^0+(?=\d)/, "");
-  const range = m[3] ? `–${m[3]}` : "";
+  // A power of ten ("9×10−7"): the cell's text loses the superscript exponent, so the number read would be its
+  // mantissa (radium as 9 ppm on elements-crust). No figure beats a wrong one.
+  if (/^\s*[×x]\s*10/.test(text.slice((m.index ?? 0) + m[0].length - (m[5]?.length ?? 0)))) return null;
+  const mult = { million: 1e6, billion: 1e9, trillion: 1e12 }[m[5]?.toLowerCase() ?? ""] ?? 1;
+  const digits = m[3].replace(/^0+(?=\d)/, "");
+  const range = m[4] ? `–${m[4]}` : "";
+  const minus = signed && m[2] && !range;
   return {
-    value: parseFloat(digits.replace(/,/g, "")) * mult,
-    display: `${m[1]}${digits}${range}${m[4] ? " " + m[4].toLowerCase() : ""}`,
+    value: (minus ? -1 : 1) * parseFloat(digits.replace(/,/g, "")) * mult,
+    display: `${m[1]}${minus ? "−" : ""}${digits}${range}${m[5] ? " " + m[5].toLowerCase() : ""}`,
   };
 }
 
@@ -446,7 +454,7 @@ export async function readRows(topic: Topic): Promise<Row[]> {
         if (!topic.numberNames && /\d{3,}.*\d{3,}/.test(name)) continue; // ad uploads and other non-titles
         const override = topic.overrides?.[cellText];
         if (override) console.log(`     ${topic.id}: ${cellText} ${valueCell.text} → ${override.value} (${override.source})`);
-        let v = parseValue(override?.value ?? valueCell.text);
+        let v = parseValue(override?.value ?? valueCell.text, topic.signed);
         if (topic.fallback && !override) {
           // A cell that disagrees with the other column by more than 2% was misread on the page ("382.936").
           const alt = convertedValue(r[fromCol], topic.fallback.factor);
@@ -892,6 +900,7 @@ async function readAlso(topic: Topic, limit: number): Promise<Entry[]> {
       for (const r of body) {
         const cell = r[nc];
         if (!cell || (cell.isHeader && !cell.text)) continue;
+        if (src.rankedOnly && !/^\d/.test(r[0]?.text ?? "")) continue;
         if (src.where && !src.where.match.test(r[column(header, src.where.col)]?.text ?? "")) continue;
         if (src.counts) {
           if (topic.region) throw new Error(`${topic.id}: \`counts\` sources can't be kept to a region`);

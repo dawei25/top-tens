@@ -1,0 +1,40 @@
+{
+  "id": "film-series",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": {
+    "recognizability": 5,
+    "curve": 4,
+    "fairness": 3,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 8,
+    "livesLost": 5,
+    "guesses": 13
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 13
+  },
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": [
+    "entertainment",
+    "film"
+  ],
+  "audience": "anyone",
+  "summary": "Marvel, Star Wars, Harry Potter and Bond come fast; Jurassic Park (#11), Avatar (#12) and Lord of the Rings (#14) are the painful misses.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 8.",
+    "The page's own franchise ranking, 20 deep, overlaps by design: the Avengers (#5) are inside the MCU (#1), the X-Men total takes in Deadpool, Batman's the Joker films. Sub-series reach their parent (harry potter: Wizarding World, deadpool: X-Men).",
+    "Famous series below #20 show a figure: animated ones from the animated films page's franchise table, live-action ones from their own box office tables (cited). Men in Black, Ghostbusters, Die Hard and Godzilla have no total and are free."
+  ],
+  "fixes": []
+}

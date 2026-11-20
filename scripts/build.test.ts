@@ -28,6 +28,7 @@ import {
   shortFormOnly,
   skipName,
   noted,
+  parseValue,
   spellingVariants,
   textRow,
 } from "./build";
@@ -373,6 +374,27 @@ describe("ranking order", () => {
     expect(rankRows({ lowerIsBetter: true }, rows()).map((r) => r.value)).toEqual([0.44, 2, 26, 61, 61]);
     expect(rankRows({ lowerIsBetter: true }, rows())[3]).toEqual({ value: 61, tiebreak: 2 });
     expect(rankRows({ keepOrder: true, lowerIsBetter: true }, rows())).toEqual(rows());
+  });
+
+  // Coldest countries (Nov 20): "−4.03 °C" read as 4.03, so Canada and Russia ranked below Sweden.
+  it("reads a figure below zero only where the topic says figures can be (`signed`)", () => {
+    expect(parseValue("−4.03 °C (24.75 °F)", true)).toEqual({ value: -4.03, display: "−4.03" });
+    expect(parseValue("-18.68 °C", true)).toEqual({ value: -18.68, display: "−18.68" });
+    expect(parseValue("1.07 °C (33.93 °F)", true)).toEqual({ value: 1.07, display: "1.07" });
+    // Elsewhere a dash before a number is no sign: a goal difference column, a range's dash.
+    expect(parseValue("−32")).toEqual({ value: 32, display: "32" });
+    expect(parseValue("2–4 billion", true)?.value).toBe(2e9);
+    expect(rankRows({ lowerIsBetter: true }, [{ value: 1.07 }, { value: -3.79 }, { value: -4.03 }]).map((r) => r.value)).toEqual([-4.03, -3.79, 1.07]);
+  });
+
+  // Elements in the crust (Nov 20): "9×10−7" lost its exponent in the cell text and radium read as 9 ppm (#40).
+  it("gives no figure for a power of ten, whose exponent the cell text loses, rather than a wrong one", () => {
+    expect(parseValue("9×10 (9×10%)")).toBeNull();
+    expect(parseValue("1.4×10−6 (1.4×10−10%)")).toBeNull();
+    expect(parseValue("3 × 10")).toBeNull();
+    // A plain figure, with a power of ten only in its brackets, still reads.
+    expect(parseValue("0.0001 (1×10−8%)")).toEqual({ value: 0.0001, display: "0.0001" });
+    expect(parseValue("461,000 (46.1%)")?.value).toBe(461000);
   });
 
   it("reads the page's tables first, then the other pages' (one ranking split by region)", () => {

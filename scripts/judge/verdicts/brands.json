@@ -1,0 +1,40 @@
+{
+  "id": "brands",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": {
+    "recognizability": 5,
+    "curve": 4,
+    "fairness": 3,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 7,
+    "livesLost": 5,
+    "guesses": 12
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 14
+  },
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": [
+    "business",
+    "brands"
+  ],
+  "audience": "anyone",
+  "summary": "Apple, Google, Amazon, Microsoft and Coca-Cola come fast; Instagram at #8 and Mercedes-Benz at #10 surprise, while Nike, Facebook, Tesla and Disney cost lives.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). Two casual orders found 7 and 8.",
+    "Interbrand's Best Global Brands 2025 (100 brands). Brands it leaves out show their 2026 Kantar BrandZ or Brand Finance rank (Walmart #13 in Kantar); Ford, Rolex and Red Bull are in none and read as not in this ranking.",
+    "Meta and Alphabet are free (parent companies, not the ranked brands)."
+  ],
+  "fixes": []
+}

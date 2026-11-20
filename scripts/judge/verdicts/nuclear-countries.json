@@ -1,0 +1,40 @@
+{
+  "id": "nuclear-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": {
+    "recognizability": 4,
+    "curve": 4,
+    "fairness": 3,
+    "data": 5,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 7,
+    "livesLost": 5,
+    "guesses": 13
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 12
+  },
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": [
+    "science",
+    "energy",
+    "nuclear"
+  ],
+  "audience": "news followers",
+  "summary": "The US, France, Russia, China and Japan are easy; players who think of weapons (Iran, North Korea, Israel, Pakistan) lose lives, and Germany shows it shut its last reactor in 2023.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). Casual orders found 7 (thinking of nuclear weapons) and 10 (thinking of power plants).",
+    "Reactors in use, 2026: Japan's 15 leave out its 18 suspended since Fukushima. Japan and Ukraine tie on 15 at #8 and #9; #10 the UK (9), #11 Spain (7). Countries that shut theirs show when (Germany, Italy, Taiwan, Lithuania, Kazakhstan)."
+  ],
+  "fixes": []
+}

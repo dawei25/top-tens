@@ -722,5 +722,68 @@
   "category": "Geography",
   "blitz": true,
   "debut": true
+ },
+ {
+  "id": "brands",
+  "title": "Most valuable brands (Interbrand 2025)",
+  "category": "Business",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "forest-countries",
+  "title": "Countries with the most forest",
+  "category": "Geography",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "elements-crust",
+  "title": "Most abundant elements in Earth's crust",
+  "category": "Science",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "world-cup-wins",
+  "title": "National teams with the most World Cup match wins",
+  "category": "Sports",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "car-countries",
+  "title": "Countries that build the most vehicles (2025)",
+  "category": "Business",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "gold-reserves",
+  "title": "Countries with the most gold reserves",
+  "category": "Business",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "coldest-countries",
+  "title": "Coldest countries (average yearly temperature)",
+  "category": "Geography",
+  "blitz": false,
+  "debut": true
+ },
+ {
+  "id": "film-series",
+  "title": "Highest-grossing film series",
+  "category": "Entertainment",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "nuclear-countries",
+  "title": "Countries with the most nuclear reactors",
+  "category": "Science",
+  "blitz": true,
+  "debut": true
  }
 ]

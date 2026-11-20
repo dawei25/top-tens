@@ -1,0 +1,52 @@
+{
+  "Canada": {
+    "text": "It has the world's northernmost settlement, Canadian Forces Station Alert, on Ellesmere Island.",
+    "source": "https://en.wikipedia.org/wiki/Climate_of_Canada",
+    "evidence": "Canada is home to the world's northernmost settlement, Canadian Forces Station Alert, on the northern tip of Ellesmere Island"
+  },
+  "Russia": {
+    "text": "In Oymyakon, the coldest inhabited place on Earth, schools close only when it drops below −55 °C.",
+    "source": "https://en.wikipedia.org/wiki/Oymyakon",
+    "evidence": "Oymyakon is currently the coldest permanently inhabited human settlement on Earth. ... Schools are closed if it is colder than −55 °C (−67 °F)."
+  },
+  "Mongolia": {
+    "text": "Its capital, Ulaanbaatar, is the coldest in the world and the coldest city of over a million people.",
+    "source": "https://en.wikipedia.org/wiki/Ulaanbaatar",
+    "evidence": "Ulaanbaatar is the coldest national capital in the world, and the coldest city on the planet with more than a million inhabitants"
+  },
+  "Iceland": {
+    "text": "Okjökull was the first of its glaciers to melt away because of climate change.",
+    "source": "https://en.wikipedia.org/wiki/Climate_of_Iceland",
+    "evidence": "Okjökull was Iceland's first glacier to have melted due to climate change."
+  },
+  "Norway": {
+    "text": "Its record low is −51.4 °C, in Karasjok, yet some coastal lighthouses vary just 10 °C over the year.",
+    "source": "https://en.wikipedia.org/wiki/Climate_of_Norway",
+    "evidence": "some lighthouses have a yearly amplitude of just 10 °C (18 °F), such as Svinøy in Herøy Municipality ... The coldest temperature ever is −51.4 °C (−60.5 °F) in Karasjok Municipality."
+  },
+  "Finland": {
+    "text": "Its record low is −51.5 °C, and without the Gulf Stream its winters would be much colder.",
+    "source": "https://en.wikipedia.org/wiki/Climate_of_Finland",
+    "evidence": "The warm waters of the Gulf Stream and the North Atlantic Drift Current, which continuously warm the region, play a big role in the climate of Norway, Sweden and Finland; if it weren't for these currents, the winters in Fennoscandia would be much colder. ... The lowest, −51.5 °C (−60.7 °F) (Kittilä, January 28, 1999)."
+  },
+  "Kyrgyzstan": {
+    "text": "The Tian Shan mountains cover over 80% of it, so it's sometimes called the Switzerland of Central Asia.",
+    "source": "https://en.wikipedia.org/wiki/Kyrgyzstan",
+    "evidence": "The mountainous region of the Tian Shan covers over 80% of the country (Kyrgyzstan is occasionally referred to as \"the Switzerland of Central Asia\" as a result), with the remainder made up of valleys and basins."
+  },
+  "Sweden": {
+    "text": "The world's first ice hotel, at Jukkasjärvi, is rebuilt from snow and ice every winter.",
+    "source": "https://en.wikipedia.org/wiki/Icehotel_(Jukkasj%C3%A4rvi)",
+    "evidence": "It is rebuilt each year with snow and ice in the village of Jukkasjärvi and is the world's first ice hotel. After its first opening in 1990, the hotel has been rebuilt each year from December to April."
+  },
+  "Tajikistan": {
+    "text": "The Pamir Highway, the world's second-highest international road, runs from its capital, Dushanbe, to Osh.",
+    "source": "https://en.wikipedia.org/wiki/Pamir_Mountains",
+    "evidence": "The Pamir Highway, the world's second highest international road, runs from Dushanbe in Tajikistan to Osh in Kyrgyzstan through the Gorno-Badakhshan Autonomous Province"
+  },
+  "Estonia": {
+    "text": "In 2005 it became the first country to hold binding internet voting nationwide, in its local elections.",
+    "source": "https://en.wikipedia.org/wiki/Estonia",
+    "evidence": "In 2005, Estonia became the first country in the world to introduce nationwide binding Internet voting in local elections of 2005."
+  }
+}

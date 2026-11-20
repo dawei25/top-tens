@@ -23,6 +23,11 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       figure or use a UAE-wide one, with a guard. Also: its top-10 facts repeat other lists' country facts (travel
       facts would fit), and China, the guess most people make, costs a life with no figure and no reason (a miss note
       needs a puzzle-format field: coordinator's call). Free play only now, so no day is at risk.
+- [ ] **Lexicon: regenerate with the Nov 20 candidates after Nov 21** (australia-cities' day). The nine new debut lists
+      (brands, forest-countries, elements-crust, world-cup-wins, car-countries, gold-reserves, coldest-countries,
+      nuclear-countries, film-series) were built on Nov 20 and lexicon.json was restored to the committed one, so their
+      names aren't in it yet: run `npx tsx scripts/lexicon.ts` (or any build) after Nov 21, commit it, and check the
+      dailies of the next days read as before (aliases.test.ts "Nov 20 candidates" passes on both).
 
 - [ ] **Lexicon retrain held back (Nov 19), until happiest-countries' day (Nov 20) has passed.** The Nov 19 build of
       empires, museums, consoles and mountains wrote a new lexicon.json; it was not committed. Retrained, it changed
