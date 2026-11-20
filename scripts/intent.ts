@@ -2042,6 +2042,11 @@ export const INTENT: Record<string, Intent> = {
       "Singapore Island": ["Singapore"],
       "Manhattan Island": ["Manhattan"],
     },
+    groups: {
+      // "usa" offers the country's islands, but "united states" is two words the game reads as generic ("united",
+      // "states"), so it said it isn't an answer (list judge, Nov 20). The same four "usa" offers first.
+      "United States": ["Long Island", "Puerto Rico", "Manhattan Island", "Oʻahu"],
+    },
   },
   "golf-countries": {
     // The nations count as themselves, so the United Kingdom's forms skip this list (as on world-cup-wins).
