@@ -77,7 +77,9 @@ that all score). The owner's target for Today's list: a typical player averages 
   - the casual simulation finds **6 to 8** of the 10 before the game ends. (A game short of 10/10 always ends at
     zero lives, so count what was found by then; running out is normal, not a fail.) `scripts/judge/par.ts` turns
     the casual score into an estimated crowd that bunches toward the middle (1.5 + 0.45 x casual for the typical
-    player): 6 found lands the average near 5, 8 near 6. Below 6 is too hard for a daily, 9-10 too easy. How fast
+    player, with a stronger group and a few fans above, so the crowd's average runs about 0.8 above the typical
+    player): 6 found lands the average near 5, 8 near 6, 9 near 6.3. Judge by the average, not the typical player's
+    figure. Below 6 is too hard for a daily, 9-10 too easy. How fast
     famous misses burn lives belongs in `fairness`, not here;
 - **Blitz** (free play): any Blitz-ready list whose verdict scores blitzDepth >= 4, data >= 4 and recognizability
   >= 4 (and isn't `reject` or `fix-first`), whatever its list decision: a list too easy or too punishing as a classic
