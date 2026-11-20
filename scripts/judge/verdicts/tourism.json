@@ -1,22 +1,27 @@
 {
   "id": "tourism",
-  "judgedAt": "2026-10-30",
-  "decision": "daily-list",
-  "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 5, "curve": 3, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 0 },
+  "judgedAt": "2026-11-20",
+  "decision": "free-play",
+  "alsoBlitz": true,
+  "priority": 2,
+  "scores": { "recognizability": 5, "curve": 2, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 4 },
   "casual": { "found": 10, "livesLost": 2, "guesses": 12 },
-  "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
-  "blitzCasual": null,
+  "fan": { "found": 10, "livesLost": 3, "guesses": 13 },
+  "blitzCasual": { "scored": 20, "named": 26 },
   "difficulty": 1,
   "tags": ["geography", "travel", "countries"],
   "audience": "anyone",
-  "summary": "An easy, friendly daily: every answer is a country people know, and the only debate is that China and Thailand are not in it. Good for a gentle day.",
+  "summary": "Too easy for Today's list: every answer is a famous country, and a casual player gets all 10, losing lives only on China and Thailand. A good Blitz and an easy free-play roll.",
   "reasons": [
-    "Casual finds all 10 in 12 guesses, losing lives only on China and Thailand. On the easy side, but Turkey at #4 and Greece at #10 give a little surprise.",
-    "Every other country is unranked, so China and Thailand cost a life with no '#11' to learn from, and the list is not Blitz-ready."
+    "Casual finds 10/10 in 12 guesses (lives lost on China and Thailand), fan 10/10 in 13. A harsher casual order still finds 9. The daily band is 6 to 8, and the crowd estimate averages about 6.8, above the owner's 5 to 6.",
+    "Flat curve: eight gimmes (France, Spain, US, Italy, UK, Germany, Japan, Mexico). Turkey at #4 and Greece at #10 are the only mild surprises, and there is no stretch answer.",
+    "China is the likeliest miss and costs a life with nothing shown: the world table has no 2024 figure for it. Thailand's miss works well (35.5, just under Greece's 36.0).",
+    "Blitz holds up: 20 of 26 quick guesses score. The dead ends (China, Australia, India, Switzerland, Croatia, Ireland) have no 2024 arrivals figure on the page.",
+    "Not fresh: it has been in random play since October (no debut flag), and the owner wants dailies nobody has seen."
   ],
   "fixes": [
-    "Only the top 10 carry a value. Add ranks 11+ from the page's regional tables (Thailand, China, Austria, UAE, etc.) so near misses show a rank and the list can be Blitz-ready."
+    "China and Hong Kong cost a life with no figure and no reason given, and China is the most natural wrong guess (both simulated players lost a life on it). Keeping them out of the ranking is right: the world table has no 2024 figure for China, and the Asia table's 64.9 is China's exit-entry count of foreigners' trips (in and out), not arrivals. But the miss should say why, e.g. 'No 2024 UN figure for China'. That needs a per-entry miss note in the puzzle format (src/game/types.ts), which is the coordinator's call.",
+    "United Arab Emirates shows 18.72, but that is Dubai's count alone (the page's source: 'Dubai Welcomes 18.72 Million International Visitors (2024)'). Drop the figure (the UAE then stops scoring in Blitz) or use a UAE-wide 2024 figure.",
+    "The top-10 facts are generic country facts that repeat on other lists: Japan's mountainous terrain (co2-emissions, island-countries), the UK as first industrialised country (countries-gdp, f1-wins-by-country), France's 1789 Declaration (ballon-dor-countries), Germany's Reformation (co2-emissions). Write travel facts in scripts/facts/tourism.json, such as what draws the visitors."
   ]
 }

@@ -10,6 +10,11 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **tourism: the UAE's figure is Dubai's alone** (list judge, Nov 20): the UAE row shows Dubai's arrivals; drop the
+      figure or use a UAE-wide one, with a guard. Also: its top-10 facts repeat other lists' country facts (travel
+      facts would fit), and China, the guess most people make, costs a life with no figure and no reason (a miss note
+      needs a puzzle-format field: coordinator's call). Free play only now, so no day is at risk.
+
 - [ ] **Lexicon retrain held back (Nov 19), until happiest-countries' day (Nov 20) has passed.** The Nov 19 build of
       empires, museums, consoles and mountains wrote a new lexicon.json; it was not committed. Retrained, it changed
       how the dailies read off-list guesses: about 280 of the new aliases' forms ("xbox1", "arab empire", "2ds") would
