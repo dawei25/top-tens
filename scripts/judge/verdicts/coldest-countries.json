@@ -1,0 +1,39 @@
+{
+  "id": "coldest-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": {
+    "recognizability": 4,
+    "curve": 4,
+    "fairness": 4,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 8,
+    "livesLost": 4,
+    "guesses": 14
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 13
+  },
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": [
+    "geography",
+    "climate"
+  ],
+  "audience": "anyone",
+  "summary": "Russia, Canada and the Nordic countries are easy; Kyrgyzstan and Tajikistan (high mountains) and Estonia are the finds, Switzerland (#11) the near miss.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 8.",
+    "World Bank averages for 1991-2020 (the mean of daily highs and lows). Sovereign states only: Greenland and Svalbard would be #1 and #2 as parts of Denmark and Norway, so they are free. Never a Blitz (smallest first)."
+  ],
+  "fixes": []
+}

@@ -1,0 +1,40 @@
+{
+  "id": "gold-reserves",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": {
+    "recognizability": 4,
+    "curve": 3,
+    "fairness": 4,
+    "data": 5,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 9,
+    "livesLost": 4,
+    "guesses": 14
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 12
+  },
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": [
+    "business",
+    "money",
+    "gold"
+  ],
+  "audience": "news followers",
+  "summary": "The US, China, Russia and Switzerland come first; Italy, France and Poland are the surprises, and the UK, Saudi Arabia and South Africa cost lives.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 9, so it may be on the easy side.",
+    "World Gold Council figures as of Q3 2026 (top 50 countries); the IMF, the ECB and the BIS are no country and not answers. Canada, which holds no gold, costs a life with no figure."
+  ],
+  "fixes": []
+}

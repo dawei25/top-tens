@@ -1,0 +1,43 @@
+{
+  "id": "car-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "free-play",
+  "alsoBlitz": false,
+  "priority": 5,
+  "scores": {
+    "recognizability": 5,
+    "curve": 2,
+    "fairness": 4,
+    "data": 5,
+    "fun": 3,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 10,
+    "livesLost": 4,
+    "guesses": 14
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 1,
+    "guesses": 11
+  },
+  "blitzCasual": null,
+  "difficulty": 2,
+  "tags": [
+    "business",
+    "cars",
+    "industry"
+  ],
+  "audience": "anyone",
+  "summary": "OICA's 2025 vehicle production: China builds over three times the US, but the rest are the car countries players expect, so a casual player gets most of them.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). Two casual orders found 10; the UK (#19), Italy (#26), Canada (#14) and Sweden (#31) are the misses.",
+    "Close at the bottom: France 1,463,991 (#10), Thailand 1,455,569 (#11). Countries without a 2025 figure show their 2024 or 2020 one.",
+    "Likely too easy for Today's list; car-makers and car-models are already in the bank."
+  ],
+  "fixes": [
+    "If a judge agrees on free play, drop its `debut` flag in topics.ts, or it waits out of random play for good."
+  ]
+}
