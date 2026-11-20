@@ -162,6 +162,11 @@ export interface Topic {
    */
   lowerIsBetter?: boolean;
   /**
+   * The figures can be below zero (temperatures in °C): a minus sign right before a cell's number counts, so Canada's
+   * "−4.03 °C" is −4.03, not 4.03. Elsewhere a dash there is no sign (scripts/build.ts `parseValue`).
+   */
+  signed?: boolean;
+  /**
    * Another column that says the same in another unit: a `value` cell that disagrees with it × `factor` by more
    * than 2% is replaced by the converted number (shown rounded). The US states' km² column has misread cells
    * ("382.936" for Nevada); their square miles × 2.589988 are right.
@@ -269,6 +274,11 @@ export interface Also {
   aliasCols?: (string | number)[];
   /** Only keep rows whose `col` cell matches, as on a topic. */
   where?: { col: string | number; match: RegExp };
+  /**
+   * Skip rows whose first column is not a rank, as on a topic: the animated franchises' table puts each franchise's
+   * sub-series (" | Minions series") and its films under it, unranked or ranked within it ("1 | Minions (2015)").
+   */
+  rankedOnly?: boolean;
   /** Names for these tables' rows, by the name the table gives: "Mercedes" is the pool's "Mercedes-Benz". */
   rename?: Record<string, string>;
   /**
