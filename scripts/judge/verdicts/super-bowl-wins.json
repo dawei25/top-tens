@@ -1,24 +1,27 @@
 {
   "id": "super-bowl-wins",
-  "judgedAt": "2026-10-30",
-  "decision": "daily-list",
+  "judgedAt": "2026-11-20",
+  "decision": "free-play",
   "alsoBlitz": false,
-  "priority": 6,
-  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 3 },
-  "casual": { "found": 9, "livesLost": 4, "guesses": 14 },
+  "priority": 4,
+  "scores": { "recognizability": 4, "curve": 3, "fairness": 3, "data": 4, "fun": 3, "blitzDepth": 0 },
+  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
   "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
-  "blitzCasual": { "scored": 17, "named": 18 },
+  "blitzCasual": null,
   "difficulty": 2,
   "tags": ["sports", "football", "nfl"],
-  "audience": "football fans",
-  "summary": "Good classic: the dynasties come fast, then the real puzzle is which teams have 3 wins versus 2. US-centric, so it fits best around Super Bowl time.",
+  "audience": "NFL fans",
+  "summary": "Clean and current, but too easy for Today's list under the current bar: the casual player found 9 and was only stopped by losing all 5 lives on recent champions with 2 wins. Good free play, mostly for US players.",
   "reasons": [
-    "Casual found 9 and lost 4 on Eagles #11, Seahawks #14, Rams #12 and Ravens #17: recent champions with 2 wins, fair near misses. Washington is the stretch.",
-    "Data is current (Seahawks 2 after Super Bowl LX). Nicknames work well (pats, niners, redskins, chiefs), but 'bucs' is not recognized.",
-    "Blitz qualifies on paper but is just reciting the 32 teams, every one worth at least 10, so the classic suits it better. Hard for players outside the US."
+    "Casual found 9 of 10 and lost all 5 lives on Eagles, Seahawks, Rams, Bucs and Ravens, each #11 with 2 wins. The fan found 10 for 1 life. The bar is 6 to 8, and the crowd estimate averages about 6.3, above the 5 to 6 target.",
+    "The curve is front-loaded: seven famous franchises are gimmes for a US player, Broncos and Raiders come with thought, and only Washington is a stretch. The trap is fair (every miss shows a number) but harsh: the 2-win group holds four of the last six champions, and 22 of the 32 teams cost a life.",
+    "Ranking: 20 teams have won (not 12; 12 never have). #10 vs #11 is clean (3 vs 2). Seven tie at #11, three at #18. Inside the top 10, tied teams take the source table's order, so the board calls the Steelers 2nd on 6, the same as the Patriots. That doesn't change what counts, but a Steelers fan will notice.",
+    "It has been in random play since before launch, and the owner wants dailies fresh. Data holds until Super Bowl LXI in February 2027."
   ],
   "fixes": [
-    "Add alias 'Bucs' to Tampa Bay Buccaneers.",
-    "Drop junk redirect aliases: 'Pittsburgh Steelers stadiums', 'Pittsburgh Pirates' (an MLB team), 'Dallascowboys.com', 'Dallas cowboy players', 'Dallas Cowboys retired numbers', 'Dallas Cowboys Super Bowls', 'Kansas City Chiefs Cheerleaders', 'Kansas City Chiefs Hall of Fame', 'Packers Pro Shop', 'Packers fan', 'New York Giants Depth Chart', 'Redskinettes', '70 Greatest Redskins', 'Command Force', 'New England Patriots strategy', 'Denver Broncos Ring of Fame', 'Broncos Ring of Fame', 'Denver Broncos retired numbers', 'San Francisco 49ers Hall of Fame', '49ers Hall of Fame', 'Let's Ride', 'Just win, baby'."
+    "Drop alias 'Football Team' from Washington Commanders: typing the list's subject, 'football team', hands over #10. Keep 'Washington Football Team' and 'Washington FT'.",
+    "Drop the junk redirect aliases still in the build: 'Pittsburgh Steelers Radio Network', 'Pittsburgh Steelers Hall of Honor', 'San Francisco 49ers Radio Network', 'New England Patriots 2010s All-Decade Team', 'Patriot Way', 'Green Bay Packers rivalries', 'Intermountain Healthcare Performance Center', 'San Antonio Raiders', 'Redskins Park', '80 Greatest Redskins', '90 Greatest Redskins', 'Washington Commanders 90 Greatest', '90 Greatest Commanders', 'Washington Redskins cheerleader', 'Washington Commanders owners', 'Steely Mcbeam', and 'How Bout Dem Cowboys' (already queued).",
+    "Add aliases 'Fourty Niners' and 'Fourtyniners' to San Francisco 49ers ('fourty niners', a common misspelling, isn't recognized while 'forty niners' is), and 'Skins' to Washington Commanders (Wikipedia lists \"The 'Skins\" as a nickname).",
+    "Coordinator (src/game/state.ts rankedDepth): the 12 teams with no win read 'Buffalo Bills is outside the top 18, with 0 Super Bowl wins', because depth is the highest rank (a three-way tie at #18) while 20 teams are ranked. Count the ranked entries instead (outside the top 20), or say 'has no Super Bowl win'."
   ]
 }
