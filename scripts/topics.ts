@@ -4907,6 +4907,10 @@ export const TOPICS: Topic[] = [
     // The edition's own name ("English Wikipedia") is an alias, with its redirects ("enwiki").
     aliasCols: [0],
     aliases: { Chinese: ["Mandarin", "Mandarin Chinese"] },
+    // Three second editions in a language are told apart only in brackets ("Norwegian (Nynorsk)"), which a row's name
+    // loses, so they merge into the first (Bokmål's Norwegian, #28). Their own names are free, and never corrected
+    // into another language ("sorani" was Somali).
+    knownNames: ["Nynorsk", "Norwegian Nynorsk", "Sorani", "Sorani Kurdish", "Central Kurdish", "Taraškievica"],
     // Redirects to the language's article that are about its speakers, words or places, a person's name, and the
     // halves of two names in brackets ("Chinese (written vernacular Chinese)").
     junkAliases: [
