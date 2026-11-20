@@ -1,14 +1,13 @@
 {
   "id": "golf-countries",
-  "by": "builder",
   "judgedAt": "2026-11-20",
   "decision": "daily-list",
   "alsoBlitz": false,
-  "priority": 6,
+  "priority": 7,
   "scores": {
     "recognizability": 5,
     "curve": 4,
-    "fairness": 4,
+    "fairness": 3,
     "data": 4,
     "fun": 4,
     "blitzDepth": 0
@@ -20,22 +19,26 @@
   },
   "fan": {
     "found": 10,
-    "livesLost": 0,
-    "guesses": 10
+    "livesLost": 3,
+    "guesses": 13
   },
   "blitzCasual": null,
   "difficulty": 2,
   "tags": [
     "sports",
     "golf",
-    "countries"
+    "geography"
   ],
   "audience": "anyone",
-  "summary": "The US (43% of all courses), Scotland, England, Canada, Australia and Japan come fast; South Korea, Sweden and France are the finds, and China (#11), Spain, Ireland and South Africa are the near misses.",
+  "summary": "Six come fast (US, Japan, Canada, England, Australia, Scotland), Germany, France, South Korea and Sweden take thought, and China, Spain, Ireland and South Africa sit just below at #11 to #14.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 7 and lost its lives on Ireland, Spain, South Africa, China and Mexico.",
-    "The R&A's 2019 count (Golf course article), top 20 only: countries below it cost a life with no figure (noFigures). England and Scotland count on their own as golf counts them, the prompt says so, and 'uk' offers the two. Wales and Northern Ireland are in no count: free.",
-    "Not the bank's 'countries with the most <sport> wins' pattern: it counts courses, which players reason out from wealth, space and golf culture. Never a Blitz (20 figures)."
+    "Casual found 7 before running out (US, Scotland, England via 'uk', Japan, Canada, Australia, Germany); lives went on Ireland #13, China #11, Spain #12, South Africa #14 and Mexico (outside the top 20). A weaker order found 6. Fan found all 10, losing lives on Ireland, South Africa and Spain.",
+    "Every answer is a country anyone knows, and the order is reasoned from wealth, space and golf culture. Japan at 3,169 and the US at 43% of all courses are good reveals; Sweden and South Korea are the fair stretches.",
+    "Fairness 3: four golf-famous countries sit at #11 to #14, all within 125 courses of Scotland, so lives go fast. Each shows its figure, and countries below the count read 'outside the top 20', so the misses teach something.",
+    "Data matches the Golf course article's 2019 R&A table and the prompt states the year and the England/Scotland split. 'uk', 'britain' and 'gb' offer both; 'golf', Wales, Northern Ireland, St Andrews and Augusta are free; 'korea' and 'holland' resolve.",
+    "Judge's note: the builder's placeholder named most answers before the prediction step, so the fan's order was set by golf culture, not recall of the table. Treat the replays as slightly generous."
   ],
-  "fixes": []
+  "fixes": [
+    "scripts/facts/golf-countries.json, Canada: 'the oldest golf club in North America still in existence' contradicts its own evidence (The Savannah Golf Club, 1794, still exists). Say 'the oldest in North America in continuous existence'."
+  ]
 }

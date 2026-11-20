@@ -1,41 +1,48 @@
 {
   "id": "languages-countries",
-  "by": "builder",
   "judgedAt": "2026-11-20",
   "decision": "daily-list",
-  "alsoBlitz": false,
+  "alsoBlitz": true,
   "priority": 7,
   "scores": {
     "recognizability": 5,
     "curve": 4,
-    "fairness": 4,
+    "fairness": 3,
     "data": 4,
     "fun": 4,
-    "blitzDepth": 0
+    "blitzDepth": 5
   },
   "casual": {
-    "found": 7,
+    "found": 8,
     "livesLost": 5,
-    "guesses": 12
+    "guesses": 13
   },
   "fan": {
     "found": 10,
-    "livesLost": 1,
-    "guesses": 11
+    "livesLost": 0,
+    "guesses": 10
   },
-  "blitzCasual": null,
-  "difficulty": 3,
+  "blitzCasual": {
+    "scored": 28,
+    "named": 28
+  },
+  "difficulty": 2,
   "tags": [
     "culture",
-    "languages",
-    "countries"
+    "geography",
+    "languages"
   ],
   "audience": "anyone",
-  "summary": "India, China, Indonesia and the US come fast and Papua New Guinea's 845 is famous trivia; Cameroon is the find, the DRC (#11) and the Philippines (#12) the near misses, Russia, South Africa and Switzerland the traps.",
+  "summary": "Big countries come fast and Papua New Guinea's 845 is famous trivia; Cameroon and Australia are the finds. Lives go on Russia, Canada and official-language guesses like South Africa and Switzerland.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 7 and lost its lives on Russia, South Africa, Switzerland, Canada and the Philippines.",
-    "Ethnologue's 22nd edition (2019), every country and territory, counting the languages established there, not recent immigrants' (the prompt says so). With them the same ten lead, the US and Australia higher. The data is from 2019: the page has no newer edition.",
-    "Distinct from languages (most spoken languages): countries, not languages, are the answers. Blitz not simulated."
+    "Casual replay found 8 (India, China, US, Nigeria, Indonesia, Brazil, Papua New Guinea, Mexico) and ran out on Russia #18, South Africa #58, Switzerland #105, Canada #21 and Ethiopia #23, every one showing its figure. That puts the crowd average near 6. The fan found all 10 in 10 guesses.",
+    "The prompt names the measure, and the same ten lead with or without immigrants' languages, so the qualifier traps nobody. The figures match the source table (Ethnologue 2019, the only edition on the page).",
+    "7 of the 10 are also on Most populous countries, so naming big countries gets you far. But Papua New Guinea at #1, Cameroon and Australia, the DRC 5 short of Brazil, and Pakistan and Russia missing make it a different game.",
+    "Official-language thinking (South Africa, Switzerland, Belgium) is the costly class of wrong answers: fair, since the prompt says living languages, but lives go fast.",
+    "As a Blitz every country scores: the casual player named 28 in 90 s and all 28 scored."
   ],
-  "fixes": []
+  "fixes": [
+    "Language names that double as demonyms cost a life as their country on this list: english and welsh (United Kingdom #100), spanish, french, german, portuguese, russian, japanese, dutch. On a languages list a player reads these as languages, and hindi, arabic, swahili and mandarin are already free. Make language-name demonyms free on this topic (chinese and indonesian also hand over China and Indonesia).",
+    "Australia's fact (\"only about 100 are still spoken\") sits next to its 226 living languages and reads as a contradiction. Use a fact that fits the count, or a sourced line saying most of the 226 have only a few speakers left."
+  ]
 }
