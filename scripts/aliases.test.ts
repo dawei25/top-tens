@@ -2,10 +2,10 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Lexicon } from "../src/game/junk";
+import { fnv, type Lexicon } from "../src/game/junk";
 import { judgeGuess, normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
-import { bareWord, blockedAlias, gluedAlias, junkRedirect, mangledText, otherNamespace } from "./aliases";
+import { bareWord, blockedAlias, companySuffix, gluedAlias, junkRedirect, mangledText, otherNamespace } from "./aliases";
 import { TOPICS } from "./topics";
 
 const junk = (raw: string, names: string[], forms: string[] = [], works = false) => junkRedirect(raw, { names, forms, works });
@@ -133,6 +133,18 @@ describe("bareWord and gluedAlias", () => {
     expect(gluedAlias("LeBronJames", ["LeBron James", "LeBron", "James"])).toBe(false);
     expect(gluedAlias("Mount Everest", forms)).toBe(false);
     expect(gluedAlias("Lotte World 2", ["Lotte World"])).toBe(false);
+  });
+});
+
+describe("companySuffix", () => {
+  // Brands' judge (Nov 20): Apple's redirect " Inc." (its logo, then the suffix) made "inc" score #1 Apple.
+  it("flags a company suffix alone, after a logo or a comma too", () => {
+    for (const a of [" Inc.", " Inc.", "Inc", ", Inc.", "Corp.", "Corporation", "Ltd.", "Limited", "LLC", "plc", "GmbH", "& Co.", "Co."]) {
+      expect(companySuffix(a), a).toBe(true);
+    }
+  });
+  it("leaves names with a suffix, and codes and symbols written otherwise", () => {
+    for (const a of ["Apple Inc.", "Inc. magazine", "CO", "Ag", "Se", "KG", "NV", "Coca", "Incas", "LLCs"]) expect(companySuffix(a), a).toBe(false);
   });
 });
 
@@ -1619,6 +1631,118 @@ describe("aliases as built: what players type", () => {
     it("world-cup-wins and nuclear-countries: a country with none says why", () => {
       expect(entry("world-cup-wins", "Finland")?.value).toBe("never played at a World Cup");
       expect(entry("nuclear-countries", "Germany")?.value).toBe("none since its phase-out in 2023");
+    });
+  });
+
+  describe("Dec 6-13 audit", () => {
+    // The coverage audit of the seven lists approved for Today's list on Dec 6-13, and their judges' fixes (Nov 20):
+    // fair answers the game refused, a company suffix that scored, names written the wrong way, a rename that didn't
+    // take, and misses that read like near misses. f1-wins-by-country's fixes wait for its refresh after the Dec 6
+    // finale (docs/REBUILD_QUEUE.md).
+    const puzzleOf = (id: string): Puzzle => JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
+    const read = (id: string, guess: string, lexicon: Lexicon = lex) => {
+      const r = judgeGuess(guess, puzzleOf(id), new Set(), lexicon);
+      if ("entry" in r) return `${r.kind}${"corrected" in r && r.corrected ? "?" : ""} ${r.entry.name}`;
+      return r.kind === "typo" ? `choose ${r.suggestions.join(" | ")}` : r.kind;
+    };
+    const entry = (id: string, name: string) => [...puzzleOf(id).answers, ...puzzleOf(id).extras].find((e) => e.name === name);
+    it.each([
+      // A company suffix alone is no name: "inc" scored #1 Apple through its logo's redirect " Inc.".
+      ["brands", "inc", "unknown"],
+      ["brands", "apple inc", "correct Apple"],
+      // The company's full name, and the short forms everyone uses.
+      ["brands", "samsung electronics", "correct Samsung"],
+      ["brands", "vw", "near Volkswagen"],
+      ["brands", "amex", "near American Express"],
+      // One Allianz (Brand Finance's "Allianz Group" was a second, unranked entry), and the brands' own spellings.
+      ["brands", "allianz", "near Allianz"],
+      ["brands", "allianz group", "near? Allianz"],
+      ["brands", "xbox", "near Xbox"],
+      ["brands", "vmware", "near VMware"],
+      ["brands", "ebay", "near eBay"],
+      // A made-up name gave sodium as typed; now it is a slip of sodium's Latin name, to confirm, as any typo is.
+      ["elements-crust", "nitrium", "correct? Sodium"],
+      ["elements-crust", "natrium", "correct Sodium"],
+      ["elements-crust", "poisoning", "unknown"],
+      ["elements-crust", "jewelry", "unknown"],
+      // "007" was dropped as a number; the parts the page counts in Spider-Man's total.
+      ["film-series", "007", "correct James Bond"],
+      ["film-series", "venom", "correct Spider-Man"],
+      ["film-series", "the amazing spider-man", "correct Spider-Man"],
+      ["film-series", "sony's spider-man universe", "correct Spider-Man"],
+      // Topic aliases of unranked rows (the animated franchises below #20) never shipped.
+      ["film-series", "httyd", "near How to Train Your Dragon"],
+      ["film-series", "nezha", "near Fengshen Cinematic Universe"],
+      ["film-series", "ne zha", "near Fengshen Cinematic Universe"],
+      ["film-series", "zootropolis", "near Zootopia"],
+      ["film-series", "case closed", "near Detective Conan"],
+      // A film of a series is still not the series.
+      ["film-series", "captain marvel", "unknown"],
+      // "kyrgyz" found Kyrgyzstan, "tajik" nothing; Lithuania's own name; a village council is no country.
+      ["coldest-countries", "tajik", "correct Tajikistan"],
+      ["coldest-countries", "kyrgyz", "correct Kyrgyzstan"],
+      ["coldest-countries", "lietuva", "near Lithuania"],
+      ["coldest-countries", "aiyl", "unknown"],
+      ["coldest-countries", "north persia", "unknown"],
+      // The topic renames Türkiye to Turkey; the universe's name took the table's "Turkey: 0" and kept its own.
+      ["nuclear-countries", "turkey", "near Turkey"],
+      ["nuclear-countries", "türkiye", "near Turkey"],
+    ])("%s: %s -> %s", (id, guess, want) => {
+      expect(read(id, guess)).toBe(want);
+    });
+
+    it("brands: ranks 11+ follow Interbrand's Rank column, not the rounded value (Facebook #19, not #18 beside SAP)", () => {
+      for (const [name, rank] of [["YouTube", 13], ["SAP", 18], ["Facebook", 19], ["Nintendo", 53], ["Ferrari", 54], ["Mercedes-Benz", 10]] as const) {
+        expect(entry("brands", name)?.rank, name).toBe(rank);
+      }
+      for (const name of ["Allianz Group", "XBOX", "VMWare", "EBay"]) expect(entry("brands", name), name).toBeUndefined();
+    });
+
+    it("brands: famous brands no ranking has are known names, so 'sprite' is free, not Stripe, once the lexicon learns them", () => {
+      // The committed lexicon is kept until its queued retrain (docs/REBUILD_QUEUE.md); this is the lexicon after it.
+      const known: string[] = JSON.parse(readFileSync(join(import.meta.dirname, "known", "brands.json"), "utf8"));
+      expect(known).toEqual(expect.arrayContaining(["Sprite", "Red Bull", "Fanta", "Diet Coke"]));
+      const learned: Lexicon = { ...lex, names: [lex.names, ...known.map((n) => fnv(normalize(n)).toString(36))].join(" ") };
+      expect(read("brands", "sprite", learned)).toBe("unknown");
+      expect(read("brands", "red bull", learned)).toBe("unknown");
+      expect(read("brands", "stripe", learned)).toBe("near Stripe");
+    });
+
+    it("nuclear-countries: the title says power, and a country with no power reactor says none", () => {
+      expect(puzzleOf("nuclear-countries").title).toBe("Countries with the most nuclear power reactors");
+      for (const name of ["North Korea", "Israel", "Australia", "Saudi Arabia", "Poland", "New Zealand"]) {
+        expect(entry("nuclear-countries", name)?.value, name).toBe("none");
+      }
+      expect(entry("nuclear-countries", "Austria")?.value).toBe("none, its one plant never went into use");
+      expect(entry("nuclear-countries", "Germany")?.value).toBe("none since its phase-out in 2023");
+      expect(entry("nuclear-countries", "Egypt")?.value).toBe("0");
+      expect(entry("nuclear-countries", "Türkiye")).toBeUndefined();
+      // Never scored in Blitz.
+      expect(entry("nuclear-countries", "North Korea")?.n).toBeUndefined();
+    });
+
+    it("nuclear-countries: Ukraine's fact names Zaporizhzhia's six, Japan's the source's 15 in use and 18 suspended", () => {
+      expect(entry("nuclear-countries", "Ukraine")?.fact?.text).toMatch(/Zaporizhzhia's six.*(shut|shutdown)/);
+      expect(entry("nuclear-countries", "Japan")?.fact?.text).toMatch(/\b15\b.*\b18\b.*suspended/);
+    });
+
+    it("elements-crust: no made-up name or redirect phrase ships as an element's alias", () => {
+      const junk = ["Nitrium", "Aluminium poisoning", "Aluminum-free", "ATC code V03AN01", "Titanium jewelry", "Oxygen partial pressure"];
+      const p = puzzleOf("elements-crust");
+      for (const e of [...p.answers, ...p.extras]) for (const a of junk) expect(e.aliases, `${e.name}: ${a}`).not.toContain(a);
+    });
+
+    it("elements-crust: the share is shown as the cell's percent, in ppm where the percent lost its exponent", () => {
+      expect(entry("elements-crust", "Oxygen")).toMatchObject({ value: "46.1%", n: 461000 });
+      expect(entry("elements-crust", "Hydrogen")).toMatchObject({ value: "0.14%", n: 1400 });
+      expect(entry("elements-crust", "Carbon")).toMatchObject({ value: "0.02%", n: 200 });
+      expect(entry("elements-crust", "Gold")).toMatchObject({ value: "0.004 ppm", n: 0.004 });
+      expect(puzzleOf("elements-crust").metric).toBe("Share of the crust by mass");
+    });
+
+    it("film-series: the X-Men fact names Deadpool, the Batman fact the Joker films", () => {
+      expect(entry("film-series", "X-Men")?.fact?.text).toMatch(/Deadpool/);
+      expect(entry("film-series", "Batman")?.fact?.text).toMatch(/Joker/);
     });
   });
 });

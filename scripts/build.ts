@@ -18,8 +18,8 @@ import { CITY_FORMS, COUNTRY_FORMS, INTENT, NICKNAMES, STATE_FORMS } from "./int
 const WORD_CODES = new Set(["IN", "OR", "ME", "HI", "OK", "OH"]);
 import { countryOf, UNIVERSES, US_STATE_CODES, whereIs, type Place, type Region, type Where } from "./gazetteer";
 import {
-  bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, COUNTRY_JUNK, isEnglishWord, junkRedirect, mangledForms,
-  otherNamespace, placeholderName,
+  bareWord, baseTitle, blockedAlias, CELEBRITY_JUNK, CITY_JUNK, COMPANY_JUNK, companySuffix, COUNTRY_JUNK, isEnglishWord, junkRedirect,
+  mangledForms, otherNamespace, placeholderName,
 } from "./aliases";
 
 const OUT_DIR = join(import.meta.dirname, "..", "public", "puzzles");
@@ -88,6 +88,8 @@ interface Row {
   country?: string[];
   /** When the figure is from, shown in brackets after it: a `textRows` year, "$54.7 million (2025)". */
   note?: string;
+  /** The cell's other way of giving the figure, shown in its place (`shownAs`): "46.1%" for "461,000 (46.1%)". */
+  shown?: string;
 }
 
 /** An entry as built: the puzzle format, plus the countries a place is in where the topic reads them. */
@@ -497,10 +499,14 @@ export async function readRows(topic: Topic): Promise<Row[]> {
           topic.articles?.[name] ?? partTarget ?? (viaCell !== cellText ? viaCell : redirectTarget(name, nameCell, hasCountries(topic)));
         if (target !== name) seeds.push(target);
         const t = tc >= 0 ? parseValue(r[tc]?.text ?? "") : null;
+        // The same figure the cell also gives another way, shown instead where it's there: "46.1%" for oxygen's
+        // "461,000 (46.1%)"; gold's "0.004 (4×10%)" lost its exponent, so it shows "0.004 ppm".
+        const shown = topic.shownAs && !override ? valueCell.text.match(topic.shownAs)?.[1] : undefined;
         rows.push({
           name,
           value: v.value,
           ...(t ? { tiebreak: t.value } : {}),
+          ...(shown ? { shown } : {}),
           valueText: t && t.value >= v.value ? rangeText(v.display, t.display) : v.display,
           aliasSeeds: seeds.map(cleanName).filter((s) => s && s.length > 1),
           redirectTarget: target,
@@ -1437,7 +1443,7 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       rank: tied ? entries[i - 1].rank : i + 1,
       name: row.name,
       aliases: [...aliases],
-      value: (topic.prefix ?? "") + row.valueText + (topic.unit ?? "") + (row.note ? ` (${row.note})` : ""),
+      value: (row.shown ?? (topic.prefix ?? "") + row.valueText + (topic.unit ?? "")) + (row.note ? ` (${row.note})` : ""),
       ...(Number.isFinite(row.value) ? { n: statNumber(row.value) } : {}),
       ...(i < 10 ? { article: row.redirectTarget } : {}),
     };
@@ -1478,13 +1484,18 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       const out = members.filter((p) => where(p) === "outside").length;
       console.log(`     ${topic.id}: ${members.length - out} ${u} in ${topic.region}, ${out} elsewhere, ${UNIVERSES[u]().length - placed.length} left free`);
     }
-    // Named fields only: a capital's `country` is the build's, not the puzzle format's.
-    const added: Entry[] = members.map((p) => ({
-      rank: 0,
-      name: p.name,
-      aliases: [...p.aliases],
-      ...(where(p) === "outside" ? { elsewhere: true as const } : {}),
-    }));
+    // Named fields only: a capital's `country` is the build's, not the puzzle format's. A member the topic renames is
+    // shown by that name, keeping its own as an alias: the table's "Turkey: 0" gave its figure to the universe's
+    // "Türkiye", which kept its name though the topic renames it (nuclear-countries' judge, Nov 20).
+    const added: Entry[] = members.map((p) => {
+      const name = topic.rename?.[p.name] ?? p.name;
+      return {
+        rank: 0,
+        name,
+        aliases: name === p.name ? [...p.aliases] : [p.name, ...p.aliases],
+        ...(where(p) === "outside" ? { elsewhere: true as const } : {}),
+      };
+    });
     if (TEAM_UNIVERSE.test(u)) for (const m of added) nicknamed.add(m);
     if (u === "countries") for (const m of added) countryMembers.add(m);
     extra.push(...added);
@@ -1571,6 +1582,12 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     if (!named.has(normalize(e.name))) named.set(normalize(e.name), e);
     own(e, [e.name, ARTICLE.get(e), LINK.get(e)]);
   }
+  // The topic's own aliases name unranked answers too ("httyd", "nezha" for animated franchises below #20, "amex" for a
+  // brand only another ranking has). They reached ranked rows only, so the rest never shipped (film-series' judge, Nov 20).
+  for (const e of entries.slice(rows.length)) for (const a of topic.aliases?.[e.name] ?? []) if (!e.aliases.includes(a)) e.aliases.push(a);
+  for (const name of Object.keys(topic.aliases ?? {})) {
+    if (!entries.some((e) => e.name === name)) console.log(`warn ${topic.id}: aliases for "${name}", which is no entry`);
+  }
   for (const [name, shown] of zeroRows(topic)) {
     // The table's "Czech Republic: 0" is the universe's Czechia.
     const e = taken.get(name) ?? (countryMembers.size ? countryNames([name]).map((n) => taken.get(n)).find(Boolean) : undefined);
@@ -1582,6 +1599,9 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
     if (!e) throw new Error(`${topic.id}: note for "${name}", which is no entry`);
     e.value = noted(e.value, note);
   }
+  // The table lists every answer that has any, so the others have none: "North Korea ... (power reactors in use:
+  // none)", not a bare "outside the top 28" that reads like a near miss (`unlistedValue`). Never scored.
+  if (topic.unlistedValue) for (const e of entries) if (e.rank === 0 && e.value === undefined && !e.elsewhere) e.value = topic.unlistedValue;
   if (topic.people) {
     // A near miss with a figure ("Tyson Fury: #3 in 2025") is typed by surname like the ranked: "prescott" is Dak
     // Prescott, not a free "isn't an answer" (judge, cycle 5). Same rule as the ranked rows above.
@@ -1618,6 +1638,11 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   addSpellings(entries, topic.people);
   // Whatever the source (redirect, cell, universe), a slur never ships.
   for (const e of entries) e.aliases = e.aliases.filter((a) => !blockedAlias(a, [e.name]));
+  // Nor a company suffix alone (" Inc." scored Apple for "inc" on brands): no name of anything, on any list.
+  for (const e of entries) {
+    for (const a of e.aliases) if (companySuffix(a)) logDrop(topic.id, e.rank, e.name, a, "only a company suffix");
+    e.aliases = e.aliases.filter((a) => !companySuffix(a));
+  }
   // Nor text decoded in the wrong code page: "Eugčne Henri Paul Gauguin" (painters' judge). validate.ts fails a name
   // like that, which needs a `rename`.
   for (const { entry: e, form, why } of mangledForms(entries)) {

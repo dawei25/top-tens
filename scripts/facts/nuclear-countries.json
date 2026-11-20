@@ -35,14 +35,14 @@
     "evidence": "on September 5, 1945, at 3:45 p.m., the 10-watt ZEEP achieved the first self-sustained nuclear reaction outside the United States. ... Canada is a technology leader in heavy water reactors and natural uranium fueled reactors more broadly."
   },
   "Japan": {
-    "text": "After the 2011 Fukushima accident it shut every reactor; of its 54, only 13 ran again by late 2024.",
-    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_Japan",
-    "evidence": "After the Fukushima accident, all reactors were shut down temporarily. As of November 2024, of the 54 nuclear reactors present in Japan before 2011, there were 33 operable reactors but only 13 reactors in 6 power plants were actually operating."
+    "text": "Besides its 15 in use, 18 of its reactors are suspended: most of the 23 suspended in the whole world.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_by_country",
+    "evidence": "The table (Country | Reactors / In use | Reactors / Suspended): World | 428 | 23 ... Japan | 15 | 18. The other suspended reactors are India's 4 and Pakistan's 1."
   },
   "Ukraine": {
-    "text": "Europe's largest nuclear plant, Zaporizhzhia, is here; Russian forces seized it in March 2022.",
+    "text": "Its 15 include Zaporizhzhia's six, Europe's largest plant, seized by Russian forces in March 2022 and now shut.",
     "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_Ukraine",
-    "evidence": "Zaporizhzhia is the largest nuclear power plant in Europe, and Russia wants Rosatom to restart it. ... In March 2022, Russian forces seized control of the Zaporizhzhia Nuclear Power Plant."
+    "evidence": "There are four nuclear power plants in Ukraine but one of them, Zaporizhzhia, is now occupied and claimed by Russia and shutdown. The 15 reactors total installed capacity is over 13 GWe. ... one of the six reactors of the Zaporizhzhia Nuclear Power Plant ... Zaporizhzhia is the largest nuclear power plant in Europe ... In March 2022, Russian forces seized control of the Zaporizhzhia Nuclear Power Plant."
   },
   "United Kingdom": {
     "text": "Calder Hall, opened in 1956, was the first nuclear plant to make electricity in commercial amounts.",
