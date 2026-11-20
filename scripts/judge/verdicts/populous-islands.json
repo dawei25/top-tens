@@ -1,41 +1,28 @@
 {
   "id": "populous-islands",
-  "by": "builder",
   "judgedAt": "2026-11-20",
-  "decision": "daily-list",
+  "decision": "fix-first",
   "alsoBlitz": false,
   "priority": 7,
-  "scores": {
-    "recognizability": 4,
-    "curve": 4,
-    "fairness": 4,
-    "data": 4,
-    "fun": 4,
-    "blitzDepth": 0
-  },
-  "casual": {
-    "found": 8,
-    "livesLost": 5,
-    "guesses": 13
-  },
-  "fan": {
-    "found": 10,
-    "livesLost": 2,
-    "guesses": 12
-  },
-  "blitzCasual": null,
+  "scores": { "recognizability": 4, "curve": 4, "fairness": 3, "data": 3, "fun": 4, "blitzDepth": 5 },
+  "casual": { "found": 6, "livesLost": 5, "guesses": 14 },
+  "fan": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "blitzCasual": { "scored": 26, "named": 28 },
   "difficulty": 3,
-  "tags": [
-    "geography",
-    "islands",
-    "population"
-  ],
+  "tags": ["geography", "islands", "population"],
   "audience": "anyone",
-  "summary": "Great Britain, Honshu, Java and Madagascar come fast; Luzon and Mindanao reward thought, Salsette (Mumbai's island) is the find, and Sri Lanka (#12), Ireland and Cuba are the near misses.",
+  "summary": "A good geography daily: Great Britain, Honshu and Madagascar come fast, and typing Indonesia or the Philippines opens their islands. One fix first: Salsette's #9 figure is unsourced and bigger than Wikipedia's figure for all of greater Mumbai, so Hispaniola should be #10.",
   "reasons": [
-    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 8 and lost its lives on Sri Lanka, Ireland, Cuba, Manhattan and Singapore; a player who doesn't think of Java or Sumatra finds 6.",
-    "Every island on the page with a figure (211), each from its latest census or estimate (2020-2024). #8 to #12 sit within 1.6 million of each other (Taiwan, Salsette, Borneo, Hispaniola, Sri Lanka), on figures of different years. Afro-Eurasia, the Americas and mainland Australia are unranked landmasses: free.",
-    "Five of the ten are also on islands (by area): Borneo, Madagascar, Sumatra, Honshu, Great Britain. Typing a country offers its islands ('japan', 'indonesia'); 'uk' is Great Britain, 'haiti' Hispaniola, 'mumbai' Salsette (Wikipedia's 'Mumbai Island'). Blitz not simulated."
+    "Casual: Great Britain, Honshu (from the 'japan' choices), Madagascar, Taiwan, Java and Luzon (from the country choices), then lives on Ireland #19, Cuba #17, Sri Lanka #12, Iceland #101 and Manhattan #43: 6/10. A player who also takes the other names in the choices (Sumatra, Mindanao) gets 8. Fan: 9/10, lives on Sri Lanka, Hispaniola, Sulawesi, New Guinea and Cuba.",
+    "Every figure matches the source, but Salsette's 23,729,378 is tagged 'citation needed' on its own article (since Jan 2022). The Mumbai article gives Greater Mumbai 12.4 million (2011) and the whole metropolitan region, seven times the island's area, 'over 20 million'. The number is almost certainly too high, and it decides who is #10.",
+    "The builder's questions: 'uk' (and england, scotland, wales) giving Great Britain and 'haiti' giving Hispaniola are what players mean. 'mumbai' giving Salsette is fair: knowing Mumbai is on an island is the whole insight, as with 'manhattan' or 'singapore'. 'india' offers four choices instead of handing it over, and the fact names Mumbai. Tokyo, Jakarta and Manila are correctly free.",
+    "Not a weaker copy of Largest islands (daily Oct 25): five answers repeat, but Java, Luzon, Mindanao and Taiwan replace Baffin, Victoria and Ellesmere. Put it late in Dec 6-13, as far as possible from island-countries (Nov 25). Blitz: 26 of 28 casual names score, so it qualifies once the data is fixed."
   ],
-  "fixes": []
+  "fixes": [
+    "Salsette (#9): replace the table's 23,729,378 (unsourced: 'citation needed' on Salsette Island's article, and above the Mumbai article's 'over 20 million' for the whole 4,355 km² metropolitan region) with a sourced figure via `overrides`. The latest one found is the 2011 census for the cities the list's own note says the island holds: Greater Mumbai 12,442,373 plus Thane and Mira-Bhayandar, about 15 million, an upper bound since Thane's municipal area runs past the island. Salsette then falls to about #13, Hispaniola (22,278,000) becomes #10 and Sri Lanka (22,000,000) #11. That is not a tie.",
+    "Once Hispaniola is in the top 10, it needs a fun fact that names Haiti and the Dominican Republic, since players will reach it by typing 'haiti'.",
+    "'australia' puts Tasmania (#78) in the box to confirm. Like the table's other unranked landmasses (and as the topic's own comment intends), it should be free, with no island suggested.",
+    "'zanzibar' isn't recognized. The table names that row 'Unguja (Zanzibar)', so keep Zanzibar and Zanzibar Island as aliases of Unguja (#47).",
+    "'united states' says it isn't an answer, while 'usa' and 'america' offer Long Island / Manhattan Island / Oʻahu / Puerto Rico; it should get the same choices. 'indonesa' and 'indonsia' don't reach Indonesia's choices either (free, but the choices never open)."
+  ]
 }

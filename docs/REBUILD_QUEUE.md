@@ -10,6 +10,12 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **populous-islands, fix first** (judge, Nov 20): Salsette's 23.7 million is tagged "citation needed" in its own
+      article and decides #10. Override it with a sourced figure (the 2011 census total for the island's cities, about
+      15 million), which makes Hispaniola #10 and Sri Lanka #11 (no tie); give Hispaniola a fun fact naming Haiti and
+      the Dominican Republic. Also: "australia" should be free (it offers Tasmania), "zanzibar" should land on Unguja,
+      and "united states" should read as a country as "usa" does. Then a quick re-judge.
+
 - [ ] **Dec 6-13 audit (Nov 20): what's left for other rebuilds.** brands, gold-reserves, coldest-countries,
       nuclear-countries, elements-crust and film-series are rebuilt with their fixes (aliases.test.ts "Dec 6-13 audit").
       - **f1-wins-by-country, at its post-finale refresh:** the source fixes are in, not built: "west germany"
