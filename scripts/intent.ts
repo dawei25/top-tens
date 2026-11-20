@@ -194,7 +194,8 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["Switzerland", "Swiss", "Swiss Confederation"],
   // "lux" found nothing on life-expectancy-countries (coverage audit, Nov 13); happiest-countries had it alone.
   ["Luxembourg", "Lux"],
-  ["India", "Bharat"],
+  // "hindustan" was offered as Honduras on languages-countries (coverage audit, Nov 20).
+  ["India", "Bharat", "Hindustan"],
   ["Japan", "Nippon", "Nihon"],
   ["South Africa", "RSA"],
   ["Taiwan", "Republic of China", "ROC", "Chinese Taipei", "Formosa"],

@@ -1830,6 +1830,9 @@ describe("aliases as built: what players type", () => {
       ["languages-countries", "nigerian", "correct Nigeria"],
       ["languages-countries", "england", "near United Kingdom"],
       ["languages-countries", "china", "correct China"],
+      // India's other name was offered as Honduras (#126) to confirm (coverage audit; shared COUNTRY_FORMS).
+      ["languages-countries", "hindustan", "correct India"],
+      ["golf-countries", "hindustan", "near India"],
       // The capitals list's spelling: "ulan bator" found nothing while "ulaanbaatar" was #20.
       ["high-capitals", "ulan bator", "near Ulaanbaatar"],
       ["high-capitals", "ulaanbaatar", "near Ulaanbaatar"],
