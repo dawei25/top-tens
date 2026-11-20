@@ -10,7 +10,7 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
-- [ ] **populous-islands, fix first** (judge, Nov 20): Salsette's 23.7 million is tagged "citation needed" in its own
+- [x] **populous-islands, fix first** (judge, Nov 20; fixed Nov 20, Salsette 15.1 million from the 2011 census, Hispaniola #10; needs a quick re-judge): Salsette's 23.7 million is tagged "citation needed" in its own
       article and decides #10. Override it with a sourced figure (the 2011 census total for the island's cities, about
       15 million), which makes Hispaniola #10 and Sri Lanka #11 (no tie); give Hispaniola a fun fact naming Haiti and
       the Dominican Republic. Also: "australia" should be free (it offers Tasmania), "zanzibar" should land on Unguja,
@@ -49,7 +49,7 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       figure or use a UAE-wide one, with a guard. Also: its top-10 facts repeat other lists' country facts (travel
       facts would fit), and China, the guess most people make, costs a life with no figure and no reason (a miss note
       needs a puzzle-format field: coordinator's call). Free play only now, so no day is at risk.
-- [ ] **Lexicon: regenerate with the Nov 20 candidates after Nov 21** (australia-cities' day). The nine new debut lists
+- [ ] **Lexicon: regenerate with the Nov 20 candidates after Nov 21, and before Dec 6** (the Dec 6-13 lineup needs it: language names free on languages-countries, sorani, brands' known names) (australia-cities' day). The nine new debut lists
       (brands, forest-countries, elements-crust, world-cup-wins, car-countries, gold-reserves, coldest-countries,
       nuclear-countries, film-series) and the second round (populous-islands, high-capitals, languages-countries,
       wikipedia-languages, golf-countries; "sorani" reads as a slip of Somali until then) were built on Nov 20 and

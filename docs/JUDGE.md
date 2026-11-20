@@ -59,6 +59,11 @@ sports statistician.
 | `fun` | surprises, debate, "oh I forgot that one" moments | a rote list nobody cares about |
 | `blitzDepth` | a casual player names 15+ scoring answers in 90 s (score 0 if not Blitz-ready) | they run dry after 3-4 |
 
+Two data checks every judge makes (Nov 20): the figure that decides #10 (and #11) is sourced on its page, not tagged
+"citation needed" (populous-islands' Salsette was, and decided #10); and each top-10 fact agrees with the figure the
+game shows beside it and with its own quoted evidence (a fact said "only about 100 are still spoken" beside 226).
+Either one failing is `fix-first`.
+
 ## Decisions
 
 Pick the best fit, in this order:
