@@ -194,7 +194,8 @@ const BASE_COUNTRY_FORMS: string[][] = [
   ["Switzerland", "Swiss", "Swiss Confederation"],
   // "lux" found nothing on life-expectancy-countries (coverage audit, Nov 13); happiest-countries had it alone.
   ["Luxembourg", "Lux"],
-  ["India", "Bharat"],
+  // "hindustan" was offered as Honduras on languages-countries (coverage audit, Nov 20).
+  ["India", "Bharat", "Hindustan"],
   ["Japan", "Nippon", "Nihon"],
   ["South Africa", "RSA"],
   ["Taiwan", "Republic of China", "ROC", "Chinese Taipei", "Formosa"],
@@ -2041,6 +2042,11 @@ export const INTENT: Record<string, Intent> = {
       Salsette: ["Mumbai", "Bombay", "Bombay Island"],
       "Singapore Island": ["Singapore"],
       "Manhattan Island": ["Manhattan"],
+    },
+    groups: {
+      // "usa" offers the country's islands, but "united states" is two words the game reads as generic ("united",
+      // "states"), so it said it isn't an answer (list judge, Nov 20). The same four "usa" offers first.
+      "United States": ["Long Island", "Puerto Rico", "Manhattan Island", "Oʻahu"],
     },
   },
   "golf-countries": {

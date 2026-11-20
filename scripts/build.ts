@@ -1150,13 +1150,15 @@ interface Curated {
 function curated(topic: Topic, entries: Entry[], final: boolean): Curated[] {
   const out: Curated[] = [];
   if ([topic.universe ?? []].flat().includes("countries")) {
+    // Forms that mean something else on this list ("english" is a language on languages-countries) go to no country.
+    const elsewhere = new Set((topic.notCountryForms ?? []).map(normalize));
     for (const forms of COUNTRY_FORMS) {
       const set = new Set(forms.map(normalize));
       let hits = entries.filter((e) => set.has(normalize(e.name)));
       // An entry that is no country takes no country's forms by a name it shares with one (topics.ts `notCountries`).
       if (!hits.length) hits = entries.filter((e) => !topic.notCountries?.includes(e.name) && e.aliases.some((a) => set.has(normalize(a))));
       if (hits.length !== 1) continue;
-      for (const alias of forms) out.push({ alias, targets: hits, strict: false });
+      for (const alias of forms) if (!elsewhere.has(normalize(alias))) out.push({ alias, targets: hits, strict: false });
     }
     // "Congo" is two countries: the game asks which one.
     const congo = (first: string) => {
@@ -1454,8 +1456,10 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
       ...(Number.isFinite(row.value) ? { n: statNumber(row.value) } : {}),
       ...(i < 10 ? { article: row.redirectTarget } : {}),
     };
-    // One country as a string, several (an island shared by countries) as a list.
-    if (row.country?.length) entry.country = row.country.length === 1 ? row.country[0] : row.country;
+    // One country as a string, several (an island shared by countries) as a list. A country that names one of the
+    // list's free landmasses offers none of its islands ("australia" is mainland Australia: `landmassCountries`).
+    const inCountries = row.country?.filter((c) => !topic.landmassCountries?.includes(c));
+    if (inCountries?.length) entry.country = inCountries.length === 1 ? inCountries[0] : inCountries;
     SHORT.set(entry, new Set(shortForms(row.name, topic.stripWords).filter((s) => normalize(s) !== normalize(row.name))));
     entries.push(entry);
   }
@@ -1510,6 +1514,8 @@ async function buildPuzzle(topic: Topic): Promise<BuiltPuzzle> {
   const junk = new Set(
     [
       ...(topic.junkAliases ?? []),
+      // Nor from a redirect or the universe's own names.
+      ...(topic.notCountryForms ?? []),
       ...(hasCountries(topic) ? COUNTRY_JUNK : []),
       ...(/\bcities\b/.test(topic.noun) ? CITY_JUNK : []),
       ...(topic.webNames ? COMPANY_JUNK : []),

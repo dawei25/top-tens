@@ -64,6 +64,12 @@ export interface Topic {
    * most prominent few first (missed guesses, Nov 18: "chinese" on empires found nothing). Names must be entries.
    */
   countries?: Record<string, string[]>;
+  /**
+   * Countries in `countryCol` whose name means one of the list's free landmasses, not their islands: typing one offers
+   * no choices. On populous-islands "australia" is mainland Australia, which the table leaves unranked, so it is free,
+   * not Tasmania (#78) in the box to confirm (list judge, Nov 20). Their islands keep every other country they're in.
+   */
+  landmassCountries?: string[];
   /** Take names from cell text instead of the first link's text. */
   nameFromText?: boolean;
   /** Take names from the first link's article title ("Nokia 1100" for a cell showing "1100"). */
@@ -201,6 +207,12 @@ export interface Topic {
    * other forms. "ROC" is the Russian Olympic Committee on the Winter medals, and also Taiwan, whose names it took.
    */
   notCountries?: string[];
+  /**
+   * Shared country forms (scripts/intent.ts COUNTRY_FORMS) that mean something else on this list: no country takes
+   * them, from any source, so typing one is free. On languages-countries a language's name ("english", "russian") is
+   * the language, not the United Kingdom or Russia, as "hindi" and "arabic" always were (list judge, Nov 20).
+   */
+  notCountryForms?: string[];
   /** Aliases to drop by exact text (after normalize): junk the rules in scripts/aliases.ts can't tell from a name. */
   junkAliases?: string[];
   /** The Wikipedia article for an entry, by name, when the table links the wrong one (or none). */
@@ -4832,6 +4844,25 @@ export const TOPICS: Topic[] = [
     rename: { "Honshū": "Honshu", "Kyūshū": "Kyushu", "Hokkaidō": "Hokkaido" },
     // The table links two of them to their geography articles.
     articles: { Madagascar: "Madagascar", Taiwan: "Taiwan" },
+    // Salsette's 23,729,378 is the island article's "(estimated) [citation needed]", more than its whole metropolitan
+    // region (seven times the island's area), and it decided #10 (list judge, Nov 20). The latest sourced figure is the
+    // 2011 census of the three cities the table's note says it holds ("Composed of Greater Mumbai, Thane and
+    // Mira-Bhayandar"), an upper bound, since Thane's area runs onto the mainland. Mumbai: "In the 2011 census, Mumbai
+    // had a population of 12,442,373 inhabitants"; Thane: "The population of Thane according to the 2011 census is
+    // 1,886,941 people"; Mira-Bhayandar: "The 2011 India census recorded a population of 809,378". 15,138,692 puts it
+    // #13, below Sulawesi; Hispaniola (22,278,000) is #10 and Sri Lanka (22,000,000) #11.
+    overrides: {
+      Salsette: {
+        value: "15,138,692",
+        source: "2011 census of Greater Mumbai, Thane and Mira-Bhayandar (their articles), the cities on the island",
+      },
+    },
+    notes: { Salsette: "2011 census of its cities" },
+    // The table names the row "Unguja (Zanzibar)", whose bracket the name loses: "zanzibar" found nothing.
+    aliases: { Unguja: ["Zanzibar", "Zanzibar Island"] },
+    // Mainland Australia is one of the table's unranked landmasses, so "australia" is free, not Tasmania (#78) to
+    // confirm (list judge, Nov 20). "tasmania" still is.
+    landmassCountries: ["Australia"],
     // Redirects that are no name for the island (flags, province codes, a region, a misnamed pair), as on islands, and
     // Iceland's own name, which Montreal's island had ("island" was the Island of Montreal).
     junkAliases: [
@@ -4863,12 +4894,19 @@ export const TOPICS: Topic[] = [
     knownOnly: [{ tables: [1], name: "Capital" }],
     // Famous high cities that are no national capital: free, and never corrected into one.
     knownNames: ["Denver", "Lhasa", "Cusco", "Cuzco", "El Alto", "Johannesburg", "Shimla", "Potosí", "Potosi", "Leh", "Xining"],
+    // The capitals universe's spelling, as on capitals: "ulan bator" found nothing while "ulaanbaatar" was #20 (list
+    // judge, Nov 20).
+    aliases: { Ulaanbaatar: ["Ulan Bator"] },
     // Redirects that are a museum, a square, a zoo, a mountain, a temple, a district or a code, not the city, and an
-    // era ("Asmara under Italy").
+    // era ("Asmara under Italy"). Below the top 10, the redirects the list judge named (Nov 20): an event, a migration,
+    // a fountain, a citizenship, a suburb, an oil field and other things in or about the city, none of them its name.
     junkAliases: [
       "Addis Ababa Museum", "Tewodros Square", "Asmara under Italy", "Asmara under Italian rule", "Asmara, Ethiopia",
       "Sana'a Zoo", "Jabal Nuqm", "Chocolate santafereño", "Gringolandia", "Changzamthok", "Changangkha", "KE-110",
       "MX-DIF", "Capital District", "Distrito Capital",
+      "Liberation from the Alberoni Occupation", "Immigration to Madrid", "Brasília, Taguatinga", "Antrim, Ontario", "NCBL",
+      "Technically Beautiful", "Roman Catholicism in Rome", "St. Joseph's Fountain", "Vatican citizenship", "Catholic City",
+      "Cecchignola", "6-resurrection", "Baku Oilfields", "Baku Today",
     ],
   },
   {
@@ -4903,6 +4941,20 @@ export const TOPICS: Topic[] = [
     ],
     // Redirects to Zambia's article about its games, from the country lists.
     junkAliases: ["Zambian sports", "Traditional Zambian games", "Indigenous Zambian games"],
+    // On a list about languages a language's name is the language, free as "hindi" and "arabic" always were: "english"
+    // and "welsh" cost a life as the United Kingdom (#100), "spanish" as Spain, "chinese" handed over China (list judge,
+    // Nov 20). Every country form that names a language with its own Wikipedia (wikipedia-languages; aliases.test.ts
+    // checks), and the other usual names of those languages. Demonyms that are no language ("american", "nigerian",
+    // "mexican") still name their country.
+    notCountryForms: [
+      "English", "Welsh", "Irish", "Chinese", "Japanese", "Korean", "German", "French", "Italian", "Spanish", "Portuguese",
+      "Russian", "Dutch", "Swedish", "Norwegian", "Danish", "Finnish", "Icelandic", "Luxembourgish", "Maltese", "Greek",
+      "Turkish", "Polish", "Czech", "Slovak", "Hungarian", "Romanian", "Bulgarian", "Serbian", "Croatian", "Slovene",
+      "Slovenian", "Bosnian", "Albanian", "Macedonian", "Ukrainian", "Belarusian", "Lithuanian", "Latvian", "Estonian",
+      "Georgian", "Armenian", "Azerbaijani", "Azeri", "Kazakh", "Uzbek", "Tajik", "Turkmen", "Kyrgyz", "Persian", "Nepali",
+      "Mongolian", "Burmese", "Thai", "Lao", "Vietnamese", "Indonesian", "Filipino", "Fijian", "Samoan", "Tongan", "Somali",
+      "Malagasy", "Greenlandic",
+    ],
   },
   {
     id: "wikipedia-languages",
@@ -4923,7 +4975,19 @@ export const TOPICS: Topic[] = [
     dataAsOf: "November 2026",
     // The edition's own name ("English Wikipedia") is an alias, with its redirects ("enwiki").
     aliasCols: [0],
-    aliases: { Chinese: ["Mandarin", "Mandarin Chinese"] },
+    // The names players use for a language, which its redirects lack (list judge, Nov 20): "bisaya" was offered as
+    // Bislama, "flemish" only as West Flemish (#186), and "farsi", "filipino", "castilian" and "espanol" found nothing.
+    // Most Cebuano speakers call it Bisaya or Binisaya (Cebuano language); the Southern Min edition "mainly uses the
+    // Taiwanese Hokkien dialect" (Southern Min Wikipedia).
+    aliases: {
+      Chinese: ["Mandarin", "Mandarin Chinese"],
+      Cebuano: ["Bisaya", "Binisaya"],
+      Dutch: ["Flemish"],
+      Persian: ["Farsi"],
+      Tagalog: ["Filipino"],
+      Spanish: ["Castilian", "Castellano", "Español"],
+      "Southern Min": ["Hokkien", "Taiwanese Hokkien", "Min Nan", "Minnan"],
+    },
     // Three second editions in a language are told apart only in brackets ("Norwegian (Nynorsk)"), which a row's name
     // loses, so they merge into the first (Bokmål's Norwegian, #28). Their own names are free, and never corrected
     // into another language ("sorani" was Somali).

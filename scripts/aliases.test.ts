@@ -6,6 +6,8 @@ import { fnv, type Lexicon } from "../src/game/junk";
 import { judgeGuess, normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import { bareWord, blockedAlias, companySuffix, gluedAlias, junkRedirect, mangledText, otherNamespace } from "./aliases";
+import { COUNTRY_FORMS } from "./intent";
+import { bankNames, misspellings } from "./lexicon";
 import { TOPICS } from "./topics";
 
 const junk = (raw: string, names: string[], forms: string[] = [], works = false) => junkRedirect(raw, { names, forms, works });
@@ -1584,8 +1586,10 @@ describe("aliases as built: what players type", () => {
       // "uk" offered Cyprus and Portsea Island; a country on an island names it, as on islands.
       ["populous-islands", "uk", "correct Great Britain"],
       ["populous-islands", "england", "correct Great Britain"],
-      ["populous-islands", "haiti", "near Hispaniola"],
-      ["populous-islands", "mumbai", "correct Salsette"],
+      // Hispaniola is #10 and Salsette #13 since Salsette's unsourced figure gave way to its cities' census ("Dec 6-13
+      // audit, round two").
+      ["populous-islands", "haiti", "correct Hispaniola"],
+      ["populous-islands", "mumbai", "near Salsette"],
       // Montreal's island had Iceland's name ("Ísland").
       ["populous-islands", "island", "unknown"],
       // Only national capitals are answers: a country, or a high city that is no capital, is free.
@@ -1793,6 +1797,120 @@ describe("aliases as built: what players type", () => {
     it("film-series: the X-Men fact names Deadpool, the Batman fact the Joker films", () => {
       expect(entry("film-series", "X-Men")?.fact?.text).toMatch(/Deadpool/);
       expect(entry("film-series", "Batman")?.fact?.text).toMatch(/Joker/);
+    });
+  });
+
+  describe("Dec 6-13 audit, round two", () => {
+    // The coverage audit of languages-countries, golf-countries and high-capitals, and the judges' fixes on them and on
+    // the spares wikipedia-languages and populous-islands (Nov 20): language names that cost a life as countries, fair
+    // names that found nothing, a choice of islands for a country that is a landmass, and an unsourced figure at #9.
+    const puzzleOf = (id: string): Puzzle => JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
+    const read = (id: string, guess: string, lexicon: Lexicon = lex) => {
+      const r = judgeGuess(guess, puzzleOf(id), new Set(), lexicon);
+      if ("entry" in r) return `${r.kind}${"corrected" in r && r.corrected ? "?" : ""} ${r.entry.name}`;
+      return r.kind === "typo" ? `choose ${r.suggestions.join(" | ")}` : r.kind;
+    };
+    const entry = (id: string, name: string) => [...puzzleOf(id).answers, ...puzzleOf(id).extras].find((e) => e.name === name);
+    it.each([
+      // A language's name is the language: free, as "hindi" and "arabic" always were. "english" and "welsh" cost a
+      // life as the United Kingdom (#100), "spanish" as Spain; "chinese" handed over China (#5).
+      ["languages-countries", "english", "unknown"],
+      ["languages-countries", "welsh", "unknown"],
+      ["languages-countries", "spanish", "unknown"],
+      ["languages-countries", "portuguese", "unknown"],
+      ["languages-countries", "japanese", "unknown"],
+      ["languages-countries", "dutch", "unknown"],
+      ["languages-countries", "italian", "unknown"],
+      ["languages-countries", "korean", "unknown"],
+      ["languages-countries", "filipino", "unknown"],
+      ["languages-countries", "chinese", "unknown"],
+      ["languages-countries", "hindi", "unknown"],
+      // Demonyms that are no language still name their country, and so do the UK's own names.
+      ["languages-countries", "american", "correct United States"],
+      ["languages-countries", "nigerian", "correct Nigeria"],
+      ["languages-countries", "england", "near United Kingdom"],
+      ["languages-countries", "china", "correct China"],
+      // India's other name was offered as Honduras (#126) to confirm (coverage audit; shared COUNTRY_FORMS).
+      ["languages-countries", "hindustan", "correct India"],
+      ["golf-countries", "hindustan", "near India"],
+      // The capitals list's spelling: "ulan bator" found nothing while "ulaanbaatar" was #20.
+      ["high-capitals", "ulan bator", "near Ulaanbaatar"],
+      ["high-capitals", "ulaanbaatar", "near Ulaanbaatar"],
+      // What speakers and players call the language: "bisaya" was Bislama (#293), "flemish" only West Flemish.
+      ["wikipedia-languages", "bisaya", "correct Cebuano"],
+      ["wikipedia-languages", "binisaya", "correct Cebuano"],
+      ["wikipedia-languages", "flemish", "correct Dutch"],
+      ["wikipedia-languages", "west flemish", "near West Flemish"],
+      ["wikipedia-languages", "farsi", "near Persian"],
+      ["wikipedia-languages", "filipino", "near Tagalog"],
+      ["wikipedia-languages", "castilian", "correct Spanish"],
+      ["wikipedia-languages", "espanol", "correct Spanish"],
+      ["wikipedia-languages", "español", "correct Spanish"],
+      // The Southern Min edition "mainly uses the Taiwanese Hokkien dialect".
+      ["wikipedia-languages", "hokkien", "near Southern Min"],
+      ["wikipedia-languages", "min nan", "near Southern Min"],
+      // Mainland Australia is a landmass the table leaves unranked: free, not Tasmania to confirm.
+      ["populous-islands", "australia", "unknown"],
+      ["populous-islands", "tasmania", "near Tasmania"],
+      ["populous-islands", "zanzibar", "near Unguja"],
+      ["populous-islands", "zanzibar island", "near Unguja"],
+      // "united states" is two generic words to the game; it offers what "usa" offers.
+      ["populous-islands", "united states", "choose Long Island | Manhattan Island | Oʻahu | Puerto Rico"],
+      ["populous-islands", "usa", "choose Long Island | Manhattan Island | Oʻahu | Puerto Rico"],
+      ["populous-islands", "haiti", "correct Hispaniola"],
+      ["populous-islands", "mumbai", "near Salsette"],
+    ])("%s: %s -> %s", (id, guess, want) => {
+      expect(read(id, guess)).toBe(want);
+    });
+
+    it("languages-countries: no country carries a language's name, and every country form naming a language is listed", () => {
+      const forms = TOPICS.find((t) => t.id === "languages-countries")!.notCountryForms!.map(normalize);
+      const p = puzzleOf("languages-countries");
+      for (const e of [...p.answers, ...p.extras]) for (const a of e.aliases) expect(forms, `${e.name}: ${a}`).not.toContain(normalize(a));
+      // A language is one with its own Wikipedia: a demonym added to intent.ts that names one ("Bengali") must be listed.
+      const langs = puzzleOf("wikipedia-languages");
+      const named = new Set([...langs.answers, ...langs.extras].flatMap((e) => [e.name, ...e.aliases]).map(normalize));
+      const languageForms = COUNTRY_FORMS.flatMap((line) => line.slice(1)).filter((f) => named.has(normalize(f)));
+      expect(languageForms.length).toBeGreaterThan(50);
+      for (const f of languageForms) expect(forms, f).toContain(normalize(f));
+    });
+
+    it("languages-countries: once the lexicon learns that a demonym is no misspelling, 'russian' is free, not Russia to confirm", () => {
+      // The committed lexicon stores "russian" as a slip of Russia (it is one letter off), so the game offers Russia to
+      // confirm; its queued retrain (docs/REBUILD_QUEUE.md) drops demonyms from the slips. This is the lexicon after it.
+      expect(misspellings("Russia", ["Russian", "Rusia", "Russian Federation"])).toEqual([["rusia", "russia"]]);
+      expect(misspellings("Afghanistan", ["Afghan", "Afganistan"])).toEqual([["afganistan", "afghanistan"]]);
+      const slips = new Set((bankNames(dir).slips ?? []).map(([s, n]) => fnv(`${s}>${n}`).toString(36)));
+      const learned: Lexicon = { ...lex, slips: [...slips].join(" ") };
+      for (const g of ["russian", "german", "indonesian", "turkish", "nepali", "georgian", "somali", "mongolian", "greenlandic"]) {
+        expect(read("languages-countries", g, learned), g).toBe("unknown");
+      }
+      // A misspelling is still corrected, and a country's own name still counts.
+      expect(read("languages-countries", "russia", learned)).toBe("near Russia");
+      expect(read("languages-countries", "indoneisa", learned)).toBe("correct? Indonesia");
+    });
+
+    it("populous-islands: Salsette shows its cities' 2011 census, not the unsourced 23.7 million that decided #10", () => {
+      expect(entry("populous-islands", "Salsette")).toMatchObject({ rank: 13, value: "15,138,692 (2011 census of its cities)" });
+      const p = puzzleOf("populous-islands");
+      expect(p.answers.slice(8).map((e) => [e.name, e.value])).toEqual([["Borneo", "23,720,000"], ["Hispaniola", "22,278,000"]]);
+      expect(entry("populous-islands", "Sri Lanka")).toMatchObject({ rank: 11, value: "22,000,000" });
+      expect(entry("populous-islands", "Hispaniola")?.fact?.text).toMatch(/Haiti.*Dominican Republic|Dominican Republic.*Haiti/);
+      expect(entry("populous-islands", "Tasmania")?.country).toBeUndefined();
+    });
+
+    it("facts that read against their own figure: Canada's club is the oldest in continuous existence, Australia's names no count", () => {
+      const canada = entry("golf-countries", "Canada")?.fact?.text;
+      expect(canada).toMatch(/in continuous existence/);
+      expect(canada).not.toMatch(/still in existence/);
+      // Beside its 226 living languages, "only about 100 are still spoken" read as a contradiction.
+      expect(entry("languages-countries", "Australia")?.fact?.text).not.toMatch(/\b\d+ (are|languages)\b|still spoken/);
+    });
+
+    it("high-capitals: no redirect below the top 10 that names something else ships as the city's name", () => {
+      const junkNames = ["Liberation from the Alberoni Occupation", "Immigration to Madrid", "Brasília, Taguatinga", "NCBL", "Technically Beautiful", "Vatican citizenship", "Catholic City", "Cecchignola", "6-resurrection", "Baku Oilfields", "Baku Today"];
+      const p = puzzleOf("high-capitals");
+      for (const e of [...p.answers, ...p.extras]) for (const a of junkNames) expect(e.aliases, `${e.name}: ${a}`).not.toContain(a);
     });
   });
 });

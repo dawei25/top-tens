@@ -47,16 +47,16 @@
     "where": "Taiwan",
     "evidence": "The name Formosa (福爾摩沙) dates from 1542, when Portuguese sailors noted it on their maps as Ilha Formosa (Portuguese for \"beautiful island\"). ... Ancestors of Taiwanese indigenous peoples settled the island around 6,000 years ago."
   },
-  "Salsette": {
-    "text": "Mumbai's seven original islands, joined by land reclamation, are now a peninsula of this island on India's west coast, which also holds Thane.",
-    "source": "https://en.wikipedia.org/wiki/Salsette_Island",
-    "where": "India (Maharashtra)",
-    "evidence": "The original seven islands of Bombay, which were merged by land reclamation during the 19th and early 20th centuries to form the city of Mumbai, are now practically a southward protruding peninsula of the much larger Salsette Island. ... Salsette Island ... is an island in Konkan division of the state of Maharashtra, along India's west coast. The cities of Mumbai ..., Thane and Mira-Bhayandar ... lie on it"
-  },
   "Borneo": {
     "text": "Split between Indonesia, Malaysia and Brunei since decolonisation; about 73% of it is Indonesia's Kalimantan.",
     "source": "https://en.wikipedia.org/wiki/Borneo",
     "where": "Indonesia, Malaysia, Brunei",
     "evidence": "Since decolonisation, Borneo has been politically divided among three sovereign states. Approximately 73% of the island forms part of Indonesia, comprising the five provinces collectively known as Kalimantan."
+  },
+  "Hispaniola": {
+    "text": "Haiti and the Dominican Republic share it; Santo Domingo (1498) was the Americas' first lasting European settlement.",
+    "source": "https://en.wikipedia.org/wiki/Hispaniola",
+    "where": "Haiti, Dominican Republic",
+    "evidence": "it is divided into two separate sovereign countries: the Spanish–speaking Dominican Republic ... to the east and the French and Haitian Creole–speaking Haiti ... to the west. ... Hispaniola is the site of the first European fort in the Americas, La Navidad (1492–1493), the first settlement, La Isabela (1493–1500), and the first permanent settlement, the capital of the Dominican Republic, Santo Domingo (1498–present)."
   }
 }
