@@ -2,6 +2,14 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-20, launch-week morning check (Fri)
+
+- Notes, ratings and missed guesses since yesterday's check: none. Plays all time: 185 across 89 lists (+1). Today's
+  Fathom: nobody finished Fathom #5 yesterday, none yet on #6.
+- So quiet that the write path was checked: the live site serves the latest build (today's list, the city list's
+  Pearl River Delta entry), and with every database call blocked (nothing written) a junk guess still tries
+  submit_miss. The game is reporting; traffic is just low two days after the first post.
+
 ## 2026-11-19, launch-week morning check (Thu, the morning after the first post)
 
 - Notes and ratings since yesterday's check: none. Plays all time: 184 across 88 lists (+10). Today's Fathom: 3
