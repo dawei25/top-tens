@@ -1,0 +1,41 @@
+{
+  "id": "populous-islands",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": {
+    "recognizability": 4,
+    "curve": 4,
+    "fairness": 4,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 8,
+    "livesLost": 5,
+    "guesses": 13
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 2,
+    "guesses": 12
+  },
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": [
+    "geography",
+    "islands",
+    "population"
+  ],
+  "audience": "anyone",
+  "summary": "Great Britain, Honshu, Java and Madagascar come fast; Luzon and Mindanao reward thought, Salsette (Mumbai's island) is the find, and Sri Lanka (#12), Ireland and Cuba are the near misses.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 8 and lost its lives on Sri Lanka, Ireland, Cuba, Manhattan and Singapore; a player who doesn't think of Java or Sumatra finds 6.",
+    "Every island on the page with a figure (211), each from its latest census or estimate (2020-2024). #8 to #12 sit within 1.6 million of each other (Taiwan, Salsette, Borneo, Hispaniola, Sri Lanka), on figures of different years. Afro-Eurasia, the Americas and mainland Australia are unranked landmasses: free.",
+    "Five of the ten are also on islands (by area): Borneo, Madagascar, Sumatra, Honshu, Great Britain. Typing a country offers its islands ('japan', 'indonesia'); 'uk' is Great Britain, 'haiti' Hispaniola, 'mumbai' Salsette (Wikipedia's 'Mumbai Island'). Blitz not simulated."
+  ],
+  "fixes": []
+}
