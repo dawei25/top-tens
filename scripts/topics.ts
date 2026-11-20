@@ -227,6 +227,20 @@ export interface Topic {
    */
   notes?: Record<string, string>;
   /**
+   * Shown in place of a figure on every unranked answer that has none, where the table lists every one that has any:
+   * "none" on nuclear-countries (no power reactor in use), so "North Korea" reads "power reactors in use: none" rather
+   * than a bare "outside the top 28" that sounds like a near miss (list judge, Nov 20). `notes` say more where the page
+   * does ("none since 1990"). Never scored.
+   */
+  unlistedValue?: string;
+  /**
+   * The value cell's other way of giving the figure, as a pattern whose first group is shown instead of the figure
+   * and `unit`, on rows where the cell has it: elements-crust shows "46.1%" for "461,000 (46.1%)" (list judge: "46.1%"
+   * reads at a glance, "461,000 ppm" doesn't), and "0.004 ppm" where the cell's percent lost its exponent. The figure
+   * still ranks and scores in the table's own unit.
+   */
+  shownAs?: RegExp;
+  /**
    * Names of the list's kind that are not answers, read like `also`: free to guess (no figure to learn from), but
    * still real names to the game. The build records them in scripts/known/<id>.json and the lexicon learns them, so
    * typed in full one is never junk nor corrected into an answer, and their words still count as plain words.
@@ -1581,6 +1595,9 @@ export const TOPICS: Topic[] = [
     value: "Wins",
     metric: "Grand Prix wins",
     noFigures: "every other country has no Grand Prix win",
+    // The table lists every nationality that has won: Japan, China and Bahrain show it (list judge, Nov 20). Built at
+    // the post-finale refresh (docs/REBUILD_QUEUE.md).
+    unlistedValue: "none",
     universe: "countries",
     junkAliases: ["Swedish sin"],
   },
@@ -4808,6 +4825,9 @@ export const TOPICS: Topic[] = [
     prefix: "$",
     unit: " billion",
     dataAsOf: "2025",
+    // Interbrand's own order, its Rank column: values rounded to $0.1 billion tie where Interbrand doesn't (Facebook
+    // is #19, not #18 beside SAP; YouTube #13; Ferrari #54).
+    keepOrder: true,
     rename: {
       "Apple Inc.": "Apple",
       "Amazon.com": "Amazon",
@@ -4817,14 +4837,38 @@ export const TOPICS: Topic[] = [
       adidas: "Adidas",
       MasterCard: "Mastercard",
       Monster: "Monster Energy",
+      // The cell's link, written as an article title: the brand writes itself "eBay".
+      EBay: "eBay",
     },
     // A brand Interbrand leaves out shows its rank in the 2026 Kantar or Brand Finance ranking: Walmart, TikTok,
-    // Starbucks, Alibaba.
+    // Starbucks, Alibaba. Their names as the brands write them, and Brand Finance's "Allianz Group" is Interbrand's
+    // Allianz (#27), not a second, unranked entry.
     also: [
-      { tables: [0], name: "Brand", rename: { "Apple Inc.": "Apple", "Visa Inc.": "Visa" }, dated: { rank: "Rank", label: "2026", source: "Kantar BrandZ" } },
-      { tables: [1], name: "Brand", rename: { "Amazon.com": "Amazon", "TikTok/Douyin": "TikTok" }, dated: { rank: "Rank", label: "2026", source: "Brand Finance" } },
+      {
+        tables: [0],
+        name: "Brand",
+        rename: { "Apple Inc.": "Apple", "Visa Inc.": "Visa", XBOX: "Xbox", VMWare: "VMware" },
+        dated: { rank: "Rank", label: "2026", source: "Kantar BrandZ" },
+      },
+      {
+        tables: [1],
+        name: "Brand",
+        rename: { "Amazon.com": "Amazon", "TikTok/Douyin": "TikTok", "Allianz Group": "Allianz" },
+        dated: { rank: "Rank", label: "2026", source: "Brand Finance" },
+      },
     ],
-    aliases: { "Mercedes-Benz": ["Mercedes", "Benz"], "Louis Vuitton": ["LV"], "L'Oréal Paris": ["L'Oréal", "Loreal"] },
+    aliases: {
+      "Mercedes-Benz": ["Mercedes", "Benz"],
+      "Louis Vuitton": ["LV"],
+      "L'Oréal Paris": ["L'Oréal", "Loreal"],
+      // Coverage audit (Nov 20): the company's full name, and the short forms everyone uses.
+      Samsung: ["Samsung Electronics"],
+      Volkswagen: ["VW"],
+      "American Express": ["Amex"],
+    },
+    // Famous brands no ranking here has: free, and said plainly ("isn't in this ranking"). "sprite" was offered as
+    // Stripe (list judge, Nov 20). The lexicon learns them when it is next trained (docs/REBUILD_QUEUE.md).
+    knownNames: ["Sprite", "Fanta", "Diet Coke", "Red Bull", "iPhone", "Heineken", "Burberry", "Jack Daniel's", "Hennessy", "Kellogg's"],
     // Redirects that are no name for the brand: people, products, slogans, ad campaigns, offices, a Nike award, and
     // words a player types for something else ("sonic" was Amazon, "the keyword" Google).
     junkAliases: [
@@ -4848,6 +4892,7 @@ export const TOPICS: Topic[] = [
       "Effects of Instagram on mental health", "Instagram impact on people", "Instagram Kids", "Instagram blogger",
       "Speedee", "Speedee Service", "QSC&V", "QSCV", "McHappy Day", "McBoat", "McRig", "Mckinley mac", "Big Yellow M",
       "Franchise Realty Interstate Corp", "McValue", "McDrive", "Mercedes-Benz CLT-Class",
+      "Telecommunication Network Business in SAMSUNG Electronics",
     ],
   },
   {
@@ -4883,8 +4928,11 @@ export const TOPICS: Topic[] = [
     // The trace elements' figures are powers of ten ("3×10−5"), and the table's text loses the exponent: radium read
     // as 9 ppm (#40). Such a cell gives no figure (build.ts `parseValue`), so only rows with a plain one rank (down to
     // krypton's 0.0001 ppm); those ten, and plutonium and neptunium (none), are answers below them that say so.
-    metric: "Share of the crust by mass (parts per million)",
+    // Shown as the cell's percent ("46.1%", carbon "0.02%"), in ppm where the percent lost its exponent (gold
+    // "0.004 ppm"); ranked and scored in ppm.
+    metric: "Share of the crust by mass",
     unit: " ppm",
+    shownAs: /\((\d[\d.,]*%)\)/,
     // Chemical symbols: "fe" is iron, "si" silicon (one-letter ones like O and H are too short to be aliases).
     aliasCols: [3],
     more: Object.fromEntries(CRUST_TRACES.map((n) => [n, []])),
@@ -4896,6 +4944,11 @@ export const TOPICS: Topic[] = [
       "In", "As", "At", "Be", "He", "Ho", "Re", "Pa", "Bi", "La", "Co", "Titan", "D lines", "Elements heavier than iron",
       "Heavier than iron", "Steel and iron manufacturing", "Silicon Age", "Zillifone", "Alumen projection", "Sodium mirror",
       "Monosodium", "Disodium", "Tetrasodium", "Dipotassium", "Aluminized",
+      // The list judge (Nov 20): a made-up name that gave sodium as typed, and redirect phrases that are no names.
+      "Nitrium", "Aluminium poisoning", "Aluminium free", "Aluminum-free", "Al-free", "Properties of alminum",
+      "Oxygen partial pressure", "ATC code V03AN01", "ATCvet code QV03AN01", "Hydrogen position in periodic table",
+      "Potassium in nutrition and human health", "Applications of titanium and titanium alloys", "Titanium bolts",
+      "Titanium jewelry", "Calcium cyclopentadienylide", "Calcium cyclopentadienyl",
     ],
     // Elements made only in laboratories: real names, free (none is in the crust).
     knownNames: [
@@ -5022,11 +5075,16 @@ export const TOPICS: Topic[] = [
     // The parts the page counts in each one's total, as players name them ("harry potter" is the Wizarding World).
     aliases: {
       "Marvel Cinematic Universe": ["MCU", "Marvel", "Marvel movies", "Marvel films", "The Infinity Saga", "The Multiverse Saga"],
-      "Spider-Man": ["Spiderman", "Spider Man", "Spider-Man films", "Spider-Verse", "Spiderverse"],
+      // The page's Spider-Man total takes in Sony's Spider-Man Universe (the Venom films) and the Webb films too.
+      "Spider-Man": [
+        "Spiderman", "Spider Man", "Spider-Man films", "Spider-Verse", "Spiderverse", "Venom", "Venom films",
+        "Sony's Spider-Man Universe", "Spider-Man Universe", "The Amazing Spider-Man", "Amazing Spider-Man",
+      ],
       "Star Wars": ["Skywalker Saga", "Star Wars films"],
       "Wizarding World": ["Harry Potter", "Harry Potter films", "Harry Potter series", "Fantastic Beasts", "Potter"],
       Avengers: ["The Avengers", "Avengers films"],
-      "James Bond": ["Bond", "007", "Bond films", "James Bond films"],
+      // "007" is in intent.ts: a name of digits only ships from there.
+      "James Bond": ["Bond", "Bond films", "James Bond films"],
       // The page's X-Men total takes in the Deadpool and Wolverine films.
       "X-Men": ["X Men", "Xmen", "Deadpool", "Wolverine"],
       "Fast & Furious": ["Fast and Furious", "The Fast and the Furious", "Fast Saga", "The Fast Saga"],
@@ -5040,7 +5098,8 @@ export const TOPICS: Topic[] = [
       "Pirates of the Caribbean": ["POTC"],
       Shrek: ["Puss in Boots"],
       "The Twilight Saga": ["Twilight"],
-      // The animated franchises' usual names (ranks 11+ only get cached redirects).
+      // The animated franchises' usual names (ranks 11+ only get cached redirects); these are unranked rows from the
+      // animated films page, which take a topic's aliases since Nov 20.
       "Fengshen Cinematic Universe": ["Ne Zha", "Nezha"],
       "Super Mario": ["Mario", "Super Mario Bros", "Mario movies"],
       "Detective Conan": ["Case Closed"],
@@ -5121,7 +5180,8 @@ export const TOPICS: Topic[] = [
     id: "nuclear-countries",
     debut: true,
     category: "Science",
-    title: "Countries with the most nuclear reactors",
+    // "power" in the title, read first: weapons guesses cost lives (list judge, Nov 20).
+    title: "Countries with the most nuclear power reactors",
     noun: "countries",
     prompt: "Name the 10 countries with the most nuclear power reactors in use (2026)",
     page: "Nuclear power by country",
@@ -5134,16 +5194,22 @@ export const TOPICS: Topic[] = [
     dataAsOf: "2026",
     skip: ["World"],
     universe: "countries",
-    // The names the other country lists use.
+    // The names the other country lists use (the universe's "Türkiye" too, which takes the table's "Turkey: 0").
     rename: { Czechia: "Czech Republic", Türkiye: "Turkey" },
-    // Countries that shut their last reactor, as the page says: a guess shows why it's no answer here.
+    // Countries that shut their last reactor, or never started their one plant, as the page says: a guess shows why
+    // it's no answer here.
     notes: {
       Germany: "none since its phase-out in 2023",
       Italy: "none since 1990",
       Taiwan: "none since its phase-out in 2025",
       Lithuania: "none since 2009",
       Kazakhstan: "none since 1999",
+      Austria: "none, its one plant never went into use",
+      Philippines: "none, its one plant never went into use",
     },
+    // The table lists every country with a power reactor in use, or building its first: North Korea, Israel,
+    // Australia and Saudi Arabia (the page's planned or abandoned programmes) have none.
+    unlistedValue: "none",
   },
 ];
 

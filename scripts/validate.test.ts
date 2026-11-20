@@ -190,6 +190,42 @@ describe("validate: placeholder rows", () => {
   });
 });
 
+describe("validate: company suffixes", () => {
+  // Brands' judge (Nov 20): Apple's redirect " Inc." (its logo, then the suffix) made "inc" score #1 Apple, as
+  // " Inc." had on market-cap-peak. A suffix alone is no name, on any list.
+  it("fails an alias that is only a company suffix, ranked or not", () => {
+    const p = puzzle();
+    p.answers[0] = { ...p.answers[0], name: "Apple", aliases: ["Apple Inc.", " Inc."] };
+    p.extras[0] = { ...p.extras[0], name: "Tiffany & Co.", aliases: ["Tiffany", "& Co."] };
+    p.extras[1] = { ...p.extras[1], name: "Toyota", aliases: ["Toyota Motor Corp.", "Corp.", "Ltd", "LLC", "Co."] };
+    expect(errors(p)).toEqual([
+      expect.stringContaining('#1 "Apple": alias " Inc." is only a company suffix'),
+      expect.stringContaining('"Tiffany & Co.": alias "& Co." is only a company suffix'),
+      expect.stringContaining('"Toyota": alias "Corp." is only a company suffix'),
+      expect.stringContaining('"Toyota": alias "Ltd" is only a company suffix'),
+      expect.stringContaining('"Toyota": alias "LLC" is only a company suffix'),
+      expect.stringContaining('"Toyota": alias "Co." is only a company suffix'),
+    ]);
+  });
+
+  it("leaves codes and symbols written otherwise alone", () => {
+    const p = puzzle();
+    p.answers[0] = { ...p.answers[0], name: "Colorado", aliases: ["CO"] };
+    p.answers[1] = { ...p.answers[1], name: "Silver", aliases: ["Ag"] };
+    p.answers[2] = { ...p.answers[2], name: "Kevin Garnett", aliases: ["KG"] };
+    p.answers[3] = { ...p.answers[3], name: "Inc. (magazine)", aliases: ["Inc. magazine", "Apple Inc."] };
+    expect(errors(p)).toEqual([]);
+  });
+
+  it("warns when topics.ts gives aliases for a name that is no entry", () => {
+    const p = puzzle();
+    expect(warnings(p, { aliases: { "Answer 3": ["Third"], "Answer Thirty": ["Thirtieth"] } })).toEqual(
+      expect.arrayContaining([expect.stringContaining('aliases for "Answer Thirty", which is no entry')]),
+    );
+    expect(warnings(p, { aliases: { "Answer 3": ["Third"], "Other 2": ["Second other"] } }).join("\n")).not.toContain("which is no entry");
+  });
+});
+
 describe("validate: text in the wrong code page", () => {
   // Painters' judge: Paul Gauguin had "Eugčne Henri Paul Gauguin" (Eugène written in Windows-1252, read as 1250).
   it("fails an alias or a name that reads as mangled encoding, ranked or not", () => {

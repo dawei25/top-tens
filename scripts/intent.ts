@@ -77,6 +77,9 @@ export const DEMONYMS: Record<string, string[]> = {
   Azerbaijan: ["Azerbaijani", "Azeri"],
   Kazakhstan: ["Kazakh", "Kazakhstani"],
   Uzbekistan: ["Uzbek"],
+  // "kyrgyz" found Kyrgyzstan and "tajik" nothing (coldest-countries' judge, Nov 20).
+  Tajikistan: ["Tajik", "Tajikistani"],
+  Turkmenistan: ["Turkmen"],
   Afghanistan: ["Afghan"],
   Pakistan: ["Pakistani"],
   Bangladesh: ["Bangladeshi"],
@@ -240,6 +243,9 @@ const BASE_COUNTRY_FORMS: string[][] = [
   // The islands table's name for the kingdom (Greenland, Zealand, Funen).
   ["Denmark", "Kingdom of Denmark", "Danish Realm"],
   ["Belarus", "Byelorussia", "Belorussia"],
+  // The countries' own names that a ranked row's redirects lack: "latvija" and "eesti" landed, "lietuva" didn't
+  // (coverage audit, Nov 20).
+  ["Lithuania", "Lietuva"],
   ["Burkina Faso", "Upper Volta", "Burkina"],
   ["Ireland", "Republic of Ireland", "Eire"],
   // Two-island states are named by their main island, and "Saint" is written "St" ("st kitts" found nothing on the
@@ -2048,7 +2054,14 @@ export const INTENT: Record<string, Intent> = {
     },
   },
   "film-series": {
+    // A name of digits is dropped as a table's number (build.ts `usableAlias`); curated here, it ships ("007" read
+    // "isn't an answer for this list": list judge, Nov 20).
+    same: { "James Bond": ["007"] },
     // DC's two series in the top 10 ("dc" found nothing): the game asks which.
     groups: { DC: ["DC Extended Universe", "Batman"], "DC Comics": ["DC Extended Universe", "Batman"] },
+  },
+  "f1-wins-by-country": {
+    // Von Trips and Mass raced for West Germany; the table counts their wins as Germany's (list judge, Nov 20).
+    same: { Germany: ["West Germany"] },
   },
 };
