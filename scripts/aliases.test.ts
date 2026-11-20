@@ -1560,6 +1560,56 @@ describe("aliases as built: what players type", () => {
     });
   });
 
+  describe("Nov 20 candidates, second round", () => {
+    // What the builder found on the five lists for the last open day of Dec 6-13: a kingdom's names that offered the
+    // wrong islands, redirects that made a plain word or another country an answer, and the names a player types.
+    const read = (id: string, guess: string) => {
+      const r = judgeGuess(guess, JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8")) as Puzzle, new Set(), lex);
+      if ("entry" in r) return `${r.kind}${"corrected" in r && r.corrected ? "?" : ""} ${r.entry.name}`;
+      return r.kind === "typo" ? `choose ${r.suggestions.join(" | ")}` : r.kind;
+    };
+    it.each([
+      // "uk" offered Cyprus and Portsea Island; a country on an island names it, as on islands.
+      ["populous-islands", "uk", "correct Great Britain"],
+      ["populous-islands", "england", "correct Great Britain"],
+      ["populous-islands", "haiti", "near Hispaniola"],
+      ["populous-islands", "mumbai", "correct Salsette"],
+      // Montreal's island had Iceland's name ("Ísland").
+      ["populous-islands", "island", "unknown"],
+      // Only national capitals are answers: a country, or a high city that is no capital, is free.
+      ["high-capitals", "bolivia", "unknown"],
+      ["high-capitals", "denver", "unknown"],
+      ["high-capitals", "kabul", "near Kabul"],
+      // The language, the edition's name, and the usual name of Chinese; a person's name is no language.
+      ["wikipedia-languages", "english wikipedia", "correct English"],
+      ["wikipedia-languages", "mandarin", "near Chinese"],
+      ["wikipedia-languages", "francois", "unknown"],
+      // The UK has no row: its names offer its two nations in the count.
+      ["golf-countries", "uk", "choose England | Scotland"],
+      ["golf-countries", "scottish", "correct Scotland"],
+      ["golf-countries", "wales", "unknown"],
+    ])("%s: %s -> %s", (id, guess, want) => {
+      expect(read(id, guess)).toBe(want);
+    });
+    const entry = (id: string, name: string) => {
+      const p: Puzzle = JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
+      return [...p.answers, ...p.extras].find((e) => e.name === name);
+    };
+    it("high-capitals: a capital at sea level ranks, above those below it (27 at 0 m were dropped as 'none')", () => {
+      expect(entry("high-capitals", "Singapore")).toMatchObject({ value: "0 m" });
+      expect(entry("high-capitals", "Singapore")?.rank).toBeGreaterThan(10);
+      expect(entry("high-capitals", "Baku")).toMatchObject({ value: "−28 m" });
+      expect(entry("high-capitals", "Baku")!.rank).toBeGreaterThan(entry("high-capitals", "Singapore")!.rank);
+    });
+    it("populous-islands: China's own name offers China's islands, not Taiwan (a redirect gave it Taiwan)", () => {
+      expect(read("populous-islands", "zhongguo")).toMatch(/^choose /);
+      expect(read("populous-islands", "zhongguo")).not.toContain("Taiwan");
+    });
+    it("populous-islands: an island in several countries has them all (Borneo's cell lists three on one line)", () => {
+      expect(entry("populous-islands", "Borneo")?.country).toEqual(["Indonesia", "Brunei", "Malaysia"]);
+    });
+  });
+
   describe("Nov 20 candidates", () => {
     // What the builder found on the new lists for Dec 6-13: redirects that turned other words into answers, and the
     // forms players use for a series' parts, a team's past names and a country with no team.

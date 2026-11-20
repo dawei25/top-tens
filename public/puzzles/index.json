@@ -724,6 +724,41 @@
   "debut": true
  },
  {
+  "id": "populous-islands",
+  "title": "Most populous islands",
+  "category": "Geography",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "high-capitals",
+  "title": "Highest capital cities",
+  "category": "Geography",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "languages-countries",
+  "title": "Countries with the most living languages",
+  "category": "Culture",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "wikipedia-languages",
+  "title": "Languages with the most Wikipedia articles",
+  "category": "Oddball",
+  "blitz": true,
+  "debut": true
+ },
+ {
+  "id": "golf-countries",
+  "title": "Countries with the most golf courses",
+  "category": "Sports",
+  "blitz": false,
+  "debut": true
+ },
+ {
   "id": "brands",
   "title": "Most valuable brands (Interbrand 2025)",
   "category": "Business",

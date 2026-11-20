@@ -1,0 +1,62 @@
+{
+  "Java": {
+    "text": "About 56% of Indonesia's people live on Java, which is only 7% of the country's land.",
+    "source": "https://en.wikipedia.org/wiki/Java",
+    "where": "Indonesia",
+    "evidence": "Java is the world's most populous island, home to an estimated 159.2 million people; about 56% of the Indonesian population, while constituting only 7% of the country's land area."
+  },
+  "Honshu": {
+    "text": "Japan's main island holds 82% of the country's people, more than any island but Java.",
+    "source": "https://en.wikipedia.org/wiki/Honshu",
+    "where": "Japan",
+    "evidence": "It is the seventh-largest island in the world, and the second-most populous after the Indonesian island of Java. ... Honshu had a population of 100.7 million as of 2025, constituting 81.9% of the entire population of Japan"
+  },
+  "Great Britain": {
+    "text": "Home to England, Scotland and Wales, it is the most populous island outside Asia; until 9,000 years ago a land bridge, Doggerland, joined it to Europe.",
+    "source": "https://en.wikipedia.org/wiki/Great_Britain",
+    "where": "United Kingdom",
+    "evidence": "In 2011, it had a population of about 61 million, making it the world's third-most-populous island after Java in Indonesia and Honshu in Japan, and the most populated island outside of Asia. ... Connected to mainland Europe until 9,000 years ago by a land bridge now known as Doggerland"
+  },
+  "Luzon": {
+    "text": "More than half of the Philippines' people live on Luzon, with Manila and Quezon City, the country's most populous city.",
+    "source": "https://en.wikipedia.org/wiki/Luzon",
+    "where": "Philippines",
+    "evidence": "The country's capital city, Manila, as well as Quezon City, the country's most populous city, are located on the island of Luzon. Luzon has a population of 64.3 million as of 2024; this constitutes more than half of the total population of the Philippines."
+  },
+  "Sumatra": {
+    "text": "Indonesia's western island has about as many people as South Africa, but is so big that it averages only 129 per km².",
+    "source": "https://en.wikipedia.org/wiki/Sumatra",
+    "where": "Indonesia",
+    "evidence": "Sumatra's population as of mid 2025 was estimated to be about 62,259,500 it has about the same number of inhabitants as South Africa, making it the fifth-most populous island in the world. Yet because it is such a large island, it is not densely populated: it has an average of about 129 people per km2."
+  },
+  "Madagascar": {
+    "text": "Madagascar was first settled around 500 to 700 CE by Austronesian peoples, probably in outrigger canoes from present-day Indonesia.",
+    "source": "https://en.wikipedia.org/wiki/Madagascar",
+    "where": "Madagascar",
+    "evidence": "Madagascar was first permanently settled during or before the mid-first millennium CE (roughly 500 to 700) by Austronesian peoples, presumably arriving on outrigger canoes from present-day Indonesia."
+  },
+  "Mindanao": {
+    "text": "The big island in the south of the Philippines is home to most of the country's Muslims; Davao City is its biggest city.",
+    "source": "https://en.wikipedia.org/wiki/Mindanao",
+    "where": "Philippines",
+    "evidence": "Ethnic minority groups in Mindanao whose members are predominantly Islamic account for most of Muslims in Philippines. ... Davao City is the most populous city on the island"
+  },
+  "Taiwan": {
+    "text": "Portuguese sailors called Taiwan Ilha Formosa, 'beautiful island', in 1542; its indigenous peoples' ancestors settled it about 6,000 years ago.",
+    "source": "https://en.wikipedia.org/wiki/Taiwan",
+    "where": "Taiwan",
+    "evidence": "The name Formosa (福爾摩沙) dates from 1542, when Portuguese sailors noted it on their maps as Ilha Formosa (Portuguese for \"beautiful island\"). ... Ancestors of Taiwanese indigenous peoples settled the island around 6,000 years ago."
+  },
+  "Salsette": {
+    "text": "Mumbai's seven original islands, joined by land reclamation, are now a peninsula of this island off India's west coast, which also holds Thane.",
+    "source": "https://en.wikipedia.org/wiki/Salsette_Island",
+    "where": "India (Maharashtra)",
+    "evidence": "The original seven islands of Bombay, which were merged by land reclamation during the 19th and early 20th centuries to form the city of Mumbai, are now practically a southward protruding peninsula of the much larger Salsette Island. ... Salsette Island ... is an island in Konkan division of the state of Maharashtra, along India's west coast. The cities of Mumbai ..., Thane and Mira-Bhayandar ... lie on it"
+  },
+  "Borneo": {
+    "text": "Split between Indonesia, Malaysia and Brunei since decolonisation; about 73% of it is Indonesia's Kalimantan.",
+    "source": "https://en.wikipedia.org/wiki/Borneo",
+    "where": "Indonesia, Malaysia, Brunei",
+    "evidence": "Since decolonisation, Borneo has been politically divided among three sovereign states. Approximately 73% of the island forms part of Indonesia, comprising the five provinces collectively known as Kalimantan."
+  }
+}
