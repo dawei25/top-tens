@@ -1,0 +1,52 @@
+{
+  "Russia": {
+    "text": "More than a fifth of the world's forests are Russian, and they cover 45% of the country.",
+    "source": "https://en.wikipedia.org/wiki/Forestry_in_Russia",
+    "evidence": "Russia has more than a fifth of the world's forests, making it the largest forest country in the world. According to data for 2015, the total forest area has exceeded 885 million hectares (2,190×10^6 acres), representing 45% of the total area of the country."
+  },
+  "Brazil": {
+    "text": "60% of the Amazon rainforest, home to an estimated 390 billion trees, lies in Brazil.",
+    "source": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+    "evidence": "The majority of the forest, 60%, is in Brazil, followed by Peru with 13%, Colombia with 10% ... comprises the largest and most biodiverse tract of tropical rainforest in the world, with an estimated 390 billion individual trees in about 16,000 species."
+  },
+  "Canada": {
+    "text": "Almost 90% of its forests are public land, owned by its provinces and territories.",
+    "source": "https://en.wikipedia.org/wiki/Forestry_in_Canada",
+    "evidence": "Moreover, almost 90% of the Canadian forests are publicly owned by and controlled by their provinces and territories."
+  },
+  "United States": {
+    "text": "Forest in the eastern US hit its low around 1872, at about 48% of what it had been in 1620.",
+    "source": "https://en.wikipedia.org/wiki/Forestry_in_the_United_States",
+    "evidence": "Forest cover in the Eastern United States reached its lowest point in roughly 1872 with about 48 percent compared to the amount of forest cover in 1620."
+  },
+  "China": {
+    "text": "Its Great Green Wall of trees, begun in 1978 against the deserts, should stretch about 4,828 km by 2050.",
+    "source": "https://en.wikipedia.org/wiki/Three-North_Shelter_Forest_Program",
+    "evidence": "The program started in 1978 and is planned to complete around 2050, at which point it will be expected to have created a vast green barrier spanning approximately 4,828 kilometres (3,000 mi) long ... The Green Wall project was started in 1978, with the proposed result of raising northern China's forest cover from 5 to 15 percent, thereby reducing desertification."
+  },
+  "Australia": {
+    "text": "As bushfires burned its forests, koala numbers fell nearly 30% from 2018.",
+    "source": "https://en.wikipedia.org/wiki/Forests_of_Australia",
+    "evidence": "Over the years, bushfires have destroyed a lot of trees and this in turn destroyed the habitat of many animals; most notably koalas numbers have decreased nearly 30% across Australia since 2018."
+  },
+  "Democratic Republic of the Congo": {
+    "text": "All five Congo Basin sites on UNESCO's list of World Heritage in Danger are in this country.",
+    "source": "https://en.wikipedia.org/wiki/Congo_Basin",
+    "evidence": "Eight sites of the Congo Basin are inscribed on the World Heritage List, five being also on the list of World Heritage in Danger (all five located in Democratic Republic of the Congo)."
+  },
+  "Indonesia": {
+    "text": "Forest covered 84% of it in 1900; its 170 million hectares shrank to under 100 million by 2000.",
+    "source": "https://en.wikipedia.org/wiki/Deforestation_in_Indonesia",
+    "evidence": "As late as 1900, Indonesia was still a densely forested country: forests represented 84 percent of the total land area. The estimated forest cover of 170 million hectares around 1900 decreased to less than 100 million hectares by the end of the 20th century."
+  },
+  "India": {
+    "text": "In its 1970s Chipko (hugging) movement, protesters wrapped their arms around trees so they couldn't be felled.",
+    "source": "https://en.wikipedia.org/wiki/Chipko_movement",
+    "evidence": "The Chipko movement (Hindi: चिपको आन्दोलन, lit. 'hugging movement') is a forest conservation movement in India. Opposed to commercial logging and the government's policies on deforestation, protesters in the 1970s engaged in tree hugging, wrapping their arms around trees so that they could not be felled."
+  },
+  "Peru": {
+    "text": "More than 60% of Peru is Amazon rainforest, yet only 5% of Peruvians live there.",
+    "source": "https://en.wikipedia.org/wiki/Peruvian_Amazonia",
+    "evidence": "More than 60% of Peruvian territory is covered by the Amazon rainforest. ... Most Peruvian territory is covered by dense forests on the east side of the Andes, yet only 5% of Peruvians live in this area."
+  }
+}

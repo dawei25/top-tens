@@ -1,0 +1,52 @@
+{
+  "United States": {
+    "text": "In 1951 a reactor in the Idaho desert lit four light bulbs: the first usable electricity from nuclear fission.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_the_United_States",
+    "evidence": "In the early afternoon of December 20, 1951, Argonne director Walter Zinn and fifteen other Argonne staff members witnessed a row of four light bulbs light up in a nondescript brick building in the eastern Idaho desert. ... This was the first time that a usable amount of electrical power had ever been generated from nuclear fission."
+  },
+  "China": {
+    "text": "Over 38 more reactors are being built here, the most of any country for the 18th year running.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_China",
+    "evidence": "At the same time, there are over 38 reactors under construction with a total net capacity of 38 GWe, ranked first for the 18th consecutive year."
+  },
+  "France": {
+    "text": "Nuclear power made 71.67% of its electricity in 2018, the highest share in the world.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_France",
+    "evidence": "Since the mid-1980s, the largest source of electricity in France has been nuclear power ... In 2018, the nuclear share was 71.67%, the highest percentage in the world."
+  },
+  "Russia": {
+    "text": "The world's first nuclear power plant, a 5 MW one at Obninsk, joined the Soviet grid in 1954.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_the_United_Kingdom",
+    "evidence": "the world’s first nuclear power plant, with a capacity of 5 MW at Obninsk in the Soviet Union was connected to the public supply in 1954"
+  },
+  "South Korea": {
+    "text": "Its first nuclear plant, Kori, opened in 1978; nuclear now makes 31% of its electricity.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_South_Korea",
+    "evidence": "Kori Nuclear Power Plant was the first plant in Korea to commence commercial operations in 1978. ... In 2025, nuclear power produced 31% of the country’s electricity."
+  },
+  "India": {
+    "text": "Asia's first nuclear reactor, Apsara, started up here in August 1956.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_India",
+    "evidence": "India's and Asia's first nuclear reactor, Apsara, reached criticality at 3:45 p.m. on 4 August 1956 and was inaugurated by Prime Minister Nehru on 20 January 1957."
+  },
+  "Canada": {
+    "text": "Its reactors burn natural uranium; in 1945 its ZEEP pile made the first chain reaction outside the US.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_Canada",
+    "evidence": "on September 5, 1945, at 3:45 p.m., the 10-watt ZEEP achieved the first self-sustained nuclear reaction outside the United States. ... Canada is a technology leader in heavy water reactors and natural uranium fueled reactors more broadly."
+  },
+  "Japan": {
+    "text": "After the 2011 Fukushima accident it shut every reactor; of its 54, only 13 ran again by late 2024.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_Japan",
+    "evidence": "After the Fukushima accident, all reactors were shut down temporarily. As of November 2024, of the 54 nuclear reactors present in Japan before 2011, there were 33 operable reactors but only 13 reactors in 6 power plants were actually operating."
+  },
+  "Ukraine": {
+    "text": "Europe's largest nuclear plant, Zaporizhzhia, is here; Russian forces seized it in March 2022.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_Ukraine",
+    "evidence": "Zaporizhzhia is the largest nuclear power plant in Europe, and Russia wants Rosatom to restart it. ... In March 2022, Russian forces seized control of the Zaporizhzhia Nuclear Power Plant."
+  },
+  "United Kingdom": {
+    "text": "Calder Hall, opened in 1956, was the first nuclear plant to make electricity in commercial amounts.",
+    "source": "https://en.wikipedia.org/wiki/Nuclear_power_in_the_United_Kingdom",
+    "evidence": "Calder Hall was the world's first nuclear power station to deliver electricity in commercial quantities (although the world’s first nuclear power plant, with a capacity of 5 MW at Obninsk in the Soviet Union was connected to the public supply in 1954)."
+  }
+}

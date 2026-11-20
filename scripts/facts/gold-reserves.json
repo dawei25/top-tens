@@ -1,0 +1,52 @@
+{
+  "United States": {
+    "text": "Over half its gold sits in Fort Knox, at the corner of Bullion Boulevard and Gold Vault Road.",
+    "source": "https://en.wikipedia.org/wiki/United_States_Bullion_Depository",
+    "evidence": "(4,580 metric tons) of gold bullion, a little over half the total gold presently held by the federal government. ... The site is located on what is now the intersection of Bullion Boulevard and Gold Vault Road."
+  },
+  "Germany": {
+    "text": "About 37% of its gold is stored in New York, at the Federal Reserve Bank, and 13% at the Bank of England.",
+    "source": "https://en.wikipedia.org/wiki/Gold_repatriation",
+    "evidence": "As of early 2026, Germany holds 1,236 tonnes (approximately 37%) of its 3,352-tonne gold reserve at the Federal Reserve Bank of New York, with another 13% stored at the Bank of England."
+  },
+  "Italy": {
+    "text": "A 2026 law spelled out that the gold held by the Bank of Italy belongs to the Italian people.",
+    "source": "https://en.wikipedia.org/wiki/Bank_of_Italy",
+    "evidence": "With the authentic interpretation of the 2026 Budget Law, in paragraph 2, it is definitively clarified that \"the gold reserves managed and held by the Bank of Italy, as recorded in its balance sheet, belong to the Italian people\"."
+  },
+  "France": {
+    "text": "Its central bank once held 28.3% of the world's gold; some scholars blame that hoard for the Great Depression.",
+    "source": "https://en.wikipedia.org/wiki/Banque_de_France",
+    "evidence": "The Bank also began to hoard gold reserves and, at its peak, held 28.3 percent of the world's gold stock (only behind the United States at 30.4 percent). Some scholars have asserted that this gold accumulation was a contributing factor to the Great Depression."
+  },
+  "China": {
+    "text": "In 2015 it revealed its gold for the first time in six years: up 57%, to 1,658 tonnes.",
+    "source": "https://en.wikipedia.org/wiki/Gold_reserve",
+    "evidence": "On 17 July 2015, China announced that it increased its gold reserves by about 57 percent from 1,054 to 1,658 tonnes, while disclosing its official gold reserves for the first time in six years."
+  },
+  "Russia": {
+    "text": "The gold in its National Wealth Fund fell from 405.7 tonnes before the war to 173.1 by November 2025.",
+    "source": "https://en.wikipedia.org/wiki/Gold_reserve",
+    "evidence": "Note that while Russian gold reserves are listed as 2,332.7 tonnes, of the 405.7 tonnes held by the National Wealth Fund at the beginning of the war, only 173.1 remained as of November 2025."
+  },
+  "Switzerland": {
+    "text": "Most of its gold is believed to lie in vaults under the Federal Square in Bern, but the location is a secret.",
+    "source": "https://en.wikipedia.org/wiki/Swiss_National_Bank",
+    "evidence": "The gold is believed to be stored in huge vaults beneath the Federal Square (Bundesplatz) to the north of the federal parliament building in Bern, but the SNB treats the location of the gold reserves as a secret."
+  },
+  "India": {
+    "text": "In a 1991 crisis it flew 46.91 tonnes of gold to the Bank of England and the Bank of Japan for a $400 million loan.",
+    "source": "https://en.wikipedia.org/wiki/Gold_repatriation",
+    "evidence": "The historical backdrop of India's gold management is deeply tied to the 1991 Indian economic crisis. Confronted with a severe balance of payments emergency and depleted foreign currency reserves, the Indian government was compelled to physically airlift 46.91 tonnes of sovereign gold to the vaults of the Bank of England and the Bank of Japan to secure a crucial $400 million emergency loan."
+  },
+  "Japan": {
+    "text": "The Bank of Japan stands on an old gold mint, Kinza, near Ginza, whose name means silver mint.",
+    "source": "https://en.wikipedia.org/wiki/Bank_of_Japan",
+    "evidence": "It is on the site of a former gold mint (Kinza) and, not coincidentally, near the famous Ginza district, whose name means \"silver mint\"."
+  },
+  "Poland": {
+    "text": "Fleeing the invading Germans, its whole 80-tonne gold reserve was smuggled through Romania, Turkey, Africa and France.",
+    "source": "https://en.wikipedia.org/wiki/Gold_repatriation",
+    "evidence": "Fearing imminent seizure by invading German forces, Polish authorities orchestrated a dramatic wartime evacuation of the nation's entire 80-tonne gold reserve. The bullion was secretly transported across three continents on a perilous journey spanning Romania, Turkey, Africa, and France"
+  }
+}
