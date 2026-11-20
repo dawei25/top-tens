@@ -4803,6 +4803,179 @@ export const TOPICS: Topic[] = [
       "Mount Barker",
     ],
   },
+  // Nov 20, second round: candidates for the last open day of Dec 6-13 and its spares (Geography, Culture, Oddball,
+  // Sports). Dropped before building: TV series by Emmy wins (the records page has no such table), countries by
+  // Michelin-starred restaurants (the guide's table groups them: "Nordic countries", "Great Britain and Ireland"), the
+  // most valuable sports teams (Forbes 2025: the Bears and the Yankees tie at #10), countries by Starbucks stores and
+  // by chess grandmasters (no table), English speakers by country (figures of mixed kinds: Egypt's counts "at least an
+  // intermediate level"), and the northernmost capitals (two capital lists in one week; high-capitals is the better).
+  {
+    id: "populous-islands",
+    debut: true,
+    category: "Geography",
+    title: "Most populous islands",
+    noun: "islands",
+    placesIn: "world",
+    prompt: "Name the 10 islands with the most people living on them",
+    page: "List of islands by population",
+    // Every island with a figure (216), each from its latest census or estimate. Afro-Eurasia, the Americas and
+    // mainland Australia have no rank ("–"): landmasses, not islands, so a guess at one is free.
+    tables: [0],
+    rankedOnly: true,
+    name: "Island",
+    value: "Population",
+    metric: "Population",
+    dataAsOf: "2020–2024",
+    // Each island's country, as on islands: "japan" offers Honshu and Kyushu to choose from.
+    countryCol: "Countries",
+    // The names the islands list uses.
+    rename: { "Honshū": "Honshu", "Kyūshū": "Kyushu", "Hokkaidō": "Hokkaido" },
+    // The table links two of them to their geography articles.
+    articles: { Madagascar: "Madagascar", Taiwan: "Taiwan" },
+    // Redirects that are no name for the island (flags, province codes, a region, a misnamed pair), as on islands, and
+    // Iceland's own name, which Montreal's island had ("island" was the Island of Montreal).
+    junkAliases: [
+      "Borneo flags", "New Guinea Man", "Sumatera Celebes", "ID-SM", "ID-JW", "Eastern Sumatra", "Ísland", "Politic in eire",
+      "Politic of eire", "Daishan County", "Zhongguo",
+    ],
+  },
+  {
+    id: "high-capitals",
+    debut: true,
+    category: "Geography",
+    title: "Highest capital cities",
+    noun: "capital cities",
+    placesIn: "world",
+    prompt: "Name the 10 national capitals that sit highest above sea level",
+    page: "List of capital cities by elevation",
+    // The capitals of the UN's members and observers (197 rows). A country with two capitals has a row for each:
+    // Bolivia's seat of government (La Paz) and its constitutional capital (Sucre) both rank. Only capitals are
+    // answers: Denver or Cusco is free, as on capitals.
+    tables: [0],
+    name: "Capital",
+    value: "Elevation (m)",
+    metric: "Elevation above sea level",
+    unit: " m",
+    // Baku is 28 m below sea level.
+    signed: true,
+    // The capitals of places that are no UN member or observer (Taipei, Pristina, Nuuk), from the page's second
+    // table: free, and real names.
+    knownOnly: [{ tables: [1], name: "Capital" }],
+    // Famous high cities that are no national capital: free, and never corrected into one.
+    knownNames: ["Denver", "Lhasa", "Cusco", "Cuzco", "El Alto", "Johannesburg", "Shimla", "Potosí", "Potosi", "Leh", "Xining"],
+    // Redirects that are a museum, a square, a zoo, a mountain, a temple, a district or a code, not the city, and an
+    // era ("Asmara under Italy").
+    junkAliases: [
+      "Addis Ababa Museum", "Tewodros Square", "Asmara under Italy", "Asmara under Italian rule", "Asmara, Ethiopia",
+      "Sana'a Zoo", "Jabal Nuqm", "Chocolate santafereño", "Gringolandia", "Changzamthok", "Changangkha", "KE-110",
+      "MX-DIF", "Capital District", "Distrito Capital",
+    ],
+  },
+  {
+    id: "languages-countries",
+    debut: true,
+    category: "Culture",
+    title: "Countries with the most living languages",
+    noun: "countries",
+    prompt: "Name the 10 countries with the most living languages (Ethnologue 2019, not counting immigrants' languages)",
+    page: "List of countries by number of languages",
+    // Ethnologue's 22nd edition (2019), every country and territory: the languages established there, not the ones
+    // recent immigrants brought (the US's 116 and Australia's 93 are left out; with them the same ten lead).
+    tables: [0],
+    name: "Country or territory",
+    value: "Established",
+    metric: "Living languages established there (Ethnologue, 2019)",
+    dataAsOf: "2019",
+    universe: "countries",
+    // The names the other country lists use.
+    rename: {
+      "China (mainland only)": "China",
+      "Côte d’Ivoire": "Ivory Coast",
+      Congo: "Republic of the Congo",
+      Czechia: "Czech Republic",
+      Vatican: "Vatican City",
+      Pitcairn: "Pitcairn Islands",
+    },
+    // Places where nobody lives: free.
+    skip: [
+      "Antarctica", "Bouvet Island", "Heard Island and McDonald Islands", "French Southern Territories",
+      "South Georgia and the South Sandwich Islands", "U.S. Minor Outlying Islands",
+    ],
+    // Redirects to Zambia's article about its games, from the country lists.
+    junkAliases: ["Zambian sports", "Traditional Zambian games", "Indigenous Zambian games"],
+  },
+  {
+    id: "wikipedia-languages",
+    debut: true,
+    category: "Oddball",
+    title: "Languages with the most Wikipedia articles",
+    noun: "languages",
+    prompt: "Name the 10 languages whose Wikipedia has the most articles",
+    page: "List of Wikipedias",
+    // Every open language edition (348), by its article count when the page was last updated. Bots wrote most of
+    // Cebuano's and Swedish's articles.
+    tables: [0],
+    // The "Language" column (the one before it is each edition's name in its own language).
+    name: 2,
+    value: "Articles",
+    metric: "Articles in that language's Wikipedia",
+    unit: " articles",
+    dataAsOf: "November 2026",
+    // The edition's own name ("English Wikipedia") is an alias, with its redirects ("enwiki").
+    aliasCols: [0],
+    aliases: { Chinese: ["Mandarin", "Mandarin Chinese"] },
+    // Three second editions in a language are told apart only in brackets ("Norwegian (Nynorsk)"), which a row's name
+    // loses, so they merge into the first (Bokmål's Norwegian, #28). Their own names are free, and never corrected
+    // into another language ("sorani" was Somali).
+    knownNames: ["Nynorsk", "Norwegian Nynorsk", "Sorani", "Sorani Kurdish", "Central Kurdish", "Taraškievica"],
+    // Redirects to the language's article that are about its speakers, words or places, a person's name, and the
+    // halves of two names in brackets ("Chinese (written vernacular Chinese)").
+    junkAliases: [
+      "vernacular Chinese)", "Narkamaŭka orthography)", "English the Global Language", "English speaking",
+      "English Language Word Count", "English speakers", "English vocabulary", "Number of English words", "English-speaker",
+      "Non-English", "English-language debut", "English lexicon", "English medium", "Blended English", "English vernacular",
+      "Vernacular english", "German-speaking", "German-speakers", "Deutschkenntnisse", "German as a foreign language",
+      "German-speaking peoples", "German speech", "German language in South Africa", "Germanophones", "German-speaking people",
+      "German vocabulary", "French-speaking", "French words and phrases", "French words", "French vocabulary",
+      "French language in Europe", "French language in India", "French word", "French speakers", "French numerals", "François",
+      "French language in Asia", "French language in Oceania", "French language in Polynesia", "French numbers",
+      "Dutch speaking", "Dutch vocabulary", "Dutch-speaking area", "Dutch-speaking world", "Dutch-speaking Europe", "Dutch word",
+      "Dutch in South Africa", "Polder Dutch", "Poldernederlands", "Spanish language in Africa", "Spanish language in Asia",
+      "Spanish language morphology", "Spanish language etymology", "Spanish language vocabulary", "Spanish in Africa",
+      "African Spanish", "Russian words", "Russian term", "Russian speaker", "PYCCKNN R3bIK", "Italian word", "Italianized",
+      "Polish word", "Lang-pl", "Polish syntax",
+    ],
+  },
+  {
+    id: "golf-countries",
+    debut: true,
+    category: "Sports",
+    title: "Countries with the most golf courses",
+    noun: "countries",
+    prompt: "Name the 10 countries with the most golf courses (2019 count; the UK's nations count separately)",
+    page: "Golf course",
+    // The R&A's 2019 count, its top 20: 78% of the world's 38,864 courses are in its top 10. England and Scotland are
+    // counted on their own, as golf counts them; the United Kingdom is no answer ("uk" offers them, intent.ts).
+    tables: [0],
+    name: "Country",
+    value: "Golf courses",
+    metric: "Golf courses (2019)",
+    unit: " golf courses",
+    dataAsOf: "2019",
+    universe: "countries",
+    rename: { USA: "United States" },
+    // No UK row (its nations have theirs), and places where nobody lives.
+    skip: [
+      "United Kingdom", "Antarctica", "Bouvet Island", "Heard Island and McDonald Islands", "French Southern Territories",
+      "South Georgia and the South Sandwich Islands", "U.S. Minor Outlying Islands",
+    ],
+    noFigures: "the R&A's 2019 count gives the top 20 only",
+    // Two names glued together, a description, and a redirect to England from Cornwall's languages.
+    junkAliases: [
+      "England, UK", "England, United Kingdom", "Scotland, UK", "North of Great Britain", "Languages of cornwall",
+      "Land of the Scottish",
+    ],
+  },
   // Nov 20: candidates for Today's list on Sun Dec 6 and the week of Dec 7-13. Dropped before building: F1 drivers by
   // wins (Clark and Lauda tie at #10 on 25), theme parks (the owner, Nov 8), airlines by passengers (the page ranks
   // ten airline groups and stops), oil-producing countries (oil-production has it) and footballers' career goals

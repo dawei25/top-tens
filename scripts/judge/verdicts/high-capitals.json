@@ -1,0 +1,41 @@
+{
+  "id": "high-capitals",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": {
+    "recognizability": 4,
+    "curve": 4,
+    "fairness": 4,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 7,
+    "livesLost": 5,
+    "guesses": 14
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 1,
+    "guesses": 11
+  },
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": [
+    "geography",
+    "capitals",
+    "mountains"
+  ],
+  "audience": "anyone",
+  "summary": "La Paz, Quito, Bogotá and Mexico City come fast, Addis Ababa and Nairobi with thought; Bolivia's second capital Sucre at #3 is the surprise, Kabul (#11, 5 m short of Nairobi) the near miss, Kathmandu and Tehran (#18) the traps.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 7 (6 without Sucre) and lost its lives on Kathmandu, Lima, Kabul, Tehran and Caracas; Denver and Lhasa were free.",
+    "The capitals of the UN's 193 members and its observers, a row per capital (197): Bolivia's La Paz and Sucre both rank. Capitals at sea level (Singapore, Tunis, 0 m) and below it (Amsterdam, Baku) rank too. Taipei, Pristina and territories' capitals are free, as are non-capital cities.",
+    "Countries are free ('bolivia' is no capital), as on capitals. Mexico City is the one overlap with capitals (by population). Blitz not simulated."
+  ],
+  "fixes": []
+}

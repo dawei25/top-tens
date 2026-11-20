@@ -6,6 +6,7 @@ import { normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import {
   capWarning,
+  cellCountries,
   countedNames,
   countryNames,
   datedLabel,
@@ -130,6 +131,21 @@ describe("regional lists", () => {
       cheerio.load(`<div class="mw-parser-output"><table class="infobox"><tr><th>Country</th><td>${country}</td></tr></table>${body}</div>`);
     expect(regionalNamesake(article("Spain"), "Valencia", "Europe")).toBe(true);
     expect(regionalNamesake(article("China", `<ul>${item("Suzhou, Spain")}</ul>`), "Suzhou", "Europe")).toBe(false);
+  });
+});
+
+describe("country cells", () => {
+  // Populous islands (Nov 20): "Indonesia (Kalimantan), Brunei, Malaysia" named no country, so Borneo had none and
+  // "malaysia" couldn't offer it.
+  const cell = (text: string, lines: string[] = []) => ({ text, lines });
+  it("reads a line that lists several countries, and keeps a name with 'and' in it whole", () => {
+    expect(cellCountries(cell("Indonesia (Kalimantan), Brunei, Malaysia"))).toEqual(["Indonesia", "Brunei", "Malaysia"]);
+    expect(cellCountries(cell("Indonesia and East Timor"))).toEqual(["Indonesia", "East Timor"]);
+    expect(cellCountries(cell("Trinidad and Tobago"))).toEqual(["Trinidad and Tobago"]);
+    expect(cellCountries(cell("", ["Japan", "Russia"]))).toEqual(["Japan", "Russia"]);
+    const unknown = new Set<string>();
+    expect(cellCountries(cell("France, Atlantis"), unknown)).toEqual(["France"]);
+    expect([...unknown]).toEqual(["Atlantis"]);
   });
 });
 

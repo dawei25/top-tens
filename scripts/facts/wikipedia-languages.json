@@ -1,0 +1,52 @@
+{
+  "English": {
+    "text": "The first edition, started on 15 January 2001; it held over half of all Wikipedia articles in 2003, and 10.6% now.",
+    "source": "https://en.wikipedia.org/wiki/English_Wikipedia",
+    "evidence": "It was created by Jimmy Wales and Larry Sanger on 15 January 2001, as Wikipedia's first edition. ... The encyclopedia is home to 10.6% of articles in all Wikipedias (down from more than 50% in 2003)."
+  },
+  "Cebuano": {
+    "text": "A language of the Philippines; nearly all of its Wikipedia's articles were made by bots, mostly Lsjbot, and it has under 200 active users.",
+    "source": "https://en.wikipedia.org/wiki/Cebuano_Wikipedia",
+    "evidence": "Despite being the second-largest Wikipedia in numbers of articles, it has a small community of only 197 active users; nearly all of the 6,116,386 articles were initially created through automatic programs, most notably Sverker Johansson's Lsjbot. ... Cebuano is the second most spoken language in the Philippines with about 20 million speakers."
+  },
+  "German": {
+    "text": "The second-oldest edition (March 2001), and in 2009 the second to pass a million articles, after English.",
+    "source": "https://en.wikipedia.org/wiki/German_Wikipedia",
+    "evidence": "Founded on 16 March 2001, it is the second-oldest Wikipedia edition (after the English Wikipedia). ... On 27 December 2009, the German Wikipedia exceeded 1,000,000 articles, becoming the second edition, after the English-language Wikipedia, to do so."
+  },
+  "French": {
+    "text": "Started two months after Wikipedia itself, it is the largest edition in a Romance language.",
+    "source": "https://en.wikipedia.org/wiki/French_Wikipedia",
+    "evidence": "This edition was started on 23 March 2001, two months after the official creation of Wikipedia. It has 2,790,459 articles as of 20 November 2026, making it the fourth-largest Wikipedia language version, after the English-, Cebuano-, and German-language editions, and the largest Wikipedia edition in a Romance language."
+  },
+  "Swedish": {
+    "text": "It jumped from 8th to 5th in 2013, largely because bots wrote articles on every known species of plant and animal.",
+    "source": "https://en.wikipedia.org/wiki/Swedish_Wikipedia",
+    "evidence": "On 15 June 2013 it reached 1,000,000 articles and rose from 8th to 5th place. This is in large part due to a community project where bots were used in producing articles for all existing species of plants and animals."
+  },
+  "Dutch": {
+    "text": "Bots created 59% of its articles; in October 2011 they added 80,000 in 11 days.",
+    "source": "https://en.wikipedia.org/wiki/Dutch_Wikipedia",
+    "evidence": "The majority of articles in Dutch Wikipedia (59%) were created by internet bots. In October 2011, several bots created 80,000 articles (then equivalent to 10% of the entire edition's article count) in only 11 days."
+  },
+  "Spanish": {
+    "text": "In 2002 many of its editors walked out over talk of adverts on Wikipedia and started a rival, the Enciclopedia Libre.",
+    "source": "https://en.wikipedia.org/wiki/Spanish_Wikipedia",
+    "evidence": "26 February 2002: many contributors left to form the Enciclopedia Libre Universal en Español, rejecting perceived censorship and the possibility of advertising on the Bomis-supported Wikipedia."
+  },
+  "Russian": {
+    "text": "Its first edit, in May 2001, read 'Russia is a great nation'; in 2012 it closed for 24 hours to protest a proposed internet law.",
+    "source": "https://en.wikipedia.org/wiki/Russian_Wikipedia",
+    "evidence": "The first edit of the Russian Wikipedia was on 24 May 2001, and consisted of the line \"Россия – великая страна\" (\"Russia is a great nation\"). ... On 10 July 2012, Russian Wikipedia closed access to its content for 24 hours in protest against proposed amendments to Russia's Information Act"
+  },
+  "Italian": {
+    "text": "In October 2011 it hid every article for three days to protest a wiretapping bill: the first Wikipedia to black itself out.",
+    "source": "https://en.wikipedia.org/wiki/Italian_Wikipedia",
+    "evidence": "From 4 to 6 October 2011, following a decision adopted by volunteers of the Italian Wikipedia community, a knowledge blackout was in place. During this time, all of the site's articles were hidden ... as a protest against the DDL intercettazioni (Wiretapping Bill) ... This was the first time that a Wikipedia had blanked all its content to protest."
+  },
+  "Polish": {
+    "text": "The second-largest edition in a Slavic language, after Russian; in 2005 it came out on a DVD with a magazine.",
+    "source": "https://en.wikipedia.org/wiki/Polish_Wikipedia",
+    "evidence": "It is also the second-largest edition in a Slavic language, after the Russian Wikipedia ... The text of the Polish Wikipedia was first published on a DVD together with the paper edition of the magazine Enter SPECIAL in August 2005."
+  }
+}

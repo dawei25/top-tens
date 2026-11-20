@@ -1,0 +1,41 @@
+{
+  "id": "languages-countries",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 7,
+  "scores": {
+    "recognizability": 5,
+    "curve": 4,
+    "fairness": 4,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 7,
+    "livesLost": 5,
+    "guesses": 12
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 1,
+    "guesses": 11
+  },
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": [
+    "culture",
+    "languages",
+    "countries"
+  ],
+  "audience": "anyone",
+  "summary": "India, China, Indonesia and the US come fast and Papua New Guinea's 845 is famous trivia; Cameroon is the find, the DRC (#11) and the Philippines (#12) the near misses, Russia, South Africa and Switzerland the traps.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 7 and lost its lives on Russia, South Africa, Switzerland, Canada and the Philippines.",
+    "Ethnologue's 22nd edition (2019), every country and territory, counting the languages established there, not recent immigrants' (the prompt says so). With them the same ten lead, the US and Australia higher. The data is from 2019: the page has no newer edition.",
+    "Distinct from languages (most spoken languages): countries, not languages, are the answers. Blitz not simulated."
+  ],
+  "fixes": []
+}

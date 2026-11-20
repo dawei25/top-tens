@@ -1,0 +1,62 @@
+{
+  "La Paz": {
+    "text": "Bolivia's seat of government is the world's highest administrative capital, and has the largest urban cable car network in the world.",
+    "source": "https://en.wikipedia.org/wiki/La_Paz",
+    "where": "Bolivia",
+    "evidence": "At an elevation of roughly 3,650 m (11,975 ft) above sea level, La Paz is the highest administrative capital city in the world. ... La Paz is home to the largest urban cable car network in the world."
+  },
+  "Quito": {
+    "text": "Ecuador's capital sits on the slopes of an active volcano, Pichincha, and is the capital closest to the Equator, which crosses its northern suburbs.",
+    "source": "https://en.wikipedia.org/wiki/Quito",
+    "where": "Ecuador",
+    "evidence": "Quito is in a valley on the eastern slopes of Pichincha, an active stratovolcano in the Andes. ... Quito is the capital city closest to the Equator, which runs through the northern part of the metropolitan area in the parish of San Antonio."
+  },
+  "Sucre": {
+    "text": "Bolivia's constitution makes it the country's true capital; La Paz, higher still, is only the seat of government.",
+    "source": "https://en.wikipedia.org/wiki/Sucre",
+    "where": "Bolivia",
+    "evidence": "As designated in the Constitution of Bolivia, Sucre is the true capital of the nation, while La Paz is the seat of government."
+  },
+  "Bogotá": {
+    "text": "Colombia's capital stands on a high Andean plateau, the Bogotá savanna, home to half a million Muisca people when the Spanish arrived.",
+    "source": "https://en.wikipedia.org/wiki/Bogot%C3%A1",
+    "where": "Colombia",
+    "evidence": "The city is located in the center of Colombia, on a high plateau known as the Bogotá savanna, part of the Altiplano Cundiboyacense located in the Eastern Cordillera of the Andes. ... At the arrival of the Spanish conquistadores, the Muisca population was estimated to be half a million indigenous people on the Bogotá savanna"
+  },
+  "Addis Ababa": {
+    "text": "Ethiopia's capital is the highest in Africa; its name means 'new flower'.",
+    "source": "https://en.wikipedia.org/wiki/Addis_Ababa",
+    "where": "Ethiopia",
+    "evidence": "Addis Ababa (... Amharic: አዲስ አበባ ..., lit. 'new flower' ...) is the capital and largest city of Ethiopia. ... At an elevation of 2,355 metres (7,726 ft), it is the fourth-highest capital city in the world and the highest capital in Africa."
+  },
+  "Thimphu": {
+    "text": "Bhutan's capital, the highest in Asia, has no airport and no traffic lights: police direct the traffic by hand.",
+    "source": "https://en.wikipedia.org/wiki/Thimphu",
+    "where": "Bhutan",
+    "evidence": "Thimphu is the fifth highest capital in the world by altitude and the highest capital in Asia ... Unlike many capitals, Thimphu does not have its own airport ... it is one of the two national capitals in the world that does not have traffic lights ... Instead of traffic lights, the city takes pride in its traffic police that directs the oncoming traffic with their dance-like movement of their arms and hands."
+  },
+  "Asmara": {
+    "text": "Eritrea's capital, nicknamed Little Rome for its Italian buildings, was in 2017 the first modernist city listed whole by UNESCO.",
+    "source": "https://en.wikipedia.org/wiki/Asmara",
+    "where": "Eritrea",
+    "evidence": "By the late 1930s, Asmara was called Piccola Roma (Little Rome). ... The city has thousands of Art Deco, futurist, modernist, and rationalist buildings, constructed during the period of Italian Eritrea. ... Asmara was listed as a UNESCO World Heritage Site in July 2017, becoming the first modernist city anywhere to be listed in its entirety."
+  },
+  "Sanaa": {
+    "text": "Yemen's capital lies between the highest mountains in Arabia; the stone tower houses of its old city rise up to 8 storeys.",
+    "source": "https://en.wikipedia.org/wiki/Sanaa",
+    "where": "Yemen",
+    "evidence": "At an elevation of 2,300 metres (7,500 ft), Sanaa is the seventh highest capital city in the world and is situated between the Sarawat Mountains of Jabal An-Nabi Shu'ayb and Jabal Tiyal, considered the highest mountains in the Arabian Peninsula ... Sanaa's Old City is renowned for its tower houses, which are typically built from stone and fired brick and can reach up to 8 stories in height."
+  },
+  "Mexico City": {
+    "text": "At the 1968 Olympics in Mexico's capital, 2,240 m up, Bob Beamon broke the long jump world record by 55 cm.",
+    "source": "https://en.wikipedia.org/wiki/1968_Summer_Olympics",
+    "where": "Mexico",
+    "evidence": "Bob Beamon leapt 8.90 m (29 ft 2.39 in) in the long jump, an incredible 55 cm (22 in) improvement over the previous world record. ... they were well-prepared for the 2240 m elevation of Mexico City."
+  },
+  "Nairobi": {
+    "text": "Railway builders picked the spot for its height and mild climate; Kenya's capital is the only one with a national park inside its boundaries.",
+    "source": "https://en.wikipedia.org/wiki/Nairobi",
+    "where": "Kenya",
+    "evidence": "Whitehouse, chief engineer of the railway, favoured the site as an ideal resting place due to its high elevation, temperate climate, adequate water supply ... Nairobi is uniquely notable for being the only capital city in the world that hosts a national park within its boundaries."
+  }
+}

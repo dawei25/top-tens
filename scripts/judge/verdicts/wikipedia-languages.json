@@ -1,0 +1,41 @@
+{
+  "id": "wikipedia-languages",
+  "by": "builder",
+  "judgedAt": "2026-11-20",
+  "decision": "daily-list",
+  "alsoBlitz": false,
+  "priority": 6,
+  "scores": {
+    "recognizability": 5,
+    "curve": 4,
+    "fairness": 3,
+    "data": 4,
+    "fun": 4,
+    "blitzDepth": 0
+  },
+  "casual": {
+    "found": 6,
+    "livesLost": 5,
+    "guesses": 11
+  },
+  "fan": {
+    "found": 10,
+    "livesLost": 0,
+    "guesses": 10
+  },
+  "blitzCasual": null,
+  "difficulty": 3,
+  "tags": [
+    "oddball",
+    "languages",
+    "internet"
+  ],
+  "audience": "anyone",
+  "summary": "English, Spanish, French, German, Russian and Italian come fast; Cebuano at #2 and Swedish at #5 (both mostly written by bots), Dutch and Polish are the surprises, while Chinese (#12), Japanese, Arabic and Portuguese cost lives.",
+  "reasons": [
+    "Builder's own replays, pending a real judge (the builder knew the answers when writing them). A casual order found 6 and lost its lives on Chinese, Japanese, Arabic, Portuguese and Hindi; each miss shows its edition's count.",
+    "Every open edition of Wikipedia (345), by its article count when the page was updated (November 2026). The player types the language; the edition's name ('English Wikipedia') works too, and 'mandarin' is Chinese.",
+    "Famous languages miss in a row, so lives go fast (fairness 3), but every miss is a near miss with a figure and the bots are a good reveal. Blitz not simulated."
+  ],
+  "fixes": []
+}

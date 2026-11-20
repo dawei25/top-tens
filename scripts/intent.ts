@@ -2026,6 +2026,36 @@ export const INTENT: Record<string, Intent> = {
     // name since 2021.
     same: { "Kanye West": ["Ye"], "Tupac Shakur": ["Tupac", "2Pac"] },
   },
+  // Nov 20, second round.
+  "populous-islands": {
+    same: {
+      // As on islands: the kingdom and its nations are Great Britain ("uk" offered Cyprus and Portsea Island), a
+      // country that shares an island names it.
+      "Great Britain": ["UK", "United Kingdom", "Britain", "England", "Scotland", "Wales", "GB"],
+      "New Guinea": ["Papua New Guinea", "PNG", "Papua"],
+      Borneo: ["Kalimantan"],
+      Ireland: ["Republic of Ireland", "Northern Ireland", "Eire"],
+      Hispaniola: ["Haiti", "Dominican Republic"],
+      Sulawesi: ["Celebes"],
+      // The city on it, as "Mumbai Island" (a redirect to Salsette) and as the old Bombay Island, merged into it.
+      Salsette: ["Mumbai", "Bombay", "Bombay Island"],
+      "Singapore Island": ["Singapore"],
+      "Manhattan Island": ["Manhattan"],
+    },
+  },
+  "golf-countries": {
+    // The nations count as themselves, so the United Kingdom's forms skip this list (as on world-cup-wins).
+    same: { England: ["English"], Scotland: ["Scottish"] },
+    groups: {
+      // No United Kingdom row: its names offer the two nations in the count ("uk" found nothing).
+      "United Kingdom": ["England", "Scotland"],
+      UK: ["England", "Scotland"],
+      Britain: ["England", "Scotland"],
+      "Great Britain": ["England", "Scotland"],
+      GB: ["England", "Scotland"],
+      British: ["England", "Scotland"],
+    },
+  },
   // Nov 20 candidates.
   "world-cup-wins": {
     same: {
