@@ -1,24 +1,29 @@
 {
   "id": "f1-wins-by-country",
-  "judgedAt": "2026-10-30",
+  "judgedAt": "2026-11-20",
   "decision": "daily-list",
   "alsoBlitz": false,
-  "priority": 6,
+  "priority": 7,
   "scores": { "recognizability": 5, "curve": 4, "fairness": 4, "data": 4, "fun": 3, "blitzDepth": 0 },
-  "casual": { "found": 9, "livesLost": 5, "guesses": 14 },
+  "casual": { "found": 7, "livesLost": 5, "guesses": 12 },
   "fan": { "found": 10, "livesLost": 1, "guesses": 11 },
   "blitzCasual": null,
   "difficulty": 2,
   "tags": ["sports", "motorsport", "formula one"],
   "audience": "F1 fans, and anyone who knows a few drivers",
-  "summary": "Countries are easy to guess even without following F1, and the reveal has good moments: Finland at #6, Argentina (Fangio) at #10, Spain only #11. A solid, gettable daily.",
+  "summary": "Ten country names anyone can type, and a casual player gets 7 by thinking of the drivers they know. Spain two wins short at #11, Finland at #6 and Italy level with Australia make a good reveal right after the season finale.",
   "reasons": [
-    "Casual found 9/10 but spent all 5 lives on Spain, USA, Mexico, Monaco and Japan, all plausible and mostly near misses (Spain #11, USA #12).",
-    "Totals check out by driver (Prost, Senna, Lauda, Fangio, Häkkinen and Räikkönen) and are current mid-2026; the US count includes the 1950-60 Indy 500, as Wikipedia does.",
-    "Only 23 countries have a win, so it is not Blitz-ready."
+    "Casual found 7/10 in 12 guesses: Spain (#11), Monaco (#18), Mexico (#19), the US (#12) and Japan (no winner) took the 5 lives. The fan found all 10 and lost only Spain.",
+    "Curve: UK, Germany, Brazil and the Netherlands are gimmes; France, Italy, Australia and Finland take thought; Austria (Lauda) and Argentina (Fangio) are the fair stretch.",
+    "Misses teach: Spain is two short of Argentina, the US 33, Monaco's 9 are all Leclerc's. Only countries with no winner (Japan, China, Bahrain) show no figure.",
+    "Totals match Wikipedia's by-nationality table driver by driver. 'england', 'british', 'holland', 'dutch' and 'aussie' land; drivers, teams, circuits and 'f1' are free; last verdict's two fixes are in.",
+    "The figures stop at the 2026 US GP (Oct 25) and the season ends Dec 6, so run it late that week after a refresh. Not a debut: it has been in free play."
   ],
   "fixes": [
-    "Typing 'british' (natural for driver nationality) offers British Indian Ocean Territory / British Virgin Islands instead of United Kingdom; add 'British' as a United Kingdom alias.",
-    "Drop the junk alias 'Swedish sin' from Sweden (#15)."
+    "Refresh 'List of Formula One Grand Prix winners' after the Abu Dhabi GP (Dec 6) and rebuild this topic before it runs: the cached page (edited Oct 26) says 'correct as of the 2026 United States Grand Prix', so the Mexico, Brazil, Las Vegas, Qatar and Abu Dhabi wins are missing. Then check that Spain (36) is still below Argentina (38) and see whether Australia and Italy (52 each, joint 7th on Wikipedia) are still level.",
+    "The game footer says 'as of' the build date (Nov 8), but the table stops at Oct 25. Set dataAsOf in topics.ts to what the page covers (for example 'end of the 2026 season' after the refresh).",
+    "The ten facts are general country trivia ('the world's first industrialised country' for the UK, boreal forest for Finland). Rewrite them from the table's Driver(s) column, since players guess by thinking of drivers: all 73 Dutch wins are Verstappen's, Fangio has 24 of Argentina's 38, Lauda 25 of Austria's 41, Prost 51 of France's 81, Senna 41 of Brazil's 101, Schumacher 91 of Germany's 179.",
+    "Optional: countries with no winner (Japan, China, Bahrain, Saudi Arabia) cost a life and show no figure. The table lists every nationality that has won, so they could show '0 wins', the way zero rows do on team lists.",
+    "Aliases: 'aus' and 'oz' for Australia and 'west germany' for Germany (von Trips and Mass raced for West Germany). All three are free today, so this is small."
   ]
 }
