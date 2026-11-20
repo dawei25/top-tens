@@ -10,6 +10,26 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Dec 6-13 audit (Nov 20): what's left for other rebuilds.** brands, gold-reserves, coldest-countries,
+      nuclear-countries, elements-crust and film-series are rebuilt with their fixes (aliases.test.ts "Dec 6-13 audit").
+      - **f1-wins-by-country, at its post-finale refresh:** the source fixes are in, not built: "west germany"
+        (intent.ts), "aus"/"oz" (COUNTRY_FORMS), and "none" for a country with no win (`unlistedValue`; Japan, China,
+        Bahrain). A trial build had all three and the same top 10. Add their guards to "Dec 6-13 audit" when it is
+        built; its facts rewrite and `dataAsOf` are in the item below.
+      - **The lexicon retrain (item below)** makes brands' `knownNames` live: "sprite" stops being offered as Stripe,
+        and Red Bull, Fanta, Diet Coke, iPhone, Heineken, Burberry say "isn't in this ranking". The audit's test judges
+        with them learned already.
+      - **Pipeline changes for every list's next rebuild:** an alias that is only a company suffix is dropped (validate.ts
+        errors on one; no committed list has one now); a topic's `aliases` reach unranked entries too (build and
+        validate.ts warn on a name that is no entry); `rename` renames universe members (world-heritage-countries will
+        show Turkey, as it asks); COUNTRY_JUNK has the coldest judge's Mongolia, Kyrgyzstan and Tajikistan redirects;
+        country forms Tajik, Tajikistani, Turkmen and Lietuva. New options, used so far on one list each:
+        `unlistedValue`, `shownAs`.
+      - **Left open:** gold-reserves' Canada (the most common costly miss without a figure) has no source on the Gold
+        reserve page for a note; elements-crust's trace elements could show the page's own rank (#83 xenon to #94
+        neptunium) instead of "a trace"; film-series' The Hunger Games total goes stale as Sunrise on the Reaping
+        earns (refresh at its next rebuild, before any rerun after Avengers: Doomsday on Dec 18).
+
 - [ ] **Re-judged Nov 20, fixes for their next rebuild** (all free play now, no day at risk):
       super-bowl-wins: the list's own subject reaches Washington through a "Football Team" alias (drop it; no generic
       words as aliases), about 16 junk aliases (a radio network, a training centre), and two common forms missing
@@ -27,7 +47,8 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       (brands, forest-countries, elements-crust, world-cup-wins, car-countries, gold-reserves, coldest-countries,
       nuclear-countries, film-series) were built on Nov 20 and lexicon.json was restored to the committed one, so their
       names aren't in it yet: run `npx tsx scripts/lexicon.ts` (or any build) after Nov 21, commit it, and check the
-      dailies of the next days read as before (aliases.test.ts "Nov 20 candidates" passes on both).
+      dailies of the next days read as before (aliases.test.ts "Nov 20 candidates" and "Dec 6-13 audit" pass on both).
+      The Dec 6-13 audit's rebuild (Nov 20) also waits on it: brands' known names (scripts/known/brands.json).
 
 - [ ] **Lexicon retrain held back (Nov 19), until happiest-countries' day (Nov 20) has passed.** The Nov 19 build of
       empires, museums, consoles and mountains wrote a new lexicon.json; it was not committed. Retrained, it changed
