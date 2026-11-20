@@ -10,6 +10,15 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
 
 ## Pending
 
+- [ ] **Re-judged Nov 20, fixes for their next rebuild** (all free play now, no day at risk):
+      super-bowl-wins: the list's own subject reaches Washington through a "Football Team" alias (drop it; no generic
+      words as aliases), about 16 junk aliases (a radio network, a training centre), and two common forms missing
+      (a misspelt 49ers, a short Washington nickname). ballon-dor-countries: three junk aliases from the shared country
+      list. Both, and f1-wins-by-country and tourism: top-10 facts are general country trivia, not about the topic.
+      f1-wins-by-country (still a daily list): refresh after the Dec 6 finale before it runs.
+- [ ] **Coordinator, src/game/state.ts:** a miss below a tie at the bottom of the ranked rows says "outside the top
+      18" when 20 rows are ranked (super-bowl-wins: three teams tie at #18); it should count the ranked rows.
+
 - [ ] **tourism: the UAE's figure is Dubai's alone** (list judge, Nov 20): the UAE row shows Dubai's arrivals; drop the
       figure or use a UAE-wide one, with a guard. Also: its top-10 facts repeat other lists' country facts (travel
       facts would fit), and China, the guess most people make, costs a life with no figure and no reason (a miss note
