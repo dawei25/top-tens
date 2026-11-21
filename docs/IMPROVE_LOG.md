@@ -2,6 +2,13 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-21, launch-week morning check (Sat)
+
+- Notes and ratings since yesterday's check: none. Plays all time: 188 across 90 lists (+3). Today's Fathom: 2
+  players finished Fathom #6 yesterday (average 517), none yet on #7.
+- Missed guesses: 2, one browser each, both correctly refused: a territory on happiest-countries (not a country) and a
+  two-letter fragment on capitals. No fix.
+
 ## 2026-11-20, launch-week morning check (Fri)
 
 - Notes, ratings and missed guesses since yesterday's check: none. Plays all time: 185 across 89 lists (+1). Today's
