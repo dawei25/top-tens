@@ -2,6 +2,18 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-22, weekly lineup (Dec 6 and the week of Dec 7), Sunday fallback
+
+- No answer from the owner by Sunday 18:00 HKT (chat, doc comments or doc edits): scheduled as proposed. Sun Dec 6
+  coldest-countries, Mon elements-crust, Tue gold-reserves, Wed languages-countries, Thu golf-countries, Fri
+  high-capitals, Sat brands, Sun film-series: all debut lists, judged daily-list and audited (80 to 120 guesses each).
+- Built Nov 20: 14 new lists in two rounds. Too easy for a daily, now free play and Blitz: world-cup-wins,
+  car-countries, forest-countries. Spares: nuclear-countries, f1-wins-by-country (refresh after the Dec 6 finale),
+  wikipedia-languages, populous-islands (fixed, needs a quick re-judge). Re-judged older lists: tourism,
+  ballon-dor-countries and super-bowl-wins to free play (too easy); f1-wins-by-country stays daily.
+- Legacy Blitz fields for the new days are free-play lists only: the scheduler had put two spare dailies there, which
+  the run-once rule would have used up; swapped by hand for music-artists and rivers.
+
 ## 2026-11-22, launch-week morning check (Sun)
 
 - Notes and ratings since yesterday's check: none. Plays all time: 189 across 91 lists (+1). Today's Fathom: 1

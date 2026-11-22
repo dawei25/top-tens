@@ -69,6 +69,14 @@ measure of how well the picks match his taste.
 | Nov 16 | Fri 20 | australia-cities | moved to Sat 21; happiest-countries came to Fri 20 | coastline (Wed 18), capitals (Thu 19) and Australia's cities on Fri 20 would be three Geography days running |
 | Nov 16 | Sat 21 | happiest-countries | moved to Fri 20 | see Fri 20 |
 | Nov 16 | Sun 22 | winter-olympics-countries | no answer, scheduled as proposed | |
+| Dec 7 | Sun 6 | coldest-countries | no answer, scheduled as proposed | Sunday 18:00 HKT fallback (owner, Nov 5); all eight debut lists, judged and audited |
+| Dec 7 | Mon 7 | elements-crust | no answer, scheduled as proposed | |
+| Dec 7 | Tue 8 | gold-reserves | no answer, scheduled as proposed | |
+| Dec 7 | Wed 9 | languages-countries | no answer, scheduled as proposed | |
+| Dec 7 | Thu 10 | golf-countries | no answer, scheduled as proposed | |
+| Dec 7 | Fri 11 | high-capitals | no answer, scheduled as proposed | the hard day (casual 6) |
+| Dec 7 | Sat 12 | brands | no answer, scheduled as proposed | a week after market-cap-peak (four shared answers) |
+| Dec 7 | Sun 13 | film-series | no answer, scheduled as proposed | a week after us-box-office |
 
 Players' signals (not the owner's): painters (Nov 17 daily) drew one note and one down, too hard: "obscure for the
 average player; free play, not a daily". One player, so logged, not acted on; judges should weigh it for art lists.

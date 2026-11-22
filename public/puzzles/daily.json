@@ -280,5 +280,53 @@
   "date": "2026-12-05",
   "id": "us-box-office",
   "blitz": "islands"
+ },
+ {
+  "n": 48,
+  "date": "2026-12-06",
+  "id": "coldest-countries",
+  "blitz": "world-cup-wins"
+ },
+ {
+  "n": 49,
+  "date": "2026-12-07",
+  "id": "elements-crust",
+  "blitz": "forest-countries"
+ },
+ {
+  "n": 50,
+  "date": "2026-12-08",
+  "id": "gold-reserves",
+  "blitz": "concert-tours"
+ },
+ {
+  "n": 51,
+  "date": "2026-12-09",
+  "id": "languages-countries",
+  "blitz": "music-artists"
+ },
+ {
+  "n": 52,
+  "date": "2026-12-10",
+  "id": "golf-countries",
+  "blitz": "tourism"
+ },
+ {
+  "n": 53,
+  "date": "2026-12-11",
+  "id": "high-capitals",
+  "blitz": "car-countries"
+ },
+ {
+  "n": 54,
+  "date": "2026-12-12",
+  "id": "brands",
+  "blitz": "rivers"
+ },
+ {
+  "n": 55,
+  "date": "2026-12-13",
+  "id": "film-series",
+  "blitz": "gdp-per-capita"
  }
 ]
