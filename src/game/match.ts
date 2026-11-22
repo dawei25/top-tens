@@ -1053,16 +1053,17 @@ function ofCountries(puzzle: Puzzle): boolean {
 /**
  * On a list of countries, the entries that are the country the guess names by any name the lists of countries give it
  * (`countryNamed`): "kirghizstan" is the Kyrgyzstan here, whatever this list calls it or lists as its aliases. An
- * entry is that country by one of its own names; a short code ("ROC", the Russian athletes on Winter Olympics medals)
- * doesn't count, as another country may go by it.
+ * entry is that country by its name, or else by one of its aliases; a short code ("ROC", the Russian athletes on Winter
+ * Olympics medals) doesn't count, as another country may go by it, and where an entry has the country's name an entry
+ * that only has one of its aliases is another (the Soviet Union beside Russia on Winter Olympics medals).
  */
 function sameCountry(guess: string, candidates: Candidate[], puzzle: Puzzle, lex?: Lexicon): Candidate[] {
   if (!lex?.countryAliases || !ofCountries(puzzle)) return [];
   const country = countryNamed(guess, lex);
   if (!country) return [];
-  return candidates.filter((c) =>
-    formsOf(c.entry).forms.some((f) => fnv(f).toString(36) === country || (f.replace(/ /g, "").length >= 5 && countryNamed(f, lex) === country)),
-  );
+  const is = (f: string) => fnv(f).toString(36) === country || (f.replace(/ /g, "").length >= 5 && countryNamed(f, lex) === country);
+  const byName = candidates.filter((c) => is(formsOf(c.entry).forms[0]));
+  return byName.length ? byName : candidates.filter((c) => formsOf(c.entry).forms.some(is));
 }
 
 /**

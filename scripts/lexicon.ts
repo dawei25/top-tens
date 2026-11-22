@@ -174,24 +174,29 @@ const ofCountries = (p: Puzzle) => /^countries\b/.test(normalize(p.noun ?? ""));
  * (`Lexicon.countryAliases`). Left out: forms that name a language ("russian" stays free on languages-countries), the
  * UK's nations and other parts of countries (SUBDIVISIONS: "wales" is not the UK on golf-countries, where England and
  * Scotland rank), a form two countries share ("Congo"), another country's own name, and an entry named by a short
- * code ("ROC", the Russian athletes on winter-olympics-countries, is no Taiwan).
+ * code ("ROC", the Russian athletes on winter-olympics-countries, is no Taiwan). A list's alias counts once two lists
+ * of countries give it: one list's topic redirects ("Austrian wine" on wine-countries, "Russian Armed Forces" on
+ * military-spending) aren't the country on every other list.
  */
 export function countryAliases(dir: string): [string, string][] {
-  const claims = new Map<string, Set<string>>();
-  const claim = (form: string, country: string) => {
+  /** form → country → where it is said: "shared" (COUNTRY_FORMS, countries-list) or the lists' ids. */
+  const claims = new Map<string, Map<string, Set<string>>>();
+  const claim = (form: string, country: string, by: string) => {
     const f = normalize(form);
     if (!f) return;
-    let set = claims.get(f);
-    if (!set) claims.set(f, (set = new Set()));
-    set.add(normalize(country));
+    let of = claims.get(f);
+    if (!of) claims.set(f, (of = new Map()));
+    let set = of.get(normalize(country));
+    if (!set) of.set(normalize(country), (set = new Set()));
+    set.add(by);
   };
   for (const line of COUNTRY_FORMS) {
     const c = line.map((f) => countryOf(f)).find(Boolean);
-    if (c) for (const f of line) claim(f, c.name);
+    if (c) for (const f of line) claim(f, c.name, "shared");
   }
   for (const c of countries()) {
     const own = countryOf(c.name);
-    if (own) for (const a of c.aliases) claim(a, own.name);
+    if (own) for (const a of c.aliases) claim(a, own.name, "shared");
   }
   const parts = new Set(SUBDIVISIONS.map(normalize));
   for (const f of readdirSync(dir)) {
@@ -201,15 +206,15 @@ export function countryAliases(dir: string): [string, string][] {
     for (const e of [...p.answers, ...p.extras]) {
       if (/^[A-Z]{2,4}$/.test(e.name) || parts.has(normalize(e.name))) continue;
       const c = countryOf(e.name);
-      if (c) for (const a of [e.name, ...e.aliases]) claim(a, c.name);
+      if (c) for (const a of [e.name, ...e.aliases]) claim(a, c.name, p.id);
     }
   }
   const names = new Set(countries().map((c) => normalize(countryOf(c.name)?.name ?? c.name)));
   const out: [string, string][] = [];
-  for (const [f, cs] of claims) {
-    if (cs.size !== 1 || names.has(f) || LANGUAGE_FORMS.has(f) || parts.has(f)) continue;
-    const [c] = cs;
-    if (f !== c) out.push([f, c]);
+  for (const [f, of] of claims) {
+    if (of.size !== 1 || names.has(f) || LANGUAGE_FORMS.has(f) || parts.has(f)) continue;
+    const [[c, by]] = of;
+    if (f !== c && (by.has("shared") || by.size >= 2)) out.push([f, c]);
   }
   return out.sort((a, b) => a[0].localeCompare(b[0]));
 }
