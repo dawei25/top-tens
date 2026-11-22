@@ -1913,6 +1913,46 @@ describe("aliases as built: what players type", () => {
       for (const e of [...p.answers, ...p.extras]) for (const a of junkNames) expect(e.aliases, `${e.name}: ${a}`).not.toContain(a);
     });
   });
+
+  describe("lexicon retrain, Nov 22", () => {
+    // Retrained with the Nov 20 lists, the lexicon knows coldest-countries' spellings of Kyrgyzstan and Tajikistan, and
+    // populous-islands' "Hayti" (Hispaniola), as names of their own. Where one only misspelt such a country's usual name
+    // ("Kirghizia", Kyrgyzstan's alias on winter-olympics-countries), it was refused there as a name the list doesn't
+    // rank, though the list has the country; old lexicon: Kyrgyzstan to confirm. "tajikistani" lost its slip with the
+    // demonyms that name a language. This is the lexicon as lexicon.ts trains it: every name known, every misspelling.
+    const puzzleOf = (id: string): Puzzle => JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
+    const bank = bankNames(dir);
+    const learned: Lexicon = {
+      ...lex,
+      names: [lex.names, ...bank.all.map((n) => fnv(normalize(n)).toString(36))].join(" "),
+      slips: [...new Set((bank.slips ?? []).map(([s, n]) => fnv(`${s}>${n}`).toString(36)))].join(" "),
+    };
+    const read = (id: string, guess: string) => {
+      const r = judgeGuess(guess, puzzleOf(id), new Set(), learned);
+      if ("entry" in r) return `${r.kind}${"corrected" in r && r.corrected ? "?" : ""} ${r.entry.name}`;
+      return r.kind === "typo" ? `choose ${r.suggestions.join(" | ")}` : r.kind;
+    };
+    it.each([
+      ["winter-olympics-countries", "kirgizia", "near? Kyrgyzstan"],
+      ["winter-olympics-countries", "kirgiz republic", "near? Kyrgyzstan"],
+      ["winter-olympics-countries", "tajikistani", "near? Tajikistan"],
+      ["winter-olympics-countries", "hayti", "near? Haiti"],
+      // A demonym that names a language stays free on languages-countries, one that names none still names its country.
+      ["languages-countries", "russian", "unknown"],
+      ["languages-countries", "tajikistani", "near Tajikistan"],
+    ])("%s: %s -> %s", (id, guess, want) => {
+      expect(read(id, guess)).toBe(want);
+    });
+    it("misspellings: a slip of a country's usual name counts, of other aliases not (one entry's aliases may name two things)", () => {
+      expect(misspellings("Kyrgyzstan", ["Kirghizia", "Kirgizia", "Kyrgyz Republic", "Kirgiz Republic", "Kyrgyz"])).toEqual([
+        ["kirgizia", "kirghizia"],
+        ["kirgiz republic", "kyrgyz republic"],
+      ]);
+      expect(misspellings("Tajikistan", ["Tajik", "Tajikistani"])).toEqual([["tajikistani", "tajikistan"]]);
+      expect(misspellings("Hispaniola", ["Haiti", "Hayti", "Hispanola"])).toEqual([["hayti", "haiti"], ["hispanola", "hispaniola"]]);
+      expect(misspellings("Final Fantasy", ["FF7", "FF8", "FFVII", "FFVIII"])).toEqual([]);
+    });
+  });
 });
 
 describe("the pipeline's hand-written tables", () => {

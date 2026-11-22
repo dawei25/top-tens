@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { fnv, trainLexicon } from "../src/game/junk";
 import { editDistance, normalize } from "../src/game/match";
 import { capitals, countries, usStates } from "./gazetteer";
-import { COUNTRY_FORMS, DEMONYMS } from "./intent";
+import { COUNTRY_FORMS } from "./intent";
 import { TOPICS } from "./topics";
 import type { Puzzle } from "../src/game/types";
 
@@ -99,27 +99,45 @@ export interface Bank {
   slips?: [string, string][];
 }
 
-/** What countries' people are called (intent.ts DEMONYMS), normalized: "russian", "nepali", "georgian". */
-const DEMONYM_FORMS = new Set(Object.values(DEMONYMS).flat().map(normalize));
+/**
+ * Country forms that name a language (topics' `notCountryForms`, normalized: "russian", "nepali", "georgian"): on a list
+ * about languages such a word is the language, free.
+ */
+const LANGUAGE_FORMS = new Set(TOPICS.flatMap((t) => t.notCountryForms ?? []).map(normalize));
+
+/** Every country's name and usual forms, normalized ("kyrgyzstan", "kirghizia", "kyrgyz republic"). */
+let countryNameSet: Set<string> | undefined;
+function isCountryForm(s: string): boolean {
+  countryNameSet ??= new Set([...countries().map((c) => normalize(c.name)), ...countryForms().flat()]);
+  return countryNameSet.has(s);
+}
 
 /**
- * An entry's aliases that misspell its own name, within two edits ("Afganistan" for Afghanistan, "Missisippi" for
- * Mississippi), with that name; normalized. Spacing variants ("Spider Man") aren't misspellings. Such an alias is a
- * known name (it's in the bank), yet typed on a list that lacks it, it is still that entry misspelled: the matcher
- * lets it correct to an entry of that name (`isSlipOf` in src/game/junk.ts) and to nothing else.
+ * An entry's aliases that misspell its own name, or one of its aliases that is a country's usual name, within two edits
+ * ("Afganistan" for Afghanistan, "Missisippi" for Mississippi, "Kirgizia" for Kirghizia), with that name; normalized.
+ * Spacing variants ("Spider Man") aren't misspellings. Such an alias is a known name (it's in the bank), yet typed on a
+ * list that lacks it, it is still that entry misspelled: the matcher lets it correct to an entry that has the name
+ * (`isSlipOf` in src/game/junk.ts) and to nothing else. A country's usual names count, not only the one it's listed
+ * under: "kirgizia" is one letter from "Kirghizia", Kyrgyzstan's alias on winter-olympics-countries, and once
+ * coldest-countries made it a known name it read as a name of its own there (the lexicon retrain, Nov 22). Other
+ * aliases don't: one entry's aliases may name different things ("FF7" and "FF8" on Final Fantasy).
  *
- * A demonym is a word of its own, never a slip of its country's name, though "Russian" is one letter from Russia: on a
- * list where a language's name is free, "russian" was still offered as Russia to confirm (languages-countries' judge,
- * Nov 20).
+ * A demonym that names a language is a word of its own, never a slip of its country's name, though "Russian" is one
+ * letter from Russia: on a list where a language's name is free, "russian" was still offered as Russia to confirm
+ * (languages-countries' judge, Nov 20). Demonyms that are no language ("tajikistani", "nigerian") still slip to their
+ * country, as they always did.
  */
 export function misspellings(name: string, aliases: string[]): [string, string][] {
   const n = normalize(name);
+  const forms = [...new Set([n, ...aliases.map(normalize)])].filter((f) => f && !LANGUAGE_FORMS.has(f));
+  const targets = forms.filter((f) => f === n || isCountryForm(f));
   const out: [string, string][] = [];
-  for (const a of aliases) {
-    const s = normalize(a);
-    if (!s || s === n || s.replace(/ /g, "") === n.replace(/ /g, "") || Math.abs(s.length - n.length) > 2) continue;
-    if (DEMONYM_FORMS.has(s)) continue;
-    if (editDistance(s, n) <= 2) out.push([s, n]);
+  for (const s of forms) {
+    if (s === n) continue;
+    for (const x of targets) {
+      if (x === s || s.replace(/ /g, "") === x.replace(/ /g, "") || Math.abs(s.length - x.length) > 2) continue;
+      if (editDistance(s, x) <= 2) out.push([s, x]);
+    }
   }
   return out;
 }
