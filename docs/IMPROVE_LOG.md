@@ -2,6 +2,13 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-22, launch-week morning check (Sun)
+
+- Notes and ratings since yesterday's check: none. Plays all time: 189 across 91 lists (+1). Today's Fathom: 1
+  player finished Fathom #7 yesterday (559), none yet on #8.
+- Missed guesses: 2, one browser, both on yesterday's australia-cities and correctly refused: a misspelt New Zealand
+  city and a state (the wrong-kind line is still the owner's call). No fix.
+
 ## 2026-11-21, launch-week morning check (Sat)
 
 - Notes and ratings since yesterday's check: none. Plays all time: 188 across 90 lists (+3). Today's Fathom: 2
