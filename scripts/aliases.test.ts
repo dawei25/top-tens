@@ -7,7 +7,7 @@ import { judgeGuess, normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import { bareWord, blockedAlias, companySuffix, gluedAlias, junkRedirect, mangledText, otherNamespace } from "./aliases";
 import { COUNTRY_FORMS } from "./intent";
-import { bankNames, countryAliases, misspellings } from "./lexicon";
+import { countryAliases, misspellings } from "./lexicon";
 import { TOPICS } from "./topics";
 
 const junk = (raw: string, names: string[], forms: string[] = [], works = false) => junkRedirect(raw, { names, forms, works });
@@ -1752,14 +1752,12 @@ describe("aliases as built: what players type", () => {
       for (const name of ["Allianz Group", "XBOX", "VMWare", "EBay"]) expect(entry("brands", name), name).toBeUndefined();
     });
 
-    it("brands: famous brands no ranking has are known names, so 'sprite' is free, not Stripe, once the lexicon learns them", () => {
-      // The committed lexicon is kept until its queued retrain (docs/REBUILD_QUEUE.md); this is the lexicon after it.
+    it("brands: famous brands no ranking has are known names, so 'sprite' is free, not Stripe", () => {
+      // Live since the lexicon's retrain (Nov 22).
       const known: string[] = JSON.parse(readFileSync(join(import.meta.dirname, "known", "brands.json"), "utf8"));
       expect(known).toEqual(expect.arrayContaining(["Sprite", "Red Bull", "Fanta", "Diet Coke"]));
-      const learned: Lexicon = { ...lex, names: [lex.names, ...known.map((n) => fnv(normalize(n)).toString(36))].join(" ") };
-      expect(read("brands", "sprite", learned)).toBe("unknown");
-      expect(read("brands", "red bull", learned)).toBe("unknown");
-      expect(read("brands", "stripe", learned)).toBe("near Stripe");
+      for (const g of ["sprite", "red bull", "fanta", "diet coke", "iphone", "heineken", "burberry"]) expect(read("brands", g), g).toBe("unknown");
+      expect(read("brands", "stripe")).toBe("near Stripe");
     });
 
     it("nuclear-countries: the title says power, and a country with no power reactor says none", () => {
@@ -1875,19 +1873,20 @@ describe("aliases as built: what players type", () => {
       for (const f of languageForms) expect(forms, f).toContain(normalize(f));
     });
 
-    it("languages-countries: once the lexicon learns that a demonym is no misspelling, 'russian' is free, not Russia to confirm", () => {
-      // The committed lexicon stores "russian" as a slip of Russia (it is one letter off), so the game offers Russia to
-      // confirm; its queued retrain (docs/REBUILD_QUEUE.md) drops demonyms from the slips. This is the lexicon after it.
+    it("languages-countries: a demonym that names a language is no misspelling, so 'russian' is free, not Russia to confirm", () => {
+      // Live since the lexicon's retrain (Nov 22): before it, "russian" was a stored slip of Russia, one letter off.
       expect(misspellings("Russia", ["Russian", "Rusia", "Russian Federation"])).toEqual([["rusia", "russia"]]);
       expect(misspellings("Afghanistan", ["Afghan", "Afganistan"])).toEqual([["afganistan", "afghanistan"]]);
-      const slips = new Set((bankNames(dir).slips ?? []).map(([s, n]) => fnv(`${s}>${n}`).toString(36)));
-      const learned: Lexicon = { ...lex, slips: [...slips].join(" ") };
       for (const g of ["russian", "german", "indonesian", "turkish", "nepali", "georgian", "somali", "mongolian", "greenlandic"]) {
-        expect(read("languages-countries", g, learned), g).toBe("unknown");
+        expect(read("languages-countries", g), g).toBe("unknown");
       }
       // A misspelling is still corrected, and a country's own name still counts.
-      expect(read("languages-countries", "russia", learned)).toBe("near Russia");
-      expect(read("languages-countries", "indoneisa", learned)).toBe("correct? Indonesia");
+      expect(read("languages-countries", "russia")).toBe("near Russia");
+      expect(read("languages-countries", "indoneisa")).toBe("correct? Indonesia");
+      // Cusco, El Alto and Tok Pisin are known names; "sorani" is no Somali.
+      for (const [id, g] of [["high-capitals", "cusco"], ["high-capitals", "el alto"], ["languages-countries", "tok pisin"], ["wikipedia-languages", "sorani"]]) {
+        expect(judgeGuess(g, puzzleOf(id), new Set(), lex), g).toMatchObject({ kind: "unknown", known: true });
+      }
     });
 
     it("populous-islands: Salsette shows its cities' 2011 census, not the unsourced 23.7 million that decided #10", () => {
@@ -1919,16 +1918,16 @@ describe("aliases as built: what players type", () => {
     // populous-islands' "Hayti" (Hispaniola), as names of their own. Where one only misspelt such a country's usual name
     // ("Kirghizia", Kyrgyzstan's alias on winter-olympics-countries), it was refused there as a name the list doesn't
     // rank, though the list has the country; old lexicon: Kyrgyzstan to confirm. "tajikistani" lost its slip with the
-    // demonyms that name a language. This is the lexicon as lexicon.ts trains it: every name known, every misspelling.
+    // demonyms that name a language. Judged with the committed lexicon, retrained on Nov 22.
     const puzzleOf = (id: string): Puzzle => JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
-    const bank = bankNames(dir);
     const h = (s: string) => fnv(s).toString(36);
-    const learned: Lexicon = {
-      ...lex,
-      names: [lex.names, ...bank.all.map((n) => h(normalize(n)))].join(" "),
-      slips: [...new Set((bank.slips ?? []).map(([s, n]) => h(`${s}>${n}`)))].join(" "),
-      countryAliases: countryAliases(dir).map(([f, c]) => `${h(f)}:${h(c)}`).join(" "),
-    };
+    const learned = lex;
+    it("the committed lexicon is the retrained one: it has the lists of countries' other names for a country", () => {
+      const pairs = new Set((lex.countryAliases ?? "").split(" "));
+      expect(pairs.size).toBe(countryAliases(dir).length);
+      expect(pairs).toContain(`${h("kirghizstan")}:${h("kyrgyzstan")}`);
+      expect(lex.slips?.split(" ")).toContain(h("kirgizia>kirghizia"));
+    });
     const read = (id: string, guess: string) => {
       const r = judgeGuess(guess, puzzleOf(id), new Set(), learned);
       if ("entry" in r) return `${r.kind}${"corrected" in r && r.corrected ? "?" : ""} ${r.entry.name}`;
