@@ -49,22 +49,18 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       figure or use a UAE-wide one, with a guard. Also: its top-10 facts repeat other lists' country facts (travel
       facts would fit), and China, the guess most people make, costs a life with no figure and no reason (a miss note
       needs a puzzle-format field: coordinator's call). Free play only now, so no day is at risk.
-- [ ] **Lexicon: regenerate with the Nov 20 candidates after Nov 21, and before Dec 6** (the Dec 6-13 lineup needs it: language names free on languages-countries, sorani, brands' known names) (australia-cities' day). The nine new debut lists
-      (brands, forest-countries, elements-crust, world-cup-wins, car-countries, gold-reserves, coldest-countries,
-      nuclear-countries, film-series) and the second round (populous-islands, high-capitals, languages-countries,
-      wikipedia-languages, golf-countries; "sorani" reads as a slip of Somali until then) were built on Nov 20 and
-      lexicon.json was restored to the committed one, so their
-      names aren't in it yet: run `npx tsx scripts/lexicon.ts` (or any build) after Nov 21, commit it, and check the
-      dailies of the next days read as before (aliases.test.ts "Nov 20 candidates" and "Dec 6-13 audit" pass on both).
-      The Dec 6-13 audit's rebuild (Nov 20) also waits on it: brands' known names (scripts/known/brands.json).
+- [x] **Lexicon: regenerate with the Nov 20 candidates after Nov 21, and before Dec 6** (done Nov 22: retrained as
+      the Nov 22 branch's last commit, after the matcher's country aliases and kind words won back what it cost; goes
+      live by date, from Nov 26; guards in docs/IMPROVE.md's Nov 22 rows). Brands' known
+      names, language names free on languages-countries, "sorani", Cusco, El Alto and Tok Pisin are live with it.
+      Left after the fix, all minor: Honda's divisions on car-makers ("Honda Marine Group", "Honda Clio"),
+      "Irlandia" on life-expectancy-countries, "Ingerland" on golf-countries, out-of-region forms on europe-cities
+      ("Mumbai Island", "Addis Ababa, ET"), "Singapore Island" on high-capitals, "Google Inc Class A" on
+      market-cap-peak, "Spider-Man Universe" on us-box-office, and "Hawaiian" on Fathom's US-state rounds; accepted:
+      "monaco city", "spidey", "caterpillar", "iron".
 
-- [ ] **Lexicon retrain held back (Nov 19), until happiest-countries' day (Nov 20) has passed.** The Nov 19 build of
-      empires, museums, consoles and mountains wrote a new lexicon.json; it was not committed. Retrained, it changed
-      how the dailies read off-list guesses: about 280 of the new aliases' forms ("xbox1", "arab empire", "2ds") would
-      read as known names on every list, 25 strings of mash flip junk or not (the letter model), and "arabs" on
-      happiest-countries would no longer be corrected to the United Arab Emirates. The answers themselves read the
-      same with or without it (aliases.test.ts passes on both). Any build writes it; after Nov 20, rebuild any list or
-      run `npx tsx scripts/lexicon.ts` and commit it, checking the dailies of those days the same way.
+- [x] **Lexicon retrain held back (Nov 19), until happiest-countries' day (Nov 20) has passed.** Done Nov 22 with the
+      item above (one retrain does both).
 
 - [ ] **Famous names count on concert-tours and tiktok-accounts** (painters agent, Nov 18), once their days pass
       (concert-tours is Nov 19's daily, tiktok-accounts Nov 20's legacy Blitz): Born This Way Ball, Reputation, Justice,

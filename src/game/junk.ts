@@ -31,6 +31,13 @@ export interface Lexicon {
   people?: string;
   /** "form:country" pairs of FNV-1a hashes: a country's usual forms ("nippon", "uk") to its name. Optional. */
   countries?: string;
+  /**
+   * "form:country" pairs of FNV-1a hashes: every other name the bank's lists of countries give a country (coldest-
+   * countries' "Kirghizstan", "Eesti Vabariik"), to its name, but none that names a language ("russian") or a part of a
+   * country ("wales"). On a list of countries such a name is that country (`countryNamed`). Optional: lexicons before
+   * Nov 22 don't have it, and the matcher reads as it did without it.
+   */
+  countryAliases?: string;
 }
 
 export const ALPHABET = "^$ 0abcdefghijklmnopqrstuvwxyz";
@@ -212,6 +219,23 @@ export function countryKey(text: string, lex?: Lexicon): string {
   const src = lex?.countries ?? "";
   if (countryCache?.src !== src) countryCache = { src, map: new Map(src.split(" ").filter(Boolean).map((p) => p.split(":") as [string, string])) };
   return countryCache.map.get(h) ?? h;
+}
+
+let aliasCache: { src: string; map: Map<string, string>; names: Set<string> } | null = null;
+/**
+ * The hash of the country a text names, by its own name or another name the lists of countries give it
+ * (`Lexicon.countryAliases`): "kirghizstan" and "kyrgyzstan" are both Kyrgyzstan's. Undefined for any other text, and
+ * for every text with a lexicon that has no such names.
+ */
+export function countryNamed(text: string, lex?: Lexicon): string | undefined {
+  const src = lex?.countryAliases;
+  if (!src) return undefined;
+  if (aliasCache?.src !== src) {
+    const map = new Map(src.split(" ").filter(Boolean).map((p) => p.split(":") as [string, string]));
+    aliasCache = { src, map, names: new Set(map.values()) };
+  }
+  const h = fnv(normalize(text)).toString(36);
+  return aliasCache.map.get(h) ?? (aliasCache.names.has(h) ? h : undefined);
 }
 
 /** A web address: "bbc.co.uk", "x.com". */

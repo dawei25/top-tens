@@ -5,8 +5,8 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fnv, trainLexicon } from "../src/game/junk";
 import { editDistance, normalize } from "../src/game/match";
-import { capitals, countries, usStates } from "./gazetteer";
-import { COUNTRY_FORMS, DEMONYMS } from "./intent";
+import { capitals, countries, countryOf, usStates } from "./gazetteer";
+import { COUNTRY_FORMS } from "./intent";
 import { TOPICS } from "./topics";
 import type { Puzzle } from "../src/game/types";
 
@@ -99,27 +99,45 @@ export interface Bank {
   slips?: [string, string][];
 }
 
-/** What countries' people are called (intent.ts DEMONYMS), normalized: "russian", "nepali", "georgian". */
-const DEMONYM_FORMS = new Set(Object.values(DEMONYMS).flat().map(normalize));
+/**
+ * Country forms that name a language (topics' `notCountryForms`, normalized: "russian", "nepali", "georgian"): on a list
+ * about languages such a word is the language, free.
+ */
+const LANGUAGE_FORMS = new Set(TOPICS.flatMap((t) => t.notCountryForms ?? []).map(normalize));
+
+/** Every country's name and usual forms, normalized ("kyrgyzstan", "kirghizia", "kyrgyz republic"). */
+let countryNameSet: Set<string> | undefined;
+function isCountryForm(s: string): boolean {
+  countryNameSet ??= new Set([...countries().map((c) => normalize(c.name)), ...countryForms().flat()]);
+  return countryNameSet.has(s);
+}
 
 /**
- * An entry's aliases that misspell its own name, within two edits ("Afganistan" for Afghanistan, "Missisippi" for
- * Mississippi), with that name; normalized. Spacing variants ("Spider Man") aren't misspellings. Such an alias is a
- * known name (it's in the bank), yet typed on a list that lacks it, it is still that entry misspelled: the matcher
- * lets it correct to an entry of that name (`isSlipOf` in src/game/junk.ts) and to nothing else.
+ * An entry's aliases that misspell its own name, or one of its aliases that is a country's usual name, within two edits
+ * ("Afganistan" for Afghanistan, "Missisippi" for Mississippi, "Kirgizia" for Kirghizia), with that name; normalized.
+ * Spacing variants ("Spider Man") aren't misspellings. Such an alias is a known name (it's in the bank), yet typed on a
+ * list that lacks it, it is still that entry misspelled: the matcher lets it correct to an entry that has the name
+ * (`isSlipOf` in src/game/junk.ts) and to nothing else. A country's usual names count, not only the one it's listed
+ * under: "kirgizia" is one letter from "Kirghizia", Kyrgyzstan's alias on winter-olympics-countries, and once
+ * coldest-countries made it a known name it read as a name of its own there (the lexicon retrain, Nov 22). Other
+ * aliases don't: one entry's aliases may name different things ("FF7" and "FF8" on Final Fantasy).
  *
- * A demonym is a word of its own, never a slip of its country's name, though "Russian" is one letter from Russia: on a
- * list where a language's name is free, "russian" was still offered as Russia to confirm (languages-countries' judge,
- * Nov 20).
+ * A demonym that names a language is a word of its own, never a slip of a country's name, though "Russian" is one letter
+ * from Russia: on a list where a language's name is free, "russian" was still offered as Russia to confirm
+ * (languages-countries' judge, Nov 20). As a country's alias it neither slips nor is slipped to; as a language's own name
+ * it is (French's "Frrench"). Demonyms that are no language ("tajikistani", "nigerian") still slip to their country, as
+ * they always did.
  */
 export function misspellings(name: string, aliases: string[]): [string, string][] {
   const n = normalize(name);
+  const others = [...new Set(aliases.map(normalize))].filter((f) => f && f !== n && !LANGUAGE_FORMS.has(f));
+  const targets = [n, ...others.filter(isCountryForm)];
   const out: [string, string][] = [];
-  for (const a of aliases) {
-    const s = normalize(a);
-    if (!s || s === n || s.replace(/ /g, "") === n.replace(/ /g, "") || Math.abs(s.length - n.length) > 2) continue;
-    if (DEMONYM_FORMS.has(s)) continue;
-    if (editDistance(s, n) <= 2) out.push([s, n]);
+  for (const s of others) {
+    for (const x of targets) {
+      if (x === s || s.replace(/ /g, "") === x.replace(/ /g, "") || Math.abs(s.length - x.length) > 2) continue;
+      if (editDistance(s, x) <= 2) out.push([s, x]);
+    }
   }
   return out;
 }
@@ -142,6 +160,65 @@ export function countryForms(): [string, string][] {
   for (const c of countries()) for (const a of c.aliases) if (!out.has(normalize(a))) out.set(normalize(a), normalize(c.name));
   for (const [f, n] of [...out]) if (!f || f === n) out.delete(f);
   return [...out];
+}
+
+/** A list of countries: its noun says so ("countries", "countries and territories"). */
+const ofCountries = (p: Puzzle) => /^countries\b/.test(normalize(p.noun ?? ""));
+
+/**
+ * Every other name the lists of countries give a country, with that country's name (countries-list's), normalized:
+ * coldest-countries' "Kirghizstan", "Tadzhikistan" and "Eesti Vabariik", languages-countries' "Aland Islands" (its
+ * name there), and the shared forms. Once the lexicon knew them they were names of their own to the matcher, so on
+ * another list of countries, whose own aliases lack them, "kirghizstan" read as a name the list doesn't rank, though
+ * Kyrgyzstan is there (the lexicon retrain, Nov 22); the matcher reads such a name as that country
+ * (`Lexicon.countryAliases`). Left out: forms that name a language ("russian" stays free on languages-countries), the
+ * UK's nations and other parts of countries (SUBDIVISIONS: "wales" is not the UK on golf-countries, where England and
+ * Scotland rank), a form two countries share ("Congo"), another country's own name, and an entry named by a short
+ * code ("ROC", the Russian athletes on winter-olympics-countries, is no Taiwan). A list's alias counts once two lists
+ * of countries give it: one list's topic redirects ("Austrian wine" on wine-countries, "Russian Armed Forces" on
+ * military-spending) aren't the country on every other list. Nor does a form two letters or fewer from another
+ * country's name: "irak" stays as ambiguous as it looks, Iran or Iraq, as its stored slip keeps it (`Lexicon.slips`).
+ */
+export function countryAliases(dir: string): [string, string][] {
+  /** form → country → where it is said: "shared" (COUNTRY_FORMS, countries-list) or the lists' ids. */
+  const claims = new Map<string, Map<string, Set<string>>>();
+  const claim = (form: string, country: string, by: string) => {
+    const f = normalize(form);
+    if (!f) return;
+    let of = claims.get(f);
+    if (!of) claims.set(f, (of = new Map()));
+    let set = of.get(normalize(country));
+    if (!set) of.set(normalize(country), (set = new Set()));
+    set.add(by);
+  };
+  for (const line of COUNTRY_FORMS) {
+    const c = line.map((f) => countryOf(f)).find(Boolean);
+    if (c) for (const f of line) claim(f, c.name, "shared");
+  }
+  for (const c of countries()) {
+    const own = countryOf(c.name);
+    if (own) for (const a of c.aliases) claim(a, own.name, "shared");
+  }
+  const parts = new Set(SUBDIVISIONS.map(normalize));
+  for (const f of readdirSync(dir)) {
+    if (!f.endsWith(".json") || NOT_PUZZLES.has(f)) continue;
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, f), "utf8"));
+    if (!ofCountries(p)) continue;
+    for (const e of [...p.answers, ...p.extras]) {
+      if (/^[A-Z]{2,4}$/.test(e.name) || parts.has(normalize(e.name))) continue;
+      const c = countryOf(e.name);
+      if (c) for (const a of [e.name, ...e.aliases]) claim(a, c.name, p.id);
+    }
+  }
+  const names = new Set(countries().map((c) => normalize(countryOf(c.name)?.name ?? c.name)));
+  const near = (f: string, c: string) => [...names].some((n) => n !== c && Math.abs(n.length - f.length) <= 2 && editDistance(f, n) <= 2);
+  const out: [string, string][] = [];
+  for (const [f, of] of claims) {
+    if (of.size !== 1 || names.has(f) || LANGUAGE_FORMS.has(f) || parts.has(f)) continue;
+    const [[c, by]] = of;
+    if (f !== c && (by.has("shared") || by.size >= 2) && !near(f, c)) out.push([f, c]);
+  }
+  return out.sort((a, b) => a[0].localeCompare(b[0]));
 }
 
 /**
@@ -210,17 +287,20 @@ export function writeLexicon(dir: string): string {
   const slips = [...new Set((bank.slips ?? []).map(([s, n]) => h(`${s}>${n}`)))];
   const people = personWords(bank.people ?? []);
   const forms = countryForms();
-  // `words`, `slips`, `people` and `countries` are optional in the Lexicon format: older lexicons don't have them.
+  const aliases = countryAliases(dir);
+  // `words`, `slips`, `people`, `countries` and `countryAliases` are optional in the Lexicon format: older lexicons
+  // don't have them.
   const out = {
     ...lex,
     words: plain.map(h).join(" "),
     slips: slips.join(" "),
     people: people.map(h).join(" "),
     countries: forms.map(([f, n]) => `${h(f)}:${h(n)}`).join(" "),
+    countryAliases: aliases.map(([f, n]) => `${h(f)}:${h(n)}`).join(" "),
   };
   writeFileSync(join(dir, "lexicon.json"), JSON.stringify(out));
   if (process.env.WORDS_LOG) writeFileSync(process.env.WORDS_LOG, plain.join("\n") + "\n");
-  return `${all.length + places.length} names, ${plain.length} plain words, ${slips.length} misspellings, ${people.length} people's words`;
+  return `${all.length + places.length} names, ${plain.length} plain words, ${slips.length} misspellings, ${people.length} people's words, ${aliases.length} country aliases`;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

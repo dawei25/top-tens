@@ -1,4 +1,4 @@
-import { countryKey, fnv, isGiveUp, isJunk, isKnownName, isPersonWord, isPlainWord, isSlipOf, type Lexicon } from "./junk";
+import { countryKey, countryNamed, fnv, isGiveUp, isJunk, isKnownName, isPersonWord, isPlainWord, isSlipOf, type Lexicon } from "./junk";
 import type { Entry, GuessResult, Puzzle } from "./types";
 
 /**
@@ -654,6 +654,14 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
     if (!stray(r)) return r;
   }
 
+  // Another list's name for a country here ("kirghizstan", "eesti vabariik": aliases on coldest-countries) is that
+  // country on a list of countries, put in the box to confirm, though this list's own aliases lack it. Known to the
+  // lexicon, such a name was otherwise read as one this list doesn't rank (the lexicon retrain, Nov 22).
+  if (!strong.length) {
+    const same = sameCountry(guess, candidates, puzzle, lex);
+    if (same.length) return choose(same, true);
+  }
+
   // A country on a list whose entries say which country they're in (islands): that country's islands, offered, the most
   // prominent few (owner: "me typing japan should give me option of the different islands honshu, okinawa, etc.").
   const ofCountry = countryEntries(guess, puzzle, lex);
@@ -679,8 +687,10 @@ function judgeReading(raw: string, guess: string, puzzle: Puzzle, found: Set<num
 
   // An answer's full name with more words after it, usually who made it ("perfect ed sheeran", "stay justin bieber"):
   // that answer, put in the box to confirm. The longest name that starts the guess wins. Not when the whole guess is a
-  // name of its own: "saudi aramco" is the company, not Saudi Arabia; "mexico city" is not Mexico.
-  const lead = ownName ? undefined : leadingName(guess, puzzle, lex);
+  // name of its own: "saudi aramco" is the company, not Saudi Arabia; "mexico city" is not Mexico. Unless the words
+  // after the name only say what kind of thing it is, or where ("singapore island", "google inc", "mario movies",
+  // "Quito, Ecuador"): such names became known with the Nov 20 lists and stopped reading as the entry they name.
+  const lead = ownName ? kindLead(raw, guess, puzzle, lex) : leadingName(guess, puzzle, lex);
   if (lead) {
     const c = candidates.find((x) => x.entry === lead);
     if (c) return resolve(c, true);
@@ -1033,6 +1043,79 @@ function isCountryName(guess: string, lex?: Lexicon): boolean {
     countryNameCache = { src: lex.countries, set: new Set(lex.countries.split(" ").map((p) => p.split(":")[1])) };
   }
   return countryNameCache.set.has(fnv(guess).toString(36));
+}
+
+/** A list of countries: its noun says so ("countries", "countries and territories"). */
+function ofCountries(puzzle: Puzzle): boolean {
+  return /^countries\b/.test(normalize(puzzle.noun ?? ""));
+}
+
+/**
+ * On a list of countries, the entries that are the country the guess names by any name the lists of countries give it
+ * (`countryNamed`): "kirghizstan" is the Kyrgyzstan here, whatever this list calls it or lists as its aliases. An
+ * entry is that country by its name, or else by one of its aliases; a short code ("ROC", the Russian athletes on Winter
+ * Olympics medals) doesn't count, as another country may go by it, and where an entry has the country's name an entry
+ * that only has one of its aliases is another (the Soviet Union beside Russia on Winter Olympics medals).
+ */
+function sameCountry(guess: string, candidates: Candidate[], puzzle: Puzzle, lex?: Lexicon): Candidate[] {
+  if (!lex?.countryAliases || !ofCountries(puzzle)) return [];
+  const country = countryNamed(guess, lex);
+  if (!country) return [];
+  const is = (f: string) => fnv(f).toString(36) === country || (f.replace(/ /g, "").length >= 5 && countryNamed(f, lex) === country);
+  const byName = candidates.filter((c) => is(formsOf(c.entry).forms[0]));
+  return byName.length ? byName : candidates.filter((c) => formsOf(c.entry).forms.some(is));
+}
+
+/**
+ * Words after a name that only say what kind of thing it is, or its company's legal form: "Singapore Island", "Kyrgyz
+ * Republic", "Google Inc.", "Mercedes-Benz AG", "Mario movies", "The Dark Knight trilogy". Not "city" or "state", which
+ * make another place ("Mexico City" is not Mexico), nor any other word ("Saudi Aramco" is not Saudi Arabia).
+ */
+const KIND_WORDS = new Set(
+  "island islands republic inc llc ag corp corporation incorporated co company ltd plc film films movie movies series trilogy franchise".split(" "),
+);
+/** The kind words that make a name a country's (`KIND_WORDS`), read only on lists of countries. */
+const PLACE_KINDS = new Set(["island", "islands", "republic"]);
+
+/**
+ * The entry a known name names once the words after it that only say what kind of thing it is are dropped, put in
+ * the box to confirm: "singapore island" is Singapore, "google inc" Alphabet (its alias Google), "mario movies" The
+ * Super Mario Bros. Movie. An island or a republic only on a list of countries, and an island only after the entry's
+ * own name, one no other entry's name has in it: "Wales Island" (Nunavut) is not Great Britain, whose alias "Wales" is,
+ * and "Guinea Island" (New Guinea) is not Guinea, beside Equatorial Guinea. Not after a code ("MS Corp" is not
+ * Mississippi). A comma and a country after the name ("Quito, Ecuador") only onto a place a regional list has outside
+ * its region, which the comma confirms: on a list of countries "Georgia, United States" is not Georgia, "Valencia,
+ * Venezuela" is not Spain's Valencia, "Rio, Brazil" is not the film Rio.
+ */
+function kindLead(raw: string, guess: string, puzzle: Puzzle, lex?: Lexicon): Entry | undefined {
+  const entries = [...puzzle.answers, ...puzzle.extras];
+  const comma = raw.lastIndexOf(",");
+  if (comma > 0) {
+    const head = normalize(raw.slice(0, comma));
+    const place = normalize(raw.slice(comma + 1));
+    if (head && place && (isCountryName(place, lex) || countryKey(place, lex) !== fnv(place).toString(36))) {
+      return mostProminent(entries.filter((e) => e.elsewhere && formsOf(e).forms.includes(head)));
+    }
+  }
+  const words = guess.split(" ");
+  let n = words.length;
+  while (n > 1 && KIND_WORDS.has(words[n - 1])) n--;
+  if (n === words.length) return undefined;
+  const base = words.slice(0, n).join(" ");
+  // A code before the words is someone else's: "MS Corp" is Microsoft, not Mississippi ("MS").
+  if (base.replace(/ /g, "").length < 4) return undefined;
+  const dropped = words.slice(n);
+  // An island or a republic is a country only on a list of countries: "Victoria Island" is no capital, "Copper
+  // Island" no element, "Lego Island" a game, "Samsung Republic" a joke about South Korea.
+  if (dropped.some((w) => PLACE_KINDS.has(w)) && !ofCountries(puzzle)) return undefined;
+  if (!dropped.some((w) => w === "island" || w === "islands")) return mostProminent(entries.filter((e) => formsOf(e).forms.includes(base)));
+  // The entry called that, or the country another list calls that ("São Tomé Island": São Tomé and Príncipe). "Guinea
+  // Island" is New Guinea: a name that is part of another entry's name here takes no island.
+  const country = countryNamed(base, lex);
+  const byName = entries.filter((e) => normalize(e.name) === base);
+  const named = byName.length || !country ? byName : entries.filter((e) => countryNamed(e.name, lex) === country || fnv(normalize(e.name)).toString(36) === country);
+  const within = entries.some((e) => !named.includes(e) && ` ${normalize(e.name)} `.includes(` ${base} `));
+  return within ? undefined : mostProminent(named);
 }
 
 /**
