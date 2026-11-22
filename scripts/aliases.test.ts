@@ -2034,5 +2034,6 @@ describe("the pipeline's hand-written tables", () => {
     });
     expect(`${r.stdout}${r.stderr}`).not.toMatch(/no-dupe-keys/);
     expect(r.status).toBe(0);
-  });
+    // Alone oxlint takes a tenth of a second; beside 50 test workers it once took over 5 s, vitest's default (Nov 22).
+  }, 30_000);
 });
