@@ -5,7 +5,7 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fnv, trainLexicon } from "../src/game/junk";
 import { editDistance, normalize } from "../src/game/match";
-import { capitals, countries, usStates } from "./gazetteer";
+import { capitals, countries, countryOf, usStates } from "./gazetteer";
 import { COUNTRY_FORMS } from "./intent";
 import { TOPICS } from "./topics";
 import type { Puzzle } from "../src/game/types";
@@ -162,6 +162,58 @@ export function countryForms(): [string, string][] {
   return [...out];
 }
 
+/** A list of countries: its noun says so ("countries", "countries and territories"). */
+const ofCountries = (p: Puzzle) => /^countries\b/.test(normalize(p.noun ?? ""));
+
+/**
+ * Every other name the lists of countries give a country, with that country's name (countries-list's), normalized:
+ * coldest-countries' "Kirghizstan", "Tadzhikistan" and "Eesti Vabariik", languages-countries' "Aland Islands" (its
+ * name there), and the shared forms. Once the lexicon knew them they were names of their own to the matcher, so on
+ * another list of countries, whose own aliases lack them, "kirghizstan" read as a name the list doesn't rank, though
+ * Kyrgyzstan is there (the lexicon retrain, Nov 22); the matcher reads such a name as that country
+ * (`Lexicon.countryAliases`). Left out: forms that name a language ("russian" stays free on languages-countries), the
+ * UK's nations and other parts of countries (SUBDIVISIONS: "wales" is not the UK on golf-countries, where England and
+ * Scotland rank), a form two countries share ("Congo"), another country's own name, and an entry named by a short
+ * code ("ROC", the Russian athletes on winter-olympics-countries, is no Taiwan).
+ */
+export function countryAliases(dir: string): [string, string][] {
+  const claims = new Map<string, Set<string>>();
+  const claim = (form: string, country: string) => {
+    const f = normalize(form);
+    if (!f) return;
+    let set = claims.get(f);
+    if (!set) claims.set(f, (set = new Set()));
+    set.add(normalize(country));
+  };
+  for (const line of COUNTRY_FORMS) {
+    const c = line.map((f) => countryOf(f)).find(Boolean);
+    if (c) for (const f of line) claim(f, c.name);
+  }
+  for (const c of countries()) {
+    const own = countryOf(c.name);
+    if (own) for (const a of c.aliases) claim(a, own.name);
+  }
+  const parts = new Set(SUBDIVISIONS.map(normalize));
+  for (const f of readdirSync(dir)) {
+    if (!f.endsWith(".json") || NOT_PUZZLES.has(f)) continue;
+    const p: Puzzle = JSON.parse(readFileSync(join(dir, f), "utf8"));
+    if (!ofCountries(p)) continue;
+    for (const e of [...p.answers, ...p.extras]) {
+      if (/^[A-Z]{2,4}$/.test(e.name) || parts.has(normalize(e.name))) continue;
+      const c = countryOf(e.name);
+      if (c) for (const a of [e.name, ...e.aliases]) claim(a, c.name);
+    }
+  }
+  const names = new Set(countries().map((c) => normalize(countryOf(c.name)?.name ?? c.name)));
+  const out: [string, string][] = [];
+  for (const [f, cs] of claims) {
+    if (cs.size !== 1 || names.has(f) || LANGUAGE_FORMS.has(f) || parts.has(f)) continue;
+    const [c] = cs;
+    if (f !== c) out.push([f, c]);
+  }
+  return out.sort((a, b) => a[0].localeCompare(b[0]));
+}
+
 /**
  * Ordinary English words (3+ letters) that are a whole word of some name or alias in the bank but no name themselves:
  * "humans" (Destroy All Humans!), "water" (Avatar: The Way of Water), "trees" (Trees of Mystery). Typed alone they
@@ -228,17 +280,20 @@ export function writeLexicon(dir: string): string {
   const slips = [...new Set((bank.slips ?? []).map(([s, n]) => h(`${s}>${n}`)))];
   const people = personWords(bank.people ?? []);
   const forms = countryForms();
-  // `words`, `slips`, `people` and `countries` are optional in the Lexicon format: older lexicons don't have them.
+  const aliases = countryAliases(dir);
+  // `words`, `slips`, `people`, `countries` and `countryAliases` are optional in the Lexicon format: older lexicons
+  // don't have them.
   const out = {
     ...lex,
     words: plain.map(h).join(" "),
     slips: slips.join(" "),
     people: people.map(h).join(" "),
     countries: forms.map(([f, n]) => `${h(f)}:${h(n)}`).join(" "),
+    countryAliases: aliases.map(([f, n]) => `${h(f)}:${h(n)}`).join(" "),
   };
   writeFileSync(join(dir, "lexicon.json"), JSON.stringify(out));
   if (process.env.WORDS_LOG) writeFileSync(process.env.WORDS_LOG, plain.join("\n") + "\n");
-  return `${all.length + places.length} names, ${plain.length} plain words, ${slips.length} misspellings, ${people.length} people's words`;
+  return `${all.length + places.length} names, ${plain.length} plain words, ${slips.length} misspellings, ${people.length} people's words, ${aliases.length} country aliases`;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -7,7 +7,7 @@ import { judgeGuess, normalize } from "../src/game/match";
 import type { Puzzle } from "../src/game/types";
 import { bareWord, blockedAlias, companySuffix, gluedAlias, junkRedirect, mangledText, otherNamespace } from "./aliases";
 import { COUNTRY_FORMS } from "./intent";
-import { bankNames, misspellings } from "./lexicon";
+import { bankNames, countryAliases, misspellings } from "./lexicon";
 import { TOPICS } from "./topics";
 
 const junk = (raw: string, names: string[], forms: string[] = [], works = false) => junkRedirect(raw, { names, forms, works });
@@ -1922,10 +1922,12 @@ describe("aliases as built: what players type", () => {
     // demonyms that name a language. This is the lexicon as lexicon.ts trains it: every name known, every misspelling.
     const puzzleOf = (id: string): Puzzle => JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
     const bank = bankNames(dir);
+    const h = (s: string) => fnv(s).toString(36);
     const learned: Lexicon = {
       ...lex,
-      names: [lex.names, ...bank.all.map((n) => fnv(normalize(n)).toString(36))].join(" "),
-      slips: [...new Set((bank.slips ?? []).map(([s, n]) => fnv(`${s}>${n}`).toString(36)))].join(" "),
+      names: [lex.names, ...bank.all.map((n) => h(normalize(n)))].join(" "),
+      slips: [...new Set((bank.slips ?? []).map(([s, n]) => h(`${s}>${n}`)))].join(" "),
+      countryAliases: countryAliases(dir).map(([f, c]) => `${h(f)}:${h(c)}`).join(" "),
     };
     const read = (id: string, guess: string) => {
       const r = judgeGuess(guess, puzzleOf(id), new Set(), learned);
@@ -1955,6 +1957,61 @@ describe("aliases as built: what players type", () => {
       expect(misspellings("Hispaniola", ["Haiti", "Hayti", "Hispanola"])).toEqual([["hayti", "haiti"], ["hispanola", "hispaniola"]]);
       expect(misspellings("Final Fantasy", ["FF7", "FF8", "FFVII", "FFVIII"])).toEqual([]);
       expect(misspellings("French", ["Frrench", "French language"])).toEqual([["frrench", "french"]]);
+    });
+
+    // Known with the Nov 20 lists, other lists' names for a country were names of their own on every other list of
+    // countries, whose aliases lack them: "Kirghizstan isn't in this ranking", though Kyrgyzstan is (old lexicon:
+    // Kyrgyzstan to confirm). Such a name is that country now (`countryAliases`, `sameCountry`), to confirm.
+    it.each([
+      ["winter-olympics-countries", "kirghizstan", "near? Kyrgyzstan"],
+      ["winter-olympics-countries", "tadzhikistan", "near? Tajikistan"],
+      ["winter-olympics-countries", "kyrgyz respublikasy", "near? Kyrgyzstan"],
+      ["gold-reserves", "eesti vabariik", "near? Estonia"],
+      ["golf-countries", "tajik republic", "near? Tajikistan"],
+      // Not a language, nor a part of a country, nor a list that isn't of countries.
+      ["languages-countries", "russian", "unknown"],
+      ["languages-countries", "german", "unknown"],
+      ["languages-countries", "english", "unknown"],
+      ["wikipedia-languages", "sorani", "unknown"],
+      ["golf-countries", "wales", "unknown"],
+      ["golf-countries", "uk", "choose England | Scotland"],
+      ["high-capitals", "bolivia", "unknown"],
+      ["populous-islands", "uk", "correct Great Britain"],
+    ])("another list's name for a country: %s: %s -> %s", (id, guess, want) => {
+      expect(read(id, guess)).toBe(want);
+    });
+    it("another list's name for a country outside a regional list's region still costs a life there, saying so", () => {
+      const r = judgeGuess("nippon", puzzleOf("europe-population"), new Set(), learned);
+      expect(r).toMatchObject({ kind: "near", entry: { name: "Japan", elsewhere: true } });
+    });
+
+    // A name with words that only say what kind of thing it is, or where, known with the Nov 20 lists ("Singapore
+    // Island" on populous-islands, "Google Inc." on brands), was a name of its own, so the leading name in it no
+    // longer read (old lexicon: Singapore, Alphabet to confirm). It reads again, to confirm; "city" and other words
+    // still make another place or thing.
+    it.each([
+      ["winter-olympics-countries", "singapore island", "near? Singapore"],
+      ["winter-olympics-countries", "malta island", "near? Malta"],
+      ["winter-olympics-countries", "aland islands", "near? Aland"],
+      ["winter-olympics-countries", "wallis and futuna islands", "near? Wallis and Futuna"],
+      ["winter-olympics-countries", "estonian republic", "near? Estonia"],
+      ["market-cap-peak", "google inc", "correct? Alphabet"],
+      ["market-cap-peak", "google llc", "correct? Alphabet"],
+      ["market-cap-peak", "visa inc.", "near? Visa"],
+      ["car-makers", "mercedes-benz ag", "near? Mercedes-Benz"],
+      ["animated-films", "mario movies", "correct? The Super Mario Bros. Movie"],
+      ["europe-cities", "Quito, Ecuador", "near? Quito"],
+      ["winter-olympics-countries", "mexico city", "unknown"],
+      ["countries-gdp", "saudi aramco", "unknown"],
+      // A place in another country is not the country; an island named after an alias may be another island.
+      ["winter-olympics-countries", "Georgia, United States", "unknown"],
+      ["winter-olympics-countries", "CA, USA", "unknown"],
+      ["winter-olympics-countries", "wales island", "unknown"],
+      ["winter-olympics-countries", "guinea island", "unknown"],
+      ["us-states-population", "ms corp", "unknown"],
+      ["animated-films", "Rio, Brazil", "unknown"],
+    ])("a name and what kind of thing it is: %s: %s -> %s", (id, guess, want) => {
+      expect(read(id, guess)).toBe(want);
     });
   });
 });
