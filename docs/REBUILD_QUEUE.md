@@ -57,8 +57,14 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       names aren't in it yet: run `npx tsx scripts/lexicon.ts` (or any build) after Nov 21, commit it, and check the
       dailies of the next days read as before (aliases.test.ts "Nov 20 candidates" and "Dec 6-13 audit" pass on both).
       The Dec 6-13 audit's rebuild (Nov 20) also waits on it: brands' known names (scripts/known/brands.json).
+      **Checked Nov 22, still held (worse on today's and tomorrow's lists):** the retrain makes every fix above live,
+      but on the 24 lists to Dec 13 (about a million guesses, old lexicon vs new) about 25 guesses per country list and
+      4 on animated-films lose a true reading to a name the lexicon now knows ("Aland Islands", "Kirghizstan", "Mario
+      movies", "Spidey", "Google Inc."; aliases.test.ts "lexicon retrain, Nov 22" has the ones lexicon.ts fixed). The
+      rest need a matcher change (coordinator's call); then run `npx tsx scripts/lexicon.ts` and commit it.
 
-- [ ] **Lexicon retrain held back (Nov 19), until happiest-countries' day (Nov 20) has passed.** The Nov 19 build of
+- [ ] **Lexicon retrain held back (Nov 19), until happiest-countries' day (Nov 20) has passed.** Covered by the item
+      above (one retrain does both; Nov 22: still held there). The Nov 19 build of
       empires, museums, consoles and mountains wrote a new lexicon.json; it was not committed. Retrained, it changed
       how the dailies read off-list guesses: about 280 of the new aliases' forms ("xbox1", "arab empire", "2ds") would
       read as known names on every list, 25 strings of mash flip junk or not (the letter model), and "arabs" on
