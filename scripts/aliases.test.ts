@@ -2001,6 +2001,8 @@ describe("aliases as built: what players type", () => {
       ["car-makers", "mercedes-benz ag", "near? Mercedes-Benz"],
       ["animated-films", "mario movies", "correct? The Super Mario Bros. Movie"],
       ["europe-cities", "Quito, Ecuador", "near? Quito"],
+      ["winter-olympics-countries", "são tomé island", "near? Sao Tome and Principe"],
+      ["us-box-office", "the dark knight trilogy", "near? The Dark Knight"],
       ["winter-olympics-countries", "mexico city", "unknown"],
       ["countries-gdp", "saudi aramco", "unknown"],
       // A place in another country is not the country; an island named after an alias may be another island.
@@ -2009,6 +2011,9 @@ describe("aliases as built: what players type", () => {
       ["winter-olympics-countries", "wales island", "unknown"],
       ["winter-olympics-countries", "guinea island", "unknown"],
       ["us-states-population", "ms corp", "unknown"],
+      ["high-capitals", "victoria island", "unknown"],
+      ["elements-crust", "copper island", "unknown"],
+      ["brands", "samsung republic", "unknown"],
       ["animated-films", "Rio, Brazil", "unknown"],
     ])("a name and what kind of thing it is: %s: %s -> %s", (id, guess, want) => {
       expect(read(id, guess)).toBe(want);

@@ -1068,22 +1068,24 @@ function sameCountry(guess: string, candidates: Candidate[], puzzle: Puzzle, lex
 
 /**
  * Words after a name that only say what kind of thing it is, or its company's legal form: "Singapore Island", "Kyrgyz
- * Republic", "Google Inc.", "Mercedes-Benz AG", "Mario movies". Not "city" or "state", which make another place
- * ("Mexico City" is not Mexico), nor any other word ("Saudi Aramco" is not Saudi Arabia).
+ * Republic", "Google Inc.", "Mercedes-Benz AG", "Mario movies", "The Dark Knight trilogy". Not "city" or "state", which
+ * make another place ("Mexico City" is not Mexico), nor any other word ("Saudi Aramco" is not Saudi Arabia).
  */
 const KIND_WORDS = new Set(
-  "island islands republic inc llc ag corp corporation incorporated co company ltd plc film films movie movies series franchise".split(" "),
+  "island islands republic inc llc ag corp corporation incorporated co company ltd plc film films movie movies series trilogy franchise".split(" "),
 );
+/** The kind words that make a name a country's (`KIND_WORDS`), read only on lists of countries. */
+const PLACE_KINDS = new Set(["island", "islands", "republic"]);
 
 /**
  * The entry a known name names once the words after it that only say what kind of thing it is are dropped, put in
  * the box to confirm: "singapore island" is Singapore, "google inc" Alphabet (its alias Google), "mario movies" The
- * Super Mario Bros. Movie. An island only after the entry's own name, and one no other entry's name has in it: "Wales
- * Island" (Nunavut) is not Great Britain, whose alias "Wales" is, and "Guinea Island" (New Guinea) is not Guinea, beside
- * Equatorial Guinea. Not after a code ("MS Corp" is not Mississippi). A comma and a country after the name ("Quito,
- * Ecuador") only onto a place a regional list has outside its region, which the comma confirms: on a list of countries
- * "Georgia, United States" is not Georgia, "Valencia, Venezuela" is not Spain's Valencia, "Rio, Brazil" is not the film
- * Rio.
+ * Super Mario Bros. Movie. An island or a republic only on a list of countries, and an island only after the entry's
+ * own name, one no other entry's name has in it: "Wales Island" (Nunavut) is not Great Britain, whose alias "Wales" is,
+ * and "Guinea Island" (New Guinea) is not Guinea, beside Equatorial Guinea. Not after a code ("MS Corp" is not
+ * Mississippi). A comma and a country after the name ("Quito, Ecuador") only onto a place a regional list has outside
+ * its region, which the comma confirms: on a list of countries "Georgia, United States" is not Georgia, "Valencia,
+ * Venezuela" is not Spain's Valencia, "Rio, Brazil" is not the film Rio.
  */
 function kindLead(raw: string, guess: string, puzzle: Puzzle, lex?: Lexicon): Entry | undefined {
   const entries = [...puzzle.answers, ...puzzle.extras];
@@ -1102,9 +1104,16 @@ function kindLead(raw: string, guess: string, puzzle: Puzzle, lex?: Lexicon): En
   const base = words.slice(0, n).join(" ");
   // A code before the words is someone else's: "MS Corp" is Microsoft, not Mississippi ("MS").
   if (base.replace(/ /g, "").length < 4) return undefined;
-  if (!words.slice(n).some((w) => w === "island" || w === "islands")) return mostProminent(entries.filter((e) => formsOf(e).forms.includes(base)));
-  // "Guinea Island" is New Guinea: a name that is part of another entry's name here takes no island.
-  const named = entries.filter((e) => normalize(e.name) === base);
+  const dropped = words.slice(n);
+  // An island or a republic is a country only on a list of countries: "Victoria Island" is no capital, "Copper
+  // Island" no element, "Lego Island" a game, "Samsung Republic" a joke about South Korea.
+  if (dropped.some((w) => PLACE_KINDS.has(w)) && !ofCountries(puzzle)) return undefined;
+  if (!dropped.some((w) => w === "island" || w === "islands")) return mostProminent(entries.filter((e) => formsOf(e).forms.includes(base)));
+  // The entry called that, or the country another list calls that ("São Tomé Island": São Tomé and Príncipe). "Guinea
+  // Island" is New Guinea: a name that is part of another entry's name here takes no island.
+  const country = countryNamed(base, lex);
+  const byName = entries.filter((e) => normalize(e.name) === base);
+  const named = byName.length || !country ? byName : entries.filter((e) => countryNamed(e.name, lex) === country || fnv(normalize(e.name)).toString(36) === country);
   const within = entries.some((e) => !named.includes(e) && ` ${normalize(e.name)} `.includes(` ${base} `));
   return within ? undefined : mostProminent(named);
 }
