@@ -176,7 +176,8 @@ const ofCountries = (p: Puzzle) => /^countries\b/.test(normalize(p.noun ?? ""));
  * Scotland rank), a form two countries share ("Congo"), another country's own name, and an entry named by a short
  * code ("ROC", the Russian athletes on winter-olympics-countries, is no Taiwan). A list's alias counts once two lists
  * of countries give it: one list's topic redirects ("Austrian wine" on wine-countries, "Russian Armed Forces" on
- * military-spending) aren't the country on every other list.
+ * military-spending) aren't the country on every other list. Nor does a form two letters or fewer from another
+ * country's name: "irak" stays as ambiguous as it looks, Iran or Iraq, as its stored slip keeps it (`Lexicon.slips`).
  */
 export function countryAliases(dir: string): [string, string][] {
   /** form → country → where it is said: "shared" (COUNTRY_FORMS, countries-list) or the lists' ids. */
@@ -210,11 +211,12 @@ export function countryAliases(dir: string): [string, string][] {
     }
   }
   const names = new Set(countries().map((c) => normalize(countryOf(c.name)?.name ?? c.name)));
+  const near = (f: string, c: string) => [...names].some((n) => n !== c && Math.abs(n.length - f.length) <= 2 && editDistance(f, n) <= 2);
   const out: [string, string][] = [];
   for (const [f, of] of claims) {
     if (of.size !== 1 || names.has(f) || LANGUAGE_FORMS.has(f) || parts.has(f)) continue;
     const [[c, by]] = of;
-    if (f !== c && (by.has("shared") || by.size >= 2)) out.push([f, c]);
+    if (f !== c && (by.has("shared") || by.size >= 2) && !near(f, c)) out.push([f, c]);
   }
   return out.sort((a, b) => a[0].localeCompare(b[0]));
 }

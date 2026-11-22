@@ -1977,6 +1977,8 @@ describe("aliases as built: what players type", () => {
       ["golf-countries", "uk", "choose England | Scotland"],
       ["high-capitals", "bolivia", "unknown"],
       ["populous-islands", "uk", "correct Great Britain"],
+      // A form a slip from another country's name stays as ambiguous as it looks (Fathom's name-it round, e2e).
+      ["winter-olympics-countries", "irak", "choose Iran | Iraq"],
     ])("another list's name for a country: %s: %s -> %s", (id, guess, want) => {
       expect(read(id, guess)).toBe(want);
     });
