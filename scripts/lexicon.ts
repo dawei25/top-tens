@@ -122,18 +122,18 @@ function isCountryForm(s: string): boolean {
  * coldest-countries made it a known name it read as a name of its own there (the lexicon retrain, Nov 22). Other
  * aliases don't: one entry's aliases may name different things ("FF7" and "FF8" on Final Fantasy).
  *
- * A demonym that names a language is a word of its own, never a slip of its country's name, though "Russian" is one
- * letter from Russia: on a list where a language's name is free, "russian" was still offered as Russia to confirm
- * (languages-countries' judge, Nov 20). Demonyms that are no language ("tajikistani", "nigerian") still slip to their
- * country, as they always did.
+ * A demonym that names a language is a word of its own, never a slip of a country's name, though "Russian" is one letter
+ * from Russia: on a list where a language's name is free, "russian" was still offered as Russia to confirm
+ * (languages-countries' judge, Nov 20). As a country's alias it neither slips nor is slipped to; as a language's own name
+ * it is (French's "Frrench"). Demonyms that are no language ("tajikistani", "nigerian") still slip to their country, as
+ * they always did.
  */
 export function misspellings(name: string, aliases: string[]): [string, string][] {
   const n = normalize(name);
-  const forms = [...new Set([n, ...aliases.map(normalize)])].filter((f) => f && !LANGUAGE_FORMS.has(f));
-  const targets = forms.filter((f) => f === n || isCountryForm(f));
+  const others = [...new Set(aliases.map(normalize))].filter((f) => f && f !== n && !LANGUAGE_FORMS.has(f));
+  const targets = [n, ...others.filter(isCountryForm)];
   const out: [string, string][] = [];
-  for (const s of forms) {
-    if (s === n) continue;
+  for (const s of others) {
     for (const x of targets) {
       if (x === s || s.replace(/ /g, "") === x.replace(/ /g, "") || Math.abs(s.length - x.length) > 2) continue;
       if (editDistance(s, x) <= 2) out.push([s, x]);

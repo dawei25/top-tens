@@ -1940,6 +1940,9 @@ describe("aliases as built: what players type", () => {
       // A demonym that names a language stays free on languages-countries, one that names none still names its country.
       ["languages-countries", "russian", "unknown"],
       ["languages-countries", "tajikistani", "near Tajikistan"],
+      // A misspelt language is still a slip of the language's own name, so of the country called by it here.
+      ["winter-olympics-countries", "frrench", "near? France"],
+      ["winter-olympics-countries", "portugese", "near? Portugal"],
     ])("%s: %s -> %s", (id, guess, want) => {
       expect(read(id, guess)).toBe(want);
     });
@@ -1951,6 +1954,7 @@ describe("aliases as built: what players type", () => {
       expect(misspellings("Tajikistan", ["Tajik", "Tajikistani"])).toEqual([["tajikistani", "tajikistan"]]);
       expect(misspellings("Hispaniola", ["Haiti", "Hayti", "Hispanola"])).toEqual([["hayti", "haiti"], ["hispanola", "hispaniola"]]);
       expect(misspellings("Final Fantasy", ["FF7", "FF8", "FFVII", "FFVIII"])).toEqual([]);
+      expect(misspellings("French", ["Frrench", "French language"])).toEqual([["frrench", "french"]]);
     });
   });
 });
