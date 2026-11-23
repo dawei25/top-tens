@@ -2,6 +2,14 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-23, launch-week morning check (Mon)
+
+- Notes and ratings since yesterday's check: none. Plays all time: 198 across 93 lists (+9: four on yesterday's
+  winter-olympics-countries, one each on china-cities, coastline-countries, mcdonalds-countries, metro-cities and
+  websites). Today's Fathom: 3 players finished Fathom #8 yesterday (average 602), none yet on #9.
+- Missed guesses: 4, one browser per list, all correctly free. On websites, two big sites the ranked table doesn't
+  have. On china-cities, two provinces (the wrong-kind line is still the owner's call). No fix.
+
 ## 2026-11-22, weekly lineup (Dec 6 and the week of Dec 7), Sunday fallback
 
 - No answer from the owner by Sunday 18:00 HKT (chat, doc comments or doc edits): scheduled as proposed. Sun Dec 6
