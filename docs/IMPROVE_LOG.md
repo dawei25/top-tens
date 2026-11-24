@@ -2,6 +2,13 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-24, launch-week morning check (Tue)
+
+- Nothing since yesterday's check: no plays (198 all time across 93 lists, +0), no notes, ratings or missed
+  guesses, and no Today's Fathom players on #9 or yet on #10. The live site is up and the game still tries to write
+  (a browser check with every database call blocked saw it attempt `submit_miss`), so this is no traffic, not an
+  outage. No fix.
+
 ## 2026-11-23, launch-week morning check (Mon)
 
 - Notes and ratings since yesterday's check: none. Plays all time: 198 across 93 lists (+9: four on yesterday's
