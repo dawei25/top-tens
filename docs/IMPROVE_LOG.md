@@ -2,6 +2,13 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-25, launch-week morning check (Wed)
+
+- Notes and ratings since yesterday's check: none. Plays all time: 199 across 94 lists (+1, on yesterday's
+  car-makers). Today's Fathom: 1 player finished Fathom #10 yesterday (537), none yet on #11.
+- Missed guesses: 1, on car-makers: a Chinese EV maker the 2025 sales table doesn't have. Free, and the game said it
+  isn't in this ranking (a known name), which is right. No fix.
+
 ## 2026-11-24, launch-week morning check (Tue)
 
 - Nothing since yesterday's check: no plays (198 all time across 93 lists, +0), no notes, ratings or missed
