@@ -1,8 +1,10 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { normalize } from "../../src/game/match";
 import { readList, readName } from "../../src/game/fathom-name";
+import type { Lexicon } from "../../src/game/junk";
 import type { Puzzle } from "../../src/game/types";
 import { blockedAlias, CITY_JUNK } from "../aliases";
 import {
@@ -27,6 +29,31 @@ import {
 
 const lists = loadLists();
 const byId = new Map(lists.map(({ list }) => [list.id, list]));
+
+const ROOT = join(import.meta.dirname, "..", "..");
+/** The lexicon retrained Nov 22, live from Nov 26 (docs/REBUILD_QUEUE.md), and committed on its own branch first. */
+const RETRAINED = "1e7e028";
+/**
+ * The lexicons a name-it round may read with: the committed one, the retrained one (from git, while main doesn't have it
+ * yet; once it does, the committed one is it, or newer) and none (the timer ran out before it loaded).
+ */
+const LEXICONS: [string, Lexicon | undefined][] = [
+  ["committed", JSON.parse(readFileSync(join(ROOT, "public", "puzzles", "lexicon.json"), "utf8")) as Lexicon],
+  ...(() => {
+    try {
+      const json = execFileSync("git", ["show", `${RETRAINED}:public/puzzles/lexicon.json`], {
+        cwd: ROOT,
+        encoding: "utf8",
+        maxBuffer: 64 << 20,
+        stdio: ["ignore", "pipe", "ignore"],
+      });
+      return [[`retrained (${RETRAINED})`, JSON.parse(json) as Lexicon]] as [string, Lexicon][];
+    } catch {
+      return [];
+    }
+  })(),
+  ["no", undefined],
+];
 
 /** A list that passes: 20 made-up countries, one alias each. */
 function sample(over: Partial<NameList> = {}): NameList {
@@ -152,6 +179,22 @@ describe("Fathom name-it lists (public/fathom/lists)", () => {
     expect(Object.fromEntries(["Alaska", "Texas", "Michigan", "Rhode Island"].map((n) => [n, value(n)]))).toEqual({
       Alaska: 1723337, Texas: 695662, Michigan: 250487, "Rhode Island": 4001,
     });
+  });
+
+  // Nov 26: the lexicon retrained Nov 22 (1e7e028, live from Nov 26) knows "hawaiian" as a name of its own (another
+  // list's language), and a known name is never corrected into another answer, so on the state rounds it read
+  // "Hawaiian isn't one of our 50 US states." (Hawaii to confirm with the lexicon before it). It is Hawaii's form on
+  // these lists (FORMS), whatever the lexicon knows, as the game reads it: against every other list, with each lexicon.
+  it('reads "hawaiian" as Hawaii on both US state lists, with the committed lexicon, the retrained one and none', () => {
+    const all = lists.map(({ list }) => readList(list)!);
+    for (const id of STATE_LISTS) {
+      const list = all.find((l) => l.id === id)!;
+      for (const [which, lex] of LEXICONS)
+        for (const typed of ["hawaiian", "Hawaiian", "HAWAIIAN"]) {
+          const r = readName(typed, list, all, { lex });
+          expect(r.kind === "answer" || r.kind === "confirm" ? `${r.kind} ${r.entry.name}` : r.kind, `${id}, ${which} lexicon: ${typed}`).toBe("answer Hawaii");
+        }
+    }
   });
 
   // The owner, Nov 17: "i guessed rome for a city based question but it wasnt accepted". The list held the 85 largest
