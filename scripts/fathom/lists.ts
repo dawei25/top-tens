@@ -224,7 +224,9 @@ export const FORMS: Record<string, string[]> = {
   Dhaka: ["Dakha"],
   London: ["Greater London"],
   "Mexico City": ["Mex City"],
-  Hawaii: ["Hawaiʻi"],
+  // "Hawaiian" (Nov 26): a name of its own in the lexicon retrained Nov 22 (another list's language), which the
+  // matcher never corrects into Hawaii. Only the US state lists have a Hawaii.
+  Hawaii: ["Hawaiʻi", "Hawaiian"],
   // Renamed in 2023; the agglomerations page still writes the old name.
   Aurangabad: ["Chhatrapati Sambhajinagar"],
 };
