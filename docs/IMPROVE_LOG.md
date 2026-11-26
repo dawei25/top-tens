@@ -2,6 +2,21 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-26, launch-week morning check (Thu, the last of launch week)
+
+- Notes and ratings since yesterday's check: none. Plays all time: 203 across 94 lists (+4, all on yesterday's
+  island-countries). Today's Fathom: 2 players finished Fathom #11 yesterday (average 619), none yet on #12.
+- Missed guesses: 14 distinct, from three browsers.
+  - One Blitz player on us-surnames typed 12. Most are real surnames outside the page's top 100, correctly free, and
+    several are famous basketball players' surnames. One is a first name one letter short of the #3 surname. On a list
+    of names the matcher deliberately keeps a different name different ("johnston" is not Johnson), so no change; a
+    hint if more players do it.
+  - On island-countries, a misspelt archipelago that is part of a country. Correctly free.
+  - On nba-points (Blitz), a famous unranked scorer typed with two slips in his surname. Refused: `swapsWord` reads
+    the slipped ending as one run of letters swapped for another. A single browser on an unranked name, so a hint,
+    not a fix: changing that rule needs a re-judge of every list.
+- No fix.
+
 ## 2026-11-25, launch-week morning check (Wed)
 
 - Notes and ratings since yesterday's check: none. Plays all time: 199 across 94 lists (+1, on yesterday's
