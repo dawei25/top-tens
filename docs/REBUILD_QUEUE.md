@@ -51,12 +51,13 @@ are live on those 10 only; a full `npm run build:puzzles` before launch applies 
       needs a puzzle-format field: coordinator's call). Free play only now, so no day is at risk.
 - [x] **Lexicon: regenerate with the Nov 20 candidates after Nov 21, and before Dec 6** (done Nov 22: retrained as
       the Nov 22 branch's last commit, after the matcher's country aliases and kind words won back what it cost; goes
-      live by date, from Nov 26; guards in docs/IMPROVE.md's Nov 22 rows). Brands' known
+      live by date, from Nov 26; merged Nov 26 18:30 HKT; guards in docs/IMPROVE.md's Nov 22 rows). Brands' known
       names, language names free on languages-countries, "sorani", Cusco, El Alto and Tok Pisin are live with it.
       Left after the fix, all minor: Honda's divisions on car-makers ("Honda Marine Group", "Honda Clio"),
       "Irlandia" on life-expectancy-countries, "Ingerland" on golf-countries, out-of-region forms on europe-cities
       ("Mumbai Island", "Addis Ababa, ET"), "Singapore Island" on high-capitals, "Google Inc Class A" on
-      market-cap-peak, "Spider-Man Universe" on us-box-office, and "Hawaiian" on Fathom's US-state rounds; accepted:
+      market-cap-peak, "Spider-Man Universe" on us-box-office ("Hawaiian" on Fathom's US-state rounds was fixed Nov 26:
+      Hawaii's form in scripts/fathom/lists.ts); accepted:
       "monaco city", "spidey", "caterpillar", "iron".
 
 - [x] **Lexicon retrain held back (Nov 19), until happiest-countries' day (Nov 20) has passed.** Done Nov 22 with the
