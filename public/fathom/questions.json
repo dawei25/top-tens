@@ -4354,7 +4354,8 @@
     "title": "Rib cage",
     "url": "https://en.wikipedia.org/wiki/Rib_cage"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "taste-bud-lifespan",
@@ -4368,7 +4369,8 @@
     "title": "Taste bud",
     "url": "https://en.wikipedia.org/wiki/Taste_bud"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "yawn-length",
@@ -4382,7 +4384,8 @@
     "title": "Yawn",
     "url": "https://en.wikipedia.org/wiki/Yawn"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "camel-drink",
@@ -4396,7 +4399,8 @@
     "title": "Dromedary",
     "url": "https://en.wikipedia.org/wiki/Dromedary"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "blue-whale-calf-growth",
@@ -4409,7 +4413,8 @@
     "title": "Blue whale",
     "url": "https://en.wikipedia.org/wiki/Blue_whale"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "kangaroo-pregnancy",
@@ -4422,7 +4427,8 @@
     "title": "Red kangaroo",
     "url": "https://en.wikipedia.org/wiki/Red_kangaroo"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "electric-eel-shock",
@@ -4435,12 +4441,13 @@
     "title": "Electric eel",
     "url": "https://en.wikipedia.org/wiki/Electric_eel"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "emperor-penguin-fast",
    "kind": "animals",
-   "question": "How long does a male emperor penguin fast to raise his egg?",
+   "question": "How long does a male emperor penguin go without food to raise his egg?",
    "unit": "days",
    "answer": 120,
    "definition": "from arrival to hatching",
@@ -4449,7 +4456,8 @@
     "title": "Emperor penguin",
     "url": "https://en.wikipedia.org/wiki/Emperor_penguin"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "lion-roar-distance",
@@ -4462,7 +4470,8 @@
     "title": "Lion",
     "url": "https://en.wikipedia.org/wiki/Lion"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "bear-species",
@@ -4476,7 +4485,8 @@
     "title": "Bear",
     "url": "https://en.wikipedia.org/wiki/Bear"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "cat-claws",
@@ -4490,7 +4500,8 @@
     "title": "Cat",
     "url": "https://en.wikipedia.org/wiki/Cat"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "wild-sloth-sleep",
@@ -4504,7 +4515,8 @@
     "title": "Sloth",
     "url": "https://en.wikipedia.org/wiki/Sloth"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "koala-sleep",
@@ -4513,25 +4525,27 @@
    "unit": "hours",
    "answer": 20,
    "definition": "up to",
-   "fact": "Its diet of eucalyptus leaves gives so little energy that digesting it can take 100 hours.",
+   "fact": "Eucalyptus leaves give it so little energy that it rests most of the day, and a meal can take 100 hours to digest.",
    "source": {
     "title": "Koala",
     "url": "https://en.wikipedia.org/wiki/Koala"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "swift-time-aloft",
    "kind": "animals",
-   "question": "How long can a common swift stay in the air without landing?",
+   "question": "How long can a common swift, a small bird, stay in the air without landing?",
    "unit": "months",
    "answer": 10,
-   "fact": "Swifts never land on the ground by choice, where they would be easy prey.",
+   "fact": "They eat, drink and even sleep on the wing, and never land on the ground by choice, where they'd be easy prey.",
    "source": {
     "title": "Common swift",
     "url": "https://en.wikipedia.org/wiki/Common_swift"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "dairy-cow-milk",
@@ -4545,7 +4559,8 @@
     "title": "Cattle",
     "url": "https://en.wikipedia.org/wiki/Cattle"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "mcdonalds-customers-a-day",
@@ -4553,12 +4568,13 @@
    "question": "How many customers does McDonald's serve worldwide each day?",
    "unit": "million people",
    "answer": 68,
-   "fact": "They come to about 41,800 restaurants around the world.",
+   "fact": "They come to about 41,800 restaurants (a 2023 count), so each one serves some 1,600 people a day.",
    "source": {
     "title": "McDonald's",
     "url": "https://en.wikipedia.org/wiki/McDonald%27s"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "french-baguettes-a-day",
@@ -4571,7 +4587,8 @@
     "title": "Baguette",
     "url": "https://en.wikipedia.org/wiki/Baguette"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "james-bond-films",
@@ -4585,7 +4602,8 @@
     "title": "List of James Bond films",
     "url": "https://en.wikipedia.org/wiki/List_of_James_Bond_films"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "green-eggs-and-ham-words",
@@ -4599,7 +4617,8 @@
     "title": "Green Eggs and Ham",
     "url": "https://en.wikipedia.org/wiki/Green_Eggs_and_Ham"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "eras-tour-crowd",
@@ -4608,12 +4627,13 @@
    "unit": "million people",
    "answer": 10.1,
    "definition": "over its 149 shows",
-   "fact": "It played 51 cities in 21 countries, on five continents.",
+   "fact": "That's about 68,000 a show, in 51 cities across 21 countries on five continents.",
    "source": {
     "title": "The Eras Tour",
     "url": "https://en.wikipedia.org/wiki/The_Eras_Tour"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "lord-of-the-rings-films-length",
@@ -4627,7 +4647,8 @@
     "title": "The Lord of the Rings (film series)",
     "url": "https://en.wikipedia.org/wiki/The_Lord_of_the_Rings_(film_series)"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "sistine-ceiling-time",
@@ -4640,7 +4661,8 @@
     "title": "Sistine Chapel ceiling",
     "url": "https://en.wikipedia.org/wiki/Sistine_Chapel_ceiling"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "mozart-first-pieces",
@@ -4653,7 +4675,8 @@
     "title": "Wolfgang Amadeus Mozart",
     "url": "https://en.wikipedia.org/wiki/Wolfgang_Amadeus_Mozart"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "haiku-syllables",
@@ -4666,7 +4689,8 @@
     "title": "Haiku",
     "url": "https://en.wikipedia.org/wiki/Haiku"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "canada-flag-leaf-points",
@@ -4679,7 +4703,8 @@
     "title": "Flag of Canada",
     "url": "https://en.wikipedia.org/wiki/Flag_of_Canada"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "eu-flag-stars",
@@ -4692,7 +4717,8 @@
     "title": "Flag of Europe",
     "url": "https://en.wikipedia.org/wiki/Flag_of_Europe"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "jenga-blocks",
@@ -4705,7 +4731,8 @@
     "title": "Jenga",
     "url": "https://en.wikipedia.org/wiki/Jenga"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "greek-alphabet-letters",
@@ -4718,7 +4745,8 @@
     "title": "Greek alphabet",
     "url": "https://en.wikipedia.org/wiki/Greek_alphabet"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "eu-official-languages",
@@ -4726,12 +4754,13 @@
    "question": "How many languages are official in the European Union?",
    "unit": "languages",
    "answer": 24,
-   "fact": "That's fewer than its 27 members, as Austria, Belgium and Luxembourg brought no language of their own.",
+   "fact": "That's fewer than its 27 members, as several share one: German is official in Germany and Austria, Greek in Greece and Cyprus.",
    "source": {
     "title": "Languages of the European Union",
     "url": "https://en.wikipedia.org/wiki/Languages_of_the_European_Union"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "concert-harp-strings",
@@ -4740,12 +4769,13 @@
    "unit": "strings",
    "answer": 47,
    "definition": "a pedal harp",
-   "fact": "Most are white, but the C strings are red and the F strings black or blue.",
+   "fact": "That's seven strings an octave over six and a half octaves; the C strings are red and the F strings black or blue.",
    "source": {
     "title": "Pedal harp",
     "url": "https://en.wikipedia.org/wiki/Pedal_harp"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "connect-four-holes",
@@ -4758,7 +4788,8 @@
     "title": "Connect Four",
     "url": "https://en.wikipedia.org/wiki/Connect_Four"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "tolkien-writing-time",
@@ -4771,7 +4802,8 @@
     "title": "The Lord of the Rings",
     "url": "https://en.wikipedia.org/wiki/The_Lord_of_the_Rings"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "shuttlecock-feathers",
@@ -4784,7 +4816,8 @@
     "title": "Shuttlecock",
     "url": "https://en.wikipedia.org/wiki/Shuttlecock"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "ten-thousand-metres-laps",
@@ -4797,7 +4830,8 @@
     "title": "10,000 metres",
     "url": "https://en.wikipedia.org/wiki/10,000_metres"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "oldest-olympic-medallist",
@@ -4811,7 +4845,8 @@
     "title": "Oscar Swahn",
     "url": "https://en.wikipedia.org/wiki/Oscar_Swahn"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "phelps-olympic-medals",
@@ -4824,7 +4859,8 @@
     "title": "Michael Phelps",
     "url": "https://en.wikipedia.org/wiki/Michael_Phelps"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "messi-barcelona-goals",
@@ -4837,7 +4873,9 @@
     "title": "Lionel Messi",
     "url": "https://en.wikipedia.org/wiki/Lionel_Messi"
    },
-   "easy": false
+   "easy": false,
+   "definition": "all competitions",
+   "verified": true
   },
   {
    "id": "super-bowl-2025-viewers",
@@ -4851,7 +4889,8 @@
     "title": "Super Bowl LIX",
     "url": "https://en.wikipedia.org/wiki/Super_Bowl_LIX"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "ironman-distance",
@@ -4864,7 +4903,8 @@
     "title": "Ironman Triathlon",
     "url": "https://en.wikipedia.org/wiki/Ironman_Triathlon"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "bowling-perfect-score",
@@ -4877,21 +4917,23 @@
     "title": "Perfect game (bowling)",
     "url": "https://en.wikipedia.org/wiki/Perfect_game_(bowling)"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "snooker-maximum-break",
    "kind": "sports",
-   "question": "What is the highest break possible in snooker, normally?",
+   "question": "What is the highest score possible in one turn of snooker?",
    "unit": "points",
    "answer": 147,
-   "definition": "without a free ball",
-   "fact": "Joe Davis made the first official one; Ronnie O'Sullivan's fastest took 5 minutes and 8 seconds.",
+   "definition": "with no fouls",
+   "fact": "It means potting all 15 reds, each followed by the black, the top-scoring ball, then all six colours.",
    "source": {
     "title": "Maximum break",
     "url": "https://en.wikipedia.org/wiki/Maximum_break"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "pele-first-world-cup",
@@ -4904,7 +4946,8 @@
     "title": "Pelé",
     "url": "https://en.wikipedia.org/wiki/Pel%C3%A9"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "tour-de-france-stages",
@@ -4917,7 +4960,8 @@
     "title": "Tour de France",
     "url": "https://en.wikipedia.org/wiki/Tour_de_France"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "paris-2024-events",
@@ -4930,7 +4974,8 @@
     "title": "2024 Summer Olympics",
     "url": "https://en.wikipedia.org/wiki/2024_Summer_Olympics"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "ski-jump-record",
@@ -4944,7 +4989,8 @@
     "title": "Ski jumping",
     "url": "https://en.wikipedia.org/wiki/Ski_jumping"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "new-york-yellow-taxis",
@@ -4958,7 +5004,8 @@
     "title": "Taxis of New York City",
     "url": "https://en.wikipedia.org/wiki/Taxis_of_New_York_City"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "magic-kingdom-visitors",
@@ -4971,7 +5018,8 @@
     "title": "Magic Kingdom",
     "url": "https://en.wikipedia.org/wiki/Magic_Kingdom"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "first-ipod-songs",
@@ -4985,7 +5033,8 @@
     "title": "IPod Classic",
     "url": "https://en.wikipedia.org/wiki/IPod_Classic"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "mayflower-crossing",
@@ -4999,7 +5048,8 @@
     "title": "Pilgrims (Plymouth Colony)",
     "url": "https://en.wikipedia.org/wiki/Pilgrims_(Plymouth_Colony)"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "pony-express-time",
@@ -5012,7 +5062,8 @@
     "title": "Pony Express",
     "url": "https://en.wikipedia.org/wiki/Pony_Express"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "centennial-light",
@@ -5026,7 +5077,8 @@
     "title": "Centennial Light",
     "url": "https://en.wikipedia.org/wiki/Centennial_Light"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "four-k-pixels",
@@ -5039,7 +5091,8 @@
     "title": "4K resolution",
     "url": "https://en.wikipedia.org/wiki/4K_resolution"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "empire-state-lightning",
@@ -5048,12 +5101,13 @@
    "unit": "times",
    "answer": 23,
    "definition": "on average",
-   "fact": "Planes are struck often too, though strikes are generally not dangerous to them.",
+   "fact": "So much for lightning never striking the same place twice: tall, prominent spots get hit again and again.",
    "source": {
     "title": "Lightning",
     "url": "https://en.wikipedia.org/wiki/Lightning"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "all-gold-cube",
@@ -5062,12 +5116,13 @@
    "unit": "metres",
    "answer": 21.7,
    "definition": "all gold above ground, 2020",
-   "fact": "That cube would weigh about 201,296 tonnes.",
+   "fact": "Gold is so dense that all 201,296 tonnes above ground would fit in that one cube.",
    "source": {
     "title": "Gold",
     "url": "https://en.wikipedia.org/wiki/Gold"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "rubiks-cube-moves",
@@ -5081,7 +5136,8 @@
     "title": "Rubik's Cube",
     "url": "https://en.wikipedia.org/wiki/Rubik%27s_Cube"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "film-frame-rate",
@@ -5094,7 +5150,8 @@
     "title": "Frame rate",
     "url": "https://en.wikipedia.org/wiki/Frame_rate"
    },
-   "easy": false
+   "easy": true,
+   "verified": true
   },
   {
    "id": "cologne-cathedral-build",
@@ -5108,7 +5165,8 @@
     "title": "Cologne Cathedral",
     "url": "https://en.wikipedia.org/wiki/Cologne_Cathedral"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "mount-rushmore-carving",
@@ -5121,7 +5179,8 @@
     "title": "Mount Rushmore",
     "url": "https://en.wikipedia.org/wiki/Mount_Rushmore"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "big-ben-bell-weight",
@@ -5129,12 +5188,13 @@
    "question": "How heavy is Big Ben, the great bell in London's clock tower?",
    "unit": "tonnes",
    "answer": 13.7,
-   "fact": "Big Ben is the bell's nickname; four smaller bells beside it chime the quarter hours.",
+   "fact": "Sixteen horses pulled it to the tower, and hauling it up to the belfry took 18 hours.",
    "source": {
     "title": "Big Ben",
     "url": "https://en.wikipedia.org/wiki/Big_Ben"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "sydney-opera-house-build",
@@ -5148,7 +5208,8 @@
     "title": "Sydney Opera House",
     "url": "https://en.wikipedia.org/wiki/Sydney_Opera_House"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "pentagon-corridors",
@@ -5161,7 +5222,8 @@
     "title": "The Pentagon",
     "url": "https://en.wikipedia.org/wiki/The_Pentagon"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "st-peters-capacity",
@@ -5169,12 +5231,13 @@
    "question": "How many people can stand inside St Peter's Basilica in Rome?",
    "unit": "people",
    "answer": 60000,
-   "fact": "Seated, it holds 20,000.",
+   "fact": "It has 15,160 square metres inside, more than any other church; seated, it holds 20,000.",
    "source": {
     "title": "St. Peter's Basilica",
     "url": "https://en.wikipedia.org/wiki/St._Peter%27s_Basilica"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "earths-to-the-moon",
@@ -5187,7 +5250,8 @@
     "title": "Lunar distance",
     "url": "https://en.wikipedia.org/wiki/Lunar_distance"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "halleys-comet-return",
@@ -5201,7 +5265,8 @@
     "title": "Halley's Comet",
     "url": "https://en.wikipedia.org/wiki/Halley%27s_Comet"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "apollo-moon-rock",
@@ -5214,21 +5279,8 @@
     "title": "Moon rock",
     "url": "https://en.wikipedia.org/wiki/Moon_rock"
    },
-   "easy": false
-  },
-  {
-   "id": "saturn-rings-thickness",
-   "kind": "space",
-   "question": "How thick are Saturn's main rings?",
-   "unit": "metres",
-   "answer": 10,
-   "definition": "top to bottom, typically",
-   "fact": "They're almost pure water ice, and may be much younger than Saturn itself.",
-   "source": {
-    "title": "Rings of Saturn",
-    "url": "https://en.wikipedia.org/wiki/Rings_of_Saturn"
-   },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "baumgartner-jump-height",
@@ -5241,7 +5293,8 @@
     "title": "Red Bull Stratos",
     "url": "https://en.wikipedia.org/wiki/Red_Bull_Stratos"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "james-webb-distance",
@@ -5254,7 +5307,8 @@
     "title": "James Webb Space Telescope",
     "url": "https://en.wikipedia.org/wiki/James_Webb_Space_Telescope"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "dinosaur-asteroid-width",
@@ -5262,12 +5316,13 @@
    "question": "How wide was the asteroid that wiped out the dinosaurs?",
    "unit": "kilometres",
    "answer": 10,
-   "fact": "It struck what is now Mexico's Yucatán Peninsula, and its crater lies buried about a kilometre down.",
+   "fact": "Set down at sea level it would stand taller than Mount Everest; its crater lies buried under Mexico's Yucatán.",
    "source": {
     "title": "Chicxulub crater",
     "url": "https://en.wikipedia.org/wiki/Chicxulub_crater"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "wettest-place-rainfall",
@@ -5281,7 +5336,8 @@
     "title": "Mawsynram",
     "url": "https://en.wikipedia.org/wiki/Mawsynram"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "oldest-living-tree",
@@ -5295,7 +5351,8 @@
     "title": "Methuselah (pine tree)",
     "url": "https://en.wikipedia.org/wiki/Methuselah_(pine_tree)"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "antarctic-ice-thickness",
@@ -5308,7 +5365,8 @@
     "title": "Antarctica",
     "url": "https://en.wikipedia.org/wiki/Antarctica"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "un-member-states",
@@ -5321,7 +5379,8 @@
     "title": "Member states of the United Nations",
     "url": "https://en.wikipedia.org/wiki/Member_states_of_the_United_Nations"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "equator-countries",
@@ -5335,7 +5394,8 @@
     "title": "Equator",
     "url": "https://en.wikipedia.org/wiki/Equator"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "busiest-airport-passengers",
@@ -5348,7 +5408,8 @@
     "title": "List of busiest airports by passenger traffic",
     "url": "https://en.wikipedia.org/wiki/List_of_busiest_airports_by_passenger_traffic"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "us-golf-courses",
@@ -5362,7 +5423,8 @@
     "title": "Golf course",
     "url": "https://en.wikipedia.org/wiki/Golf_course"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "pineapple-flowers",
@@ -5370,26 +5432,14 @@
    "question": "How many flowers can join together to form one pineapple?",
    "unit": "flowers",
    "answer": 200,
-   "definition": "usually, at most",
-   "fact": "They fuse into one 'multiple fruit', and the plant usually matures within a year.",
+   "definition": "the usual maximum",
+   "fact": "Each flower's ovary swells into a berry, and the berries fuse into one big, compact fruit.",
    "source": {
     "title": "Pineapple",
     "url": "https://en.wikipedia.org/wiki/Pineapple"
    },
-   "easy": false
-  },
-  {
-   "id": "statue-of-liberty-crown-visitors",
-   "kind": "landmarks",
-   "question": "How many visitors a day can climb to the Statue of Liberty's crown?",
-   "unit": "visitors",
-   "answer": 425,
-   "fact": "Tickets can be reserved up to five months ahead, in groups of up to four.",
-   "source": {
-    "title": "Statue of Liberty",
-    "url": "https://en.wikipedia.org/wiki/Statue_of_Liberty"
-   },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "colosseum-audience",
@@ -5398,25 +5448,13 @@
    "unit": "spectators",
    "answer": 65000,
    "definition": "its average audience",
-   "fact": "It hosted gladiator fights, animal hunts, dramas and even mock sea battles.",
+   "fact": "Crowds came in through 80 entrances, with numbered pottery shards for tickets showing their section and row.",
    "source": {
     "title": "Colosseum",
     "url": "https://en.wikipedia.org/wiki/Colosseum"
    },
-   "easy": true
-  },
-  {
-   "id": "red-blood-cell-making",
-   "kind": "body",
-   "question": "How long does your body take to make a new red blood cell?",
-   "unit": "days",
-   "answer": 7,
-   "fact": "Each one then circulates in the blood for three to four months.",
-   "source": {
-    "title": "Red blood cell",
-    "url": "https://en.wikipedia.org/wiki/Red_blood_cell"
-   },
-   "easy": false
+   "easy": true,
+   "verified": true
   },
   {
    "id": "right-eye-dominant-share",
@@ -5426,12 +5464,13 @@
    "unit": "percent",
    "answer": 70,
    "definition": "the eye you'd aim with",
-   "fact": "About 29% favour the left eye instead.",
+   "fact": "About 29% favour the left eye, and your stronger eye doesn't always match your stronger hand.",
    "source": {
     "title": "Ocular dominance",
     "url": "https://en.wikipedia.org/wiki/Ocular_dominance"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "short-sighted-share",
@@ -5446,7 +5485,8 @@
     "title": "Myopia",
     "url": "https://en.wikipedia.org/wiki/Myopia"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "blood-plasma-share",
@@ -5460,7 +5500,8 @@
     "title": "Blood plasma",
     "url": "https://en.wikipedia.org/wiki/Blood_plasma"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "brown-eyes-share",
@@ -5474,7 +5515,8 @@
     "title": "Eye color",
     "url": "https://en.wikipedia.org/wiki/Eye_color"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "blood-in-veins-share",
@@ -5483,12 +5525,13 @@
    "question": "At any moment, how much of your blood is in your veins?",
    "unit": "percent",
    "answer": 70,
-   "fact": "And nearly three-quarters of that sits in the smallest veins and venules.",
+   "fact": "Their thin walls and wide insides let them hold far more blood than the arteries, mostly in the small veins.",
    "source": {
     "title": "Vein",
     "url": "https://en.wikipedia.org/wiki/Vein"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "rice-maize-wheat-share",
@@ -5503,7 +5546,8 @@
     "title": "Staple food",
     "url": "https://en.wikipedia.org/wiki/Staple_food"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "soy-for-livestock",
@@ -5517,7 +5561,8 @@
     "title": "Soybean",
     "url": "https://en.wikipedia.org/wiki/Soybean"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "parmesan-milk-share",
@@ -5532,7 +5577,8 @@
     "title": "Parmesan",
     "url": "https://en.wikipedia.org/wiki/Parmesan"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "farmland-share",
@@ -5547,7 +5593,8 @@
     "title": "Agricultural land",
     "url": "https://en.wikipedia.org/wiki/Agricultural_land"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "plastic-recycled-share",
@@ -5562,7 +5609,8 @@
     "title": "Plastic recycling",
     "url": "https://en.wikipedia.org/wiki/Plastic_recycling"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "france-nuclear-share",
@@ -5572,12 +5620,13 @@
    "unit": "percent",
    "answer": 68,
    "definition": "2025",
-   "fact": "France has 56 power reactors, all run by EDF, the state-owned electricity company.",
+   "fact": "It built its 56 reactors after an oil crisis, when most of its electricity still came from foreign oil.",
    "source": {
     "title": "Nuclear power in France",
     "url": "https://en.wikipedia.org/wiki/Nuclear_power_in_France"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "iceland-geothermal-share",
@@ -5592,7 +5641,8 @@
     "title": "Energy in Iceland",
     "url": "https://en.wikipedia.org/wiki/Energy_in_Iceland"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "cloud-cover-share",
@@ -5607,7 +5657,8 @@
     "title": "Cloud cover",
     "url": "https://en.wikipedia.org/wiki/Cloud_cover"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "amazon-river-flow-share",
@@ -5621,7 +5672,8 @@
     "title": "Amazon River",
     "url": "https://en.wikipedia.org/wiki/Amazon_River"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "mountainous-land-share",
@@ -5635,7 +5687,8 @@
     "title": "Mountain",
     "url": "https://en.wikipedia.org/wiki/Mountain"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "tropics-share",
@@ -5650,7 +5703,8 @@
     "title": "Tropics",
     "url": "https://en.wikipedia.org/wiki/Tropics"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "lunar-maria-share",
@@ -5665,7 +5719,8 @@
     "title": "Lunar mare",
     "url": "https://en.wikipedia.org/wiki/Lunar_mare"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "moon-width-share",
@@ -5679,7 +5734,8 @@
     "title": "Moon",
     "url": "https://en.wikipedia.org/wiki/Moon"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "mars-mission-failures",
@@ -5694,7 +5750,8 @@
     "title": "Exploration of Mars",
     "url": "https://en.wikipedia.org/wiki/Exploration_of_Mars"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "octopus-arm-neurons",
@@ -5708,21 +5765,8 @@
     "title": "Octopus",
     "url": "https://en.wikipedia.org/wiki/Octopus"
    },
-   "easy": false
-  },
-  {
-   "id": "australia-endemic-mammals",
-   "kind": "animals",
-   "round": "percent",
-   "question": "What share of Australia's mammal species live nowhere else?",
-   "unit": "percent",
-   "answer": 69,
-   "fact": "For its reptiles the share is even higher, 93%, and for its amphibians 94%.",
-   "source": {
-    "title": "Fauna of Australia",
-    "url": "https://en.wikipedia.org/wiki/Fauna_of_Australia"
-   },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "perching-birds-share",
@@ -5737,22 +5781,24 @@
     "title": "Passerine",
     "url": "https://en.wikipedia.org/wiki/Passerine"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "free-ranging-dogs-share",
    "kind": "animals",
    "round": "percent",
-   "question": "What share of the world's dogs roam free, not as pets?",
+   "question": "What share of the world's dogs roam free?",
    "unit": "percent",
    "answer": 75,
-   "definition": "village, street and feral dogs",
+   "definition": "not shut in a house or yard, owned or not",
    "fact": "Only 17 to 24% of dogs live as pets in rich countries, out of 700 to 900 million in all.",
    "source": {
     "title": "Free-ranging dog",
     "url": "https://en.wikipedia.org/wiki/Free-ranging_dog"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "india-wild-tigers-share",
@@ -5767,7 +5813,8 @@
     "title": "Project Tiger",
     "url": "https://en.wikipedia.org/wiki/Project_Tiger"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "world-literacy-share",
@@ -5782,7 +5829,8 @@
     "title": "Literacy",
     "url": "https://en.wikipedia.org/wiki/Literacy"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "english-wikipedia-share",
@@ -5792,12 +5840,13 @@
    "unit": "percent",
    "answer": 10.6,
    "definition": "2026",
-   "fact": "English still has more articles than any other edition, about 7.27 million.",
+   "fact": "It once held more than half of them; English still has the most articles of any edition, about 7.27 million.",
    "source": {
     "title": "English Wikipedia",
     "url": "https://en.wikipedia.org/wiki/English_Wikipedia"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "welsh-speakers-share",
@@ -5812,7 +5861,8 @@
     "title": "Welsh language",
     "url": "https://en.wikipedia.org/wiki/Welsh_language"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "bank-account-share",
@@ -5827,7 +5877,8 @@
     "title": "Financial inclusion",
     "url": "https://en.wikipedia.org/wiki/Financial_inclusion"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "electric-car-sales-share",
@@ -5842,7 +5893,8 @@
     "title": "Electric car use by country",
     "url": "https://en.wikipedia.org/wiki/Electric_car_use_by_country"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "us-passport-share",
@@ -5857,7 +5909,8 @@
     "title": "United States passport",
     "url": "https://en.wikipedia.org/wiki/United_States_passport"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "under-15-share",
@@ -5872,7 +5925,8 @@
     "title": "Demographics of the world",
     "url": "https://en.wikipedia.org/wiki/Demographics_of_the_world"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "coastal-population-share",
@@ -5887,7 +5941,8 @@
     "title": "Coast",
     "url": "https://en.wikipedia.org/wiki/Coast"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "great-wall-lost-share",
@@ -5897,12 +5952,13 @@
    "unit": "percent",
    "answer": 22,
    "definition": "2012 survey",
-   "fact": "Many of the square lookout towers in its most famous pictures have gone too.",
+   "fact": "Many western stretches are built of mud, not brick and stone, so wind and sandstorms wear them away.",
    "source": {
     "title": "Great Wall of China",
     "url": "https://en.wikipedia.org/wiki/Great_Wall_of_China"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "women-first-at-olympics",
@@ -5917,7 +5973,8 @@
     "title": "Participation of women in the Olympics",
     "url": "https://en.wikipedia.org/wiki/Participation_of_women_in_the_Olympics"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "first-london-marathon",
@@ -5931,7 +5988,8 @@
     "title": "London Marathon",
     "url": "https://en.wikipedia.org/wiki/London_Marathon"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "uranus-discovered",
@@ -5945,7 +6003,8 @@
     "title": "Uranus",
     "url": "https://en.wikipedia.org/wiki/Uranus"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "basketball-invented",
@@ -5959,7 +6018,8 @@
     "title": "Basketball",
     "url": "https://en.wikipedia.org/wiki/Basketball"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "first-f1-championship",
@@ -5973,7 +6033,8 @@
     "title": "1950 Formula One season",
     "url": "https://en.wikipedia.org/wiki/1950_Formula_One_season"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "olympic-gold-silver-bronze",
@@ -5987,7 +6048,8 @@
     "title": "Olympic medal",
     "url": "https://en.wikipedia.org/wiki/Olympic_medal"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "insulin-first-used",
@@ -6001,7 +6063,8 @@
     "title": "Insulin (medication)",
     "url": "https://en.wikipedia.org/wiki/Insulin_(medication)"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "aspirin-first-sold",
@@ -6011,12 +6074,13 @@
    "unit": "year",
    "answer": 1899,
    "definition": "under that name",
-   "fact": "Its name comes from Spiraea, the meadowsweet plant its key ingredient was first taken from.",
+   "fact": "It was Bayer's gentler version of a willow-bark remedy that people had used for at least 2,400 years.",
    "source": {
     "title": "Aspirin",
     "url": "https://en.wikipedia.org/wiki/Aspirin"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "stethoscope-invented",
@@ -6030,7 +6094,8 @@
     "title": "Stethoscope",
     "url": "https://en.wikipedia.org/wiki/Stethoscope"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "suez-canal-opens",
@@ -6044,7 +6109,8 @@
     "title": "Suez Canal",
     "url": "https://en.wikipedia.org/wiki/Suez_Canal"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "sagrada-familia-begun",
@@ -6058,7 +6124,8 @@
     "title": "Sagrada Família",
     "url": "https://en.wikipedia.org/wiki/Sagrada_Fam%C3%ADlia"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "tower-bridge-opens",
@@ -6072,7 +6139,8 @@
     "title": "Tower Bridge",
     "url": "https://en.wikipedia.org/wiki/Tower_Bridge"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "voyager-1-launch",
@@ -6086,7 +6154,8 @@
     "title": "Voyager 1",
     "url": "https://en.wikipedia.org/wiki/Voyager_1"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "earthrise-photo",
@@ -6100,7 +6169,8 @@
     "title": "Earthrise",
     "url": "https://en.wikipedia.org/wiki/Earthrise"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "first-spacewalk",
@@ -6109,12 +6179,13 @@
    "question": "When did someone first walk in space?",
    "unit": "year",
    "answer": 1965,
-   "fact": "Alexei Leonov spent 12 minutes outside his spacecraft, Voskhod 2.",
+   "fact": "Alexei Leonov spent 12 minutes outside; his suit ballooned so much that he had to let air out to get back in.",
    "source": {
     "title": "Voskhod 2",
     "url": "https://en.wikipedia.org/wiki/Voskhod_2"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "iss-first-crew",
@@ -6128,7 +6199,8 @@
     "title": "Expedition 1",
     "url": "https://en.wikipedia.org/wiki/Expedition_1"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "sony-walkman-launch",
@@ -6143,7 +6215,8 @@
     "title": "Walkman",
     "url": "https://en.wikipedia.org/wiki/Walkman"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "toy-story-released",
@@ -6157,7 +6230,8 @@
     "title": "Toy Story",
     "url": "https://en.wikipedia.org/wiki/Toy_Story"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "first-christmas-card",
@@ -6171,7 +6245,8 @@
     "title": "Christmas card",
     "url": "https://en.wikipedia.org/wiki/Christmas_card"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "first-bicycle",
@@ -6185,7 +6260,8 @@
     "title": "Dandy horse",
     "url": "https://en.wikipedia.org/wiki/Dandy_horse"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "tin-can-patent",
@@ -6199,7 +6275,8 @@
     "title": "Canning",
     "url": "https://en.wikipedia.org/wiki/Canning"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "dodo-last-seen",
@@ -6213,7 +6290,8 @@
     "title": "Dodo",
     "url": "https://en.wikipedia.org/wiki/Dodo"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "dolly-the-sheep",
@@ -6227,7 +6305,8 @@
     "title": "Dolly (sheep)",
     "url": "https://en.wikipedia.org/wiki/Dolly_(sheep)"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "last-tasmanian-tiger",
@@ -6241,7 +6320,8 @@
     "title": "Thylacine",
     "url": "https://en.wikipedia.org/wiki/Thylacine"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "mickey-mouse-debut",
@@ -6256,7 +6336,8 @@
     "title": "Steamboat Willie",
     "url": "https://en.wikipedia.org/wiki/Steamboat_Willie"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "first-guinness-book",
@@ -6270,7 +6351,8 @@
     "title": "Guinness World Records",
     "url": "https://en.wikipedia.org/wiki/Guinness_World_Records"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "first-bullet-train",
@@ -6284,7 +6366,8 @@
     "title": "Shinkansen",
     "url": "https://en.wikipedia.org/wiki/Shinkansen"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "yellowstone-first-park",
@@ -6298,13 +6381,14 @@
     "title": "Yellowstone National Park",
     "url": "https://en.wikipedia.org/wiki/Yellowstone_National_Park"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "krakatoa-eruption",
    "kind": "nature",
    "round": "year",
-   "question": "When did Krakatoa erupt, one of the most violent eruptions recorded?",
+   "question": "When was Krakatoa's great eruption, one of the most violent ever recorded?",
    "unit": "year",
    "answer": 1883,
    "fact": "The blast was heard 4,780 km away, on the island of Rodrigues near Mauritius.",
@@ -6312,7 +6396,8 @@
     "title": "Krakatoa",
     "url": "https://en.wikipedia.org/wiki/Krakatoa"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "spotify-launch",
@@ -6327,7 +6412,8 @@
     "title": "Spotify",
     "url": "https://en.wikipedia.org/wiki/Spotify"
    },
-   "easy": true
+   "easy": true,
+   "verified": true
   },
   {
    "id": "apple-i-on-sale",
@@ -6341,7 +6427,8 @@
     "title": "Apple I",
     "url": "https://en.wikipedia.org/wiki/Apple_I"
    },
-   "easy": false
+   "easy": false,
+   "verified": true
   },
   {
    "id": "name-country-as-many-people-as-germany",
@@ -6354,8 +6441,7 @@
     "Germany"
    ],
    "easy": false,
-   "verified": false,
-   "note": "target is Germany's own figure on the list (83.3 million); check Turkey, Iran, Thailand, France and the UK register"
+   "verified": true
   },
   {
    "id": "name-country-as-many-people-as-japan",
@@ -6368,8 +6454,7 @@
     "Japan"
    ],
    "easy": false,
-   "verified": false,
-   "note": "target is Japan's own figure on the list (122.7 million); check Mexico, the Philippines, Ethiopia, Egypt and Russia register"
+   "verified": true
   },
   {
    "id": "name-country-as-many-people-as-tokyo",
@@ -6380,8 +6465,7 @@
    "question": "Name a country with about as many people as Tokyo",
    "definition": "Tokyo's whole built-up area, 2026",
    "easy": false,
-   "verified": false,
-   "note": "target is Tokyo's figure on the city list (41.3 million); check Canada, Poland, Argentina and Spain register, and Tokyo says it is a city"
+   "verified": true
   },
   {
    "id": "name-country-as-big-as-turkey",
@@ -6394,8 +6478,7 @@
     "Turkey"
    ],
    "easy": false,
-   "verified": false,
-   "note": "target is Turkey's own total area on the list; check Mozambique, Chile, Zambia, Myanmar, Pakistan and France register"
+   "verified": true
   },
   {
    "id": "name-country-as-big-as-italy",
@@ -6408,20 +6491,7 @@
     "Italy"
    ],
    "easy": false,
-   "verified": false,
-   "note": "target is Italy's own total area on the list; check the Philippines, Poland, Norway, Finland, Vietnam and the UK register"
-  },
-  {
-   "id": "name-country-as-big-as-alaska",
-   "kind": "places",
-   "round": "name",
-   "list": "countries-area",
-   "target": 1723337,
-   "question": "Name a country with about the same area as Alaska",
-   "definition": "Alaska's total area, water included",
-   "easy": false,
-   "verified": false,
-   "note": "target is Alaska's total area on the US state area list; check Iran, Libya, Sudan, Indonesia, Mexico and Mongolia register, and Alaska says it is a US state"
+   "verified": true
   },
   {
    "id": "name-city-as-many-people-as-new-zealand",
@@ -6432,8 +6502,8 @@
    "question": "Name a city with about as many people as New Zealand",
    "definition": "its whole built-up area, 2026",
    "easy": false,
-   "verified": false,
-   "note": "target is New Zealand's figure on the country population list (5.36 million); check Sydney, Melbourne, Madrid, Barcelona, Berlin and Toronto register"
+   "verified": true,
+   "fact": "Australia's two biggest cities, Sydney and Melbourne, each hold about as many people as all of New Zealand."
   },
   {
    "id": "name-city-as-many-people-as-texas",
@@ -6444,8 +6514,7 @@
    "question": "Name a city with about as many people as Texas",
    "definition": "its whole built-up area, 2026",
    "easy": false,
-   "verified": false,
-   "note": "target is Texas's figure on the US state population list (31.7 million, 2025); check Jakarta, Mumbai, Manila, Delhi and Mexico City register, and Texas says it is a US state"
+   "verified": true
   },
   {
    "id": "name-us-state-as-many-people-as-netherlands",
@@ -6455,8 +6524,7 @@
    "target": 18171612,
    "question": "Name a US state with about as many people as the Netherlands",
    "easy": false,
-   "verified": false,
-   "note": "target is the Netherlands' figure on the country population list (18.2 million); check New York, Florida, Pennsylvania and Illinois register"
+   "verified": true
   },
   {
    "id": "name-us-state-as-many-people-as-hong-kong",
@@ -6466,8 +6534,7 @@
    "target": 7500000,
    "question": "Name a US state with about as many people as Hong Kong",
    "easy": false,
-   "verified": false,
-   "note": "target is Hong Kong's figure on the city list (7.5 million); check Arizona, Tennessee, Massachusetts, Washington and Virginia register"
+   "verified": true
   },
   {
    "id": "name-us-state-as-many-people-as-rome",
@@ -6478,8 +6545,7 @@
    "question": "Name a US state with about as many people as Rome",
    "definition": "Rome's whole built-up area, 2026",
    "easy": false,
-   "verified": false,
-   "note": "target is Rome's figure on the city list (3.45 million); check Utah, Nevada, Iowa, Connecticut and Oregon register"
+   "verified": true
   },
   {
    "id": "name-us-state-as-big-as-portugal",
@@ -6490,8 +6556,7 @@
    "question": "Name a US state with about the same area as Portugal",
    "definition": "total area, lakes and coastal water",
    "easy": false,
-   "verified": false,
-   "note": "target is Portugal's total area on the country area list; check Maine, Indiana, South Carolina, Kentucky and Virginia register"
+   "verified": true
   },
   {
    "id": "name-us-state-as-big-as-spain",
@@ -6502,8 +6567,7 @@
    "question": "Name a US state with about the same area as Spain",
    "definition": "total area, lakes and coastal water",
    "easy": false,
-   "verified": false,
-   "note": "target is Spain's total area on the country area list; only California, Texas and Montana score 70 or more, so check all three register"
+   "verified": true
   },
   {
    "id": "name-country-as-dense-as-india",
@@ -6517,8 +6581,7 @@
     "India"
    ],
    "easy": false,
-   "verified": false,
-   "note": "target is India's own figure on the list; check Japan, the Philippines, Israel, Belgium and the Netherlands register"
+   "verified": true
   },
   {
    "id": "name-country-as-dense-as-china",
@@ -6532,8 +6595,7 @@
     "China"
    ],
    "easy": false,
-   "verified": false,
-   "note": "target is China's own figure on the list; check Indonesia, Denmark, Thailand, France, Italy and Poland register"
+   "verified": true
   },
   {
    "id": "name-country-as-dense-as-united-states",
@@ -6547,8 +6609,7 @@
     "United States"
    ],
    "easy": false,
-   "verified": false,
-   "note": "target is the United States' own figure on the list; check Laos, Estonia, Colombia and Sweden register, and USA and America read as the US"
+   "verified": true
   }
  ]
 }
