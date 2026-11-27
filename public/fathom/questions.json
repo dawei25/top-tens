@@ -5417,6 +5417,931 @@
     "url": "https://en.wikipedia.org/wiki/Red_blood_cell"
    },
    "easy": false
+  },
+  {
+   "id": "right-eye-dominant-share",
+   "kind": "body",
+   "round": "percent",
+   "question": "What share of people are right-eye dominant?",
+   "unit": "percent",
+   "answer": 70,
+   "definition": "the eye you'd aim with",
+   "fact": "About 29% favour the left eye instead.",
+   "source": {
+    "title": "Ocular dominance",
+    "url": "https://en.wikipedia.org/wiki/Ocular_dominance"
+   },
+   "easy": true
+  },
+  {
+   "id": "short-sighted-share",
+   "kind": "body",
+   "round": "percent",
+   "question": "What share of the world's people are short-sighted?",
+   "unit": "percent",
+   "answer": 22,
+   "definition": "nearsighted",
+   "fact": "That's about 1.5 billion people, and in parts of China and Malaysia it's up to 41% of adults.",
+   "source": {
+    "title": "Myopia",
+    "url": "https://en.wikipedia.org/wiki/Myopia"
+   },
+   "easy": false
+  },
+  {
+   "id": "blood-plasma-share",
+   "kind": "body",
+   "round": "percent",
+   "question": "How much of your blood is plasma, the pale yellow liquid part?",
+   "unit": "percent",
+   "answer": 55,
+   "fact": "Plasma is mostly water, up to 95%, and gets its yellow from substances such as bilirubin.",
+   "source": {
+    "title": "Blood plasma",
+    "url": "https://en.wikipedia.org/wiki/Blood_plasma"
+   },
+   "easy": false
+  },
+  {
+   "id": "brown-eyes-share",
+   "kind": "body",
+   "round": "percent",
+   "question": "What share of the world's people have brown eyes?",
+   "unit": "percent",
+   "answer": 79,
+   "fact": "Blue eyes come next, at 8 to 10%, and green is the rarest, at about 2%.",
+   "source": {
+    "title": "Eye color",
+    "url": "https://en.wikipedia.org/wiki/Eye_color"
+   },
+   "easy": true
+  },
+  {
+   "id": "blood-in-veins-share",
+   "kind": "body",
+   "round": "percent",
+   "question": "At any moment, how much of your blood is in your veins?",
+   "unit": "percent",
+   "answer": 70,
+   "fact": "And nearly three-quarters of that sits in the smallest veins and venules.",
+   "source": {
+    "title": "Vein",
+    "url": "https://en.wikipedia.org/wiki/Vein"
+   },
+   "easy": false
+  },
+  {
+   "id": "rice-maize-wheat-share",
+   "kind": "food",
+   "round": "percent",
+   "question": "How much of the world's food do rice, maize and wheat make up?",
+   "unit": "percent",
+   "answer": 66.67,
+   "definition": "food energy from crops",
+   "fact": "Just 15 crops provide 90% of the food energy people get from plants, and rice alone feeds almost half of humanity.",
+   "source": {
+    "title": "Staple food",
+    "url": "https://en.wikipedia.org/wiki/Staple_food"
+   },
+   "easy": false
+  },
+  {
+   "id": "soy-for-livestock",
+   "kind": "food",
+   "round": "percent",
+   "question": "How much of the world's soy is fed to farm animals?",
+   "unit": "percent",
+   "answer": 75,
+   "fact": "Dried soybeans are 36% protein, which makes the meal left after pressing out the oil a cheap animal feed.",
+   "source": {
+    "title": "Soybean",
+    "url": "https://en.wikipedia.org/wiki/Soybean"
+   },
+   "easy": false
+  },
+  {
+   "id": "parmesan-milk-share",
+   "kind": "food",
+   "round": "percent",
+   "question": "How much of Italy's milk goes into making Parmesan?",
+   "unit": "percent",
+   "answer": 18,
+   "definition": "2017",
+   "fact": "That's about 3.6 million wheels a year, and each vat of 1,100 litres of milk makes just two.",
+   "source": {
+    "title": "Parmesan",
+    "url": "https://en.wikipedia.org/wiki/Parmesan"
+   },
+   "easy": false
+  },
+  {
+   "id": "farmland-share",
+   "kind": "food",
+   "round": "percent",
+   "question": "How much of the world's land is used for farming?",
+   "unit": "percent",
+   "answer": 38.4,
+   "definition": "crops and grazing, 2011",
+   "fact": "Over two-thirds of it is pasture for grazing animals, and less than a third grows crops.",
+   "source": {
+    "title": "Agricultural land",
+    "url": "https://en.wikipedia.org/wiki/Agricultural_land"
+   },
+   "easy": false
+  },
+  {
+   "id": "plastic-recycled-share",
+   "kind": "science",
+   "round": "percent",
+   "question": "How much of all the plastic ever made has been recycled?",
+   "unit": "percent",
+   "answer": 9,
+   "definition": "by 2017",
+   "fact": "Of the plastic thrown away, 12% was burned and 79% went to landfill or into the environment.",
+   "source": {
+    "title": "Plastic recycling",
+    "url": "https://en.wikipedia.org/wiki/Plastic_recycling"
+   },
+   "easy": false
+  },
+  {
+   "id": "france-nuclear-share",
+   "kind": "science",
+   "round": "percent",
+   "question": "How much of France's electricity comes from nuclear power?",
+   "unit": "percent",
+   "answer": 68,
+   "definition": "2025",
+   "fact": "France has 56 power reactors, all run by EDF, the state-owned electricity company.",
+   "source": {
+    "title": "Nuclear power in France",
+    "url": "https://en.wikipedia.org/wiki/Nuclear_power_in_France"
+   },
+   "easy": false
+  },
+  {
+   "id": "iceland-geothermal-share",
+   "kind": "science",
+   "round": "percent",
+   "question": "How much of Iceland's electricity comes from geothermal power?",
+   "unit": "percent",
+   "answer": 29.4,
+   "definition": "2025",
+   "fact": "Almost all the rest comes from hydropower, though 90% of homes are heated with geothermal water.",
+   "source": {
+    "title": "Energy in Iceland",
+    "url": "https://en.wikipedia.org/wiki/Energy_in_Iceland"
+   },
+   "easy": false
+  },
+  {
+   "id": "cloud-cover-share",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of Earth is covered by cloud at any moment?",
+   "unit": "percent",
+   "answer": 67,
+   "definition": "on average",
+   "fact": "Clouds cover about 72% of the oceans but only about 55% of the land.",
+   "source": {
+    "title": "Cloud cover",
+    "url": "https://en.wikipedia.org/wiki/Cloud_cover"
+   },
+   "easy": false
+  },
+  {
+   "id": "amazon-river-flow-share",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of the river water entering the oceans comes from the Amazon?",
+   "unit": "percent",
+   "answer": 20,
+   "fact": "It carries more water than the next seven largest rivers combined.",
+   "source": {
+    "title": "Amazon River",
+    "url": "https://en.wikipedia.org/wiki/Amazon_River"
+   },
+   "easy": false
+  },
+  {
+   "id": "mountainous-land-share",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of the world's dry land is mountainous?",
+   "unit": "percent",
+   "answer": 24,
+   "fact": "Mountains cover 33% of Eurasia but only 14% of Africa.",
+   "source": {
+    "title": "Mountain",
+    "url": "https://en.wikipedia.org/wiki/Mountain"
+   },
+   "easy": false
+  },
+  {
+   "id": "tropics-share",
+   "kind": "nature",
+   "round": "percent",
+   "question": "How much of Earth's surface lies in the tropics?",
+   "unit": "percent",
+   "answer": 39.8,
+   "definition": "between Cancer and Capricorn",
+   "fact": "About 40% of the world's people live there too, a share expected to reach half by 2050.",
+   "source": {
+    "title": "Tropics",
+    "url": "https://en.wikipedia.org/wiki/Tropics"
+   },
+   "easy": false
+  },
+  {
+   "id": "lunar-maria-share",
+   "kind": "space",
+   "round": "percent",
+   "question": "How much of the Moon is covered by its dark 'seas'?",
+   "unit": "percent",
+   "answer": 16,
+   "definition": "the maria, far side included",
+   "fact": "They're old lava plains, dark because of their iron, and nearly all are on the side that faces Earth.",
+   "source": {
+    "title": "Lunar mare",
+    "url": "https://en.wikipedia.org/wiki/Lunar_mare"
+   },
+   "easy": false
+  },
+  {
+   "id": "moon-width-share",
+   "kind": "space",
+   "round": "percent",
+   "question": "How wide is the Moon, as a share of Earth's width?",
+   "unit": "percent",
+   "answer": 27.27,
+   "fact": "At 3,474 km across, it's about as wide as the contiguous United States.",
+   "source": {
+    "title": "Moon",
+    "url": "https://en.wikipedia.org/wiki/Moon"
+   },
+   "easy": false
+  },
+  {
+   "id": "mars-mission-failures",
+   "kind": "space",
+   "round": "percent",
+   "question": "What share of spacecraft sent to Mars have failed?",
+   "unit": "percent",
+   "answer": 60,
+   "definition": "before completing their missions",
+   "fact": "The early ones fared worst: the Soviet Union's first nine probes meant for Mars all failed.",
+   "source": {
+    "title": "Exploration of Mars",
+    "url": "https://en.wikipedia.org/wiki/Exploration_of_Mars"
+   },
+   "easy": false
+  },
+  {
+   "id": "octopus-arm-neurons",
+   "kind": "animals",
+   "round": "percent",
+   "question": "What share of an octopus's neurons are in its arms?",
+   "unit": "percent",
+   "answer": 66.67,
+   "fact": "It has over 500 million neurons, about as many as a dog, and the ones in its arms let each arm act on its own.",
+   "source": {
+    "title": "Octopus",
+    "url": "https://en.wikipedia.org/wiki/Octopus"
+   },
+   "easy": false
+  },
+  {
+   "id": "australia-endemic-mammals",
+   "kind": "animals",
+   "round": "percent",
+   "question": "What share of Australia's mammal species live nowhere else?",
+   "unit": "percent",
+   "answer": 69,
+   "fact": "For its reptiles the share is even higher, 93%, and for its amphibians 94%.",
+   "source": {
+    "title": "Fauna of Australia",
+    "url": "https://en.wikipedia.org/wiki/Fauna_of_Australia"
+   },
+   "easy": false
+  },
+  {
+   "id": "perching-birds-share",
+   "kind": "animals",
+   "round": "percent",
+   "question": "What share of bird species are perching birds?",
+   "unit": "percent",
+   "answer": 60,
+   "definition": "passerines, like sparrows and crows",
+   "fact": "Their toes, three forward and one back, lock onto a branch, so they can sleep perched without falling off.",
+   "source": {
+    "title": "Passerine",
+    "url": "https://en.wikipedia.org/wiki/Passerine"
+   },
+   "easy": false
+  },
+  {
+   "id": "free-ranging-dogs-share",
+   "kind": "animals",
+   "round": "percent",
+   "question": "What share of the world's dogs roam free, not as pets?",
+   "unit": "percent",
+   "answer": 75,
+   "definition": "village, street and feral dogs",
+   "fact": "Only 17 to 24% of dogs live as pets in rich countries, out of 700 to 900 million in all.",
+   "source": {
+    "title": "Free-ranging dog",
+    "url": "https://en.wikipedia.org/wiki/Free-ranging_dog"
+   },
+   "easy": false
+  },
+  {
+   "id": "india-wild-tigers-share",
+   "kind": "animals",
+   "round": "percent",
+   "question": "What share of the world's wild tigers live in India?",
+   "unit": "percent",
+   "answer": 75,
+   "definition": "2022",
+   "fact": "India counted 3,682 wild tigers, more than double its count of 1,706 twelve years earlier.",
+   "source": {
+    "title": "Project Tiger",
+    "url": "https://en.wikipedia.org/wiki/Project_Tiger"
+   },
+   "easy": false
+  },
+  {
+   "id": "world-literacy-share",
+   "kind": "culture",
+   "round": "percent",
+   "question": "What share of the world's people can read and write?",
+   "unit": "percent",
+   "answer": 87,
+   "definition": "2022 estimate",
+   "fact": "Two hundred years ago it was 12%.",
+   "source": {
+    "title": "Literacy",
+    "url": "https://en.wikipedia.org/wiki/Literacy"
+   },
+   "easy": true
+  },
+  {
+   "id": "english-wikipedia-share",
+   "kind": "culture",
+   "round": "percent",
+   "question": "What share of all Wikipedia articles are in English?",
+   "unit": "percent",
+   "answer": 10.6,
+   "definition": "2026",
+   "fact": "English still has more articles than any other edition, about 7.27 million.",
+   "source": {
+    "title": "English Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/English_Wikipedia"
+   },
+   "easy": false
+  },
+  {
+   "id": "welsh-speakers-share",
+   "kind": "culture",
+   "round": "percent",
+   "question": "What share of people in Wales can speak Welsh?",
+   "unit": "percent",
+   "answer": 17.8,
+   "definition": "2021 census",
+   "fact": "Just over a quarter said they had at least some Welsh.",
+   "source": {
+    "title": "Welsh language",
+    "url": "https://en.wikipedia.org/wiki/Welsh_language"
+   },
+   "easy": false
+  },
+  {
+   "id": "bank-account-share",
+   "kind": "everyday",
+   "round": "percent",
+   "question": "What share of the world's adults have a bank or mobile-money account?",
+   "unit": "percent",
+   "answer": 79,
+   "definition": "2024",
+   "fact": "That still leaves about 1.3 billion adults without one.",
+   "source": {
+    "title": "Financial inclusion",
+    "url": "https://en.wikipedia.org/wiki/Financial_inclusion"
+   },
+   "easy": false
+  },
+  {
+   "id": "electric-car-sales-share",
+   "kind": "everyday",
+   "round": "percent",
+   "question": "What share of new cars sold worldwide in 2025 were electric?",
+   "unit": "percent",
+   "answer": 25,
+   "definition": "plug-in hybrids included",
+   "fact": "Over 20 million were sold, yet electric cars were only about 5% of all the cars on the road.",
+   "source": {
+    "title": "Electric car use by country",
+    "url": "https://en.wikipedia.org/wiki/Electric_car_use_by_country"
+   },
+   "easy": false
+  },
+  {
+   "id": "us-passport-share",
+   "kind": "everyday",
+   "round": "percent",
+   "question": "What share of Americans hold a passport?",
+   "unit": "percent",
+   "answer": 48,
+   "definition": "June 2024",
+   "fact": "In 1990 it was just 5%.",
+   "source": {
+    "title": "United States passport",
+    "url": "https://en.wikipedia.org/wiki/United_States_passport"
+   },
+   "easy": false
+  },
+  {
+   "id": "under-15-share",
+   "kind": "everyday",
+   "round": "percent",
+   "question": "What share of the world's people are under 15?",
+   "unit": "percent",
+   "answer": 25.18,
+   "definition": "2021",
+   "fact": "People aged 65 and over made up nearly a tenth.",
+   "source": {
+    "title": "Demographics of the world",
+    "url": "https://en.wikipedia.org/wiki/Demographics_of_the_world"
+   },
+   "easy": false
+  },
+  {
+   "id": "coastal-population-share",
+   "kind": "places",
+   "round": "percent",
+   "question": "What share of the world's people live less than 150 km from the sea?",
+   "unit": "percent",
+   "answer": 44,
+   "definition": "2013",
+   "fact": "Many big cities grew up on good harbours, and some inland ones dug canals to become ports.",
+   "source": {
+    "title": "Coast",
+    "url": "https://en.wikipedia.org/wiki/Coast"
+   },
+   "easy": false
+  },
+  {
+   "id": "great-wall-lost-share",
+   "kind": "landmarks",
+   "round": "percent",
+   "question": "How much of the Ming-era Great Wall of China has disappeared?",
+   "unit": "percent",
+   "answer": 22,
+   "definition": "2012 survey",
+   "fact": "Many of the square lookout towers in its most famous pictures have gone too.",
+   "source": {
+    "title": "Great Wall of China",
+    "url": "https://en.wikipedia.org/wiki/Great_Wall_of_China"
+   },
+   "easy": false
+  },
+  {
+   "id": "women-first-at-olympics",
+   "kind": "sports",
+   "round": "year",
+   "question": "When did women first take part in the Olympics?",
+   "unit": "year",
+   "answer": 1900,
+   "definition": "the modern Games",
+   "fact": "22 women competed, and Charlotte Cooper, a British tennis player, became the first female individual champion.",
+   "source": {
+    "title": "Participation of women in the Olympics",
+    "url": "https://en.wikipedia.org/wiki/Participation_of_women_in_the_Olympics"
+   },
+   "easy": false
+  },
+  {
+   "id": "first-london-marathon",
+   "kind": "sports",
+   "round": "year",
+   "question": "When was the first London Marathon run?",
+   "unit": "year",
+   "answer": 1981,
+   "fact": "6,255 runners finished, and the men's race ended in a tie, the two leaders crossing the line holding hands.",
+   "source": {
+    "title": "London Marathon",
+    "url": "https://en.wikipedia.org/wiki/London_Marathon"
+   },
+   "easy": false
+  },
+  {
+   "id": "uranus-discovered",
+   "kind": "space",
+   "round": "year",
+   "question": "When did William Herschel discover Uranus?",
+   "unit": "year",
+   "answer": 1781,
+   "fact": "He spotted it from his garden in Bath with a homemade telescope, and at first reported it as a comet.",
+   "source": {
+    "title": "Uranus",
+    "url": "https://en.wikipedia.org/wiki/Uranus"
+   },
+   "easy": false
+  },
+  {
+   "id": "basketball-invented",
+   "kind": "sports",
+   "round": "year",
+   "question": "When did James Naismith invent basketball?",
+   "unit": "year",
+   "answer": 1891,
+   "fact": "A PE teacher, he made it up to keep his class busy on a rainy day, with peach baskets for hoops.",
+   "source": {
+    "title": "Basketball",
+    "url": "https://en.wikipedia.org/wiki/Basketball"
+   },
+   "easy": false
+  },
+  {
+   "id": "first-f1-championship",
+   "kind": "sports",
+   "round": "year",
+   "question": "When was the first Formula One World Championship held?",
+   "unit": "year",
+   "answer": 1950,
+   "fact": "It had seven races, and one of them was the Indianapolis 500.",
+   "source": {
+    "title": "1950 Formula One season",
+    "url": "https://en.wikipedia.org/wiki/1950_Formula_One_season"
+   },
+   "easy": false
+  },
+  {
+   "id": "olympic-gold-silver-bronze",
+   "kind": "sports",
+   "round": "year",
+   "question": "When did the Olympics start giving gold, silver and bronze medals?",
+   "unit": "year",
+   "answer": 1904,
+   "fact": "At the first modern Games, winners got a silver medal and an olive branch.",
+   "source": {
+    "title": "Olympic medal",
+    "url": "https://en.wikipedia.org/wiki/Olympic_medal"
+   },
+   "easy": false
+  },
+  {
+   "id": "insulin-first-used",
+   "kind": "body",
+   "round": "year",
+   "question": "When was insulin first used to treat diabetes?",
+   "unit": "year",
+   "answer": 1922,
+   "fact": "Frederick Banting and Charles Best first gave it to patients in Toronto, Canada.",
+   "source": {
+    "title": "Insulin (medication)",
+    "url": "https://en.wikipedia.org/wiki/Insulin_(medication)"
+   },
+   "easy": false
+  },
+  {
+   "id": "aspirin-first-sold",
+   "kind": "body",
+   "round": "year",
+   "question": "When did Bayer start selling aspirin?",
+   "unit": "year",
+   "answer": 1899,
+   "definition": "under that name",
+   "fact": "Its name comes from Spiraea, the meadowsweet plant its key ingredient was first taken from.",
+   "source": {
+    "title": "Aspirin",
+    "url": "https://en.wikipedia.org/wiki/Aspirin"
+   },
+   "easy": false
+  },
+  {
+   "id": "stethoscope-invented",
+   "kind": "body",
+   "round": "year",
+   "question": "When was the stethoscope invented?",
+   "unit": "year",
+   "answer": 1816,
+   "fact": "René Laennec made it because he wasn't comfortable putting his ear to a woman's chest.",
+   "source": {
+    "title": "Stethoscope",
+    "url": "https://en.wikipedia.org/wiki/Stethoscope"
+   },
+   "easy": false
+  },
+  {
+   "id": "suez-canal-opens",
+   "kind": "places",
+   "round": "year",
+   "question": "When did the Suez Canal open?",
+   "unit": "year",
+   "answer": 1869,
+   "fact": "It opened under French control, as a single-lane waterway with a few places for ships to pass.",
+   "source": {
+    "title": "Suez Canal",
+    "url": "https://en.wikipedia.org/wiki/Suez_Canal"
+   },
+   "easy": false
+  },
+  {
+   "id": "sagrada-familia-begun",
+   "kind": "landmarks",
+   "round": "year",
+   "question": "When did building start on Barcelona's Sagrada Família?",
+   "unit": "year",
+   "answer": 1882,
+   "fact": "It's still under construction, paid for only by private donations; Gaudí said his client was not in a hurry.",
+   "source": {
+    "title": "Sagrada Família",
+    "url": "https://en.wikipedia.org/wiki/Sagrada_Fam%C3%ADlia"
+   },
+   "easy": false
+  },
+  {
+   "id": "tower-bridge-opens",
+   "kind": "landmarks",
+   "round": "year",
+   "question": "When did London's Tower Bridge open?",
+   "unit": "year",
+   "answer": 1894,
+   "fact": "Its high walkways between the towers were so little used, except by pickpockets, that they closed for over 70 years.",
+   "source": {
+    "title": "Tower Bridge",
+    "url": "https://en.wikipedia.org/wiki/Tower_Bridge"
+   },
+   "easy": false
+  },
+  {
+   "id": "voyager-1-launch",
+   "kind": "space",
+   "round": "year",
+   "question": "When was the Voyager 1 space probe launched?",
+   "unit": "year",
+   "answer": 1977,
+   "fact": "It went up 16 days after its twin, Voyager 2, and still sends data from beyond the Sun's heliosphere.",
+   "source": {
+    "title": "Voyager 1",
+    "url": "https://en.wikipedia.org/wiki/Voyager_1"
+   },
+   "easy": false
+  },
+  {
+   "id": "earthrise-photo",
+   "kind": "space",
+   "round": "year",
+   "question": "When was Earthrise, the photo of Earth rising over the Moon, taken?",
+   "unit": "year",
+   "answer": 1968,
+   "fact": "William Anders took it on Christmas Eve, from Apollo 8, the first crewed voyage to orbit the Moon.",
+   "source": {
+    "title": "Earthrise",
+    "url": "https://en.wikipedia.org/wiki/Earthrise"
+   },
+   "easy": false
+  },
+  {
+   "id": "first-spacewalk",
+   "kind": "space",
+   "round": "year",
+   "question": "When did someone first walk in space?",
+   "unit": "year",
+   "answer": 1965,
+   "fact": "Alexei Leonov spent 12 minutes outside his spacecraft, Voskhod 2.",
+   "source": {
+    "title": "Voskhod 2",
+    "url": "https://en.wikipedia.org/wiki/Voskhod_2"
+   },
+   "easy": false
+  },
+  {
+   "id": "iss-first-crew",
+   "kind": "space",
+   "round": "year",
+   "question": "When did the first crew move into the International Space Station?",
+   "unit": "year",
+   "answer": 2000,
+   "fact": "They stayed 136 days, starting a human presence on the station that hasn't been broken since.",
+   "source": {
+    "title": "Expedition 1",
+    "url": "https://en.wikipedia.org/wiki/Expedition_1"
+   },
+   "easy": true
+  },
+  {
+   "id": "sony-walkman-launch",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When did Sony launch the Walkman, its portable cassette player?",
+   "unit": "year",
+   "answer": 1979,
+   "definition": "in Japan",
+   "fact": "Sony expected to sell 5,000 a month and sold more than 30,000 in the first two months.",
+   "source": {
+    "title": "Walkman",
+    "url": "https://en.wikipedia.org/wiki/Walkman"
+   },
+   "easy": true
+  },
+  {
+   "id": "toy-story-released",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did Toy Story, the first computer-animated feature film, come out?",
+   "unit": "year",
+   "answer": 1995,
+   "fact": "It was Pixar's first feature film, and it grossed over $363 million worldwide.",
+   "source": {
+    "title": "Toy Story",
+    "url": "https://en.wikipedia.org/wiki/Toy_Story"
+   },
+   "easy": true
+  },
+  {
+   "id": "first-christmas-card",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When was the first Christmas card printed for sale?",
+   "unit": "year",
+   "answer": 1843,
+   "fact": "Sir Henry Cole, a civil servant in London, commissioned it from the artist John Callcott Horsley.",
+   "source": {
+    "title": "Christmas card",
+    "url": "https://en.wikipedia.org/wiki/Christmas_card"
+   },
+   "easy": false
+  },
+  {
+   "id": "first-bicycle",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When was the first bicycle, pushed along with the feet, invented?",
+   "unit": "year",
+   "answer": 1817,
+   "fact": "Karl Drais called it a 'running machine': he wanted a way to get about without a horse.",
+   "source": {
+    "title": "Dandy horse",
+    "url": "https://en.wikipedia.org/wiki/Dandy_horse"
+   },
+   "easy": false
+  },
+  {
+   "id": "tin-can-patent",
+   "kind": "food",
+   "round": "year",
+   "question": "When was food in tin cans first patented?",
+   "unit": "year",
+   "answer": 1810,
+   "fact": "Peter Durand's patent built on Nicolas Appert's finding that food sealed in jars didn't spoil.",
+   "source": {
+    "title": "Canning",
+    "url": "https://en.wikipedia.org/wiki/Canning"
+   },
+   "easy": false
+  },
+  {
+   "id": "dodo-last-seen",
+   "kind": "animals",
+   "round": "year",
+   "question": "When was the last widely accepted sighting of a dodo?",
+   "unit": "year",
+   "answer": 1662,
+   "fact": "Dutch sailors had first recorded the bird on Mauritius in 1598.",
+   "source": {
+    "title": "Dodo",
+    "url": "https://en.wikipedia.org/wiki/Dodo"
+   },
+   "easy": false
+  },
+  {
+   "id": "dolly-the-sheep",
+   "kind": "animals",
+   "round": "year",
+   "question": "When was Dolly the sheep, the first mammal cloned from an adult cell, born?",
+   "unit": "year",
+   "answer": 1996,
+   "fact": "She had three mothers: one gave the egg, one the DNA, and one carried her.",
+   "source": {
+    "title": "Dolly (sheep)",
+    "url": "https://en.wikipedia.org/wiki/Dolly_(sheep)"
+   },
+   "easy": true
+  },
+  {
+   "id": "last-tasmanian-tiger",
+   "kind": "animals",
+   "round": "year",
+   "question": "When did the last known Tasmanian tiger die?",
+   "unit": "year",
+   "answer": 1936,
+   "fact": "It died at Hobart Zoo, 59 days after the species was finally given legal protection.",
+   "source": {
+    "title": "Thylacine",
+    "url": "https://en.wikipedia.org/wiki/Thylacine"
+   },
+   "easy": false
+  },
+  {
+   "id": "mickey-mouse-debut",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did Mickey Mouse make his official debut?",
+   "unit": "year",
+   "answer": 1928,
+   "definition": "in Steamboat Willie",
+   "fact": "It was one of the first cartoons with fully synchronised sound.",
+   "source": {
+    "title": "Steamboat Willie",
+    "url": "https://en.wikipedia.org/wiki/Steamboat_Willie"
+   },
+   "easy": false
+  },
+  {
+   "id": "first-guinness-book",
+   "kind": "culture",
+   "round": "year",
+   "question": "When did the Guinness Book of Records first come out?",
+   "unit": "year",
+   "answer": 1955,
+   "fact": "Sir Hugh Beaver came up with it to settle arguments in pubs, and it topped the British bestseller list by Christmas.",
+   "source": {
+    "title": "Guinness World Records",
+    "url": "https://en.wikipedia.org/wiki/Guinness_World_Records"
+   },
+   "easy": false
+  },
+  {
+   "id": "first-bullet-train",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When did Japan's first bullet train line open?",
+   "unit": "year",
+   "answer": 1964,
+   "fact": "The Tōkaidō Shinkansen began running nine days before the Tokyo Olympics opened.",
+   "source": {
+    "title": "Shinkansen",
+    "url": "https://en.wikipedia.org/wiki/Shinkansen"
+   },
+   "easy": false
+  },
+  {
+   "id": "yellowstone-first-park",
+   "kind": "nature",
+   "round": "year",
+   "question": "When did Yellowstone become the first national park?",
+   "unit": "year",
+   "answer": 1872,
+   "fact": "President Grant signed it into law, and only a few hundred people visited in its first year.",
+   "source": {
+    "title": "Yellowstone National Park",
+    "url": "https://en.wikipedia.org/wiki/Yellowstone_National_Park"
+   },
+   "easy": false
+  },
+  {
+   "id": "krakatoa-eruption",
+   "kind": "nature",
+   "round": "year",
+   "question": "When did Krakatoa erupt, one of the most violent eruptions recorded?",
+   "unit": "year",
+   "answer": 1883,
+   "fact": "The blast was heard 4,780 km away, on the island of Rodrigues near Mauritius.",
+   "source": {
+    "title": "Krakatoa",
+    "url": "https://en.wikipedia.org/wiki/Krakatoa"
+   },
+   "easy": false
+  },
+  {
+   "id": "spotify-launch",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When did Spotify's music streaming service launch?",
+   "unit": "year",
+   "answer": 2008,
+   "definition": "in its first European countries",
+   "fact": "It was started as a legal alternative to music piracy.",
+   "source": {
+    "title": "Spotify",
+    "url": "https://en.wikipedia.org/wiki/Spotify"
+   },
+   "easy": true
+  },
+  {
+   "id": "apple-i-on-sale",
+   "kind": "everyday",
+   "round": "year",
+   "question": "When did Apple sell its first computer, the Apple I?",
+   "unit": "year",
+   "answer": 1976,
+   "fact": "It cost $666.66, and only a couple of hundred were made.",
+   "source": {
+    "title": "Apple I",
+    "url": "https://en.wikipedia.org/wiki/Apple_I"
+   },
+   "easy": false
   }
  ]
 }
