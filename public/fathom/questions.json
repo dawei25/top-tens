@@ -6342,6 +6342,213 @@
     "url": "https://en.wikipedia.org/wiki/Apple_I"
    },
    "easy": false
+  },
+  {
+   "id": "name-country-as-many-people-as-germany",
+   "kind": "places",
+   "round": "name",
+   "list": "countries-population",
+   "target": 83298787,
+   "question": "Name a country with about as many people as Germany",
+   "except": [
+    "Germany"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "target is Germany's own figure on the list (83.3 million); check Turkey, Iran, Thailand, France and the UK register"
+  },
+  {
+   "id": "name-country-as-many-people-as-japan",
+   "kind": "places",
+   "round": "name",
+   "list": "countries-population",
+   "target": 122690000,
+   "question": "Name a country with about as many people as Japan",
+   "except": [
+    "Japan"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "target is Japan's own figure on the list (122.7 million); check Mexico, the Philippines, Ethiopia, Egypt and Russia register"
+  },
+  {
+   "id": "name-country-as-many-people-as-tokyo",
+   "kind": "places",
+   "round": "name",
+   "list": "countries-population",
+   "target": 41300000,
+   "question": "Name a country with about as many people as Tokyo",
+   "definition": "Tokyo's whole built-up area, 2026",
+   "easy": false,
+   "verified": false,
+   "note": "target is Tokyo's figure on the city list (41.3 million); check Canada, Poland, Argentina and Spain register, and Tokyo says it is a city"
+  },
+  {
+   "id": "name-country-as-big-as-turkey",
+   "kind": "places",
+   "round": "name",
+   "list": "countries-area",
+   "target": 783562,
+   "question": "Name a country with about the same area as Turkey",
+   "except": [
+    "Turkey"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "target is Turkey's own total area on the list; check Mozambique, Chile, Zambia, Myanmar, Pakistan and France register"
+  },
+  {
+   "id": "name-country-as-big-as-italy",
+   "kind": "places",
+   "round": "name",
+   "list": "countries-area",
+   "target": 302068,
+   "question": "Name a country with about the same area as Italy",
+   "except": [
+    "Italy"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "target is Italy's own total area on the list; check the Philippines, Poland, Norway, Finland, Vietnam and the UK register"
+  },
+  {
+   "id": "name-country-as-big-as-alaska",
+   "kind": "places",
+   "round": "name",
+   "list": "countries-area",
+   "target": 1723337,
+   "question": "Name a country with about the same area as Alaska",
+   "definition": "Alaska's total area, water included",
+   "easy": false,
+   "verified": false,
+   "note": "target is Alaska's total area on the US state area list; check Iran, Libya, Sudan, Indonesia, Mexico and Mongolia register, and Alaska says it is a US state"
+  },
+  {
+   "id": "name-city-as-many-people-as-new-zealand",
+   "kind": "places",
+   "round": "name",
+   "list": "cities-population",
+   "target": 5357300,
+   "question": "Name a city with about as many people as New Zealand",
+   "definition": "its whole built-up area, 2026",
+   "easy": false,
+   "verified": false,
+   "note": "target is New Zealand's figure on the country population list (5.36 million); check Sydney, Melbourne, Madrid, Barcelona, Berlin and Toronto register"
+  },
+  {
+   "id": "name-city-as-many-people-as-texas",
+   "kind": "places",
+   "round": "name",
+   "list": "cities-population",
+   "target": 31709821,
+   "question": "Name a city with about as many people as Texas",
+   "definition": "its whole built-up area, 2026",
+   "easy": false,
+   "verified": false,
+   "note": "target is Texas's figure on the US state population list (31.7 million, 2025); check Jakarta, Mumbai, Manila, Delhi and Mexico City register, and Texas says it is a US state"
+  },
+  {
+   "id": "name-us-state-as-many-people-as-netherlands",
+   "kind": "places",
+   "round": "name",
+   "list": "us-states-population",
+   "target": 18171612,
+   "question": "Name a US state with about as many people as the Netherlands",
+   "easy": false,
+   "verified": false,
+   "note": "target is the Netherlands' figure on the country population list (18.2 million); check New York, Florida, Pennsylvania and Illinois register"
+  },
+  {
+   "id": "name-us-state-as-many-people-as-hong-kong",
+   "kind": "places",
+   "round": "name",
+   "list": "us-states-population",
+   "target": 7500000,
+   "question": "Name a US state with about as many people as Hong Kong",
+   "easy": false,
+   "verified": false,
+   "note": "target is Hong Kong's figure on the city list (7.5 million); check Arizona, Tennessee, Massachusetts, Washington and Virginia register"
+  },
+  {
+   "id": "name-us-state-as-many-people-as-rome",
+   "kind": "places",
+   "round": "name",
+   "list": "us-states-population",
+   "target": 3450000,
+   "question": "Name a US state with about as many people as Rome",
+   "definition": "Rome's whole built-up area, 2026",
+   "easy": false,
+   "verified": false,
+   "note": "target is Rome's figure on the city list (3.45 million); check Utah, Nevada, Iowa, Connecticut and Oregon register"
+  },
+  {
+   "id": "name-us-state-as-big-as-portugal",
+   "kind": "places",
+   "round": "name",
+   "list": "us-states-area",
+   "target": 92090,
+   "question": "Name a US state with about the same area as Portugal",
+   "definition": "total area, lakes and coastal water",
+   "easy": false,
+   "verified": false,
+   "note": "target is Portugal's total area on the country area list; check Maine, Indiana, South Carolina, Kentucky and Virginia register"
+  },
+  {
+   "id": "name-us-state-as-big-as-spain",
+   "kind": "places",
+   "round": "name",
+   "list": "us-states-area",
+   "target": 505370,
+   "question": "Name a US state with about the same area as Spain",
+   "definition": "total area, lakes and coastal water",
+   "easy": false,
+   "verified": false,
+   "note": "target is Spain's total area on the country area list; only California, Texas and Montana score 70 or more, so check all three register"
+  },
+  {
+   "id": "name-country-as-dense-as-india",
+   "kind": "places",
+   "round": "name",
+   "list": "countries-density",
+   "target": 441,
+   "question": "Name a country about as densely populated as India",
+   "definition": "people per square kilometre of land",
+   "except": [
+    "India"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "target is India's own figure on the list; check Japan, the Philippines, Israel, Belgium and the Netherlands register"
+  },
+  {
+   "id": "name-country-as-dense-as-china",
+   "kind": "places",
+   "round": "name",
+   "list": "countries-density",
+   "target": 151,
+   "question": "Name a country about as densely populated as China",
+   "definition": "people per square kilometre of land",
+   "except": [
+    "China"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "target is China's own figure on the list; check Indonesia, Denmark, Thailand, France, Italy and Poland register"
+  },
+  {
+   "id": "name-country-as-dense-as-united-states",
+   "kind": "places",
+   "round": "name",
+   "list": "countries-density",
+   "target": 37,
+   "question": "Name a country about as densely populated as the US",
+   "definition": "people per square kilometre of land",
+   "except": [
+    "United States"
+   ],
+   "easy": false,
+   "verified": false,
+   "note": "target is the United States' own figure on the list; check Laos, Estonia, Colombia and Sweden register, and USA and America read as the US"
   }
  ]
 }
