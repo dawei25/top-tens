@@ -537,3 +537,23 @@ fact, always from the source; it never invents an answer. A dropped question is 
   only past the last scheduled day.
 - Name-it lists: US states by population and by area, countries by people per square kilometre (Nov 17). A list's
   noun may hold an acronym ("US state"); a place of the list's own kind is kept as an alias ("New York State").
+
+## Notes from the Nov 27 bank expansion
+
+160 questions written for Dec 14 to 27 (80 estimates, 33 percents, 31 years, 16 name-it), unjudged: no `verified` on
+the number questions, `verified: false` and a `note` on the name-it ones.
+
+- A new name-it target reads as a new question when its yardstick comes from another list: a US state or a city for a
+  country ("as many people as Tokyo", "the same area as Alaska"), a country or a city for a US state ("as many people
+  as Rome"), a country or a state for a city ("as many people as Texas"). Every list's round-number targets were
+  already taken, and land borders 4 and 5 are hit exactly by 25 and 26 countries (the 3-border problem).
+- The real bank's name-it questions must also pass against the browser suite's fixture lists (`check.test.ts`),
+  which hold no small countries: an area yardstick under about 150,000 km² (Ireland, Greece), a city target near 50
+  million or a density near Canada's leaves fewer than 3 good answers there. Check both list sets before writing one.
+- A fact may not name a decade that starts at another question's year: "the 1930s" states 1930 to `check.ts`
+  (first-world-cup), "the 1960s" 1960, "the 1840s" 1840.
+- In a file of candidates, `check.ts` counts "when" and "first" as subject words, so year questions flag one another
+  ("When was basketball invented?" against "When was the stethoscope invented?"), and every name-it question flags
+  its list's others. Reword a real near-copy; the rest can be ignored.
+- A dry run of `freshDay` from Dec 14 with all of them covers 16 days; with a fifth dropped at random, 13 or 14. The
+  easy openers and the year rounds run out first, as on Nov 17.

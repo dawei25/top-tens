@@ -2088,5 +2088,805 @@
     "verdict": "keep",
     "why": "An easy opener with a way in (Check it yourself: 20 clubs, and each plays every other club at home and away); figure and fact checked on Premier League.",
     "judgedAt": "2026-11-17"
+  },
+  "ribs": {
+    "verdict": "keep",
+    "why": "Way in: feel your ribcage or recall '12 pairs'; the unit 'ribs' settles ribs vs pairs; source 24, and the Vesalius/Adam fact is the reveal.",
+    "judgedAt": "2026-11-27"
+  },
+  "taste-bud-lifespan": {
+    "verdict": "keep",
+    "why": "Familiar, a way in (a burnt tongue heals in days, so the cells turn over in days to weeks); 10 days checked on Taste bud.",
+    "judgedAt": "2026-11-27"
+  },
+  "yawn-length": {
+    "verdict": "keep",
+    "why": "Check it yourself: yawn and count; source infobox 'usually 6 seconds'; fact walks through the phases.",
+    "judgedAt": "2026-11-27"
+  },
+  "camel-drink": {
+    "verdict": "keep",
+    "why": "Familiar, a way in (a bucket is 10 litres, a bathtub about 150); 114 L in one sitting and the 30% water loss checked on Dromedary.",
+    "judgedAt": "2026-11-27"
+  },
+  "blue-whale-calf-growth": {
+    "verdict": "keep",
+    "why": "Fermi: an adult's 100-odd tonnes put on over years means tens of kg a day; source 'approximately 90 kg per day'; the 220 kg of milk explains it.",
+    "judgedAt": "2026-11-27"
+  },
+  "kangaroo-pregnancy": {
+    "verdict": "keep",
+    "why": "Familiar, a way in (the joey is born tiny and grows in the pouch, so the pregnancy is short); 33 days and 235 days checked on Red kangaroo.",
+    "judgedAt": "2026-11-27"
+  },
+  "electric-eel-shock": {
+    "verdict": "keep",
+    "why": "Way in: a wall socket is 120-230 V and an eel stuns prey; source 'up to 860 volts' (other species 600, within 1.5x).",
+    "judgedAt": "2026-11-27"
+  },
+  "emperor-penguin-fast": {
+    "verdict": "fix",
+    "why": "Two readings: 'fast' reads as speed (the brief's own example), so it says 'go without food'; 120 days and 65-75 days checked on Emperor penguin.",
+    "judgedAt": "2026-11-27"
+  },
+  "lion-roar-distance": {
+    "verdict": "keep",
+    "why": "Way in: the loudest big cat, against thunder heard from far off; source 'can be heard from a distance of 8 km'.",
+    "judgedAt": "2026-11-27"
+  },
+  "bear-species": {
+    "verdict": "keep",
+    "why": "Easy opener, check it yourself (polar, brown, black, panda, sun, sloth...); eight extant species and the diets checked on Bear.",
+    "judgedAt": "2026-11-27"
+  },
+  "cat-claws": {
+    "verdict": "keep",
+    "why": "Easy opener: picture four paws of 4 or 5 claws; source five front, four back; the dewclaw is the reveal.",
+    "judgedAt": "2026-11-27"
+  },
+  "wild-sloth-sleep": {
+    "verdict": "keep",
+    "why": "Familiar, a way in (you sleep 8 hours, the legend says 15 to 20), and the wild figure surprises; 9.6 hours checked on Sloth.",
+    "judgedAt": "2026-11-27"
+  },
+  "koala-sleep": {
+    "verdict": "fix",
+    "why": "Kept the question (famous sleeper, capped at 24); the fact said low energy makes digestion take 100 hours, which the source doesn't say: rewritten from the source.",
+    "judgedAt": "2026-11-27"
+  },
+  "swift-time-aloft": {
+    "verdict": "fix",
+    "why": "Label: a 20-year-old may not know a common swift is a bird; the fact now says how it stays up (eats, drinks, sleeps on the wing); 10 months checked on Common swift.",
+    "judgedAt": "2026-11-27"
+  },
+  "dairy-cow-milk": {
+    "verdict": "keep",
+    "why": "Way in: a bucket or two a day; source 'the average in the UK is about 22 litres per day'; definition names whose average.",
+    "judgedAt": "2026-11-27"
+  },
+  "mcdonalds-customers-a-day": {
+    "verdict": "fix",
+    "why": "Good Fermi (restaurants x customers each); fact now dated and explains the number (the page's 41,800 is a 2023 count, its infobox now says 45,356); 68 million checked on McDonald's.",
+    "judgedAt": "2026-11-27"
+  },
+  "french-baguettes-a-day": {
+    "verdict": "keep",
+    "why": "Fermi from France's 68 million people; source 'France consumes about 30 million' a day; Algeria's 49 million is a surprising superlative.",
+    "judgedAt": "2026-11-27"
+  },
+  "james-bond-films": {
+    "verdict": "keep",
+    "why": "Easy opener, check it yourself (count by actor: Connery, Moore, Craig...); 25 Eon films and the two non-Eon ones checked on List of James Bond films.",
+    "judgedAt": "2026-11-27"
+  },
+  "green-eggs-and-ham-words": {
+    "verdict": "keep",
+    "why": "Way in: a famously repetitive picture book; source 50 distinct words (the $50 bet); the definition rules out counting every word.",
+    "judgedAt": "2026-11-27"
+  },
+  "eras-tour-crowd": {
+    "verdict": "fix",
+    "why": "Fermi from the definition (149 shows x a 60,000 stadium); fact now explains the number (68,000 a show) instead of listing places; 10.1 million checked on The Eras Tour.",
+    "judgedAt": "2026-11-27"
+  },
+  "lord-of-the-rings-films-length": {
+    "verdict": "keep",
+    "why": "Easy opener: three films of about three hours each; source 558 minutes theatrical, the definition rules out the extended cuts.",
+    "judgedAt": "2026-11-27"
+  },
+  "sistine-ceiling-time": {
+    "verdict": "keep",
+    "why": "Familiar, a way in (a vast ceiling, one painter: a few years); 1508 to 1512 and the standing-not-lying fact checked on Sistine Chapel ceiling.",
+    "judgedAt": "2026-11-27"
+  },
+  "mozart-first-pieces": {
+    "verdict": "keep",
+    "why": "Easy opener: the famous child prodigy; source 'at the age of five, he was already composing little pieces'.",
+    "judgedAt": "2026-11-27"
+  },
+  "haiku-syllables": {
+    "verdict": "keep",
+    "why": "Easy opener, check it yourself (five, seven, five from school); 17 on checked on Haiku.",
+    "judgedAt": "2026-11-27"
+  },
+  "canada-flag-leaf-points": {
+    "verdict": "keep",
+    "why": "Check it yourself: picture the flag and count; source '11-pointed'; the wind-tunnel fact explains the number.",
+    "judgedAt": "2026-11-27"
+  },
+  "eu-flag-stars": {
+    "verdict": "keep",
+    "why": "Easy opener, picture the flag (a ring of stars, not one per member); twelve and 'perfection and entirety' checked on Flag of Europe.",
+    "judgedAt": "2026-11-27"
+  },
+  "jenga-blocks": {
+    "verdict": "keep",
+    "why": "Easy opener: three blocks a layer times the tower's height; source 54 blocks.",
+    "judgedAt": "2026-11-27"
+  },
+  "greek-alphabet-letters": {
+    "verdict": "keep",
+    "why": "Easy opener, a way in (alpha to omega, near the English 26); 24 letters checked on Greek alphabet.",
+    "judgedAt": "2026-11-27"
+  },
+  "eu-official-languages": {
+    "verdict": "fix",
+    "why": "Kept the question (27 members sharing languages is a fine way in); the fact named only Austria, Belgium and Luxembourg, but Cyprus brings no language of its own either: rewritten from the source's table.",
+    "judgedAt": "2026-11-27"
+  },
+  "concert-harp-strings": {
+    "verdict": "fix",
+    "why": "A way in (picture a harp, a piano has 88 keys); fact now explains 47 (seven an octave over six and a half octaves), colours kept; checked on Pedal harp.",
+    "judgedAt": "2026-11-27"
+  },
+  "connect-four-holes": {
+    "verdict": "keep",
+    "why": "Easy opener: picture the 7 x 6 grid; source 'six-row, seven-column'.",
+    "judgedAt": "2026-11-27"
+  },
+  "tolkien-writing-time": {
+    "verdict": "keep",
+    "why": "Familiar, a way in (a huge book begun after The Hobbit, published in the 1950s); written 1937 to 1949 checked on The Lord of the Rings.",
+    "judgedAt": "2026-11-27"
+  },
+  "shuttlecock-feathers": {
+    "verdict": "keep",
+    "why": "Easy opener: picture the ring of feathers; source '16 feathers'; the left/right wing fact.",
+    "judgedAt": "2026-11-27"
+  },
+  "ten-thousand-metres-laps": {
+    "verdict": "keep",
+    "why": "Easy opener, arithmetic (a lap is 400 m); 25 laps and the longest standard track event checked on 10,000 metres.",
+    "judgedAt": "2026-11-27"
+  },
+  "oldest-olympic-medallist": {
+    "verdict": "keep",
+    "why": "Way in: shooters and riders compete into old age; source 72, silver in 1920, 'not counting the art competitions' as the definition says.",
+    "judgedAt": "2026-11-27"
+  },
+  "phelps-olympic-medals": {
+    "verdict": "keep",
+    "why": "Easy opener, a way in (8 golds in Beijing, four Games); 28 medals, 23 gold checked on Michael Phelps.",
+    "judgedAt": "2026-11-27"
+  },
+  "messi-barcelona-goals": {
+    "verdict": "fix",
+    "why": "Two readings: all goals (672) or league goals (474, which the fact quotes); definition now says all competitions.",
+    "judgedAt": "2026-11-27"
+  },
+  "super-bowl-2025-viewers": {
+    "verdict": "keep",
+    "why": "Fermi (a third of 340 million Americans), measure named (average viewers, all platforms); 127.7 million and the record checked on Super Bowl LIX.",
+    "judgedAt": "2026-11-27"
+  },
+  "ironman-distance": {
+    "verdict": "keep",
+    "why": "Fermi from the marathon's 42 km plus a long ride and a swim; source 226.3 km in total.",
+    "judgedAt": "2026-11-27"
+  },
+  "bowling-perfect-score": {
+    "verdict": "keep",
+    "why": "Easy opener, check it yourself (ten frames, strikes count double): 300 and the 12 strikes checked on Perfect game (bowling).",
+    "judgedAt": "2026-11-27"
+  },
+  "snooker-maximum-break": {
+    "verdict": "fix",
+    "why": "Fair arithmetic (15 reds with blacks, then the colours), but 'break', 'normally' and 'free ball' are snooker terms: reworded to a turn with no fouls, and the fact now explains 147 from the source.",
+    "judgedAt": "2026-11-27"
+  },
+  "pele-first-world-cup": {
+    "verdict": "keep",
+    "why": "Easy opener (a teenage prodigy, players are 17 to 35); 17 and youngest winner checked on Pelé.",
+    "judgedAt": "2026-11-27"
+  },
+  "tour-de-france-stages": {
+    "verdict": "keep",
+    "why": "Easy opener: three weeks less rest days; source '21 day-long stages over a 23- or 24-day period'.",
+    "judgedAt": "2026-11-27"
+  },
+  "paris-2024-events": {
+    "verdict": "keep",
+    "why": "Fermi from a familiar anchor (about 30 sports x 10 events each), and the wording names medal events plainly enough; 329 medal events in 32 sports checked on 2024 Summer Olympics.",
+    "judgedAt": "2026-11-27"
+  },
+  "ski-jump-record": {
+    "verdict": "keep",
+    "why": "Way in from hills on TV and football pitches; source official 254.5 m (Prevc, 30 March 2025); the unofficial 291 m is the reveal.",
+    "judgedAt": "2026-11-27"
+  },
+  "new-york-yellow-taxis": {
+    "verdict": "keep",
+    "why": "Familiar, Fermi (8.8 million people, cabs everywhere in films); 13,587 medallions in July 2016 and the $1 million price checked on Taxis of New York City.",
+    "judgedAt": "2026-11-27"
+  },
+  "magic-kingdom-visitors": {
+    "verdict": "keep",
+    "why": "Fermi from about 50,000 a day; source 17.83 million in 2024, the world's most visited theme park 18 years running.",
+    "judgedAt": "2026-11-27"
+  },
+  "first-ipod-songs": {
+    "verdict": "keep",
+    "why": "Easy opener, arithmetic from the definition (5 GB over a 5 MB MP3); 1,000 songs at 160 kbit/s, $399 and the monochrome screen checked on IPod Classic.",
+    "judgedAt": "2026-11-27"
+  },
+  "mayflower-crossing": {
+    "verdict": "keep",
+    "why": "Way in: a sailing ship in 1620 takes weeks to months; source 'for about 65 days'; definition pins where the crossing ends.",
+    "judgedAt": "2026-11-27"
+  },
+  "pony-express-time": {
+    "verdict": "keep",
+    "why": "Familiar enough (horseback mail, named in the question), Fermi (about 3,000 km at a relay's pace); about 10 days and 18 months checked on Pony Express.",
+    "judgedAt": "2026-11-27"
+  },
+  "centennial-light": {
+    "verdict": "keep",
+    "why": "Way in: bulbs date from about 1880, so it's under 150 years; source first lit 1901 (125 years to 2026); the dimmed 4 W glow is the reveal.",
+    "judgedAt": "2026-11-27"
+  },
+  "four-k-pixels": {
+    "verdict": "keep",
+    "why": "Arithmetic (4K is about 4,000 wide, HD is 1920 x 1080); 3840 x 2160 and four times 1080p checked on 4K resolution.",
+    "judgedAt": "2026-11-27"
+  },
+  "empire-state-lightning": {
+    "verdict": "fix",
+    "why": "Kept the question (tall buildings, NYC storms); the fact about planes was beside the point: now the never-strikes-twice myth the source gives the figure for.",
+    "judgedAt": "2026-11-27"
+  },
+  "all-gold-cube": {
+    "verdict": "fix",
+    "why": "Surprising reveal with a way in (all the gold ever mined fits in a few pools); fact reworded ('about 201,296' is odd precision) to say why it's small; 21.7 m checked on Gold.",
+    "judgedAt": "2026-11-27"
+  },
+  "rubiks-cube-moves": {
+    "verdict": "keep",
+    "why": "Way in: a hobby solve takes 50-100 moves, the shortest far fewer; source God's number 20 (quarter-turn 26 is within 1.5x).",
+    "judgedAt": "2026-11-27"
+  },
+  "film-frame-rate": {
+    "verdict": "keep",
+    "why": "A way in (videos run at 30 or 60, film a bit less); 24 and the silent-film compromise checked on Frame rate. Could be marked easy.",
+    "judgedAt": "2026-11-27"
+  },
+  "cologne-cathedral-build": {
+    "verdict": "keep",
+    "why": "Way in: Gothic cathedrals took centuries; source 632 years from 1248; the 280-year halt explains it.",
+    "judgedAt": "2026-11-27"
+  },
+  "mount-rushmore-carving": {
+    "verdict": "keep",
+    "why": "Familiar, a way in (four giant heads blasted from granite: years, not months); 1927 to 1941 and 400 workers checked on Mount Rushmore.",
+    "judgedAt": "2026-11-27"
+  },
+  "big-ben-bell-weight": {
+    "verdict": "fix",
+    "why": "Kept (a car is 1.5 t, a great bell many times that; the name teaches it's the bell); the fact about quarter bells didn't explain the weight: now the 16 horses and 18-hour haul.",
+    "judgedAt": "2026-11-27"
+  },
+  "sydney-opera-house-build": {
+    "verdict": "keep",
+    "why": "Familiar, a way in (famous overruns, opened in the 1970s); 1 March 1959 to 20 October 1973 = 14.6 years checked on Sydney Opera House.",
+    "judgedAt": "2026-11-27"
+  },
+  "pentagon-corridors": {
+    "verdict": "keep",
+    "why": "Fermi from five rings on five floors; source '17.5 mi (28.2 km) of corridors'.",
+    "judgedAt": "2026-11-27"
+  },
+  "st-peters-capacity": {
+    "verdict": "fix",
+    "why": "A way in (a stadium holds 60,000, this is the largest church); fact now gives its floor area, which explains the number (4 people a square metre); 60,000/20,000 checked on St. Peter's Basilica.",
+    "judgedAt": "2026-11-27"
+  },
+  "earths-to-the-moon": {
+    "verdict": "keep",
+    "why": "Arithmetic from two anchors (384,000 km, 12,700 km), and intuition says 5 to 10, so the reveal lands; source 'roughly 30 times Earth's diameter'.",
+    "judgedAt": "2026-11-27"
+  },
+  "halleys-comet-return": {
+    "verdict": "keep",
+    "why": "Easy opener (once in a lifetime: 1986, next 2061); 74.7 years in the infobox and the three comets fact checked on Halley's Comet.",
+    "judgedAt": "2026-11-27"
+  },
+  "apollo-moon-rock": {
+    "verdict": "keep",
+    "why": "Fermi from six landings of tens of kg each; source 381 kg in 2,200 samples.",
+    "judgedAt": "2026-11-27"
+  },
+  "saturn-rings-thickness": {
+    "verdict": "drop",
+    "why": "No way in: nothing a player knows leads to metres (they'd guess km), and the source gives a range (as little as 10 m, as much as 1 km), not one figure.",
+    "judgedAt": "2026-11-27"
+  },
+  "baumgartner-jump-height": {
+    "verdict": "keep",
+    "why": "Way in: airliners fly at 10-12 km, space starts at 100; source exit altitude 38.969 km; breaking the sound barrier is the reveal.",
+    "judgedAt": "2026-11-27"
+  },
+  "james-webb-distance": {
+    "verdict": "keep",
+    "why": "A way in (the unit says millions of km, and it sits past the Moon at 0.4 million); 1.5 million km checked on James Webb Space Telescope.",
+    "judgedAt": "2026-11-27"
+  },
+  "dinosaur-asteroid-width": {
+    "verdict": "fix",
+    "why": "Way in: a mountain-sized rock; source 'about ten kilometers'; the fact about where it hit didn't explain the size: now the source's taller-than-Everest comparison.",
+    "judgedAt": "2026-11-27"
+  },
+  "wettest-place-rainfall": {
+    "verdict": "keep",
+    "why": "Superlative with a way in (a wet city gets about 1,000 mm, a rainforest a few thousand); 11,872 mm and the Colombian rivals checked on Mawsynram.",
+    "judgedAt": "2026-11-27"
+  },
+  "oldest-living-tree": {
+    "verdict": "keep",
+    "why": "Way in: bristlecones and redwoods live for thousands of years; source Methuselah 4,858 (the unverified 5,000+ tree is within 1.05x).",
+    "judgedAt": "2026-11-27"
+  },
+  "antarctic-ice-thickness": {
+    "verdict": "keep",
+    "why": "A way in (ice sheets 'miles thick', the unit is km); average 1.9 km and the 60 m sea rise checked on Antarctica.",
+    "judgedAt": "2026-11-27"
+  },
+  "un-member-states": {
+    "verdict": "keep",
+    "why": "Easy opener from 'about 200 countries'; source 193; the Indonesia walkout fact.",
+    "judgedAt": "2026-11-27"
+  },
+  "equator-countries": {
+    "verdict": "keep",
+    "why": "Check it yourself on a mental map (Ecuador, Colombia, Brazil, a band of Africa, Indonesia); eleven on land and three by sea checked on Equator.",
+    "judgedAt": "2026-11-27"
+  },
+  "busiest-airport-passengers": {
+    "verdict": "keep",
+    "why": "Fermi from a few hundred thousand passengers a day; source Atlanta 106,302,208 in 2025; Atlanta is the surprising winner.",
+    "judgedAt": "2026-11-27"
+  },
+  "us-golf-courses": {
+    "verdict": "keep",
+    "why": "Fermi (a course in every town), and the reveal teaches (over 40% of the world's); 16,752 in 2019 checked on Golf course.",
+    "judgedAt": "2026-11-27"
+  },
+  "pineapple-flowers": {
+    "verdict": "fix",
+    "why": "Kept (look at its scaly skin); the definition 'usually, at most' read two ways at once: now 'the usual maximum' (source 'usually produces up to 200 flowers'); fact now explains how the flowers become one fruit.",
+    "judgedAt": "2026-11-27"
+  },
+  "statue-of-liberty-crown-visitors": {
+    "verdict": "drop",
+    "why": "Reveal: a dull administrative number (the crown's daily ticket quota, which the park service can change), with a fact about booking rules.",
+    "judgedAt": "2026-11-27"
+  },
+  "colosseum-audience": {
+    "verdict": "fix",
+    "why": "Kept (compare a big football stadium); the fact listing its shows was beside the point: now how 65,000 got in (80 entrances, pottery-shard tickets).",
+    "judgedAt": "2026-11-27"
+  },
+  "red-blood-cell-making": {
+    "verdict": "drop",
+    "why": "No way in: nothing anchors how long one cell takes to mature, only the unit sets the guess; and the reveal (7 days) teaches little.",
+    "judgedAt": "2026-11-27"
+  },
+  "right-eye-dominant-share": {
+    "verdict": "fix",
+    "why": "Easy opener (like handedness); source 'approximately 70%'; the fact only restated the rest: added that the dominant eye and hand don't always match.",
+    "judgedAt": "2026-11-27"
+  },
+  "short-sighted-share": {
+    "verdict": "keep",
+    "why": "Reason from yourself (glasses in your class, fewer in poor rural places); 22% and 41% in China and Malaysia checked on Myopia.",
+    "judgedAt": "2026-11-27"
+  },
+  "blood-plasma-share": {
+    "verdict": "keep",
+    "why": "Way in: picture a spun-down blood tube, about half; source 'about 55% of the body's total blood volume'.",
+    "judgedAt": "2026-11-27"
+  },
+  "brown-eyes-share": {
+    "verdict": "keep",
+    "why": "Easy opener, reason from the world (most of Asia and Africa); 79%, blue 8-10%, green 2% checked on Eye color.",
+    "judgedAt": "2026-11-27"
+  },
+  "blood-in-veins-share": {
+    "verdict": "fix",
+    "why": "Kept (veins are wide and slow, a reservoir); source 'nearly 70%'; the fact now says why (thin walls, wide insides) and drops 'smallest', which the source doesn't say.",
+    "judgedAt": "2026-11-27"
+  },
+  "rice-maize-wheat-share": {
+    "verdict": "keep",
+    "why": "A way in (bread, rice, pasta, tortillas), measure named (food energy from crops); two-thirds and the 15 crops checked on Staple food.",
+    "judgedAt": "2026-11-27"
+  },
+  "soy-for-livestock": {
+    "verdict": "keep",
+    "why": "Way in: tofu and soy milk against animal feed; source 'three-quarters of soy is used to feed livestock'; the 36% protein explains why.",
+    "judgedAt": "2026-11-27"
+  },
+  "parmesan-milk-share": {
+    "verdict": "keep",
+    "why": "Surprising share with a way in (Italy's milk goes into many cheeses and drinks); 18% in 2017 and 1,100 L a vat checked on Parmesan.",
+    "judgedAt": "2026-11-27"
+  },
+  "farmland-share": {
+    "verdict": "keep",
+    "why": "Way in: picture a flight over fields, deserts, forest and ice; source FAO 38.4% of land area (2011); the pasture split teaches.",
+    "judgedAt": "2026-11-27"
+  },
+  "plastic-recycled-share": {
+    "verdict": "keep",
+    "why": "A way in (you recycle, most is binned); 9% and 12%/79% checked on Plastic recycling.",
+    "judgedAt": "2026-11-27"
+  },
+  "france-nuclear-share": {
+    "verdict": "fix",
+    "why": "Kept (France is known for nuclear power); source 'approximately 68%' in 2025; the fact about EDF didn't explain the share: now the oil-crisis reason.",
+    "judgedAt": "2026-11-27"
+  },
+  "iceland-geothermal-share": {
+    "verdict": "keep",
+    "why": "Surprise with a way in (volcanoes and glacier rivers: two sources), measure named (electricity, not heat); 29.4% in 2025 checked on Energy in Iceland.",
+    "judgedAt": "2026-11-27"
+  },
+  "cloud-cover-share": {
+    "verdict": "keep",
+    "why": "Way in: satellite pictures show most of Earth white; source 'averages around 67-68%'; the ocean/land split.",
+    "judgedAt": "2026-11-27"
+  },
+  "amazon-river-flow-share": {
+    "verdict": "keep",
+    "why": "Superlative with a way in (the biggest river by far among thousands); 20% and the next seven combined checked on Amazon River.",
+    "judgedAt": "2026-11-27"
+  },
+  "mountainous-land-share": {
+    "verdict": "keep",
+    "why": "Way in: picture the big ranges on a map; source '24% of the Earth's land mass'; the Eurasia/Africa contrast.",
+    "judgedAt": "2026-11-27"
+  },
+  "tropics-share": {
+    "verdict": "keep",
+    "why": "Reason it out (about a quarter of the latitudes, but the widest band of the globe); 39.8% and 40% of people checked on Tropics.",
+    "judgedAt": "2026-11-27"
+  },
+  "lunar-maria-share": {
+    "verdict": "keep",
+    "why": "Reason from the near side: its dark patches are about a third, the far side has few; source 'about 16%'.",
+    "judgedAt": "2026-11-27"
+  },
+  "moon-width-share": {
+    "verdict": "keep",
+    "why": "A way in (pictures of Earth and Moon side by side: about a quarter), measure named (width); 0.2727 and the US width checked on Moon.",
+    "judgedAt": "2026-11-27"
+  },
+  "mars-mission-failures": {
+    "verdict": "keep",
+    "why": "Way in: Mars is famously hard; source 'roughly sixty percent ... failed before completing their missions', matching the definition.",
+    "judgedAt": "2026-11-27"
+  },
+  "octopus-arm-neurons": {
+    "verdict": "keep",
+    "why": "Surprise with a way in (arms that act on their own); two-thirds and 500 million neurons checked on Octopus.",
+    "judgedAt": "2026-11-27"
+  },
+  "australia-endemic-mammals": {
+    "verdict": "drop",
+    "why": "One clear answer: the page says 69% of mammals, but the Australian government and museums widely cite 87%, 18 points apart; a fix can't change the answer (dcceew.gov.au didn't load from here).",
+    "judgedAt": "2026-11-27"
+  },
+  "perching-birds-share": {
+    "verdict": "keep",
+    "why": "Reason from yourself (most birds you see are sparrows, crows, finches); 60% and the locking toes checked on Passerine.",
+    "judgedAt": "2026-11-27"
+  },
+  "free-ranging-dogs-share": {
+    "verdict": "fix",
+    "why": "Two readings: 'not as pets' is wrong, as the source says free-ranging dogs 'may be owned or unowned' (not confined to a yard or house); reworded to that.",
+    "judgedAt": "2026-11-27"
+  },
+  "india-wild-tigers-share": {
+    "verdict": "keep",
+    "why": "A way in (India, Russia, Southeast Asia, with India the main home); almost 75%, 3,682 and 1,706 checked on Project Tiger.",
+    "judgedAt": "2026-11-27"
+  },
+  "world-literacy-share": {
+    "verdict": "keep",
+    "why": "Easy opener: most but not all; source WEF 87% (2022); 12% two centuries ago is the reveal.",
+    "judgedAt": "2026-11-27"
+  },
+  "english-wikipedia-share": {
+    "verdict": "fix",
+    "why": "Surprise with a way in (the biggest edition among 300 languages); fact now says why it is low (it once held over half); 10.6% checked on English Wikipedia.",
+    "judgedAt": "2026-11-27"
+  },
+  "welsh-speakers-share": {
+    "verdict": "keep",
+    "why": "Way in: bilingual signs, but English everywhere; source 17.8% at the 2021 census; definition rules out the surveys' 34%.",
+    "judgedAt": "2026-11-27"
+  },
+  "bank-account-share": {
+    "verdict": "keep",
+    "why": "Reason from yourself and the world (rich countries near all, mobile money in Africa); 79% in 2024 and 1.3 billion checked on Financial inclusion.",
+    "judgedAt": "2026-11-27"
+  },
+  "electric-car-sales-share": {
+    "verdict": "keep",
+    "why": "Way in: EVs are common now and China sells many; source 25% of 2025 sales, over 20 million; only 5% of cars on the road.",
+    "judgedAt": "2026-11-27"
+  },
+  "us-passport-share": {
+    "verdict": "keep",
+    "why": "A way in (the stereotype that few Americans travel abroad), dated; 48% in June 2024 and 5% in 1990 checked on United States passport.",
+    "judgedAt": "2026-11-27"
+  },
+  "under-15-share": {
+    "verdict": "keep",
+    "why": "Fermi: 15 years of a 70-year life, plus young populations; source 25.18% (2021).",
+    "judgedAt": "2026-11-27"
+  },
+  "coastal-population-share": {
+    "verdict": "keep",
+    "why": "A way in (Tokyo, Shanghai, New York, Lagos on the sea; Delhi, Beijing inland); 44% in 2013 checked on Coast.",
+    "judgedAt": "2026-11-27"
+  },
+  "great-wall-lost-share": {
+    "verdict": "fix",
+    "why": "Kept (a 600-year-old wall, parts of it in desert); source 22% per the 2012 report; the fact now explains why (mud sections, sandstorms).",
+    "judgedAt": "2026-11-27"
+  },
+  "women-first-at-olympics": {
+    "verdict": "keep",
+    "why": "A way in (the first modern Games in the 1890s, women soon after); 1900, 22 women and Charlotte Cooper checked on Participation of women in the Olympics.",
+    "judgedAt": "2026-11-27"
+  },
+  "first-london-marathon": {
+    "verdict": "keep",
+    "why": "Way in: the city-marathon boom after New York's; source 1981; the hand-in-hand tie is the reveal.",
+    "judgedAt": "2026-11-27"
+  },
+  "uranus-discovered": {
+    "verdict": "keep",
+    "why": "A way in (the telescope era, after Galileo, before Neptune); 13 March 1781, Bath, reported as a comet checked on Uranus.",
+    "judgedAt": "2026-11-27"
+  },
+  "basketball-invented": {
+    "verdict": "keep",
+    "why": "Way in: well before the NBA, the peach-basket era; source December 1891; the rainy-day class fact.",
+    "judgedAt": "2026-11-27"
+  },
+  "first-f1-championship": {
+    "verdict": "keep",
+    "why": "A way in (after the Second World War); seven races with the Indy 500 checked on 1950 Formula One season.",
+    "judgedAt": "2026-11-27"
+  },
+  "olympic-gold-silver-bronze": {
+    "verdict": "keep",
+    "why": "Way in: just after the first modern Games; source 1904 (St. Louis); silver for winners at the first Games is the reveal.",
+    "judgedAt": "2026-11-27"
+  },
+  "insulin-first-used": {
+    "verdict": "keep",
+    "why": "A way in (early 20th-century medicine, before penicillin); 1922 in Toronto checked on Insulin (medication).",
+    "judgedAt": "2026-11-27"
+  },
+  "aspirin-first-sold": {
+    "verdict": "fix",
+    "why": "Kept (a household medicine from around 1900); source 1899; the fact about its name didn't place the year: now the willow-bark remedy it replaced.",
+    "judgedAt": "2026-11-27"
+  },
+  "stethoscope-invented": {
+    "verdict": "keep",
+    "why": "A way in (before modern medicine, after the Enlightenment); 1816 and Laennec's reason checked on Stethoscope.",
+    "judgedAt": "2026-11-27"
+  },
+  "suez-canal-opens": {
+    "verdict": "keep",
+    "why": "Way in: the Victorian steamship era, before Panama; source opened 17 November 1869.",
+    "judgedAt": "2026-11-27"
+  },
+  "sagrada-familia-begun": {
+    "verdict": "keep",
+    "why": "A way in (Gaudí, Art Nouveau, still unfinished); 19 March 1882 and 'my client is not in a hurry' checked on Sagrada Família.",
+    "judgedAt": "2026-11-27"
+  },
+  "tower-bridge-opens": {
+    "verdict": "keep",
+    "why": "Way in: it looks Victorian though many think it medieval; source opened 30 June 1894; the walkways fact.",
+    "judgedAt": "2026-11-27"
+  },
+  "voyager-1-launch": {
+    "verdict": "keep",
+    "why": "A way in (after the Moon landings, before the Shuttle); September 1977 and 16 days after Voyager 2 checked on Voyager 1.",
+    "judgedAt": "2026-11-27"
+  },
+  "earthrise-photo": {
+    "verdict": "keep",
+    "why": "Way in: the Apollo years, just before the landing; source 24 December 1968, Apollo 8.",
+    "judgedAt": "2026-11-27"
+  },
+  "first-spacewalk": {
+    "verdict": "fix",
+    "why": "A way in (between Gagarin and the Moon landing); fact now tells the ballooning suit, a reveal worth it; March 1965 and 12 minutes checked on Voskhod 2.",
+    "judgedAt": "2026-11-27"
+  },
+  "iss-first-crew": {
+    "verdict": "keep",
+    "why": "Easy opener: people have lived up there about 25 years; source 2 November 2000; continuous presence since.",
+    "judgedAt": "2026-11-27"
+  },
+  "sony-walkman-launch": {
+    "verdict": "keep",
+    "why": "Easy opener (a cassette-era icon, before CDs); 1 July 1979 and 30,000 in two months checked on Walkman.",
+    "judgedAt": "2026-11-27"
+  },
+  "toy-story-released": {
+    "verdict": "keep",
+    "why": "Easy opener: childhood anchor; source 1995.",
+    "judgedAt": "2026-11-27"
+  },
+  "first-christmas-card": {
+    "verdict": "keep",
+    "why": "A way in (Victorian Christmas, the penny post); 1843, Henry Cole and Horsley checked on Christmas card.",
+    "judgedAt": "2026-11-27"
+  },
+  "first-bicycle": {
+    "verdict": "keep",
+    "why": "Way in: before the penny-farthing; the label pins the dandy horse; source Drais, 1817.",
+    "judgedAt": "2026-11-27"
+  },
+  "tin-can-patent": {
+    "verdict": "keep",
+    "why": "A way in (Napoleon's armies, the Industrial Revolution); 1810, Durand and Appert checked on Canning.",
+    "judgedAt": "2026-11-27"
+  },
+  "dodo-last-seen": {
+    "verdict": "keep",
+    "why": "Way in: found by Dutch sailors around 1600, gone within a century; source 'last widely accepted sighting ... 1662'.",
+    "judgedAt": "2026-11-27"
+  },
+  "dolly-the-sheep": {
+    "verdict": "keep",
+    "why": "Easy opener (90s news, before 2000); 5 July 1996 and three mothers checked on Dolly (sheep).",
+    "judgedAt": "2026-11-27"
+  },
+  "last-tasmanian-tiger": {
+    "verdict": "keep",
+    "why": "Way in: black-and-white zoo footage, early 20th century; source 7 September 1936; the 59 days of protection.",
+    "judgedAt": "2026-11-27"
+  },
+  "mickey-mouse-debut": {
+    "verdict": "keep",
+    "why": "A way in (early sound cartoons, late 1920s), definition pins the debut; 1928 checked on Steamboat Willie.",
+    "judgedAt": "2026-11-27"
+  },
+  "first-guinness-book": {
+    "verdict": "keep",
+    "why": "Way in: post-war Britain, settling pub arguments; source 27 August 1955; a bestseller by Christmas.",
+    "judgedAt": "2026-11-27"
+  },
+  "first-bullet-train": {
+    "verdict": "keep",
+    "why": "A way in (postwar Japan's boom, the Tokyo Olympics); 1 October 1964, nine days before the Games, checked on Shinkansen.",
+    "judgedAt": "2026-11-27"
+  },
+  "yellowstone-first-park": {
+    "verdict": "keep",
+    "why": "Way in: the Wild West after the Civil War; source 1 March 1872; 300 visitors that year.",
+    "judgedAt": "2026-11-27"
+  },
+  "krakatoa-eruption": {
+    "verdict": "fix",
+    "why": "Two readings: Krakatoa erupted many times (Anak Krakatau in 2018), and the label hung off 'Krakatoa'; now names the great eruption; 1883 and 4,780 km checked on Krakatoa.",
+    "judgedAt": "2026-11-27"
+  },
+  "spotify-launch": {
+    "verdict": "keep",
+    "why": "Easy opener: just after the iPhone; source October 2008 in Europe, and the definition rules out the US launch (2011).",
+    "judgedAt": "2026-11-27"
+  },
+  "apple-i-on-sale": {
+    "verdict": "keep",
+    "why": "A way in (a garage start-up in the 70s, before the Macintosh); July 1976, $666.66, about 200 made checked on Apple I.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-country-as-many-people-as-germany": {
+    "verdict": "keep",
+    "why": "Verified at #fathom: target is Germany's 83,298,787 on the list; Turkey, Türkiye, Iran, Persia, Thailand, UK, Britain, France, Vietnam, Egypt, Italy, DRC lock; Congo offers both; Germany, Berlin, Bavaria, England say why.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-country-as-many-people-as-japan": {
+    "verdict": "keep",
+    "why": "Played: Mexico, Philippines (and 'the Philippines', 'Philipines'), Ethiopia, Egypt, Russia, Vietnam, DRC/DR Congo lock; Congo offers both; Japan/Nippon, Tokyo, Texas, Siberia say what they are. Target 122,690,000 matches the list's page. Its good answers overlap name-country-100m-people (Nov 24), a month earlier, but finding Japan's figure first makes it a new puzzle.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-country-as-many-people-as-tokyo": {
+    "verdict": "keep",
+    "why": "Verified: Tokyo's 41.3 million on the city list, the definition names it; Canada, Poland, Argentina, Spain, Iraq, Morocco, Algeria, Korea, Ukraine lock; Tokyo says city, California says US state.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-country-as-big-as-turkey": {
+    "verdict": "keep",
+    "why": "Played: Mozambique, Chile, Zambia, Myanmar/Burma, Pakistan, France, Namibia, Egypt and more lock; Türkiye/Turkiye read as the yardstick; Istanbul, Texas say what they are. Target 783,562 matches the list's page. For the data agent: 'Anatolia' offers Angola/Australia (free); it wants a PLACES entry, part of Turkey.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-country-as-big-as-italy": {
+    "verdict": "keep",
+    "why": "Verified: Italy's 302,068 km2 on the list; Philippines, Poland, Norway, Finland, Vietnam, UK, Japan, Germany, New Zealand, Côte d'Ivoire lock; Italy, Sicily, Arizona say why.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-country-as-big-as-alaska": {
+    "verdict": "drop",
+    "why": "Near-copy: 1.14x from name-country-as-big-as-mexico (Dec 13), and three of its four best answers are the same (Libya, Sudan, Indonesia). Every answer registered (Persia, Alaska, Greenland, Texas say what they are).",
+    "judgedAt": "2026-11-27"
+  },
+  "name-city-as-many-people-as-new-zealand": {
+    "verdict": "fix",
+    "why": "Verified: NZ's 5,357,300 on the country list; Sydney, Melbourne, Madrid, Barcelona, Berlin, Toronto, St Petersburg, Saigon lock; the reveal's best four are Belo Horizonte, Guiyang, Kampala, Changchun, so a fact names Sydney and Melbourne.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-city-as-many-people-as-texas": {
+    "verdict": "keep",
+    "why": "Played: Jakarta, Mumbai/Bombay, Manila, Delhi/New Delhi, Mexico City, Seoul, Tokyo, Shanghai, Dhaka, Cairo, São Paulo/Sao Paulo, New York/NYC, Bangkok, Lagos, Beijing, Karachi, Calcutta lock; Shenzhen in Guangzhou; Texas, California, Brooklyn, Mexico say what they are. Target is Texas's 31,709,821 on its list page.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-us-state-as-many-people-as-netherlands": {
+    "verdict": "keep",
+    "why": "Verified: the Netherlands' 18,171,612; New York, NY, New York State, Florida, Pennsylvania, Illinois lock (4 at 70+); Netherlands, Holland, NYC say why.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-us-state-as-many-people-as-hong-kong": {
+    "verdict": "keep",
+    "why": "Played: Arizona, Tennessee, Massachusetts/Mass, Washington/Washington State, Indiana, Virginia, Missouri, Maryland, Colorado and more lock; Arizonia confirms; Hong Kong, Washington DC, Puerto Rico, Ontario, Phoenix say what they are. Target 7.5 million is Hong Kong's on the city list.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-us-state-as-many-people-as-rome": {
+    "verdict": "keep",
+    "why": "Verified: Rome's 3.45 million built-up area on the city list, named in the definition; Utah, Nevada, Iowa, Connecticut, Oregon, Oklahoma lock; Puerto Rico, Rome, Italy, Las Vegas say why.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-us-state-as-big-as-portugal": {
+    "verdict": "keep",
+    "why": "Played: Maine, Indiana, South Carolina, Kentucky, Tennessee, Virginia, Ohio, Pennsylvania lock; Carolina offers both; Kentucy confirms; Portugal, Lisbon, Puerto Rico, New England say what they are. Target 92,090 matches the country area page.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-us-state-as-big-as-spain": {
+    "verdict": "keep",
+    "why": "Verified: Spain's 505,370 km2 on the list; California, Cali, CA, Montana, Texas (the 3 at 70+) lock, and Alaska, New Mexico, Arizona lock; Spain says country.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-country-as-dense-as-india": {
+    "verdict": "keep",
+    "why": "Played: Japan, Philippines, Israel, Belgium, Netherlands/Holland, Sri Lanka/Ceylon, South Korea/Korea, Haiti, Lebanon, Vietnam, UK lock; India/Hindustan/Bharat read as the yardstick; England, Mumbai say what they are. Target 441 matches the page's India row (its 'Land area' column).",
+    "judgedAt": "2026-11-27"
+  },
+  "name-country-as-dense-as-china": {
+    "verdict": "keep",
+    "why": "Verified: China's 151 per km2 on the list; Indonesia, Denmark, Thailand, France, Italy, Poland, Czechia lock; China and PRC say any but China, Hong Kong says city.",
+    "judgedAt": "2026-11-27"
+  },
+  "name-country-as-dense-as-united-states": {
+    "verdict": "keep",
+    "why": "Played: Kyrgyzstan (and Kyrgystan to confirm), Laos, Estonia, Colombia, Sweden, Venezuela, Belarus, Brazil, Chile, Peru and more lock; USA, America, US, U.S., United States read as the yardstick; Texas, Alaska say what they are. Target 37 matches the page.",
+    "judgedAt": "2026-11-27"
   }
 }
