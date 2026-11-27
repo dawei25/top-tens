@@ -2,6 +2,22 @@
 
 Newest first. One entry per cycle of the loop in `docs/IMPROVE.md`.
 
+## 2026-11-27, weekly cycle (Fri)
+
+- No new week to plan: Dec 7-13 was scheduled last Friday. The next lineup (Fri Dec 4) plans Dec 14-20.
+- Notes and ratings since yesterday's check: none. Plays all time: 205 across 95 lists (+2, both on yesterday's
+  dog-breeds). Today's Fathom: 3 players finished Fathom #12 yesterday, none yet on #13.
+- Missed guesses: 6 on dog-breeds, from two browsers.
+  - A common nickname for the Dachshund and a common misspelling of Chihuahua were unknown. Fixed: Wiener and Weiner
+    now read as Dachshund (#5), and four Chihuahua spellings as Chihuahua (outside the top 10, so it costs a life,
+    like the name itself). Merged at 18:05 HKT, once Nov 26 had ended everywhere.
+  - Two mixes and a dog type the AKC doesn't rank (one typed in two browsers): correctly free, and the known one
+    says it isn't in this ranking. A bare group name asks which breed. No change.
+- Fathom: 160 new questions for Dec 14-27, judged by two fathom-judges: 129 kept, 26 fixed (wording with two
+  readings, facts that didn't explain the number), 5 dropped (no way in, two answers on the source, a near-copy).
+  The schedule now runs to Fathom #43 (Dec 27), with Nov 15 to Dec 13 unchanged; the 452-question bank covers through
+  Dec 28. Follow-up: "Anatolia" on the Turkey name-it offers Angola or Australia (free); it wants a PLACES entry.
+
 ## 2026-11-26, launch-week morning check (Thu, the last of launch week)
 
 - Notes and ratings since yesterday's check: none. Plays all time: 203 across 94 lists (+4, all on yesterday's
