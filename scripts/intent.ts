@@ -1961,7 +1961,9 @@ export const INTENT: Record<string, Intent> = {
       "English Mastiff": ["Mastiff"],
       "Rhodesian Ridgeback": ["Ridgeback"],
       Pug: ["Pugs"],
-      Chihuahua: ["Chihuahuas"],
+      // Spelled the way it sounds (players, Nov 26: "chiwawa" found nothing), four edits away, past any slip;
+      // "chihuahau" changes the last letter, which a slip of an unranked name keeps.
+      Chihuahua: ["Chihuahuas", "Chiwawa", "Chiwawas", "Chiwauwa", "Chihuahau"],
       Boxer: ["Boxers"],
       "Great Dane": ["Great Danes"],
       // The AKC's names for them.

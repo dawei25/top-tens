@@ -3686,8 +3686,11 @@ export const TOPICS: Topic[] = [
       "Labrador Retriever": ["Lab", "Labs", "Labrador", "Labradors", "Labrador Retrievers", "Black Lab", "Black Labrador"],
       "Golden Retriever": ["Golden", "Goldens", "Golden Retrievers", "Goldie"],
       "German Shepherd": ["GSD", "German Shepherd Dog", "German Shepherds", "Alsatian"],
-      // "dachsie", "rotty" and "teacup poodle" found nothing (coverage audit, Nov 17).
-      Dachshund: ["Doxie", "Wiener dog", "Weiner dog", "Sausage dog", "Dachshunds", "Daschund", "Dachsie"],
+      // "dachsie", "rotty" and "teacup poodle" found nothing (coverage audit, Nov 17). Nor did "wiener" (players, Nov 26):
+      // the matcher reads a word typed alone as part of a name, not of an alias like "Wiener dog". "Wiener" is a word
+      // (the sausage), but on a list of dog breeds it is this breed's own nickname, as "Wiener dog" is, and names nothing
+      // else here: no plain word turned into an answer. It stays on this list.
+      Dachshund: ["Doxie", "Wiener dog", "Weiner dog", "Wiener", "Weiner", "Sausage dog", "Dachshunds", "Daschund", "Dachsie"],
       Poodle: ["Poodles", "Standard Poodle", "Toy Poodle", "Miniature Poodle", "Mini Poodle", "French Poodle", "Teacup Poodle"],
       Beagle: ["Beagles"],
       Rottweiler: ["Rottie", "Rottweilers", "Rotty"],
