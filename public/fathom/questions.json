@@ -4342,6 +4342,1081 @@
    "definition": "its population over its land area",
    "easy": false,
    "verified": true
+  },
+  {
+   "id": "ribs",
+   "kind": "body",
+   "question": "How many ribs does a person have?",
+   "unit": "ribs",
+   "answer": 24,
+   "fact": "Twelve pairs: when Vesalius counted 24 in 1543 it caused a stir, as many believed from the Adam and Eve story that men had one fewer.",
+   "source": {
+    "title": "Rib cage",
+    "url": "https://en.wikipedia.org/wiki/Rib_cage"
+   },
+   "easy": true
+  },
+  {
+   "id": "taste-bud-lifespan",
+   "kind": "body",
+   "question": "How long does a taste bud last before it's replaced?",
+   "unit": "days",
+   "answer": 10,
+   "definition": "on average",
+   "fact": "A tongue has thousands of them, sitting on the small bumps called papillae.",
+   "source": {
+    "title": "Taste bud",
+    "url": "https://en.wikipedia.org/wiki/Taste_bud"
+   },
+   "easy": false
+  },
+  {
+   "id": "yawn-length",
+   "kind": "body",
+   "question": "How long does a yawn last?",
+   "unit": "seconds",
+   "answer": 6,
+   "definition": "usually",
+   "fact": "It's a long breath in as the mouth slowly opens, a brief stretch at the peak, then a quick breath out.",
+   "source": {
+    "title": "Yawn",
+    "url": "https://en.wikipedia.org/wiki/Yawn"
+   },
+   "easy": true
+  },
+  {
+   "id": "camel-drink",
+   "kind": "animals",
+   "question": "How much water can a thirsty camel drink in one go?",
+   "unit": "litres",
+   "answer": 114,
+   "definition": "a dromedary, the one-humped camel",
+   "fact": "It drinks 10 to 20 litres a minute, and can lose more than 30% of its body's water, which would kill most mammals.",
+   "source": {
+    "title": "Dromedary",
+    "url": "https://en.wikipedia.org/wiki/Dromedary"
+   },
+   "easy": false
+  },
+  {
+   "id": "blue-whale-calf-growth",
+   "kind": "animals",
+   "question": "How much weight does a newborn blue whale gain each day?",
+   "unit": "kilograms",
+   "answer": 90,
+   "fact": "Its mother makes an estimated 220 kg of milk a day to keep it growing.",
+   "source": {
+    "title": "Blue whale",
+    "url": "https://en.wikipedia.org/wiki/Blue_whale"
+   },
+   "easy": false
+  },
+  {
+   "id": "kangaroo-pregnancy",
+   "kind": "animals",
+   "question": "How long is a red kangaroo's pregnancy?",
+   "unit": "days",
+   "answer": 33,
+   "fact": "The tiny newborn then grows in its mother's pouch, leaving it for good after about 235 days.",
+   "source": {
+    "title": "Red kangaroo",
+    "url": "https://en.wikipedia.org/wiki/Red_kangaroo"
+   },
+   "easy": false
+  },
+  {
+   "id": "electric-eel-shock",
+   "kind": "animals",
+   "question": "How many volts can an electric eel's shock reach?",
+   "unit": "volts",
+   "answer": 860,
+   "fact": "That makes it the strongest electricity maker in nature, enough to stun the fish it hunts.",
+   "source": {
+    "title": "Electric eel",
+    "url": "https://en.wikipedia.org/wiki/Electric_eel"
+   },
+   "easy": false
+  },
+  {
+   "id": "emperor-penguin-fast",
+   "kind": "animals",
+   "question": "How long does a male emperor penguin fast to raise his egg?",
+   "unit": "days",
+   "answer": 120,
+   "definition": "from arrival to hatching",
+   "fact": "He balances the egg on his feet, under loose skin and feathers, for 65 to 75 days until it hatches.",
+   "source": {
+    "title": "Emperor penguin",
+    "url": "https://en.wikipedia.org/wiki/Emperor_penguin"
+   },
+   "easy": false
+  },
+  {
+   "id": "lion-roar-distance",
+   "kind": "animals",
+   "question": "How far away can you hear a lion's roar?",
+   "unit": "kilometres",
+   "answer": 8,
+   "fact": "Lions roar most often at night, to let other lions know where they are.",
+   "source": {
+    "title": "Lion",
+    "url": "https://en.wikipedia.org/wiki/Lion"
+   },
+   "easy": false
+  },
+  {
+   "id": "bear-species",
+   "kind": "animals",
+   "question": "How many species of bear are there?",
+   "unit": "species",
+   "answer": 8,
+   "definition": "alive today",
+   "fact": "The polar bear is mostly a meat-eater and the giant panda mostly a plant-eater; the other six eat both.",
+   "source": {
+    "title": "Bear",
+    "url": "https://en.wikipedia.org/wiki/Bear"
+   },
+   "easy": true
+  },
+  {
+   "id": "cat-claws",
+   "kind": "animals",
+   "question": "How many claws are on a cat's four paws?",
+   "unit": "claws",
+   "answer": 18,
+   "definition": "as most cats have",
+   "fact": "Most cats have five claws on each front paw and four on each back one.",
+   "source": {
+    "title": "Cat",
+    "url": "https://en.wikipedia.org/wiki/Cat"
+   },
+   "easy": true
+  },
+  {
+   "id": "wild-sloth-sleep",
+   "kind": "animals",
+   "question": "How long does a wild sloth sleep each day?",
+   "unit": "hours",
+   "answer": 9.6,
+   "definition": "three-toed sloths, measured in the wild",
+   "fact": "They spend 90 percent of their time motionless, and digesting a meal can take a month or more.",
+   "source": {
+    "title": "Sloth",
+    "url": "https://en.wikipedia.org/wiki/Sloth"
+   },
+   "easy": false
+  },
+  {
+   "id": "koala-sleep",
+   "kind": "animals",
+   "question": "How long does a koala sleep each day?",
+   "unit": "hours",
+   "answer": 20,
+   "definition": "up to",
+   "fact": "Its diet of eucalyptus leaves gives so little energy that digesting it can take 100 hours.",
+   "source": {
+    "title": "Koala",
+    "url": "https://en.wikipedia.org/wiki/Koala"
+   },
+   "easy": true
+  },
+  {
+   "id": "swift-time-aloft",
+   "kind": "animals",
+   "question": "How long can a common swift stay in the air without landing?",
+   "unit": "months",
+   "answer": 10,
+   "fact": "Swifts never land on the ground by choice, where they would be easy prey.",
+   "source": {
+    "title": "Common swift",
+    "url": "https://en.wikipedia.org/wiki/Common_swift"
+   },
+   "easy": false
+  },
+  {
+   "id": "dairy-cow-milk",
+   "kind": "food",
+   "question": "How much milk does a dairy cow give a day?",
+   "unit": "litres",
+   "answer": 22,
+   "definition": "the UK average",
+   "fact": "Most cows are milked twice a day, and the milk is taken to a dairy to be processed.",
+   "source": {
+    "title": "Cattle",
+    "url": "https://en.wikipedia.org/wiki/Cattle"
+   },
+   "easy": false
+  },
+  {
+   "id": "mcdonalds-customers-a-day",
+   "kind": "food",
+   "question": "How many customers does McDonald's serve worldwide each day?",
+   "unit": "million people",
+   "answer": 68,
+   "fact": "They come to about 41,800 restaurants around the world.",
+   "source": {
+    "title": "McDonald's",
+    "url": "https://en.wikipedia.org/wiki/McDonald%27s"
+   },
+   "easy": false
+  },
+  {
+   "id": "french-baguettes-a-day",
+   "kind": "food",
+   "question": "How many baguettes do the French eat a day?",
+   "unit": "million baguettes",
+   "answer": 30,
+   "fact": "Algeria eats even more: about 49 million baguettes a day.",
+   "source": {
+    "title": "Baguette",
+    "url": "https://en.wikipedia.org/wiki/Baguette"
+   },
+   "easy": false
+  },
+  {
+   "id": "james-bond-films",
+   "kind": "culture",
+   "question": "How many films are in the official James Bond series?",
+   "unit": "films",
+   "answer": 25,
+   "definition": "by Eon Productions",
+   "fact": "Eon made all but two of the Bond films ever released.",
+   "source": {
+    "title": "List of James Bond films",
+    "url": "https://en.wikipedia.org/wiki/List_of_James_Bond_films"
+   },
+   "easy": true
+  },
+  {
+   "id": "green-eggs-and-ham-words",
+   "kind": "culture",
+   "question": "How many words did Dr. Seuss use to write Green Eggs and Ham?",
+   "unit": "words",
+   "answer": 50,
+   "definition": "different words only",
+   "fact": "His editor bet him he couldn't write a good children's book with so few, and 'not' turns up 82 times.",
+   "source": {
+    "title": "Green Eggs and Ham",
+    "url": "https://en.wikipedia.org/wiki/Green_Eggs_and_Ham"
+   },
+   "easy": false
+  },
+  {
+   "id": "eras-tour-crowd",
+   "kind": "culture",
+   "question": "How many people saw Taylor Swift's Eras Tour in person?",
+   "unit": "million people",
+   "answer": 10.1,
+   "definition": "over its 149 shows",
+   "fact": "It played 51 cities in 21 countries, on five continents.",
+   "source": {
+    "title": "The Eras Tour",
+    "url": "https://en.wikipedia.org/wiki/The_Eras_Tour"
+   },
+   "easy": false
+  },
+  {
+   "id": "lord-of-the-rings-films-length",
+   "kind": "culture",
+   "question": "How long are the three Lord of the Rings films back to back?",
+   "unit": "minutes",
+   "answer": 558,
+   "definition": "the cinema versions",
+   "fact": "The extended editions released for home viewing run over 11 hours.",
+   "source": {
+    "title": "The Lord of the Rings (film series)",
+    "url": "https://en.wikipedia.org/wiki/The_Lord_of_the_Rings_(film_series)"
+   },
+   "easy": true
+  },
+  {
+   "id": "sistine-ceiling-time",
+   "kind": "culture",
+   "question": "How long did Michelangelo take to paint the Sistine Chapel ceiling?",
+   "unit": "years",
+   "answer": 4,
+   "fact": "He painted it standing on scaffolding, not lying on his back, as one early biographer imagined.",
+   "source": {
+    "title": "Sistine Chapel ceiling",
+    "url": "https://en.wikipedia.org/wiki/Sistine_Chapel_ceiling"
+   },
+   "easy": false
+  },
+  {
+   "id": "mozart-first-pieces",
+   "kind": "culture",
+   "question": "How old was Mozart when he began composing?",
+   "unit": "years",
+   "answer": 5,
+   "fact": "He played his little pieces to his father, who wrote them down for him.",
+   "source": {
+    "title": "Wolfgang Amadeus Mozart",
+    "url": "https://en.wikipedia.org/wiki/Wolfgang_Amadeus_Mozart"
+   },
+   "easy": true
+  },
+  {
+   "id": "haiku-syllables",
+   "kind": "culture",
+   "question": "How many syllables does a traditional haiku have?",
+   "unit": "syllables",
+   "answer": 17,
+   "fact": "In Japanese it counts sound units called on, in three phrases of five, seven and five.",
+   "source": {
+    "title": "Haiku",
+    "url": "https://en.wikipedia.org/wiki/Haiku"
+   },
+   "easy": true
+  },
+  {
+   "id": "canada-flag-leaf-points",
+   "kind": "culture",
+   "question": "How many points does the maple leaf on Canada's flag have?",
+   "unit": "points",
+   "answer": 11,
+   "fact": "The number means nothing: wind tunnel tests showed this design blurred least in a strong wind.",
+   "source": {
+    "title": "Flag of Canada",
+    "url": "https://en.wikipedia.org/wiki/Flag_of_Canada"
+   },
+   "easy": false
+  },
+  {
+   "id": "eu-flag-stars",
+   "kind": "culture",
+   "question": "How many stars are on the European Union's flag?",
+   "unit": "stars",
+   "answer": 12,
+   "fact": "The number never changes: twelve is meant as a symbol of perfection and entirety.",
+   "source": {
+    "title": "Flag of Europe",
+    "url": "https://en.wikipedia.org/wiki/Flag_of_Europe"
+   },
+   "easy": true
+  },
+  {
+   "id": "jenga-blocks",
+   "kind": "culture",
+   "question": "How many blocks are in a game of Jenga?",
+   "unit": "blocks",
+   "answer": 54,
+   "fact": "They start as a tower of 18 layers, three blocks each; the name comes from a Swahili word meaning 'to build'.",
+   "source": {
+    "title": "Jenga",
+    "url": "https://en.wikipedia.org/wiki/Jenga"
+   },
+   "easy": true
+  },
+  {
+   "id": "greek-alphabet-letters",
+   "kind": "culture",
+   "question": "How many letters are in the Greek alphabet?",
+   "unit": "letters",
+   "answer": 24,
+   "fact": "The same letters, from alpha to omega, have been standard since the end of the 4th century BC.",
+   "source": {
+    "title": "Greek alphabet",
+    "url": "https://en.wikipedia.org/wiki/Greek_alphabet"
+   },
+   "easy": true
+  },
+  {
+   "id": "eu-official-languages",
+   "kind": "culture",
+   "question": "How many languages are official in the European Union?",
+   "unit": "languages",
+   "answer": 24,
+   "fact": "That's fewer than its 27 members, as Austria, Belgium and Luxembourg brought no language of their own.",
+   "source": {
+    "title": "Languages of the European Union",
+    "url": "https://en.wikipedia.org/wiki/Languages_of_the_European_Union"
+   },
+   "easy": true
+  },
+  {
+   "id": "concert-harp-strings",
+   "kind": "culture",
+   "question": "How many strings does a concert harp have?",
+   "unit": "strings",
+   "answer": 47,
+   "definition": "a pedal harp",
+   "fact": "Most are white, but the C strings are red and the F strings black or blue.",
+   "source": {
+    "title": "Pedal harp",
+    "url": "https://en.wikipedia.org/wiki/Pedal_harp"
+   },
+   "easy": false
+  },
+  {
+   "id": "connect-four-holes",
+   "kind": "culture",
+   "question": "How many holes are in a Connect Four grid?",
+   "unit": "holes",
+   "answer": 42,
+   "fact": "Computers have solved the game: with the right moves, the first player can always win.",
+   "source": {
+    "title": "Connect Four",
+    "url": "https://en.wikipedia.org/wiki/Connect_Four"
+   },
+   "easy": true
+  },
+  {
+   "id": "tolkien-writing-time",
+   "kind": "culture",
+   "question": "How long did Tolkien take to write The Lord of the Rings?",
+   "unit": "years",
+   "answer": 12,
+   "fact": "It began as a sequel to The Hobbit and became one of the best-selling books ever, with over 150 million copies sold.",
+   "source": {
+    "title": "The Lord of the Rings",
+    "url": "https://en.wikipedia.org/wiki/The_Lord_of_the_Rings"
+   },
+   "easy": false
+  },
+  {
+   "id": "shuttlecock-feathers",
+   "kind": "sports",
+   "question": "How many feathers make a badminton shuttlecock?",
+   "unit": "feathers",
+   "answer": 16,
+   "fact": "Makers use feathers from only right wings or only left wings in each one, as the two are shaped differently.",
+   "source": {
+    "title": "Shuttlecock",
+    "url": "https://en.wikipedia.org/wiki/Shuttlecock"
+   },
+   "easy": true
+  },
+  {
+   "id": "ten-thousand-metres-laps",
+   "kind": "sports",
+   "question": "How many laps of the track is the 10,000 metres race?",
+   "unit": "laps",
+   "answer": 25,
+   "fact": "It's the longest standard track race; the men's world record is 26 minutes 11 seconds.",
+   "source": {
+    "title": "10,000 metres",
+    "url": "https://en.wikipedia.org/wiki/10,000_metres"
+   },
+   "easy": true
+  },
+  {
+   "id": "oldest-olympic-medallist",
+   "kind": "sports",
+   "question": "How old was the oldest Olympic medal winner?",
+   "unit": "years",
+   "answer": 72,
+   "definition": "not counting the old art contests",
+   "fact": "Oscar Swahn, a Swedish shooter, won silver; he is also the oldest gold medallist ever, at 64.",
+   "source": {
+    "title": "Oscar Swahn",
+    "url": "https://en.wikipedia.org/wiki/Oscar_Swahn"
+   },
+   "easy": false
+  },
+  {
+   "id": "phelps-olympic-medals",
+   "kind": "sports",
+   "question": "How many medals did Michael Phelps win at the Olympics?",
+   "unit": "medals",
+   "answer": 28,
+   "fact": "23 of them were gold, over four Olympic Games: more medals than any other athlete.",
+   "source": {
+    "title": "Michael Phelps",
+    "url": "https://en.wikipedia.org/wiki/Michael_Phelps"
+   },
+   "easy": true
+  },
+  {
+   "id": "messi-barcelona-goals",
+   "kind": "sports",
+   "question": "How many goals did Lionel Messi score for Barcelona?",
+   "unit": "goals",
+   "answer": 672,
+   "fact": "It's the most anyone has scored for a single club, and 474 of them came in La Liga.",
+   "source": {
+    "title": "Lionel Messi",
+    "url": "https://en.wikipedia.org/wiki/Lionel_Messi"
+   },
+   "easy": false
+  },
+  {
+   "id": "super-bowl-2025-viewers",
+   "kind": "sports",
+   "question": "How many people in the US watched the 2025 Super Bowl?",
+   "unit": "million people",
+   "answer": 127.7,
+   "definition": "average viewers, all platforms",
+   "fact": "It was the most watched broadcast in American television history, beating the Super Bowl the year before.",
+   "source": {
+    "title": "Super Bowl LIX",
+    "url": "https://en.wikipedia.org/wiki/Super_Bowl_LIX"
+   },
+   "easy": false
+  },
+  {
+   "id": "ironman-distance",
+   "kind": "sports",
+   "question": "How far is an Ironman triathlon, swim, ride and run together?",
+   "unit": "kilometres",
+   "answer": 226.3,
+   "fact": "It's a 3.9 km swim, then a 180.2 km bike ride, then a full marathon.",
+   "source": {
+    "title": "Ironman Triathlon",
+    "url": "https://en.wikipedia.org/wiki/Ironman_Triathlon"
+   },
+   "easy": false
+  },
+  {
+   "id": "bowling-perfect-score",
+   "kind": "sports",
+   "question": "What is the highest score possible in a game of ten-pin bowling?",
+   "unit": "points",
+   "answer": 300,
+   "fact": "It takes 12 strikes in a row: one in each of the first nine frames and three in the tenth.",
+   "source": {
+    "title": "Perfect game (bowling)",
+    "url": "https://en.wikipedia.org/wiki/Perfect_game_(bowling)"
+   },
+   "easy": true
+  },
+  {
+   "id": "snooker-maximum-break",
+   "kind": "sports",
+   "question": "What is the highest break possible in snooker, normally?",
+   "unit": "points",
+   "answer": 147,
+   "definition": "without a free ball",
+   "fact": "Joe Davis made the first official one; Ronnie O'Sullivan's fastest took 5 minutes and 8 seconds.",
+   "source": {
+    "title": "Maximum break",
+    "url": "https://en.wikipedia.org/wiki/Maximum_break"
+   },
+   "easy": false
+  },
+  {
+   "id": "pele-first-world-cup",
+   "kind": "sports",
+   "question": "How old was Pelé when he won his first World Cup?",
+   "unit": "years",
+   "answer": 17,
+   "fact": "He is the only player to win three World Cups, and still the youngest to win one.",
+   "source": {
+    "title": "Pelé",
+    "url": "https://en.wikipedia.org/wiki/Pel%C3%A9"
+   },
+   "easy": true
+  },
+  {
+   "id": "tour-de-france-stages",
+   "kind": "sports",
+   "question": "How many stages does the Tour de France have?",
+   "unit": "stages",
+   "answer": 21,
+   "fact": "Each is a day's racing, spread over 23 or 24 days.",
+   "source": {
+    "title": "Tour de France",
+    "url": "https://en.wikipedia.org/wiki/Tour_de_France"
+   },
+   "easy": true
+  },
+  {
+   "id": "paris-2024-events",
+   "kind": "sports",
+   "question": "How many events awarded medals at the Paris 2024 Olympics?",
+   "unit": "events",
+   "answer": 329,
+   "fact": "They spanned 32 sports, at the first Games with equal numbers of men and women competing.",
+   "source": {
+    "title": "2024 Summer Olympics",
+    "url": "https://en.wikipedia.org/wiki/2024_Summer_Olympics"
+   },
+   "easy": false
+  },
+  {
+   "id": "ski-jump-record",
+   "kind": "sports",
+   "question": "How far is the official ski jumping world record?",
+   "unit": "metres",
+   "answer": 254.5,
+   "definition": "men's, set in March 2025",
+   "fact": "Ryōyū Kobayashi flew 291 m at an unofficial event in Iceland, which doesn't count.",
+   "source": {
+    "title": "Ski jumping",
+    "url": "https://en.wikipedia.org/wiki/Ski_jumping"
+   },
+   "easy": false
+  },
+  {
+   "id": "new-york-yellow-taxis",
+   "kind": "everyday",
+   "question": "How many yellow taxis are licensed in New York City?",
+   "unit": "yellow taxis",
+   "answer": 13587,
+   "definition": "medallions, 2016",
+   "fact": "The city sold no new licences for about 60 years, so by 2014 one cost over $1 million.",
+   "source": {
+    "title": "Taxis of New York City",
+    "url": "https://en.wikipedia.org/wiki/Taxis_of_New_York_City"
+   },
+   "easy": false
+  },
+  {
+   "id": "magic-kingdom-visitors",
+   "kind": "everyday",
+   "question": "How many people visited Disney World's Magic Kingdom in 2024?",
+   "unit": "million people",
+   "answer": 17.83,
+   "fact": "It has been the most visited theme park in the world for 18 years running.",
+   "source": {
+    "title": "Magic Kingdom",
+    "url": "https://en.wikipedia.org/wiki/Magic_Kingdom"
+   },
+   "easy": false
+  },
+  {
+   "id": "first-ipod-songs",
+   "kind": "everyday",
+   "question": "How many songs could the first iPod hold?",
+   "unit": "songs",
+   "answer": 1000,
+   "definition": "on its 5 GB hard drive, as MP3s",
+   "fact": "It cost $399 and had a black-and-white screen.",
+   "source": {
+    "title": "IPod Classic",
+    "url": "https://en.wikipedia.org/wiki/IPod_Classic"
+   },
+   "easy": true
+  },
+  {
+   "id": "mayflower-crossing",
+   "kind": "everyday",
+   "question": "How long did the Mayflower take to cross the Atlantic?",
+   "unit": "days",
+   "answer": 65,
+   "definition": "England to first sight of land",
+   "fact": "When land finally came into sight, it turned out to be Cape Cod.",
+   "source": {
+    "title": "Pilgrims (Plymouth Colony)",
+    "url": "https://en.wikipedia.org/wiki/Pilgrims_(Plymouth_Colony)"
+   },
+   "easy": false
+  },
+  {
+   "id": "pony-express-time",
+   "kind": "everyday",
+   "question": "How long did a Pony Express letter take from Missouri to California?",
+   "unit": "days",
+   "answer": 10,
+   "fact": "Riders changed horses every 16 to 24 km and rode day and night, but the service lasted only 18 months.",
+   "source": {
+    "title": "Pony Express",
+    "url": "https://en.wikipedia.org/wiki/Pony_Express"
+   },
+   "easy": false
+  },
+  {
+   "id": "centennial-light",
+   "kind": "science",
+   "question": "How long has the longest-burning light bulb been on?",
+   "unit": "years",
+   "answer": 125,
+   "definition": "to 2026",
+   "fact": "It was a 60-watt bulb and now glows about as bright as a 4-watt nightlight.",
+   "source": {
+    "title": "Centennial Light",
+    "url": "https://en.wikipedia.org/wiki/Centennial_Light"
+   },
+   "easy": false
+  },
+  {
+   "id": "four-k-pixels",
+   "kind": "science",
+   "question": "How many pixels does a 4K TV screen have?",
+   "unit": "million pixels",
+   "answer": 8.2944,
+   "fact": "It's 3,840 across by 2,160 down, four times as many as a 1080p HD screen.",
+   "source": {
+    "title": "4K resolution",
+    "url": "https://en.wikipedia.org/wiki/4K_resolution"
+   },
+   "easy": false
+  },
+  {
+   "id": "empire-state-lightning",
+   "kind": "science",
+   "question": "How often does lightning strike the Empire State Building in a year?",
+   "unit": "times",
+   "answer": 23,
+   "definition": "on average",
+   "fact": "Planes are struck often too, though strikes are generally not dangerous to them.",
+   "source": {
+    "title": "Lightning",
+    "url": "https://en.wikipedia.org/wiki/Lightning"
+   },
+   "easy": false
+  },
+  {
+   "id": "all-gold-cube",
+   "kind": "science",
+   "question": "How wide would a cube of all the world's gold be?",
+   "unit": "metres",
+   "answer": 21.7,
+   "definition": "all gold above ground, 2020",
+   "fact": "That cube would weigh about 201,296 tonnes.",
+   "source": {
+    "title": "Gold",
+    "url": "https://en.wikipedia.org/wiki/Gold"
+   },
+   "easy": false
+  },
+  {
+   "id": "rubiks-cube-moves",
+   "kind": "science",
+   "question": "How many moves are always enough to solve a Rubik's Cube?",
+   "unit": "moves",
+   "answer": 20,
+   "definition": "from any scramble",
+   "fact": "Computers provided by Google proved it, and millions of positions need every one of those moves.",
+   "source": {
+    "title": "Rubik's Cube",
+    "url": "https://en.wikipedia.org/wiki/Rubik%27s_Cube"
+   },
+   "easy": false
+  },
+  {
+   "id": "film-frame-rate",
+   "kind": "science",
+   "question": "How many frames a second does cinema film run at?",
+   "unit": "frames",
+   "answer": 24,
+   "fact": "Silent-film theatres ran at 22 to 26, so sound films settled on this as a compromise.",
+   "source": {
+    "title": "Frame rate",
+    "url": "https://en.wikipedia.org/wiki/Frame_rate"
+   },
+   "easy": false
+  },
+  {
+   "id": "cologne-cathedral-build",
+   "kind": "landmarks",
+   "question": "How long did it take to build Cologne Cathedral?",
+   "unit": "years",
+   "answer": 632,
+   "definition": "the Gothic one, start to finish",
+   "fact": "Work stopped for about 280 years in the middle, and when it was finished it was the tallest building in the world.",
+   "source": {
+    "title": "Cologne Cathedral",
+    "url": "https://en.wikipedia.org/wiki/Cologne_Cathedral"
+   },
+   "easy": false
+  },
+  {
+   "id": "mount-rushmore-carving",
+   "kind": "landmarks",
+   "question": "How long did it take to carve Mount Rushmore?",
+   "unit": "years",
+   "answer": 14,
+   "fact": "About 400 workers used dynamite, then drilled close-set holes and chipped the rest away by hand.",
+   "source": {
+    "title": "Mount Rushmore",
+    "url": "https://en.wikipedia.org/wiki/Mount_Rushmore"
+   },
+   "easy": false
+  },
+  {
+   "id": "big-ben-bell-weight",
+   "kind": "landmarks",
+   "question": "How heavy is Big Ben, the great bell in London's clock tower?",
+   "unit": "tonnes",
+   "answer": 13.7,
+   "fact": "Big Ben is the bell's nickname; four smaller bells beside it chime the quarter hours.",
+   "source": {
+    "title": "Big Ben",
+    "url": "https://en.wikipedia.org/wiki/Big_Ben"
+   },
+   "easy": false
+  },
+  {
+   "id": "sydney-opera-house-build",
+   "kind": "landmarks",
+   "question": "How long did the Sydney Opera House take to build?",
+   "unit": "years",
+   "answer": 14.6,
+   "definition": "first work on site to opening",
+   "fact": "It opened 16 years after Jørn Utzon won the design competition, after huge cost and time overruns.",
+   "source": {
+    "title": "Sydney Opera House",
+    "url": "https://en.wikipedia.org/wiki/Sydney_Opera_House"
+   },
+   "easy": false
+  },
+  {
+   "id": "pentagon-corridors",
+   "kind": "landmarks",
+   "question": "How long are the Pentagon's corridors, all added together?",
+   "unit": "kilometres",
+   "answer": 28.2,
+   "fact": "It has five sides, five floors above ground and five ring corridors on each floor.",
+   "source": {
+    "title": "The Pentagon",
+    "url": "https://en.wikipedia.org/wiki/The_Pentagon"
+   },
+   "easy": false
+  },
+  {
+   "id": "st-peters-capacity",
+   "kind": "landmarks",
+   "question": "How many people can stand inside St Peter's Basilica in Rome?",
+   "unit": "people",
+   "answer": 60000,
+   "fact": "Seated, it holds 20,000.",
+   "source": {
+    "title": "St. Peter's Basilica",
+    "url": "https://en.wikipedia.org/wiki/St._Peter%27s_Basilica"
+   },
+   "easy": false
+  },
+  {
+   "id": "earths-to-the-moon",
+   "kind": "space",
+   "question": "How many Earths would fit side by side between Earth and the Moon?",
+   "unit": "earths",
+   "answer": 30,
+   "fact": "Flying that far on Earth, non-stop, would take a plane more than two weeks.",
+   "source": {
+    "title": "Lunar distance",
+    "url": "https://en.wikipedia.org/wiki/Lunar_distance"
+   },
+   "easy": false
+  },
+  {
+   "id": "halleys-comet-return",
+   "kind": "space",
+   "question": "How often does Halley's Comet come back?",
+   "unit": "years",
+   "answer": 74.7,
+   "definition": "its present orbit",
+   "fact": "Edmond Halley saw that three famous comets were one object returning, the first comet known to come back.",
+   "source": {
+    "title": "Halley's Comet",
+    "url": "https://en.wikipedia.org/wiki/Halley%27s_Comet"
+   },
+   "easy": true
+  },
+  {
+   "id": "apollo-moon-rock",
+   "kind": "space",
+   "question": "How much Moon rock did the Apollo astronauts bring back?",
+   "unit": "kilograms",
+   "answer": 381,
+   "fact": "It came in 2,200 samples from six landings; Apollo 17 alone brought back 110 kg.",
+   "source": {
+    "title": "Moon rock",
+    "url": "https://en.wikipedia.org/wiki/Moon_rock"
+   },
+   "easy": false
+  },
+  {
+   "id": "saturn-rings-thickness",
+   "kind": "space",
+   "question": "How thick are Saturn's main rings?",
+   "unit": "metres",
+   "answer": 10,
+   "definition": "top to bottom, typically",
+   "fact": "They're almost pure water ice, and may be much younger than Saturn itself.",
+   "source": {
+    "title": "Rings of Saturn",
+    "url": "https://en.wikipedia.org/wiki/Rings_of_Saturn"
+   },
+   "easy": false
+  },
+  {
+   "id": "baumgartner-jump-height",
+   "kind": "space",
+   "question": "How high did Felix Baumgartner jump from in his record skydive?",
+   "unit": "kilometres",
+   "answer": 38.969,
+   "fact": "He broke the sound barrier on the way down, at 1,357.64 km/h, with no engine.",
+   "source": {
+    "title": "Red Bull Stratos",
+    "url": "https://en.wikipedia.org/wiki/Red_Bull_Stratos"
+   },
+   "easy": false
+  },
+  {
+   "id": "james-webb-distance",
+   "kind": "space",
+   "question": "How far from Earth does the James Webb Space Telescope orbit?",
+   "unit": "million kilometres",
+   "answer": 1.5,
+   "fact": "That's about four times as far as the Moon, at a spot where the Sun, Earth and Moon all stay behind its sunshield.",
+   "source": {
+    "title": "James Webb Space Telescope",
+    "url": "https://en.wikipedia.org/wiki/James_Webb_Space_Telescope"
+   },
+   "easy": false
+  },
+  {
+   "id": "dinosaur-asteroid-width",
+   "kind": "space",
+   "question": "How wide was the asteroid that wiped out the dinosaurs?",
+   "unit": "kilometres",
+   "answer": 10,
+   "fact": "It struck what is now Mexico's Yucatán Peninsula, and its crater lies buried about a kilometre down.",
+   "source": {
+    "title": "Chicxulub crater",
+    "url": "https://en.wikipedia.org/wiki/Chicxulub_crater"
+   },
+   "easy": false
+  },
+  {
+   "id": "wettest-place-rainfall",
+   "kind": "nature",
+   "question": "How much rain falls a year in Mawsynram, often called the wettest place?",
+   "unit": "millimetres",
+   "answer": 11872,
+   "definition": "on average",
+   "fact": "Two towns in Colombia report even more, so its title is disputed.",
+   "source": {
+    "title": "Mawsynram",
+    "url": "https://en.wikipedia.org/wiki/Mawsynram"
+   },
+   "easy": false
+  },
+  {
+   "id": "oldest-living-tree",
+   "kind": "nature",
+   "question": "How old is the oldest known living tree?",
+   "unit": "years",
+   "answer": 4858,
+   "definition": "not counting clonal colonies, 2026",
+   "fact": "It's a bristlecone pine called Methuselah, in California's White Mountains, and its exact spot was kept secret for years.",
+   "source": {
+    "title": "Methuselah (pine tree)",
+    "url": "https://en.wikipedia.org/wiki/Methuselah_(pine_tree)"
+   },
+   "easy": false
+  },
+  {
+   "id": "antarctic-ice-thickness",
+   "kind": "nature",
+   "question": "How thick is Antarctica's ice sheet, on average?",
+   "unit": "kilometres",
+   "answer": 1.9,
+   "fact": "If it all melted, sea levels around the world would rise by almost 60 metres.",
+   "source": {
+    "title": "Antarctica",
+    "url": "https://en.wikipedia.org/wiki/Antarctica"
+   },
+   "easy": false
+  },
+  {
+   "id": "un-member-states",
+   "kind": "places",
+   "question": "How many countries are members of the United Nations?",
+   "unit": "countries",
+   "answer": 193,
+   "fact": "Every member has one vote in the General Assembly, and only one has ever tried to leave on its own.",
+   "source": {
+    "title": "Member states of the United Nations",
+    "url": "https://en.wikipedia.org/wiki/Member_states_of_the_United_Nations"
+   },
+   "easy": true
+  },
+  {
+   "id": "equator-countries",
+   "kind": "places",
+   "question": "How many countries does the equator pass through?",
+   "unit": "countries",
+   "answer": 11,
+   "definition": "over land",
+   "fact": "It also crosses the seas of three more: the Maldives, Kiribati and the United States.",
+   "source": {
+    "title": "Equator",
+    "url": "https://en.wikipedia.org/wiki/Equator"
+   },
+   "easy": false
+  },
+  {
+   "id": "busiest-airport-passengers",
+   "kind": "lists",
+   "question": "How many passengers used the world's busiest airport in 2025?",
+   "unit": "million people",
+   "answer": 106.3,
+   "fact": "It's Atlanta's Hartsfield–Jackson, top of the list every year since the late 1990s but one.",
+   "source": {
+    "title": "List of busiest airports by passenger traffic",
+    "url": "https://en.wikipedia.org/wiki/List_of_busiest_airports_by_passenger_traffic"
+   },
+   "easy": false
+  },
+  {
+   "id": "us-golf-courses",
+   "kind": "lists",
+   "question": "How many golf courses are there in the United States?",
+   "unit": "golf courses",
+   "answer": 16752,
+   "definition": "2019",
+   "fact": "The United States has over 40% of all the golf courses in the world.",
+   "source": {
+    "title": "Golf course",
+    "url": "https://en.wikipedia.org/wiki/Golf_course"
+   },
+   "easy": false
+  },
+  {
+   "id": "pineapple-flowers",
+   "kind": "food",
+   "question": "How many flowers can join together to form one pineapple?",
+   "unit": "flowers",
+   "answer": 200,
+   "definition": "usually, at most",
+   "fact": "They fuse into one 'multiple fruit', and the plant usually matures within a year.",
+   "source": {
+    "title": "Pineapple",
+    "url": "https://en.wikipedia.org/wiki/Pineapple"
+   },
+   "easy": false
+  },
+  {
+   "id": "statue-of-liberty-crown-visitors",
+   "kind": "landmarks",
+   "question": "How many visitors a day can climb to the Statue of Liberty's crown?",
+   "unit": "visitors",
+   "answer": 425,
+   "fact": "Tickets can be reserved up to five months ahead, in groups of up to four.",
+   "source": {
+    "title": "Statue of Liberty",
+    "url": "https://en.wikipedia.org/wiki/Statue_of_Liberty"
+   },
+   "easy": false
+  },
+  {
+   "id": "colosseum-audience",
+   "kind": "landmarks",
+   "question": "How many spectators did Rome's Colosseum typically hold?",
+   "unit": "spectators",
+   "answer": 65000,
+   "definition": "its average audience",
+   "fact": "It hosted gladiator fights, animal hunts, dramas and even mock sea battles.",
+   "source": {
+    "title": "Colosseum",
+    "url": "https://en.wikipedia.org/wiki/Colosseum"
+   },
+   "easy": true
+  },
+  {
+   "id": "red-blood-cell-making",
+   "kind": "body",
+   "question": "How long does your body take to make a new red blood cell?",
+   "unit": "days",
+   "answer": 7,
+   "fact": "Each one then circulates in the blood for three to four months.",
+   "source": {
+    "title": "Red blood cell",
+    "url": "https://en.wikipedia.org/wiki/Red_blood_cell"
+   },
+   "easy": false
   }
  ]
 }
