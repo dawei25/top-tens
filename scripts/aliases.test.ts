@@ -2020,6 +2020,38 @@ describe("aliases as built: what players type", () => {
       expect(read(id, guess)).toBe(want);
     });
   });
+
+  describe("missed guesses, Nov 26", () => {
+    // Players' misses on Nov 26's daily, dog-breeds, judged with the committed lexicon. "wiener" found nothing though
+    // "wiener dog" is the Dachshund (#5): the matcher reads a word typed alone as part of a name, never of an alias. And
+    // "chiwawa", the way Chihuahua sounds, is four edits from it, past any slip. "known": a real name the list leaves out.
+    const read = (guess: string) => {
+      const r = judgeGuess(guess, JSON.parse(readFileSync(join(dir, "dog-breeds.json"), "utf8")) as Puzzle, new Set(), lex);
+      if ("entry" in r) return `${r.kind}${"corrected" in r && r.corrected ? "?" : ""} ${r.entry.name}`;
+      if (r.kind === "typo") return `choose ${r.suggestions.join(" | ")}`;
+      if (r.kind !== "unknown") return r.kind;
+      return r.known ? "known" : r.vague ? "vague" : "unknown";
+    };
+    it.each([
+      ["wiener", "correct Dachshund"],
+      ["weiner", "correct Dachshund"],
+      ["chiwawa", "near Chihuahua"],
+      ["chiwawas", "near Chihuahua"],
+      ["chiwauwa", "near Chihuahua"],
+      ["chihuahau", "near Chihuahua"],
+      // Right as they were: the AKC registers no pit bulls or doodles (free, and real names), "terrier" asks which, and
+      // "french terrier" is no breed.
+      ["pitbull", "known"],
+      ["labradoodle", "known"],
+      ["terrier", "vague"],
+      ["french terrier", "unknown"],
+      // The full nickname still lands; the sausage is still no dog.
+      ["wiener dog", "correct Dachshund"],
+      ["sausage", "unknown"],
+    ])("dog-breeds: %s -> %s", (guess, want) => {
+      expect(read(guess)).toBe(want);
+    });
+  });
 });
 
 describe("the pipeline's hand-written tables", () => {
